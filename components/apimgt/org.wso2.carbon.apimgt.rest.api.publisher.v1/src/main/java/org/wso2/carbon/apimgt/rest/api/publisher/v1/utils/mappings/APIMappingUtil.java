@@ -54,7 +54,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
-import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
@@ -81,8 +80,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.sql.Timestamp;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -496,38 +493,20 @@ public class APIMappingUtil {
      * @return ConversionPolicyListDTO object containing ConversionPolicyInfoDTOs
      * @throws APIManagementException
      */
-    public static ResourcePolicyListDTO fromResourcePolicyStrToDTO(String conversionPolicyStr, List apiResourcePaths)
+    public static ResourcePolicyListDTO fromResourcePolicyStrToDTO(String conversionPolicyStr)
             throws APIManagementException {
         ResourcePolicyListDTO policyListDTO = new ResourcePolicyListDTO();
         List<ResourcePolicyInfoDTO> policyInfoDTOs = policyListDTO.getList();
-        Pattern pattern = Pattern.compile("[{}]");
         if (StringUtils.isNotEmpty(conversionPolicyStr)) {
             try {
                 JSONObject conversionPolicyObj = (JSONObject) new JSONParser().parse(conversionPolicyStr);
                 for (Object key : conversionPolicyObj.keySet()) {
                     JSONObject policyInfo = (JSONObject) conversionPolicyObj.get(key);
                     String keyStr = ((String) key);
-                    String resourcePath = keyStr.substring(0, keyStr.lastIndexOf("_"));
-                    for (int i = 0; i < apiResourcePaths.size(); i++) {
-                        ResourcePath apiResourcePath = (ResourcePath) apiResourcePaths.get(0);
-                        String apiResourcePathName = apiResourcePath.getHttpVerb();
-                        Matcher hasSpecialCharacters = pattern.matcher(apiResourcePathName);
-                        if (hasSpecialCharacters.find() && apiResourcePathName.contains(
-                                SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR + resourcePath
-                                        + SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR)) {
-                            if (apiResourcePathName.startsWith(SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR)) {
-                                apiResourcePathName = apiResourcePathName.substring(1);
-                            }
-                            if (apiResourcePathName.endsWith(SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR)) {
-                                apiResourcePathName = apiResourcePathName.substring(0, apiResourcePathName.length() - 1);
-                            }
-                            resourcePath = apiResourcePathName;
-                        }
-                    }
                     ResourcePolicyInfoDTO policyInfoDTO = new ResourcePolicyInfoDTO();
                     policyInfoDTO.setId(policyInfo.get(RestApiConstants.SEQUENCE_ARTIFACT_ID).toString());
                     policyInfoDTO.setHttpVerb(policyInfo.get(RestApiConstants.HTTP_METHOD).toString());
-                    policyInfoDTO.setResourcePath(resourcePath);
+                    policyInfoDTO.setResourcePath(keyStr.substring(0, keyStr.lastIndexOf("_")));
                     policyInfoDTO.setContent(policyInfo.get(RestApiConstants.SEQUENCE_CONTENT).toString());
                     policyInfoDTOs.add(policyInfoDTO);
                 }

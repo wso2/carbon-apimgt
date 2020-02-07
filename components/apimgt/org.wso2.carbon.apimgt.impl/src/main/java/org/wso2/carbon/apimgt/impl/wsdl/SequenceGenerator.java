@@ -192,21 +192,8 @@ public class SequenceGenerator {
                             namespace, soapNamespace, arraySequenceElements);
                     String outSequence = template.getMappingOutSequence();
                     if (isResourceFromWSDL) {
-                        Pattern pattern = Pattern.compile("[{}]");
-                        Matcher hasSpecialCharacters = pattern.matcher(pathName);
-                        if (hasSpecialCharacters.find()) {
-                            String resourcePathName = pathName.split("[{]")[0];
-                            if (resourcePathName.endsWith("/")) {
-                                saveApiSequences(apiIdentifier, inSequence, outSequence,
-                                        httpMethod.toString().toLowerCase(), StringUtils.removeEnd(resourcePathName, "/"));
-                            } else {
-                                saveApiSequences(apiIdentifier, inSequence, outSequence,
-                                        httpMethod.toString().toLowerCase(), resourcePathName);
-                            }
-                        } else {
-                            saveApiSequences(apiIdentifier, inSequence, outSequence,
-                                    httpMethod.toString().toLowerCase(), pathName);
-                        }
+                        saveApiSequences(apiIdentifier, inSequence, outSequence, httpMethod.toString().toLowerCase(),
+                                pathName);
                     }
                 } catch (APIManagementException e) {
                     handleException("Error when generating sequence property and arg elements for soap operation: " + operationId, e);
@@ -280,19 +267,31 @@ public class SequenceGenerator {
                 APIUtil.loadTenantRegistry(tenantId);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
 
+                Pattern pattern = Pattern.compile("[{}]");
+                Matcher hasSpecialCharacters = pattern.matcher(resourcePath);
+                String resourcePathName = resourcePath;
+                if (hasSpecialCharacters.find()) {
+                    resourcePathName = resourcePath.split("[{]")[0];
+                    if (resourcePathName.endsWith("/")) {
+                        resourcePathName = StringUtils.removeEnd(resourcePathName, "/");
+                    }
+                }
+
                 String resourceInPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                         provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
                         + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_IN_RESOURCE
-                        + resourcePath + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
+                        + resourcePathName + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
                         + SOAPToRESTConstants.SequenceGen.XML_FILE_EXTENSION;
                 String resourceOutPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                         provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
                         + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE
-                        + resourcePath + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
+                        + resourcePathName + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
                         + SOAPToRESTConstants.SequenceGen.XML_FILE_EXTENSION;
 
-                SequenceUtils.saveRestToSoapConvertedSequence(registry, inSequence, method, resourceInPath);
-                SequenceUtils.saveRestToSoapConvertedSequence(registry, outSequence, method, resourceOutPath);
+                SequenceUtils.saveRestToSoapConvertedSequence(registry, inSequence, method, resourceInPath,
+                        resourcePath);
+                SequenceUtils.saveRestToSoapConvertedSequence(registry, outSequence, method, resourceOutPath,
+                        resourcePath);
             } catch (UserStoreException e) {
                 handleException("Error while reading tenant information", e);
             } catch (RegistryException e) {

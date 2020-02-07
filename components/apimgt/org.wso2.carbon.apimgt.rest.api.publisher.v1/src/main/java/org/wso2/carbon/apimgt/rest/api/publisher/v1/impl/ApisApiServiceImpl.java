@@ -2596,8 +2596,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
                             apiIdentifier.getProviderName());
             if (isSoapToRESTApi) {
-                APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-                List<ResourcePath> apiResourcePaths = apiProvider.getResourcePathsOfAPI(apiIdentifier);
                 if (StringUtils.isEmpty(sequenceType) || !(RestApiConstants.IN_SEQUENCE.equals(sequenceType)
                         || RestApiConstants.OUT_SEQUENCE.equals(sequenceType))) {
                     String errorMessage = "Sequence type should be either of the values from 'in' or 'out'";
@@ -2608,7 +2606,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                                 apiIdentifier.getProviderName(), sequenceType);
                 if (StringUtils.isEmpty(resourcePath) && StringUtils.isEmpty(verb)) {
                     ResourcePolicyListDTO resourcePolicyListDTO = APIMappingUtil
-                            .fromResourcePolicyStrToDTO(resourcePolicy, apiResourcePaths);
+                            .fromResourcePolicyStrToDTO(resourcePolicy);
                     return Response.ok().entity(resourcePolicyListDTO).build();
                 }
                 if (StringUtils.isNotEmpty(resourcePath) && StringUtils.isNotEmpty(verb)) {
@@ -2623,7 +2621,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     resultJson.put(key, sequenceObj.get(key));
                     ResourcePolicyListDTO resourcePolicyListDTO = APIMappingUtil
-                            .fromResourcePolicyStrToDTO(resultJson.toJSONString(), apiResourcePaths);
+                            .fromResourcePolicyStrToDTO(resultJson.toJSONString());
                     return Response.ok().entity(resourcePolicyListDTO).build();
                 } else if (StringUtils.isEmpty(resourcePath)) {
                     String errorMessage = "Resource path cannot be empty for the defined verb: " + verb;
@@ -2840,7 +2838,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 updatedSwagger = updateSwagger(apiId, apiDefinition);
             }
-            String updatedSwagger = updateSwagger(apiId, apiDefinition);
             if (isSoapToRestConvertedAPI) {
                 SequenceGenerator.generateSequencesFromSwagger(updatedSwagger, apiIdentifier);
             }
