@@ -4559,7 +4559,6 @@ public class ApiMgtDAO {
         boolean isAppUpdated = false;
         Connection connection = null;
         PreparedStatement prepStmt = null;
-        String appName = null;
 
         String sqlQuery = SQLConstants.UPDATE_APPLICATION_OWNER;
 
@@ -4568,11 +4567,13 @@ public class ApiMgtDAO {
             if (subscriber != null) {
                 int subscriberId = getSubscriber(userName).getId();
                 connection = APIMgtDBUtil.getConnection();
+                connection.setAutoCommit(false);
                 prepStmt = connection.prepareStatement(sqlQuery);
                 prepStmt.setString(1, userName);
                 prepStmt.setInt(2, subscriberId);
                 prepStmt.setString(3, application.getUUID());
                 prepStmt.executeUpdate();
+                connection.commit();
                 isAppUpdated = true;
             } else {
                 String errorMessage = "Error when retrieving subscriber details for user " + userName;
