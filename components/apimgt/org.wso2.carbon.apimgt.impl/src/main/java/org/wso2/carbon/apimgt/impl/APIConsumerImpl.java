@@ -3553,7 +3553,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application,tenantDomain);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -3729,7 +3729,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(applicationId);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(applicationId, tenantDomain);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -5793,7 +5793,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } catch (ParseException e) {
                     log.error("ParseException thrown when passing API tenant config from registry", e);
                 } catch (APIManagementException e) {
-                    log.error("APIManagementException thrown when passing API tenant config from registry", e);
+                    log.debug(e.getMessage());
                 }
             }
         }

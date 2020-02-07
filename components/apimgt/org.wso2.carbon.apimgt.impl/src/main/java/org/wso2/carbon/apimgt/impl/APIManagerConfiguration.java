@@ -87,7 +87,7 @@ public class APIManagerConfiguration {
     private JSONArray applicationAttributes = new JSONArray();
     private JSONArray monetizationAttributes = new JSONArray();
 
-    private RecommendationEnvironment recommendationEnvironment = new RecommendationEnvironment();
+    private RecommendationEnvironment recommendationEnvironment;
 
     private SecretResolver secretResolver;
 
@@ -1201,6 +1201,7 @@ public class APIManagerConfiguration {
     private void setRecommendationConfigurations(OMElement element) {
         OMElement recommendationSeverEndpointElement = element.getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_ENDPOINT));
         if (recommendationSeverEndpointElement != null) {
+            recommendationEnvironment = new RecommendationEnvironment();
             recommendationEnvironment.setRecommendationServerURL(recommendationSeverEndpointElement.getText());
 
             OMElement oauthEndpointElement = element
