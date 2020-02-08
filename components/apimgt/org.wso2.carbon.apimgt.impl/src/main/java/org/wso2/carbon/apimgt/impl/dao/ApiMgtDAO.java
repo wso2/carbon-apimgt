@@ -8898,46 +8898,7 @@ public class ApiMgtDAO {
                     ps = conn.prepareStatement(scopeEntry, new String[]{scopeId});
                     ps2 = conn.prepareStatement(scopeLink);
                     ps3 = conn.prepareStatement(scopeRoleEntry);
-                    if (object instanceof URITemplate) {
-                        URITemplate uriTemplate = (URITemplate) object;
-
-                        if (uriTemplate.getScope() == null) {
-                            continue;
-                        }
-
-                        if (!scopeSharingEnabled && isScopeKeyAssigned(apiIdentifier, uriTemplate.getScope().getKey(),
-                                tenantID)) {
-                            throw new APIManagementException("Scope '" + uriTemplate.getScope().getKey() + "' "
-                                    + "is already used by another API.");
-                        }
-
-                        ps.setString(1, uriTemplate.getScope().getKey());
-                        ps.setString(2, uriTemplate.getScope().getName());
-                        ps.setString(3, uriTemplate.getScope().getDescription());
-                        ps.setInt(4, tenantID);
-                        ps.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
-                        ps.execute();
-                        rs = ps.getGeneratedKeys();
-                        if (rs.next()) {
-                            uriTemplate.getScope().setId(rs.getInt(1));
-                        }
-
-                        String roles = uriTemplate.getScope().getRoles();
-                        //Adding scope bindings
-                        List<String> roleList = Lists.newArrayList(Splitter.on(",").trimResults().split(roles));
-                        for (String role : roleList) {
-                            ps3.setInt(1, uriTemplate.getScope().getId());
-                            ps3.setString(2, role);
-                            ps3.setString(3, APIConstants.DEFAULT_BINDING_TYPE);
-                            ps3.addBatch();
-                        }
-                        ps3.executeBatch();
-
-                        ps2.setInt(1, apiID);
-                        ps2.setInt(2, uriTemplate.getScope().getId());
-                        ps2.execute();
-                        conn.commit();
-                    } else if (object instanceof Scope) {
+                    if (object instanceof Scope) {
                         Scope scope = (Scope) object;
                         if (!scopeSharingEnabled && isScopeKeyAssigned(apiIdentifier, scope.getKey(), tenantID)) {
                             throw new APIManagementException("Scope '" + scope.getKey() + "' is already used " +
