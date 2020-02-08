@@ -22,14 +22,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GlobalScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.GlobalScopeMappingUtil;
@@ -38,20 +36,16 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.KeyManagementException;
 import java.util.List;
 
-import java.io.InputStream;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
 
     public static final Log log = LogFactory.getLog(GlobalScopesApiServiceImpl.class);
 
     /**
-     * Add Global Scope.
+     * Add Global Scope
      *
      * @param body           Scope DTO object to add
      * @param messageContext CXF Message Context
@@ -60,30 +54,49 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
      */
     public Response addGlobalScope(ScopeDTO body, MessageContext messageContext) throws APIManagementException {
 
+        String scopeName = body.getName();
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            if (StringUtils.isEmpty(body.getName())) {
-                RestApiUtil.handleBadRequest("Scope Name cannot be empty or null", log);
+            if (StringUtils.isEmpty(scopeName)) {
+                throw new APIManagementException("Global Scope Name cannot be null or empty",
+                        ExceptionCodes.GLOBAL_SCOPE_NAME_NOT_SPECIFIED);
             }
-            Scope scope = GlobalScopeMappingUtil.fromDTOToScope(body);
-            scope = apiProvider.addGlobalScope(scope, tenantDomain);
-
-            ScopeDTO createdScopeDTO = GlobalScopeMappingUtil.fromScopeToDTO(scope);
+            if (apiProvider.isGlobalScopeNameExists(scopeName, tenantDomain)) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.GLOBAL_SCOPE_ALREADY_REGISTERED,
+                        scopeName));
+            }
+            Scope scopeToAdd = GlobalScopeMappingUtil.fromDTOToScope(body);
+            String globalScopeId = apiProvider.addGlobalScope(scopeToAdd, tenantDomain);
+            //Get registered global scope
+            Scope createdScope = apiProvider.getGlobalScopeByUUID(globalScopeId, tenantDomain);
+            ScopeDTO createdScopeDTO = GlobalScopeMappingUtil.fromScopeToDTO(createdScope);
             String createdScopeURIString = RestApiConstants.RESOURCE_PATH_GLOBAL_SCOPES_SCOPE_ID
                     .replace(RestApiConstants.GLOBAL_SCOPE_ID_PARAM, createdScopeDTO.getId());
             URI createdScopeURI = new URI(createdScopeURIString);
             return Response.created(createdScopeURI).entity(createdScopeDTO).build();
         } catch (URISyntaxException e) {
-            RestApiUtil.handleInternalServerError("Error while creating global scope: " + body.getName(), e, log);
+            throw new APIManagementException("Error while creating global scope: " + scopeName, e);
         }
-        return null;
     }
 
+    /**
+     * Delete global scope
+     *
+     * @param scopeId        Scope UUID
+     * @param messageContext CXF Message Context
+     * @return Deletion Response
+     * @throws APIManagementException If an error occurs while deleting global scope
+     */
     public Response deleteGlobalScope(String scopeId, MessageContext messageContext) throws APIManagementException {
 
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        if (StringUtils.isEmpty(scopeId)) {
+            throw new APIManagementException("Scope Id cannot be null or empty",
+                    ExceptionCodes.GLOBAL_SCOPE_ID_NOT_SPECIFIED);
+        }
+        //TODO:check if scope has attachments and throw error
         apiProvider.deleteGlobalScope(scopeId, tenantDomain);
         return Response.ok().build();
     }
@@ -101,7 +114,8 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         if (StringUtils.isEmpty(scopeId)) {
-            RestApiUtil.handleBadRequest("Scope Id cannot be empty or null", log);
+            throw new APIManagementException("Scope Id cannot be null or empty",
+                    ExceptionCodes.GLOBAL_SCOPE_ID_NOT_SPECIFIED);
         }
         Scope scope = apiProvider.getGlobalScopeByUUID(scopeId, tenantDomain);
         ScopeDTO scopeDTO = GlobalScopeMappingUtil.fromScopeToDTO(scope);
@@ -113,10 +127,11 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
      *
      * @param messageContext CXF Message Context
      * @return Global Scopes DTO List
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs while retrieving global scope
      */
     public Response getGlobalScopes(MessageContext messageContext) throws APIManagementException {
 
+        //TODO: Add pagination from rest api layer only
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
@@ -127,22 +142,30 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
 
     /**
      * Update Global Scope By Id
-     * @param scopeId   Global Scope Id
-     * @param body  Global Scope DTO
-     * @param messageContext    CXF Message Context
-     * @return  Updated Global Scope DTO
-     * @throws APIManagementException
+     *
+     * @param scopeId        Global Scope Id
+     * @param body           Global Scope DTO
+     * @param messageContext CXF Message Context
+     * @return Updated Global Scope DTO
+     * @throws APIManagementException if an error occurs while updating global scope
      */
     public Response updateGlobalScope(String scopeId, ScopeDTO body, MessageContext messageContext)
             throws APIManagementException {
 
+        String scopeName = body.getName();
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        if (StringUtils.isEmpty(scopeId)) {
-            RestApiUtil.handleBadRequest("Scope Id cannot be empty or null", log);
+        if (StringUtils.isEmpty(scopeName)) {
+            throw new APIManagementException("Global Scope Name cannot be null or empty",
+                    ExceptionCodes.GLOBAL_SCOPE_NAME_NOT_SPECIFIED);
         }
+        Scope existingScope = apiProvider.getGlobalScopeByUUID(scopeId, tenantDomain);
+        //Override scope Id and name in request body from existing scope
+        body.setId(existingScope.getId());
+        body.setName(existingScope.getName());
         Scope scope = GlobalScopeMappingUtil.fromDTOToScope(body);
         apiProvider.updateGlobalScope(scope, tenantDomain);
+        //Get updated global scope
         scope = apiProvider.getGlobalScopeByUUID(scope.getId(), tenantDomain);
         ScopeDTO updatedScopeDTO = GlobalScopeMappingUtil.fromScopeToDTO(scope);
         return Response.ok().entity(updatedScopeDTO).build();

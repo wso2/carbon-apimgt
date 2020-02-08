@@ -25,7 +25,7 @@ public class GlobalScopeMappingUtil {
     public static ScopeDTO fromScopeToDTO(Scope scope) {
 
         ScopeDTO scopeDTO = new ScopeDTO();
-        scopeDTO.setName(scope.getName());
+        scopeDTO.setName(scope.getKey());
         scopeDTO.setDescription(scope.getDescription());
         scopeDTO.setId(scope.getId());
         ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
