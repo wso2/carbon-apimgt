@@ -42,7 +42,6 @@ public interface KeyManager {
      */
     OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException;
 
-
     /**
      * Update an oAuth application
      *
@@ -60,7 +59,7 @@ public interface KeyManager {
     default OAuthApplicationInfo updateApplicationOwner(OAuthAppRequest appInfoDTO, String owner)
             throws APIManagementException {
 
-        throw new  APIManagementException("This is not supported");
+        throw new APIManagementException("This is not supported");
     }
 
     /**
@@ -81,6 +80,7 @@ public interface KeyManager {
     /**
      * Store calls this method to get a new Application Access Token. This will be called when getting the token for
      * the first time and when Store needs to refresh the existing token.
+     *
      * @param tokenRequest AccessTokenRequest which encapsulates parameters sent from UI.
      * @return Details of the Generated Token. AccessToken and Validity period are a must.
      * @throws APIManagementException
@@ -99,6 +99,7 @@ public interface KeyManager {
     /**
      * Get details about an access token. As a part of the response, consumer key against which token was obtained
      * must be returned.
+     *
      * @return {@code AccessTokenInfo}
      */
     AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException;
@@ -119,19 +120,18 @@ public interface KeyManager {
 
     /**
      * @param authApplicationInfo
-     * @param jsonInput this jsonInput will contain set of oAuth application properties.
+     * @param jsonInput           this jsonInput will contain set of oAuth application properties.
      * @return OAuthApplicationInfo object will return after parsed jsonInput
      * @throws APIManagementException
-     *
      */
-    OAuthApplicationInfo buildFromJSON(OAuthApplicationInfo authApplicationInfo,  String jsonInput) throws
+    OAuthApplicationInfo buildFromJSON(OAuthApplicationInfo authApplicationInfo, String jsonInput) throws
             APIManagementException;
-
 
     /**
      * This method will parse the JSON input and add those additional values to AccessTokenRequest. If its needed to
      * pass parameters in addition to those specified in AccessTokenRequest, those can be provided in the JSON input.
-     * @param jsonInput Input as a JSON. This is the same JSON passed from Store UI.
+     *
+     * @param jsonInput    Input as a JSON. This is the same JSON passed from Store UI.
      * @param tokenRequest Object encapsulating parameters sent from UI.
      * @return If input AccessTokenRequest is null, a new object will be returned,
      * else the additional parameters will be added to the input object passed.
@@ -153,25 +153,34 @@ public interface KeyManager {
     /**
      * This method will create an AccessTokenRequest using OAuthApplicationInfo object. If tokenRequest is null,
      * this will create a new object, else will modify the provided AccessTokenRequest Object.
+     *
      * @param oAuthApplication
      * @param tokenRequest
      * @return AccessTokenRequest
      */
     AccessTokenRequest buildAccessTokenRequestFromOAuthApp(OAuthApplicationInfo oAuthApplication,
-                                                           AccessTokenRequest tokenRequest) throws APIManagementException;
+                                                           AccessTokenRequest tokenRequest)
+            throws APIManagementException;
 
     void loadConfiguration(KeyManagerConfiguration configuration) throws APIManagementException;
 
     /**
+     * This method will initialize a HTTP Client and a connection manager for each authorization server instance.
+     *
+     * @throws APIManagementException If an error occurs while initializing HTTP client
+     */
+    void initializeHttpClient() throws APIManagementException;
+
+    /**
      * This Method will talk to APIResource registration end point  of  authorization server and creates a new resource
      *
-     * @param  api this is a API object which contains all details about a API.
-     * @param  resourceAttributes this param will contains additional details if required.
+     * @param api                this is a API object which contains all details about a API.
+     * @param resourceAttributes this param will contains additional details if required.
      * @return true if sucessfully registered. false if there is a error while registering a new resource.
      * @throws APIManagementException
      */
 
-    boolean registerNewResource(API api , Map resourceAttributes) throws APIManagementException;
+    boolean registerNewResource(API api, Map resourceAttributes) throws APIManagementException;
 
     /**
      * This method will be used to retrieve registered resource by given API ID.
@@ -185,12 +194,12 @@ public interface KeyManager {
     /**
      * This method is responsible for update given APIResource  by its resourceId.
      *
-     * @param  api this is a API object which contains all details about a API.
-     * @param  resourceAttributes this param will contains additional details if required.
+     * @param api                this is a API object which contains all details about a API.
+     * @param resourceAttributes this param will contains additional details if required.
      * @return TRUE|FALSE. if it is successfully updated it will return TRUE or else FALSE.
      * @throws APIManagementException
      */
-    boolean updateRegisteredResource(API api , Map resourceAttributes) throws APIManagementException;
+    boolean updateRegisteredResource(API api, Map resourceAttributes) throws APIManagementException;
 
     /**
      * This method will accept API id  as a parameter  and will delete the registered resource.
@@ -202,6 +211,7 @@ public interface KeyManager {
 
     /**
      * This method will be used to delete mapping records of oAuth applications.
+     *
      * @param consumerKey
      * @throws APIManagementException
      */
@@ -209,15 +219,16 @@ public interface KeyManager {
 
     /**
      * When provided the ConsumerKey, this method will provide all the Active tokens issued against that Key.
+     *
      * @param consumerKey ConsumerKey of the OAuthClient
      * @return {@link java.util.Set} having active access tokens.
      * @throws APIManagementException
      */
     Set<String> getActiveTokensByConsumerKey(String consumerKey) throws APIManagementException;
 
-
     /**
      * Gives details of the Access Token to be displayed on Store.
+     *
      * @param consumerKey
      * @return {@link org.wso2.carbon.apimgt.api.model.AccessTokenInfo} populating all the details of the Access Token.
      * @throws APIManagementException
@@ -226,16 +237,17 @@ public interface KeyManager {
 
     /**
      * Get Scopes of the APIs by API Ids
+     *
      * @param apiIdsString String of API Ids
      * @return {@link java.util.Map} having scopes of each API
      * @throws APIManagementException
      */
-    Map<String,Set<Scope>> getScopesForAPIS(String apiIdsString) throws  APIManagementException;
+    Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException;
 
     /**
      * This method will be used to register a Scope in the authorization server.
      *
-     * @param scope Scope to register
+     * @param scope        Scope to register
      * @param tenantDomain tenant domain to add scope
      * @throws APIManagementException if an error occurs while registering scope
      */
@@ -244,9 +256,9 @@ public interface KeyManager {
     /**
      * This method will be used to retrieve details of a Scope in the authorization server.
      *
-     * @param scopeName Scope Name to retrieve
+     * @param scopeName    Scope Name to retrieve
      * @param tenantDomain tenant domain to retrieve scope from
-     * @return  Scope object
+     * @return Scope object
      * @throws APIManagementException if an error while retrieving scope
      */
     Scope getScopeByName(String scopeName, String tenantDomain) throws APIManagementException;
@@ -254,19 +266,50 @@ public interface KeyManager {
     /**
      * This method will be used to retrieve all the scopes available in the authorization server for the given tenant
      * domain.
-     * @param tenantDomain  tenant domain to retrieve scopes from
-     * @return  Scope object list
-     * @throws APIManagementException   if an error occurs while getting scopes list
+     *
+     * @param tenantDomain tenant domain to retrieve scopes from
+     * @return Mapping of Scope object to scope key
+     * @throws APIManagementException if an error occurs while getting scopes list
      */
-    List<Scope> getAllScopes(String tenantDomain) throws APIManagementException;
+    Map<String, Scope> getAllScopes(String tenantDomain) throws APIManagementException;
 
     /**
-     * This method will be used to attach a Scope in the authorization server to a API resource.
+     * This method will be used to attach a Scope in the authorization server to a API resource
      *
-     * @param scope Scope to attach
-     * @param tenantDomain tenant domain to add scope
-     * @return true if successfully attached, false if there is an error while attaching a scope to a resource.
+     * @param api          API
+     * @param uriTemplate  URITemplate
+     * @param scope        Scope to attach
+     * @param tenantDomain tenant domain
      * @throws APIManagementException
      */
-    Boolean attachScopeToResource(Scope scope, String tenantDomain) throws APIManagementException;
+    void attachScopeToResource(API api, URITemplate uriTemplate, Scope scope, String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * This method will be used to delete a Scope in the authorization server
+     *
+     * @param scope        Scope object
+     * @param tenantDomain tenant domain to delete the scope from
+     * @throws APIManagementException if an error occurs while deleting the scope
+     */
+    void deleteScope(Scope scope, String tenantDomain) throws APIManagementException;
+
+    /**
+     * This method will be used to update a Scope in the authorization server
+     *
+     * @param scope        Scope object
+     * @param tenantDomain tenant domain to update the scope
+     * @throws APIManagementException if an error occurs while updating the scope
+     */
+    void updateScope(Scope scope, String tenantDomain) throws APIManagementException;
+
+    /**
+     * This method will be used to check whether the a Scope exists for the given scope name in the authorization server
+     *
+     * @param scopeName    Scope Name
+     * @param tenantDomain tenant Domain to check scope existence
+     * @return whether scope exists or not
+     * @throws APIManagementException if an error occurs while checking the existence of the scope
+     */
+    Boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException;
 }
