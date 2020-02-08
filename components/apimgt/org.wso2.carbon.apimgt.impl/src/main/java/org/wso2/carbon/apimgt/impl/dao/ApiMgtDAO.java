@@ -28,6 +28,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
@@ -14870,34 +14871,88 @@ public class ApiMgtDAO {
     }
     /**
      * Add global scope
-     * @param scope Scope Object to add
-     * @param tenantDomain  Tenant domain
-     * @return  Scope object with UUID
-     * @throws APIManagementException   if an error occurs while adding global scope
+     *
+     * @param scope        Scope Object to add
+     * @param tenantDomain Tenant domain
+     * @return UUID of the global scope
+     * @throws APIManagementException if an error occurs while adding global scope
      */
-    public Scope addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException {
+    public String addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException {
 
         String uuid = UUID.randomUUID().toString();
-        scope.setId(uuid);
+        String scopeName = scope.getKey();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GLOBAL_SCOPE)) {
             try {
                 initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
-                statement.setString(1, scope.getName());
+                statement.setString(1, scopeName);
                 statement.setString(2, uuid);
                 statement.setInt(3, tenantId);
                 statement.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to add Global Scope : " + scope.getName(), e);
+                handleException("Failed to add Global Scope : " + scopeName, e);
             } finally {
                 APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
-            handleException("Faled to add Global Scope: " + scope.getName(), e);
+            handleException("Failed to add Global Scope: " + scopeName, e);
+        }
+        return uuid;
+    }
+
+    /**
+     * Delete global scope
+     *
+     * @param uuid Global Scope ID
+     * @throws APIManagementException if an error occurs while removing global scope
+     */
+    public void deleteGlobalScope(String uuid) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_GLOBAL_SCOPE)) {
+            try {
+                initialAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
+                statement.setString(1, uuid);
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete Global Scope : " + uuid, e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to delete Global Scope : " + uuid, e);
+        }
+    }
+
+    /**
+     * Get global scope by uuid
+     *
+     * @param uuid UUID of global scope
+     * @return Global scope object with UUID and scope key
+     * @throws APIManagementException if an error occurs while getting global scope
+     */
+    public Scope getGlobalScope(String uuid) throws APIManagementException {
+
+        Scope scope = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_GLOBAL_SCOPE_BY_UUID)) {
+            statement.setString(1, uuid);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    scope = new Scope();
+                    scope.setKey(rs.getString("NAME"));
+                    scope.setId(uuid);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Global Scope : " + uuid, e);
         }
         return scope;
     }
@@ -14944,6 +14999,159 @@ public class ApiMgtDAO {
             handleException("Error while retrieving details of endpoint registries", e);
         }
         return endpointRegistryInfoList;
+    }
+    /**
+     * Checks whether the given global scope name is already available under given tenant domain
+     * @param scopeName Scope Name
+     * @param tenantDomain  Tenant Domain
+     * @return  scope name availability
+     * @throws APIManagementException If an error occurs while checking the availability
+     */
+    public boolean isGlobalScopeExists(String scopeName, String tenantDomain) throws APIManagementException {
+
+        boolean isExist = false;
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.IS_GLOBAL_SCOPE_NAME_EXISTS)) {
+            statement.setInt(1, tenantId);
+            statement.setString(2, scopeName);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs != null && rs.next()) {
+                    isExist = true;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check is exists Global Scope : " + scopeName + "-" + tenantId, e);
+        }
+        return isExist;
+    }
+
+    /**
+     * Get all global scopes for tenant
+     *
+     * @param tenantDomain Tenant Domain
+     * @return global scope list
+     * @throws APIManagementException if an error occurs while getting all global scopes for tenant
+     */
+    public List<Scope> getAllGlobalScopes(String tenantDomain) throws APIManagementException {
+
+        List<Scope> scopeList = null;
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_ALL_GLOBAL_SCOPES_BY_TENANT)) {
+            statement.setInt(1, tenantId);
+            try (ResultSet rs = statement.executeQuery()) {
+                scopeList = new ArrayList<>();
+                while (rs.next()) {
+                    Scope scope = new Scope();
+                    scope.setId( rs.getString("UUID"));
+                    scope.setKey(rs.getString("NAME"));
+                    scopeList.add(scope);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get all Global Scopes for tenant: " + tenantDomain, e);
+        }
+        return scopeList;
+    }
+
+    /**
+     * Add Scope to API Mapping
+     * @param scopeId   Scope UUID
+     * @param apiIdentifier API Identifier
+     * @throws APIManagementException If an error occurs while adding scope to API mapping
+     */
+    public void addScopeToAPIMapping(String scopeId, APIIdentifier apiIdentifier) throws APIManagementException {
+
+        int apiId;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_SCOPE_LINK_SQL)) {
+            try {
+                initialAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
+                apiId = getAPIID(apiIdentifier, connection);
+                if (apiId == -1) {
+                    //scope to api mapping addition has failed
+                    throw new APIManagementException(
+                            "Failed to add Scope: " + scopeId + " to API: " + apiIdentifier.getApiName()
+                                    + "-" + apiIdentifier.getVersion() + ". Unable to find matching API Id in " +
+                                    "database.");
+                }
+                statement.setInt(1, apiId);
+                statement.setInt(2, Integer.parseInt(scopeId));
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to add Scope: " + scopeId + " to API: " + apiIdentifier.getApiName()
+                        + "-" + apiIdentifier.getVersion(), e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add Scope: " + scopeId + " to API: " + apiIdentifier.getApiName()
+                    + "-" + apiIdentifier.getVersion(), e);
+        }
+    }
+
+    /**
+     * Add scope to API resource mapping to AM table
+     * @param scopeId
+     * @param urlMappingId
+     * @throws APIManagementException if an error occurs while adding resource scope to AM table
+     */
+    public void addScopeToResourceMapping(String scopeId, Integer urlMappingId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_API_RESOURCE_SCOPE_MAPPING)) {
+            try {
+                initialAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
+                statement.setInt(1, Integer.parseInt(scopeId));
+                statement.setInt(2, urlMappingId);
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to add Scope: " + scopeId + " to Resource mapping: " + urlMappingId, e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add Scope: " + scopeId + " to Resource mapping: " + urlMappingId, e);
+        }
+    }
+
+    /**
+     * Add resource scope to IDN OAuth2 table
+     *
+     * @throws APIManagementException if an error occurs while adding resource scope to IDN table
+     */
+    public void addResourceScope(API api, URITemplate uriTemplate, Scope scope, String tenantDomain)
+            throws APIManagementException {
+
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_OAUTH2_RESOURCE_SCOPE_SQL)) {
+            try {
+                initialAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
+                statement.setString(1, APIUtil.getResourceKey(api, uriTemplate));
+                statement.setInt(2, Integer.parseInt(scope.getId()));
+                statement.setInt(3, tenantId);
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to add resource scope: " + scope.getName() + " to URL Template: "
+                        + uriTemplate.getId(), e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add resource scope: " + scope.getName() + " to URL Template: "
+                    + uriTemplate.getId(), e);
+        }
     }
 
     /**
