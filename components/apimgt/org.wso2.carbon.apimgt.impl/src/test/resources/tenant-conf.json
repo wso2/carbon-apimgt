@@ -192,6 +192,10 @@
       {
         "Name": "apim:tenantInfo",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:global_scope_manage",
+        "Roles": "admin"
       }
     ]
   },
