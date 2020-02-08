@@ -31,7 +31,6 @@ public class Scope {
     private String displayName;
     private String description;
     private List<String> bindings = new ArrayList<String>();
-    private List<ScopeBinding> scopeBindings = new ArrayList<ScopeBinding>();
 
     public String getName() {
 
@@ -71,16 +70,6 @@ public class Scope {
     public void setBindings(List<String> bindings) {
 
         this.bindings = bindings;
-    }
-
-    public List<ScopeBinding> getScopeBindings() {
-
-        return scopeBindings;
-    }
-
-    public void setScopeBindings(List<ScopeBinding> scopeBindings) {
-
-        this.scopeBindings = scopeBindings;
     }
 
 }
