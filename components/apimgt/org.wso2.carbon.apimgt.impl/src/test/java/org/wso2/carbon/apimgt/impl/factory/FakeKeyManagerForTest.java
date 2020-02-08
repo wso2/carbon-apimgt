@@ -131,4 +131,37 @@ public class FakeKeyManagerForTest implements KeyManager {
     public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
         return null;
     }
+
+    @Override
+    public void registerScope(Scope scope, String tenantDomain) throws APIManagementException {
+
+    }
+
+    @Override
+    public Scope getScopeByName(String scopeName, String tenantDomain) throws APIManagementException {
+
+        return null;
+    }
+
+    @Override
+    public Map<String, Scope> getAllScopes(String tenantDomain) throws APIManagementException {
+
+        return null;
+    }
+
+    @Override
+    public Boolean attachScopeToResource(Scope scope, String tenantDomain) throws APIManagementException {
+
+        return null;
+    }
+
+    @Override
+    public void deleteScope(Scope scope, String tenantDomain) throws APIManagementException {
+
+    }
+
+    @Override
+    public void updateScope(Scope scope, String tenantDomain) throws APIManagementException {
+
+    }
 }
