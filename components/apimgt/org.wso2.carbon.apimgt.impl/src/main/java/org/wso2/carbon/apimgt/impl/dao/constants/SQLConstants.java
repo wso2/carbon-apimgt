@@ -1902,9 +1902,6 @@ public class SQLConstants {
             " AM_API_URL_MAPPING (API_ID,HTTP_METHOD,AUTH_SCHEME,URL_PATTERN,THROTTLING_TIER,MEDIATION_SCRIPT)" +
             " VALUES (?,?,?,?,?,?)";
 
-    public static final String ADD_OAUTH2_RESOURCE_SCOPE_SQL =
-            "INSERT INTO IDN_OAUTH2_RESOURCE_SCOPE (RESOURCE_PATH,SCOPE_ID,TENANT_ID) VALUES (?,?,?)";
-
     public static final String GET_APPLICATION_BY_NAME_PREFIX =
             " SELECT " +
             "   APP.APPLICATION_ID," +
@@ -3453,5 +3450,16 @@ public class SQLConstants {
     }
 
     //Global Scopes related constants
-    public static final String ADD_GLOBAL_SCOPE = "INSERT INTO AM_GLOBAL_SCOPE (NAME, UUID, TENANT_ID) VALUES(???)";
+    public static final String ADD_GLOBAL_SCOPE = "INSERT INTO AM_GLOBAL_SCOPE (NAME, UUID, TENANT_ID) VALUES (?,?,?)";
+    public static final String DELETE_GLOBAL_SCOPE = "DELETE FROM AM_GLOBAL_SCOPE WHERE UUID = ?";
+    public static final String GET_GLOBAL_SCOPE_BY_UUID = "SELECT * FROM AM_GLOBAL_SCOPE WHERE UUID = ?";
+    public static final String GET_ALL_GLOBAL_SCOPES_BY_TENANT = "SELECT * FROM AM_GLOBAL_SCOPE WHERE TENANT_ID = ?";
+    public static final String IS_GLOBAL_SCOPE_NAME_EXISTS = "SELECT UUID FROM AM_GLOBAL_SCOPE WHERE TENANT_ID = ? AND"
+            + " NAME = ?";
+
+    //Resource Scope related constants
+    public static final String ADD_API_RESOURCE_SCOPE_MAPPING =
+            "INSERT INTO AM_API_RESOURCE_SCOPE_MAPPING (SCOPE_ID, URL_MAPPING_ID) VALUES (?, ?)";
+    public static final String ADD_OAUTH2_RESOURCE_SCOPE_SQL =
+            "INSERT INTO IDN_OAUTH2_RESOURCE_SCOPE (RESOURCE_PATH, SCOPE_ID, TENANT_ID) VALUES (?,?,?)";
 }
