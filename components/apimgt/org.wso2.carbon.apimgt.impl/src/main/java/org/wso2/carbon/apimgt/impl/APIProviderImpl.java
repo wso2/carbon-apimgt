@@ -7953,50 +7953,117 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return getGraphqlSchemaDefinition(apiId);
     }
 
+    /**
+     * Check whether the given global scope name exists in the tenant domain.
+     * If the scope does not exists in API-M (AM_DB) as a global scope, check the existence of scope name in the KM.
+     *
+     * @param scopeName    Global Scope name
+     * @param tenantDomain Tenant Domain
+     * @return Scope availability
+     * @throws APIManagementException if failed to check the availability
+     */
     @Override
+    public Boolean isGlobalScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException {
+
+        if (!ApiMgtDAO.getInstance().isGlobalScopeExists(scopeName, tenantDomain)) {
+            return KeyManagerHolder.getKeyManagerInstance().isScopeExists(scopeName, tenantDomain);
+        }
+        return true;
+    }
+
     /**
      * Add Global Scope by registering it in the KM and adding the scope as a Global Scope in AM DB.
      * @param scope Global Scope
      * @param tenantDomain Tenant domain
-     * @return Added Global Scope object
+     * @return UUId of the added Global Scope object
      * @throws APIManagementException if failed to add a scope
      */
-    public Scope addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException {
+    @Override
+    public String addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException {
 
         KeyManagerHolder.getKeyManagerInstance().registerScope(scope, tenantDomain);
         return ApiMgtDAO.getInstance().addGlobalScope(scope, tenantDomain);
     }
 
+    /**
+     * Get all available global scopes
+     *
+     * @param tenantDomain tenant domain
+     * @return Global Scope list
+     * @throws APIManagementException if failed to get the scope list
+     */
     @Override
     public List<Scope> getAllGlobalScopes(String tenantDomain) throws APIManagementException {
 
-        List<Scope>  allScopes = KeyManagerHolder.getKeyManagerInstance().getAllScopes(tenantDomain);
-
-        Map<String, String> globalScopeMapping = new HashMap<>();
-        //TODO: Get from AM_GLOBAL_SCOPESTABLE
-        for (Scope scope: allScopes) {
-            scope.setId(globalScopeMapping.get(scope.getKey()));
+        //Get all global scopes
+        List<Scope> allGlobalScopes = ApiMgtDAO.getInstance().getAllGlobalScopes(tenantDomain);
+        //Get all scopes from KM
+        Map<String, Scope> allScopes = KeyManagerHolder.getKeyManagerInstance().getAllScopes(tenantDomain);
+        //Set name, roles and description to global scopes
+        for (Scope scope : allGlobalScopes) {
+            if (!allScopes.containsKey(scope.getKey())) {
+                log.error("No matching scope found in authorization server for global scope name: " + scope.getKey());
+            } else {
+                Scope kmScope = allScopes.get(scope.getKey());
+                scope.setName(kmScope.getName());
+                scope.setRoles(kmScope.getRoles());
+                scope.setDescription(kmScope.getDescription());
+            }
         }
-        return allScopes;
+        return allGlobalScopes;
     }
+
+    /**
+     * Get global scope by UUID
+     * @param globalScopeId  Global scope Id
+     * @param tenantDomain  tenant domain
+     * @return Global Scope
+     * @throws APIManagementException If failed to get the scope
+     */
     @Override
     public Scope getGlobalScopeByUUID(String globalScopeId, String tenantDomain) throws APIManagementException {
-        String scopeName = null;
-        //TODO: get scope name from AMDB
 
-        return KeyManagerHolder.getKeyManagerInstance().getScopeByName(scopeName,tenantDomain);
+        Scope scope = ApiMgtDAO.getInstance().getGlobalScope(globalScopeId);
+        if (scope != null) {
+            scope = KeyManagerHolder.getKeyManagerInstance().getScopeByName(scope.getKey(), tenantDomain);
+            scope.setId(globalScopeId);
+        } else {
+            throw new APIMgtResourceNotFoundException("Global Scope not found for scope ID: " + globalScopeId,
+                    ExceptionCodes.from(ExceptionCodes.GLOBAL_SCOPE_NOT_FOUND, globalScopeId));
+        }
+        return scope;
     }
 
+    /**
+     * Delete global scope
+     * @param globalScopeId Global Scope Id
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException If failed to delete the scope
+     */
     @Override
     public void deleteGlobalScope(String globalScopeId, String tenantDomain) throws APIManagementException {
-        //TODO: call KeyManager and delete
-        //TODO: remove from global scope table
+
+        Scope scope = ApiMgtDAO.getInstance().getGlobalScope(globalScopeId);
+        if (scope == null) {
+            throw new APIMgtResourceNotFoundException("Error while deleting Global Scope. Global Scope not found for " +
+                    "scope ID: " + globalScopeId,
+                    ExceptionCodes.from(ExceptionCodes.GLOBAL_SCOPE_NOT_FOUND, globalScopeId));
+        }
+        KeyManagerHolder.getKeyManagerInstance().deleteScope(scope, tenantDomain);
+        ApiMgtDAO.getInstance().deleteGlobalScope(scope.getId());
     }
 
+    /**
+     * Update a global scope
+     *
+     * @param globalScope  Global Scope
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException If failed to update
+     */
     @Override
-    public Scope updateGlobalScope(Scope globalScope, String tenantDomain) throws APIManagementException {
-        //TODO: call key Manager and update scope role bindings
-        return null;
+    public void updateGlobalScope(Scope globalScope, String tenantDomain) throws APIManagementException {
+
+        KeyManagerHolder.getKeyManagerInstance().updateScope(globalScope, tenantDomain);
     }
 
     /**

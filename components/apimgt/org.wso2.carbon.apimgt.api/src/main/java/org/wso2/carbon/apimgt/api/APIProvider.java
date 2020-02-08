@@ -1329,15 +1329,23 @@ public interface APIProvider extends APIManager {
      */
     List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI);
 
+    /**
+     * Check whether the given global scope name exists in the tenant domain
+     * @param scopeName Global Scope name
+     * @param tenantDomain  Tenant Domain
+     * @return  Scope availability
+     * @throws APIManagementException if failed to check the availability
+     */
+    Boolean isGlobalScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException;
 
     /**
      * Add a global scope
      * @param scope Global Scope
      * @param tenantDomain Tenant domain
-     * @return Added Global Scope object
+     * @return UUID of the added Global Scope
      * @throws APIManagementException if failed to add a scope
      */
-    Scope addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException;
+    String addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException;
 
     /**
      * Get all available global scopes
@@ -1368,8 +1376,7 @@ public interface APIProvider extends APIManager {
      * Update a global scope
      * @param globalScope Global Scope
      * @param tenantDomain tenant domain
-     * @return  updated Global Scope
      * @throws APIManagementException   If failed to update
      */
-    Scope updateGlobalScope(Scope globalScope, String tenantDomain) throws APIManagementException;
+    void updateGlobalScope(Scope globalScope, String tenantDomain) throws APIManagementException;
 }
