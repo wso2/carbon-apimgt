@@ -81,7 +81,7 @@ public class KeyManagerHolder {
 
                     // Iterating through the Configuration and seeing which elements are starting with APIKeyManager
                     // .Configuration. Values of those keys will be set in KeyManagerConfiguration object.
-                    String startKey = APIConstants.API_KEY_MANAGER + "Configuration.";
+                    String startKey = APIConstants.API_KEY_MANAGER + APIConstants.API_KEY_MANAGER_CONFIGURATION;
                     for (String configKey : configKeySet) {
                         if (configKey.startsWith(startKey)) {
                             keyManagerConfiguration.addParameter(configKey.replace(startKey, ""),
@@ -92,6 +92,8 @@ public class KeyManagerHolder {
                     // Set the created configuration in the KeyManager instance.
                     keyManager.loadConfiguration(keyManagerConfiguration);
                 }
+                //Initialize a Http Client and Connection Manager using the ServerURL of KM
+                keyManager.initializeHttpClient();
             } catch (ClassNotFoundException e) {
                 log.error("Error occurred while instantiating KeyManager implementation");
                 throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
