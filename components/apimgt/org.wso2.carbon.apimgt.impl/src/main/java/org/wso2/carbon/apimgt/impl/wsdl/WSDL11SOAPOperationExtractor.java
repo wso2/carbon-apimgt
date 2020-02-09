@@ -761,9 +761,14 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                                     parameterModelMap.put(model.getName(), model);
                                     inputParameterModelList.add(model);
                                 } else {
-                                    ModelImpl model = new ModelImpl();
-                                    model.setType(ObjectProperty.TYPE);
-                                    model.setName(message.getQName().getLocalPart());
+                                    ModelImpl model;
+                                    if (parameterModelMap.get(message.getQName().getLocalPart()) != null) {
+                                        model = parameterModelMap.get(message.getQName().getLocalPart());
+                                    } else {
+                                        model = new ModelImpl();
+                                        model.setType(ObjectProperty.TYPE);
+                                        model.setName(message.getQName().getLocalPart());
+                                    }
                                     if (getPropertyFromDataType(part.getTypeName().getLocalPart()) instanceof RefProperty) {
                                         RefProperty property = (RefProperty) getPropertyFromDataType(part.getTypeName()
                                                 .getLocalPart());
