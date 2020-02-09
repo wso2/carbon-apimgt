@@ -31,32 +31,30 @@ import org.jaxen.JaxenException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
+import javax.cache.Cache;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.cache.Cache;
-import javax.cache.Caching;
 
 public class ApiKeyAuthenticator implements Authenticator {
 
@@ -95,6 +93,7 @@ public class ApiKeyAuthenticator implements Authenticator {
         try {
             // Extract apikey from the request while removing it from the msg context.
             String apiKey = extractApiKey(synCtx);
+            JWTTokenPayloadInfo payloadInfo = null;
 
             String splitToken[] = apiKey.split("\\.");
             JSONObject decodedHeader;
@@ -176,7 +175,16 @@ public class ApiKeyAuthenticator implements Authenticator {
                     if (log.isDebugEnabled()) {
                         log.debug("Api Key retrieved from the Api Key cache.");
                     }
-                    isVerified = true;
+                    if (getGatewayApiKeyDataCache().get(cacheKey) != null) {
+                        // Token is found in the key cache
+                        payloadInfo = (JWTTokenPayloadInfo) getGatewayApiKeyDataCache().get(cacheKey);
+                        String rawPayload = payloadInfo.getRawPayload();
+                        if (!rawPayload.equals(splitToken[1])) {
+                            isVerified = false;
+                        } else {
+                            isVerified = true;
+                        }
+                    }
                 } else if (getInvalidGatewayApiKeyCache().get(tokenSignature) != null) {
                     if (log.isDebugEnabled()) {
                         log.debug("Api Key retrieved from the invalid Api Key cache. Api Key: " +
@@ -264,9 +272,9 @@ public class ApiKeyAuthenticator implements Authenticator {
                 if (log.isDebugEnabled()) {
                     log.debug("Api Key signature is verified.");
                 }
-                if (isGatewayTokenCacheEnabled && getGatewayApiKeyKeyCache().get(cacheKey) != null) {
+                if (isGatewayTokenCacheEnabled && payloadInfo != null) {
                     // Api Key is found in the key cache
-                    payload = (JSONObject) getGatewayApiKeyKeyCache().get(cacheKey);
+                    payload = payloadInfo.getPayload();
                     if (isJwtTokenExpired(payload)) {
                         getGatewayApiKeyCache().remove(tokenSignature);
                         getInvalidGatewayApiKeyCache().put(tokenSignature, tenantDomain);
@@ -301,7 +309,10 @@ public class ApiKeyAuthenticator implements Authenticator {
                                 APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED_MESSAGE);
                     }
                     if (isGatewayTokenCacheEnabled) {
-                        getGatewayApiKeyKeyCache().put(cacheKey, payload);
+                        JWTTokenPayloadInfo jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
+                        jwtTokenPayloadInfo.setPayload(payload);
+                        jwtTokenPayloadInfo.setRawPayload(splitToken[1]);
+                        getGatewayApiKeyDataCache().put(cacheKey, jwtTokenPayloadInfo);
                     }
                 }
                 JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload, splitToken, false);
@@ -415,87 +426,18 @@ public class ApiKeyAuthenticator implements Authenticator {
         return java.util.Base64.getUrlDecoder().decode(payload.getBytes(StandardCharsets.UTF_8));
     }
 
-    /**
-     * Returns the API Manager Configuration.
-     *
-     * @return the API Manager Configuration
-     */
-    private APIManagerConfiguration getApiManagerConfiguration() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-    }
-
     //first level cache
     private Cache getGatewayApiKeyCache() {
-        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-        if (!gatewayApiKeyCacheInit) {
-            gatewayApiKeyCacheInit = true;
-            if (apimGWCacheExpiry != null) {
-                return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
-                        APIConstants.GATEWAY_API_KEY_CACHE_NAME, Long.parseLong(apimGWCacheExpiry),
-                        Long.parseLong(apimGWCacheExpiry));
-            } else {
-                long defaultCacheTimeout = getDefaultCacheTimeout();
-                return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
-                        APIConstants.GATEWAY_API_KEY_CACHE_NAME, defaultCacheTimeout, defaultCacheTimeout);
-            }
-        }
-        return getCacheFromCacheManager(APIConstants.GATEWAY_API_KEY_CACHE_NAME);
+        return CacheProvider.getGatewayApiKeyCache();
     }
 
     private Cache getInvalidGatewayApiKeyCache() {
-        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-        if (!gatewayInvalidApiKeyCacheInit) {
-            gatewayInvalidApiKeyCacheInit = true;
-            if (apimGWCacheExpiry != null) {
-                return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
-                        APIConstants.GATEWAY_INVALID_API_KEY_CACHE_NAME, Long.parseLong(apimGWCacheExpiry),
-                        Long.parseLong(apimGWCacheExpiry));
-            } else {
-                long defaultCacheTimeout = getDefaultCacheTimeout();
-                return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
-                        APIConstants.GATEWAY_INVALID_API_KEY_CACHE_NAME, defaultCacheTimeout, defaultCacheTimeout);
-            }
-        }
-        return getCacheFromCacheManager(APIConstants.GATEWAY_INVALID_API_KEY_CACHE_NAME);
+        return CacheProvider.getInvalidGatewayApiKeyCache();
     }
 
     //second level cache
-    private Cache getGatewayApiKeyKeyCache() {
-        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-        if (!gatewayApiKeyKeyCacheInit) {
-            gatewayApiKeyKeyCacheInit = true;
-            if (apimGWCacheExpiry != null) {
-                return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
-                        APIConstants.GATEWAY_API_KEY_KEY_CACHE_NAME, Long.parseLong(apimGWCacheExpiry),
-                        Long.parseLong(apimGWCacheExpiry));
-            } else {
-                long defaultCacheTimeout = getDefaultCacheTimeout();
-                return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
-                        APIConstants.GATEWAY_API_KEY_KEY_CACHE_NAME, defaultCacheTimeout, defaultCacheTimeout);
-            }
-        }
-        return getCacheFromCacheManager(APIConstants.GATEWAY_API_KEY_KEY_CACHE_NAME);
-    }
-
-    /**
-     * Returns the Cache object of the given name.
-     *
-     * @param cacheName name of the Cache
-     * @return the cache object
-     */
-    private Cache getCacheFromCacheManager(String cacheName) {
-        return Caching.getCacheManager(
-                APIConstants.API_MANAGER_CACHE_MANAGER).getCache(cacheName);
-    }
-
-    /**
-     * Returns the default cache timeout.
-     *
-     * @return the default cache timeout
-     */
-    private long getDefaultCacheTimeout() {
-        return Long.valueOf(ServerConfiguration.getInstance().getFirstProperty(APIConstants.DEFAULT_CACHE_TIMEOUT))
-                * 60;
+    private Cache getGatewayApiKeyDataCache() {
+        return CacheProvider.getGatewayApiKeyDataCache();
     }
 
     private String getApiLevelPolicy() {

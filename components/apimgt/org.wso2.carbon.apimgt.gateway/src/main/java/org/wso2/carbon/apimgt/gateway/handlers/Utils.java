@@ -337,6 +337,16 @@ public class Utils {
     }
 
     /**
+     * Remove a token from gateway API Key token cache
+     *
+     * @param key signature of JWT token which should be removed from the cache
+     */
+    public static void removeCacheEntryFromGatewayAPiKeyCache(String key) {
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_API_KEY_CACHE_NAME)
+                .remove(key);
+    }
+
+    /**
      * Add a token to the invalid token cache of the given tenant domain
      *
      * @param cachedToken   Access token to be added to the invalid token cache
