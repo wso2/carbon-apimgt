@@ -7226,8 +7226,8 @@ public final class APIUtil {
                 .get(tenantDomain);
         if (restAPIScopes == null) {
             try {
-                restAPIScopes =
-                        APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain), APIUtil.getTenantRESTAPIScopeRoleMappingsConfig(tenantDomain));
+                restAPIScopes = APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain),
+                        APIUtil.getTenantRESTAPIScopeRoleMappingsConfig(tenantDomain));
                 //call load tenant config for rest API.
                 //then put cache
                 Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)

@@ -24,7 +24,6 @@ var getTenantConfig = function() {
     }        
 };
 var updateTenantConf = function(tenantConfString) {
-
     try {
         var gson = com.google.gson.Gson();
         var provider = jagg.getUser().username;
