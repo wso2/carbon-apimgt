@@ -7311,7 +7311,7 @@ public final class APIUtil {
                         mappedRoles.add(role);
                     }
                 }
-                scopeRoles = mappedRoles.toString().replace("[", "").replace("]", "").replace(" ", "");
+                scopeRoles = String.join(",", mappedRoles);
             }
             scopes.put(scopeName, scopeRoles);
         }
