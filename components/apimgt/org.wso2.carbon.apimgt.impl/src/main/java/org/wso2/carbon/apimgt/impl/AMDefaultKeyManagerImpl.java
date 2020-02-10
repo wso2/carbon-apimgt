@@ -837,7 +837,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         try {
             HttpEntity entity = httpResponse.getEntity();
-            String responseString = EntityUtils.toString(entity, StandardCharsets.UTF_8);
+            String responseString = entity != null ? EntityUtils.toString(entity, StandardCharsets.UTF_8) : null;
             //release all resources held by the responseHttpEntity
             EntityUtils.consume(entity);
             return responseString;
@@ -1094,11 +1094,21 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpHead)) {
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode != HttpStatus.SC_OK) {
-                String responseString = readHttpResponseAsString(httpResponse);
-                String errorMessage = "Error occurred while checking existence of scope: " + scopeName + " via: "
-                        + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: "
-                        + responseString;
-                throw new APIManagementException(errorMessage);
+                if (statusCode != HttpStatus.SC_NOT_FOUND) {
+                    String responseString = readHttpResponseAsString(httpResponse);
+                    String errorMessage = "Error occurred while checking existence of scope: " + scopeName + " via: "
+                            + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: "
+                            + responseString;
+                    throw new APIManagementException(errorMessage);
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Scope " + scopeName + " not found in authorization server " + scopeEndpoint);
+                    }
+                    return false;
+                }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Scope " + scopeName + " found in authorization server " + scopeEndpoint);
             }
             return true;
         } catch (IOException e) {
