@@ -128,5 +128,8 @@
   "apim.token.revocation.persistent_notifier.username": "admin",
   "apim.token.revocation.persistent_notifier.password": "admin",
   "oauth.grant_type.iwa_ntlm.grant_handler": "org.wso2.carbon.identity.oauth2.token.handlers.grant.iwa.ntlm.NTLMAuthenticationGrantHandlerWithHandshake",
-  "oauth.grant_type.iwa_ntlm.grant_validator": "org.wso2.carbon.identity.oauth.common.NTLMAuthenticationValidator"
+  "oauth.grant_type.iwa_ntlm.grant_validator": "org.wso2.carbon.identity.oauth.common.NTLMAuthenticationValidator",
+  "apim.certificate_reloader.period": "600",
+  "apimgt.mutual_ssl.certificate_header": "X-WSO2-CLIENT-CERTIFICATE",
+  "apimgt.mutual_ssl.enable_client_validation": true
 }

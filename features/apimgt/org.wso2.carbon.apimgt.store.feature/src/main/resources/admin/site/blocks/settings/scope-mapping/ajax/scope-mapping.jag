@@ -45,6 +45,39 @@
                 }
             }
             print(obj);
+        } else if (action == "saveRoleMappingConfig") {
+            var originalRole = request.getParameter("originalRole");
+            var mappedRoleList = request.getParameter("mappedRoles");
+
+            var result = jagg.module("scope-mapping").getTenantConfig();
+            //Replace the old Roles with new Roles
+            var mappings = result.tenantConfig.RoleMappings;
+
+            //mappings can be null when RoleMappings config is not yet included in tenant-conf.json
+            if (mappings == null) {
+                mappings = {};
+                result.tenantConfig.RoleMappings = mappings;
+            }
+
+            if (mappedRoleList == null || mappedRoleList == "null" || mappedRoleList == "") {
+                delete mappings[originalRole];
+            } else {
+                mappings[originalRole] = mappedRoleList;
+            }
+
+            var updateResults = jagg.module("scope-mapping").updateTenantConf(stringify(result.tenantConfig));
+            if (updateResults.error) {
+                obj = {
+                    error: true,
+                    message: updateResults.message
+                };
+            } else {
+                obj = {
+                    error: false,
+                    response: result,
+                }
+            }
+            print(obj);
         }
     }
 }());

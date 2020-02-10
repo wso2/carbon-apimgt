@@ -1338,6 +1338,7 @@ public final class APIConstants {
     public static final String REST_API_SCOPE_NAME = "Name";
     public static final String REST_API_SCOPE_ROLE = "Roles";
     public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
+    public static final String REST_API_ROLE_MAPPINGS_CONFIG = "RoleMappings";
     public static final String APIM_SUBSCRIBE_SCOPE = "apim:subscribe";
 
     public static final String HTTPS_PROTOCOL = "https";
@@ -1920,4 +1921,18 @@ public final class APIConstants {
     public static final String RECOMMENDATIONS_PUBLISH_RESOURCE = "/publishEvents";
     public static final String RECOMMENDATIONS_USER_HEADER = "User";
     public static final String RECOMMENDATIONS_ACCOUNT_HEADER = "Account";
+
+    public static class CertificateReLoaderConfiguration {
+
+        public static final String CERTIFICATE_RELOADER_CONFIGURATION_ROOT = "CertificateReLoaderConfiguration";
+        public static final String PERIOD = CERTIFICATE_RELOADER_CONFIGURATION_ROOT + ".Period";
+    }
+
+    public static class MutualSSL {
+
+        public static final String MUTUAL_SSL_CONFIG_ROOT = "MutualSSL";
+        public static final String CLIENT_CERTIFICATE_HEADER = MUTUAL_SSL_CONFIG_ROOT + ".ClientCertificateHeader";
+        public static final String ENABLE_CLIENT_CERTIFICATE_VALIDATION = MUTUAL_SSL_CONFIG_ROOT +
+                ".EnableClientCertificateValidation";
+    }
 }

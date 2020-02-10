@@ -243,6 +243,7 @@ public class APIUtilTest {
 
         Map<String, String> expectedScopes = new HashMap<String, String>();
         JSONArray scopes = (JSONArray) restapiScopes.get("Scope");
+        JSONObject roleMappings = (JSONObject) restapiScopes.get("RoleMappings");
 
         for (Object scopeObj : scopes) {
             JSONObject scope = (JSONObject) scopeObj;
@@ -251,7 +252,38 @@ public class APIUtilTest {
             expectedScopes.put(name, roles);
         }
 
-        Map<String, String> restapiScopesFromConfig = APIUtil.getRESTAPIScopesFromConfig(restapiScopes);
+        Map<String, String> restapiScopesFromConfig = APIUtil.getRESTAPIScopesFromConfig(restapiScopes, roleMappings);
+
+        Assert.assertEquals(expectedScopes, restapiScopesFromConfig);
+    }
+
+    @Test
+    public void testGetRESTAPIScopesFromConfigWithRoleMappings() throws Exception {
+        File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
+                getResource("tenant-conf.json").getFile());
+
+        String tenantConfValue = FileUtils.readFileToString(siteConfFile);
+
+        JSONParser parser = new JSONParser();
+        JSONObject json = (JSONObject) parser.parse(tenantConfValue);
+        JSONObject restapiScopes = (JSONObject) json.get("RESTAPIScopes");
+
+        Map<String, String> expectedScopes = new HashMap<String, String>();
+        JSONArray scopes = (JSONArray) restapiScopes.get("Scope");
+        JSONObject roleMappings = new JSONObject();
+        roleMappings.put("Internal/publisher", "publisher");
+
+        for (Object scopeObj : scopes) {
+            JSONObject scope = (JSONObject) scopeObj;
+            String name = (String) scope.get("Name");
+            String roles = (String) scope.get("Roles");
+            //replace Internal/publisher role for publisher role and remove white spaces
+            roles = roles.replace("Internal/publisher", "publisher");
+            roles = roles.replace(" ", "");
+            expectedScopes.put(name, roles);
+        }
+
+        Map<String, String> restapiScopesFromConfig = APIUtil.getRESTAPIScopesFromConfig(restapiScopes, roleMappings);
 
         Assert.assertEquals(expectedScopes, restapiScopesFromConfig);
     }
