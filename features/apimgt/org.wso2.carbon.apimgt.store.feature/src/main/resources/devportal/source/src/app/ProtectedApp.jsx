@@ -36,8 +36,6 @@ import AppRouts from './AppRouts';
 import TenantListing from './TenantListing';
 import CONSTS from './data/Constants';
 import LoginDenied from './LoginDenied';
-import Cookies from 'js-cookie';
-import Iframe from 'react-iframe';
 
 /**
  * Language.
@@ -68,8 +66,8 @@ class ProtectedApp extends Component {
             scopesFound: false,
             tenantResolved: false,
             tenantList: [],
-            clientId: Cookies.get(User.CONST.DEVPORTAL_CLIENT_ID),
-            sessionStateCookie: Cookies.get(User.CONST.DEVPORTAL_SESSION_STATE),
+            clientId: Utils.getCookieWithoutEnvironment(User.CONST.DEVPORTAL_CLIENT_ID),
+            sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.DEVPORTAL_SESSION_STATE),
             sessionState: 'unchanged',
         };
         this.environments = [];
@@ -190,17 +188,17 @@ class ProtectedApp extends Component {
         const { sessionState } = this.state;
         console.log('sessionState: ' + sessionState);
         let stat;
-        if (e.data == 'unchanged') {
+        if (e.data === 'unchanged') {
             stat = 'unchanged';
             // console.log('checkSession: ' + stat);
-        } else {
+        } else if (e.data === 'changed') {
             stat = 'changed';
             // console.log('checkSession: ' + stat);
             this.setState({
                 sessionState: stat,
             });
         }
-   }
+    }
 
     /**
      * Invoke checksession oidc endpoint.
@@ -302,15 +300,13 @@ class ProtectedApp extends Component {
         return (
             <IntlProvider locale={language} messages={messages}>
                 <Base>
-                    <Iframe
-                        url={checkSessionURL}
-                        width="0px"
-                        height="0px"
-                        id="iframeOP"
-                        className="myClassname"
-                        display="none"
-                        position="relative"
-                    />      
+                    <iframe
+                        title='iframeOP'
+                        id='iframeOP'
+                        src={checkSessionURL}
+                        width='0px'
+                        height='0px'
+                    />     
                     <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
                 </Base>
             </IntlProvider>

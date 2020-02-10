@@ -48,7 +48,6 @@ class Utils {
     /**
      * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
      * @param {String} name - Name of the cookie which need to be retrieved
-     * @param {String} environmentName - label of the environment of the cookie
      * @returns {String|null} - If found a cookie with given name , return its value,Else null value is returned
      */
     static getCookieWithoutEnvironment(name) {

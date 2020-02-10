@@ -25,6 +25,7 @@ import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Api from 'AppData/api';
 import User from 'AppData/User';
+import Utils from 'AppData/Utils';
 import Base from 'AppComponents/Base';
 import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
@@ -36,8 +37,6 @@ import { IntlProvider } from 'react-intl';
 import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import SettingsBase from 'AppComponents/Apis/Settings/SettingsBase';
 import Progress from 'AppComponents/Shared/Progress';
-import Cookies from 'js-cookie';
-import Iframe from 'react-iframe';
 import Configurations from 'Config';
 
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
@@ -67,8 +66,8 @@ export default class Protected extends Component {
         super(props);
         this.state = {
             settings: null,
-            clientId: Cookies.get(User.CONST.PUBLISHER_CLIENT_ID),
-            sessionStateCookie: Cookies.get(User.CONST.PUBLISHER_SESSION_STATE),
+            clientId: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_CLIENT_ID),
+            sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_SESSION_STATE),
             sessionState: 'unchanged',
         };
         this.environments = [];
@@ -106,7 +105,7 @@ export default class Protected extends Component {
         if (e.data === 'unchanged') {
             stat = 'unchanged';
             // console.log('checkSession: ' + stat);
-        } else {
+        } else if (e.data === 'changed') {
             stat = 'changed';
             // console.log('checkSession: ' + stat);
             this.setState({
@@ -146,17 +145,15 @@ export default class Protected extends Component {
         }
         return (
             <MuiThemeProvider theme={theme}>
-                <Iframe
-                    url={checkSessionURL}
-                    width='0px'
-                    height='0px'
-                    id='iframeOP'
-                    className='myClassname'
-                    display='none'
-                    position='relative'
-                />
                 <AppErrorBoundary>
                     <Base header={header}>
+                        <iframe
+                            title='iframeOP'
+                            id='iframeOP'
+                            src={checkSessionURL}
+                            width='0px'
+                            height='0px'
+                        />
                         {settings ? (
                             <AppContextProvider value={{ settings, user }}>
                                 <Switch>
