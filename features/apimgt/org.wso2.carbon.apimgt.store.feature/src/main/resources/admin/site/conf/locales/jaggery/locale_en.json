@@ -321,6 +321,9 @@
     "API Category name already Exists": "API Category name already Exists",
     "Categories": "Categories",
     "Number of APIs": "Number of APIs",
-    "API Categories": "API Categories"
-
+    "API Categories": "API Categories",
+    "Role Mapping": "Role Mapping",
+    "Role Mappings": "Role Mappings",
+    "Role": "Role",
+    "Mapped Role": "Mapped Role"
 }
