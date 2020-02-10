@@ -402,7 +402,7 @@ class APISecurityAudit extends Component {
         } = this.state;
 
         const reportObject = JSON.parse(report);
-        const linkToFullReport = 'https://platform.42crunch.com/apis/' + externalApiId + '/security-audit-report';
+        const linkToDetailedReport = 'https://platform.42crunch.com/apis/' + externalApiId + '/security-audit-report';
         if (loading) {
             return (
                 <div>
@@ -673,14 +673,14 @@ class APISecurityAudit extends Component {
                                     </Typography>
                                     <Typography variant='body1' className={classes.linkText}>
                                         <FormattedMessage
-                                            id='Apis.Details.APIDefinition.AuditApi.LinkToFullReport'
+                                            id='Apis.Details.APIDefinition.AuditApi.LinkToDetailedReport'
                                             defaultMessage='{linkToDetailedReportText} {link} {afterLinkText}'
                                             values={{
                                                 linkToDetailedReportText: 'Check out the ',
                                                 link: (
                                                     <b>
                                                         <a
-                                                            href={linkToFullReport}
+                                                            href={linkToDetailedReport}
                                                             target='_blank'
                                                             rel='noopener noreferrer'
                                                         >
