@@ -125,6 +125,9 @@ const styles = (theme) => ({
         fontWeight: 200,
         marginBottom: 20,
     },
+    linkText: {
+        float: 'right',
+    },
 });
 
 
@@ -668,20 +671,23 @@ class APISecurityAudit extends Component {
                                             defaultMessage='Audit Score and Summary'
                                         />
                                     </Typography>
-                                    <Typography variant='body1'>
+                                    <Typography variant='body1' className={classes.linkText}>
                                         <FormattedMessage
                                             id='Apis.Details.APIDefinition.AuditApi.LinkToFullReport'
-                                            defaultMessage='{linkToFullReportText} {link}'
+                                            defaultMessage='{linkToDetailedReportText} {link} {afterLinkText}'
                                             values={{
-                                                linkToFullReportText: 'Check out the ',
+                                                linkToDetailedReportText: 'Check out the ',
                                                 link: (
-                                                    <a
-                                                        href={linkToFullReport}
-                                                        target='_blank'
-                                                        rel='noopener noreferrer'
-                                                    >
-                                                        Full Report
-                                                    </a>),
+                                                    <b>
+                                                        <a
+                                                            href={linkToFullReport}
+                                                            target='_blank'
+                                                            rel='noopener noreferrer'
+                                                        >
+                                                        detailed Report
+                                                        </a>
+                                                    </b>),
+                                                afterLinkText: ' from 42Crunch',
                                             }}
                                         />
                                     </Typography>
