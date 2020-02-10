@@ -69,14 +69,23 @@ public class AccessTokenGeneratorImpl implements AccessTokenGenerator {
         if (this.oauthUrl == oauthUrl && this.consumerKey == consumerKey && this.consumerSecret == consumerSecret
                 && this.accessToken != null) {
             if (System.currentTimeMillis() > (this.generatedTime + this.validityPeriod)) {
+                if(log.isDebugEnabled()) {
+                    log.debug("Access token expired. New token requested");
+                }
                 return generateNewAccessToken(oauthUrl, consumerKey, consumerSecret);
             } else {
+                if(log.isDebugEnabled()) {
+                    log.debug("Valid Access Token already available for the provided application");
+                }
                 return this.accessToken;
             }
         } else {
             this.oauthUrl = oauthUrl;
             this.consumerKey = consumerKey;
             this.consumerSecret = consumerSecret;
+            if(log.isDebugEnabled()) {
+                log.debug("Valid Access token not found for the application. New token requested");
+            }
             return generateNewAccessToken(oauthUrl, consumerKey, consumerSecret);
         }
     }
@@ -109,12 +118,17 @@ public class AccessTokenGeneratorImpl implements AccessTokenGenerator {
                     this.accessToken = (String) response.get("access_token");
                     this.validityPeriod = (Integer)response.get("expires_in") * 1000;
                     this.generatedTime = System.currentTimeMillis();
+                    if(log.isDebugEnabled()) {
+                        log.debug("Successfully received an access token which expires in " + validityPeriod);
+                    }
                     return (String) response.get("access_token");
                 } else {
+                    this.accessToken = null;
                     log.error("Error occurred when generating a new Access token. Server responded with "
                             + httpResponse.getStatusLine().getStatusCode());
                 }
             } catch (IOException e) {
+                this.accessToken = null;
                 log.error("Error occurred when generating a new Access token", e);
             }
         }

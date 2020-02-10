@@ -5776,24 +5776,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (recommendationEnvironment.isApplyForAllTenants()) {
                 return true;
             } else {
-                JSONObject apiTenantConfig = null;
                 try {
                     String content = apimRegistryService
                             .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
                     if (content != null) {
-                        JSONParser parser = new JSONParser();
-                        apiTenantConfig = (JSONObject) parser.parse(content);
+                        org.json.JSONObject apiTenantConfig = new org.json.JSONObject(content);
+                        if (apiTenantConfig != null) {
+                            if (apiTenantConfig.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
+                                Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
+                                return Boolean.parseBoolean(value.toString());
+                            }
+                        }
                     }
-                    return getTenantConfigValue(tenantDomain, apiTenantConfig,
-                            APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
-                } catch (UserStoreException e) {
-                    log.error("UserStoreException thrown when getting API tenant config from registry", e);
-                } catch (RegistryException e) {
-                    log.error("RegistryException thrown when getting API tenant config from registry", e);
-                } catch (ParseException e) {
-                    log.error("ParseException thrown when passing API tenant config from registry", e);
-                } catch (APIManagementException e) {
-                    log.debug(e.getMessage());
+                } catch (UserStoreException | RegistryException e) {
+                    log.error("Error occurred when getting API tenant config from registry", e);
                 }
             }
         }
