@@ -1,5 +1,6 @@
 {
   "EnableMonetization" : false,
+  "EnableRecommendation" : false,
   "IsUnlimitedTierPaid" : false,
   "ExtensionHandlerPosition": "bottom",
   "RESTAPIScopes": {
