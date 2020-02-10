@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.6.33-SNAPSHOT</version>
+        <version>6.6.47-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -97,6 +97,14 @@
                             org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth.*
                         </Export-Package>
                         <Import-Package>
+                            org.wso2.carbon.event.output.adapter.core.*; version=${carbon.analytics.common.version},
+                            org.apache.commons.*; version=${apache.commons.version},
+                            org.apache.http.*,
+                            org.wso2.carbon.apimgt.impl; version=${carbon.apimgt.version},
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",
+                            org.apache.axiom.om.util; version="${imp.pkg.version.axiom}",
                             javax.xml.namespace; version=0.0.0,
                             *;resolution:=optional
                         </Import-Package>

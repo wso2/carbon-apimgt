@@ -70,10 +70,6 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
                 .get(ExtendedHTTPEventAdapterConstants.ADAPTER_HTTP_CLIENT_METHOD);
     }
 
-    public static HttpClient getHttpClient() {
-        return httpClient;
-    }
-
     @Override
     public void init() throws OutputEventAdapterException {
         tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();

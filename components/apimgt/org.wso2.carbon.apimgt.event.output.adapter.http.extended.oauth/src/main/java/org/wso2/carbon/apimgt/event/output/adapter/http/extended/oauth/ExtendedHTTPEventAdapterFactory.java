@@ -18,9 +18,17 @@
 package org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth;
 
 import org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth.internal.util.ExtendedHTTPEventAdapterConstants;
-import org.wso2.carbon.event.output.adapter.core.*;
+import org.wso2.carbon.event.output.adapter.core.MessageType;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapter;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterFactory;
+import org.wso2.carbon.event.output.adapter.core.Property;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 /**
  * The Extended HTTP event adapter factory class to create an Extended Http output adapter

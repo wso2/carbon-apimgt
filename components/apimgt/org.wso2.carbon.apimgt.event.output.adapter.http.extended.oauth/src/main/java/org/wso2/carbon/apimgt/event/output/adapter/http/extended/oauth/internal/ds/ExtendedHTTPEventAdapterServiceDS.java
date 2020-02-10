@@ -46,10 +46,10 @@ public class ExtendedHTTPEventAdapterServiceDS {
             bundleContext.registerService(OutputEventAdapterFactory.class.getName(),
                     extendedHttpEventAdaptorFactory, null);
             if (log.isDebugEnabled()) {
-                log.debug("Successfully deployed the output recommendation event adaptor service");
+                log.debug("Successfully deployed the Extended Http event adaptor service");
             }
-        } catch (Throwable e) {
-            log.error("Can not create the output recommendation event adaptor service: " + e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Can not create the Extended Http event event adaptor service: " + e.getMessage(), e);
         }
     }
 
