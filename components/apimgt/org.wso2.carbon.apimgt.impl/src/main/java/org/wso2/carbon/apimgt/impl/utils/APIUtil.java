@@ -8834,7 +8834,6 @@ public final class APIUtil {
                 ConditionDto.IPCondition ipCondition = new Gson().fromJson(ipSpecificCondition.toJSONString(),
                         ConditionDto.IPCondition.class);
                 conditionDto.setIpCondition(ipCondition);
-                System.out.println("++++++++++ " +conditionDto.getIpCondition().getSpecificIp() );
             } else if (conditionJsonObject.containsKey(PolicyConstants.IP_RANGE_TYPE.toLowerCase())) {
                 JSONObject ipRangeCondition = (JSONObject) conditionJsonObject.get(PolicyConstants.IP_RANGE_TYPE
                         .toLowerCase());
