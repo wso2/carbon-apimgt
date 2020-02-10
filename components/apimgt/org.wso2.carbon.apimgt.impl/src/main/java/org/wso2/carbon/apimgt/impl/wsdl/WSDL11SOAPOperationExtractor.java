@@ -424,7 +424,8 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                                             }
                                         } else if (parentProperty instanceof ObjectProperty) {
                                             if (((ObjectProperty) parentProperty).getProperties() != null) {
-                                                if ((((ObjectProperty) parentProperty).getProperties()).get(parentName) != null) {
+                                                if ((((ObjectProperty) parentProperty).getProperties())
+                                                        .get(parentName) != null) {
                                                     Property objectProperty = new ObjectProperty();
                                                     Map propertiesMap = new HashMap();
                                                     propertiesMap.put(element, createPropertyFromNode(current, true));
@@ -523,18 +524,17 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
     }
 
     private boolean isChildNode(Node current, Node prevNode) {
-        boolean isChild = false;
         if (prevNode.hasChildNodes()) {
             NodeList childNodes = prevNode.getChildNodes();
             for (int i = 0; i < childNodes.getLength(); i++) {
                 if (childNodes.item(i).getAttributes() != null && current.getAttributes()
                         .getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue().equals(childNodes.item(i)
                                 .getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue())) {
-                    isChild = true;
+                    return true;
                 }
             }
         }
-        return isChild;
+        return false;
     }
 
     private String getXPath(Node node) {
