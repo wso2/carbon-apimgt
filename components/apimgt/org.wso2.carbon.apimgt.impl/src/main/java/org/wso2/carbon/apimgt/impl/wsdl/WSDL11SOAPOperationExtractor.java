@@ -103,6 +103,7 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
     private List<WSDLParamDefinition> wsdlParamDefinitions = new ArrayList<>();
     private Map<String, ModelImpl> parameterModelMap = new HashMap<>();
     private Property currentProperty;
+    private boolean isArrayType = false;
 
     protected Map<String, Definition> pathToDefinitionMap;
 
@@ -263,10 +264,10 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
             }
         }
         if (prevNode != null) {
-            currentProperty = generateSwaggerModelForComplexType(element, model, currentProp, true);
+            currentProperty = generateSwaggerModelForComplexType(element, model, currentProp, true, prevNode);
             setNamespaceDetails(model, element);
         } else {
-            currentProperty = generateSwaggerModelForComplexType(element, model, currentProp, false);
+            currentProperty = generateSwaggerModelForComplexType(element, model, currentProp, false, null);
             setNamespaceDetails(model, element);
         }
         NodeList nodeList = element.getChildNodes();
@@ -290,30 +291,31 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
      * @return swagger property for the wsdl element
      */
     private Property generateSwaggerModelForComplexType(Node current, ModelImpl model, Property currentProp,
-                                                        boolean prevNodeExist) {
+                                                        boolean prevNodeExist, Node prevNode) {
         if (WSDL_ELEMENT_NODE.equals(current.getLocalName())) {
             if (StringUtils.isNotBlank(getNodeName(current))) {
-                addModelDefinition(current, model, SOAPToRESTConstants.EMPTY_STRING, prevNodeExist);
+                addModelDefinition(current, model, SOAPToRESTConstants.EMPTY_STRING, prevNodeExist, prevNode);
             } else if (StringUtils.isNotBlank(getRefNodeName(current))) {
                 if (current.getParentNode() != null) {
-                    addModelDefinition(current, model, SOAPToRESTConstants.EMPTY_STRING, prevNodeExist);
+                    addModelDefinition(current, model, SOAPToRESTConstants.EMPTY_STRING, prevNodeExist, prevNode);
                 }
             }
         } else if (COMPLEX_TYPE_NODE_NAME.equals(current.getLocalName())) {
             if (StringUtils.isNotBlank(getNodeName(current))) {
                 if (current.getParentNode() != null) {
-                    addModelDefinition(current, model, SOAPToRESTConstants.EMPTY_STRING, prevNodeExist);
+                    addModelDefinition(current, model, SOAPToRESTConstants.EMPTY_STRING, prevNodeExist, prevNode);
                 }
             }
         } else if (SIMPLE_TYPE_NODE_NAME.equals(current.getLocalName())) {
             if (StringUtils.isNotBlank(getNodeName(current))) {
                 if (current.getParentNode() != null) {
-                    addModelDefinition(current, model, SOAPToRESTConstants.SIMPLE_TYPE_NODE_NAME, prevNodeExist);
+                    addModelDefinition(current, model, SOAPToRESTConstants.SIMPLE_TYPE_NODE_NAME, prevNodeExist,
+                            prevNode);
                 }
             }
         } else if (SOAPToRESTConstants.RESTRICTION_ATTR.equals(current.getLocalName())) {
             if (current.getParentNode() != null) {
-                addModelDefinition(current, model, SOAPToRESTConstants.RESTRICTION_ATTR, prevNodeExist);
+                addModelDefinition(current, model, SOAPToRESTConstants.RESTRICTION_ATTR, prevNodeExist, prevNode);
             }
         }
         return currentProp;
@@ -326,7 +328,7 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
      * @param model   swagger model element
      * @param type    wsdl node type{i.e: complexType, simpleType}
      */
-    private void addModelDefinition(Node current, ModelImpl model, String type, boolean prevNodeExist) {
+    private void addModelDefinition(Node current, ModelImpl model, String type, boolean prevNodeExist, Node prevNode) {
         if (current.getParentNode() != null) {
             String xPath = getXpathFromNode(current);
             if (log.isDebugEnabled()) {
@@ -386,11 +388,56 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                             //do nothing
                         } else if (model.getProperties().containsKey(element)) {
                             parentProp = model.getProperties().get(element);
-                            if (SOAPToRESTConstants.RESTRICTION_ATTR.equals(type) && pos == elements.length - 1) {
-                                model.getProperties().remove(element);
-                                parentProp = createPropertyFromNode(current, true);
-                                parentProp.setName(element);
-                                model.addProperty(element, parentProp);
+                            if (pos == elements.length - 1) {
+                                if (SOAPToRESTConstants.RESTRICTION_ATTR.equals(type)) {
+                                    model.getProperties().remove(element);
+                                    parentProp = createPropertyFromNode(current, true);
+                                    parentProp.setName(element);
+                                    model.addProperty(element, parentProp);
+                                } else {
+                                    if (isChildNode(current, prevNode)) {
+                                        int index = Arrays.asList(elements).indexOf(element);
+                                        Property parentProperty = null;
+                                        String parentName = "";
+                                        for (int i = 1; i < index; i++) {
+                                            parentProperty = model.getProperties().get(elements[index - i]);
+                                            if (parentProperty != null) {
+                                                model.getProperties().remove(element);
+                                                parentName = elements[index - i];
+                                                break;
+                                            }
+                                        }
+                                        if (parentProperty instanceof ArrayProperty) {
+                                            if (((ArrayProperty) parentProperty).getItems() != null) {
+                                                if (parentName.equals(((ArrayProperty) parentProperty).getItems()
+                                                        .getName())) {
+                                                    Property objectProperty = new ObjectProperty();
+                                                    Map propertiesMap = new HashMap();
+                                                    propertiesMap.put(element, createPropertyFromNode(current, true));
+                                                    ((ObjectProperty) objectProperty).setProperties(propertiesMap);
+                                                    ((ArrayProperty) parentProperty).setItems(objectProperty);
+                                                    parentProp = parentProperty;
+                                                }
+                                            } else {
+                                                ((ArrayProperty) parentProperty)
+                                                        .setItems(createPropertyFromNode(current, true));
+                                            }
+                                        } else if (parentProperty instanceof ObjectProperty) {
+                                            if (((ObjectProperty) parentProperty).getProperties() != null) {
+                                                if ((((ObjectProperty) parentProperty).getProperties())
+                                                        .get(parentName) != null) {
+                                                    Property objectProperty = new ObjectProperty();
+                                                    Map propertiesMap = new HashMap();
+                                                    propertiesMap.put(element, createPropertyFromNode(current, true));
+                                                    ((ObjectProperty) objectProperty).setProperties(propertiesMap);
+                                                    ((ObjectProperty) parentProperty).setProperties(propertiesMap);
+                                                }
+                                            }
+                                        }
+                                    }  else {
+                                        model.addProperty(getNodeName(current), createPropertyFromNode(current, true));
+                                    }
+                                }
                             }
                         } else {
                             if (parentProp instanceof ArrayProperty) {
@@ -405,7 +452,35 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                                         arrayObjProp.setProperties(arrayPropMap);
                                         ((ArrayProperty) parentProp).setItems(arrayObjProp);
                                     } else {
-                                        ((ArrayProperty) parentProp).setItems(currentProp);
+                                        if (((ArrayProperty) parentProp).getItems() instanceof ObjectProperty) {
+                                            Property objectProperty = ((ArrayProperty) parentProp).getItems();
+                                            Map parentProperties = null;
+                                            if (((ObjectProperty) objectProperty).getProperties() != null) {
+                                                parentProperties = ((ObjectProperty) objectProperty).getProperties();
+                                            }
+                                            Map propertiesMap = new HashMap();
+                                            propertiesMap.put(currentProp.getName(), currentProp);
+                                            if (parentProperties != null) {
+                                                Property obj = new ObjectProperty();
+                                                obj.setName(element);
+                                                if (parentProperties.get(element) instanceof ArrayProperty) {
+                                                    ((ObjectProperty) obj).setProperties(propertiesMap);
+                                                    parentProperties.remove(element);
+                                                    parentProperties.put(element, obj);
+                                                } else if (parentProperties.get(element) instanceof ObjectProperty) {
+                                                    Map parentPropertyMap = ((ObjectProperty) parentProperties
+                                                            .get(element)).getProperties();
+                                                    parentPropertyMap.put(currentProp.getName(), currentProp);
+                                                    ((ObjectProperty) obj).setProperties(parentProperties);
+                                                }
+                                                ((ObjectProperty) objectProperty).setProperties(parentProperties);
+                                            } else {
+                                                ((ObjectProperty) objectProperty).setProperties(propertiesMap);
+                                            }
+                                            ((ArrayProperty) parentProp).setItems(objectProperty);
+                                        } else {
+                                            ((ArrayProperty) parentProp).setItems(currentProp);
+                                        }
                                     }
                                 } else {
                                     ((ArrayProperty) parentProp).setItems(createPropertyFromNode(current, true));
@@ -446,6 +521,20 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                 }
             }
         }
+    }
+
+    private boolean isChildNode(Node current, Node prevNode) {
+        if (prevNode.hasChildNodes()) {
+            NodeList childNodes = prevNode.getChildNodes();
+            for (int i = 0; i < childNodes.getLength(); i++) {
+                if (childNodes.item(i).getAttributes() != null && current.getAttributes()
+                        .getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue().equals(childNodes.item(i)
+                                .getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private String getXPath(Node node) {
@@ -549,14 +638,36 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
             } else if (node.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null && prevNodeExist) {
                 property = new ObjectProperty();
                 property.setName(getNodeName(node));
+                if (node.hasChildNodes()) {
+                    NodeList childNodes = node.getChildNodes();
+                    for (int i = 0; i < childNodes.getLength(); i++) {
+                        Node childNode = childNodes.item(i);
+                        if (SOAPToRESTConstants.COMPLEX_TYPE_NODE_NAME.equals(childNode.getLocalName())) {
+                            isComplexTypeContainsArray(childNode);
+                        }
+                    }
+                }
             }
-            if (isArrayType(node)) {
+            if (isArrayType(node) || isArrayType) {
+                isArrayType = false;
                 Property arrayProperty = new ArrayProperty();
                 ((ArrayProperty) arrayProperty).setItems(property);
                 return arrayProperty;
             }
         }
         return property;
+    }
+
+    private void isComplexTypeContainsArray(Node current) {
+        if (current.getAttributes() != null && isArrayType(current)) {
+            isArrayType = true;
+        } else if (current.hasChildNodes()) {
+            NodeList nodeList = current.getChildNodes();
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node child = nodeList.item(i);
+                isComplexTypeContainsArray(child);
+            }
+        }
     }
 
     private Property getPropertyFromDataType(String dataType) {
