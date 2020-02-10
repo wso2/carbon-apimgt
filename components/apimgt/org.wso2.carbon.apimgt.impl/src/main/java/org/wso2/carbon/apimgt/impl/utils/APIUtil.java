@@ -8082,16 +8082,20 @@ public final class APIUtil {
      * @return BigInteger value for the given ip address. returns 0 for unknown host
      */
     public static BigInteger ipToBigInteger(String ipAddress) {
-        InetAddress a;
+        InetAddress address;
         try {
-            a = InetAddress.getByName(ipAddress);
-            byte[] bytes = a.getAddress();
+            address = getAddress(ipAddress);
+            byte[] bytes = address.getAddress();
             return new BigInteger(1, bytes);
         } catch (UnknownHostException e) {
             //ignore the error and log it
-            log.error("Error while parsing host Ip " + ipAddress, e);
+            log.error("Error while parsing host IP " + ipAddress, e);
         }
         return BigInteger.ZERO;
+    }
+    
+    public static InetAddress getAddress(String ipAddress) throws UnknownHostException {
+        return InetAddress.getByName(ipAddress);
     }
 
     public String getFullLifeCycleData(Registry registry) throws XMLStreamException, RegistryException {
@@ -8830,6 +8834,7 @@ public final class APIUtil {
                 ConditionDto.IPCondition ipCondition = new Gson().fromJson(ipSpecificCondition.toJSONString(),
                         ConditionDto.IPCondition.class);
                 conditionDto.setIpCondition(ipCondition);
+                System.out.println("++++++++++ " +conditionDto.getIpCondition().getSpecificIp() );
             } else if (conditionJsonObject.containsKey(PolicyConstants.IP_RANGE_TYPE.toLowerCase())) {
                 JSONObject ipRangeCondition = (JSONObject) conditionJsonObject.get(PolicyConstants.IP_RANGE_TYPE
                         .toLowerCase());

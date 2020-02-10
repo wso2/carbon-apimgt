@@ -838,15 +838,15 @@ public class ThrottleConditionEvaluatorTest {
     private ConditionDto getIPCondition(boolean invert) {
 
         ConditionDto conditionDto = new ConditionDto();
-        conditionDto.setIpCondition(new ConditionDto.IPCondition(APIUtil.ipToLong("127.0.0.1"), invert));
+        conditionDto.setIpCondition(new ConditionDto.IPCondition(APIUtil.ipToBigInteger("127.0.0.1"), invert));
         return conditionDto;
     }
 
     private ConditionDto getIpRangeCondition(boolean invert) {
 
         ConditionDto conditionDto = new ConditionDto();
-        conditionDto.setIpRangeCondition(new ConditionDto.IPCondition(APIUtil.ipToLong("192.168.0.0"), APIUtil
-                .ipToLong("192.168.0.10"), invert));
+        conditionDto.setIpRangeCondition(new ConditionDto.IPCondition(APIUtil.ipToBigInteger("192.168.0.0"), APIUtil
+                .ipToBigInteger("192.168.0.10"), invert));
         return conditionDto;
     }
 
@@ -892,7 +892,7 @@ public class ThrottleConditionEvaluatorTest {
     private ConditionDto getComplexCondition1() {
 
         ConditionDto conditionDto = new ConditionDto();
-        ConditionDto.IPCondition ipCondition = new ConditionDto.IPCondition(APIUtil.ipToLong("127.0.0.1"), false);
+        ConditionDto.IPCondition ipCondition = new ConditionDto.IPCondition(APIUtil.ipToBigInteger("127.0.0.1"), false);
         conditionDto.setIpCondition(ipCondition);
         ConditionDto.HeaderConditions headerConditions = new ConditionDto.HeaderConditions();
         Map map = new HashMap();
@@ -906,7 +906,7 @@ public class ThrottleConditionEvaluatorTest {
     private ConditionDto getComplexCondition2() {
 
         ConditionDto conditionDto = new ConditionDto();
-        ConditionDto.IPCondition ipCondition = new ConditionDto.IPCondition(APIUtil.ipToLong("127.0.0.1"), false);
+        ConditionDto.IPCondition ipCondition = new ConditionDto.IPCondition(APIUtil.ipToBigInteger("127.0.0.1"), false);
         conditionDto.setIpCondition(ipCondition);
         ConditionDto.QueryParamConditions queryParamConditions = new ConditionDto.QueryParamConditions();
         Map map = new HashMap();

@@ -70,6 +70,7 @@ import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -958,7 +959,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 key = key.replaceAll("\\$apiTenant", apiTenant);
                 key = key.replaceAll("\\$appId", appId);
                 if (clientIp != null){
-                    key = key.replaceAll("\\$clientIp", Long.valueOf(APIUtil.ipToLong(clientIp)).toString());
+                    key = key.replaceAll("\\$clientIp", APIUtil.ipToBigInteger(clientIp).toString());
                 }
                 if (getThrottleDataHolder().isThrottled(key)) {
                     long timestamp = getThrottleDataHolder().getThrottleNextAccessTimestamp(key);
