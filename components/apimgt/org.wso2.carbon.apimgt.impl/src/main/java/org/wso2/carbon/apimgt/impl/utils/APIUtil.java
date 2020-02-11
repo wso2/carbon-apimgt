@@ -10132,9 +10132,11 @@ public final class APIUtil {
         return null;
     }
 
-    public static boolean isPerTenantServiceProviderEnabled(String tenantDomain) throws APIManagementException {
+        public static boolean isPerTenantServiceProviderEnabled(String tenantDomain) throws APIManagementException,
+                RegistryException {
 
         int tenantId = getTenantIdFromTenantDomain(tenantDomain);
+        loadTenantRegistry(tenantId);
         JSONObject tenantConfig = getTenantConfig(tenantId);
         if (tenantConfig.containsKey(APIConstants.ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION)) {
             return (boolean) tenantConfig.get(APIConstants.ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION);
