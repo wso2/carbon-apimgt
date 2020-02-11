@@ -23,10 +23,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.*;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
 
-
-import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomUrlInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
-
 import java.util.List;
 
 import java.io.InputStream;
@@ -41,7 +37,7 @@ import javax.ws.rs.core.Response;
 
 public class CustomUrlsApiServiceImpl extends CustomUrlsApiService {
 
-    private static final Log log = LogFactory.getLog(CustomUrlApiServiceImpl.class);
+    private static final Log log = LogFactory.getLog(CustomUrlsApiServiceImpl.class);
 
     @Override
     public Response getCustomUrlInfoByTenantDomain(String tenantDomain){
