@@ -109,7 +109,11 @@ export default function Transports(props) {
                     title={(
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.Transports.tooltip'
-                            defaultMessage='API will be exposed in selected transport(s) in the gateway(s)'
+                            defaultMessage={
+                                'API will be exposed in selected transport(s) in the gateway(s)'
+                                + 'If Mutual SSL option is selected, a trusted client'
+                                + 'certificate should be presented to access the API'
+                            }
                         />
                     )}
                     aria-label='Transports'
