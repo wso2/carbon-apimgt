@@ -18,7 +18,6 @@
  */
 
 package org.wso2.carbon.apimgt.impl.definitions;
-
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.swagger.oas.inflector.examples.ExampleBuilder;
 import io.swagger.oas.inflector.examples.XmlExampleSerializer;

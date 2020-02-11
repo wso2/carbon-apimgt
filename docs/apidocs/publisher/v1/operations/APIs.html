@@ -2946,6 +2946,7 @@ Location: https://localhost:9443/api/am/publisher/v1/apis/35ee8a2d-d9ef-4d6d-862
                 </tbody>
             </table>
             <hr/>
+
             <h4 class="operation-heading"><a name="generateMockResponses"></a>Get swagger definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1/apis/{apiId}/generate-mock-responses</code>
             <p class="marked"></p>
 
@@ -2956,7 +2957,6 @@ Location: https://localhost:9443/api/am/publisher/v1/apis/35ee8a2d-d9ef-4d6d-862
 
             <p class="marked">This operation can be used to retrieve the WSDL meta information of an API. It states whether the API is a SOAP
 API. If the API is a SOAP API, it states whether it has a single WSDL or a WSDL archive.
-
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -3042,6 +3042,7 @@ Content-Type: application/json
                             <p class="marked"></p>
                         </td>
                     </tr>
+
                     <tr>
                         <td class="parameter">
                             
@@ -3071,6 +3072,7 @@ variant of the resource.
                             <p class="marked"></p>
                         </td>
                     </tr>
+
             </table>
 
             <h4 class="section-heading">Responses</h4>
@@ -3115,6 +3117,8 @@ variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
+
+                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
                         <td class="parameter"><p class="marked">Not Found. Requested API does not exist or the API is not a SOAP API. </p></td>
                         <td class="parameter">
                             <span class="parameter">
