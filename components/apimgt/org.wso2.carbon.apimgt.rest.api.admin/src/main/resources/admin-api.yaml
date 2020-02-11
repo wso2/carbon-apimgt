@@ -2629,7 +2629,7 @@ paths:
   ######################################################
   # The Custom URL Info resource API
   ######################################################
-  /custom-url/{tenantDomain}:
+  /custom-urls/{tenantDomain}:
     #----------------------------------------------------------
     # Retrieve custom url information of the given tenant domain
     #----------------------------------------------------------
@@ -3844,12 +3844,15 @@ definitions:
       tenantAdminUsername:
         type: string
         example: 'john@foo.com'
-      isCustomUrlEnabled:
+      enabled:
         type: boolean
         example: true
-      customUrl:
-        type: string
-        example: 'https://example.org/analytics'
+      devPortal:
+        type: object
+        properties:
+          url:
+            type: string
+            example: "http://example.com"
 
   #-----------------------------------------------------
   # The Category resource

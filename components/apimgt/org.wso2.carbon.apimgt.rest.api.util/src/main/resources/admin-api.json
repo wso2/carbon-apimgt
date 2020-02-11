@@ -2663,7 +2663,7 @@
         }
       }
     },
-    "/custom-url/{tenantDomain}": {
+    "/custom-urls/{tenantDomain}": {
       "get": {
         "x-scope": "apim:tenantInfo",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X GET \"https://localhost:9443/api/am/admin/v0.16/custom-url/foo.com\"",
@@ -3892,13 +3892,22 @@
           "type": "string",
           "example": "carbon.super"
         },
-        "isCustomUrlEnabled": {
+        "tenantAdminUsername": {
+          "type": "string",
+          "example": "john@foo.com"
+        },
+        "enabled": {
           "type": "boolean",
           "example": true
         },
-        "customUrl": {
-          "type": "string",
-          "example": "https://example.org/analytics"
+        "devPortal": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "example": "http://example.com"
+            }
+          }
         }
       }
     },

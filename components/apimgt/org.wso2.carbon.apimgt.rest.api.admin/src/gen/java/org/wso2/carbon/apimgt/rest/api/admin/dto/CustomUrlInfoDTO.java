@@ -1,9 +1,14 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import io.swagger.annotations.ApiModel;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomUrlInfoDevPortalDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
+import javax.validation.constraints.NotNull;
+
+
 
 /**
  * The custom url information of the tenant domain
@@ -16,13 +21,15 @@ public class CustomUrlInfoDTO  {
   
   
   private String tenantDomain = null;
-
+  
+  
   private String tenantAdminUsername = null;
   
-  private Boolean isCustomUrlEnabled = null;
+  
+  private Boolean enabled = null;
   
   
-  private String customUrl = null;
+  private CustomUrlInfoDevPortalDTO devPortal = null;
 
   
   /**
@@ -36,6 +43,7 @@ public class CustomUrlInfoDTO  {
     this.tenantDomain = tenantDomain;
   }
 
+  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -51,24 +59,24 @@ public class CustomUrlInfoDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("isCustomUrlEnabled")
-  public Boolean getIsCustomUrlEnabled() {
-    return isCustomUrlEnabled;
+  @JsonProperty("enabled")
+  public Boolean getEnabled() {
+    return enabled;
   }
-  public void setIsCustomUrlEnabled(Boolean isCustomUrlEnabled) {
-    this.isCustomUrlEnabled = isCustomUrlEnabled;
+  public void setEnabled(Boolean enabled) {
+    this.enabled = enabled;
   }
 
   
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("customUrl")
-  public String getCustomUrl() {
-    return customUrl;
+  @JsonProperty("devPortal")
+  public CustomUrlInfoDevPortalDTO getDevPortal() {
+    return devPortal;
   }
-  public void setCustomUrl(String customUrl) {
-    this.customUrl = customUrl;
+  public void setDevPortal(CustomUrlInfoDevPortalDTO devPortal) {
+    this.devPortal = devPortal;
   }
 
   
@@ -80,8 +88,8 @@ public class CustomUrlInfoDTO  {
     
     sb.append("  tenantDomain: ").append(tenantDomain).append("\n");
     sb.append("  tenantAdminUsername: ").append(tenantAdminUsername).append("\n");
-    sb.append("  isCustomUrlEnabled: ").append(isCustomUrlEnabled).append("\n");
-    sb.append("  customUrl: ").append(customUrl).append("\n");
+    sb.append("  enabled: ").append(enabled).append("\n");
+    sb.append("  devPortal: ").append(devPortal).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
