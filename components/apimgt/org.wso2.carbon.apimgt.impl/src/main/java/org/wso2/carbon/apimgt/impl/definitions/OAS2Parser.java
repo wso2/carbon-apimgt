@@ -58,6 +58,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.*;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYPE;
+
 /**
  * Models API definition using OAS (swagger 2.0) parser
  */
@@ -65,8 +68,12 @@ public class OAS2Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS2Parser.class);
     private static final String SWAGGER_SECURITY_SCHEMA_KEY = "default";
 
-
-
+    /**
+     * This method  generates Sample/Mock payloads for Swagger (2.0) definitions
+     *
+     * @param swaggerDef Swagger Definition
+     * @return
+     */
     @Override
     public String generateExample(String swaggerDef) {
         SwaggerParser parser = new SwaggerParser();
@@ -74,43 +81,112 @@ public class OAS2Parser extends APIDefinition {
         Swagger swagger = parseAttemptForV2.getSwagger();
         for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
             String path = entry.getKey();
+            int responseCode = 0;
+            int minResponseCode = 0;
             Map<String, Model> definitions = swagger.getDefinitions();
-                List<Operation> operations = swagger.getPaths().get(path).getOperations();
-                for (Operation op : operations) {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    int finalResponseEntry = 200;
-                    stringBuilder.append("########## Generated Code (Do not Modify) ##########\n");
-                    for (String responseEntry : op.getResponses().keySet()) {
-                        if(op.getResponses().get(responseEntry).getResponseSchema()!=null){
-                            Model model = op.getResponses().get(responseEntry).getResponseSchema();
-                            String example = getJsonExample("Model", model, definitions, new HashSet<String>());
-                            stringBuilder.append("var response" + responseEntry + "json = " + example + ";\n");
-                            int currentResponseEntry = Integer.parseInt(responseEntry);
-                            if (finalResponseEntry > currentResponseEntry) {
-                                finalResponseEntry = currentResponseEntry;
-                            }
+            ArrayList<Integer> responseCodes = new ArrayList<Integer>();
+            List<Operation> operations = swagger.getPaths().get(path).getOperations();
+            for (Operation op : operations) {
+                StringBuilder genCode = new StringBuilder();
+                StringBuilder responseSection = new StringBuilder();
+                for (String responseEntry : op.getResponses().keySet()) {
+                    if (!responseEntry.equals("default")) {
+                        responseCode = Integer.parseInt(responseEntry);
+                        responseCodes.add(responseCode);
+                        minResponseCode = Collections.min(responseCodes);
+                    }
+                    if (op.getResponses().get(responseEntry).getResponseSchema() != null) {
+                        Model model = op.getResponses().get(responseEntry).getResponseSchema();
+                        String schemaExample = getSchemaExample(model, definitions, new HashSet<String>());
+                        genCode.append(getGeneratedResponseVar(responseEntry, schemaExample, "json"));
+                        if (responseCode == minResponseCode) {
+                            responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
                         }
                     }
-                    stringBuilder.append("############## End Of Generated Code ##################\n\n\t"
-                            +"mc.setProperty('CONTENT_TYPE', 'application/json');\n\t"
-                            +"mc.setPayloadJSON(response"+finalResponseEntry+"json);");
-
-                    op.setVendorExtension("x-mediation-script",stringBuilder.toString());
+                    if (op.getResponses().get(responseEntry).getExamples() != null) {
+                        Object applicationJson = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_JSON_MEDIA_TYPE);
+                        Object applicationXml = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_XML_MEDIA_TYPE);
+                        if (applicationJson != null) {
+                            String jsonExample = Json.pretty(applicationJson);
+                            genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
+                            if (responseCode == minResponseCode) {
+                                responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
+                                if (applicationXml != null) {
+                                    responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
+                                }
+                            }
+                        }
+                        if (applicationXml != null) {
+                            String xmlExample = applicationXml.toString();
+                            genCode.append(getGeneratedResponseVar(responseEntry, xmlExample, "xml"));
+                            if (responseCode == minResponseCode) {
+                                if (applicationJson == null) {
+                                    responseSection.append(getGeneratedSetResponse(responseEntry, "xml"));
+                                }
+                            }
+                        }
+                        if (applicationJson==null && applicationXml==null){
+                            setDefaultGeneratedResponse(genCode);
+                        }
+                    }
                 }
+                genCode.append(responseSection);
+                op.setVendorExtension("x-mediation-script", genCode);
+            }
         }
         return Json.pretty(swagger);
     }
+
     /**
-     * This method retrieves the examples of each operation in the swagger file
+     * This method  generates Sample/Mock payloads of Schema Examples for operations in the swagger definition
      * @param model
      * @param definitions
      * @return
      */
-    public String getJsonExample(String string, Model model, Map<String, Model> definitions, HashSet<String> strings){
+
+    private String getSchemaExample(Model model, Map<String, Model> definitions, HashSet<String> strings){
         Example example = ExampleBuilder.fromModel("Model", model, definitions, new HashSet<String>());
         SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
         Json.mapper().registerModule(simpleModule);
         return Json.pretty(example);
+    }
+
+
+    /**
+     *Sets default script
+     *
+     * @param genCode String builder
+     */
+    private void setDefaultGeneratedResponse(StringBuilder genCode) {
+        genCode.append("/* mc.setProperty('CONTENT_TYPE', 'application/json');\n\t" +
+                "mc.setPayloadJSON('{ \"data\" : \"sample JSON\"}');*/\n" +
+                "/*Uncomment the above comment block to send a sample response.*/");
+    }
+
+    /**
+     * Generates string for variables in Payload Generation
+     *
+     * @param responseCode response Entry Code
+     * @param example generated Example Json/Xml
+     * @param type  mediaType (Json/Xml)
+     * @return generatedString
+     */
+
+    private String getGeneratedResponseVar(String responseCode, String example, String type){
+        return "\nvar response" + responseCode + type + " = "+ example+"\n\n";
+    }
+
+    /**
+     * Generates string for methods in Payload Generation
+     *
+     * @param responseCode response Entry Code
+     * @param type mediaType (Json/Xml)
+     * @return manualCode
+     */
+
+    private String getGeneratedSetResponse(String responseCode, String type) {
+        return "mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
+                "mc.setPayloadJSON(response" + responseCode + type + ");";
     }
 
 

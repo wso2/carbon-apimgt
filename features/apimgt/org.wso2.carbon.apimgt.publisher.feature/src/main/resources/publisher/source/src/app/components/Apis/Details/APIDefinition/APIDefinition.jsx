@@ -301,6 +301,10 @@ class APIDefinition extends React.Component {
         const promise = api.updateSwagger(parsedContent);
         promise
             .then((response) => {
+                const {endpointImplementationType } = api;
+                if(endpointImplementationType === "INLINE"){
+                    api.generateMockResponses(api.id,null);
+                }
                 if (response) {
                     Alert.success(intl.formatMessage({
                         id: 'Apis.Details.APIDefinition.APIDefinition.api.definition.updated.successfully',

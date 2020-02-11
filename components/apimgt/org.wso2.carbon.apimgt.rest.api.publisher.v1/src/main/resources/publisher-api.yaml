@@ -613,11 +613,12 @@ paths:
   # The swagger resource of "Individual API" resource APIs
   ################################################################
 
-  /apis/{apiId}/generate-mocks:
+  /apis/{apiId}/generate-mock-responses:
     #-----------------------------------------------------
-    # Retrieve the API swagger definition
+    # Generate Mock responses from Swagger/OAS Definition
     #-----------------------------------------------------
     post:
+      operationId: generateMockResponses
       summary: Get swagger definition
       description: |
         This operation can be used to retrieve the swagger definition of an API.
