@@ -20,6 +20,7 @@
     include("/services/constants.jag");
     var appUtils = require("/services/utils.js");
     var app = require("/site/public/theme/settings.js").Settings.app;
+    app.context = appUtils.getTenantBaseStoreContext();
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var serverUrl = "";
     var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
@@ -28,17 +29,25 @@
     } else {
         serverUrl = utils.getServerURL();
     }
+    var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
+    if(loginCallbackUrl == null){
+        loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
+     }
     var tokenRequestData = {
         "grant_type": "authorization_code",
         "code": request.getParameter("code","UTF-8"),
-        "redirect_uri": serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX
+        "redirect_uri": loginCallbackUrl
     };
+     var tenantDomain = "carbon.super" ;
+     if(appUtils.isPerTenantServiceProviderEnabled()){
+        tenantDomain = appUtils.getTenantDomain();
+      }
     var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
     var systemApplicationDAO = new SystemApplicationDTO();
     // this is to support migration from admin_store to admin_devportal
-    var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
+    var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME,tenantDomain);
     if (systemApplicationDTO === null) {
-        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD);
+        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD,tenantDomain);
     }
     var clientId = systemApplicationDTO.getConsumerKey();
     var clientSecret = systemApplicationDTO.getConsumerSecret();

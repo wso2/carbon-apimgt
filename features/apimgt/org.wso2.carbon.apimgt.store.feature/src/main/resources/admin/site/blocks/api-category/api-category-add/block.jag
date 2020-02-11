@@ -1,0 +1,22 @@
+<%
+jagg.block("api-category/api-category-add", {
+    initializer:function (data) {},
+
+    getInputs:function () {
+        return {};
+    },
+
+    getOutputs:function (inputs) {
+        var labelList, result;
+        result = jagg.module("label").getAllLabels();
+        labelList = result.labelList;
+
+        // we put results to the session.
+        session.put("labelList", labelList);
+     
+        return {
+            "labelList":labelList
+        };
+    }
+});
+%>

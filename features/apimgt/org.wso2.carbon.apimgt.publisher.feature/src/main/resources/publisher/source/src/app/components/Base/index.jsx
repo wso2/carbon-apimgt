@@ -43,7 +43,7 @@ const styles = (theme) => ({
     wrapper: {
         minHeight: '100%',
         marginBottom: -50,
-        background: '#d3d3d326',
+        background: theme.custom.wrapperBackground,
     },
     contentWrapper: {
         display: 'flex',

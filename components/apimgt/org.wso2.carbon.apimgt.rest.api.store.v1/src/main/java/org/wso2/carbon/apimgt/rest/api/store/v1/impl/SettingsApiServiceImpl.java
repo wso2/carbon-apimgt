@@ -54,12 +54,13 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             String tenantDomain = MultitenantUtils.getTenantDomain(username);
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             boolean monetizationEnabled = apiConsumer.isMonetizationEnabled(tenantDomain);
+            boolean recommendationEnabled = apiConsumer.isRecommendationEnabled();
             boolean isUserAvailable = false;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
                 isUserAvailable = true;
             }
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO( isUserAvailable, monetizationEnabled );
+            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO( isUserAvailable, monetizationEnabled, recommendationEnabled );
             return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Store Settings";

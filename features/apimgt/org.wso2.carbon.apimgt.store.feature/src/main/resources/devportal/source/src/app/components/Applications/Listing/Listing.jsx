@@ -359,7 +359,7 @@ class Listing extends Component {
                     <Grid item xs={12}>
                         {data.size > 0 ? (
                             <div className={classes.appContent}>
-                                <Paper>
+                                <Paper className={classes.appTablePaper}>
                                     <Table>
                                         <ApplicationTableHead
                                             order={order}

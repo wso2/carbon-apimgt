@@ -1,0 +1,151 @@
+<% jagg.template("settings/scope-mapping", function(inputs, outputs, jagg) {
+    var mappings = outputs.conf.tenantConfig.RESTAPIScopes.Scope;
+    var roleMappingsConfig = outputs.conf.tenantConfig.RoleMappings;
+%>
+
+<!-- Start script to add role mappings -->
+<script id="role-mappings-add-template" type="text/x-handlebars-template">
+<div>
+    <div class="page-header">
+        <h2><%=i18n.localize("Role Mapping")%></h2>
+       <h2></h2>
+    </div>
+    <div class="row">
+        <div class="form-group col-sm-8 col-lg-offset-2 col-md-8 col-xs-8">
+             <div class="col-sm-4 col-md-4 col-xs-4">
+                  <div class="col-sm-10 col-md-10 col-xs-10" >
+                      <input id="original_role" type="text" placeholder="original role" class="form-control"/>
+                      <label id="original_role_error" class="error hidden" ></label>
+                  </div>
+             </div>
+             <div class="col-sm-6 col-md-6 col-xs-6">
+                 <input id="mapped_role" type="text" placeholder="mapped role(s) list" class="form-control"/>
+                 <label id="mapped_role_error" class="error hidden"></label>
+             </div>
+             <div class="col-sm-2 col-md-2 col-xs-2">
+                 <a class="btn" id="role_mapping_add">
+                     <span class="icon fw-stack" style="font-size:10px">
+                         <i class="fw fw-add fw-stack-1x"></i>
+                         <i class="fw fw-circle-outline fw-stack-2x"></i>
+                     </span>
+                 </a>
+             </div>
+             <h2><br/></h2>
+        </div>
+    </div>
+
+    <div class = "row">
+        <div class="col-sm-8 col-lg-offset-2 col-md-8 col-xs-8">
+            {{#if roleMappings}}
+                <table class="table table-striped table-responsive">
+                    <thead>
+                        <tr>
+                            <td style="width: 30%"><%=i18n.localize("Role")%></td>
+                            <td style="width: 60%"><%=i18n.localize("Mapped Role")%></strong></td>
+                            <td style="width: 10%"></td>
+                        </tr>
+                    </thead>
+                    {{#each roleMappings}}
+                        <tr>
+                            <td style="width: 30%">{{@key}}</td>
+                            <td style="width: 60%">{{this}}</td>
+                            <td style="width: 10%" align="right">
+                                <a class="delete-role-mappings" data-key="{{@key}}" data-value="{{this}}">
+                                    <span class="fw-stack" style="font-size:10px">
+                                        <i class="fw fw-delete fw-stack-1x"></i>
+                                        <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                    </span>
+                                </a>
+                            </td>
+                        <tr>
+                    {{/each}}
+                </table>
+            {{/if}}
+        </div>
+    </div>
+</div>
+</script>
+<!-- End script to add role mappings -->
+
+<%
+var roleMappingsJSONString = JSON.stringify(roleMappingsConfig);
+if (roleMappingsJSONString != null) {
+    roleMappingsJSONString = roleMappingsJSONString.replace(" ", "");
+}
+%>
+<input hidden id="role_mappings" value=<%= roleMappingsJSONString%>></input>
+<div id="roleListing"></div>
+
+<div id="listing">
+    <div class="page-header">
+        <h2><%=i18n.localize("Scope Mapping")%></h2>
+       <h2></h2>
+    </div>
+    <div class="content-section shadow-up">
+    <div class="content-data">
+    <table class="table table-responsive table-striped" id="get-app">
+        <thead>
+            <tr>
+                <th width="200"><%=i18n.localize("Name")%></th>
+                <th><%=i18n.localize("Roles")%></th>
+                <th width="300"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(var i=0; i < mappings.length ; i++ ){
+                %>
+                <tr data-name="<%=mappings[i]['Name']%>" data-roles="<%=mappings[i]['Roles']%>">
+                    <td style="vertical-align: middle;"><%=mappings[i]['Name']%></td>
+                    <td style="vertical-align: middle;">
+                        <span class="mappingRolesView"><%=mappings[i]['Roles']%></span>
+                        <input 
+                            class="mappingRolesEdit hidden" 
+                            type="text" 
+                            value="<%=mappings[i]['Roles']%>" 
+                            style="width: 100%; line-height: 30px" 
+                        />
+                    </td>
+                    <td class="text-left">
+                        <a class="btn padding-reduce-on-grid-view mappingEditBtn">
+                            <span class="fw-stack">
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                <i class="fw fw-edit fw-stack-1x"></i>
+                            </span>
+                            <span class="hidden-xs"><%=i18n.localize("Edit")%></span>
+                        </a>
+                        <a class="btn padding-reduce-on-grid-view mappingSaveBtn hidden">
+                            <span class="fw-stack">
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                <i class="fw fw-save fw-stack-1x"></i>
+                            </span>
+                            <span class="hidden-xs"><%=i18n.localize("Save")%></span>
+                        </a>
+                        <a class="btn padding-reduce-on-grid-view mappingCancelBtn hidden">
+                            <span class="fw-stack">
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                <i class="fw fw-cancel fw-stack-1x"></i>
+                            </span>
+                            <span class="hidden-xs"><%=i18n.localize("Cancel")%></span>
+                        </a>
+                    </td>
+                </tr>
+                <%
+            }%>
+        </tbody>
+    </table>
+    </div>
+    </div>
+</div>
+<script id="application-actions" type="text/x-handlebars-template" >
+<div class="text-right">
+  <a title="Edit" href="<%=jagg.url("/site/pages/changeOwner.jag?name={{ name }}&owner={{ owner }}&uuid={{ uuid }}&action=changeOwner")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+      <span class="fw-stack">
+          <i class="fw fw-ring fw-stack-2x"></i>
+          <i class="fw fw-edit fw-stack-1x"></i>
+      </span>
+      <span class="hidden-xs"><%=i18n.localize("Edit")%></span>
+  </a>
+  </div>
+</script>
+
+<% }); %>

@@ -115,10 +115,11 @@ export default function ProvideOpenAPI(props) {
         // State `null` means URL is valid, We do backend validation only in valid URLs
         if (state === null) {
             setIsValidating(true);
-            API.validateOpenAPIByUrl(apiInputs.inputValue).then((response) => {
+            API.validateOpenAPIByUrl(apiInputs.inputValue, { returnContent: true }).then((response) => {
                 const {
-                    body: { isValid: isValidURL, info },
+                    body: { isValid: isValidURL, info, content },
                 } = response;
+                info.content = content;
                 if (isValidURL) {
                     inputsDispatcher({ action: 'preSetAPI', value: info });
                     setValidity({ ...isValid, url: null });
@@ -308,7 +309,7 @@ export default function ProvideOpenAPI(props) {
 }
 
 ProvideOpenAPI.defaultProps = {
-    onValidate: () => {},
+    onValidate: () => { },
 };
 ProvideOpenAPI.INPUT_TYPES = {
     URL: 'url',

@@ -119,8 +119,12 @@ function endpointsToList(endpointConfig) {
     }
 
     if (config.endpoint_type === 'failover') {
-        endpoints.push(...config.sandbox_failovers);
-        endpoints.push(...config.production_failovers);
+        if (config.sandbox_failovers) {
+            endpoints.push(...config.sandbox_failovers);
+        }
+        if (config.production_failovers) {
+            endpoints.push(...config.production_failovers);
+        }
     }
     return endpoints;
 }

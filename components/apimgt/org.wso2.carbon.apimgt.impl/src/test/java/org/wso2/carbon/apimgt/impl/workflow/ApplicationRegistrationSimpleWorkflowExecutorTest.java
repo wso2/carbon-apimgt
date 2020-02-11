@@ -103,7 +103,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutorTest {
     @Test
     public void testGetWorkflowDetails(){
         try {
-            applicationRegistrationSimpleWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+            applicationRegistrationSimpleWorkflowExecutor.getWorkflowDetails("random_string");
         } catch (WorkflowException e) {
             Assert.fail("Unexpected exception occurred while retriving workflow details");
         }

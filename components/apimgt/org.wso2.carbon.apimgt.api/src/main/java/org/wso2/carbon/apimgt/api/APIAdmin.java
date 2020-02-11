@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
@@ -122,6 +123,75 @@ public interface APIAdmin  {
      */
     void updateMonetizationUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
             throws APIManagementException;
+
+    /**
+     * Adds a new category for the tenant
+     *
+     * @param userName    logged in user name
+     * @param category        category to add
+     * @throws APIManagementException if failed add category
+     */
+    APICategory addCategory(APICategory category, String userName) throws APIManagementException;
+
+    /**
+     * Updates an API Category
+     *
+     * @param apiCategory
+     * @return
+     * @throws APIManagementException
+     */
+    void updateCategory(APICategory apiCategory) throws APIManagementException;
+
+    /**
+     * Delete an API Category
+     *
+     * @param categoryID
+     * @param username
+     * @throws APIManagementException
+     */
+    void deleteCategory(String categoryID, String username) throws APIManagementException;
+
+    /**
+     * Checks whether an api category exists by the given name
+     *
+     * 1. in case uuid is null : checks whether the categoryName is already taken in the tenantDomain (this
+     *                           flow is used when adding a new api category)
+     * 2. in case uuid is not null: checks whether the categoryName is already taken by any category other than the one
+     *                              defined by the passed uuid in the given tenant
+     *
+     * @param categoryName
+     * @param tenantID
+     * @return true if an api category exists by the given category name
+     * @throws APIManagementException
+     */
+    boolean isCategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException;
+
+    /**
+     * Returns all api categories of the tenant
+     *
+     * @param tenantID
+     * @return
+     * @throws APIManagementException
+     */
+    List<APICategory> getAllAPICategoriesOfTenant(int tenantID) throws APIManagementException;
+
+    /**
+     * Returns all api categories of the tenant along with the count of attached APIs
+     *
+     * @param username
+     * @return
+     * @throws APIManagementException
+     */
+    List<APICategory> getAllAPICategoriesOfTenantForAdminListing(String username) throws APIManagementException;
+
+    /**
+     * Get API Category identified by the given uuid
+     *
+     * @param apiCategoryId api category UUID
+     * @return
+     * @throws APIManagementException
+     */
+    APICategory getAPICategoryByID(String apiCategoryId) throws APIManagementException;
 
     /**
      * The method converts the date into timestamp

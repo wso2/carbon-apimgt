@@ -16,6 +16,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -23,8 +24,10 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.TenantInfoApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.TenantInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
+import java.util.Base64;
 
 public class TenantInfoApiServiceImpl extends TenantInfoApiService {
     Log log = LogFactory.getLog(TenantInfoApiServiceImpl.class);
@@ -32,15 +35,25 @@ public class TenantInfoApiServiceImpl extends TenantInfoApiService {
     @Override
     public Response getTenantInfoByUsername(String username){
         TenantInfoDTO tenantInfoDTO = new TenantInfoDTO();
+        String decodedUserName;
         try {
-            if (!APIUtil.isUserExist(username)) {
-                RestApiUtil.handleBadRequest("Requested User does not exist", log);
+            if (StringUtils.isEmpty(username)) {
+                RestApiUtil.handleBadRequest("User Name should not be empty", log);
             }
-            int tenantId = APIUtil.getTenantId(username);
-            String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+            try {
+                decodedUserName = new String(Base64.getDecoder().decode(username));
+            } catch (IllegalArgumentException e) {
+                log.warn("Could not decode the username. Using original username");
+                decodedUserName = username;
+            }
+            if (!APIUtil.isUserExist(decodedUserName)) {
+                RestApiUtil.handleBadRequest("Requested User " + decodedUserName + " does not exist", log);
+            }
+            String tenantDomain = MultitenantUtils.getTenantDomain(decodedUserName);
+            int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             tenantInfoDTO.setTenantDomain(tenantDomain);
             tenantInfoDTO.setTenantId(tenantId);
-            tenantInfoDTO.setUsername(username);
+            tenantInfoDTO.setUsername(decodedUserName);
             return Response.status(Response.Status.OK).entity(tenantInfoDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Internal Server Error occurred while retrieving tenant "

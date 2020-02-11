@@ -97,6 +97,9 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -105,6 +108,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -137,35 +142,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.Map;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
@@ -182,6 +158,7 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.namespace.QName;
 
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
@@ -330,6 +307,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             API apiToAdd = prepareToCreateAPIByDTO(body);
             validateScopes(apiToAdd);
+            //validate API categories
+            List<APICategory> apiCategories = apiToAdd.getApiCategories();
+            if (apiCategories != null && apiCategories.size() >0) {
+                if (!APIUtil.validateAPICategories(apiCategories, RestApiUtil.getLoggedInUserTenantDomain())) {
+                    RestApiUtil.handleBadRequest("Invalid API Category name(s) defined", log);
+                }
+            }
             //adding the api
             apiProvider.addAPI(apiToAdd);
 
@@ -745,6 +729,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
             apiToUpdate.setWsdlUrl(body.getWsdlUrl());
+
+            //validate API categories
+            List<APICategory> apiCategories = apiToUpdate.getApiCategories();
+            if (apiCategories != null && apiCategories.size() >0) {
+                if (!APIUtil.validateAPICategories(apiCategories, RestApiUtil.getLoggedInUserTenantDomain())) {
+                    RestApiUtil.handleBadRequest("Invalid API Category name(s) defined", log);
+                }
+            }
+
             apiProvider.manageAPI(apiToUpdate);
 
             API updatedApi = apiProvider.getAPI(apiIdentifier);
@@ -1962,6 +1955,30 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(apiExternalStoreListDTO).build();
     }
 
+    /**
+     * Retrieves the WSDL meta information of the given API. The API must be a SOAP API.
+     *
+     * @param apiId Id of the API
+     * @param messageContext CXF Message Context
+     * @return WSDL meta information of the API
+     * @throws APIManagementException when error occurred while retrieving API WSDL meta info.
+     *  eg: when API doesn't exist, API exists but it is not a SOAP API.
+     */
+    @Override
+    public Response getWSDLInfoOfAPI(String apiId, MessageContext messageContext)
+            throws APIManagementException {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        API api = apiProvider.getLightweightAPIByUUID(apiId, tenantDomain);
+        WSDLInfoDTO wsdlInfoDTO = APIMappingUtil.getWsdlInfoDTO(api);
+        if (wsdlInfoDTO == null) {
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.NO_WSDL_AVAILABLE_FOR_API,
+                            api.getId().getApiName(), api.getId().getVersion()));
+        } else {
+            return Response.ok().entity(wsdlInfoDTO).build();
+        }
+    }
 
     /**
      * Retrieves API Lifecycle history information
@@ -2360,7 +2377,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 fileName = fileDetail.getDataHandler().getName();
                 //Constructing mediation resource path
                 mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR +
-                        type + RegistryConstants.PATH_SEPARATOR + fileName;
+                        type + RegistryConstants.PATH_SEPARATOR;
                 String fileContentType = URLConnection.guessContentTypeFromName(fileName);
 
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
@@ -2373,7 +2390,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
                 OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(sequenceBytes));
                 String localName = seqElement.getLocalName();
-                checkMediationPolicy(apiProvider,mediationResourcePath);
+                fileName = seqElement.getAttributeValue(new QName("name"));
+                //Constructing mediation resource path
+                mediationResourcePath = mediationResourcePath + fileName;
+                checkMediationPolicy(apiProvider, mediationResourcePath);
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
                     ResourceFile contentFile = new ResourceFile(inSequenceStream, fileContentType);
                     //Adding api specific mediation policy
@@ -2814,25 +2834,36 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiDefinition     Swagger definition
      * @param url               Swagger definition URL
      * @param fileInputStream   Swagger definition input file content
-     * @param fileDetail
+     * @param fileDetail        file meta information as Attachment
      * @param ifMatch           If-match header value
      * @return updated swagger document of the API
      */
     @Override
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
             Attachment fileDetail, String ifMatch, MessageContext messageContext) {
-
-        // Validate and retrieve the OpenAPI definition
-        Map validationResponseMap = null;
         try {
+            String updatedSwagger;
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            boolean isSoapToRestConvertedAPI = SOAPOperationBindingUtils.isSOAPToRESTApi(apiIdentifier.getApiName(),
+                    apiIdentifier.getVersion(), apiIdentifier.getProviderName());
             //Handle URL and file based definition imports
             if(url != null || fileInputStream != null) {
-                validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, true);
-                APIDefinitionValidationResponse validationResponse = (APIDefinitionValidationResponse) validationResponseMap
-                        .get(RestApiConstants.RETURN_MODEL);
-                apiDefinition = validationResponse.getJsonContent();
+                // Validate and retrieve the OpenAPI definition
+                Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream,
+                        fileDetail, true);
+                APIDefinitionValidationResponse validationResponse =
+                        (APIDefinitionValidationResponse) validationResponseMap .get(RestApiConstants.RETURN_MODEL);
+                if (!validationResponse.isValid()) {
+                    RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
+                }
+                updatedSwagger = updateSwagger(apiId, validationResponse);
+            } else {
+                updatedSwagger = updateSwagger(apiId, apiDefinition);
             }
-            String updatedSwagger = updateSwagger(apiId, apiDefinition);
+            if (isSoapToRestConvertedAPI) {
+                SequenceGenerator.generateSequencesFromSwagger(updatedSwagger, apiIdentifier);
+            }
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -2855,12 +2886,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * update swagger definition of the given api
-     * @param apiId apiid
+     * update swagger definition of the given api. The swagger will be validated before updating.
+     *
+     * @param apiId API Id
      * @param apiDefinition swagger definition
      * @return updated swagger definition
-     * @throws APIManagementException
-     * @throws FaultGatewaysException
+     * @throws APIManagementException when error occurred updating swagger
+     * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
     private String updateSwagger(String apiId, String apiDefinition)
             throws APIManagementException, FaultGatewaysException {
@@ -2869,11 +2901,26 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (!response.isValid()) {
             RestApiUtil.handleBadRequest(response.getErrorItems(), log);
         }
+        return updateSwagger(apiId, response);
+    }
+
+    /**
+     * update swagger definition of the given api
+     *
+     * @param apiId API Id
+     * @param response response of a swagger definition validation call
+     * @return updated swagger definition
+     * @throws APIManagementException when error occurred updating swagger
+     * @throws FaultGatewaysException when error occurred publishing API to the gateway
+     */
+    private String updateSwagger(String apiId, APIDefinitionValidationResponse response)
+            throws APIManagementException, FaultGatewaysException {
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         //this will fail if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIDefinition oasParser = response.getParser();
+        String apiDefinition = response.getJsonContent();
         Set<URITemplate> uriTemplates = null;
         try {
             uriTemplates = oasParser.getURITemplates(apiDefinition);
@@ -3348,7 +3395,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String additionalProperties, String implementationType, MessageContext messageContext)
             throws APIManagementException {
         try {
-            validateWSDLAndReset(fileInputStream, fileDetail, url);
+            WSDLValidationResponse validationResponse = validateWSDLAndReset(fileInputStream, fileDetail, url);
 
             if (StringUtils.isEmpty(implementationType)) {
                 implementationType = APIDTO.TypeEnum.SOAP.toString();
@@ -3357,7 +3404,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             boolean isSoapToRestConvertedAPI = APIDTO.TypeEnum.SOAPTOREST.toString().equals(implementationType);
             boolean isSoapAPI = APIDTO.TypeEnum.SOAP.toString().equals(implementationType);
 
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             APIDTO additionalPropertiesAPI = null;
             APIDTO createdApiDTO;
             URI createdApiUri;
@@ -3372,7 +3418,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (isSoapAPI) {
                 createdApi = importSOAPAPI(fileInputStream, fileDetail, url, apiToAdd);
             } else if (isSoapToRestConvertedAPI) {
-                createdApi = importSOAPToRESTAPI(fileInputStream, fileDetail, url, apiToAdd);
+                String wsdlArchiveExtractedPath = null;
+                if (validationResponse.getWsdlArchiveInfo() != null) {
+                    wsdlArchiveExtractedPath = validationResponse.getWsdlArchiveInfo().getLocation()
+                            + File.separator + APIConstants.API_WSDL_EXTRACTED_DIRECTORY;
+                }
+                createdApi = importSOAPToRESTAPI(fileInputStream, fileDetail, url, wsdlArchiveExtractedPath, apiToAdd);
             } else {
                 RestApiUtil.handleBadRequest("Invalid implementationType parameter", log);
             }
@@ -3394,7 +3445,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param url WSDL url
      * @throws APIManagementException when error occurred during the operation
      */
-    private void validateWSDLAndReset(InputStream fileInputStream, Attachment fileDetail, String url)
+    private WSDLValidationResponse validateWSDLAndReset(InputStream fileInputStream, Attachment fileDetail, String url)
             throws APIManagementException {
         Map validationResponseMap = validateWSDL(url, fileInputStream, fileDetail);
         WSDLValidationResponse validationResponse =
@@ -3420,6 +3471,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         "input stream.");
             }
         }
+        return validationResponse;
     }
 
     /**
@@ -3490,7 +3542,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiToAdd API object to be added to the system (which is not added yet)
      * @return API added api
      */
-    private API importSOAPToRESTAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd) {
+    private API importSOAPToRESTAPI(InputStream fileInputStream, Attachment fileDetail, String url,
+            String wsdlArchiveExtractedPath, API apiToAdd) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             //adding the api
@@ -3499,19 +3552,26 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);
-
-
-            String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(url);
-
+            String swaggerStr = "";
+            if (StringUtils.isNotBlank(url)) {
+                swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(url);
+            } else if (fileInputStream != null) {
+                String filename = fileDetail.getContentDisposition().getFilename();
+                if (filename.endsWith(".zip")) {
+                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath);;
+                } else if (filename.endsWith(".wsdl")) {
+                    byte[] wsdlContent = APIUtil.toByteArray(fileInputStream);
+                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlContent);
+                } else {
+                    throw new APIManagementException(ExceptionCodes.UNSUPPORTED_WSDL_FILE_EXTENSION);
+                }
+            }
             String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr);
             SequenceGenerator.generateSequencesFromSwagger(updatedSwagger, apiToAdd.getId());
-
             return createdApi;
-        } catch (APIManagementException | FaultGatewaysException e) {
-            RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP-to-REST API",
-                    e, log);
+        } catch (FaultGatewaysException | IOException e) {
+            throw new APIManagementException("Error while importing WSDL to create a SOAP-to-REST API", e);
         }
-        return null;
     }
 
     /**
@@ -3675,6 +3735,46 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location of " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Exports an API from API Manager for a given API using the ApiId. ID. Meta information, API icon, documentation,
+     * WSDL and sequences are exported. This service generates a zipped archive which contains all the above mentioned
+     * resources for a given API.
+     *
+     * @param apiId          UUID of an API
+     * @param name           Name of the API that needs to be exported
+     * @param version        Version of the API that needs to be exported
+     * @param providerName   Provider name of the API that needs to be exported
+     * @param format         Format of output documents. Can be YAML or JSON
+     * @param preserveStatus Preserve API status on export
+     * @return
+     */
+    @Override
+    public Response apisExportGet(String apiId, String name, String version, String providerName, String format,
+                                  Boolean preserveStatus, MessageContext messageContext)
+            throws APIManagementException {
+        ExportApiUtil exportApiUtil = new ExportApiUtil();
+        if (apiId == null) {
+
+            return exportApiUtil.exportApiByParams(name, version, providerName, format, preserveStatus);
+        } else {
+            try {
+                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+                return exportApiUtil.exportApiById(apiIdentifier, preserveStatus);
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                } else if (isAuthorizationFailure(e)) {
+                    RestApiUtil.handleAuthorizationFailure(
+                            "Authorization failure while exporting the  API " + apiId, e, log);
+                } else {
+                    RestApiUtil.handleInternalServerError("Error while exporting the API " + apiId, e, log);
+                }
+            }
         }
         return null;
     }
@@ -3917,7 +4017,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private Map validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
            Boolean returnContent) throws APIManagementException {
+        //validate inputs
         handleInvalidParams(fileInputStream, fileDetail, url);
+
         OpenAPIDefinitionValidationResponseDTO responseDTO;
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (url != null) {

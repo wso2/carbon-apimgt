@@ -24,11 +24,14 @@ const styles = theme => ({
 
 function Landing(props) {
     const { classes, theme } = props;
-    const content = theme.custom.listByTag;
-    const carouselActive = app.context + theme.custom.landingPage.carousel.active;
-    const listByTagActive = theme.custom.landingPage.listByTag.active;
-    const parallaxActive = theme.custom.landingPage.parallax.active;
-    const listByTagContent = theme.custom.landingPage.listByTag.content;
+    const { custom: { landingPage: 
+        { 
+            carousel: { active: carouselActive }, 
+            listByTag: {active: listByTagActive, content: listByTagContent},
+            parallax: {active: parallaxActive},
+            contact: {active: contactActive},
+        }
+    } } =  theme;
     return (
         <div className={classes.superRoot}>
             <div className={classes.root}>
@@ -76,13 +79,13 @@ function Landing(props) {
             {parallaxActive && <div className={classes.fullWidthBack}>
                 <ParallaxScroll index={1} />
             </div>}
-            <div className={classes.root}>
-              <Typography variant='h2' gutterBottom>
-                Contact Us
+            {contactActive && <div className={classes.root}>
+                <Typography variant='h2' gutterBottom>
+                    Contact Us
               </Typography>
-              <Contact />
-            </div>
-            
+                <Contact />
+            </div>}
+
         </div>
     );
 }
