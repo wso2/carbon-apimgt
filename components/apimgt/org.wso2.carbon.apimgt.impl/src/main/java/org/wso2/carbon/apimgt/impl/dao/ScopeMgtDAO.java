@@ -15,39 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.clients.scopemgt.dto;
+package org.wso2.carbon.apimgt.impl.dao;
 
-import java.util.ArrayList;
-import java.util.List;
+public class ScopeMgtDAO {
 
-/**
- * Model of ScopeBinding DTO
- */
-public class ScopeBinding {
-
-    private String bindingType;
-
-    public String getBindingType() {
-
-        return bindingType;
-    }
-
-    public void setBindingType(String bindingType) {
-
-        this.bindingType = bindingType;
-    }
-
-    public List<String> getBinding() {
-
-        return binding;
-    }
-
-    public void setBinding(List<String> binding) {
-
-        this.binding = binding;
-    }
-
-    private List<String> binding = new ArrayList<String>();
+    //TODO: add global scopes, scope attachments related db methods
 
 }
 
