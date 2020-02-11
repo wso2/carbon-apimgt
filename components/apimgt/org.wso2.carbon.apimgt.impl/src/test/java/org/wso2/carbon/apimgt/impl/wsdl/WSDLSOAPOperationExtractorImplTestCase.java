@@ -133,10 +133,10 @@ public class WSDLSOAPOperationExtractorImplTestCase {
         Map<String, ModelImpl> parameterModelMap = processor.getWsdlInfo().getParameterModelMap();
         Assert.assertNotNull(parameterModelMap);
         Assert.assertTrue("wsdl complex types has not been properly parsed",
-                parameterModelMap.size() == 11);
+                parameterModelMap.size() == 12);
         //composite complex type
         Assert.assertNotNull(parameterModelMap.get("ItemSearchRequest"));
-        Assert.assertEquals(5, parameterModelMap.get("ItemSearchRequest").getProperties().size());
+        Assert.assertEquals(7, parameterModelMap.get("ItemSearchRequest").getProperties().size());
         Assert.assertNotNull(parameterModelMap.get("ItemSearchRequest").getProperties().get("Tracks"));
         Assert.assertNotNull(parameterModelMap.get("ItemSearchRequest").getProperties().get("Tracks"));
         Assert.assertEquals(ArrayProperty.TYPE,
