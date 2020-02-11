@@ -334,6 +334,7 @@ function EditMediationPolicy(props) {
     //     setDesignPreviewShown(false);
     //     setDialogWidth('sm');
     // };
+
     // const handleDesignClick = (event) => {
     //     event.preventDefault();
     //     setDesignPreviewShown(true);

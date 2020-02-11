@@ -1,9 +1,23 @@
-/* eslint-disable no-mixed-operators */
-/* eslint-disable eqeqeq */
-/* eslint-disable jsx-a11y/alt-text */
-/* eslint-disable react/jsx-no-comment-textnodes */
-/* eslint-disable no-bitwise */
-/* eslint-disable require-jsdoc */
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
+
 import React, { useState } from 'react';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Button from '@material-ui/core/Button';
@@ -603,9 +617,9 @@ function EditCustomMediation(props) {
                                                     onClick={() => addMediator(mediator.src2, mediator.name)}
                                                     classes={{ root: classes.iconButtonOverride }}
                                                 >
-                                                    <img src={mediator.src1} style={{ paddingRight: 10 }} />
+                                                    <img src={ mediator.src1 } style={{ paddingRight: 10 }} />
                                                     <Typography>
-                                                        { mediator.name}
+                                                        { mediator.name }
                                                     </Typography>
                                                 </IconButton>
                                             </TableCell>
