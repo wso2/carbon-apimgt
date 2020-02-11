@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.Map;
 import java.util.Set;
@@ -99,6 +100,11 @@ public class FakeKeyManagerForTest implements KeyManager {
 
     }
 
+    @Override
+    public void initializeHttpClient() throws APIManagementException {
+
+    }
+
     @Override public boolean registerNewResource(API api, Map map) throws APIManagementException {
         return false;
     }
@@ -150,9 +156,9 @@ public class FakeKeyManagerForTest implements KeyManager {
     }
 
     @Override
-    public Boolean attachScopeToResource(Scope scope, String tenantDomain) throws APIManagementException {
+    public void attachScopeToResource(API api, URITemplate uriTemplate, Scope scope, String tenantDomain)
+            throws APIManagementException {
 
-        return null;
     }
 
     @Override
@@ -163,5 +169,11 @@ public class FakeKeyManagerForTest implements KeyManager {
     @Override
     public void updateScope(Scope scope, String tenantDomain) throws APIManagementException {
 
+    }
+
+    @Override
+    public Boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException {
+
+        return null;
     }
 }
