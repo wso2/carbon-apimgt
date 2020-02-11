@@ -2361,8 +2361,8 @@ public class SQLConstants {
             "   ES.API_ID = ? ";
 
     public static final String ADD_SCOPE_ENTRY_SQL =
-            " INSERT INTO IDN_OAUTH2_SCOPE (NAME, DISPLAY_NAME , DESCRIPTION, TENANT_ID) " +
-            " VALUES(?,?,?,?)";
+            " INSERT INTO IDN_OAUTH2_SCOPE (NAME, DISPLAY_NAME , DESCRIPTION, TENANT_ID, SCOPE_TYPE) " +
+            " VALUES(?,?,?,?,?)";
 
     public static final String ADD_SCOPE_LINK_SQL =
             " INSERT INTO AM_API_SCOPES (API_ID, SCOPE_ID) VALUES (?,?)";
@@ -2387,7 +2387,7 @@ public class SQLConstants {
                     " AND TENANT_ID = ?";
 
     public static final String ADD_SCOPE_ROLE_SQL =
-            "INSERT INTO IDN_OAUTH2_SCOPE_BINDING (SCOPE_ID, SCOPE_BINDING) values (?,?)";
+            "INSERT INTO IDN_OAUTH2_SCOPE_BINDING (SCOPE_ID, SCOPE_BINDING, BINDING_TYPE) values (?,?,?)";
 
     public static final String GET_API_SCOPES_ORACLE_SQL =
             "SELECT " +

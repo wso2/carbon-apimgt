@@ -8905,15 +8905,17 @@ public class ApiMgtDAO {
                             continue;
                         }
 
-                        if (!scopeSharingEnabled && isScopeKeyAssigned(apiIdentifier, uriTemplate.getScope().getKey(), tenantID)) {
-                            throw new APIManagementException("Scope '" + uriTemplate.getScope().getKey() + "' " +
-                                    "is already used by another API.");
+                        if (!scopeSharingEnabled && isScopeKeyAssigned(apiIdentifier, uriTemplate.getScope().getKey(),
+                                tenantID)) {
+                            throw new APIManagementException("Scope '" + uriTemplate.getScope().getKey() + "' "
+                                    + "is already used by another API.");
                         }
 
                         ps.setString(1, uriTemplate.getScope().getKey());
                         ps.setString(2, uriTemplate.getScope().getName());
                         ps.setString(3, uriTemplate.getScope().getDescription());
                         ps.setInt(4, tenantID);
+                        ps.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
                         ps.execute();
                         rs = ps.getGeneratedKeys();
                         if (rs.next()) {
@@ -8926,6 +8928,7 @@ public class ApiMgtDAO {
                         for (String role : roleList) {
                             ps3.setInt(1, uriTemplate.getScope().getId());
                             ps3.setString(2, role);
+                            ps3.setString(3, APIConstants.DEFAULT_BINDING_TYPE);
                             ps3.addBatch();
                         }
                         ps3.executeBatch();
@@ -8944,7 +8947,7 @@ public class ApiMgtDAO {
                         ps.setString(2, scope.getName());
                         ps.setString(3, scope.getDescription());
                         ps.setInt(4, tenantID);
-
+                        ps.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
                         ps.execute();
                         rs = ps.getGeneratedKeys();
                         if (rs.next()) {
@@ -8963,6 +8966,7 @@ public class ApiMgtDAO {
                         for (String role : roleList) {
                             ps3.setInt(1, scope.getId());
                             ps3.setString(2, role);
+                            ps3.setString(3, APIConstants.DEFAULT_BINDING_TYPE);
                             ps3.addBatch();
                         }
                         ps3.executeBatch();
@@ -9089,7 +9093,7 @@ public class ApiMgtDAO {
                         ps.setString(2, uriTemplate.getScope().getName());
                         ps.setString(3, uriTemplate.getScope().getDescription());
                         ps.setInt(4, tenantID);
-                        ps.setString(5, uriTemplate.getScope().getRoles());
+                        ps.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
                         ps.execute();
                         rs = ps.getGeneratedKeys();
                         if (rs.next()) {
@@ -9103,7 +9107,7 @@ public class ApiMgtDAO {
                         ps.setString(2, scope.getName());
                         ps.setString(3, scope.getDescription());
                         ps.setInt(4, tenantID);
-                        ps.setString(5, scope.getRoles());
+                        ps.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
                         ps.execute();
                         rs = ps.getGeneratedKeys();
                         if (rs.next()) {
