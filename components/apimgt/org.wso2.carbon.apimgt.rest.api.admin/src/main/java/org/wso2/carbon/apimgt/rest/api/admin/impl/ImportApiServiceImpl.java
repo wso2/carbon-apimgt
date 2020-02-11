@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -241,7 +242,9 @@ public class ImportApiServiceImpl extends ImportApiService {
         if (apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT) && apiKey.getGrantTypes().contains(GRANT_TYPE_CODE)){
             apiKey.setCallbackUrl((String) oAuthApplicationInfo.getParameter(REDIRECT_URIS));
         }
-        apiKey.setValidityPeriod(DEFAULT_VALIDITY_PERIOD);
+
+        long validityPeriod = OAuthServerConfiguration.getInstance().getApplicationAccessTokenValidityPeriodInSeconds();
+        apiKey.setValidityPeriod(validityPeriod);
         apiKey.setTokenScope(DEFAULT_TOKEN_SCOPE);
         return apiKey;
     }

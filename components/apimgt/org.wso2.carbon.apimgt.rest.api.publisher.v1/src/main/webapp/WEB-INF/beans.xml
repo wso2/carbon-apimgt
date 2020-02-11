@@ -36,6 +36,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.TenantsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.LabelsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ScopesApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiCategoriesApi"/>
 
         </jaxrs:serviceBeans>
         <jaxrs:providers>
@@ -61,6 +62,11 @@
                 <value>Authorization</value>
                 <value>X-WSO2-Tenant</value>
                 <value>content-type</value>
+            </list>
+        </property>
+        <property name="exposeHeaders">
+            <list>
+                <value>Content-Disposition</value>
             </list>
         </property>
         <property name="allowCredentials" value="true" />

@@ -1,0 +1,12 @@
+{
+  "name": "org.wso2.apimgt.recommendation.event.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "payload",
+      "type": "STRING"
+    }
+  ]
+}

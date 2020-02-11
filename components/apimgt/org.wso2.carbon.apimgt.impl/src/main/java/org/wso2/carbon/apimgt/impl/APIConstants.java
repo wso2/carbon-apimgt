@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -135,6 +136,9 @@ public final class APIConstants {
     //domain mapping app keys
     public static final String API_DOMAIN_MAPPINGS_GATEWAY = "gateway";
     public static final String API_DOMAIN_MAPPINGS_STORE = "store";
+    public static final String API_DOMAIN_MAPPINGS_CONTEXT = "context";
+    public static final String API_DOMAIN_MAPPINGS_LOGIN_CALLBACK = "login";
+    public static final String API_DOMAIN_MAPPINGS_LOGOUT_CALLBACK = "logout";
 
 
     public static final String API_IMAGE_LOCATION = API_APPLICATION_DATA_LOCATION + "/icons";
@@ -314,6 +318,7 @@ public final class APIConstants {
     public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
+    public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
@@ -390,13 +395,21 @@ public final class APIConstants {
     public static final String EXP = "exp";
     public static final String JWT = "JWT";
     public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
-    public static final String JWT_CONFIGS = "JWTConfiguration.";
-    public static final String JWT_HEADER = JWT_CONFIGS + "JWTHeader";
-    public static final String TOKEN_GENERATOR_IMPL = JWT_CONFIGS + "JWTGeneratorImpl";
-    public static final String ENABLE_JWT_GENERATION = JWT_CONFIGS + "EnableJWTGeneration";
-    public static final String CLAIMS_RETRIEVER_CLASS = JWT_CONFIGS + "ClaimsRetrieverImplClass";
-    public static final String CONSUMER_DIALECT_URI = JWT_CONFIGS + "ConsumerDialectURI";
-    public static final String JWT_SIGNATURE_ALGORITHM = JWT_CONFIGS + "SignatureAlgorithm";
+    public static final String JWT_CONFIGS = "JWTConfiguration";
+    public static final String JWT_HEADER = "JWTHeader";
+    public static final String TOKEN_GENERATOR_IMPL = "JWTGeneratorImpl";
+    public static final String ENABLE_JWT_GENERATION = "EnableJWTGeneration";
+    public static final String CLAIMS_RETRIEVER_CLASS = "ClaimsRetrieverImplClass";
+    public static final String CONSUMER_DIALECT_URI =  "ConsumerDialectURI";
+    public static final String JWT_SIGNATURE_ALGORITHM = "SignatureAlgorithm";
+    public static final String GATEWAY_JWT_GENERATOR = "GatewayJWTGeneration";
+    public static final String GATEWAY_JWT_GENERATOR_IMPL = "ImplClass";
+    public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
+    public static final String GATEWAY_JWT_GENERATOR_CLAIM_MAPPING = "ClaimMappings";
+    public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
+    public static final String GATEWAY_JWT_GENERATOR_LOCAL_CLAIM = "LocalClaim";
+    public static final String GATEWAY_JWT_GENERATOR_REMOTE_CLAIM = "RemoteClaim";
+
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
     public static final String API_SECURITY = "APISecurity";
@@ -690,6 +703,10 @@ public final class APIConstants {
     public static final String AUTH_MANAGER_PASSWORD = AUTH_MANAGER + "Password";
     public static final String ENABLE_MTLS_FOR_APIS = "EnableMTLSForAPIs";
 
+    public static final String IDENTITY_PROVIDER = "IdentityProvider.";
+    public static final String IDENTITY_PROVIDER_AUTHORIZE_ENDPOINT = IDENTITY_PROVIDER + "AuthorizeEndpoint";
+    public static final String IDENTITY_PROVIDER_OIDC_LOGOUT_ENDPOINT = IDENTITY_PROVIDER + "OIDCLogoutEndpoint";
+
     public static final String SELF_SIGN_UP = "SelfSignUp.";
     public static final String SELF_SIGN_UP_ENABLED = SELF_SIGN_UP + "Enabled";
     public static final String SELF_SIGN_UP_ROLE = SELF_SIGN_UP + "SubscriberRoleName";
@@ -900,6 +917,8 @@ public final class APIConstants {
     public static final String GATEWAY_INVALID_TOKEN_CACHE_NAME = "GATEWAY_INVALID_TOKEN_CACHE";
     public static final String REST_API_TOKEN_CACHE_NAME = "RESTAPITokenCache";
     public static final String REST_API_INVALID_TOKEN_CACHE_NAME = "RESTAPIInvalidTokenCache";
+    public static final String GATEWAY_JWT_TOKEN_CACHE = "GatewayJWTTokenCache";
+
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";
     public static final String WORKFLOW_CACHE_NAME = "workflowCache";
@@ -990,7 +1009,8 @@ public final class APIConstants {
     }
 
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";
-
+    public static final String ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION = "EnablePerTenantServiceProviderCreation";
+    public static final String DISABLE_DEFAULT_APPLICATION_CREATION = "DisableDefaultApplicationCreation";
     public static final String GATEWAY_ENV_TYPE_HYBRID = "hybrid";
     public static final String GATEWAY_ENV_TYPE_PRODUCTION = "production";
     public static final String GATEWAY_ENV_TYPE_SANDBOX = "sandbox";
@@ -1193,6 +1213,10 @@ public final class APIConstants {
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
     public static final String SWAGGER_X_WSO2_SECURITY = "x-wso2-security";
+    public static final String SWAGGER_X_WSO2_APP_SECURITY = "x-wso2-application-security";
+    public static final String WSO2_APP_SECURITY_TYPES = "security-types";
+    public static final String OPTIONAL = "optional";
+    public static final String MANDATORY = "mandatory";
     public static final String SWAGGER_X_WSO2_SCOPES = "x-wso2-scopes";
     public static final String SWAGGER_X_EXAMPLES = "x-examples";
     public static final String SWAGGER_SCOPE_KEY = "key";
@@ -1315,6 +1339,7 @@ public final class APIConstants {
     public static final String REST_API_SCOPE_NAME = "Name";
     public static final String REST_API_SCOPE_ROLE = "Roles";
     public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
+    public static final String REST_API_ROLE_MAPPINGS_CONFIG = "RoleMappings";
     public static final String APIM_SUBSCRIBE_SCOPE = "apim:subscribe";
 
     public static final String HTTPS_PROTOCOL = "https";
@@ -1465,6 +1490,8 @@ public final class APIConstants {
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
     public static final String CONTENT_SEARCH_TYPE_PREFIX = "content";
     public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
+    public static final String LABEL_SEARCH_TYPE_PREFIX = "label";
+    public static final String CATEGORY_SEARCH_TYPE_PREFIX = "api-category";
 
     //api-product related constants
     public static final String API_PRODUCT_VERSION = "1.0.0";
@@ -1670,7 +1697,8 @@ public final class APIConstants {
     public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
             NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
-            API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX };
+            API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX,
+            CATEGORY_SEARCH_TYPE_PREFIX };
     // Prefix for registry attributes.
     public static final String OVERVIEW_PREFIX = "overview_";
     /**
@@ -1845,6 +1873,12 @@ public final class APIConstants {
     public static final String API_KEY_REVOKE_PATH = "/apikey/revoke";
 
     public static final String SKIP_ROLES_BY_REGEX = "skipRolesByRegex";
+    
+    /**
+     * API categories related constants
+     */
+    public static final String API_CATEGORIES_CATEGORY_NAME = "apiCategories_categoryName";
+    public static final String API_CATEGORY = "api-category";
 
     // AWS Lambda: Constants for aws lambda
     public static final String AWS_SECRET_KEY = "AWS_SECRET_KEY";
@@ -1858,4 +1892,38 @@ public final class APIConstants {
     public static final String JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION =
             JWT_AUTHENTICATION_CONFIG + ".EnableSubscriptionValidationViaKeyManager";
 
+    /**
+     * Constants for the recommendation system
+     *
+     * */
+    public static final String API_RECOMMENDATION = "APIRecommendations";
+    public static final String RECOMMENDATION_ENDPOINT = API_RECOMMENDATION + ".recommendationEndpoint";
+    public static final String EVENT_PUBLISHING_ENDPOINT = API_RECOMMENDATION + ".eventPublishingEndpoint";
+    public static final String RECOMMENDATION_USERNAME = API_RECOMMENDATION + ".username";
+    public static final String RECOMMENDATION_PASSWORD = API_RECOMMENDATION + ".password";
+    public static final String ADD_API = "ADD_API";
+    public static final String DELETE_API = "DELETE_API";
+    public static final String ADD_NEW_APPLICATION = "ADD_NEW_APPLICATION";
+    public static final String UPDATED_APPLICATION = "UPDATED_APPLICATION";
+    public static final String DELETE_APPLICATION = "DELETE_APPLICATION";
+    public static final String ADD_USER_CLICKED_API = "ADD_USER_CLICKED_API";
+    public static final String ADD_USER_SEARCHED_QUERY = "ADD_USER_SEARCHED_QUERY";
+    public static final String PUBLISHED_STATUS = "PUBLISHED";
+    public static final String DELETED_STATUS = "DELETED";
+    public static final String ACTION_STRING = "action";
+    public static final String PAYLOAD_STRING = "payload";
+
+    public static class CertificateReLoaderConfiguration {
+
+        public static final String CERTIFICATE_RELOADER_CONFIGURATION_ROOT = "CertificateReLoaderConfiguration";
+        public static final String PERIOD = CERTIFICATE_RELOADER_CONFIGURATION_ROOT + ".Period";
+    }
+
+    public static class MutualSSL {
+
+        public static final String MUTUAL_SSL_CONFIG_ROOT = "MutualSSL";
+        public static final String CLIENT_CERTIFICATE_HEADER = MUTUAL_SSL_CONFIG_ROOT + ".ClientCertificateHeader";
+        public static final String ENABLE_CLIENT_CERTIFICATE_VALIDATION = MUTUAL_SSL_CONFIG_ROOT +
+                ".EnableClientCertificateValidation";
+    }
 }

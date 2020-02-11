@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.token.JWTGenerator;
 import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
@@ -40,7 +42,6 @@ public class APIKeyMgtDataHolder {
     private static APIManagerConfigurationService amConfigService;
     private static Boolean isKeyCacheEnabledKeyMgt = true;
     private static TokenGenerator tokenGenerator;
-    private static boolean jwtGenerationEnabled = false;
     private static Map<String, AbstractScopesIssuer> scopesIssuers = new HashMap<String, AbstractScopesIssuer>();
     private static final Log log = LogFactory.getLog(APIKeyMgtDataHolder.class);
 
@@ -90,27 +91,29 @@ public class APIKeyMgtDataHolder {
             if (configuration == null) {
                 log.error("API Manager configuration is not initialized");
             } else {
+
                 applicationTokenScope = configuration.getFirstProperty(APIConstants
                                                                                .APPLICATION_TOKEN_SCOPE);
-                jwtGenerationEnabled = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants
-                                                                                                   .ENABLE_JWT_GENERATION));
+                JWTConfigurationDto jwtConfigurationDto = configuration.getJwtConfigurationDto();
                 if (log.isDebugEnabled()) {
-                    log.debug("JWTGeneration enabled : " + jwtGenerationEnabled);
+                    log.debug("JWTGeneration enabled : " + jwtConfigurationDto.isEnabled());
                 }
 
-                if (jwtGenerationEnabled) {
-                    String clazz = configuration.getFirstProperty(APIConstants.TOKEN_GENERATOR_IMPL);
-                    if (clazz == null) {
+                if (jwtConfigurationDto.isEnabled()) {
+                    if (jwtConfigurationDto.getJwtGeneratorImplClass() == null) {
                         tokenGenerator = new JWTGenerator();
                     } else {
                         try {
-                            tokenGenerator = (TokenGenerator) APIUtil.getClassForName(clazz).newInstance();
+                            tokenGenerator = (TokenGenerator) APIUtil
+                                    .getClassForName(jwtConfigurationDto.getJwtGeneratorImplClass()).newInstance();
                         } catch (InstantiationException e) {
-                            log.error("Error while instantiating class " + clazz, e);
+                            log.error(
+                                    "Error while instantiating class " + jwtConfigurationDto.getJwtGeneratorImplClass(),
+                                    e);
                         } catch (IllegalAccessException e) {
                             log.error(e);
                         } catch (ClassNotFoundException e) {
-                            log.error("Cannot find the class " + clazz + e);
+                            log.error("Cannot find the class " + jwtConfigurationDto.getJwtGeneratorImplClass() + e);
                         }
                     }
                 }
@@ -129,7 +132,14 @@ public class APIKeyMgtDataHolder {
     }
 
     public static boolean isJwtGenerationEnabled(){
-        return jwtGenerationEnabled;
+
+        APIManagerConfiguration configuration = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (configuration == null){
+            return false;
+        }
+        JWTConfigurationDto jwtConfigurationDto = configuration.getJwtConfigurationDto();
+        return jwtConfigurationDto.isEnabled();
     }
 
     // Returns the implementation for JWTTokenGenerator.

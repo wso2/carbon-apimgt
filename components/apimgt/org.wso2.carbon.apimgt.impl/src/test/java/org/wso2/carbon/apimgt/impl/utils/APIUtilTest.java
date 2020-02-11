@@ -105,6 +105,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -242,6 +243,7 @@ public class APIUtilTest {
 
         Map<String, String> expectedScopes = new HashMap<String, String>();
         JSONArray scopes = (JSONArray) restapiScopes.get("Scope");
+        JSONObject roleMappings = (JSONObject) restapiScopes.get("RoleMappings");
 
         for (Object scopeObj : scopes) {
             JSONObject scope = (JSONObject) scopeObj;
@@ -250,7 +252,38 @@ public class APIUtilTest {
             expectedScopes.put(name, roles);
         }
 
-        Map<String, String> restapiScopesFromConfig = APIUtil.getRESTAPIScopesFromConfig(restapiScopes);
+        Map<String, String> restapiScopesFromConfig = APIUtil.getRESTAPIScopesFromConfig(restapiScopes, roleMappings);
+
+        Assert.assertEquals(expectedScopes, restapiScopesFromConfig);
+    }
+
+    @Test
+    public void testGetRESTAPIScopesFromConfigWithRoleMappings() throws Exception {
+        File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
+                getResource("tenant-conf.json").getFile());
+
+        String tenantConfValue = FileUtils.readFileToString(siteConfFile);
+
+        JSONParser parser = new JSONParser();
+        JSONObject json = (JSONObject) parser.parse(tenantConfValue);
+        JSONObject restapiScopes = (JSONObject) json.get("RESTAPIScopes");
+
+        Map<String, String> expectedScopes = new HashMap<String, String>();
+        JSONArray scopes = (JSONArray) restapiScopes.get("Scope");
+        JSONObject roleMappings = new JSONObject();
+        roleMappings.put("Internal/publisher", "publisher");
+
+        for (Object scopeObj : scopes) {
+            JSONObject scope = (JSONObject) scopeObj;
+            String name = (String) scope.get("Name");
+            String roles = (String) scope.get("Roles");
+            //replace Internal/publisher role for publisher role and remove white spaces
+            roles = roles.replace("Internal/publisher", "publisher");
+            roles = roles.replace(" ", "");
+            expectedScopes.put(name, roles);
+        }
+
+        Map<String, String> restapiScopesFromConfig = APIUtil.getRESTAPIScopesFromConfig(restapiScopes, roleMappings);
 
         Assert.assertEquals(expectedScopes, restapiScopesFromConfig);
     }
@@ -406,7 +439,7 @@ public class APIUtilTest {
         Mockito.when(registry.get(artifactPath)).thenReturn(resource);
         Mockito.when(resource.getLastModified()).thenReturn(expectedAPI.getLastUpdated());
 
-        DateFormat df = new SimpleDateFormat("E MMM dd HH:mm:ss zzz yyyy");
+        DateFormat df = new SimpleDateFormat("E MMM dd HH:mm:ss zzz yyyy", Locale.US);
         Date createdTime = df.parse(expectedAPI.getCreatedTime());
         Mockito.when(resource.getCreatedTime()).thenReturn(createdTime);
 

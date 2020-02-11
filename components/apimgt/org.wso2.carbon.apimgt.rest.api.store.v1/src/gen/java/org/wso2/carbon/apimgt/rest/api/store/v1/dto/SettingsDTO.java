@@ -23,6 +23,7 @@ public class SettingsDTO   {
     private Boolean mapExistingAuthApps = false;
     private String apiGatewayEndpoint = null;
     private Boolean monetizationEnabled = false;
+    private Boolean recommendationEnabled = false;
     private Boolean isUnlimitedTierPaid = false;
 
   /**
@@ -129,6 +130,23 @@ public class SettingsDTO   {
 
   /**
    **/
+  public SettingsDTO recommendationEnabled(Boolean recommendationEnabled) {
+    this.recommendationEnabled = recommendationEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("recommendationEnabled")
+  public Boolean isRecommendationEnabled() {
+    return recommendationEnabled;
+  }
+  public void setRecommendationEnabled(Boolean recommendationEnabled) {
+    this.recommendationEnabled = recommendationEnabled;
+  }
+
+  /**
+   **/
   public SettingsDTO isUnlimitedTierPaid(Boolean isUnlimitedTierPaid) {
     this.isUnlimitedTierPaid = isUnlimitedTierPaid;
     return this;
@@ -160,12 +178,13 @@ public class SettingsDTO   {
         Objects.equals(mapExistingAuthApps, settings.mapExistingAuthApps) &&
         Objects.equals(apiGatewayEndpoint, settings.apiGatewayEndpoint) &&
         Objects.equals(monetizationEnabled, settings.monetizationEnabled) &&
+        Objects.equals(recommendationEnabled, settings.recommendationEnabled) &&
         Objects.equals(isUnlimitedTierPaid, settings.isUnlimitedTierPaid);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, isUnlimitedTierPaid);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid);
   }
 
   @Override
@@ -179,6 +198,7 @@ public class SettingsDTO   {
     sb.append("    mapExistingAuthApps: ").append(toIndentedString(mapExistingAuthApps)).append("\n");
     sb.append("    apiGatewayEndpoint: ").append(toIndentedString(apiGatewayEndpoint)).append("\n");
     sb.append("    monetizationEnabled: ").append(toIndentedString(monetizationEnabled)).append("\n");
+    sb.append("    recommendationEnabled: ").append(toIndentedString(recommendationEnabled)).append("\n");
     sb.append("    isUnlimitedTierPaid: ").append(toIndentedString(isUnlimitedTierPaid)).append("\n");
     sb.append("}");
     return sb.toString();

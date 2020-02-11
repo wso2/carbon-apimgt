@@ -37,6 +37,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -491,12 +492,15 @@ public class GatewayUtils {
 
     public static AuthenticationContext generateAuthenticationContext(String tokenSignature, JSONObject payload,
                                                                       JSONObject api,
-                                                                      APIKeyValidationInfoDTO apiKeyValidationInfoDTO,String apiLevelPolicy, boolean isOauth) {
+                                                                      APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
+                                                                      String apiLevelPolicy, String endUserToken,
+                                                                      boolean isOauth) {
 
 
         AuthenticationContext authContext = new AuthenticationContext();
         authContext.setAuthenticated(true);
         authContext.setApiKey(tokenSignature);
+        authContext.setUsername(payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
 
         if (apiKeyValidationInfoDTO != null) {
             authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
@@ -522,7 +526,6 @@ public class GatewayUtils {
             }
 
             authContext.setApiTier(apiLevelPolicy);
-            authContext.setUsername(payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
 
             if (payload.has(APIConstants.JwtTokenConstants.APPLICATION)) {
                 JSONObject applicationObj = payload.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
@@ -566,8 +569,8 @@ public class GatewayUtils {
             }
         }
         // Set JWT token sent to the backend
-        if (payload.has(APIConstants.JwtTokenConstants.BACKEND_TOKEN)) {
-            authContext.setCallerToken(payload.getString(APIConstants.JwtTokenConstants.BACKEND_TOKEN));
+        if (StringUtils.isNotEmpty(endUserToken)) {
+            authContext.setCallerToken(endUserToken);
         }
 
         return authContext;
@@ -726,5 +729,63 @@ public class GatewayUtils {
                                                 String resourceUri, String httpVerb) {
 
         return accessToken + ":" + apiContext + ":" + apiVersion + ":" + resourceUri + ":" + httpVerb;
+    }
+    public static JWTInfoDto generateJWTInfoDto(JSONObject jwtToken, JSONObject subscribedAPI,
+                                                APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String apiContext,
+                                                String apiVersion){
+        JWTInfoDto jwtInfoDto = new JWTInfoDto();
+        jwtInfoDto.setJwtToken(jwtToken);
+        jwtInfoDto.setMessageContext(null);
+        jwtInfoDto.setApicontext(apiContext);
+        jwtInfoDto.setVersion(apiVersion);
+        constructJWTContent(jwtToken, subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
+        return jwtInfoDto;
+    }
+
+    private static void constructJWTContent(JSONObject jwtToken, JSONObject subscribedAPI,
+                                            APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
+
+        jwtInfoDto.setEnduser(jwtToken.getString(APIConstants.JwtTokenConstants.SUBJECT));
+        if (apiKeyValidationInfoDTO != null) {
+            jwtInfoDto.setApplicationid(apiKeyValidationInfoDTO.getApplicationId());
+            jwtInfoDto.setApplicationname(apiKeyValidationInfoDTO.getApplicationName());
+            jwtInfoDto.setApplicationtier(apiKeyValidationInfoDTO.getApplicationTier());
+            jwtInfoDto.setKeytype(apiKeyValidationInfoDTO.getType());
+            jwtInfoDto.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
+            jwtInfoDto.setSubscriptionTier(apiKeyValidationInfoDTO.getTier());
+            jwtInfoDto.setEndusertenantid(
+                    APIUtil.getTenantIdFromTenantDomain(apiKeyValidationInfoDTO.getSubscriberTenantDomain()));
+        } else if (subscribedAPI != null) {
+            // If the user is subscribed to the API
+            String subscriptionTier = subscribedAPI.getString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER);
+            String subscriptionTenantDomain =
+                    subscribedAPI.getString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN);
+            jwtInfoDto.setSubscriptionTier(subscriptionTier);
+            jwtInfoDto.setEndusertenantid(APIUtil.getTenantIdFromTenantDomain(subscriptionTenantDomain));
+            if (jwtToken.has(APIConstants.JwtTokenConstants.APPLICATION)) {
+                JSONObject applicationObj = jwtToken.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
+                jwtInfoDto.setApplicationid(
+                        String.valueOf(applicationObj.getInt(APIConstants.JwtTokenConstants.APPLICATION_ID)));
+                jwtInfoDto
+                        .setApplicationname(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
+                jwtInfoDto
+                        .setApplicationtier(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
+                jwtInfoDto.setSubscriber(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
+            }
+        }
+    }
+
+    public static JWTInfoDto generateJWTInfoDto(JSONObject jwtToken, JSONObject subscribedAPI,
+                                                APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
+                                                org.apache.synapse.MessageContext synCtx) {
+        JWTInfoDto jwtInfoDto = new JWTInfoDto();
+        jwtInfoDto.setJwtToken(jwtToken);
+        jwtInfoDto.setMessageContext(synCtx);
+        String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+        String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        jwtInfoDto.setApicontext(apiContext);
+        jwtInfoDto.setVersion(apiVersion);
+        constructJWTContent(jwtToken, subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
+        return jwtInfoDto;
     }
 }

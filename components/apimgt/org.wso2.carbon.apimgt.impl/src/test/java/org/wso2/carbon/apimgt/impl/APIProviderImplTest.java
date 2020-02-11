@@ -4121,6 +4121,7 @@ public class APIProviderImplTest {
         String apiPath1 = "/API1/1.0.0";
         Resource resource1 = Mockito.mock(Resource.class);
         String apiArtifactId1 = "76897689";
+        Mockito.when(apiProvider.registry.resourceExists(apiPath1)).thenReturn(true);
         Mockito.when(association1.getDestinationPath()).thenReturn(apiPath1);
         Mockito.when(apiProvider.registry.get(apiPath1)).thenReturn(resource1);
         Mockito.when(resource1.getUUID()).thenReturn(apiArtifactId1);
@@ -4133,6 +4134,7 @@ public class APIProviderImplTest {
         String apiPath2 = "/API2/1.0.0";
         Resource resource2 = Mockito.mock(Resource.class);
         String apiArtifactId2 = "76897622";
+        Mockito.when(apiProvider.registry.resourceExists(apiPath2)).thenReturn(true);
         Mockito.when(association2.getDestinationPath()).thenReturn(apiPath2);
         Mockito.when(apiProvider.registry.get(apiPath2)).thenReturn(resource2);
         Mockito.when(resource2.getUUID()).thenReturn(apiArtifactId2);

@@ -98,6 +98,8 @@ public class APIProduct {
     private String accessControl;
     private String accessControlRoles;
 
+    private List<APICategory> apiCategories;
+
     private Date lastUpdated;
     private Date createdTime;
 
@@ -519,4 +521,13 @@ public class APIProduct {
     public void removeAllTiers() {
         availableTiers.clear();
     }
+
+    public void setApiCategories(List<APICategory> apiCategories) {
+        this.apiCategories = apiCategories;
+    }
+
+    public List<APICategory> getApiCategories() {
+        return apiCategories;
+    }
+
 }

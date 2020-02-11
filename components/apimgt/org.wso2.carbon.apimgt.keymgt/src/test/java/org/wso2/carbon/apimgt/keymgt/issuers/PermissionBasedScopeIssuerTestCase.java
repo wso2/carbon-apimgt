@@ -75,7 +75,7 @@ public class PermissionBasedScopeIssuerTestCase {
         PowerMockito.when(APIUtil.getTenantRESTAPIScopesConfig(Mockito.anyString())).thenReturn(new JSONObject());
         Map<String, String> scopes = new HashMap<String, String>();
         scopes.put("default", "default");
-        PowerMockito.when(APIUtil.getRESTAPIScopesFromConfig(Mockito.any())).thenReturn(scopes);
+        PowerMockito.when(APIUtil.getRESTAPIScopesFromConfig(Mockito.any(), Mockito.any())).thenReturn(scopes);
         Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);

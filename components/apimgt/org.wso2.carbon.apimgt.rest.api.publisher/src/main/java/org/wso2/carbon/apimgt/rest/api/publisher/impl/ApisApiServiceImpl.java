@@ -326,7 +326,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                         "Specified policy " + body.getApiLevelPolicy() + " is invalid", log);
             }
             if (isSoapToRestConvertedApi && StringUtils.isNotBlank(body.getWsdlUri())) {
-                String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
+                String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(body.getWsdlUri());
                 body.setApiDefinition(swaggerStr);
             }
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
@@ -346,7 +346,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             apiProvider.addAPI(apiToAdd);
             if (isSoapToRestConvertedApi) {
                 if (StringUtils.isNotBlank(apiToAdd.getWsdlUrl())) {
-                    String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
+                    String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(body.getWsdlUri());
                     apiProvider.saveSwagger20Definition(apiToAdd.getId(), swaggerStr);
                     SequenceGenerator.generateSequencesFromSwagger(swaggerStr, apiToAdd.getId());
                 } else {

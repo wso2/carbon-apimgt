@@ -1,0 +1,16 @@
+<%
+jagg.module("api-category", {
+    getAllAPICategories:function () {
+        return jagg.require(jagg.getModulesDir() + "api-category/api-category-list.jag").getAllAPICategories.apply(this, arguments);
+    },
+    deleteAPICategory:function () {
+        return jagg.require(jagg.getModulesDir() + "api-category/api-category-list.jag").deleteAPICategory.apply(this, arguments);
+    },
+    addAPICategory:function () {
+        return jagg.require(jagg.getModulesDir() + "api-category/api-category-add.jag").addAPICategory.apply(this, arguments);
+    },
+    isCategoryNameExists:function () {
+        return jagg.require(jagg.getModulesDir() + "api-category/api-category-add.jag").isCategoryNameExists.apply(this, arguments);
+    },
+});
+%>

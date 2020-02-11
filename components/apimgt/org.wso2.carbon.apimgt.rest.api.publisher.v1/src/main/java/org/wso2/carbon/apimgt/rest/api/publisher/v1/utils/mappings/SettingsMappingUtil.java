@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -37,9 +38,12 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.io.IOException;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +70,19 @@ public class SettingsMappingUtil {
                 environmentListDTO = EnvironmentMappingUtil.fromEnvironmentCollectionToDTO(environments.values());
             }
             settingsDTO.setEnvironment(environmentListDTO.getList());
-            settingsDTO.setStoreUrl(APIUtil.getStoreUrl());
+            String storeUrl = APIUtil.getStoreUrl();
+            String loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            Map<String, String> domainMappings =
+                    APIUtil.getDomainMappings(loggedInUserTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_STORE);
+            if (domainMappings.size() != 0) {
+                Iterator entries = domainMappings.entrySet().iterator();
+                while (entries.hasNext()) {
+                    Map.Entry thisEntry = (Map.Entry) entries.next();
+                    storeUrl = "https://" + thisEntry.getValue();
+                    break;
+                }
+            }
+            settingsDTO.setStoreUrl(storeUrl);
             settingsDTO.setMonetizationAttributes(getMonetizationAttributes());
             settingsDTO.setSecurityAuditProperties(getSecurityAuditProperties());
             settingsDTO.setExternalStoresEnabled(

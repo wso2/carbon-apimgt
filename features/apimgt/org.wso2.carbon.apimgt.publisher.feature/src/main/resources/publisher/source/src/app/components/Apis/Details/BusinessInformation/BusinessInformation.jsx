@@ -141,6 +141,10 @@ class BusinessInformation extends React.Component {
             businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail,
         } = this.state;
 
+        const subHeadingId = (api.apiType === API.CONSTS.APIProduct
+            ? 'Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading'
+            : 'Apis.Details.BusinessInformation.BusinessInformation.sub.heading');
+
         return (
             <>
                 <Container maxWidth='md'>
@@ -153,7 +157,7 @@ class BusinessInformation extends React.Component {
                         </Typography>
                         <Typography variant='caption'>
                             <FormattedMessage
-                                id='Apis.Details.BusinessInformation.BusinessInformation.sub.heading'
+                                id={subHeadingId}
                                 defaultMessage='Business Information of the API'
                             />
                         </Typography>

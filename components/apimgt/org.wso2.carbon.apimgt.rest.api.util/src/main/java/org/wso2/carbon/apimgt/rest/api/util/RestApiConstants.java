@@ -63,6 +63,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_WORKFLOW = "workflow";
     public static final String RESOURCE_COMMENTS = "comments";
     public static final String RESOURCE_MEDIATION_POLICY = "mediation-policy";
+    public static final String RESOURCE_API_CATEGORY = "API Category";
 
     public static final String API_ID_DELIMITER = "-";
     public static final String QUERY_PARAM = "{query}";
@@ -76,6 +77,7 @@ public final class RestApiConstants {
     public static final String APIPRODUCTID_PARAM = "{apiProductId}";
     public static final String APPLICATIONID_PARAM = "{applicationId}";
     public static final String DOCUMENTID_PARAM = "{documentId}";
+    public static final String APICATEGORYID_PARAM = "{apiCategoryId}";
     public static final String API_VERSION_PARAM="{version}";
     public static final String URL_ENCODED_API_ID_DELIMITER = "%2D";
     public static final String CHARSET = "UTF-8";
@@ -97,6 +99,7 @@ public final class RestApiConstants {
             + "/subscription";
     public static final String RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL = RESOURCE_PATH_THROTTLING_POLICIES
             + "/custom";
+    public static final String RESOURCE_PATH_CATEGORY = "/categories";
 
     public static final String SERVER_URL = "/applications";
     public static final String SERVER_USER_NAME = "/applications";
@@ -122,6 +125,8 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_RESOURCE_PATHS = "/resource-paths";
     public static final String RESOURCE_PATH_COMMENTS = "/comments";
     public static final String REST_API_STORE_VERSION_0 ="v0.16";
+    public static final String RESOURCE_PATH_API_CATEGORIES = "/api-categories";
+    public static final String RESOURCE_PATH_CATEGORY_THUMBNAIL = RESOURCE_PATH_API_CATEGORIES + "/" + APICATEGORYID_PARAM + "/thumbnail";
     public static final String REST_API_STORE_VERSION_1 ="v1";
     public static final String REST_API_STORE_CONTEXT="/api/am/store/";
     public static final String REST_API_STORE_CONTEXT_FULL_0 = REST_API_STORE_CONTEXT + REST_API_STORE_VERSION_0;
@@ -141,6 +146,8 @@ public final class RestApiConstants {
     public static final Pattern REGEX_BEARER_PATTERN = Pattern.compile("Bearer\\s");
     public static final String COOKIE_HEADER_NAME = "cookie";
     public static final String AUTH_COOKIE_NAME = "AM_ACC_TOKEN_DEFAULT_P2"; // This cookie name should be used when setting the cookie for SPA app in SPA app user authentication response to REST API context as path directive
+
+    public static final String API_VERSION = "API_VERSION";
 
     public static final int PAGINATION_LIMIT_DEFAULT = 25;
     public static final int PAGINATION_OFFSET_DEFAULT = 0;

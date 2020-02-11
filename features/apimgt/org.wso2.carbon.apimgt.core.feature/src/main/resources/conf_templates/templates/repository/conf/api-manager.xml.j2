@@ -15,9 +15,8 @@
     APIs will be protected with OAuth2 security-->
     <EnableMTLSForAPIs>true</EnableMTLSForAPIs>
 
-    <!-- Authentication manager configuration for API publisher and API Developer Portal. This is
-         a required configuration for both web applications as their user authentication
-         logic relies on this. -->
+    <!-- Authentication manager configuration for Admin Portal. This is a required configuration as its user
+    authentication logic relies on this. -->
     <AuthManager>
         <!-- Server URL of the Authentication service -->
         <ServerURL>https://localhost:${mgt.transport.https.port}${carbon.context}services/</ServerURL>
@@ -29,6 +28,14 @@
            via a remote service. The check will be done on the local server when false. -->
         <CheckPermissionsRemotely>false</CheckPermissionsRemotely>
     </AuthManager>
+
+    {% if apim.idp is defined %}
+    <IdentityProvider>
+        <!-- Server URL of the Identity Provider used for login/logout operations in API Publisher and API Developer Portal -->
+        <AuthorizeEndpoint>{{apim.idp.authorize_endpoint}}</AuthorizeEndpoint>
+        <OIDCLogoutEndpoint>{{apim.idp.oidc_logout_endpoint}}</OIDCLogoutEndpoint>
+    </IdentityProvider>
+    {% endif %}
 
     <JWTConfiguration>
         <!-- Enable/Disable JWT generation. Default is false. -->
@@ -66,7 +73,19 @@
         <!-- This parameter specifies which implementation should be used for generating the Token. For URL safe JWT
              Token generation the implementation is provided in URLSafeJWTGenerator -->
         <!--<JWTGeneratorImpl>org.wso2.carbon.apimgt.keymgt.token.URLSafeJWTGenerator</JWTGeneratorImpl>-->
-
+        <GatewayJWTGeneration>
+            <ImplClass>{{apim.jwt.gateway_generator.impl}}</ImplClass>
+            <Configuration>
+                <ClaimMappings>
+                {%- for claim in apim.jwt.gateway_generator.claims -%}
+                    <Claim>
+                    <RemoteClaim>{{claim.remote_claim}}</RemoteClaim>
+                    <LocalClaim>{{claim.local_claim}}</LocalClaim>
+                    </Claim>
+                    {% endfor %}
+                </ClaimMappings>
+            </Configuration>
+        </GatewayJWTGeneration>
     </JWTConfiguration>
 
     <!-- Primary/secondary login configuration for API Developer Portal. If user likes to keep two login attributes in a distributed setup, to login the API Developer Portal,
@@ -315,6 +334,9 @@
         <!-- Specifies the implementation to be used for KeyValidationHandler. Steps for validating a token can be controlled by plugging in a
              custom KeyValidation Handler -->
         <KeyValidationHandlerClassName>{{apim.key_manager.key_validation_handler_impl}}</KeyValidationHandlerClassName>
+       {% if apim.jwt.expiry_time is defined %}
+        <JWTExpiryTime>{{apim.jwt.expiry_time}}</JWTExpiryTime>
+       {% endif %}
     </APIKeyValidator>
 
     <!-- Uncomment this section only if you are going to have an instance other than KeyValidator as your KeyManager.
@@ -625,6 +647,10 @@
                 <URI>/api/am/publisher/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-categories</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
         </WhiteListedURIs>
         <ETagSkipList>
             <ETagSkipURI>
@@ -869,7 +895,7 @@
             <!-- Configure supported languages/Frameworks as comma separated values,
              Supported Languages/Frameworks : android, java, scala, csharp, dart, flash, groovy, javascript, jmeter,
              nodejs, perl, php, python, ruby, swift, clojure, asyncScala, csharpDotNet2-->
-            <SupportedLanguages>{{apim.sdk.supported_languages}}</SupportedLanguages>
+            <SupportedLanguages>{{apim.sdk.supported_languages.toList()|join(',')}}</SupportedLanguages>
         </ClientGeneration>
     </SwaggerCodegen>
 
@@ -895,6 +921,15 @@
             </AdditionalAttributes>
         {% endif %}
     </Monetization>
+
+    {% if apim.devportal.recommendations is defined %}
+    <APIRecommendations>
+        <recommendationEndpoint>{{apim.devportal.recommendations.recommendations_endpoint}}</recommendationEndpoint>
+        <eventPublishingEndpoint>{{apim.devportal.recommendations.event_publishing_endpoint}}</eventPublishingEndpoint>
+        <username>{{apim.devportal.recommendations.username}}</username>
+        <password>{{apim.devportal.recommendations.password}}</password>
+    </APIRecommendations>
+    {% endif %}
 
     <OpenTracer>
         <RemoteTracer>
@@ -1008,5 +1043,11 @@
     <JWTAuthentication>
         <EnableSubscriptionValidationViaKeyManager>{{apim.jwt_authenitcation.subscription_validation_via_km}}</EnableSubscriptionValidationViaKeyManager>
     </JWTAuthentication>
-
+    <CertificateReLoaderConfiguration>
+        <Period>{{apim.certificate_reloader.period}}</Period>
+    </CertificateReLoaderConfiguration>
+        <MutualSSL>
+            <ClientCertificateHeader>{{apimgt.mutual_ssl.certificate_header}}</ClientCertificateHeader>
+            <EnableClientCertificateValidation>{{apimgt.mutual_ssl.enable_client_validation}}</EnableClientCertificateValidation>
+        </MutualSSL>
 </APIManager>

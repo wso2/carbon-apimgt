@@ -122,7 +122,7 @@ function validateInput(text, element, errorMsg) {
 function validateLength(text, element, errorMsg) {
     var elementId = element.attr('id');
     text = text.trim();
-    if(text.length > 255) {
+    if (text.length > 255) {
         element.css("border", "1px solid red");
         $('#label' + elementId).remove();
         element.parent().append('<label class="error" id="label' + elementId + '" >' + errorMsg + '</label>');

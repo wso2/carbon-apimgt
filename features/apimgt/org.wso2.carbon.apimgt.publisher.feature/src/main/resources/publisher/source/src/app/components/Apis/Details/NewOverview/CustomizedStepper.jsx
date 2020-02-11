@@ -30,7 +30,6 @@ import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import ArrowForwardIosRoundedIcon from '@material-ui/icons/ArrowForwardIosRounded';
 import Tooltip from '@material-ui/core/Tooltip';
 import Button from '@material-ui/core/Button';
 import ApiContext, { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
@@ -100,18 +99,99 @@ const useStyles = makeStyles((theme) => ({
         maxWidth: '33.3333%',
     },
     stepper: {
-        background: theme.palette.background.default,
+        background: 'transparent',
         marginLeft: theme.spacing(10),
     },
     box: {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'white',
+        backgroundColor: 'transparent',
         padding: '2px',
         height: '82px',
         borderRight: '0',
         marginRight: '0',
+    },
+    pointerStart: {
+        height: 82,
+        position: 'relative',
+        background: theme.custom.overviewStepper.backgrounds.completed,
+        marginRight: '21px',
+        '&:before': {
+            content: '""',
+            position: 'absolute',
+            right: '-41px',
+            bottom: 0,
+            width: 0,
+            height: 0,
+            borderLeft: '41px solid',
+            borderLeftColor: theme.custom.overviewStepper.backgrounds.completed,
+            borderTop: '41px solid transparent',
+            borderBottom: '41px solid transparent',
+        },
+    },
+    pointerMiddle: {
+        height: 82,
+        position: 'relative',
+        background: theme.custom.overviewStepper.backgrounds.active,
+        margin: '0 20px',
+        '&:before': {
+            content: '""',
+            position: 'absolute',
+            right: '-41px',
+            bottom: 0,
+            width: 0,
+            height: 0,
+            borderLeft: '41px solid',
+            borderLeftColor: theme.custom.overviewStepper.backgrounds.active,
+            borderTop: '41px solid transparent',
+            borderBottom: '41px solid transparent',
+        },
+        '&:after': {
+            content: '""',
+            position: 'absolute',
+            left: 0,
+            bottom: 0,
+            width: 0,
+            height: 0,
+            borderLeft: '41px solid',
+            borderLeftColor: theme.custom.wrapperBackground,
+            borderTop: '41px solid transparent',
+            borderBottom: '41px solid transparent',
+        },
+    },
+    pointerEnd: {
+        height: 82,
+        position: 'relative',
+        background: theme.custom.overviewStepper.backgrounds.inactive,
+        marginLeft: '21px',
+        '&:after': {
+            content: '""',
+            position: 'absolute',
+            left: 0,
+            bottom: 0,
+            width: 0,
+            height: 0,
+            borderLeft: '41px solid',
+            borderLeftColor: theme.custom.wrapperBackground,
+            borderTop: '41px solid transparent',
+            borderBottom: '41px solid transparent',
+        },
+    },
+    pointerMiddleCompleted: {
+        background: theme.custom.overviewStepper.backgrounds.completed,
+        '&:before': {
+            borderLeftColor: theme.custom.overviewStepper.backgrounds.completed,
+        },
+    },
+    pointerEndActive: {
+        background: theme.custom.overviewStepper.backgrounds.active,
+    },
+    pointerEndCompleted: {
+        background: theme.custom.overviewStepper.backgrounds.completed,
+    },
+    stepIcon: {
+        fontSize: theme.custom.overviewStepper.iconSize,
     },
 }));
 
@@ -197,7 +277,7 @@ export default function CustomizedSteppers() {
                                 className={classes.viewInStoreLauncher}
                             >
                                 <Typography
-                                    variant='caption'
+                                    variant='h6'
                                     color='primary'
                                 >
                                     <FormattedMessage
@@ -299,76 +379,98 @@ export default function CustomizedSteppers() {
         activeStep = 3;
     }
 
+    const step2Class = activeStep > 1 ? classes.pointerMiddleCompleted : '';
+    let step3Class;
+    if (activeStep === 2) {
+        step3Class = classes.pointerEndActive;
+    } else if (activeStep === 3) {
+        step3Class = classes.pointerEndCompleted;
+    } else {
+        step3Class = '';
+    }
+
     return (
         <div className={classes.root}>
             <Stepper alternativeLabel activeStep={activeStep} className={classes.stepper}>
                 <Step className={classes.label}>
-                    <StepLabel style={{ position: 'relative' }}>
-                        <Box className={classes.box}>
-                            <Typography variant='h5'>
-                                <FormattedMessage
-                                    id='Apis.Details.Overview.CustomizedStepper.create'
-                                    defaultMessage='Created'
-                                />
-                            </Typography>
-                        </Box>
-                        <ArrowForwardIosRoundedIcon className={classes.arrowIcon} />
+                    <StepLabel style={{ position: 'relative' }} StepIconProps={{ classes: { root: classes.stepIcon } }}>
+                        <div className={classes.pointerStart}>
+                            <Box className={classes.box}>
+                                <Typography variant='h5'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Overview.CustomizedStepper.create'
+                                        defaultMessage='Created'
+                                    />
+                                </Typography>
+                            </Box>
+                        </div>
                     </StepLabel>
                 </Step>
                 <Step className={classes.label}>
-                    <StepLabel style={{ position: 'relative' }}>
-                        <Box p={2} bgcolor='white' borderLeft='0' borderRight='0'>
-                            <Tooltip
-                                title={isEndpointAvailable ? '' : 'You have to specify an endpoint for the API'}
-                                placement='top'
-                            >
-                                <Grid className={classes.gridEndpoint}>
-                                    {isEndpointAvailable ? (
-                                        <CheckIcon className={classes.iconTrue} />
-                                    ) : (
-                                        <CloseIcon className={classes.iconFalse} />
-                                    )}
-                                    <Typography variant='h7'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Overview.CustomizedStepper.business.plan.endpoint'
-                                            defaultMessage='Endpoint'
-                                        />
-                                    </Typography>
-                                    <Link to={'/apis/' + api.id + '/endpoints'}>
-                                        <LaunchIcon style={{ marginLeft: '5px' }} color='primary' fontSize='small' />
-                                    </Link>
-                                </Grid>
-                            </Tooltip>
-                            <Tooltip
-                                title={isTierAvailable ? '' : 'You have to select the business plan for the API'}
-                                placement='bottom'
-                            >
-                                <Grid xs={12} className={classes.gridSmall}>
-                                    {isTierAvailable ? (
-                                        <CheckIcon className={classes.iconTrue} />
-                                    ) : (
-                                        <CloseIcon className={classes.iconFalse} />
-                                    )}
-                                    <Typography variant='h7'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Overview.CustomizedStepper.business.plan.businessPlans'
-                                            defaultMessage=' Business plans'
-                                        />
-                                    </Typography>
-                                    <Link to={'/apis/' + api.id + '/subscriptions'}>
-                                        <LaunchIcon style={{ marginLeft: '5px' }} color='primary' fontSize='small' />
-                                    </Link>
-                                </Grid>
-                            </Tooltip>
-                        </Box>
-                        <ArrowForwardIosRoundedIcon className={classes.arrowIcon} />
+                    <StepLabel style={{ position: 'relative' }} StepIconProps={{ classes: { root: classes.stepIcon } }}>
+                        <div className={`${classes.pointerMiddle} ${step2Class}`}>
+                            <Box p={2} borderLeft='0' borderRight='0'>
+                                <Tooltip
+                                    title={isEndpointAvailable ? '' : 'You have to specify an endpoint for the API'}
+                                    placement='top'
+                                >
+                                    <Grid className={classes.gridEndpoint}>
+                                        {isEndpointAvailable ? (
+                                            <CheckIcon className={classes.iconTrue} />
+                                        ) : (
+                                            <CloseIcon className={classes.iconFalse} />
+                                        )}
+                                        <Typography variant='h7'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Overview.CustomizedStepper.business.plan.endpoint'
+                                                defaultMessage='Endpoint'
+                                            />
+                                        </Typography>
+                                        <Link to={'/apis/' + api.id + '/endpoints'}>
+                                            <LaunchIcon
+                                                style={{ marginLeft: '5px' }}
+                                                color='primary'
+                                                fontSize='small'
+                                            />
+                                        </Link>
+                                    </Grid>
+                                </Tooltip>
+                                <Tooltip
+                                    title={isTierAvailable ? '' : 'You have to select the business plan for the API'}
+                                    placement='bottom'
+                                >
+                                    <Grid xs={12} className={classes.gridSmall}>
+                                        {isTierAvailable ? (
+                                            <CheckIcon className={classes.iconTrue} />
+                                        ) : (
+                                            <CloseIcon className={classes.iconFalse} />
+                                        )}
+                                        <Typography variant='h7'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Overview.CustomizedStepper.business.plan.businessPlans'
+                                                defaultMessage=' Business plans'
+                                            />
+                                        </Typography>
+                                        <Link to={'/apis/' + api.id + '/subscriptions'}>
+                                            <LaunchIcon
+                                                style={{ marginLeft: '5px' }}
+                                                color='primary'
+                                                fontSize='small'
+                                            />
+                                        </Link>
+                                    </Grid>
+                                </Tooltip>
+                            </Box>
+                        </div>
                     </StepLabel>
                 </Step>
                 <Step className={classes.label}>
-                    <StepLabel style={{ position: 'relative' }}>
-                        <Box className={classes.box}>
-                            {finalLifecycleState(lifecycleState)}
-                        </Box>
+                    <StepLabel style={{ position: 'relative' }} StepIconProps={{ classes: { root: classes.stepIcon } }}>
+                        <div className={`${classes.pointerEnd} ${step3Class}`}>
+                            <Box className={classes.box}>
+                                {finalLifecycleState(lifecycleState)}
+                            </Box>
+                        </div>
                     </StepLabel>
                 </Step>
             </Stepper>

@@ -1966,7 +1966,9 @@ paths:
     # Retrieve the details about a certain GraphQL schema
     #-----------------------------------------------------
     get:
-      x-scope: apim:api_view
+      security:
+        - OAuth2Security:
+            - apim:api_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1/apis/7f82f6b0-2667-441e-af23-c0fc44cf3a17/graphql-schema\""
       x-wso2-request: |
         GET https://localhost:9443/api/am/publisher/v1/apis/7f82f6b0-2667-441e-af23-c0fc44cf3a17/graphql-schema
@@ -2024,7 +2026,9 @@ paths:
     # Add a GraphQL schema to the registry
     #-----------------------------------------------------
     put:
-      x-scope: apim:api_create
+      security:
+        - OAuth2Security:
+            - apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v1/apis/af3f96da-9ccf-463f-8cee-13ec8530a9cd/graphql-schema\""
       x-wso2-request: "PUT https://localhost:9443/api/am/publisher/v1/apis/af3f96da-9ccf-463f-8cee-13ec8530a9cd/graphql-schema\r\nContent-Type: text/plain\r\nAuthorization: Bearer 7d237cab-7011-3f81-b384-24d03e750873\r\n\r\n{\r\n   \"name\": \"admin--HackerNewsAPI1.0.0.graphql\",\r\n   \"schemaDefinition\": \"schema {\r\n  \r\n  # The query root of HackerNews GraphQL interface.\r\n  query: Query\r\n\r\n  # The root query for implementing GraphQL mutations.\r\n  mutation: Mutation\r\n}\r\n\r\ntype Link {\r\n\r\n  # ID of the link\r\n  id: ID!\r\n\r\n  # URL of the link\r\n  url: String!\r\n\r\n  # Description of the link\r\n  description: String\r\n}\r\n\r\ninput LinkFilter {\r\n\r\n  # Value to be checked whether it contains in the description\r\n  description_contains: String\r\n\r\n  # Value to be checked whether it contains in the URL\r\n  url_contains: String\r\n}\r\n\r\ntype Query {\r\n\r\n  # Fetches all the links\r\n  #\r\n  # Arguments\r\n  # filter: To filter the links according a specific criteria\r\n  # skip: Skip to a specific index in the list (default value is 0)\r\n  # first: Index of the link first to display (default value is 0)\r\n  allLinks(filter: LinkFilter, skip: Int = 0, first: Int = 0): [Link]\r\n}\r\n\r\ntype Mutation {\r\n\r\n  # Creates a new link\r\n  #\r\n  # Arguments\r\n  # url: URL of the link\r\n  # description: Description about the link\r\n  createLink(url: String!, description: String!): Link\r\n}\r\n\"\r\n}"
       x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n{\r\n   \"name\": \"admin--HackerNewsAPI1.0.0.graphql\",\r\n   \"schemaDefinition\": \"schema {\r\n  \r\n  # The query root of HackerNews GraphQL interface.\r\n  query: Query\r\n\r\n  # The root query for implementing GraphQL mutations.\r\n  mutation: Mutation\r\n}\r\n\r\ntype Link {\r\n\r\n  # ID of the link\r\n  id: ID!\r\n\r\n  # URL of the link\r\n  url: String!\r\n\r\n  # Description of the link\r\n  description: String\r\n}\r\n\r\ninput LinkFilter {\r\n\r\n  # Value to be checked whether it contains in the description\r\n  description_contains: String\r\n\r\n  # Value to be checked whether it contains in the URL\r\n  url_contains: String\r\n}\r\n\r\ntype Query {\r\n\r\n  # Fetches all the links\r\n  #\r\n  # Arguments\r\n  # filter: To filter the links according a specific criteria\r\n  # skip: Skip to a specific index in the list (default value is 0)\r\n  # first: Index of the link first to display (default value is 0)\r\n  allLinks(filter: LinkFilter, skip: Int = 0, first: Int = 0): [Link]\r\n}\r\n\r\ntype Mutation {\r\n\r\n  # Creates a new link\r\n  #\r\n  # Arguments\r\n  # url: URL of the link\r\n  # description: Description about the link\r\n  createLink(url: String!, description: String!): Link\r\n}\r\n\"\r\n}"
@@ -2351,6 +2355,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:document_create
+          - apim:api_create
+          - apim:document_create
       summary: Add a new document to an API
       description: |
         This operation can be used to add a new documentation to an API. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an API document ** API once we obtain a document Id by this operation.
@@ -2474,6 +2480,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:document_manage
+          - apim:api_create
+          - apim:document_manage
       summary: Update a document of an API
       description: |
         This operation can be used to update metadata of an API's document.
@@ -2541,6 +2549,7 @@ paths:
     delete:
       security:
         - OAuth2Security:
+          - apim:api_create
           - apim:document_manage
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058"
       x-wso2-request: |
@@ -2668,6 +2677,7 @@ paths:
         - multipart/form-data
       security:
         - OAuth2Security:
+          - apim:api_create
           - apim:document_create
       x-wso2-curl: "curl -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -F file=@\"sample.pdf\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\""
       x-wso2-request: |
@@ -2762,6 +2772,7 @@ paths:
         $ref: docs/examples/apis/apis_id_document_validate.yaml
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:document_create
       summary: Check whether a document with the provided name exist.
       description: |
@@ -2819,6 +2830,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:mediation_policy_view
+          - apim:api_view
+          - apim:mediation_policy_view
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_get.yaml
       summary: |
@@ -2872,6 +2885,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:mediation_policy_create
+          - apim:api_create
+          - apim:mediation_policy_create
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_post.yaml
       summary: Add an API specific mediation policy
@@ -2955,6 +2970,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+          - apim:api_view
+          - apim:mediation_policy_view
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_get.yaml
       summary: Get an API specific mediation policy
@@ -3013,6 +3030,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:mediation_policy_manage
+          - apim:api_create
+          - apim:mediation_policy_manage
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_delete.yaml
       summary: Delete an API specific mediation policy
@@ -3060,6 +3079,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+      - OAuth2Security:
+        - apim:api_view
+        - apim:mediation_policy_view
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_get.yaml
       summary: Download an API specific mediation policy
@@ -3111,6 +3133,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:mediation_policy_manage
+      - OAuth2Security:
+        - apim:api_create
+        - apim:mediation_policy_manage
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_put.yaml
       summary: Update an API specific mediation policy
@@ -3191,6 +3216,53 @@ paths:
   ################################################################
   # The WSDL resource of "Individual API" resource APIs
   ################################################################
+  # The WSDL meta info resource of "APIs" resource APIs
+  ################################################################
+
+  /apis/{apiId}/wsdl-info:
+    #-----------------------------------------------------
+    # Retrieve the API's WSDL
+    #-----------------------------------------------------
+    get:
+      produces:
+        - application/json
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      operationId: getWSDLInfoOfAPI
+      summary: Get WSDL definition
+      description: |
+        This operation can be used to retrieve the WSDL meta information of an API. It states whether the API is a SOAP
+        API. If the API is a SOAP API, it states whether it has a single WSDL or a WSDL archive.
+      x-examples:
+        $ref: docs/examples/apis/wsdl/apiId_wsdl_info_get.yaml
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - APIs
+      responses:
+        200:
+          description: |
+            OK.
+            Requested WSDL meta information of the API is returned
+          schema:
+            $ref: '#/definitions/WSDLInfo'
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist or the API is not a SOAP API.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+################################################################
+# The WSDL resource of "Individual API" resource APIs
+################################################################
 
   /apis/{apiId}/wsdl:
     #-----------------------------------------------------
@@ -3272,7 +3344,7 @@ paths:
           name: file
           description: WSDL file or archive to upload
           type: file
-          required: true
+          required: false
         - in: formData
           name: url
           description: WSDL Definition url
@@ -3576,6 +3648,96 @@ paths:
   ######################################################
   # The "Subscription Collection" resource APIs
   ######################################################
+  # Export Resource API
+  ######################################################
+  '/apis/export':
+    #--------------------------------------------------------
+    # Get an API as a Zip File
+    #--------------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_create
+      produces:
+        - application/zip
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET https://localhost:9443/api/am/publisher/v1/export/api?name=PizzaShackAPI&version=1.0.0&providerName=admin > exportAPI.zip"
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/publisher/v1/export/api?name=SampleAPI&version=1.0.0&providerName=admin
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-api.zip\"\n  Content-Type: application/zip"
+      summary: Export an API
+      description: |
+        This operation can be used to export the details of a particular API as a zip file.
+      parameters:
+        - in: query
+          name: apiId
+          required: false
+          type: string
+          description: UUID of the API
+        - name: name
+          in: query
+          description: |
+            API Name
+          required: false
+          type: string
+        - name: version
+          in: query
+          description: |
+            Version of the API
+          required: false
+          type: string
+        - name: providerName
+          in: query
+          description: |
+            Provider name of the API
+          required: false
+          type: string
+        - name: format
+          in: query
+          description: |
+            Format of output documents. Can be YAML or JSON.
+          type: string
+          enum:
+            - JSON
+            - YAML
+          required: false
+        - name: preserveStatus
+          in: query
+          description: |
+            Preserve API Status on export
+          required: false
+          type: boolean
+      tags:
+        - Import Export
+      responses:
+        200:
+          description: |
+            OK.
+            Export Successful.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            type: file
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error.
+            Error in exporting API.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "Subscription Collection" resource APIs
+######################################################
   /subscriptions:
 
     #-----------------------------------------------------
@@ -3952,6 +4114,7 @@ paths:
     get:
       security:
         - OAuth2Security:
+          - apim:api_view
           - apim:mediation_policy_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v1/mediation-policies"
       x-wso2-request: |
@@ -4013,6 +4176,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+      - OAuth2Security:
+        - apim:api_view
+        - apim:mediation_policy_view
       summary: Downloadt specific global mediation policy
       operationId: getGlobalMediationPolicyContent
       description: |
@@ -4065,6 +4231,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:client_certificates_view
+          - apim:api_view
+          - apim:client_certificates_view
       produces:
         - application/json
       x-wso2-curl: "curl -X GET \
@@ -4125,6 +4293,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:client_certificates_add
+          - apim:api_create
+          - apim:client_certificates_add
       consumes:
         - multipart/form-data
       x-wso2-curl: "curl -X POST \
@@ -4212,6 +4382,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:client_certificates_view
+          - apim:api_create
+          - apim:client_certificates_update
       consumes:
         - multipart/form-data
       x-wso2-curl: "curl -X PUT \
@@ -4291,6 +4463,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:client_certificates_update
+          - apim:api_create
+          - apim:client_certificates_update
       x-wso2-curl:
         "curl -X DELETE \
            https://localhost:9443/api/am/publisher/v1/client-certificates/newtest1 \
@@ -4351,6 +4525,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:client_certificates_view
+          - apim:api_view
+          - apim:client_certificates_view
       produces:
         - application/json
       x-wso2-curl: "curl -X GET \
@@ -4418,6 +4594,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:client_certificates_view
+          - apim:api_view
+          - apim:client_certificates_view
       x-wso2-curl: "curl -X GET \
                       https://localhost:9443/api/am/publisher/v1/client-certificates/newtest1/content \
                       -H 'authorization: Bearer f80b8c34-01bc-3ac2-99b6-4873e45c861c'"
@@ -4481,6 +4659,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:ep_certificates_view
+          - apim:api_view
+          - apim:ep_certificates_view
       produces:
         - application/json
       x-wso2-curl: "curl -X GET -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" \"https://localhost:9443/api/am/publisher/v1/certificates\""
@@ -4540,6 +4720,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:ep_certificates_add
+          - apim:api_create
+          - apim:ep_certificates_add
       consumes:
         - multipart/form-data
       x-wso2-curl: "curl -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: multipart/form-data\"  -F \"certificate=@/home/user/wso2carbon.cert\" -F \"alias=wso2carbon\" -F \"endpoint=https://www.abc.com\" \"https://localhost:9443/api/am/publisher/v1/certificates/certificate\""
@@ -4610,6 +4792,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:ep_certificates_update
+          - apim:api_create
+          - apim:ep_certificates_update
       consumes:
         - multipart/form-data
       x-wso2-curl: "curl -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type:multipart/form-data\" -F \"certificate=@/home/user/wso2carbon.cert\" \"https://localhost:9443/api/am/publisher/v1/certificates/wso2carbon\""
@@ -4672,6 +4856,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:ep_certificates_update
+          - apim:api_create
+          - apim:ep_certificates_update
       x-wso2-curl:
         "curl -X DELETE -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1/certificates/wso2carbon\""
       x-wso2-request: "DELETE https://localhost:9443/api/am/publisher/v1/certificates/wso2carbon Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4725,6 +4911,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:ep_certificates_view
+          - apim:api_view
+          - apim:ep_certificates_view
       produces:
         - application/json
       x-wso2-curl: "curl -X GET \"https://apis.wso2.com/api/am/publisher/v1/certificates/wso2carbon\" -H  \"accept: application/json\""
@@ -4776,6 +4964,7 @@ paths:
     get:
       security:
         - OAuth2Security:
+          - apim:api_view
           - apim:ep_certificates_view
       x-wso2-curl: "curl -X GET \"https://apis.wso2.com/api/am/publisher/v1/certificates/wso2carbon/content\" -H \"accept: application/json\""
       x-wso2-request: "GET https://apis.wso2.com/api/am/publisher/v1/certificates/wso2carbon/content Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6429,7 +6618,9 @@ paths:
     # Retrieve all labels
     #-----------------------------------------------------
     get:
-      x-scope: apim:api_view
+      security:
+        - OAuth2Security:
+            - apim:api_view
       x-wso2-request: |
         GET https://localhost:9443/api/am/publisher/v1/labels
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -6447,6 +6638,36 @@ paths:
             Labels returned
           schema:
             $ref: '#/definitions/LabelList'
+
+######################################################
+# The "Category" resource API
+######################################################
+  /api-categories:
+
+#-----------------------------------------------------
+# Retrieve all categories
+#-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      x-wso2-request: |
+              GET https://localhost:9443/api/am/publisher/v1.1/api-categories
+              Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1.1/api-categories\""
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}"
+      summary: Get all API categories
+      description: |
+        Get all API categories
+      tags:
+        - API Category (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            Categories returned
+          schema:
+            $ref: '#/definitions/APICategoryList'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -6891,14 +7112,7 @@ definitions:
         type: string
         example: CREATED
       wsdlInfo:
-        description: WSDL information of the API. This is only available if the API is a SOAP API.
-        properties:
-          type:
-            type: string
-            description: Indicates whether the WSDL is a single WSDL or an archive in ZIP format
-            enum:
-              - WSDL
-              - ZIP
+        $ref: '#/definitions/WSDLInfo'
       wsdlUrl:
         type: string
         example: /apimgt/applicationdata/wsdls/admin--soap1.wsdl
@@ -7200,6 +7414,13 @@ definitions:
                   type: string
                 priority:
                   type: integer
+      categories:
+        description: |
+          API categories
+        type: array
+        items:
+          type: string
+          example: ["Finance"]
 
   #-----------------------------------------------------
   # The Audit Report resource
@@ -7456,6 +7677,13 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Scope'
+      categories:
+        description: |
+          API categories
+        type: array
+        items:
+          type: string
+          example: ["Finance"]
   #-----------------------------------------------------
   # The API and its resources in a API Product resource
   #-----------------------------------------------------
@@ -9070,6 +9298,15 @@ definitions:
       baseUrl:
         type: string
 
+  WSDLInfo:
+    title: WSDL information of the API. This is only available if the API is a SOAP API.
+    properties:
+      type:
+        type: string
+        description: Indicates whether the WSDL is a single WSDL or an archive in ZIP format
+        enum:
+          - WSDL
+          - ZIP
 
 #-----------------------------------------------------
 # The pagination resource
@@ -9292,6 +9529,40 @@ definitions:
       apiVersion: '1.0.0'
       applicationName: 'DefaultApplication'
       requestConunt: '12'
+
+  #-----------------------------------------------------
+  # The Category resource
+  #-----------------------------------------------------
+  APICategory:
+    title: API Category
+    required:
+    - name
+    properties:
+      id:
+        type: string
+        example: "01234567-0123-0123-0123-012345678901"
+      name:
+        type: string
+        example: "Finance"
+      description:
+        type: string
+        example: "Finance related APIs"
+
+  #-----------------------------------------------------
+  # The Category List resource
+  #-----------------------------------------------------
+  APICategoryList:
+    title: API Category List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of API categories returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APICategory'
 
 #-----------------------------------------------------
 # END-OF-FILE

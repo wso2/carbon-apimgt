@@ -12,9 +12,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIWsdlInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -36,7 +36,7 @@ public class APIDTO   {
     private String version = null;
     private String provider = null;
     private String lifeCycleStatus = null;
-    private APIWsdlInfoDTO wsdlInfo = null;
+    private WSDLInfoDTO wsdlInfo = null;
     private String wsdlUrl = null;
     private Boolean responseCachingEnabled = null;
     private Integer cacheTimeout = null;
@@ -249,6 +249,7 @@ public enum EndpointImplementationTypeEnum {
     private List<ScopeDTO> scopes = new ArrayList<>();
     private List<APIOperationsDTO> operations = new ArrayList<>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
+    private List<String> categories = new ArrayList<>();
 
   /**
    * UUID of the api registry artifact 
@@ -376,7 +377,7 @@ public enum EndpointImplementationTypeEnum {
 
   /**
    **/
-  public APIDTO wsdlInfo(APIWsdlInfoDTO wsdlInfo) {
+  public APIDTO wsdlInfo(WSDLInfoDTO wsdlInfo) {
     this.wsdlInfo = wsdlInfo;
     return this;
   }
@@ -384,10 +385,10 @@ public enum EndpointImplementationTypeEnum {
   
   @ApiModelProperty(value = "")
   @JsonProperty("wsdlInfo")
-  public APIWsdlInfoDTO getWsdlInfo() {
+  public WSDLInfoDTO getWsdlInfo() {
     return wsdlInfo;
   }
-  public void setWsdlInfo(APIWsdlInfoDTO wsdlInfo) {
+  public void setWsdlInfo(WSDLInfoDTO wsdlInfo) {
     this.wsdlInfo = wsdlInfo;
   }
 
@@ -1051,6 +1052,24 @@ public enum EndpointImplementationTypeEnum {
     this.threatProtectionPolicies = threatProtectionPolicies;
   }
 
+  /**
+   * API categories 
+   **/
+  public APIDTO categories(List<String> categories) {
+    this.categories = categories;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "API categories ")
+  @JsonProperty("categories")
+  public List<String> getCategories() {
+    return categories;
+  }
+  public void setCategories(List<String> categories) {
+    this.categories = categories;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1106,12 +1125,13 @@ public enum EndpointImplementationTypeEnum {
         Objects.equals(endpointImplementationType, API.endpointImplementationType) &&
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(operations, API.operations) &&
-        Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies);
+        Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies) &&
+        Objects.equals(categories, API.categories);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories);
   }
 
   @Override
@@ -1165,6 +1185,7 @@ public enum EndpointImplementationTypeEnum {
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");
+    sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("}");
     return sb.toString();
   }

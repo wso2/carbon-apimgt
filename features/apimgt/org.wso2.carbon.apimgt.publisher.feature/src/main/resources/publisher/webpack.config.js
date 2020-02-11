@@ -47,7 +47,14 @@ const config = {
             {
                 test: /\.(js|jsx)$/,
                 exclude: [/node_modules\/(?!(@hapi)\/).*/, /coverage/],
-                loader: 'babel-loader',
+                use: [
+                    {
+                        loader: 'babel-loader',
+                    },
+                    {
+                        loader: path.resolve('loader.js'),
+                    },
+                ],
             },
             {
                 test: /\.css$/,

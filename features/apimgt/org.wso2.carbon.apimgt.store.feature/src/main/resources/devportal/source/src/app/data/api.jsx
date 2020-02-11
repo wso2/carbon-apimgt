@@ -775,4 +775,28 @@ export default class API extends Resource {
             );
         });
     }
+
+    /**
+     * @static
+     * Get all API Categories of the given tenant
+     * @return {Promise}
+     * */
+    apiCategories(params) {
+        return this.client.then((client) => {
+            return client.apis['API Category (Collection)'].get_api_categories(
+                params, this._requestMetaData());
+        });
+    }
+
+    /**
+     * Get API recommendations for a given user.
+     * @param {string} userId The username.
+     * @return {Promise}
+     * */
+    getApiRecommendations(params = {}) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.Recommendations.get_recommendations(params, this._requestMetaData());
+        });
+        return promiseGet;
+    }
 }

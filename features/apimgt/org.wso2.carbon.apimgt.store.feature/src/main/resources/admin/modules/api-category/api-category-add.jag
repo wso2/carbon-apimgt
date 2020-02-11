@@ -1,0 +1,69 @@
+<%
+var log = new Log();
+var addAPICategory = function (action, uuid, categoryName, description) {
+    try {
+        var username = jagg.getUser().username;
+        var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
+        var apiAdmin = new APIAdminImpl();
+
+        var APICategory = Packages.org.wso2.carbon.apimgt.api.model.APICategory;
+        var category = new APICategory();
+
+        category.setId(uuid);
+        category.setName(categoryName);
+        category.setDescription(description);
+
+        if (action == "categoryAction") {
+            var category = constructCategoryObject(uuid, categoryName, description);
+            apiAdmin.addCategory(category, username);
+        } else if (action == "update") {
+            var category = constructCategoryObject(uuid, categoryName, description);
+            apiAdmin.updateCategory(category);
+        }
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while saving API Category (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+
+var isCategoryNameExists = function(categoryName, uuid, tenantId) {
+    try {
+        var exists;
+        var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
+        var apiAdmin = new APIAdminImpl();
+
+        exists = apiAdmin.isCategoryNameExists(categoryName, uuid, tenantId);
+        if (log.isDebugEnabled()) {
+            log.debug("isAPICategoryNameExists exist for : " + categoryName + " : " + exists);
+        }
+        return {
+            error:false,
+            exist:exists
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+}
+
+var constructCategoryObject  = function(categoryId, categoryName, description) {
+    var APICategory = Packages.org.wso2.carbon.apimgt.api.model.APICategory;
+    var category = new APICategory();
+
+    category.setId(categoryId);
+    category.setName(categoryName);
+    category.setDescription(description);
+
+    return category;
+}
+
+%>

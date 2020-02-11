@@ -93,6 +93,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public boolean init(URL url) throws APIMgtWSDLException {
+        setMode(Mode.SINGLE);
         WSDLReader reader;
         try {
             reader = WSDLFactory.newInstance().newWSDLReader();
@@ -117,6 +118,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public boolean init(byte[] wsdlContent) throws APIMgtWSDLException {
+        setMode(Mode.SINGLE);
         WSDLReader reader;
         try {
             reader = getWsdlFactoryInstance().newWSDLReader();
@@ -145,6 +147,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public boolean initPath(String path) throws APIMgtWSDLException {
+        setMode(Mode.ARCHIVE);
         pathToDescriptionMap = new HashMap<>();
         wsdlArchiveExtractedPath = path;
         WSDLReader reader;
@@ -199,7 +202,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public ByteArrayInputStream getWSDL() throws APIMgtWSDLException {
-        if (wsdlDescription != null) {
+        if (Mode.SINGLE.equals(getMode())) {
             return getSingleWSDL();
         } else {
             return getWSDLArchive(wsdlArchiveExtractedPath);
@@ -253,7 +256,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public void updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException {
-        if (wsdlDescription != null) {
+        if (Mode.SINGLE.equals(getMode())) {
             updateEndpointsOfSingleWSDL(api, environmentName, environmentType);
         } else {
             updateEndpointsOfWSDLArchive(api, environmentName, environmentType);
@@ -341,7 +344,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
      * @throws APIMgtWSDLException if error occurs while reading endpoints
      */
     private Map<String, String> getEndpoints() throws APIMgtWSDLException {
-        if (wsdlDescription != null) {
+        if (Mode.SINGLE.equals(getMode())) {
             return getEndpoints(wsdlDescription);
         } else {
             Map<String, String> allEndpointsOfAllWSDLs = new HashMap<>();

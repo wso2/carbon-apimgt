@@ -1,0 +1,84 @@
+<%
+    include("/jagg/jagg.jag");
+
+(function () {
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, applications, obj, permissionResult, username,
+        action = request.getParameter("action"),
+        site = require("/site/conf/site.json"),
+        msg = require("/site/conf/ui-messages.jag");
+    user = jagg.getUser();
+    if (user == null) {
+        print({
+            error: true,
+            message: 'timeout'
+        });
+    } else if (request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()) {
+        print({
+            error: true,
+            message: msg.error.csrfError
+        });
+    } else if (request.getMethod() == 'POST') {
+        if (action == "saveTenantConfig") {
+            var newRoles = request.getParameter("newRoles");
+            var scopeName = request.getParameter("scopeName");
+            var result = jagg.module("scope-mapping").getTenantConfig();
+
+            //Replace the old Roles with new Roles
+            var mappings = result.tenantConfig.RESTAPIScopes.Scope;
+            for(var i=0; i < mappings.length ; i++ ){
+                if(mappings[i]['Name'] === scopeName){
+                    mappings[i]['Roles'] = newRoles;
+                }
+            }
+
+            var updateResults = jagg.module("scope-mapping").updateTenantConf(stringify(result.tenantConfig));
+            if (updateResults.error) {
+                obj = {
+                    error: true,
+                    message: updateResults.message
+                };
+            } else {
+                obj = {
+                    error: false,
+                    response: result,
+                }
+            }
+            print(obj);
+        } else if (action == "saveRoleMappingConfig") {
+            var originalRole = request.getParameter("originalRole");
+            var mappedRoleList = request.getParameter("mappedRoles");
+
+            var result = jagg.module("scope-mapping").getTenantConfig();
+            //Replace the old Roles with new Roles
+            var mappings = result.tenantConfig.RoleMappings;
+
+            //mappings can be null when RoleMappings config is not yet included in tenant-conf.json
+            if (mappings == null) {
+                mappings = {};
+                result.tenantConfig.RoleMappings = mappings;
+            }
+
+            if (mappedRoleList == null || mappedRoleList == "null" || mappedRoleList == "") {
+                delete mappings[originalRole];
+            } else {
+                mappings[originalRole] = mappedRoleList;
+            }
+
+            var updateResults = jagg.module("scope-mapping").updateTenantConf(stringify(result.tenantConfig));
+            if (updateResults.error) {
+                obj = {
+                    error: true,
+                    message: updateResults.message
+                };
+            } else {
+                obj = {
+                    error: false,
+                    response: result,
+                }
+            }
+            print(obj);
+        }
+    }
+}());
+%>

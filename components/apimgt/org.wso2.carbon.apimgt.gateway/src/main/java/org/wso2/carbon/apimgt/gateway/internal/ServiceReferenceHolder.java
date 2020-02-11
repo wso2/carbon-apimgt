@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.gateway.internal;
 
 
 import org.apache.axis2.context.ConfigurationContext;
+import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -30,9 +31,11 @@ import org.wso2.carbon.localentry.service.LocalEntryAdmin;
 import org.wso2.carbon.mediation.security.vault.MediationSecurityAdminService;
 import org.wso2.carbon.rest.api.service.RestApiAdmin;
 import org.wso2.carbon.sequences.services.SequenceAdmin;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ServiceReferenceHolder {
 
@@ -45,14 +48,14 @@ public class ServiceReferenceHolder {
     private ConfigurationContext axis2ConfigurationContext;
     private TracingService tracingService;
     private ServerConfigurationService serverConfigurationService;
-    private RealmService realmService;
     private RestApiAdmin restAPIAdmin;
     private SequenceAdmin sequenceAdmin;
     private LocalEntryAdmin localEntryAdmin;
     private EndpointAdmin endpointAdmin;
     private MediationSecurityAdminService mediationSecurityAdminService;
     private ThrottleDataPublisher throttleDataPublisher;
-
+    private AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator;
+    private Set<String> claims = new HashSet<>();
     public ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
     }
@@ -134,14 +137,6 @@ public class ServiceReferenceHolder {
         this.serverConfigurationService = serverConfigurationService;
     }
 
-    public RealmService getRealmService() {
-        return realmService;
-    }
-
-    public void setRealmService(RealmService realmService) {
-        this.realmService = realmService;
-    }
-
     public void setRestAPIAdmin(RestApiAdmin restAPIAdmin) {
         this.restAPIAdmin = restAPIAdmin;
 
@@ -200,4 +195,21 @@ public class ServiceReferenceHolder {
 
         this.throttleDataPublisher = throttleDataPublisher;
     }
+
+    public AbstractAPIMgtGatewayJWTGenerator getAPIMgtGatewayJWTGenerator() {
+
+        return apiMgtGatewayJWTGenerator;
+    }
+
+    public AbstractAPIMgtGatewayJWTGenerator getApiMgtGatewayJWTGenerator() {
+
+        return apiMgtGatewayJWTGenerator;
+    }
+
+    public void setApiMgtGatewayJWTGenerator(
+            AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator) {
+
+        this.apiMgtGatewayJWTGenerator = apiMgtGatewayJWTGenerator;
+    }
+
 }

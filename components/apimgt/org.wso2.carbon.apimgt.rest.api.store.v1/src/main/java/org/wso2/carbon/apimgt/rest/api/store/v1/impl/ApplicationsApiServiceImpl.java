@@ -817,11 +817,4 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         }
         return null;
     }
-
-    @Override
-    public Response applicationsApplicationIdScopesGet(String applicationId, Boolean filterByUserRoles,
-            String ifNoneMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
-    }
 }

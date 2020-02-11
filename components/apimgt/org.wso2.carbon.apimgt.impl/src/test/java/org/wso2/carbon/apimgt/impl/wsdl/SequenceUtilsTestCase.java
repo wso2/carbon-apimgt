@@ -60,6 +60,7 @@ public class SequenceUtilsTestCase {
     private TenantManager tenantManager;
 
     private static final String RESOURCE_PATH = "/apimgt/applicationdata/provider/admin/sample-api/1.0.0/soap_to_rest/in/test_get.xml";
+    private static final String RESOURCE_NAME = "test";
     private static final String INSEQUENCE_RESOURCES = "/apimgt/applicationdata/provider/admin/sample-api/1.0.0/soap_to_rest/in/";
     private static final String SEQUENCE = "";
     private static final String HTTP_METHOD = "post";
@@ -89,10 +90,12 @@ public class SequenceUtilsTestCase {
         Mockito.when(userRegistry.resourceExists(RESOURCE_PATH)).thenReturn(false);
         Mockito.when(userRegistry.newResource()).thenReturn(resource);
         try {
-            SequenceUtils.saveRestToSoapConvertedSequence(userRegistry, SEQUENCE, HTTP_METHOD, RESOURCE_PATH);
+            SequenceUtils.saveRestToSoapConvertedSequence(userRegistry, SEQUENCE, HTTP_METHOD, RESOURCE_PATH,
+                    RESOURCE_NAME);
             Mockito.when(userRegistry.resourceExists(RESOURCE_PATH)).thenReturn(true);
             Mockito.when(userRegistry.get(RESOURCE_PATH)).thenReturn(resource);
-            SequenceUtils.saveRestToSoapConvertedSequence(userRegistry, SEQUENCE, HTTP_METHOD, RESOURCE_PATH);
+            SequenceUtils.saveRestToSoapConvertedSequence(userRegistry, SEQUENCE, HTTP_METHOD, RESOURCE_PATH,
+                    RESOURCE_NAME);
         } catch (APIManagementException e) {
             Assert.fail("Failed to save the sequence in the registry");
         }

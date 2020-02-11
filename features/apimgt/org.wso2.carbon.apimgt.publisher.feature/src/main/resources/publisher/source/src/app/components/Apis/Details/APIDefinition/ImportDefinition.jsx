@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useReducer } from 'react';
+import React, { useReducer, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
@@ -30,8 +30,9 @@ import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api.js';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import ProvideWSDL from 'AppComponents/Apis/Create/WSDL/Steps/ProvideWSDL';
 import ProvideOpenAPI from '../../Create/OpenAPI/Steps/ProvideOpenAPI';
-
 import ProvideGraphQL from '../../Create/GraphQL/Steps/ProvideGraphQL';
 
 
@@ -44,13 +45,22 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
+/**
+ *
+ *
+ * @export
+ * @param {*} props
+ * @returns
+ */
 export default function ImportDefinition(props) {
     const { setSchemaDefinition } = props;
     const classes = useStyles();
-    const [openAPIDefinitionImport, setOpenAPIDefinitionImport] = React.useState(false);
+    const [openAPIDefinitionImport, setOpenAPIDefinitionImport] = useState(false);
+    const [isImporting, setIsImporting] = useState(false);
     const [api] = useAPI();
     const intl = useIntl();
     const isGraphQL = api.isGraphql();
+    const isSOAP = api.isSOAP();
 
     const handleAPIDefinitionImportOpen = () => {
         setOpenAPIDefinitionImport(true);
@@ -63,13 +73,7 @@ export default function ImportDefinition(props) {
     function apiInputsReducer(currentState, inputAction) {
         const { action, value } = inputAction;
         switch (action) {
-            case 'type':
             case 'inputValue':
-            case 'name':
-            case 'version':
-            case 'endpoint':
-            case 'context':
-            case 'policies':
             case 'isFormValid':
                 return { ...currentState, [action]: value };
             case 'inputType':
@@ -77,9 +81,7 @@ export default function ImportDefinition(props) {
             case 'preSetAPI':
                 return {
                     ...currentState,
-                    name: value.name.replace(/[&/\\#,+()$~%.'":*?<>{}\s]/g, ''),
-                    version: value.version,
-                    context: value.context,
+                    content: value.content,
                 };
             default:
                 return currentState;
@@ -87,22 +89,32 @@ export default function ImportDefinition(props) {
     }
 
     const [apiInputs, inputsDispatcher] = useReducer(apiInputsReducer, {
-        type: 'ImportDefinition',
+        type: '',
         inputType: 'url',
         inputValue: '',
         formValidity: false,
+        mode: 'update',
     });
 
     /**
      * Updates OpenAPI definition
      */
     function updateOASDefinition() {
+        setIsImporting(true);
         const {
-            inputValue, inputType,
+            inputValue, inputType, content,
         } = apiInputs;
-
+        const isFileInput = inputType === 'file';
+        if (isFileInput) {
+            const reader = new FileReader();
+            const contentType = inputValue.type.includes('yaml') ? 'yaml ' : 'json';
+            reader.onloadend = (event) => {
+                setSchemaDefinition(event.currentTarget.result, contentType);
+            };
+            reader.readAsText(inputValue);
+        }
         const newAPI = new API();
-        const promisedResponse = inputType === 'file' ? newAPI.updateAPIDefinitionByFile(api.id, inputValue)
+        const promisedResponse = isFileInput ? newAPI.updateAPIDefinitionByFile(api.id, inputValue)
             : newAPI.updateAPIDefinitionByUrl(api.id, inputValue);
         promisedResponse
             .then(() => {
@@ -111,7 +123,12 @@ export default function ImportDefinition(props) {
                     defaultMessage: 'API Definition Updated Successfully',
                 }));
                 setOpenAPIDefinitionImport(false);
-                setSchemaDefinition(inputValue);
+                if (!isFileInput) {
+                    // Test to starting the content with'{' character ignoring white spaces
+                    const isJSONRegex = RegExp(/^\s*{/); // TODO: not a solid test need to support from REST API ~tmkb
+                    const contentType = isJSONRegex.test(content) ? 'json' : 'yaml';
+                    setSchemaDefinition(content, contentType);
+                }
             })
             .catch((error) => {
                 console.error(error);
@@ -119,7 +136,7 @@ export default function ImportDefinition(props) {
                     id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
                     defaultMessage: 'Error while updating the API Definition',
                 }));
-            });
+            }).finally(() => setIsImporting(false));
     }
 
     /**
@@ -136,7 +153,7 @@ export default function ImportDefinition(props) {
                     defaultMessage: 'Schema Definition Updated Successfully',
                 }));
                 setOpenAPIDefinitionImport(false);
-                setSchemaDefinition(null, graphQLSchema);
+                setSchemaDefinition(graphQLSchema);
             })
             .catch((err) => {
                 console.log(err);
@@ -174,6 +191,37 @@ export default function ImportDefinition(props) {
             });
     }
 
+    /**
+     * Updates WSDL definition
+     */
+    function updateWSDL() {
+        const {
+            inputType, inputValue,
+        } = apiInputs;
+        const isFileInput = inputType === 'file';
+        let promisedAPI;
+        if (isFileInput) {
+            promisedAPI = api.updateWSDLByFileOrArchive(api.id, inputValue);
+        } else {
+            promisedAPI = api.updateWSDLByUrl(api.id, inputValue);
+        }
+        promisedAPI
+            .then(() => {
+                Alert.success(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.ImportDefinition.WSDL.updated.successfully',
+                    defaultMessage: 'WSDL Updated Successfully',
+                }));
+                setOpenAPIDefinitionImport(false);
+                setSchemaDefinition(isFileInput && inputValue.type === 'application/zip');
+            })
+            .catch((err) => {
+                console.log(err);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.ImportDefinition.error.updating.WSDL',
+                    defaultMessage: 'Error while updating WSDL',
+                }));
+            });
+    }
 
     /**
      * Handles API definition import
@@ -181,6 +229,8 @@ export default function ImportDefinition(props) {
     function importDefinition() {
         if (isGraphQL) {
             updateGraphQLSchema();
+        } if (isSOAP) {
+            updateWSDL();
         } else {
             updateOASDefinition();
         }
@@ -198,6 +248,62 @@ export default function ImportDefinition(props) {
         });
     }
 
+    let dialogTitle = (
+        <FormattedMessage
+            id='Apis.Details.APIDefinition.APIDefinition.import.definition.oas'
+            defaultMessage='Import OpenAPI Definition'
+        />
+    );
+    let dialogContent = (
+        <ProvideOpenAPI
+            onValidate={handleOnValidate}
+            apiInputs={apiInputs}
+            inputsDispatcher={inputsDispatcher}
+        />
+    );
+    let btnText = (
+        <FormattedMessage
+            id='Apis.Details.APIDefinition.APIDefinition.import.definition'
+            defaultMessage='Import Definition'
+        />
+    );
+    if (isGraphQL) {
+        dialogTitle = (
+            <FormattedMessage
+                id='Apis.Details.APIDefinition.APIDefinition.import.definition.graphql'
+                defaultMessage='Import GraphQL Schema Definition'
+            />
+        );
+        dialogContent = (
+            <ProvideGraphQL
+                onValidate={handleOnValidate}
+                apiInputs={apiInputs}
+                inputsDispatcher={inputsDispatcher}
+            />
+        );
+    }
+    if (isSOAP) {
+        dialogTitle = (
+            <FormattedMessage
+                id='Apis.Details.APIDefinition.APIDefinition.import.definition.wsdl'
+                defaultMessage='Import WSDL'
+            />
+        );
+        dialogContent = (
+            <ProvideWSDL
+                onValidate={handleOnValidate}
+                apiInputs={apiInputs}
+                inputsDispatcher={inputsDispatcher}
+            />
+        );
+        btnText = (
+            <FormattedMessage
+                id='Apis.Details.APIDefinition.APIDefinition.import.wsdl'
+                defaultMessage='Import WSDL'
+            />
+        );
+    }
+
     return (
         <>
             <Button
@@ -207,44 +313,16 @@ export default function ImportDefinition(props) {
                 disabled={isRestricted(['apim:api_create'], api)}
             >
                 <CloudUploadRounded className={classes.buttonIcon} />
-                <FormattedMessage
-                    id='Apis.Details.APIDefinition.APIDefinition.import.definition'
-                    defaultMessage='Import Definition'
-                />
+                {btnText}
             </Button>
             <Dialog onBackdropClick={setOpenAPIDefinitionImport} open={openAPIDefinitionImport}>
                 <DialogTitle>
                     <Typography className={classes.importDefinitionDialogHeader}>
-                        {isGraphQL ? (
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.import.definition.graphql'
-                                defaultMessage='Import GraphQL Schema Definition'
-                            />
-                        )
-                            : (
-                                <FormattedMessage
-                                    id='Apis.Details.APIDefinition.APIDefinition.import.definition.oas'
-                                    defaultMessage='Import OpenAPI Definition'
-                                />
-                            )}
+                        {dialogTitle}
                     </Typography>
                 </DialogTitle>
                 <DialogContent>
-                    {isGraphQL ? (
-                        <ProvideGraphQL
-                            onValidate={handleOnValidate}
-                            apiInputs={apiInputs}
-                            inputsDispatcher={inputsDispatcher}
-                        />
-                    ) : (
-
-                        <ProvideOpenAPI
-                            onValidate={handleOnValidate}
-                            apiInputs={apiInputs}
-                            inputsDispatcher={inputsDispatcher}
-                        />
-                    )}
-
+                    {dialogContent}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleAPIDefinitionImportCancel}>
@@ -257,12 +335,13 @@ export default function ImportDefinition(props) {
                         onClick={importDefinition}
                         variant='contained'
                         color='primary'
-                        disabled={!apiInputs.isFormValid}
+                        disabled={!apiInputs.isFormValid || isImporting}
                     >
                         <FormattedMessage
                             id='Apis.Details.APIDefinition.APIDefinition.import.definition.import'
                             defaultMessage='Import'
                         />
+                        {isImporting && <CircularProgress size={20} />}
                     </Button>
                 </DialogActions>
             </Dialog>

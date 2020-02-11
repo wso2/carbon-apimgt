@@ -45,6 +45,19 @@ const styles = theme => ({
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
     },
+    gridRoot: {
+        marginLeft: theme.spacing(2),
+    },
+    titleWrappper: {
+        display: 'flex',
+        alignItems: 'center',
+        '& h4' : {
+            marginRight: theme.spacing(1),
+        },
+    },
+    cardTitle: {
+        background: theme.palette.grey[50],
+    },
 });
 
 /**
@@ -219,27 +232,28 @@ class Sdk extends React.Component {
         }
         return (
             <React.Fragment>
-                <Typography variant='h4' className={classes.titleSub}>
-                    <FormattedMessage id='Apis.Details.Sdk.title' defaultMessage='Software Development Kits (SDKs)' />
-                </Typography>
+                <div className={classes.titleWrappper}>
+                    <Typography variant='h4' className={classes.titleSub}>
+                        <FormattedMessage id='Apis.Details.Sdk.title' defaultMessage='Software Development Kits (SDKs)' />
+                    </Typography>
+                    {filteredLanguageList && this.state.sdkLanguages.length >= this.filter_threshold && (
+                        <TextField
+                            variant="outlined"
+                            id='search'
+                            label={intl.formatMessage({
+                                defaultMessage: 'Search SDK',
+                                id: 'Apis.Details.Sdk.search.sdk',
+                            })}
+                            type='text'
+                            margin='normal'
+                            name='searchSdk'
+                            onChange={this.handleChange}
+                        />
+                    )}
+                </div>
                 {filteredLanguageList ? (
-                    <Grid container className='tab-grid' spacing={0}>
+                    <Grid container className='tab-grid' spacing={0} className={classes.gridRoot}>
                         <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
-                            {this.state.sdkLanguages.length >= this.filter_threshold && (
-                                <Grid item style={{ textAlign: 'left', margin: '14px' }}>
-                                    <TextField
-                                        id='search'
-                                        label={intl.formatMessage({
-                                            defaultMessage: 'Search SDK',
-                                            id: 'Apis.Details.Sdk.search.sdk',
-                                        })}
-                                        type='text'
-                                        margin='normal'
-                                        name='searchSdk'
-                                        onChange={this.handleChange}
-                                    />
-                                </Grid>
-                            )}
                             <Grid container justify='flex-start' spacing={4}>
                                 {filteredLanguageList.map((language, index) => (
                                     <Grid key={index} item key={index}>
@@ -254,6 +268,7 @@ class Sdk extends React.Component {
                                                         new String(language) +
                                                         '.svg'
                                                     }
+                                                    classes={{root: classes.cardTitle}}
                                                 >
                                                     <img
                                                         alt={language}

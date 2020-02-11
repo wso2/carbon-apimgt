@@ -118,6 +118,11 @@
               onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
               <i class="fw fw-user"></i><%= i18n.localize("Applications") %></a>
             </li>
+            <li <%if (reqUrl.match("scopeMapping")){%> class="active" <% } %>><a
+              href="<%= jagg.url("/scopeMapping") %>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-user"></i><%= i18n.localize("Scope Mapping") %></a>
+            </li>
           </ul>
         </li>
         <li class="nav-header">
@@ -141,6 +146,16 @@
               <%
               }
               %>
+            </ul>
+        </li>
+        <li class="nav-header">
+          <a href="#"><i class="fw fw-folder fw-2x" style="font-size:22px;"></i><%=i18n.localize("Categories")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
+            <ul class="nav nav-pills secondary-nav collapse">
+              <li <%if (reqUrl.match("api-category-list")){%> class="active" <% } %>><a
+                href="<%= jagg.url("/api-category-list") %>"
+                onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                <i class="fw fw-file-browse"></i><%= i18n.localize("API Categories")%></a>
+              </li>
             </ul>
         </li>
         <li class="nav-header">

@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -3172,6 +3173,53 @@ public class ApiMgtDAO {
     }
 
     /**
+     *
+     * @param apiIdentifier
+     * @param userId
+     * @param applicationId
+     * @return true if user app subscribed for given APIIdentifier
+     * @throws APIManagementException if failed to check subscribed or not
+     */
+    public boolean isSubscribedToApp(APIIdentifier apiIdentifier, String userId, int applicationId)
+            throws APIManagementException {
+        boolean isSubscribed = false;
+        String loginUserName = getLoginUserName(userId);
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = SQLConstants.GET_APP_SUBSCRIPTION_TO_API_SQL;
+
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_APP_SUBSCRIPTION_TO_API_CASE_INSENSITIVE_SQL;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+            ps.setString(2, apiIdentifier.getApiName());
+            ps.setString(3, apiIdentifier.getVersion());
+            ps.setString(4, loginUserName);
+            int tenantId;
+            tenantId = APIUtil.getTenantId(loginUserName);
+            ps.setInt(5, tenantId);
+            ps.setInt(6, applicationId);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                isSubscribed = true;
+            }
+        } catch (SQLException e) {
+            handleException("Error while checking if user has subscribed to the API ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return isSubscribed;
+    }
+
+    /**
      * @param providerName Name of the provider
      * @return UserApplicationAPIUsage of given provider
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get
@@ -4511,7 +4559,6 @@ public class ApiMgtDAO {
         boolean isAppUpdated = false;
         Connection connection = null;
         PreparedStatement prepStmt = null;
-        String appName = null;
 
         String sqlQuery = SQLConstants.UPDATE_APPLICATION_OWNER;
 
@@ -4520,11 +4567,13 @@ public class ApiMgtDAO {
             if (subscriber != null) {
                 int subscriberId = getSubscriber(userName).getId();
                 connection = APIMgtDBUtil.getConnection();
+                connection.setAutoCommit(false);
                 prepStmt = connection.prepareStatement(sqlQuery);
                 prepStmt.setString(1, userName);
                 prepStmt.setInt(2, subscriberId);
                 prepStmt.setString(3, application.getUUID());
                 prepStmt.executeUpdate();
+                connection.commit();
                 isAppUpdated = true;
             } else {
                 String errorMessage = "Error when retrieving subscriber details for user " + userName;
@@ -14321,4 +14370,166 @@ public class ApiMgtDAO {
             handleException("Error while deleting expired JWTs from revoke table.", e);
         }
     }
+
+    /**
+     * Adds an API category
+     *
+     * @param tenantID     Logged in user's tenant ID
+     * @param category     Category
+     * @return Category
+     */
+    public APICategory addCategory(int tenantID, APICategory category) throws APIManagementException {
+        String uuid = UUID.randomUUID().toString();
+        category.setId(uuid);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_CATEGORY_SQL)) {
+            statement.setString(1, uuid);
+            statement.setString(2, category.getName());
+            statement.setString(3, category.getDescription());
+            statement.setInt(4, tenantID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to add Category: " + uuid, e);
+        }
+        return category;
+    }
+
+    /**
+     * Update API Category
+     *
+     * @param apiCategory API category object with updated details
+     * @throws APIManagementException
+     */
+    public void updateCategory(APICategory apiCategory) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_CATEGORY)) {
+            statement.setString(1, apiCategory.getDescription());
+            statement.setString(2, apiCategory.getName());
+            statement.setString(3, apiCategory.getId());
+            statement.execute();
+        } catch (SQLException e) {
+            handleException("Failed to update API Category : " + apiCategory.getName() + " of tenant " +
+                    APIUtil.getTenantDomainFromTenantId(apiCategory.getTenantID()), e);
+        }
+    }
+
+    /**
+     * Get all available API categories of the tenant
+     *
+     * @param tenantID
+     * @return API Categories List
+     */
+    public List<APICategory> getAllCategories(int tenantID) throws APIManagementException {
+        List<APICategory> categoriesList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_CATEGORIES_BY_TENANT_ID_SQL)) {
+            statement.setInt(1, tenantID);
+
+            ResultSet rs = statement.executeQuery();
+            while(rs.next()) {
+                String id = rs.getString("UUID");
+                String name = rs.getString("NAME");
+                String description = rs.getString("DESCRIPTION");
+
+                APICategory category = new APICategory();
+                category.setId(id);
+                category.setName(name);
+                category.setDescription(description);
+                category.setTenantID(tenantID);
+
+                categoriesList.add(category);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve API categories for tenant " + tenantID, e);
+        }
+        return categoriesList;
+    }
+
+    /**
+     * Checks whether the given category name is already available under given tenant domain with any UUID other than the given UUID
+     *
+     * @param categoryName
+     * @param uuid
+     * @param tenantID
+     * @return
+     */
+    public boolean isAPICategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException {
+        String sql = SQLConstants.IS_API_CATEGORY_NAME_EXISTS;
+        if (uuid != null) {
+            sql = SQLConstants.IS_API_CATEGORY_NAME_EXISTS_FOR_ANOTHER_UUID;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, categoryName);
+            statement.setInt(2, tenantID);
+            if (uuid != null) {
+                statement.setString(3, uuid);
+            }
+
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt("API_CATEGORY_COUNT");
+                if (count > 0) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check whether API category name : " + categoryName + " exists", e);
+        }
+        return false;
+    }
+
+
+    public APICategory getAPICategoryByID(String apiCategoryID) throws APIManagementException {
+        APICategory apiCategory = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_CATEGORY_BY_ID)) {
+            statement.setString(1, apiCategoryID);
+
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                apiCategory = new APICategory();
+                apiCategory.setName(rs.getString("NAME"));
+                apiCategory.setDescription(rs.getString("DESCRIPTION"));
+                apiCategory.setTenantID(rs.getInt("TENANT_ID"));
+                apiCategory.setId(apiCategoryID);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to fetch API category : " + apiCategoryID, e);
+        }
+        return apiCategory;
+    }
+
+    public APICategory getAPICategoryByName(String apiCategoryName, String tenantDomain) throws APIManagementException {
+        APICategory apiCategory = null;
+        int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_CATEGORY_BY_NAME)) {
+            statement.setString(1, apiCategoryName);
+            statement.setInt(2, tenantID);
+
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                apiCategory = new APICategory();
+                apiCategory.setName(rs.getString("NAME"));
+                apiCategory.setDescription(rs.getString("DESCRIPTION"));
+                apiCategory.setTenantID(rs.getInt("TENANT_ID"));
+                apiCategory.setId(rs.getString("UUID"));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to fetch API category : " + apiCategoryName + " of tenant " + tenantDomain, e);
+        }
+        return apiCategory;
+    }
+
+    public void deleteCategory(String categoryID) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_API_CATEGORY)) {
+            statement.setString(1, categoryID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to delete API category : " + categoryID, e);
+        }
+    }
+
 }

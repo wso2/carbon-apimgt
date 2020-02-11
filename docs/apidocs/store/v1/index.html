@@ -75,6 +75,13 @@
             <h3>Resources</h3>
             <ul class="nav nav-stacked fixed">
                         <hr/>
+                        <span class="class-name">API Category (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apiCategoriesGet"><a href="#!/operations#APICategoryCollection#apiCategoriesGet">Get all API categories</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
                         <span class="class-name">API Documents</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
@@ -166,14 +173,6 @@
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">Application Scopes</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-applicationsApplicationIdScopesGet"><a href="#!/operations#ApplicationScopes#applicationsApplicationIdScopesGet">Get scopes of application
-</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
                         <span class="class-name">Application Tokens</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
@@ -215,15 +214,6 @@
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">Import and Export Applications</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-exportApplicationsGet"><a href="#!/operations#ImportAndExportApplications#exportApplicationsGet">Export details related to an Application.</a></li>
-                                        <li id="op-importApplicationsPost"><a href="#!/operations#ImportAndExportApplications#importApplicationsPost">Imports an Application.</a></li>
-                                        <li id="op-importApplicationsPut"><a href="#!/operations#ImportAndExportApplications#importApplicationsPut">Imports an Updates an Application.</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
                         <span class="class-name">Ratings</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
@@ -231,6 +221,13 @@
                                         <li id="op-apisApiIdUserRatingDelete"><a href="#!/operations#Ratings#apisApiIdUserRatingDelete">Delete user API rating</a></li>
                                         <li id="op-apisApiIdUserRatingGet"><a href="#!/operations#Ratings#apisApiIdUserRatingGet">Retrieve API rating of user</a></li>
                                         <li id="op-apisApiIdUserRatingPut"><a href="#!/operations#Ratings#apisApiIdUserRatingPut">Add or update logged in user's rating for an API</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Recommendations</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-recommendationsGet"><a href="#!/operations#Recommendations#recommendationsGet">Give API recommendations for a user</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -250,13 +247,6 @@
                                         <li id="op-settingsApplicationAttributesGet"><a href="#!/operations#Settings#settingsApplicationAttributesGet">Get all application attributes from configuration
 </a></li>
                                         <li id="op-settingsGet"><a href="#!/operations#Settings#settingsGet">Retreive store settings</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">Sign Up</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-selfSignupPost"><a href="#!/operations#SignUp#selfSignupPost">Register a new user</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -319,6 +309,16 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-APIBusinessInformation"><a href="#!/models#APIBusinessInformation">APIBusinessInformation</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APICategory"><a href="#!/models#APICategory">APICategory</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APICategoryList"><a href="#!/models#APICategoryList">APICategoryList</a></li>
                             </ul>
                         </li>
                         <li class="section-box">
@@ -544,6 +544,16 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-RatingList"><a href="#!/models#RatingList">RatingList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Recommendations"><a href="#!/models#Recommendations">Recommendations</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-RecommendedAPI"><a href="#!/models#RecommendedAPI">RecommendedAPI</a></li>
                             </ul>
                         </li>
                         <li class="section-box">
