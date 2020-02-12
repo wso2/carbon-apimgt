@@ -88,7 +88,6 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
-import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGeneratorImpl;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
@@ -5781,11 +5780,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
                     if (content != null) {
                         org.json.JSONObject apiTenantConfig = new org.json.JSONObject(content);
-                        if (apiTenantConfig != null) {
-                            if (apiTenantConfig.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
-                                Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
-                                return Boolean.parseBoolean(value.toString());
-                            }
+                        if (apiTenantConfig.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
+                            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
+                            return Boolean.parseBoolean(value.toString());
                         }
                     }
                 } catch (UserStoreException | RegistryException e) {
@@ -5817,16 +5814,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 HttpGet method = new HttpGet(recommendationEndpointURL);
                 HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
                 if (recommendationEnvironment.getOauthURL() != null) {
-                    String accessToken = AccessTokenGeneratorImpl.getInstance().getAccessToken(
-                                    recommendationEnvironment.getOauthURL(),
-                                    recommendationEnvironment.getConsumerKey(),
-                                    recommendationEnvironment.getConsumerSecret());
-                    method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, "Bearer " + accessToken);
+                    String accessToken = ServiceReferenceHolder.getInstance().getAccessTokenGenerator()
+                            .getAccessToken();
+                    method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                            APIConstants.AUTHORIZATION_BEARER + accessToken);
                 } else {
                     byte[] credentials = org.apache.commons.codec.binary.Base64.encodeBase64(
                             (recommendationEnvironment.getUserName() + ":" + recommendationEnvironment.getPassword())
                                     .getBytes(StandardCharsets.UTF_8));
-                    method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
+                    method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                            APIConstants.AUTHORIZATION_BASIC + new String(credentials, StandardCharsets.UTF_8));
                 }
                 method.setHeader(APIConstants.RECOMMENDATIONS_USER_HEADER, userID);
                 method.setHeader(APIConstants.RECOMMENDATIONS_ACCOUNT_HEADER, tenantDomain);
@@ -5839,7 +5836,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                     return contentString;
                 } else {
-                    //TODO:handle if the response code is 401
                     log.warn("Error getting recommendations from server. Server responded with "
                             + httpResponse.getStatusLine().getStatusCode());
                 }

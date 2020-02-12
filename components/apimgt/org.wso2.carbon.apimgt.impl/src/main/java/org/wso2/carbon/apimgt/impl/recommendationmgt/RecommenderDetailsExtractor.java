@@ -41,6 +41,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
@@ -146,7 +147,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             String apiContext = api.getContext();
             String apiTags = api.getTags().toString();
             Set<URITemplate> uriTemplates = api.getUriTemplates();
-            ArrayList<String> resources = new ArrayList<String>();
+            List<String> resources = new ArrayList<String>();
 
             for (URITemplate uriTemplate : uriTemplates) {
                 String resource = uriTemplate.getUriTemplate();
@@ -327,11 +328,9 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                         Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
                         String content = new String((byte[]) resource.getContent());
                         JSONObject jsonObject = new JSONObject(content);
-                        if (jsonObject != null) {
-                            if (jsonObject.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
-                                Object value = jsonObject.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
-                                return Boolean.parseBoolean(value.toString());
-                            }
+                        if (jsonObject.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
+                            Object value = jsonObject.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
+                            return Boolean.parseBoolean(value.toString());
                         }
                     }
                 } catch (RegistryException | APIManagementException | UserStoreException e) {

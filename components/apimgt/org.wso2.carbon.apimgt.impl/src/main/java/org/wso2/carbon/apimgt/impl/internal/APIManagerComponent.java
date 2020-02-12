@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoader;
 import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -55,7 +54,7 @@ import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
-import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGeneratorImpl;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
@@ -164,7 +163,6 @@ public class APIManagerComponent {
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver, null);
             TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), tenantLoadMessageSender, null);
-            bundleContext.registerService(AccessTokenGenerator.class, AccessTokenGeneratorImpl.getInstance(), null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
@@ -263,6 +261,7 @@ public class APIManagerComponent {
             CacheProvider.createGatewayJWTTokenCache();
             //Initialize Recommendation wso2event output publisher
             configureRecommendationEventPublisherProperties();
+            setupAccessTokenGenerator();
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
@@ -705,6 +704,19 @@ public class APIManagerComponent {
                     log.error("Exception occurred while reading the admin username and password", e);
                 }
             }
+        }
+    }
+
+    private void setupAccessTokenGenerator(){
+
+        RecommendationEnvironment recommendationEnvironment =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
+        if (recommendationEnvironment != null && recommendationEnvironment.getOauthURL()!= null){
+            AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(
+                    recommendationEnvironment.getOauthURL(),
+                    recommendationEnvironment.getConsumerKey(),
+                    recommendationEnvironment.getConsumerSecret());
+            ServiceReferenceHolder.getInstance().setAccessTokenGenerator(accessTokenGenerator);
         }
     }
 }

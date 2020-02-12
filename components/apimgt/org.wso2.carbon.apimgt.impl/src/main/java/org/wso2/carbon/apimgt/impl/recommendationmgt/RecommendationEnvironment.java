@@ -29,10 +29,12 @@ public class RecommendationEnvironment {
     private boolean applyForAllTenants = true;
 
     public String getRecommendationServerURL() {
+
         return recommendationServerURL;
     }
 
     public void setRecommendationServerURL(String recommendationServerURL) {
+
         this.recommendationServerURL = recommendationServerURL;
     }
 
@@ -47,50 +49,62 @@ public class RecommendationEnvironment {
     }
 
     public String getConsumerKey() {
+
         return consumerKey;
     }
 
     public void setConsumerKey(String consumerKey) {
+
         this.consumerKey = consumerKey;
     }
 
     public String getConsumerSecret() {
+
         return consumerSecret;
     }
 
     public void setConsumerSecret(String consumerSecret) {
+
         this.consumerSecret = consumerSecret;
     }
 
     public int getMaxRecommendations() {
+
         return maxRecommendations;
     }
 
     public void setMaxRecommendations(int maxRecommendations) {
+
         this.maxRecommendations = maxRecommendations;
     }
 
     public boolean isApplyForAllTenants() {
+
         return applyForAllTenants;
     }
 
     public void setApplyForAllTenants(boolean applyForAllTenants) {
+
         this.applyForAllTenants = applyForAllTenants;
     }
 
     public String getUserName() {
+
         return userName;
     }
 
     public void setUserName(String userName) {
+
         this.userName = userName;
     }
 
     public String getPassword() {
+
         return password;
     }
 
     public void setPassword(String password) {
+
         this.password = password;
     }
 }

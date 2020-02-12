@@ -1921,6 +1921,15 @@ public final class APIConstants {
     public static final String RECOMMENDATIONS_PUBLISH_RESOURCE = "/publishEvents";
     public static final String RECOMMENDATIONS_USER_HEADER = "User";
     public static final String RECOMMENDATIONS_ACCOUNT_HEADER = "Account";
+    public static final String ACCESS_TOKEN = "access_token";
+    public static final String CONTENT_TYPE_HEADER = "Content-Type";
+    public static final String CONTENT_TYPE_APPLICATION_FORM = "application/x-www-form-urlencoded";
+    public static final String AUTHORIZATION_BASIC = "Basic ";
+    public static final String AUTHORIZATION_BEARER = "Bearer ";
+    public static final String TOKEN_GRANT_TYPE_KEY = "grant_type";
+    public static final String TOKEN_KEY = "token";
+    public static final String GRANT_TYPE_VALUE = "client_credentials";
+
 
     public static class CertificateReLoaderConfiguration {
 
