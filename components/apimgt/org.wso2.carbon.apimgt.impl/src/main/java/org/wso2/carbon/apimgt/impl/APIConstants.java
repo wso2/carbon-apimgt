@@ -483,6 +483,9 @@ public final class APIConstants {
     public static final String APP_SKIP_CONSENT_DISPLAY = "Skip Consent";
     public static final String APP_SKIP_CONSENT_NAME = "skipConsent";
     public static final String APP_SKIP_CONSENT_VALUE = "true";
+    public static final String APP_SKIP_LOGOUT_CONSENT_DISPLAY = "Skip Logout Consent";
+    public static final String APP_SKIP_LOGOUT_CONSENT_NAME = "skipLogoutConsent";
+    public static final String APP_SKIP_LOGOUT_CONSENT_VALUE = "true";
     public static final String RECEIVER_URL = "receiverURL";
     public static final String AUTHENTICATOR_URL = "authenticatorURL";
     public static final String USERNAME = "username";
