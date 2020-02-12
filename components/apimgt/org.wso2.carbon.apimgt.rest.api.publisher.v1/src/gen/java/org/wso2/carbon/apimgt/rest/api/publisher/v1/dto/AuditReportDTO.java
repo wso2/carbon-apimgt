@@ -18,6 +18,7 @@ public class AuditReportDTO   {
     private String report = null;
     private String grade = null;
     private Integer numErrors = null;
+    private String externalApiId = null;
 
   /**
    * The API Security Audit Report 
@@ -73,6 +74,24 @@ public class AuditReportDTO   {
     this.numErrors = numErrors;
   }
 
+  /**
+   * The External API ID 
+   **/
+  public AuditReportDTO externalApiId(String externalApiId) {
+    this.externalApiId = externalApiId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "fd21f9f7-3674-49cf-8a83-dca401f635de", value = "The External API ID ")
+  @JsonProperty("externalApiId")
+  public String getExternalApiId() {
+    return externalApiId;
+  }
+  public void setExternalApiId(String externalApiId) {
+    this.externalApiId = externalApiId;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -85,12 +104,13 @@ public class AuditReportDTO   {
     AuditReportDTO auditReport = (AuditReportDTO) o;
     return Objects.equals(report, auditReport.report) &&
         Objects.equals(grade, auditReport.grade) &&
-        Objects.equals(numErrors, auditReport.numErrors);
+        Objects.equals(numErrors, auditReport.numErrors) &&
+        Objects.equals(externalApiId, auditReport.externalApiId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(report, grade, numErrors);
+    return Objects.hash(report, grade, numErrors, externalApiId);
   }
 
   @Override
@@ -101,6 +121,7 @@ public class AuditReportDTO   {
     sb.append("    report: ").append(toIndentedString(report)).append("\n");
     sb.append("    grade: ").append(toIndentedString(grade)).append("\n");
     sb.append("    numErrors: ").append(toIndentedString(numErrors)).append("\n");
+    sb.append("    externalApiId: ").append(toIndentedString(externalApiId)).append("\n");
     sb.append("}");
     return sb.toString();
   }
