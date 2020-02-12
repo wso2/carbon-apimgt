@@ -154,6 +154,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
 
 
         String remoteIP = GatewayUtils.getIp(axis2MessageContext);
+        if (log.isDebugEnabled()) {
+            log.debug("Remote IP address : " + remoteIP);
+        }
 
         if (remoteIP != null && remoteIP.length() > 0) {
             try {
