@@ -36,34 +36,37 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccessTokenGeneratorImpl  {
+public class AccessTokenGenerator {
 
-    private static final Log log = LogFactory.getLog(AccessTokenGeneratorImpl.class);
+    private static final Log log = LogFactory.getLog(AccessTokenGenerator.class);
 
-    private static volatile AccessTokenGeneratorImpl accessTokenGenerator = null;
-    long generatedTime = 0;
-    long validityPeriod = 3600000;
+    private static volatile AccessTokenGenerator accessTokenGenerator = null;
+    long expiryTime = 0;
+    long buffer = 20000; // buffer time is set to 20 seconds
     String accessToken = null;
     String oauthUrl;
     String consumerKey;
     String consumerSecret;
 
-    public AccessTokenGeneratorImpl(String oauthUrl, String consumerKey, String consumerSecret) {
+    public AccessTokenGenerator(String oauthUrl, String consumerKey, String consumerSecret) {
         this.oauthUrl = oauthUrl;
         this.consumerKey = consumerKey;
         this.consumerSecret = consumerSecret;
     }
 
     public String getAccessToken() {
-        if (System.currentTimeMillis() > (this.generatedTime + this.validityPeriod)) {
+        if (System.currentTimeMillis() > expiryTime) {
             if (log.isDebugEnabled()) {
                 log.debug("Access token expired. New token requested");
             }
             return generateNewAccessToken();
-        } else {
+        } else if (buffer > (expiryTime - System.currentTimeMillis())) {
             if (log.isDebugEnabled()) {
                 log.debug("Valid Access Token already available for the provided application");
             }
+            revokeAccessToken();
+            return generateNewAccessToken();
+        } else {
             return this.accessToken;
         }
     }
@@ -74,7 +77,7 @@ public class AccessTokenGeneratorImpl  {
             int serverPort = oauthURL.getPort();
             String serverProtocol = oauthURL.getProtocol();
 
-            HttpPost request = new HttpPost(oauthUrl);
+            HttpPost request = new HttpPost(oauthUrl + "/token");
             HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
 
             byte[] credentials = org.apache.commons.codec.binary.Base64
@@ -94,10 +97,10 @@ public class AccessTokenGeneratorImpl  {
                 String payload = EntityUtils.toString(httpResponse.getEntity());
                 JSONObject response = new JSONObject(payload);
                 this.accessToken = (String) response.get(APIConstants.OAUTH_RESPONSE_ACCESSTOKEN);
-                this.validityPeriod = (Integer) response.get(APIConstants.OAUTH_RESPONSE_EXPIRY_TIME) * 1000;
-                this.generatedTime = System.currentTimeMillis();
+                int validityPeriod = (Integer) response.get(APIConstants.OAUTH_RESPONSE_EXPIRY_TIME) * 1000;
+                this.expiryTime = System.currentTimeMillis() + validityPeriod;
                 if (log.isDebugEnabled()) {
-                    log.debug("Successfully received an access token which expires in " + validityPeriod);
+                    log.debug("Successfully received an access token which expires in " + expiryTime);
                 }
                 return (String) response.get(APIConstants.OAUTH_RESPONSE_ACCESSTOKEN);
             } else {
@@ -110,5 +113,39 @@ public class AccessTokenGeneratorImpl  {
             log.error("Error occurred when generating a new Access token", e);
         }
         return null;
+    }
+
+    public void revokeAccessToken(){
+        try {
+            URL oauthURL = new URL(oauthUrl);
+            int serverPort = oauthURL.getPort();
+            String serverProtocol = oauthURL.getProtocol();
+
+            HttpPost request = new HttpPost(oauthUrl + "/revoke");
+            HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
+
+            byte[] credentials = org.apache.commons.codec.binary.Base64
+                    .encodeBase64((consumerKey + ":" + consumerSecret).getBytes(StandardCharsets.UTF_8));
+
+            request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BASIC
+                    + new String(credentials, StandardCharsets.UTF_8));
+            request.setHeader(APIConstants.CONTENT_TYPE_HEADER, APIConstants.CONTENT_TYPE_APPLICATION_FORM);
+
+            List<BasicNameValuePair> urlParameters = new ArrayList<>();
+            urlParameters.add(new BasicNameValuePair(APIConstants.TOKEN_KEY, accessToken));
+            request.setEntity(new UrlEncodedFormEntity(urlParameters));
+            HttpResponse httpResponse = httpClient.execute(request);
+            if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully revoked the token");
+                }
+            } else {
+                log.error("Error occurred when revoking the Access token. Server responded with "
+                        + httpResponse.getStatusLine().getStatusCode());
+            }
+        } catch (IOException e) {
+            log.error("Error occurred when revoking the Access token", e);
+        }
+        this.accessToken = null;
     }
 }
