@@ -453,17 +453,17 @@ class API extends Resource {
      * 
      * @param id {String} The api id.
      */
-     generateMockResponses(id=this.id){
-
-        const promise_get = this.client.then(client => {
+    generateMockResponses(id=this.id) {
+        const promise_get = this.client.then(client => { 
             return client.apis['APIs'].generateMockResponses(
-                {
+                { 
                     apiId: id,
                 },
                 this._requestMetaData(),
             );
         });
-     }
+        return promise_get;
+    }
 
 
     /**

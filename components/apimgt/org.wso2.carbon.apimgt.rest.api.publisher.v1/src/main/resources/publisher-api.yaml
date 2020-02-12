@@ -619,12 +619,12 @@ paths:
     #-----------------------------------------------------
     post:
       operationId: generateMockResponses
-      summary: Get swagger definition
+      summary: Generate mock response payloads
       description: |
-        This operation can be used to retrieve the swagger definition of an API.
+        This operation can be used to generate mock responses from examples of swagger definition of an API.
       security:
         - OAuth2Security:
-            - apim:api_view
+            - apim:api_create
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'

@@ -3916,10 +3916,10 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Generates Mock response examples for Inline prototyping
      * of a swagger
      *
-     * @param apiId
-     * @param ifNoneMatch
-     * @param messageContext
-     * @return
+     * @param apiId API Id
+     * @param ifNoneMatch If-None-Match header value
+     * @param messageContext message context
+     * @return apiDefinition
      * @throws APIManagementException
      */
     @Override
