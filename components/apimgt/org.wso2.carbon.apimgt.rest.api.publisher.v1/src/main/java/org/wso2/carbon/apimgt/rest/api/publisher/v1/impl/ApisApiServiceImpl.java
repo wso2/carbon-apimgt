@@ -27,7 +27,6 @@ import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.gson.Gson;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
@@ -39,21 +38,8 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
-
-import io.swagger.oas.inflector.examples.ExampleBuilder;
-import io.swagger.oas.inflector.examples.models.Example;
-import io.swagger.oas.inflector.processors.JsonNodeExampleSerializer;
-import io.swagger.util.Json;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
-
 import org.apache.axiom.util.base64.Base64Utils;
-
 import org.apache.axiom.om.OMElement;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;

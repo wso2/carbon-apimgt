@@ -19,7 +19,6 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -167,14 +166,12 @@ public class OAS2Parser extends APIDefinition {
      * @param definitions
      * @return
      */
-
     private String getSchemaExample(Model model, Map<String, Model> definitions, HashSet<String> strings){
         Example example = ExampleBuilder.fromModel("Model", model, definitions, new HashSet<String>());
         SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
         Json.mapper().registerModule(simpleModule);
         return Json.pretty(example);
     }
-
 
     /**
      *Sets default script
@@ -195,7 +192,6 @@ public class OAS2Parser extends APIDefinition {
      * @param type  mediaType (Json/Xml)
      * @return generatedString
      */
-
     private String getGeneratedResponseVar(String responseCode, String example, String type){
         return "\nvar response" + responseCode + type + " = "+ example+"\n\n";
     }
@@ -207,12 +203,10 @@ public class OAS2Parser extends APIDefinition {
      * @param type mediaType (Json/Xml)
      * @return manualCode
      */
-
     private String getGeneratedSetResponse(String responseCode, String type) {
         return "mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
                 "mc.setPayloadJSON(response" + responseCode + type + ");";
     }
-
 
     /**
      * This method returns URI templates according to the given swagger file

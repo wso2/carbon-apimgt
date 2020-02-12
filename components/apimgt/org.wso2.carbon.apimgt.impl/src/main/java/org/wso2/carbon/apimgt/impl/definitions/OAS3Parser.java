@@ -205,7 +205,6 @@ public class OAS3Parser extends APIDefinition {
      * @param type  mediaType (Json/Xml)
      * @return generatedString
      */
-
     private String getGeneratedResponseVar(String responseCode, String example, String type) {
         return "\nvar response" + responseCode + type + " = " + example + "\n\n";
     }
@@ -217,7 +216,6 @@ public class OAS3Parser extends APIDefinition {
      * @param type mediaType (Json/Xml)
      * @return manualCode
      */
-
     private String getGeneratedSetResponse(String responseCode, String type) {
         return "mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
                 "mc.setPayloadJSON(response" + responseCode + type + ");";

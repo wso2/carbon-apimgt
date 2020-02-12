@@ -48,7 +48,6 @@ public abstract class APIDefinition {
      * @param apiDefinition
      * @return
      */
-
     public abstract String generateExample(String apiDefinition);
 
     /**
