@@ -736,7 +736,7 @@ public class APIMWSDLReader {
      * @throws APIManagementException When error occurred while reading from URL
      */
     @Deprecated
-    private Document getSecuredParsedDocumentFromURL(String url) throws APIManagementException {
+    public Document getSecuredParsedDocumentFromURL(String url) throws APIManagementException {
         URL wsdl;
         String errorMsg = "Error while reading WSDL document";
         InputStream inputStream = null;
