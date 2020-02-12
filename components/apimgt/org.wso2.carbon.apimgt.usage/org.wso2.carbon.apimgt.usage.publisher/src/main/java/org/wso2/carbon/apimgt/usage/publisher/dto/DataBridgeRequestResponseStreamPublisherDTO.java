@@ -58,6 +58,7 @@ public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponse
         setGatewayType(requestResponseStreamDTO.getGatewayType());
         setLabel(requestResponseStreamDTO.getLabel());
         setResponseTime(requestResponseStreamDTO.getResponseTime());
+        setProperties(requestResponseStreamDTO.getProperties());
     }
 
     public Object createPayload() {
@@ -70,7 +71,8 @@ public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponse
                 getResponseCode(), getDestination(), getExecutionTime().getSecurityLatency(),
                 getExecutionTime().getThrottlingLatency(), getExecutionTime().getRequestMediationLatency(),
                 getExecutionTime().getResponseMediationLatency(), getExecutionTime().getBackEndLatency(),
-                getExecutionTime().getOtherLatency(), getGatewayType(), getLabel() };
+                getExecutionTime().getOtherLatency(), getGatewayType(), getLabel(),
+                DataPublisherUtil.toJsonString(getProperties()) };
 
     }
 

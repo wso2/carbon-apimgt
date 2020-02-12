@@ -143,6 +143,9 @@ public class APIMgtGatewayConstants {
     public static final String CORS_REQUEST_HANDLER_ERROR = "Error in CORS_Request Handler";
     public static final String API_KEY_VALIDATOR_ERROR = "Error while accessing backend services for API key validation";
     public static final String GOOGLE_ANALYTICS_ERROR = "Error in Google Analytics Handler";
+    public static final String CUSTOM_ANALYTICS_REQUEST_PROPERTIES = "apim.analytics.request.properties";
+    public static final String CUSTOM_ANALYTICS_RESPONSE_PROPERTIES = "apim.analytics.response.properties";
+    public static final String CUSTOM_ANALYTICS_PROPERTY_SEPARATOR = ",";
 
     /**
      * Constants for swagger schema validator
