@@ -376,7 +376,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         String subscriptionLevelThrottleKey = appId + ":" + apiContext + ":" + apiVersion;
         String messageId = UIDGenerator.generateURNString();
         String remoteIP = getRemoteIP(ctx);
-
+        if (log.isDebugEnabled()) {
+            log.debug("Remote IP address : " + remoteIP);
+        }
         if (remoteIP.indexOf(":") > 0) {
             remoteIP = remoteIP.substring(1, remoteIP.indexOf(":"));
         }
