@@ -445,7 +445,7 @@
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.event.output.adapter.http.extended.oauth</artifactId>
+                <artifactId>org.wso2.carbon.apimgt.output.adapter.http</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 

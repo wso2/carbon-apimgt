@@ -47,6 +47,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
         List<JSONObject> recommendedApis = new ArrayList<>();
         JSONObject responseObj = new JSONObject();
+        String apiId = null;
         try {
             String userName = RestApiUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(userName);
@@ -58,13 +59,12 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
                 if (recommendations != null) {
                     JSONObject jsonResponse = new JSONObject(recommendations);
                     JSONArray apiList = jsonResponse.getJSONArray("userRecommendations");
-                    String requestedTenant = jsonResponse.getString("requestedTenantDomain");
 
                     for (int i = 0; i < apiList.length(); i++) {
                         try {
                             JSONObject apiObj = apiList.getJSONObject(i);
-                            String apiId = apiObj.getString("id");
-                            ApiTypeWrapper apiWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenant);
+                            apiId = apiObj.getString("id");
+                            ApiTypeWrapper apiWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, tenantDomain);
                             API api = apiWrapper.getApi();
                             APIIdentifier apiIdentifier = api.getId();
                             boolean isApiSubscribed = apiConsumer.isSubscribed(apiIdentifier, userName);
@@ -76,7 +76,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
                                 recommendedApis.add(apiDetails);
                             }
                         } catch (APIManagementException e) {
-                            log.error("Error occurred when retrieving api details for the recommended API", e);
+                            log.debug("Requested API "+ apiId +" is not accessible by the consumer");
                         }
                     }
                 }
