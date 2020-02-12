@@ -476,8 +476,8 @@ class InfoBar extends React.Component {
                                                             <Icon className={classes.iconEven}>desktop_windows</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
-                                                                    id='Apis.Details.InfoBar.available.environments'
-                                                                    defaultMessage='Available Environments'
+                                                                    id='Apis.Details.InfoBar.gateway.environments'
+                                                                    defaultMessage='Gateway Environments'
                                                                 />
                                                             </span>
                                                         </div>
