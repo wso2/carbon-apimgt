@@ -169,8 +169,10 @@ public class DataProcessAndPublishingAgent implements Runnable {
                     jsonObMap.put(APIThrottleConstants.IP, 0);
                 }
             } catch (UnknownHostException e) {
-                //ignore the error and log it
+                //send empty value as ip
                 log.error("Error while parsing host IP " + remoteIP, e);
+                jsonObMap.put(APIThrottleConstants.IPv6, 0);
+                jsonObMap.put(APIThrottleConstants.IP, 0);
             }
         }
 
