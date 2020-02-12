@@ -46,13 +46,15 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         setMetaClientType(faultPublisherDTO.getMetaClientType());
         setGatewaType(faultPublisherDTO.getGatewaType());
         setUserTenantDomain(faultPublisherDTO.getUserTenantDomain());
+        setProperties(faultPublisherDTO.getProperties());
     }
 
     public Object createPayload() {
         return new Object[] { getApplicationConsumerKey(), getApiName(), getApiVersion(),
                 getApiContext(), getApiResourcePath(), getApiMethod(), getApiCreator(), 
                 getUsername(), getApiCreatorTenantDomain(), getUserTenantDomain(), getHostname(), getApplicationId(), getApplicationName(),
-                getProtocol(), getErrorCode(), getErrorMessage(), getRequestTimestamp()};
+                getProtocol(), getErrorCode(), getErrorMessage(), getRequestTimestamp(),
+                DataPublisherUtil.toJsonString(getProperties()) };
     }
 
     public Object createMetaData() {
