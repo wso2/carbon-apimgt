@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.impl.wsdl;
 
 import io.swagger.models.ModelImpl;
+import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import org.junit.Assert;
@@ -132,16 +133,16 @@ public class WSDLSOAPOperationExtractorImplTestCase {
         Map<String, ModelImpl> parameterModelMap = processor.getWsdlInfo().getParameterModelMap();
         Assert.assertNotNull(parameterModelMap);
         Assert.assertTrue("wsdl complex types has not been properly parsed",
-                parameterModelMap.size() == 11);
+                parameterModelMap.size() == 12);
         //composite complex type
         Assert.assertNotNull(parameterModelMap.get("ItemSearchRequest"));
-        Assert.assertEquals(5, parameterModelMap.get("ItemSearchRequest").getProperties().size());
+        Assert.assertEquals(7, parameterModelMap.get("ItemSearchRequest").getProperties().size());
         Assert.assertNotNull(parameterModelMap.get("ItemSearchRequest").getProperties().get("Tracks"));
         Assert.assertNotNull(parameterModelMap.get("ItemSearchRequest").getProperties().get("Tracks"));
-        Assert.assertEquals(ObjectProperty.TYPE,
+        Assert.assertEquals(ArrayProperty.TYPE,
                 parameterModelMap.get("ItemSearchRequest").getProperties().get("Tracks").getType());
-        Assert.assertNotNull(((ObjectProperty) parameterModelMap.get("ItemSearchRequest").getProperties().get("Tracks"))
-                .getProperties());
+        Assert.assertNotNull(((ArrayProperty) parameterModelMap.get("ItemSearchRequest").getProperties().get("Tracks"))
+                .getItems());
     }
 
     @Test

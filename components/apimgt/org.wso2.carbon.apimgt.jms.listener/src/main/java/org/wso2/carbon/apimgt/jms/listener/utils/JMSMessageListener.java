@@ -26,7 +26,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
@@ -38,10 +37,12 @@ import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import javax.jms.JMSException;
+import javax.jms.MapMessage;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.Topic;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -49,12 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.Topic;
 
 public class JMSMessageListener implements MessageListener {
 
@@ -337,7 +332,7 @@ public class JMSMessageListener implements MessageListener {
     }
 
     private void handleRevokedTokenMessage(String revokedToken, long expiryTime) {
-
+        boolean isJwtToken = false;
         if (StringUtils.isEmpty(revokedToken)) {
             return;
         }
@@ -347,6 +342,7 @@ public class JMSMessageListener implements MessageListener {
             revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
             RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedToken, expiryTime);  // Add revoked token to
             // revoked JWT map
+            isJwtToken = true;
         }
 
         //Find the actual tenant domain on which the access token was cached. It is stored as a reference in
@@ -362,6 +358,10 @@ public class JMSMessageListener implements MessageListener {
             }
             Utils.removeCacheEntryFromGatewayCache(revokedToken);
             Utils.putInvalidTokenEntryIntoInvalidTokenCache(revokedToken, cachedTenantDomain);
+            //Clear the API Key cache if revoked token is in the JWT format
+            if (isJwtToken) {
+                Utils.removeCacheEntryFromGatewayAPiKeyCache(revokedToken);
+            }
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

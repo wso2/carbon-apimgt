@@ -451,7 +451,7 @@ public class APIExportUtil {
                         //If sequence doesn't exist in 'apimgt/customsequences/{in/out/fault}' directory check in API
                         //specific registry path
                         sequenceDetails = getAPISpecificSequence(api.getId(), sequenceName, direction, registry);
-                        pathToExportedSequence += APIImportExportConstants.CUSTOM_TYPE;
+                        pathToExportedSequence += APIImportExportConstants.CUSTOM_TYPE + File.separator;
                     }
                     writeSequenceToFile(pathToExportedSequence, sequenceDetails, apiIdentifier);
                 }
@@ -531,8 +531,7 @@ public class APIExportUtil {
                     Resource sequence = registry.get(childPath);
                     OMElement seqElement = APIUtil.buildOMElement(sequence.getContentStream());
                     if (sequenceName.equals(seqElement.getAttributeValue(new QName("name")))) {
-                        String sequenceFileName = sequence.getPath().
-                                substring(sequence.getPath().lastIndexOf(RegistryConstants.PATH_SEPARATOR));
+                        String sequenceFileName = sequenceName + APIConstants.XML_EXTENSION;
                         sequenceDetails = new AbstractMap.SimpleEntry<>(sequenceFileName, seqElement);
                         break;
                     }

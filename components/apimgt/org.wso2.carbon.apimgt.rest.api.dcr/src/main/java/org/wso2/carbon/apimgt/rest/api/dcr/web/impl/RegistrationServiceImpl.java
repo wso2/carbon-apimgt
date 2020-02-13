@@ -334,7 +334,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             serviceProvider.setApplicationName(applicationName);
             serviceProvider.setDescription("Service Provider for application " + appName);
             serviceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
-            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[3];
+            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[4];
             ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
             serviceProviderProperty.setName(APP_DISPLAY_NAME);
             serviceProviderProperty.setValue(applicationName);
@@ -348,6 +348,11 @@ public class RegistrationServiceImpl implements RegistrationService {
             consentProperty.setName(APIConstants.APP_SKIP_CONSENT_NAME);
             consentProperty.setValue(APIConstants.APP_SKIP_CONSENT_VALUE);
             serviceProviderProperties[2] = consentProperty;
+            ServiceProviderProperty logoutConsentProperty = new ServiceProviderProperty();
+            logoutConsentProperty.setDisplayName(APIConstants.APP_SKIP_LOGOUT_CONSENT_DISPLAY);
+            logoutConsentProperty.setName(APIConstants.APP_SKIP_LOGOUT_CONSENT_NAME);
+            logoutConsentProperty.setValue(APIConstants.APP_SKIP_LOGOUT_CONSENT_VALUE);
+            serviceProviderProperties[3] = logoutConsentProperty;
             serviceProvider.setSpProperties(serviceProviderProperties);
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);

@@ -2663,6 +2663,55 @@
         }
       }
     },
+    "/custom-urls/{tenantDomain}": {
+      "get": {
+        "x-scope": "apim:tenantInfo",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X GET \"https://localhost:9443/api/am/admin/v0.16/custom-url/foo.com\"",
+        "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.16/custom-url/foo.com\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"tenantDomain\" : \"foo.com\",\n}",
+        "x-wso2-response": "HTTP/1.1 200 OK",
+        "summary": "Get custom-url info of a tenant domain\n",
+        "description": "This operation is to get custom-url information of the provided tenant-domain\n",
+        "operationId": "getCustomUrlInfoByTenantDomain",
+        "parameters": [
+          {
+            "name": "tenantDomain",
+            "description": "The tenant domain name.\n",
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "tags": [
+          "Tenants"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nCustom url info of the tenant is retrieved.\n",
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/CustomUrlInfo"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested user does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/api-categories": {
       "get": {
         "x-scope": "apim:admin_operations",
@@ -3831,6 +3880,34 @@
         "tenantId": {
           "type": "integer",
           "example": -1234
+        }
+      }
+    },
+    "CustomUrlInfo": {
+      "title": "Custom url information",
+      "type": "object",
+      "description": "The custom url information of the tenant domain",
+      "properties": {
+        "tenantDomain": {
+          "type": "string",
+          "example": "carbon.super"
+        },
+        "tenantAdminUsername": {
+          "type": "string",
+          "example": "john@foo.com"
+        },
+        "enabled": {
+          "type": "boolean",
+          "example": true
+        },
+        "devPortal": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "example": "http://example.com"
+            }
+          }
         }
       }
     },

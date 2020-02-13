@@ -31,9 +31,11 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
+import org.wso2.carbon.apimgt.impl.dto.ConditionDto.IPCondition;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -283,14 +285,14 @@ public class ThrottleConditionEvaluator {
 
     private boolean isWithinIP(MessageContext messageContext, ConditionDTO condition) {
         // For an IP Range Condition, starting IP is set as a the name, ending IP as the value.
-        long startIp = APIUtil.ipToLong(condition.getConditionName());
-        long endIp = APIUtil.ipToLong(condition.getConditionValue());
+        BigInteger startIp = APIUtil.ipToBigInteger(condition.getConditionName());
+        BigInteger endIp = APIUtil.ipToBigInteger(condition.getConditionValue());
 
         String currentIpString = GatewayUtils.getIp(messageContext);
         if (!currentIpString.isEmpty()) {
-            long currentIp = APIUtil.ipToLong(currentIpString);
+            BigInteger currentIp = APIUtil.ipToBigInteger(currentIpString);
 
-            return startIp <= currentIp && endIp >= currentIp;
+            return startIp.compareTo(currentIp) <= 0 && endIp.compareTo(currentIp) >= 0;
         }
         return false;
     }
@@ -300,8 +302,9 @@ public class ThrottleConditionEvaluator {
         String currentIpString = GatewayUtils.getIp(messageContext);
         boolean status;
         if (StringUtils.isNotEmpty(currentIpString)) {
-            long currentIp = APIUtil.ipToLong(currentIpString);
-            status = ipCondition.getStartingIp() <= currentIp && ipCondition.getEndingIp() >= currentIp;
+            BigInteger currentIp = APIUtil.ipToBigInteger(currentIpString);
+            status = ipCondition.getStartingIp().compareTo(currentIp) <= 0
+                    && ipCondition.getEndingIp().compareTo(currentIp) >= 0;
         } else {
             return false;
         }
@@ -315,12 +318,12 @@ public class ThrottleConditionEvaluator {
     private boolean isMatchingIP(MessageContext messageContext, ConditionDto.IPCondition ipCondition) {
 
         String currentIpString = GatewayUtils.getIp(messageContext);
-        long longValueOfIp = APIUtil.ipToLong(currentIpString);
+        BigInteger longValueOfIp = APIUtil.ipToBigInteger(currentIpString);
 
         if (ipCondition.isInvert()) {
-            return longValueOfIp != ipCondition.getSpecificIp();
+            return !longValueOfIp.equals(ipCondition.getSpecificIp());
         }
-        return longValueOfIp == ipCondition.getSpecificIp();
+        return longValueOfIp.equals(ipCondition.getSpecificIp());
     }
 
     public String getThrottledInCondition(org.apache.synapse.MessageContext synCtx, AuthenticationContext authContext,

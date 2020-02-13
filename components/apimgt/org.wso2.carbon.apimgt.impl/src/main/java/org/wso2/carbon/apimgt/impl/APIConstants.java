@@ -94,6 +94,8 @@ public final class APIConstants {
 
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
 
+    public static final String APPLICATION_XML_MEDIA_TYPE = "application/xml";
+
     public static final String APPLICATION_WSDL_MEDIA_TYPE = "application/wsdl";
 
     public static final String WSDL_NAMESPACE_URI = "http://www.w3.org/2005/08/addressing";
@@ -425,6 +427,7 @@ public final class APIConstants {
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT = "true";
     public static final String REMOVE_OAUTH_HEADERS_FROM_MESSAGE = OAUTH_CONFIGS + "RemoveOAuthHeadersFromOutMessage";
+    public static final String JWT_AS_OPAQUE_TOKEN = OAUTH_CONFIGS + "JWTAsOpaqueToken";
     public static final String APPLICATION_TOKEN_SCOPE = OAUTH_CONFIGS + "ApplicationTokenScope";
     public static final String WHITELISTED_SCOPES = OAUTH_CONFIGS + "ScopeWhitelist.Scope";
     public static final String TOKEN_ENDPOINT_NAME = OAUTH_CONFIGS + "TokenEndPointName";
@@ -489,6 +492,9 @@ public final class APIConstants {
     public static final String APP_SKIP_CONSENT_DISPLAY = "Skip Consent";
     public static final String APP_SKIP_CONSENT_NAME = "skipConsent";
     public static final String APP_SKIP_CONSENT_VALUE = "true";
+    public static final String APP_SKIP_LOGOUT_CONSENT_DISPLAY = "Skip Logout Consent";
+    public static final String APP_SKIP_LOGOUT_CONSENT_NAME = "skipLogoutConsent";
+    public static final String APP_SKIP_LOGOUT_CONSENT_VALUE = "true";
     public static final String RECEIVER_URL = "receiverURL";
     public static final String AUTHENTICATOR_URL = "authenticatorURL";
     public static final String USERNAME = "username";
@@ -915,7 +921,7 @@ public final class APIConstants {
     public static final String GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME = "gatewayBasicAuthResourceCache";
     public static final String GATEWAY_CERTIFICATE_CACHE_NAME = "gatewayCertificateCache";
     public static final String GATEWAY_API_KEY_CACHE_NAME = "gatewayApiKeyCache";
-    public static final String GATEWAY_API_KEY_KEY_CACHE_NAME = "gatewayApiKeyKeyCache";
+    public static final String GATEWAY_API_KEY_DATA_CACHE_NAME = "gatewayApiKeyKeyCache";
     public static final String GATEWAY_INVALID_API_KEY_CACHE_NAME = "gatewayInvalidApiKeyCache";
     public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
     public static final String GATEWAY_INVALID_TOKEN_CACHE_NAME = "GATEWAY_INVALID_TOKEN_CACHE";
@@ -1949,4 +1955,7 @@ public final class APIConstants {
         public static final String ENABLE_CLIENT_CERTIFICATE_VALIDATION = MUTUAL_SSL_CONFIG_ROOT +
                 ".EnableClientCertificateValidation";
     }
+
+    public static final String DEFAULT_SCOPE_TYPE = "OAUTH2";
+    public static final String DEFAULT_BINDING_TYPE = "DEFAULT";
 }

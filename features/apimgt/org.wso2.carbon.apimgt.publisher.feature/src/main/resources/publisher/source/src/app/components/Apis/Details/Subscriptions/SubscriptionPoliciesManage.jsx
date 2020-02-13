@@ -90,10 +90,6 @@ class SubscriptionPoliciesManage extends Component {
         const { classes, api, policies } = this.props;
         const { subscriptionPolicies } = this.state;
 
-        const subHeadingId = (api.apiType === API.CONSTS.APIProduct
-            ? 'Apis.Details.Subscriptions.SubscriptionPoliciesManage.APIProduct.sub.heading'
-            : 'Apis.Details.Subscriptions.SubscriptionPoliciesManage.sub.heading');
-
         return (
             <>
                 <Typography variant='h4'>
@@ -102,12 +98,23 @@ class SubscriptionPoliciesManage extends Component {
                         defaultMessage='Business Plans'
                     />
                 </Typography>
-                <Typography variant='caption' gutterBottom>
-                    <FormattedMessage
-                        id={subHeadingId}
-                        defaultMessage='Attach business plans to API'
-                    />
-                </Typography>
+                {api.apiType === API.CONSTS.APIProduct
+                    ? (
+                        <Typography variant='caption' gutterBottom>
+                            <FormattedMessage
+                                id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.APIProduct.sub.heading'
+                                defaultMessage='Attach business plans to API'
+                            />
+                        </Typography>
+                    )
+                    : (
+                        <Typography variant='caption' gutterBottom>
+                            <FormattedMessage
+                                id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.sub.heading'
+                                defaultMessage='Attach business plans to API'
+                            />
+                        </Typography>
+                    )}
                 <Paper className={classes.subscriptionPoliciesPaper}>
                     <FormControl className={classes.formControl}>
                         <FormGroup>

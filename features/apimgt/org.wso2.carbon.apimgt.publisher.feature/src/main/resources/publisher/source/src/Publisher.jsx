@@ -63,7 +63,6 @@ class Publisher extends React.Component {
         /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
         const queryParams = qs.parse(queryString);
         const { environment = Utils.getCurrentEnvironment().label } = queryParams;
-
         this.state = {
             userResolved: false,
             user: AuthManager.getUser(environment),

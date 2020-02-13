@@ -58,6 +58,7 @@ public class APIThrottleConstants {
     public static final String EXPIRY_TIMESTAMP = "expiryTimeStamp";
     public static final String EVALUATED_CONDITIONS = "evaluatedConditions";
     public static final String IP = "ip";
+    public static final String IPv6 = "ipv6";
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String MESSAGE_SIZE = "messageSize";
     public static final String MIN = "min";

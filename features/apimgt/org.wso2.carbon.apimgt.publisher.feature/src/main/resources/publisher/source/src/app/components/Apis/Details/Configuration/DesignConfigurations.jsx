@@ -209,10 +209,6 @@ export default function DesignConfigurations() {
             .finally(() => setIsUpdating(false));
     }
 
-    const subHeadingId = (api.apiType === API.CONSTS.APIProduct
-        ? 'Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading'
-        : 'Apis.Details.Configuration.Configuration.Design.sub.heading');
-
     return (
         <>
             <Container maxWidth='md'>
@@ -224,12 +220,25 @@ export default function DesignConfigurations() {
                                 defaultMessage='Design Configurations'
                             />
                         </Typography>
-                        <Typography variant='caption'>
-                            <FormattedMessage
-                                id={subHeadingId}
-                                defaultMessage="Configure your API's visibility and define what your API offers."
-                            />
-                        </Typography>
+                        {api.apiType === API.CONSTS.APIProduct
+                            ? (
+                                <Typography variant='caption'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading'
+                                        defaultMessage="Configure your API's
+                                        visibility and define what your API offers."
+                                    />
+                                </Typography>
+                            )
+                            : (
+                                <Typography variant='caption'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.Configuration.Design.sub.heading'
+                                        defaultMessage="Configure your API's visibility
+                                        and define what your API offers."
+                                    />
+                                </Typography>
+                            )}
                     </Grid>
                     <Grid item md={12}>
                         <Paper elevation={0}>

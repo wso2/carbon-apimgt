@@ -224,6 +224,7 @@ import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.security.InvalidKeyException;
@@ -8163,6 +8164,28 @@ public final class APIUtil {
         return result;
     }
 
+    /**
+     * This method provides the BigInteger value for the given IP address. This supports both IPv4 and IPv6 address
+     * @param ipAddress ip address
+     * @return BigInteger value for the given ip address. returns 0 for unknown host
+     */
+    public static BigInteger ipToBigInteger(String ipAddress) {
+        InetAddress address;
+        try {
+            address = getAddress(ipAddress);
+            byte[] bytes = address.getAddress();
+            return new BigInteger(1, bytes);
+        } catch (UnknownHostException e) {
+            //ignore the error and log it
+            log.error("Error while parsing host IP " + ipAddress, e);
+        }
+        return BigInteger.ZERO;
+    }
+    
+    public static InetAddress getAddress(String ipAddress) throws UnknownHostException {
+        return InetAddress.getByName(ipAddress);
+    }
+
     public String getFullLifeCycleData(Registry registry) throws XMLStreamException, RegistryException {
         return CommonUtil.getLifecycleConfiguration(APIConstants.API_LIFE_CYCLE, registry);
 
@@ -10133,9 +10156,11 @@ public final class APIUtil {
         return null;
     }
 
-    public static boolean isPerTenantServiceProviderEnabled(String tenantDomain) throws APIManagementException {
+        public static boolean isPerTenantServiceProviderEnabled(String tenantDomain) throws APIManagementException,
+                RegistryException {
 
         int tenantId = getTenantIdFromTenantDomain(tenantDomain);
+        loadTenantRegistry(tenantId);
         JSONObject tenantConfig = getTenantConfig(tenantId);
         if (tenantConfig.containsKey(APIConstants.ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION)) {
             return (boolean) tenantConfig.get(APIConstants.ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION);

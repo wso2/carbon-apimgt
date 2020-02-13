@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>6.6.47-SNAPSHOT</version>
+    <version>6.6.62-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>https://wso2.org</url>
 
@@ -311,6 +311,26 @@
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>shib-release</id>
+            <url>https://build.shibboleth.net/nexus/content/groups/public</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>shib-snapshot</id>
+            <url>https://build.shibboleth.net/nexus/content/repositories/snapshots</url>
+            <snapshots>
+                <enabled>false</enabled>
             </snapshots>
             <releases>
                 <enabled>false</enabled>
@@ -1560,6 +1580,11 @@
                 <version>${openapitools.swagger.parser.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-inflector</artifactId>
+                <version>${swagger.inflector.oas3.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.orbit.com.jayway.jsonpath</groupId>
                 <artifactId>json-path</artifactId>
                 <version>${com.jayway.jsonpath.version}</version>
@@ -1611,13 +1636,13 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>6.6.47-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>6.6.62-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
         <carbon.analytics.common.version>5.2.21</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.6.0-alpha3</carbon.kernel.version>
-        <carbon.kernel.feature.version>4.6.0-alpha3</carbon.kernel.feature.version>
+        <carbon.kernel.version>4.6.0-beta</carbon.kernel.version>
+        <carbon.kernel.feature.version>4.6.0-beta</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.7.23</carbon.commons.version>
@@ -1625,15 +1650,15 @@
         <carbon.mediation.version>4.7.33</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.16.39</carbon.identity.version>
-        <carbon.identity.governance.version>1.3.40</carbon.identity.governance.version>
-        <carbon.identity-inbound-auth-oauth.version>6.2.112</carbon.identity-inbound-auth-oauth.version>
-        <carbon.identity-oauth2-grant-jwt.version>1.0.25</carbon.identity-oauth2-grant-jwt.version>
+        <carbon.identity.version>5.16.66</carbon.identity.version>
+        <carbon.identity.governance.version>1.3.45</carbon.identity.governance.version>
+        <carbon.identity-inbound-auth-oauth.version>6.2.123</carbon.identity-inbound-auth-oauth.version>
+        <carbon.identity-oauth2-grant-jwt.version>1.0.26</carbon.identity-oauth2-grant-jwt.version>
         <carbon.identity-user-ws.version>5.3.6</carbon.identity-user-ws.version>
-        <carbon.identity-inbound-auth-saml2.version>5.4.8</carbon.identity-inbound-auth-saml2.version>
+        <carbon.identity-inbound-auth-saml2.version>5.4.9</carbon.identity-inbound-auth-saml2.version>
         <carbon.identity-inbound-auth-openid.version>5.4.5</carbon.identity-inbound-auth-openid.version>
         <carbon.identity-local-auth-basicauth.version>6.2.8</carbon.identity-local-auth-basicauth.version>
-        <carbon.identity-outbound-auth-samlsso.version>5.3.4</carbon.identity-outbound-auth-samlsso.version>
+        <carbon.identity-outbound-auth-samlsso.version>5.3.6</carbon.identity-outbound-auth-samlsso.version>
         <carbon.identity-data-publisher-application-authentication.version>5.3.10</carbon.identity-data-publisher-application-authentication.version>
 
         <!--SAML Common Utils Version-->
@@ -1776,6 +1801,7 @@
         <event.processor.stub.version>2.2.11</event.processor.stub.version>
         <swagger.codegen.version>2.3.1.wso2v2</swagger.codegen.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
+        <swagger.inflector.oas3.version>2.0.5</swagger.inflector.oas3.version>
         <swagger.parser.version>1.0.32.wso2v1</swagger.parser.version>
         <swagger.core.version>1.5.24</swagger.core.version>
         <swagger.models.version>1.5.23</swagger.models.version>

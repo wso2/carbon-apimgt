@@ -105,6 +105,9 @@ function Endpoints(props) {
                 const config = createEndpointConfig(endpointType);
                 if (endpointType === 'prototyped') {
                     if (implementationType === 'mock') {
+                        api.generateMockResponses(api.id).then((res) => {
+                            setSwagger(res.obj);
+                        });
                         return { ...initState, endpointConfig: config, endpointImplementationType: 'INLINE' };
                     }
                     return { ...initState, endpointConfig: config, endpointImplementationType: 'ENDPOINT' };

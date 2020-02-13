@@ -26,6 +26,8 @@ public class SOAPToRESTConstants {
 
     public static final String COMPLEX_TYPE_NODE_NAME = "complexType";
     public static final String SIMPLE_TYPE_NODE_NAME = "simpleType";
+    public static final String EXTENSION_NODE_NAME = "extension";
+    public static final String ATTRIBUTE_NODE_NAME = "attribute";
     public static final String RESTRICTION_ATTR = "restriction";
     public static final String BASE_ATTR = "base";
     public static final String TYPE_ATTRIBUTE = "type";
@@ -50,6 +52,8 @@ public class SOAPToRESTConstants {
     public static final String X_NAMESPACE_QUALIFIED = "x-namespace-qualified";
     public static final String XMLNS = "xmlns";
     public static final String X_WSO2_UNIQUE_NAMESPACE = "x-wso2-empty-namespace";
+    public static final String BASE_CONTENT_KEYWORD = "_base";
+    public static final String ATTR_CONTENT_KEYWORD = "_attr";
 
     public final class Swagger {
         public static final String DEFINITIONS = "definitions";
