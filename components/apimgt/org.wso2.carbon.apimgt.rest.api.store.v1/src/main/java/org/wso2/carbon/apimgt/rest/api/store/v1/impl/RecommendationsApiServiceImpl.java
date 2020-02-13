@@ -31,7 +31,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApiService;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +50,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
         String apiId = null;
         try {
             String userName = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             if (apiConsumer.isRecommendationEnabled(tenantDomain) && userName != "wso2.anonymous.user") {
                 int maxRecommendations = recommendationEnvironment.getMaxRecommendations();
