@@ -27,6 +27,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
+import { app } from 'Settings';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
@@ -59,6 +60,7 @@ const styles = (theme) => {
     return {
         LeftMenu: {
             backgroundColor: theme.custom.leftMenu.background,
+            backgroundImage: `url(${app.context}${theme.custom.leftMenu.backgroundImage})`,
             textAlign: 'left',
             fontFamily: theme.typography.fontFamily,
             position: 'absolute',

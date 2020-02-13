@@ -35,6 +35,13 @@ import Divider from '@material-ui/core/Divider';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
+import Box from '@material-ui/core/Box';
+import Paper from '@material-ui/core/Paper';
+import InputBase from '@material-ui/core/InputBase';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import SearchIcon from '@material-ui/icons/Search';
+import DirectionsIcon from '@material-ui/icons/Directions';
+import Chip from '@material-ui/core/Chip';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from 'AppComponents/Shared/Alert';
 import APIList from 'AppComponents/Apis/Listing/APICardView';
@@ -51,6 +58,26 @@ import SubscriptionTableData from './SubscriptionTableData';
  * @param {*} theme theme
  */
 const styles = (theme) => ({
+    searchRoot: {
+        padding: '2px 4px',
+        display: 'flex',
+        alignItems: 'center',
+        width: 400,
+        flex: 1,
+        marginLeft: theme.spacing(2),
+        marginRight: theme.spacing(2),
+    },
+    input: {
+        marginLeft: theme.spacing(1),
+        flex: 1,
+    },
+    iconButton: {
+        padding: 10,
+    },
+    divider: {
+        height: 28,
+        margin: 4,
+    },
     root: {
         padding: theme.spacing(3),
     },
@@ -73,15 +100,26 @@ const styles = (theme) => ({
     },
     dialogTitle: {
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         padding: theme.spacing(1),
-        '& h6': {
-            flex: 1,
-        },
     },
     genericMessageWrapper: {
         margin: theme.spacing(2),
     },
+    searchWrapper: {
+        flex: 1,
+    },
+    searchResults: {
+        height: 30,
+        display: 'flex',
+        paddingTop: theme.spacing(1),
+        paddingRight: 0,
+        paddingBottom: 0,
+        paddingLeft: theme.spacing(2),
+    },
+    clearSearchIcon: {
+        cursor: 'pointer',
+    }
 });
 /**
  *
@@ -104,13 +142,17 @@ class Subscriptions extends React.Component {
             subscriptionsNotFound: false,
             isAuthorize: true,
             openDialog: false,
+            searchText: '',
         };
         this.handleSubscriptionDelete = this.handleSubscriptionDelete.bind(this);
         this.updateSubscriptions = this.updateSubscriptions.bind(this);
-        this.updateUnsubscribedAPIsList = this.updateUnsubscribedAPIsList.bind(this);
         this.handleSubscribe = this.handleSubscribe.bind(this);
-        this.getIdsOfSubscribedEntities = this.getIdsOfSubscribedEntities.bind(this);
         this.handleOpenDialog = this.handleOpenDialog.bind(this);
+        this.handleSearchTextChange = this.handleSearchTextChange.bind(this);
+        this.handleSearchTextTmpChange = this.handleSearchTextTmpChange.bind(this);
+        this.handleClearSearch = this.handleClearSearch.bind(this);
+        this.handleEnterPress = this.handleEnterPress.bind(this);
+        this.searchTextTmp = '';
     }
 
     /**
@@ -125,23 +167,6 @@ class Subscriptions extends React.Component {
             },
         } = this.props;
         this.updateSubscriptions(applicationId);
-        this.updateUnsubscribedAPIsList();
-    }
-
-    /**
-     *
-     * Get List of the Ids of all APIs that have been already subscribed
-     *
-     * @returns {*} Ids of respective APIs
-     * @memberof Subscriptions
-     */
-    getIdsOfSubscribedEntities() {
-        const { subscriptions } = this.state;
-
-        // Get arrays of the API Ids and remove all null/empty references by executing 'fliter(Boolean)'
-        const subscribedAPIIds = subscriptions.map((sub) => sub.apiId).filter(Boolean);
-
-        return subscribedAPIIds;
     }
 
     handleOpenDialog() {
@@ -156,10 +181,11 @@ class Subscriptions extends React.Component {
      */
     updateSubscriptions(applicationId) {
         const client = new Subscription();
-        const promisedSubscriptions = client.getSubscriptions(null, applicationId);
+        const subscriptionLimit = app.subscriptionLimit || 1000;
+        const promisedSubscriptions = client.getSubscriptions(null, applicationId, subscriptionLimit);
         promisedSubscriptions
             .then((response) => {
-                this.setState({ subscriptions: response.body.list }, this.updateUnsubscribedAPIsList());
+                this.setState({ subscriptions: response.body.list });
             })
             .catch((error) => {
                 const { status } = error;
@@ -199,7 +225,7 @@ class Subscriptions extends React.Component {
                         break;
                     }
                 }
-                this.setState({ subscriptions }, this.updateUnsubscribedAPIsList());
+                this.setState({ subscriptions });
             })
             .catch((error) => {
                 const { status } = error;
@@ -207,41 +233,6 @@ class Subscriptions extends React.Component {
                     this.setState({ isAuthorize: false });
                 }
                 Alert.error('Error occurred when deleting subscription');
-            });
-    }
-
-    /**
-     *
-     * Update list of unsubscribed APIs
-     * @memberof Subscriptions
-     */
-    updateUnsubscribedAPIsList() {
-        const apiClient = new Api();
-        const promisedGetApis = apiClient.getAllAPIs({ query: 'status:published' });
-
-        promisedGetApis
-            .then((response) => {
-                const { list } = response.obj;
-                const subscribedIds = this.getIdsOfSubscribedEntities();
-                const unsubscribedAPIList = list
-                    .filter((api) => (!subscribedIds.includes(api.id) && !api.advertiseInfo.advertised)
-                        && api.isSubscriptionAvailable)
-                    .map((filteredApi) => {
-                        return {
-                            Id: filteredApi.id,
-                            Policy: filteredApi.throttlingPolicies,
-                            Name: filteredApi.name,
-                        };
-                    });
-                this.setState({ unsubscribedAPIList });
-            })
-            .catch((error) => {
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ apisNotFound: true });
-                } else if (status === 401) {
-                    this.setState({ isAuthorize: false });
-                }
             });
     }
 
@@ -298,27 +289,41 @@ class Subscriptions extends React.Component {
                 }));
             });
     }
-
+    handleSearchTextChange() {
+        this.setState({ searchText: this.searchTextTmp });
+    };
+    handleSearchTextTmpChange(event) {
+        this.searchTextTmp = event.target.value;
+    };
+    handleClearSearch() {
+        this.setState({ searchText: '' });
+    };
+    handleEnterPress(e) {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            this.handleSearchTextChange();
+        }
+    }
     /**
      * @inheritdoc
      * @memberof Subscriptions
      */
     render() {
-        const { isAuthorize, openDialog } = this.state;
+        const { isAuthorize, openDialog, searchText } = this.state;
 
         if (!isAuthorize) {
             window.location = app.context + '/services/configs';
         }
 
         const {
-            subscriptions, unsubscribedAPIList, apisNotFound, subscriptionsNotFound,
+            subscriptions, apisNotFound, subscriptionsNotFound,
         } = this.state;
         const {
             match: {
                 params: { applicationId },
             },
         } = this.props;
-        const { classes } = this.props;
+        const { classes, intl } = this.props;
 
         if (subscriptions) {
             return (
@@ -379,63 +384,63 @@ class Subscriptions extends React.Component {
                                             {subscriptionsNotFound ? (
                                                 <ResourceNotFound />
                                             ) : (
-                                                <Table>
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell className={classes.firstCell}>
-                                                                <FormattedMessage
-                                                                    id='Applications.Details.Subscriptions.api.name'
-                                                                    defaultMessage='API'
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <FormattedMessage
-                                                                    id={`Applications.Details.Subscriptions
-                                                                        .subscription.state`}
-                                                                    defaultMessage='Lifecycle State'
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <FormattedMessage
-                                                                    id={`Applications.Details.Subscriptions
-                                                                        .subscription.tier`}
-                                                                    defaultMessage='Subscription Tier'
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <FormattedMessage
-                                                                    id='Applications.Details.Subscriptions.Status'
-                                                                    defaultMessage='Subscription Status'
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <FormattedMessage
-                                                                    id='Applications.Details.Subscriptions.action'
-                                                                    defaultMessage='Action'
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <FormattedMessage
-                                                                    id='Applications.Details.Subscriptions.invoice'
-                                                                    defaultMessage='Invoice'
-                                                                />
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {subscriptions
-                                                            && subscriptions.map((subscription) => {
-                                                                return (
-                                                                    <SubscriptionTableData
-                                                                        key={subscription.subscriptionId}
-                                                                        subscription={subscription}
-                                                                        handleSubscriptionDelete={this.handleSubscriptionDelete}
+                                                    <Table>
+                                                        <TableHead>
+                                                            <TableRow>
+                                                                <TableCell className={classes.firstCell}>
+                                                                    <FormattedMessage
+                                                                        id='Applications.Details.Subscriptions.api.name'
+                                                                        defaultMessage='API'
                                                                     />
-                                                                );
-                                                            })}
-                                                    </TableBody>
-                                                </Table>
-                                            )}
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <FormattedMessage
+                                                                        id={`Applications.Details.Subscriptions
+                                                                        .subscription.state`}
+                                                                        defaultMessage='Lifecycle State'
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <FormattedMessage
+                                                                        id={`Applications.Details.Subscriptions
+                                                                        .subscription.tier`}
+                                                                        defaultMessage='Subscription Tier'
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <FormattedMessage
+                                                                        id='Applications.Details.Subscriptions.Status'
+                                                                        defaultMessage='Subscription Status'
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <FormattedMessage
+                                                                        id='Applications.Details.Subscriptions.action'
+                                                                        defaultMessage='Action'
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <FormattedMessage
+                                                                        id='Applications.Details.Subscriptions.invoice'
+                                                                        defaultMessage='Invoice'
+                                                                    />
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        </TableHead>
+                                                        <TableBody>
+                                                            {subscriptions
+                                                                && subscriptions.map((subscription) => {
+                                                                    return (
+                                                                        <SubscriptionTableData
+                                                                            key={subscription.subscriptionId}
+                                                                            subscription={subscription}
+                                                                            handleSubscriptionDelete={this.handleSubscriptionDelete}
+                                                                        />
+                                                                    );
+                                                                })}
+                                                        </TableBody>
+                                                    </Table>
+                                                )}
                                         </CardContent>
                                     </Card>
                                 )}
@@ -447,6 +452,7 @@ class Subscriptions extends React.Component {
                         open={openDialog}
                         maxWidth='lg'
                         fullWidth
+                        fullScreen
                     >
                         <MuiDialogTitle disableTypography className={classes.dialogTitle}>
                             <Typography variant='h6'>
@@ -455,16 +461,51 @@ class Subscriptions extends React.Component {
                                     defaultMessage='Subscribe APIs'
                                 />
                             </Typography>
+                            <Box className={classes.searchWrapper}>
+                                <Paper component="form" className={classes.searchRoot}>
+                                    {searchText && <HighlightOffIcon className={classes.clearSearchIcon}
+                                        onClick={this.handleClearSearch}
+                                    />}
+                                    <InputBase
+                                        className={classes.input}
+                                        placeholder={intl.formatMessage({ defaultMessage: 'Search APIs', id: 'Applications.Details.Subscriptions.search' })}
+                                        inputProps={{ 'aria-label': intl.formatMessage({ defaultMessage: 'Search APIs', id: 'Applications.Details.Subscriptions.search' }) }}
+                                        onChange={this.handleSearchTextTmpChange}
+                                        onKeyDown={this.handleEnterPress}
+                                    />
+                                    <IconButton className={classes.iconButton} aria-label="search" onClick={this.handleSearchTextChange}>
+                                        <SearchIcon />
+                                    </IconButton>
+                                </Paper>
+                                <Box className={classes.searchResults}>
+                                    {(searchText && searchText !== '') ? <>
+                                        <Typography variant='caption'>
+                                            <FormattedMessage
+                                                id='Applications.Details.Subscriptions.filter.msg'
+                                                defaultMessage='Filtered APIs for '
+                                            />{searchText}</Typography>
+                                    </> : (<Typography variant='caption'>
+                                        <FormattedMessage
+                                            id='Applications.Details.Subscriptions.filter.msg.all.apis'
+                                            defaultMessage='Displaying all APIs'
+                                        /></Typography>)}
+                                </Box>
+
+                            </Box>
+
                             <IconButton aria-label='close' className={classes.closeButton} onClick={this.handleOpenDialog}>
                                 <Icon>cancel</Icon>
                             </IconButton>
                         </MuiDialogTitle>
-                        <APIList
-                            apisNotFound={apisNotFound}
-                            unsubscribedAPIList={unsubscribedAPIList}
-                            applicationId={applicationId}
-                            handleSubscribe={(app, api, policy) => this.handleSubscribe(app, api, policy)}
-                        />
+                        <Box padding={2}>
+                            <APIList
+                                apisNotFound={apisNotFound}
+                                subscriptions={subscriptions}
+                                applicationId={applicationId}
+                                handleSubscribe={(app, api, policy) => this.handleSubscribe(app, api, policy)}
+                                searchText={searchText}
+                            />
+                        </Box>
                     </Dialog>
                 </div>
             );
