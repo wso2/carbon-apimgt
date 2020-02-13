@@ -264,7 +264,7 @@ const Configurations = {
                     sufix: '- WSO2 APIM',
                 },
                 languageSwitch: { // Country flags are downloaded from https://dribbble.com/shots/1211759-Free-195-Flat-Flags
-                    active: true,
+                    active: false,
                     languages: [
                         {
                             key: 'en',
