@@ -319,6 +319,9 @@
         <repository>
             <id>shib-release</id>
             <url>https://build.shibboleth.net/nexus/content/groups/public</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -326,6 +329,9 @@
         <repository>
             <id>shib-snapshot</id>
             <url>https://build.shibboleth.net/nexus/content/repositories/snapshots</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
             <releases>
                 <enabled>false</enabled>
             </releases>
