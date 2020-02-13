@@ -44,6 +44,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import javax.cache.Cache;
+
 public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(RecommenderDetailsExtractor.class);
@@ -268,7 +270,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         try {
             startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
-                    .publish("recommendationEventPublisher", Collections.EMPTY_MAP, event);
+                    .publish(APIConstants.RECOMMENDATIONS_WSO2_EVENT_PUBLISHER, Collections.EMPTY_MAP, event);
             if (log.isDebugEnabled()) {
                 log.debug("Event Published for recommendation server with payload " + payload);
             }
@@ -315,25 +317,37 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 return true;
             } else {
                 try {
+                    JSONObject tenantConfig = null;
                     startTenantFlow(tenantDomain);
-                    int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                            .getTenantId(tenantDomain);
-                    Registry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                            .getConfigSystemRegistry(tenantId);
-                    APIUtil.loadTenantRegistry(tenantId);
-                    if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                        APIUtil.loadTenantConf(tenantId);
-                    }
-                    if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                        Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
-                        String content = new String((byte[]) resource.getContent());
-                        JSONObject jsonObject = new JSONObject(content);
-                        if (jsonObject.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
-                            Object value = jsonObject.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
-                            return Boolean.parseBoolean(value.toString());
+                    Cache tenantConfigCache = APIUtil.getCache(
+                            APIConstants.API_MANAGER_CACHE_MANAGER,
+                            APIConstants.TENANT_CONFIG_CACHE_NAME,
+                            APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
+                            APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
+                    String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
+                    if (tenantConfigCache.containsKey(cacheName)) {
+                        tenantConfig = (JSONObject) tenantConfigCache.get(cacheName);
+                    } else {
+                        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                .getTenantId(tenantDomain);
+                        APIUtil.loadTenantRegistry(tenantId);
+                        Registry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                                .getConfigSystemRegistry(tenantId);
+                        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                            APIUtil.loadTenantConf(tenantId);
+                        }
+                        if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                            Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
+                            String content = new String((byte[]) resource.getContent());
+                            tenantConfig = new JSONObject(content);
+                            tenantConfigCache.put(cacheName, tenantConfig);
                         }
                     }
-                } catch (RegistryException | APIManagementException | UserStoreException e) {
+                    if (tenantConfig.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
+                        Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
+                        return Boolean.parseBoolean(value.toString());
+                    }
+                } catch (RegistryException | UserStoreException | NullPointerException | APIManagementException e) {
                     log.error("Error while retrieving Recommendation config from registry", e);
                 } finally {
                     if (tenantFlowStarted) {

@@ -104,6 +104,11 @@ public final class APIConstants {
 
     public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/" + API_TENANT_CONF;
 
+    public static final String API_TENANT_CONF_MEDIA_TYPE = "tenant-config";
+    public static final String TENANT_CONFIG_CACHE_NAME = "tenantConfigCache";
+    public static final long TENANT_CONFIG_CACHE_MODIFIED_EXPIRY = 900; // cache set to 15 minutes
+    public static final long TENANT_CONFIG_CACHE_ACCESS_EXPIRY = 900;
+
     public static final String RESOURCE_FOLDER_LOCATION = "repository" + File.separator + "resources";
 
     public static final String API_TENANT_CONF_ENABLE_MONITZATION_KEY = "EnableMonetization";

@@ -162,6 +162,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.wsdl.Definition;
 
@@ -5776,16 +5777,26 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 return true;
             } else {
                 try {
-                    String content = apimRegistryService
-                            .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
-                    if (content != null) {
-                        org.json.JSONObject apiTenantConfig = new org.json.JSONObject(content);
-                        if (apiTenantConfig.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
-                            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
-                            return Boolean.parseBoolean(value.toString());
-                        }
+                    org.json.JSONObject tenantConfig = null;
+                    Cache tenantConfigCache = APIUtil.getCache(
+                            APIConstants.API_MANAGER_CACHE_MANAGER,
+                            APIConstants.TENANT_CONFIG_CACHE_NAME,
+                            APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
+                            APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
+                    String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
+                    if (tenantConfigCache.containsKey(cacheName)) {
+                        tenantConfig = (org.json.JSONObject) tenantConfigCache.get(cacheName);
+                    } else {
+                        String content = apimRegistryService
+                                .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+                        tenantConfig = new org.json.JSONObject(content);
+                        tenantConfigCache.put(cacheName, tenantConfig);
                     }
-                } catch (UserStoreException | RegistryException e) {
+                    if (tenantConfig.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
+                        Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
+                        return Boolean.parseBoolean(value.toString());
+                    }
+                } catch (UserStoreException | RegistryException | NullPointerException e) {
                     log.error("Error occurred when getting API tenant config from registry", e);
                 }
             }
