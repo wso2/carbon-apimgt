@@ -1010,4 +1010,10 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException If an error occurs while publishing clicked API
      */
     String getApiRecommendations(String userName, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get the requested tenant Domain from consumer.
+     *
+     */
+    String getRequestedTenant();
 }

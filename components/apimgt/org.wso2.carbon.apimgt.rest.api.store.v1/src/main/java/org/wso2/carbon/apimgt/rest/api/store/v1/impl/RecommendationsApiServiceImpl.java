@@ -50,8 +50,9 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
         String apiId = null;
         try {
             String userName = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            String tenantDomain = apiConsumer.getRequestedTenant();
+
             if (apiConsumer.isRecommendationEnabled(tenantDomain) && userName != "wso2.anonymous.user") {
                 int maxRecommendations = recommendationEnvironment.getMaxRecommendations();
                 String recommendations = apiConsumer.getApiRecommendations(userName, tenantDomain);

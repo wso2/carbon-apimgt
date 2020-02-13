@@ -5804,6 +5804,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return false;
     }
 
+    public String getRequestedTenant() {
+
+        return requestedTenant;
+    }
+
     /**
      * Get recommendations for the user by connecting with the recommendation engine.
      *
