@@ -421,6 +421,7 @@ public final class APIConstants {
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT = "true";
     public static final String REMOVE_OAUTH_HEADERS_FROM_MESSAGE = OAUTH_CONFIGS + "RemoveOAuthHeadersFromOutMessage";
+    public static final String JWT_AS_OPAQUE_TOKEN = OAUTH_CONFIGS + "JWTAsOpaqueToken";
     public static final String APPLICATION_TOKEN_SCOPE = OAUTH_CONFIGS + "ApplicationTokenScope";
     public static final String WHITELISTED_SCOPES = OAUTH_CONFIGS + "ScopeWhitelist.Scope";
     public static final String TOKEN_ENDPOINT_NAME = OAUTH_CONFIGS + "TokenEndPointName";

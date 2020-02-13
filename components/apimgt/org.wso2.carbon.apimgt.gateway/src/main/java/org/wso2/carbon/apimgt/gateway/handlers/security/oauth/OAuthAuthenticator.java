@@ -75,6 +75,7 @@ public class OAuthAuthenticator implements Authenticator {
     private String securityContextHeader;
     private boolean removeOAuthHeadersFromOutMessage=true;
     private boolean removeDefaultAPIHeaderFromOutMessage=true;
+    private boolean isJWTAnOpaqueToken = false;
     private String clientDomainHeader = "referer";
     private String requestOrigin;
     private String remainingAuthHeader;
@@ -186,7 +187,7 @@ public class OAuthAuthenticator implements Authenticator {
         String authenticationScheme;
         try {
             //Initial guess of a JWT token using the presence of a DOT.
-            if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
+            if (!isJWTAnOpaqueToken && StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
                 try {
                     // Check if the header part is decoded
                     Base64.getUrlDecoder().decode(apiKey.split("\\.")[0]);
@@ -487,6 +488,10 @@ public class OAuthAuthenticator implements Authenticator {
         String value = config.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE);
         if (value != null) {
             removeOAuthHeadersFromOutMessage = Boolean.parseBoolean(value);
+        }
+        value = config.getFirstProperty(APIConstants.JWT_AS_OPAQUE_TOKEN);
+        if (value != null) {
+            isJWTAnOpaqueToken = Boolean.parseBoolean(value);
         }
         JWTConfigurationDto jwtConfigurationDto = config.getJwtConfigurationDto();
         value = jwtConfigurationDto.getJwtHeader();
