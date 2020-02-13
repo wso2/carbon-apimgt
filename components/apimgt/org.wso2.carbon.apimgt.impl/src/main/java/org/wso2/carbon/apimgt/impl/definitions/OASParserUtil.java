@@ -167,6 +167,7 @@ public class OASParserUtil {
      * @throws APIManagementException If error occurred while parsing definition.
      */
     public static APIDefinition getOASParser(String apiDefinition) throws APIManagementException {
+
         SwaggerVersion swaggerVersion = getSwaggerVersion(apiDefinition);
 
         if (swaggerVersion == SwaggerVersion.SWAGGER) {
@@ -200,6 +201,18 @@ public class OASParserUtil {
         }
 
         throw new APIManagementException("Invalid OAS definition provided.");
+    }
+
+    public static String generateExamples(String apiDefinition) throws APIManagementException {
+        SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
+
+        if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
+            return oas3Parser.generateExample(apiDefinition);
+        } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) {
+            return oas2Parser.generateExample(apiDefinition);
+        } else {
+            throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
+        }
     }
 
     public static String updateAPIProductSwaggerOperations(Map<API, List<APIProductResource>> apiToProductResourceMapping,

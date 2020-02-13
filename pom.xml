@@ -1554,6 +1554,11 @@
                 <version>${openapitools.swagger.parser.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-inflector</artifactId>
+                <version>${swagger.inflector.oas3.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.orbit.com.jayway.jsonpath</groupId>
                 <artifactId>json-path</artifactId>
                 <version>${com.jayway.jsonpath.version}</version>
@@ -1770,6 +1775,7 @@
         <event.processor.stub.version>2.2.11</event.processor.stub.version>
         <swagger.codegen.version>2.3.1.wso2v2</swagger.codegen.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
+        <swagger.inflector.oas3.version>2.0.5</swagger.inflector.oas3.version>
         <swagger.parser.version>1.0.32.wso2v1</swagger.parser.version>
         <swagger.core.version>1.5.24</swagger.core.version>
         <swagger.models.version>1.5.23</swagger.models.version>

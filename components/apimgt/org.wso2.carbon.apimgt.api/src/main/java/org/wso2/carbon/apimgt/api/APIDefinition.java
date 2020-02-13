@@ -43,6 +43,14 @@ public abstract class APIDefinition {
     public static final String KEEP_LEGACY_EXTENSION_PROP = "preserveLegacyExtensions";
 
     /**
+     * This method generates Mock/Sample payloads for API prototyping
+     *
+     * @param apiDefinition
+     * @return
+     */
+    public abstract String generateExample(String apiDefinition);
+
+    /**
      * This method extracts the URI templates from the API definition
      *
      * @return URI templates

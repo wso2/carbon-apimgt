@@ -27,6 +27,7 @@ const defaultScript = '/* mc.setProperty(\'CONTENT_TYPE\', \'application/json\')
     + 'mc.setPayloadJSON(\'{ "data" : "sample JSON"}\');*/\n'
     + '/*Uncomment the above comment block to send a sample response.*/';
 
+
 /**
  * The inline endpoints component.
  * This component lists the api resources to add custom mediation scripts.
