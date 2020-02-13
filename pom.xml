@@ -316,26 +316,6 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
-        <repository>
-            <id>shib-release</id>
-            <url>https://build.shibboleth.net/nexus/content/groups/public</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>shib-snapshot</id>
-            <url>https://build.shibboleth.net/nexus/content/repositories/snapshots</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -803,6 +783,16 @@
                 <groupId>org.wso2.carbon.registry</groupId>
                 <artifactId>org.wso2.carbon.registry.ws.client</artifactId>
                 <version>${carbon.registry.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.rampart</groupId>
+                        <artifactId>rampart-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.rampart</groupId>
+                        <artifactId>rampart-trust</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
