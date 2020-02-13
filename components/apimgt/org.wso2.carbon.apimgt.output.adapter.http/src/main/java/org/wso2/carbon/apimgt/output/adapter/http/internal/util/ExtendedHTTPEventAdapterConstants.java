@@ -51,6 +51,16 @@ public class ExtendedHTTPEventAdapterConstants {
     public static final String ADAPTER_OAUTH_CONSUMER_KEY_HINT = "oauth.consumer.key.hint";
     public static final String ADAPTER_OAUTH_CONSUMER_SECRET = "oauth.consumer.secret";
     public static final String ADAPTER_OAUTH_CONSUMER_SECRET_HINT = "oauth.consumer.secret.hint";
+    public static final String JSON_STRING = "json";
+    public static final String TEXT_STRING = "text";
+    public static final String APPLICATION_JSON_CONTENT_TYPE = "application/json";
+    public static final String UTF_EIGHT_CONTENT_TYPE = "UTF-8";
+    public static final String TEXT_PLAIN_CONTENT_TYPE = "text/plain";
+    public static final String TEXT_XML_CONTENT_TYPE = "text/xml";
+    public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
+    public static final String AUTHORIZATION_BASIC = "Basic ";
+    public static final String AUTHORIZATION_BEARER = "Bearer ";
+
 
     //configurations for the httpConnectionManager
     public static final String DEFAULT_MAX_CONNECTIONS_PER_HOST = "defaultMaxConnectionsPerHost";

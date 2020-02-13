@@ -35,17 +35,11 @@ public class ExtendedHTTPEventAdapterServiceDS {
 
     @Activate
     protected void activate(ComponentContext context) {
-
-        try {
-            ExtendedHTTPEventAdapterFactory extendedHttpEventAdaptorFactory = new ExtendedHTTPEventAdapterFactory();
-            BundleContext bundleContext = context.getBundleContext();
-            bundleContext.registerService(OutputEventAdapterFactory.class.getName(),
-                    extendedHttpEventAdaptorFactory, null);
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully deployed the Extended Http event adaptor service");
-            }
-        } catch (Exception e) {
-            log.error("Can not create the Extended Http event event adaptor service: " + e.getMessage(), e);
+        ExtendedHTTPEventAdapterFactory extendedHttpEventAdaptorFactory = new ExtendedHTTPEventAdapterFactory();
+        BundleContext bundleContext = context.getBundleContext();
+        bundleContext.registerService(OutputEventAdapterFactory.class.getName(),extendedHttpEventAdaptorFactory, null);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully deployed the Extended Http event adaptor service");
         }
     }
 }

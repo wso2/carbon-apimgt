@@ -233,12 +233,12 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
             }
 
             String messageFormat = eventAdapterConfiguration.getMessageFormat();
-            if (messageFormat.equalsIgnoreCase("json")) {
-                contentType = "application/json";
-            } else if (messageFormat.equalsIgnoreCase("text")) {
-                contentType = "text/plain";
+            if (ExtendedHTTPEventAdapterConstants.JSON_STRING.equalsIgnoreCase(messageFormat)) {
+                contentType = ExtendedHTTPEventAdapterConstants.APPLICATION_JSON_CONTENT_TYPE;
+            } else if (ExtendedHTTPEventAdapterConstants.TEXT_STRING.equalsIgnoreCase(messageFormat)) {
+                contentType = ExtendedHTTPEventAdapterConstants.TEXT_PLAIN_CONTENT_TYPE;
             } else {
-                contentType = "text/xml";
+                contentType = ExtendedHTTPEventAdapterConstants.TEXT_XML_CONTENT_TYPE;
             }
 
         }
@@ -357,11 +357,14 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
                     hostConfiguration = new HostConfiguration();
                     hostConfiguration.setHost(hostUrl.getHost(), hostUrl.getPort(), hostUrl.getProtocol());
                 }
-                method.setRequestEntity(new StringRequestEntity(this.getPayload(), contentType, "UTF-8"));
+                method.setRequestEntity(new StringRequestEntity(this.getPayload(), contentType,
+                        ExtendedHTTPEventAdapterConstants.UTF_EIGHT_CONTENT_TYPE));
                 if (this.getAccessToken() != null && !this.getAccessToken().isEmpty()) {
-                    method.setRequestHeader("Authorization", "Bearer " + this.getAccessToken());
+                    method.setRequestHeader(ExtendedHTTPEventAdapterConstants.AUTHORIZATION_HEADER_DEFAULT,
+                            ExtendedHTTPEventAdapterConstants.AUTHORIZATION_BEARER + this.getAccessToken());
                 } else if (this.getUserName() != null && this.getPassword() != null) {
-                    method.setRequestHeader("Authorization", "Basic " + Base64
+                    method.setRequestHeader(ExtendedHTTPEventAdapterConstants.AUTHORIZATION_HEADER_DEFAULT,
+                            ExtendedHTTPEventAdapterConstants.AUTHORIZATION_BASIC + Base64
                             .encode((this.getUserName() + ExtendedHTTPEventAdapterConstants.ENTRY_SEPARATOR + this
                                     .getPassword()).getBytes()));
                 }
