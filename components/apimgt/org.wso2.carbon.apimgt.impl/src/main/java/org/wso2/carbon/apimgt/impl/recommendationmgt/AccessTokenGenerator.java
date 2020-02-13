@@ -62,11 +62,14 @@ public class AccessTokenGenerator {
             return generateNewAccessToken();
         } else if (buffer > (expiryTime - System.currentTimeMillis())) {
             if (log.isDebugEnabled()) {
-                log.debug("Valid Access Token already available for the provided application");
+                log.debug("Access Token will expire soon. Generated a new Token after revoking the previous");
             }
             revokeAccessToken();
             return generateNewAccessToken();
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Valid Access Token already available for the provided application");
+            }
             return this.accessToken;
         }
     }

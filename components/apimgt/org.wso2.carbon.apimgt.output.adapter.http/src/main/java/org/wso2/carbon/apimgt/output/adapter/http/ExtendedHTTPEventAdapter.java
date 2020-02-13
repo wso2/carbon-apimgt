@@ -143,11 +143,12 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
             connectionManager.getParams().setDefaultMaxConnectionsPerHost(defaultMaxConnectionsPerHost);
             connectionManager.getParams().setMaxTotalConnections(maxTotalConnections);
 
-            if (globalProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_URL) != null) {
+            Map<String, String> staticProperties = eventAdapterConfiguration.getStaticProperties();
+            if (staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_URL) != null) {
                 accessTokenGenerator = new AccessTokenGenerator(
-                        globalProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_URL),
-                        globalProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_CONSUMER_KEY),
-                        globalProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_CONSUMER_SECRET));
+                        staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_URL),
+                        staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_CONSUMER_KEY),
+                        staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_CONSUMER_SECRET));
             }
         }
     }
