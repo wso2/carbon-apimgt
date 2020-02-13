@@ -1199,7 +1199,8 @@ public class APIManagerConfiguration {
      * @param element
      */
     private void setRecommendationConfigurations(OMElement element) {
-        OMElement recommendationSeverEndpointElement = element.getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_ENDPOINT));
+        OMElement recommendationSeverEndpointElement = element.getFirstChildWithName(
+                new QName(APIConstants.RECOMMENDATION_ENDPOINT));
         if (recommendationSeverEndpointElement != null) {
             recommendationEnvironment = new RecommendationEnvironment();
             recommendationEnvironment.setRecommendationServerURL(recommendationSeverEndpointElement.getText());

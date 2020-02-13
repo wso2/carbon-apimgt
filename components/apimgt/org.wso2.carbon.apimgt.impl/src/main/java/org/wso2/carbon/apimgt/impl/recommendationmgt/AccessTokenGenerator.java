@@ -41,12 +41,12 @@ public class AccessTokenGenerator {
     private static final Log log = LogFactory.getLog(AccessTokenGenerator.class);
 
     private static volatile AccessTokenGenerator accessTokenGenerator = null;
-    long expiryTime = 0;
-    long buffer = 20000; // buffer time is set to 20 seconds
-    String accessToken = null;
-    String oauthUrl;
-    String consumerKey;
-    String consumerSecret;
+    private long expiryTime = 0;
+    private long buffer = 20000; // buffer time is set to 20 seconds
+    private String accessToken = null;
+    private String oauthUrl;
+    private String consumerKey;
+    private String consumerSecret;
 
     public AccessTokenGenerator(String oauthUrl, String consumerKey, String consumerSecret) {
         this.oauthUrl = oauthUrl;

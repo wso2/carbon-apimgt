@@ -709,8 +709,8 @@ public class APIManagerComponent {
 
     private void setupAccessTokenGenerator(){
 
-        RecommendationEnvironment recommendationEnvironment =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
+        RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
         if (recommendationEnvironment != null && recommendationEnvironment.getOauthURL()!= null){
             AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(
                     recommendationEnvironment.getOauthURL(),
