@@ -142,6 +142,15 @@
     };
     response.addCookie(cookie);
 
+    cookie = {
+        'name': 'publisher_session_state',
+        'value': request.getParameter("session_state", "UTF-8"),
+        'path': app.context + "/",
+        "secure": true,
+        "maxAge": Integer(-1)
+    };
+    response.addCookie(cookie);
+
     var state = request.getParameter("state");
     if (state !== null) {
         state = decodeURIComponent(state);
