@@ -321,23 +321,27 @@ function Properties(props) {
     const { intl } = props;
     const classes = useStyles();
 
-    const headingId = (api.apiType === API.CONSTS.APIProduct
-        ? 'Apis.Details.Properties.Properties.api.product.properties'
-        : 'Apis.Details.Properties.Properties.api.properties');
-
-    const descriptionId = (api.apiType === API.CONSTS.APIProduct
-        ? 'Apis.Details.Properties.Properties.APIProduct.add.new.property.message.content'
-        : 'Apis.Details.Properties.Properties.add.new.property.message.content');
-
     return (
         <>
             <div className={classes.titleWrapper}>
-                <Typography variant='h4' align='left' className={classes.mainTitle}>
-                    <FormattedMessage
-                        id={headingId}
-                        defaultMessage='API Properties'
-                    />
-                </Typography>
+                {api.apiType === API.CONSTS.APIProduct
+                    ? (
+                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                            <FormattedMessage
+                                id='Apis.Details.Properties.Properties.api.product.properties'
+                                defaultMessage='API Properties'
+                            />
+                        </Typography>
+                    )
+                    : (
+                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                            <FormattedMessage
+                                id='Apis.Details.Properties.Properties.api.properties'
+                                defaultMessage='API Properties'
+                            />
+                        </Typography>
+                    )}
+
                 {(!isEmpty(additionalProperties) || showAddProperty) && (
                     <Button
                         size='small'
@@ -363,15 +367,30 @@ function Properties(props) {
                                     defaultMessage='Create Additional Properties'
                                 />
                             </Typography>
-                            <Typography component='p' className={classes.content}>
-                                <FormattedMessage
-                                    id={descriptionId}
-                                    defaultMessage={
-                                        'Add specific custom properties to your '
+                            {api.apiType === API.CONSTS.APIProduct
+                                ? (
+                                    <Typography component='p' className={classes.content}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Properties.Properties.APIProduct.
+                                            add.new.property.message.content'
+                                            defaultMessage={
+                                                'Add specific custom properties to your '
                                         + 'API here.'
-                                    }
-                                />
-                            </Typography>
+                                            }
+                                        />
+                                    </Typography>
+                                )
+                                : (
+                                    <Typography component='p' className={classes.content}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Properties.Properties.add.new.property.message.content'
+                                            defaultMessage={
+                                                'Add specific custom properties to your '
+                                        + 'API here.'
+                                            }
+                                        />
+                                    </Typography>
+                                )}
                             <div className={classes.actions}>
                                 <Button
                                     variant='contained'
