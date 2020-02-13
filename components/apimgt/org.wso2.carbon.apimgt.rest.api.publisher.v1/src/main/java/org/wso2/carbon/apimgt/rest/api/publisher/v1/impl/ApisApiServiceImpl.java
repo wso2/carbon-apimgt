@@ -871,6 +871,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         while ((inputLine = reader.readLine()) != null) {
                             responseString.append(inputLine);
                         }
+                        reader.close();
                         JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
                         String report = responseJson.get(APIConstants.DATA).toString();
                         String grade = (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
