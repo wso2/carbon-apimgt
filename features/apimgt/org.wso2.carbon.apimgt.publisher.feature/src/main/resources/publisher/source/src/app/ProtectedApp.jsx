@@ -68,7 +68,6 @@ export default class Protected extends Component {
             settings: null,
             clientId: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_CLIENT_ID),
             sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_SESSION_STATE),
-            sessionState: 'unchanged',
         };
         this.environments = [];
         this.checkSession = this.checkSession.bind(this);
@@ -83,11 +82,11 @@ export default class Protected extends Component {
         const user = AuthManager.getUser();
         const api = new Api();
         const settingPromise = api.getSettings();
-        // window.addEventListener('message', this.handleMessage);
+        window.addEventListener('message', this.handleMessage);
         if (user) {
             this.setState({ user });
             settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
-            // this.checkSession();
+            this.checkSession();
         } else {
             // If no user data available , Get the user info from existing token information
             // This could happen when OAuth code authentication took place and could send
@@ -98,19 +97,13 @@ export default class Protected extends Component {
         }
     }
 
+    /**
+     * Handle iframe message
+     * @param {event} e Event
+     */
     handleMessage(e) {
-        const { sessionState } = this.state;
-        console.log('sessionState: ' + sessionState);
-        let stat;
-        if (e.data === 'unchanged') {
-            stat = 'unchanged';
-            // console.log('checkSession: ' + stat);
-        } else if (e.data === 'changed') {
-            stat = 'changed';
-            // console.log('checkSession: ' + stat);
-            this.setState({
-                sessionState: stat,
-            });
+        if (e.data === 'changed') {
+            window.location = Configurations.app.context + '/services/auth/login?not-Login';
         }
     }
 
