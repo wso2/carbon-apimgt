@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.usage.publisher;
 
+import com.google.gson.Gson;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -45,6 +46,8 @@ public class DataPublisherUtil {
     private static final String UNKNOWN_HOST = "UNKNOWN_HOST";
     private static boolean isEnabledMetering=false;
     private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
+    private static final Gson gson = new Gson();
+
     public static String getHostAddress() {
 
         if (hostAddress != null) {
@@ -131,5 +134,9 @@ public class DataPublisherUtil {
         } else {
             return null;
         }
+    }
+
+    public static String toJsonString(Map<String, String> properties) {
+        return gson.toJson(properties);
     }
 }

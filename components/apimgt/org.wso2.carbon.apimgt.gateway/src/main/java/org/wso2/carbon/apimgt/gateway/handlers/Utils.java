@@ -62,6 +62,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -443,4 +445,36 @@ public class Utils {
         return false;
     }
 
+    /**
+     * Populate custom properties define in a mediation sequence
+     *
+     * @param messageContext MessageContext
+     * @return Map<String, String> with custom properties
+     */
+    public static Map<String, String> getCustomAnalyticsProperties(MessageContext messageContext) {
+        Map<String, String> requestProperties = getCustomAnalyticsProperties(messageContext,
+                APIMgtGatewayConstants.CUSTOM_ANALYTICS_REQUEST_PROPERTIES);
+        Map<String, String> responseProperties = getCustomAnalyticsProperties(messageContext,
+                APIMgtGatewayConstants.CUSTOM_ANALYTICS_RESPONSE_PROPERTIES);
+        Map<String, String> properties = new HashMap<>(requestProperties);
+        properties.putAll(responseProperties);
+        return properties;
+    }
+
+    private static Map<String, String> getCustomAnalyticsProperties(MessageContext messageContext,
+            String propertyPathKey) {
+        Set<String> keys = messageContext.getPropertyKeySet();
+        String properties = (String) messageContext.getProperty(propertyPathKey);
+        if (StringUtils.isBlank(properties)) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> propertyMap = new HashMap<>();
+        String[] propertyKeys = properties.split(APIMgtGatewayConstants.CUSTOM_ANALYTICS_PROPERTY_SEPARATOR);
+        for (String propertyKey : propertyKeys) {
+            if (keys.contains(propertyKey.trim())) {
+                propertyMap.put(propertyKey, (String) messageContext.getProperty(propertyKey.trim()));
+            }
+        }
+        return propertyMap;
+    }
 }

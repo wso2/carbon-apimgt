@@ -18,7 +18,11 @@
  */
 
 package org.wso2.carbon.apimgt.impl.definitions;
-
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.swagger.oas.inflector.examples.ExampleBuilder;
+import io.swagger.oas.inflector.examples.XmlExampleSerializer;
+import io.swagger.oas.inflector.examples.models.Example;
+import io.swagger.oas.inflector.processors.JsonNodeExampleSerializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
@@ -63,9 +67,6 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -78,6 +79,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYPE;
 
 /**
  * Models API definition using OAS (OpenAPI 3.0) parser
@@ -85,6 +88,138 @@ import java.util.Set;
 public class OAS3Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS3Parser.class);
     static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
+
+    /**
+     * This method  generates Sample/Mock payloads for Open API Specification (3.0) definitions
+     *
+     * @param apiDefinition API Definition
+     * @return swagger Json
+     */
+    @Override
+    public String generateExample(String apiDefinition) {
+        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, null);
+        if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
+            log.debug("Errors found when parsing OAS definition");
+        }
+        OpenAPI swagger = parseAttemptForV3.getOpenAPI();
+        for (Map.Entry<String, PathItem> entry : swagger.getPaths().entrySet()) {
+            String path = entry.getKey();
+            int minResponse = 0;
+            int responseCode = 0;
+            Map<String, Schema> definitions = swagger.getComponents().getSchemas();
+            ArrayList<Integer> responseCodes = new ArrayList<Integer>();
+            List<Operation> operations = swagger.getPaths().get(path).readOperations();
+            for (Operation op : operations) {
+                StringBuilder genCode = new StringBuilder();
+                StringBuilder responseSection = new StringBuilder();
+                for (String responseEntry : op.getResponses().keySet()) {
+                    if (!responseEntry.equals("default")) {
+                        responseCode = Integer.parseInt(responseEntry);
+                        responseCodes.add(responseCode);
+                        minResponse = Collections.min(responseCodes);
+                    }
+                    Content content = op.getResponses().get(responseEntry).getContent();
+                    if (content != null) {
+                        MediaType applicationJson = content.get(APPLICATION_JSON_MEDIA_TYPE);
+                        MediaType applicationXml = content.get(APPLICATION_XML_MEDIA_TYPE);
+                        if (applicationJson != null) {
+                            Schema jsonSchema = applicationJson.getSchema();
+                            if (jsonSchema != null) {
+                                String jsonExample = getJsonExample(jsonSchema, definitions);
+                                genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
+                            }
+                            if (responseCode == minResponse) {
+                                responseSection.append(getGeneratedSetResponse(responseEntry,"json"));
+                                if (applicationXml != null) {
+                                    responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry,"xml")).append("*/\n\n");
+                                }
+                            }
+                        }
+                        if (applicationXml != null) {
+                            Schema xmlSchema = applicationXml.getSchema();
+                            if (xmlSchema != null) {
+                                String xmlExample = getXmlExample(xmlSchema, definitions);
+                                genCode.append(getGeneratedResponseVar(responseEntry, xmlExample, "xml"));
+                            }
+                            if (responseCode == minResponse) {
+                                if (applicationJson == null) {
+                                    responseSection.append(getGeneratedSetResponse(responseEntry, "xml"));
+                                }
+                            }
+                        }
+                        if (applicationJson == null && applicationXml == null) {
+                            setDefaultGeneratedResponse(genCode);
+                        }
+                    }
+                }
+                genCode.append(responseSection);
+                op.addExtension("x-mediation-script", genCode);
+            }
+        }
+        return Json.pretty(swagger);
+    }
+
+    /**
+     * This method  generates Sample/Mock payloads of Json Examples for operations in the swagger definition
+     *
+     * @param model model
+     * @param definitions definition
+     * @return JsonExample
+     */
+    private String getJsonExample(Schema model, Map<String, Schema> definitions){
+        Example example = ExampleBuilder.fromSchema(model,  definitions);
+        SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
+        Json.mapper().registerModule(simpleModule);
+        return Json.pretty(example);
+    }
+
+    /**
+     * This method  generates Sample/Mock payloads of XML Examples for operations in the swagger definition
+     * @param model model
+     * @param definitions definition
+     * @return XmlExample
+     */
+    private String getXmlExample(Schema model, Map<String, Schema> definitions){
+        Example example = ExampleBuilder.fromSchema(model,  definitions);
+        String rawXmlExample = new XmlExampleSerializer().serialize(example);
+        return rawXmlExample.replace("<?xml version='1.1' encoding='UTF-8'?>","");
+    }
+
+    /**
+     *Sets default script
+     *
+     * @param genCode String builder
+     */
+    private void setDefaultGeneratedResponse(StringBuilder genCode) {
+        genCode.append("/* mc.setProperty('CONTENT_TYPE', 'application/json');\n\t" +
+                "mc.setPayloadJSON('{ \"data\" : \"sample JSON\"}');*/\n" +
+                "/*Uncomment the above comment block to send a sample response.*/");
+    }
+
+    /**
+     * Generates string for variables in Payload Generation
+     *
+     * @param responseCode response Entry Code
+     * @param example generated Example Json/Xml
+     * @param type  mediaType (Json/Xml)
+     * @return generatedString
+     */
+    private String getGeneratedResponseVar(String responseCode, String example, String type) {
+        return "\nvar response" + responseCode + type + " = " + example + "\n\n";
+    }
+
+    /**
+     * Generates string for methods in Payload Generation
+     *
+     * @param responseCode response Entry Code
+     * @param type mediaType (Json/Xml)
+     * @return manualCode
+     */
+    private String getGeneratedSetResponse(String responseCode, String type) {
+        return "mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
+                "mc.setPayloadJSON(response" + responseCode + type + ");";
+    }
 
     /**
      * This method returns URI templates according to the given swagger file
@@ -973,7 +1108,7 @@ public class OAS3Parser extends APIDefinition {
         mediaType.setSchema(postSchema);
 
         Content content = new Content();
-        content.addMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE, mediaType);
+        content.addMediaType(APPLICATION_JSON_MEDIA_TYPE, mediaType);
         requestBody.setContent(content);
         postOperation.setRequestBody(requestBody);
 

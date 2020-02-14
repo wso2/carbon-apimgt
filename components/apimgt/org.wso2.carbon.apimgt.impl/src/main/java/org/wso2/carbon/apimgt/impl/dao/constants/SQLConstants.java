@@ -3165,6 +3165,10 @@ public class SQLConstants {
 
     public static final String DELETE_API_CATEGORY = "DELETE FROM AM_API_CATEGORIES WHERE UUID = ?";
 
+    public static final String GET_USER_ID = "SELECT USER_ID FROM AM_USER WHERE USER_NAME=?";
+
+    public static final String ADD_USER_ID = "INSERT INTO AM_USER (USER_ID, USER_NAME) VALUES (?,?)";
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

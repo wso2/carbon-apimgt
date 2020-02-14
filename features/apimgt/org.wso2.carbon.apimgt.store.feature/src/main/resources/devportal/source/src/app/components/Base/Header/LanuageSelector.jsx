@@ -25,6 +25,7 @@ import Select from '@material-ui/core/Select';
 import Box from '@material-ui/core/Box';
 import { useTheme } from '@material-ui/core/styles';
 import { app } from 'Settings';
+import Hidden from '@material-ui/core/Hidden';
 
 const useStyles = makeStyles(theme => ({
     formControl: {
@@ -79,7 +80,7 @@ export default function LanuageSelector() {
                 {languages.map((lang) => <MenuItem value={lang.key}>
                     <Box display='flex'>
                         {showFlag && <img src={`${app.context}${lang.image}`} alt={lang.key} width={`${lang.imageWidth}px`} />}
-                        {showText && <Typography variant="body1" className={classes.langText}>{lang.text}</Typography>}
+                        <Hidden mdDown>{showText && <Typography variant="body1" className={classes.langText}>{lang.text}</Typography>}</Hidden>
                     </Box>
                 </MenuItem>)}
 

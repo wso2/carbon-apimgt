@@ -13,7 +13,7 @@ exports[`Test scenarios for <Footer/> component should match with the existing s
       <p
         className="MuiTypography-root MuiTypography-body1 MuiTypography-noWrap"
       >
-        WSO2 API-M v3.1.0 | © 2019 WSO2 Inc
+        WSO2 API-M v3.1.0 | © 2020 WSO2 Inc
       </p>
     </div>
   </div>

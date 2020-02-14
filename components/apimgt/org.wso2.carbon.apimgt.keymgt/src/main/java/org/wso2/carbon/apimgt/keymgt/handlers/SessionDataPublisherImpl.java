@@ -56,10 +56,10 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
 
     public static final Log log = LogFactory.getLog(SessionDataPublisherImpl.class);
     private static final String handlerName = "APIMSessionDataPublisherImpl";
-    private static final String DEVPORTAL_CLIENT_APP_NAME = "apim_devportal";
+    private static final String DEVPORTAL_CLIENT_APP_NAME = "admin_apim_devportal";
     private static final String DEVPORTAL_CLIENT_APP_NAME_OLD = "admin_store";
     private static final String PUBLISHER_CLIENT_APP_NAME_OLD = "admin_publisher";
-    private static final String PUBLISHER_CLIENT_APP_NAME = "apim_publisher";
+    private static final String PUBLISHER_CLIENT_APP_NAME = "admin_apim_publisher";
 
     @Override public void doPublishAuthenticationStepSuccess(AuthenticationData authenticationData) {
 
@@ -156,6 +156,8 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
                     for (AccessTokenDO accessTokenDO : accessTokenDOs) {
                         //Clear cache with AccessTokenDO
                         authzUser = accessTokenDO.getAuthzUser();
+                        OAuthUtil.clearOAuthCache(accessTokenDO.getConsumerKey(), authzUser,
+                                OAuth2Util.buildScopeString(accessTokenDO.getScope()),"NONE");
                         OAuthUtil.clearOAuthCache(accessTokenDO.getConsumerKey(), authzUser,
                                 OAuth2Util.buildScopeString(accessTokenDO.getScope()));
                         OAuthUtil.clearOAuthCache(accessTokenDO.getConsumerKey(), authzUser);
