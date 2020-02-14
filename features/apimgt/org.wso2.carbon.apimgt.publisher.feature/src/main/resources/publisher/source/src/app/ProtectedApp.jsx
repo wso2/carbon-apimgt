@@ -83,11 +83,11 @@ export default class Protected extends Component {
         const user = AuthManager.getUser();
         const api = new Api();
         const settingPromise = api.getSettings();
-        window.addEventListener('message', this.handleMessage);
+        // window.addEventListener('message', this.handleMessage);
         if (user) {
             this.setState({ user });
             settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
-            this.checkSession();
+            // this.checkSession();
         } else {
             // If no user data available , Get the user info from existing token information
             // This could happen when OAuth code authentication took place and could send
