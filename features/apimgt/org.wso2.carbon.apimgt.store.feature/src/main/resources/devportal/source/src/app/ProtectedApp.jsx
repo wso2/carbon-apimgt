@@ -94,7 +94,7 @@ class ProtectedApp extends Component {
             }
         }
         this.loadLocale(locale);
-        window.addEventListener('message', this.handleMessage);
+        // window.addEventListener('message', this.handleMessage);
         const { location: { search } } = this.props;
         const { setTenantDomain, setSettings } = this.context;
         const { tenant } = queryString.parse(search);
@@ -131,7 +131,7 @@ class ProtectedApp extends Component {
         if (user) { // If token exisit in cookies and user info available in local storage
             const hasViewScope = user.scopes.includes('apim:subscribe');
             if (hasViewScope) {
-                this.checkSession();
+                //this.checkSession();
                 this.setState({ userResolved: true, scopesFound: true });
             } else {
                 console.log('No relevant scopes found, redirecting to Anonymous View');
@@ -163,7 +163,7 @@ class ProtectedApp extends Component {
                                         error,
                                     );
                                 });
-                                this.checkSession();
+                                //this.checkSession();
                         } else {
                             console.log('No relevant scopes found, redirecting to Anonymous View');
                             this.setState({ userResolved: true });
