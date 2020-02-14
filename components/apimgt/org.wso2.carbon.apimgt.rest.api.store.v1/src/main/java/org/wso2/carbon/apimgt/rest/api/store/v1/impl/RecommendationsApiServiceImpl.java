@@ -24,14 +24,16 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApiService;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,11 +53,13 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
         try {
             String userName = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            String tenantDomain = apiConsumer.getRequestedTenant();
+            String requestedTenantDomain = apiConsumer.getRequestedTenant();
+            String userTenantDomain = MultitenantUtils.getTenantDomain(userName);
 
-            if (apiConsumer.isRecommendationEnabled(tenantDomain) && userName != "wso2.anonymous.user") {
+            if (apiConsumer.isRecommendationEnabled(requestedTenantDomain) &&
+                    userName != APIConstants.WSO2_ANONYMOUS_USER) {
                 int maxRecommendations = recommendationEnvironment.getMaxRecommendations();
-                String recommendations = apiConsumer.getApiRecommendations(userName, tenantDomain);
+                String recommendations = apiConsumer.getApiRecommendations(userName, requestedTenantDomain);
 
                 if (recommendations != null) {
                     JSONObject jsonResponse = new JSONObject(recommendations);
@@ -65,7 +69,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
                         try {
                             JSONObject apiObj = apiList.getJSONObject(i);
                             apiId = apiObj.getString("id");
-                            ApiTypeWrapper apiWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, tenantDomain);
+                            ApiTypeWrapper apiWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, userTenantDomain);
                             API api = apiWrapper.getApi();
                             APIIdentifier apiIdentifier = api.getId();
                             boolean isApiSubscribed = apiConsumer.isSubscribed(apiIdentifier, userName);
