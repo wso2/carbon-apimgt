@@ -17,11 +17,12 @@
  */
 
 import React, { Suspense, lazy } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import Progress from 'AppComponents/Shared/Progress';
 import APICreateRoutes from './Create/APICreateRoutes';
 
 import Listing from './Listing/Listing';
+import AuthManager from 'AppData/AuthManager';
 
 
 const Details = lazy(() => import('./Details/index' /* webpackChunkName: "DeferredDetails" */));
@@ -47,13 +48,35 @@ const Apis = () => {
                 exact
                 path='/api-products'
                 key={Date.now()}
-                render={(props) => <Listing {...props} isAPIProduct />}
+                render={(props) => {
+                    if (AuthManager.isNotPublisher()) {
+                        return <Redirect to='/apis' />
+                    } else  {
+                        return <Listing {...props} isAPIProduct />;
+                    }
+                }}
             />
             <Route path='/apis/search' render={(props) => <Listing {...props} isAPIProduct={false} />} />
             <Route path='/apis/create' component={APICreateRoutes} />
-            <Route path='/api-products/create' component={APICreateRoutes} />
+            <Route path='/api-products/create'
+                render={() => {
+                    if (AuthManager.isNotPublisher()) {
+                        return <Redirect to='/apis' />
+                    } else  {
+                        return <APICreateRoutes />;
+                    }
+                }}
+            />
             <Route path='/apis/:apiUUID/' render={(props) => <DeferredDetails {...props} isAPIProduct={false} />} />
-            <Route path='/api-products/:apiProdUUID/' render={(props) => <DeferredDetails {...props} isAPIProduct />} />
+            <Route path='/api-products/:apiProdUUID/'
+                render={(props) => {
+                    if (AuthManager.isNotPublisher()) {
+                        return <Redirect to='/apis' />
+                    } else  {
+                        return <DeferredDetails {...props} isAPIProduct />;
+                    }
+                }}
+            />
         </Switch>
     );
 };
