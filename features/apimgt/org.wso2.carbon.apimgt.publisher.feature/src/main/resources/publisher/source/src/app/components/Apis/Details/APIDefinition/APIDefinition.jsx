@@ -98,11 +98,13 @@ class APIDefinition extends React.Component {
         this.state = {
             openEditor: false,
             swagger: null,
+            swaggerModified: null,
             graphQL: null,
             format: null,
             convertTo: null,
             isAuditApiClicked: false,
             securityAuditProperties: [],
+            isSwaggerValid: true,
         };
         this.handleNo = this.handleNo.bind(this);
         this.handleOk = this.handleOk.bind(this);
@@ -115,6 +117,7 @@ class APIDefinition extends React.Component {
         this.onChangeFormatClick = this.onChangeFormatClick.bind(this);
         this.openUpdateConfirmation = this.openUpdateConfirmation.bind(this);
         this.updateSwaggerDefinition = this.updateSwaggerDefinition.bind(this);
+        this.onChangeSwaggerContent = this.onChangeSwaggerContent.bind(this);
     }
 
     /**
@@ -141,7 +144,8 @@ class APIDefinition extends React.Component {
                     });
                 } else {
                     this.setState({
-                        swagger: json2yaml.stringify(response.obj),
+                        swagger: json2yaml.stringify(response.obj).replace('---\n', ''),
+                        swaggerModified: json2yaml.stringify(response.obj).replace('---\n', ''),
                         format: 'yaml',
                         convertTo: this.getConvertToFormat('yaml'),
                     });
@@ -178,9 +182,36 @@ class APIDefinition extends React.Component {
         if (convertTo === 'json') {
             formattedString = JSON.stringify(yaml.load(swagger), null, 1);
         } else {
-            formattedString = json2yaml.stringify(JSON.parse(swagger));
+            formattedString = json2yaml.stringify(JSON.parse(swagger)).replace('---\n', '');
         }
-        this.setState({ swagger: formattedString, format: convertTo, convertTo: format });
+        this.setState({
+            swagger: formattedString,
+            swaggerModified: formattedString,
+            format: convertTo,
+            convertTo: format,
+        });
+    }
+
+    /**
+     * Method to handle swagger content change
+     *
+     * @param {string} modifiedContent : The modified swagger content.
+     * */
+    onChangeSwaggerContent(modifiedContent) {
+        const { format } = this.state;
+        /**
+         * Validate for the basic json/ yaml format.
+         * */
+        try {
+            if (format === 'json') {
+                JSON.parse(modifiedContent, null);
+            } else {
+                yaml.load(modifiedContent);
+            }
+            this.setState({ isSwaggerValid: true, swaggerModified: modifiedContent });
+        } catch (e) {
+            this.setState({ isSwaggerValid: false, swaggerModified: modifiedContent });
+        }
     }
 
     setSchemaDefinition = (schemaContent, contentType) => {
@@ -191,12 +222,12 @@ class APIDefinition extends React.Component {
         } else {
             this.setState({
                 swagger: schemaContent,
+                swaggerModified: schemaContent,
                 convertTo: this.getConvertToFormat(contentType),
                 format: contentType,
             });
         }
     };
-
 
     /**
      * Util function to get the format which the definition can be converted to.
@@ -226,8 +257,8 @@ class APIDefinition extends React.Component {
      * Handles the yes button action of the save api definition confirmation dialog box.
      */
     handleOk() {
-        const updatedContent = window.localStorage.getItem('swagger-editor-content');
-        this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(updatedContent, '', ''));
+        const { swaggerModified } = this.state;
+        this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
     }
 
     /**
@@ -243,7 +274,6 @@ class APIDefinition extends React.Component {
      * local storage.
      * */
     openEditor() {
-        window.localStorage.setItem('swagger-editor-content', this.state.swagger);
         this.setState({ openEditor: true });
     }
 
@@ -251,7 +281,6 @@ class APIDefinition extends React.Component {
      * Sets the state to close the swagger-editor drawer.
      * */
     closeEditor() {
-        window.localStorage.setItem('swagger-editor-content', '');
         this.setState({ openEditor: false });
         const { intl, api, history } = this.props;
         const { isAuditApiClicked } = this.state;
@@ -338,7 +367,7 @@ class APIDefinition extends React.Component {
     render() {
         const {
             swagger, graphQL, openEditor, openDialog, format, convertTo, notFound, isAuditApiClicked,
-            securityAuditProperties,
+            securityAuditProperties, isSwaggerValid, swaggerModified,
         } = this.state;
         const { classes, resourceNotFountMessage, api } = this.props;
         let downloadLink;
@@ -482,6 +511,7 @@ class APIDefinition extends React.Component {
                             variant='contained'
                             color='primary'
                             onClick={this.openUpdateConfirmation}
+                            disabled={!isSwaggerValid}
                         >
                             <FormattedMessage
                                 id='Apis.Details.APIDefinition.APIDefinition.documents.swagger.editor.update.content'
@@ -501,7 +531,11 @@ class APIDefinition extends React.Component {
                             </div>
                         )}
                     >
-                        <EditorDialog />
+                        <EditorDialog
+                            swagger={swaggerModified}
+                            language={format}
+                            onEditContent={this.onChangeSwaggerContent}
+                        />
                     </Suspense>
                 </Dialog>
                 <Dialog
