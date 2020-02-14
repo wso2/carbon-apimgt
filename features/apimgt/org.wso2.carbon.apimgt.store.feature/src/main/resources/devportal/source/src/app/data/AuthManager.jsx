@@ -48,27 +48,7 @@ class AuthManager {
             throw error_response;
             /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain */
         }
-        const message = 'The session has expired' + '.<br/> You will be redirect to the login page ...';
-        if (typeof noty !== 'undefined') {
-            noty({
-                text: message,
-                type: 'error',
-                dismissQueue: true,
-                modal: true,
-                progressBar: true,
-                timeout: 5000,
-                layout: 'top',
-                theme: 'relax',
-                maxVisible: 10,
-                callback: {
-                    afterClose() {
-                        window.location = loginPageUri;
-                    },
-                },
-            });
-        } else {
-            throw error_response;
-        }
+        throw error_response;
     }
 
     /**
