@@ -14536,4 +14536,34 @@ public class ApiMgtDAO {
         }
     }
 
+    public String addUserID(String userID, String userName) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_USER_ID)) {
+            statement.setString(1, userID);
+            statement.setString(2, userName);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to add userID for " + userName , e);
+        }
+        return userID;
+    }
+
+    public String getUserID(String userName) throws APIManagementException {
+        String userID = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_USER_ID)) {
+            statement.setString(1, userName);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                userID = rs.getString("USER_ID");
+            }
+            if (userID == null) {
+                userID = UUID.randomUUID().toString();
+                addUserID(userID, userName);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to fetch user ID for " + userName , e);
+        }
+        return userID;
+    }
 }
