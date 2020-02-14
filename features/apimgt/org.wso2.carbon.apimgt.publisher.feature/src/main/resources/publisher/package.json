@@ -80,7 +80,7 @@
         "@babel/preset-env": "^7.6.3",
         "@babel/preset-react": "^7.6.3",
         "@babel/register": "^7.6.2",
-        "@stoplight/prism-http": "^3.1.0",
+        "@stoplight/prism-http": "^3.2.8",
         "babel-eslint": "^10.0.3",
         "babel-jest": "^24.8.0",
         "babel-loader": "^8.0.6",
