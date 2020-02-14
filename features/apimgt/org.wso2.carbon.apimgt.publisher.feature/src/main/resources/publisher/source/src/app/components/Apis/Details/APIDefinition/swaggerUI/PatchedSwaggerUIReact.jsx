@@ -95,7 +95,7 @@ PatchedSwaggerUI.defaultProps = {
     docExpansion: 'list',
     defaultModelsExpandDepth: 1,
     presets: [],
-    spec: null,
+    spec: '',
 };
 
 PatchedSwaggerUI.propTypes = {
