@@ -435,6 +435,9 @@ export default function Resources(props) {
                                     alignItems='stretch'
                                 >
                                     {Object.entries(verbObject).map(([verb, operation]) => {
+                                        if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].includes(verb.toUpperCase())) {
+                                            return null;
+                                        }
                                         return (
                                             <Grid key={`${target}/${verb}`} item>
                                                 <Operation

@@ -78,7 +78,7 @@ export default function ListParameters(props) {
                 </TableHead>
                 <TableBody>
                     {operation.parameters
-                        && operation.parameters.map((parameter) => (
+                        && operation.parameters.filter((param) => !param.$ref).map((parameter) => (
                             <TableRow key={parameter.name}>
                                 <TableCell>{parameter.name}</TableCell>
                                 <TableCell align='right'>{capitalizeFirstLetter(parameter.in)}</TableCell>
