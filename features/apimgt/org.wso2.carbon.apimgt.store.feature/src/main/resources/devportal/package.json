@@ -1,6 +1,6 @@
 {
-    "name": "wso2_apim_developer_portal",
-    "version": "1.0.0",
+    "name": "@wso2/dev-portal",
+    "version": "3.1.0",
     "description": "WSO2 API Manager Developer Portal Web App Note: reverted the swagger-ui version from 3.24.3 to 3.22.2 as POST was not working within swagger console",
     "main": "app.js",
     "scripts": {
@@ -15,9 +15,13 @@
     },
     "repository": {
         "type": "git",
-        "url": "git://github.com/wso2/carbon-apimgt"
+        "url": "git://github.com/wso2/carbon-apimgt",
+        "directory": "carbon-apimgt/features/apimgt/org.wso2.carbon.apimgt.store.feature/src/main/resources/devportal"
     },
-    "author": "WSO2 Org",
+    "bugs": {
+        "url": "https://github.com/wso2/product-apim/issues"
+    },
+    "author": "WSO2 Team",
     "license": "Apache-2.0",
     "dependencies": {
         "@hapi/joi": "^16.1.7",
