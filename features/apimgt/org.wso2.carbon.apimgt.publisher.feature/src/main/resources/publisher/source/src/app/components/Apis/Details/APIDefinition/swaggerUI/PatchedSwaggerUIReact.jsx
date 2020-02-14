@@ -95,11 +95,12 @@ PatchedSwaggerUI.defaultProps = {
     docExpansion: 'list',
     defaultModelsExpandDepth: 1,
     presets: [],
+    spec: null,
 };
 
 PatchedSwaggerUI.propTypes = {
     spec: PropTypes.shape({}),
-    url: PropTypes.string,
+    url: PropTypes.string.isRequired,
     defaultModelsExpandDepth: PropTypes.number,
     docExpansion: PropTypes.oneOf(['list', 'full', 'none']),
     presets: PropTypes.arrayOf(PropTypes.func),
