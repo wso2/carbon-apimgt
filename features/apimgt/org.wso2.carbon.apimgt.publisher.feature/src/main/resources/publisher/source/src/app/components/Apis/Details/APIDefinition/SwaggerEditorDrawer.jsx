@@ -17,6 +17,7 @@
  */
 import React, { lazy } from 'react';
 import Grid from '@material-ui/core/Grid';
+import PropTypes from 'prop-types';
 import withStyles from '@material-ui/core/styles/withStyles';
 import SwaggerUI from './swaggerUI/SwaggerUI';
 
@@ -40,13 +41,17 @@ const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName
  * https://github.com/wso2/product-apim/issues/5071
  * */
 class SwaggerEditorDrawer extends React.Component {
+    /**
+     * @inheritDoc
+     */
     constructor(props) {
         super(props);
         this.onContentChange = this.onContentChange.bind(this);
     }
 
     /**
-     *
+     * Method to handle the change event of the editor.
+     * @param {string} content : The edited content.
      * */
     onContentChange(content) {
         const { onEditContent } = this.props;
@@ -81,5 +86,12 @@ class SwaggerEditorDrawer extends React.Component {
         );
     }
 }
+
+SwaggerEditorDrawer.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+    language: PropTypes.string.isRequired,
+    swagger: PropTypes.string.isRequired,
+    onEditContent: PropTypes.func.isRequired,
+};
 
 export default withStyles(styles)(SwaggerEditorDrawer);
