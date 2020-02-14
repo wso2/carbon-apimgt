@@ -31,6 +31,9 @@
     } else {
         serverUrl = utils.getServerURL();
     }
+    if(request.getParameter("error") == "login_required") {
+       response.sendRedirect(serverUrl + app.context + "/services/auth/login");
+    } else if (request.getParameter("code") != null) {
     var tokenRequestData = {
         "grant_type": "authorization_code",
         "code": request.getParameter("code", "UTF-8"),
@@ -161,6 +164,7 @@
         }
     } else {
         response.sendRedirect(app.context);
+    }
     }
 
 %>

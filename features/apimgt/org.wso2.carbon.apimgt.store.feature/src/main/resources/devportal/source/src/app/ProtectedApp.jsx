@@ -68,7 +68,6 @@ class ProtectedApp extends Component {
             tenantList: [],
             clientId: Utils.getCookieWithoutEnvironment(User.CONST.DEVPORTAL_CLIENT_ID),
             sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.DEVPORTAL_SESSION_STATE),
-            sessionState: 'unchanged',
         };
         this.environments = [];
         this.loadLocale = this.loadLocale.bind(this);
@@ -94,7 +93,7 @@ class ProtectedApp extends Component {
             }
         }
         this.loadLocale(locale);
-        // window.addEventListener('message', this.handleMessage);
+        window.addEventListener('message', this.handleMessage);
         const { location: { search } } = this.props;
         const { setTenantDomain, setSettings } = this.context;
         const { tenant } = queryString.parse(search);
@@ -131,7 +130,7 @@ class ProtectedApp extends Component {
         if (user) { // If token exisit in cookies and user info available in local storage
             const hasViewScope = user.scopes.includes('apim:subscribe');
             if (hasViewScope) {
-                //this.checkSession();
+                this.checkSession();
                 this.setState({ userResolved: true, scopesFound: true });
             } else {
                 console.log('No relevant scopes found, redirecting to Anonymous View');
@@ -163,7 +162,7 @@ class ProtectedApp extends Component {
                                         error,
                                     );
                                 });
-                                //this.checkSession();
+                                this.checkSession();
                         } else {
                             console.log('No relevant scopes found, redirecting to Anonymous View');
                             this.setState({ userResolved: true });
@@ -185,18 +184,8 @@ class ProtectedApp extends Component {
     }
 
     handleMessage(e) {
-        const { sessionState } = this.state;
-        console.log('sessionState: ' + sessionState);
-        let stat;
-        if (e.data === 'unchanged') {
-            stat = 'unchanged';
-            // console.log('checkSession: ' + stat);
-        } else if (e.data === 'changed') {
-            stat = 'changed';
-            // console.log('checkSession: ' + stat);
-            this.setState({
-                sessionState: stat,
-            });
+        if (e.data === 'changed') {
+            window.location = Settings.app.context + '/services/configs?not-Login';
         }
     }
 

@@ -29,6 +29,9 @@
     } else {
         serverUrl = utils.getServerURL();
     }
+    if(request.getParameter("error") === "login_required"){
+       response.sendRedirect(serverUrl + app.context + "/services/configs");  
+    } else if(request.getParameter("code") != null){
     var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
     if(loginCallbackUrl == null){
         loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
@@ -122,6 +125,7 @@
         response.sendRedirect(app.context + state);
     } else {
         response.sendRedirect(app.context + "/apis");
+    }
     }
 
 %>
