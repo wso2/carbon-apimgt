@@ -15,9 +15,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import SwaggerEditor, { plugins } from 'swagger-editor';
-import 'swagger-editor/dist/swagger-editor.css';
+import React, { lazy } from 'react';
+import Grid from '@material-ui/core/Grid';
+import withStyles from '@material-ui/core/styles/withStyles';
+import SwaggerUI from './swaggerUI/SwaggerUI';
+
+const styles = () => ({
+    editorPane: {
+        width: '50%',
+        height: '100%',
+        overflow: 'scroll',
+    },
+    editorRoot: {
+        height: '100%',
+    },
+});
+
+const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
 
 /**
  * This component hosts the Swagger Editor component.
@@ -26,30 +40,46 @@ import 'swagger-editor/dist/swagger-editor.css';
  * https://github.com/wso2/product-apim/issues/5071
  * */
 class SwaggerEditorDrawer extends React.Component {
+    constructor(props) {
+        super(props);
+        this.onContentChange = this.onContentChange.bind(this);
+    }
+
     /**
-     * @inheritDoc
-     */
-    componentDidMount() {
-        window.editor = SwaggerEditor({
-            dom_id: '#swagger-editor',
-            layout: 'EditorLayout',
-            plugins: Object.values(plugins),
-            supportedSubmitMethods: [],
-            components: {},
-            swagger2GeneratorUrl: 'https://generator.swagger.io/api/swagger.json',
-            oas3GeneratorUrl: 'https://generator3.swagger.io/openapi.json',
-            swagger2ConverterUrl: 'https://converter.swagger.io/api/convert',
-        });
+     *
+     * */
+    onContentChange(content) {
+        const { onEditContent } = this.props;
+        onEditContent(content);
     }
 
     /**
      * @inheritDoc
      */
     render() {
+        const { classes, language, swagger } = this.props;
+        const swaggerUrl = 'data:text/' + language + ',' + encodeURIComponent(swagger);
         return (
-            <div id='swagger-editor' />
+            <>
+                <Grid container spacing={2} className={classes.editorRoot}>
+                    <Grid item className={classes.editorPane}>
+                        <MonacoEditor
+                            language={language}
+                            width='100%'
+                            height='calc(100vh - 51px)'
+                            theme='vs-dark'
+                            value={swagger}
+                            onChange={this.onContentChange}
+                            options={{ glyphMargin: true }}
+                        />
+                    </Grid>
+                    <Grid item className={classes.editorPane}>
+                        <SwaggerUI url={swaggerUrl} />
+                    </Grid>
+                </Grid>
+            </>
         );
     }
 }
 
-export default SwaggerEditorDrawer;
+export default withStyles(styles)(SwaggerEditorDrawer);
