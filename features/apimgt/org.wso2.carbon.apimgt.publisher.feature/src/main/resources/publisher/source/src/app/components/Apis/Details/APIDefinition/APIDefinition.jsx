@@ -199,22 +199,18 @@ class APIDefinition extends React.Component {
      * */
     onChangeSwaggerContent(modifiedContent) {
         const { format } = this.state;
-        console.log(modifiedContent);
-        // validate the content.
-        if (format === 'json') {
-            try {
+        /**
+         * Validate for the basic json/ yaml format.
+         * */
+        try {
+            if (format === 'json') {
                 JSON.parse(modifiedContent, null);
-                this.setState({ isSwaggerValid: true, swaggerModified: modifiedContent });
-            } catch (e) {
-                this.setState({ isSwaggerValid: false, swaggerModified: modifiedContent });
-            }
-        } else {
-            try {
+            } else {
                 yaml.load(modifiedContent);
-                this.setState({ isSwaggerValid: true, swaggerModified: modifiedContent });
-            } catch (e) {
-                this.setState({ isSwaggerValid: false, swaggerModified: modifiedContent });
             }
+            this.setState({ isSwaggerValid: true, swaggerModified: modifiedContent });
+        } catch (e) {
+            this.setState({ isSwaggerValid: false, swaggerModified: modifiedContent });
         }
     }
 
@@ -262,8 +258,7 @@ class APIDefinition extends React.Component {
      */
     handleOk() {
         const { swaggerModified } = this.state;
-        // const updatedContent = window.localStorage.getItem('swagger-editor-content');
-        this.setState({ openDialog: false, swagger: swaggerModified },
+        this.setState({ openDialog: false },
             () => this.updateSwaggerDefinition(swaggerModified, '', ''));
     }
 
@@ -280,7 +275,6 @@ class APIDefinition extends React.Component {
      * local storage.
      * */
     openEditor() {
-        // window.localStorage.setItem('swagger-editor-content', this.state.swagger);
         this.setState({ openEditor: true });
     }
 
@@ -288,7 +282,6 @@ class APIDefinition extends React.Component {
      * Sets the state to close the swagger-editor drawer.
      * */
     closeEditor() {
-        // window.localStorage.setItem('swagger-editor-content', '');
         this.setState({ openEditor: false });
         const { intl, api, history } = this.props;
         const { isAuditApiClicked } = this.state;
