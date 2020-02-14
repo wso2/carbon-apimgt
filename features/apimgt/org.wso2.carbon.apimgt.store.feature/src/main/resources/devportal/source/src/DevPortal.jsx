@@ -108,7 +108,7 @@ class DevPortal extends React.Component {
      * @param {string} tenant tenant name
      */
     setTenantTheme(tenant) {
-        fetch(`${Settings.app.context}/site/public/tenant_themes/${tenant}/defaultTheme.json`)
+        fetch(`${Settings.app.context}/site/public/tenant_themes/${tenant}/apim/defaultTheme.json`)
             .then((resp) => resp.json())
             .then((data) => {
                 this.setState({ theme: data.themes.light });
