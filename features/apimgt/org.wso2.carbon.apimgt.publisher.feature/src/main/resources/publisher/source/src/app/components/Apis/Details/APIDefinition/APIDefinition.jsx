@@ -258,8 +258,7 @@ class APIDefinition extends React.Component {
      */
     handleOk() {
         const { swaggerModified } = this.state;
-        this.setState({ openDialog: false },
-            () => this.updateSwaggerDefinition(swaggerModified, '', ''));
+        this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
     }
 
     /**
