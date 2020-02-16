@@ -410,11 +410,10 @@ public final class APIConstants {
     public static final String JWT_SIGNATURE_ALGORITHM = "SignatureAlgorithm";
     public static final String GATEWAY_JWT_GENERATOR = "GatewayJWTGeneration";
     public static final String GATEWAY_JWT_GENERATOR_IMPL = "ImplClass";
+    public static final String TOKEN_ISSUERS = "TokenIssuers";
     public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
-    public static final String GATEWAY_JWT_GENERATOR_CLAIM_MAPPING = "ClaimMappings";
+    public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "Claims";
     public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
-    public static final String GATEWAY_JWT_GENERATOR_LOCAL_CLAIM = "LocalClaim";
-    public static final String GATEWAY_JWT_GENERATOR_REMOTE_CLAIM = "RemoteClaim";
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
@@ -521,6 +520,7 @@ public final class APIConstants {
 
     public static final String PASSWORD_RESOLVER_IMPL_CLASS = "PasswordResolverImpl";
     public static final String CACHE_INVALIDATION_TYPE = "type";
+    public static final String GATEWAY_JWKS_CACHE = "JWKS_CACHE";
     public static final String BLOCKING_CONDITION_ID = "id";
 
     public static class TokenStatus {
@@ -1971,4 +1971,24 @@ public final class APIConstants {
 
     public static final String DEFAULT_SCOPE_TYPE = "OAUTH2";
     public static final String DEFAULT_BINDING_TYPE = "DEFAULT";
+
+    public static class TokenIssuer {
+
+        public static String TOKEN_ISSUER = "TokenIssuer";
+        public static final String JWKS_CONFIGURATION = "JWKSConfiguration";
+        public static final String CLAIM_MAPPINGS = "ClaimMappings";
+        public static final String CLAIM_MAPPING = "ClaimMapping";
+
+        public static class JWKSConfiguration {
+
+            public static final String URL = "URL";
+        }
+
+        public static class ClaimMapping {
+
+            public static final String LOCAL_CLAIM = "LocalClaim";
+            public static final String REMOTE_CLAIM = "RemoteClaim";
+
+        }
+    }
 }
