@@ -31,7 +31,8 @@ public class JWTConfigurationDto {
     private String jwtGeneratorImplClass = "org.wso2.carbon.apimgt.keymgt.token.JWTGenerator";
     private String claimRetrieverImplClass;
     private String gatewayJWTGeneratorImpl;
-    private Set<ClaimMappingDto> claimConfigurations = new HashSet<>();
+    private Map<String,TokenIssuerDto> tokenIssuerDtoMap = new HashMap();
+    private Set<String> jwtAdditionalClaims = new HashSet<>();
 
     public boolean isEnabled() {
 
@@ -102,9 +103,24 @@ public class JWTConfigurationDto {
         return gatewayJWTGeneratorImpl;
     }
 
-    public Set<ClaimMappingDto> getClaimConfigurations() {
+    public Map<String, TokenIssuerDto> getTokenIssuerDtoMap() {
 
-        return claimConfigurations;
+        return tokenIssuerDtoMap;
     }
 
+    public void setTokenIssuerDtoMap(
+            Map<String, TokenIssuerDto> tokenIssuerDtoMap) {
+
+        this.tokenIssuerDtoMap = tokenIssuerDtoMap;
+    }
+
+    public Set<String> getJwtAdditionalClaims() {
+
+        return jwtAdditionalClaims;
+    }
+
+    public void setJwtAdditionalClaims(Set<String> jwtClaims) {
+
+        this.jwtAdditionalClaims = jwtClaims;
+    }
 }

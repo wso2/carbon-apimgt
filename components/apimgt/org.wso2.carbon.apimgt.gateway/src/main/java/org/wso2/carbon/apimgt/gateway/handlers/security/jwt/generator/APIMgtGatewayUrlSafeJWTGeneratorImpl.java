@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator;
 import org.apache.commons.codec.binary.Base64;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-public class APIMgtGatewayUrlSafeJWTGeneratorImplImpl extends APIMgtGatewayJWTGeneratorImpl {
+public class APIMgtGatewayUrlSafeJWTGeneratorImpl extends APIMgtGatewayJWTGeneratorImpl {
 
     @Override
     public String encode(byte[] stringToBeEncoded) throws APIManagementException {
