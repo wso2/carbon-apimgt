@@ -152,58 +152,60 @@ rate limiting per operation
             <Grid item md={6} />
             <Grid item md={1} />
             <Grid item md={5}>
-                <TextField
-                    id='operation_scope'
-                    select
-                    disabled={disableUpdate}
-                    fullWidth
-                    label={api.scopes.length !== 0 ? 'Operation scope' : 'No scope available'}
-                    value={getOperationScopes(operation, spec)[0]}
-                    onChange={({ target: { value } }) => operationsDispatcher({
-                        action: 'scopes',
-                        data: { target, verb, value: [value] },
-                    })}
-                    helperText='Select a scope to control permissions to this operation'
-                    margin='dense'
-                    variant='outlined'
-                >
-                    <MenuItem
-                        value=''
-                        dense
+                { operation['x-auth-type'] && operation['x-auth-type'].toLowerCase() !== 'none' ? (
+                    <TextField
+                        id='operation_scope'
+                        select
+                        disabled={disableUpdate}
+                        fullWidth
+                        label={api.scopes.length !== 0 ? 'Operation scope' : 'No scope available'}
+                        value={getOperationScopes(operation, spec)[0]}
+                        onChange={({ target: { value } }) => operationsDispatcher({
+                            action: 'scopes',
+                            data: { target, verb, value: [value] },
+                        })}
+                        helperText='Select a scope to control permissions to this operation'
+                        margin='dense'
+                        variant='outlined'
                     >
+                        <MenuItem
+                            value=''
+                            dense
+                        >
                         None
-                    </MenuItem>
-                    {api.scopes.length !== 0
-                        ? api.scopes.map((scope) => (
-                            <MenuItem
-                                key={scope.name}
-                                value={scope.name}
-                                dense
-                            >
-                                {scope.name}
-                            </MenuItem>
-                        )) : (
-                            <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
+                        </MenuItem>
+                        {api.scopes.length !== 0
+                            ? api.scopes.map((scope) => (
                                 <MenuItem
-                                    key='Create New Scope'
-                                    value='Create New Scope'
+                                    key={scope.name}
+                                    value={scope.name}
                                     dense
                                 >
-                                Create New Scope
+                                    {scope.name}
                                 </MenuItem>
-                            </Link>
-                        )}
-                </TextField>
+                            )) : (
+                                <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
+                                    <MenuItem
+                                        key='Create New Scope'
+                                        value='Create New Scope'
+                                        dense
+                                    >
+                                Create New Scope
+                                    </MenuItem>
+                                </Link>
+                            )}
+                    </TextField>
+                ) : null }
             </Grid>
             <Grid item md={5} style={{ marginTop: '14px' }}>
-                {!disableUpdate && (
+                { operation['x-auth-type'] && operation['x-auth-type'].toLowerCase() !== 'none' ? !disableUpdate && (
                     <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
                         <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
                             Create new scope
                             <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                         </Typography>
                     </Link>
-                )}
+                ) : null}
             </Grid>
             <Grid item md={1} />
         </>
