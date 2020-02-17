@@ -120,16 +120,18 @@ export default class Application extends Resource {
      * @param {string[]} supportedGrantTypes Grant types supported
      * @param  {string} callbackUrl callback url
      * @param  {string} tokenType Token type either `OAUTH` or `JWT`
+     * @param {string} additionalProperties additional properties that needed for application.
      * @returns {promise} Set the generated token into current instance and return tokenObject
      * received as Promise object
      */
-    generateKeys(keyType, supportedGrantTypes, callbackUrl, validityTime) {
+    generateKeys(keyType, supportedGrantTypes, callbackUrl, validityTime, additionalProperties) {
         const promisedKeys = this.client.then((client) => {
             const requestContent = {
                 keyType, /* TODO: need to support dynamic key types ~tmkb */
                 grantTypesToBeSupported: supportedGrantTypes,
                 callbackUrl,
                 validityTime,
+                additionalProperties
             };
             const payload = { applicationId: this.id, body: requestContent };
             return client.apis['Application Keys'].post_applications__applicationId__generate_keys(payload);
