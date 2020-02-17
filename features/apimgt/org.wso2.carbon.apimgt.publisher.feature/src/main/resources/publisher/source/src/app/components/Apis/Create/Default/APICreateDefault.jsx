@@ -75,7 +75,7 @@ function APICreateDefault(props) {
     /**
      *
      *
-     * @param {*} eventa
+     * @param {*} event
      */
     function handleOnChange(event) {
         const { name: action, value } = event.target;
