@@ -1924,7 +1924,7 @@ public final class APIConstants {
     public static final String RECOMMENDATION_PASSWORD = "password";
     public static final String ADD_API = "ADD_API";
     public static final String DELETE_API = "DELETE_API";
-    public static final String ADD_NEW_APPLICATION = "ADD_NEW_APPLICATION";
+    public static final String ADD_NEW_APPLICATION = "ADD_APPLICATION";
     public static final String UPDATED_APPLICATION = "UPDATED_APPLICATION";
     public static final String DELETE_APPLICATION = "DELETE_APPLICATION";
     public static final String ADD_USER_CLICKED_API = "ADD_USER_CLICKED_API";

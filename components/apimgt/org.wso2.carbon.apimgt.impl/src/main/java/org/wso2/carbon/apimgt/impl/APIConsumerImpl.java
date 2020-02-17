@@ -3553,7 +3553,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application,tenantDomain);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, username);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }

@@ -73,16 +73,18 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
         this.publishingDetailType = APIConstants.ADD_NEW_APPLICATION;
         this.application = application;
-        this.userName = userName;
         this.applicationId = applicationId;
+        this.userName = userName;
         this.tenantDomain = MultitenantUtils.getTenantDomain(userName);
     }
 
-    public RecommenderDetailsExtractor(Application application, String tenantDomain) {
+    public RecommenderDetailsExtractor(Application application, String userName) {
 
         this.publishingDetailType = APIConstants.UPDATED_APPLICATION;
         this.application = application;
-        this.tenantDomain = tenantDomain;
+        this.applicationId = application.getId();
+        this.userName = userName;
+        this.tenantDomain = MultitenantUtils.getTenantDomain(userName);
     }
 
     public RecommenderDetailsExtractor(int applicationId, String tenantDomain) {
@@ -116,13 +118,13 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         try {
             if (isRecommendationEnabled(tenantDomain)) {
                 if (APIConstants.ADD_API.equals(publishingDetailType)) {
-                    publishAPIdetails(api, tenantDomain);
+                    publishAPIDetails(api, tenantDomain);
                 } else if (APIConstants.ADD_NEW_APPLICATION.equals(publishingDetailType)) {
-                    publishNewApplication(application, userName, applicationId);
+                    publishApplicationDetails(application, userName, applicationId);
                 } else if (APIConstants.UPDATED_APPLICATION.equals(publishingDetailType)) {
-                    publishUpdatedApplication(application);
+                    publishApplicationDetails(application, userName, applicationId);
                 } else if (APIConstants.DELETE_APPLICATION.equals(publishingDetailType)) {
-                    publishedDeletedApplication(applicationId);
+                    publishDeletedApplication(applicationId);
                 } else if (APIConstants.ADD_USER_CLICKED_API.equals(publishingDetailType)) {
                     publishClickedApi(clickedApi, userName);
                 } else if (APIConstants.ADD_USER_SEARCHED_QUERY.equals(publishingDetailType)) {
@@ -135,7 +137,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     }
 
     @Override
-    public void publishAPIdetails(API api, String tenantDomain) throws IOException {
+    public void publishAPIDetails(API api, String tenantDomain) throws IOException {
 
         String apiName = api.getId().getApiName();
         String apiStatus = api.getStatus();
@@ -182,7 +184,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     }
 
     @Override
-    public void publishNewApplication(Application application, String userName, int applicationId) {
+    public void publishApplicationDetails(Application application, String userName, int applicationId) {
 
         String appName = application.getName();
         String appDescription = application.getDescription();
@@ -201,25 +203,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     }
 
     @Override
-    public void publishUpdatedApplication(Application application) {
-
-        String appName = application.getName();
-        String appDescription = application.getDescription();
-        int appId = application.getId();
-
-        JSONObject obj = new JSONObject();
-        obj.put("application_id", appId);
-        obj.put("application_name", appName);
-        obj.put("application_description", appDescription);
-
-        JSONObject payload = new JSONObject();
-        payload.put(APIConstants.ACTION_STRING, APIConstants.UPDATED_APPLICATION);
-        payload.put(APIConstants.PAYLOAD_STRING, obj);
-        publishEvent(payload.toString());
-    }
-
-    @Override
-    public void publishedDeletedApplication(int appId) {
+    public void publishDeletedApplication(int appId) {
 
         JSONObject obj = new JSONObject();
         obj.put("appid", appId);
@@ -260,7 +244,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_USER_SEARCHED_QUERY);
         payload.put(APIConstants.PAYLOAD_STRING, obj);
         publishEvent(payload.toString());
-
     }
 
     public void publishEvent(String payload) {
