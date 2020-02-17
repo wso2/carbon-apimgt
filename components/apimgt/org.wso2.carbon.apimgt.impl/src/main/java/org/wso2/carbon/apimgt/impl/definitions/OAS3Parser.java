@@ -659,6 +659,8 @@ public class OAS3Parser extends APIDefinition {
                 OASParserUtil.getTransportSecurity(api.getApiSecurity(), api.getTransports()));
         openAPI.addExtension(APIConstants.SWAGGER_X_WSO2_APP_SECURITY,
                 OASParserUtil.getAppSecurity(api.getApiSecurity()));
+        openAPI.addExtension(APIConstants.SWAGGER_X_WSO2_RESPONSE_CACHE,
+                OASParserUtil.getResponseCacheConfig(api.getResponseCache(), api.getCacheTimeout()));
         return Json.pretty(openAPI);
     }
 

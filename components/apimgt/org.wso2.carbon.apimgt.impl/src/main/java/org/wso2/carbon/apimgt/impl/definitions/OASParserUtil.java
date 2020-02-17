@@ -1156,6 +1156,21 @@ public class OASParserUtil {
     }
 
     /**
+     * generate response cache configuration for OAS definition.
+     *
+     * @param responseCache     response cache Enabled/Disabled
+     * @param cacheTimeout      cache timeout in seconds
+     * @return JsonNode
+     */
+     static JsonNode getResponseCacheConfig(String responseCache, int cacheTimeout) {
+         ObjectNode responseCacheConfig = objectMapper.createObjectNode();
+         boolean enabled = APIConstants.ENABLED.equalsIgnoreCase(responseCache);
+         responseCacheConfig.put(APIConstants.RESPONSE_CACHING_ENABLED, enabled);
+         responseCacheConfig.put(APIConstants.RESPONSE_CACHING_TIMEOUT, cacheTimeout);
+         return responseCacheConfig;
+    }
+
+    /**
      * generate app security information for OAS definition
      *
      * @param security          application security
