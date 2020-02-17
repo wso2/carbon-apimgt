@@ -157,7 +157,7 @@ rate limiting per operation
                     select
                     disabled={disableUpdate}
                     fullWidth
-                    label='Operation scope'
+                    label={api.scopes.length !== 0 ? 'Operation scope' : 'No scope available'}
                     value={getOperationScopes(operation, spec)[0]}
                     onChange={({ target: { value } }) => operationsDispatcher({
                         action: 'scopes',
