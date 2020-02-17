@@ -66,8 +66,8 @@
         "react-toastify": "^1.7.0",
         "react-visibility-sensor": "^5.1.1",
         "swagger-client": "^3.9.4",
-        "swagger-editor": "^3.6.30",
         "swagger-parser": "^7.0.1",
+        "swagger-ui": "^3.25.0",
         "typeface-roboto": "0.0.35",
         "url-loader": "^0.5.9"
     },
@@ -80,7 +80,7 @@
         "@babel/preset-env": "^7.6.3",
         "@babel/preset-react": "^7.6.3",
         "@babel/register": "^7.6.2",
-        "@stoplight/prism-http": "^3.1.0",
+        "@stoplight/prism-http": "^3.2.8",
         "babel-eslint": "^10.0.3",
         "babel-jest": "^24.8.0",
         "babel-loader": "^8.0.6",
