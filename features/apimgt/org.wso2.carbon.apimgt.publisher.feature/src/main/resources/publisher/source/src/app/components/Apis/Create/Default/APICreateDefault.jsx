@@ -69,7 +69,7 @@ function APICreateDefault(props) {
         formValidity: false,
     });
     const isPublishable = apiInputs.endpoint && apiInputs.policies && apiInputs.policies.length !== 0;
-    const isAPICreateDisabled = !apiInputs.isFormValid || isCreating || isPublishing;
+    const isAPICreateDisabled = !(apiInputs.name && apiInputs.version && apiInputs.context) || isCreating || isPublishing;
 
     /**
      *
