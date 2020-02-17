@@ -183,7 +183,7 @@ function Overview(props) {
             },
         },
     } = theme;
-    const { api, applicationsAvailable } = useContext(ApiContext);
+    const { api, subscribedApplications } = useContext(ApiContext);
     const [totalComments, setCount] = useState(0);
     const [totalDocuments, setDocsCount] = useState(0);
     const [overviewDocOverride, setOverviewDocOverride] = useState(null);
@@ -300,7 +300,7 @@ function Overview(props) {
                                             <Box display='block' mt={2}>
                                                 <Grid item xs={12}>
                                                     {user ? (
-                                                        <Box display='inline' mr={2}>
+                                                        <Box display='flex' flexDirection='column' mr={2}>
                                                             <Link
                                                                 to={'/apis/' + api.id + '/credentials'}
                                                                 style={
@@ -321,6 +321,31 @@ function Overview(props) {
                                                                     />
                                                                 </Button>
                                                             </Link>
+                                                            {subscribedApplications && (<Typography variant='caption' component='div'>
+                                                                {subscribedApplications.length === 0 ? (<FormattedMessage
+                                                                    id='Apis.Details.Overview.subscribe.count.zero'
+                                                                    defaultMessage={
+                                                                        'No application subscriptions.'
+                                                                    }
+                                                                />): (
+                                                                    subscribedApplications.length    
+                                                                )}
+                                                                {' '}
+                                                                {subscribedApplications.length === 1 && (<>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.Overview.subscribe.count.singular'
+                                                                        defaultMessage={
+                                                                            'Application subscribed.'
+                                                                        }
+                                                                    /></>)}
+                                                                {subscribedApplications.length > 1 && (<>
+                                                                     <FormattedMessage
+                                                                        id='Apis.Details.Overview.subscribe.count.plural'
+                                                                        defaultMessage={
+                                                                            'Applications subscribed.'
+                                                                        }
+                                                                    /></>)}
+                                                            </Typography>)}
                                                         </Box>
                                                     ) : (
                                                             <Box display='inline' mr={2}>
