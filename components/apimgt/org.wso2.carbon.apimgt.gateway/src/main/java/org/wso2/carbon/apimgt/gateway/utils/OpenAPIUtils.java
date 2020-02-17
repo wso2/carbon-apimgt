@@ -125,14 +125,18 @@ public class OpenAPIUtils {
         }
 
         if (resourceRoles == null) {
+            LinkedHashMap<String, Object> scopeBindings = null;
             Map<String, Object> extensions = openAPI.getComponents().getSecuritySchemes()
                     .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY).getExtensions();
             if (extensions != null && extensions.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS) != null) {
-                LinkedHashMap<String, Object> scopeBindings =
-                        (LinkedHashMap<String, Object>) extensions.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
-                if (scopeBindings != null) {
-                    return (String) scopeBindings.get(resourceScope);
-                }
+                scopeBindings = (LinkedHashMap<String, Object>) extensions.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+            } else {
+                scopeBindings = (LinkedHashMap<String, Object>) openAPI.getComponents().getSecuritySchemes().
+                        get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY).getFlows().getImplicit().getExtensions().
+                        get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+            }
+            if (scopeBindings != null) {
+                return (String) scopeBindings.get(resourceScope);
             }
         }
 
