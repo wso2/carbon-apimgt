@@ -30,10 +30,7 @@ import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-
-import {
-    API_SECURITY_MUTUAL_SSL,
-} from './APISecurity/components/apiSecurityConstants';
+import { API_SECURITY_MUTUAL_SSL } from './APISecurity/components/apiSecurityConstants';
 
 const useStyles = makeStyles((theme) => ({
     error: {
