@@ -1224,9 +1224,12 @@ public final class APIConstants {
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
     public static final String SWAGGER_X_WSO2_SECURITY = "x-wso2-security";
     public static final String SWAGGER_X_WSO2_APP_SECURITY = "x-wso2-application-security";
+    public static final String SWAGGER_X_WSO2_RESPONSE_CACHE = "x-wso2-response-cache";
     public static final String WSO2_APP_SECURITY_TYPES = "security-types";
     public static final String OPTIONAL = "optional";
     public static final String MANDATORY = "mandatory";
+    public static final String RESPONSE_CACHING_ENABLED = "enabled";
+    public static final String RESPONSE_CACHING_TIMEOUT = "cacheTimeoutInSeconds";
     public static final String SWAGGER_X_WSO2_SCOPES = "x-wso2-scopes";
     public static final String SWAGGER_X_EXAMPLES = "x-examples";
     public static final String SWAGGER_SCOPE_KEY = "key";
