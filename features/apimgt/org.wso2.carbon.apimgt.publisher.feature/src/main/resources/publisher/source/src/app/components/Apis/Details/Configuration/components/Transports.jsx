@@ -60,12 +60,11 @@ export default function Transports(props) {
                     defaultMessage='Please select at least one transport!'
                 />
             );
-        }
-        else if (isMutualSSLEnabled && !api.transport.includes('https')) {
+        } else if (isMutualSSLEnabled && !api.transport.includes('https')) {
             return (
                 <FormattedMessage
                     id='Apis.Details.Configuration.components.transport.sslHttps'
-                    defaultMessage='Please select Https as transport with mutual ssl!'
+                    defaultMessage='Please select Https as transport with mutual SSL!'
                 />
             );
         }
