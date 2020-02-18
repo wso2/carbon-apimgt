@@ -728,7 +728,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     applicationKeyDTO.setConsumerSecret(updatedData.getClientSecret());
                     applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(keyType));
                     Object additionalProperties = updatedData.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
-					applicationKeyDTO.setAdditionalProperties((String) additionalProperties);
+                    applicationKeyDTO.setAdditionalProperties((String) additionalProperties);
                     return Response.ok().entity(applicationKeyDTO).build();
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);

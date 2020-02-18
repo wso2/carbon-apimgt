@@ -68,12 +68,12 @@ public class ApplicationKeyMappingUtil {
                     }
                     String callbackUrl = (String) appDetailsJsonObj.get(ApplicationConstants.OAUTH_REDIRECT_URIS);
                     applicationKeyDTO.setCallbackUrl(callbackUrl);
-                    
-					Object additionalPropertiesObj = appDetailsJsonObj.get(APIConstants.JSON_ADDITIONAL_PROPERTIES);
-					if (additionalPropertiesObj != null) {
-						String additionalProperties = (String) additionalPropertiesObj;
-						applicationKeyDTO.setAdditionalProperties(additionalProperties);
-					}
+
+                    Object additionalPropertiesObj = appDetailsJsonObj.get(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+                    if (additionalPropertiesObj != null) {
+                        String additionalProperties = (String) additionalPropertiesObj;
+                        applicationKeyDTO.setAdditionalProperties(additionalProperties);
+                    }
                     
                 }
             }
