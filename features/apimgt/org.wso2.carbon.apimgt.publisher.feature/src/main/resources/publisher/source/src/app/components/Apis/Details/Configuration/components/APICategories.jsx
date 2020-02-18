@@ -38,10 +38,6 @@ function APICategories(props) {
         API.apiCategories().then((response) => setCategories(response.body));
     }, []);
 
-    // const handleValidateAndChange = ({ target: { value, name } }) => {
-    //     onChange({ target: { name, value } });
-    // };
-
     if (!categories.list) {
         return null;
     } else {
@@ -72,18 +68,28 @@ function APICategories(props) {
                     }}
                     helperText='Select API Categories for the API'
                 >
-                    {categories.list.map((category) => (
-                        <MenuItem
-                            dense
-                            disableGutters
-                            id={category.id}
-                            key={category.name}
-                            value={category.name}
-                        >
-                            <Checkbox color='primary' checked={api.categories.includes(category.name)} />
-                            <ListItemText primary={category.name} secondary={category.description} />
-                        </MenuItem>
-                    ))}
+                    { (categories.list.length === 0)
+                        ? (
+                            <MenuItem id='no-category-notification'>
+                                <ListItemText
+                                    primary='No API Categories defined yet. Please create an API Category first.'
+                                />
+                            </MenuItem>
+                        )
+                        : (
+                            categories.list.map((category) => (
+                                <MenuItem
+                                    dense
+                                    disableGutters
+                                    id={category.id}
+                                    key={category.name}
+                                    value={category.name}
+                                >
+                                    <Checkbox color='primary' checked={api.categories.includes(category.name)} />
+                                    <ListItemText primary={category.name} secondary={category.description} />
+                                </MenuItem>
+                            ))
+                        )}
                 </TextField>
             </Box>
         );
