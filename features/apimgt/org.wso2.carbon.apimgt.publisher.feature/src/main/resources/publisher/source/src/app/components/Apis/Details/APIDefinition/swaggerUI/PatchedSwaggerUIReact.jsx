@@ -64,7 +64,6 @@ export default class PatchedSwaggerUI extends React.Component {
      * @param {*} prevProps
      * @memberof SwaggerUI
      */
-    // eslint-disable-next-line react/sort-comp
     componentDidUpdate(prevProps) {
         if (this.props.url !== prevProps.url) {
             // flush current content
