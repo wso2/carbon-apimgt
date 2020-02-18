@@ -224,6 +224,7 @@ public class Util {
         while ((line = bufferedReader.readLine()) != null) {
             jsonString = jsonString + line;
         }
+        bufferedReader.close();
         return jsonString;
     }
 

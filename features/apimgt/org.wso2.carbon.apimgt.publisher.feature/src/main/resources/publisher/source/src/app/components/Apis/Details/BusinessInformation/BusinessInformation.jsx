@@ -141,10 +141,6 @@ class BusinessInformation extends React.Component {
             businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail,
         } = this.state;
 
-        const subHeadingId = (api.apiType === API.CONSTS.APIProduct
-            ? 'Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading'
-            : 'Apis.Details.BusinessInformation.BusinessInformation.sub.heading');
-
         return (
             <>
                 <Container maxWidth='md'>
@@ -155,12 +151,23 @@ class BusinessInformation extends React.Component {
                                 defaultMessage='Business Information'
                             />
                         </Typography>
-                        <Typography variant='caption'>
-                            <FormattedMessage
-                                id={subHeadingId}
-                                defaultMessage='Business Information of the API'
-                            />
-                        </Typography>
+                        {api.apiType === API.CONSTS.APIProduct
+                            ? (
+                                <Typography variant='caption'>
+                                    <FormattedMessage
+                                        id='Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading'
+                                        defaultMessage='Business Information of the API'
+                                    />
+                                </Typography>
+                            )
+                            : (
+                                <Typography variant='caption'>
+                                    <FormattedMessage
+                                        id='Apis.Details.BusinessInformation.BusinessInformation.sub.heading'
+                                        defaultMessage='Business Information of the API'
+                                    />
+                                </Typography>
+                            )}
                     </Box>
                     <Paper elevation={0}>
                         <Box px={8} py={5}>

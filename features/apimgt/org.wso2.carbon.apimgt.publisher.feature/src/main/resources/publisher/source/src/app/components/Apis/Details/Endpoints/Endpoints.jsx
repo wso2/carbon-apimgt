@@ -79,11 +79,12 @@ function Endpoints(props) {
         const tmpEndpointConfig = cloneDeep(initState.endpointConfig);
         const { action, value } = configAction;
         switch (action) {
-            case 'production_endpoints': {
-                return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
-            }
+            case 'production_endpoints':
             case 'sandbox_endpoints': {
-                return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
+                if (value) {
+                    return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
+                }
+                return { ...initState, endpointConfig: { ...tmpEndpointConfig } };
             }
             case 'select_endpoint_category': {
                 return { ...initState, endpointConfig: { ...value } };

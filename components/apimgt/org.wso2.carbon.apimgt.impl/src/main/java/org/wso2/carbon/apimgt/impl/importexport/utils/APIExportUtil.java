@@ -716,13 +716,21 @@ public class APIExportUtil {
             throws APIImportExportException {
 
         JSONObject endpointConfig;
-        JSONTokener tokener = new JSONTokener(api.getEndpointConfig());
         List<String> productionEndpoints;
         List<String> sandboxEndpoints;
         Set<String> uniqueEndpointURLs = new HashSet<>();
         List<CertificateDetail> endpointCertificatesDetails = new ArrayList<>();
+        String endpointConfigString = api.getEndpointConfig();
 
+        if (StringUtils.isEmpty(endpointConfigString)) {
+            if(log.isDebugEnabled()) {
+                log.debug("Endpoint Details are empty for API: " + api.getId().getApiName() + StringUtils.SPACE
+                        + APIConstants.API_DATA_VERSION + ": " + api.getId().getVersion());
+            }
+            return;
+        }
         try {
+            JSONTokener tokener = new JSONTokener(endpointConfigString);
             endpointConfig = new JSONObject(tokener);
             productionEndpoints = getEndpointURLs(endpointConfig, APIConstants.API_DATA_PRODUCTION_ENDPOINTS,
                     api.getId().getApiName());

@@ -15,9 +15,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import SwaggerEditor, { plugins } from 'swagger-editor';
-import 'swagger-editor/dist/swagger-editor.css';
+import React, { lazy } from 'react';
+import Grid from '@material-ui/core/Grid';
+import PropTypes from 'prop-types';
+import withStyles from '@material-ui/core/styles/withStyles';
+import SwaggerUI from './swaggerUI/SwaggerUI';
+
+const styles = () => ({
+    editorPane: {
+        width: '50%',
+        height: '100%',
+        overflow: 'scroll',
+    },
+    editorRoot: {
+        height: '100%',
+    },
+});
+
+const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
 
 /**
  * This component hosts the Swagger Editor component.
@@ -29,27 +44,54 @@ class SwaggerEditorDrawer extends React.Component {
     /**
      * @inheritDoc
      */
-    componentDidMount() {
-        window.editor = SwaggerEditor({
-            dom_id: '#swagger-editor',
-            layout: 'EditorLayout',
-            plugins: Object.values(plugins),
-            supportedSubmitMethods: [],
-            components: {},
-            swagger2GeneratorUrl: 'https://generator.swagger.io/api/swagger.json',
-            oas3GeneratorUrl: 'https://generator3.swagger.io/openapi.json',
-            swagger2ConverterUrl: 'https://converter.swagger.io/api/convert',
-        });
+    constructor(props) {
+        super(props);
+        this.onContentChange = this.onContentChange.bind(this);
+    }
+
+    /**
+     * Method to handle the change event of the editor.
+     * @param {string} content : The edited content.
+     * */
+    onContentChange(content) {
+        const { onEditContent } = this.props;
+        onEditContent(content);
     }
 
     /**
      * @inheritDoc
      */
     render() {
+        const { classes, language, swagger } = this.props;
+        const swaggerUrl = 'data:text/' + language + ',' + encodeURIComponent(swagger);
         return (
-            <div id='swagger-editor' />
+            <>
+                <Grid container spacing={2} className={classes.editorRoot}>
+                    <Grid item className={classes.editorPane}>
+                        <MonacoEditor
+                            language={language}
+                            width='100%'
+                            height='calc(100vh - 51px)'
+                            theme='vs-dark'
+                            value={swagger}
+                            onChange={this.onContentChange}
+                            options={{ glyphMargin: true }}
+                        />
+                    </Grid>
+                    <Grid item className={classes.editorPane}>
+                        <SwaggerUI url={swaggerUrl} />
+                    </Grid>
+                </Grid>
+            </>
         );
     }
 }
 
-export default SwaggerEditorDrawer;
+SwaggerEditorDrawer.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+    language: PropTypes.string.isRequired,
+    swagger: PropTypes.string.isRequired,
+    onEditContent: PropTypes.func.isRequired,
+};
+
+export default withStyles(styles)(SwaggerEditorDrawer);

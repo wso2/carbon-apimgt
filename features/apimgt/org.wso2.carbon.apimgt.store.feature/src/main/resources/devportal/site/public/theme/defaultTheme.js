@@ -5,7 +5,7 @@ const Configurations = {
             palette: {
                 primary: {
                     // light: will be calculated from palette.primary.main,
-                    main: '#6093c1',
+                    main: '#006e9c',
                     // dark: will be calculated from palette.primary.main,
                     // contrastText: will be calculated to contrast with palette.primary.main
                 },
@@ -45,10 +45,11 @@ const Configurations = {
                     logo: '/site/public/images/logo.svg', // You can set the url to an external image also ( ex: https://dummyimage.com/208x19/66aad1/ffffff&text=testlogo)
                     logoHeight: 19,
                     logoWidth: 208,
-                    background: '#253451',
+                    background: '#0fa2db',
+                    backgroundImage: '/site/public/images/appbarBack.png',
                     searchInputBackground: '#fff',
                     searchInputActiveBackground: '#fff',
-                    activeBackground: '#dc4748',
+                    activeBackground: '#1c6584',
                     showSearch: true,
                     drawerWidth: 200,
                 },
@@ -58,8 +59,9 @@ const Configurations = {
                     iconSize: 24,
                     leftMenuTextStyle: 'uppercase',
                     width: 180,
-                    background: '#222',
-                    leftMenuActive: '#50a4da',
+                    background: '#012534',
+                    backgroundImage: '/site/public/images/leftMenuBack.png',
+                    leftMenuActive: '#00597f',
                     leftMenuActiveSubmenu: '#0d1723',
                     activeBackground: '#191e46',
                     rootIconVisible: true,
@@ -220,7 +222,7 @@ const Configurations = {
                     leftMenu: { // These params will be applyed only if the style is 'fixed-left'
                         width: 200,
                         height: 'calc(100vh - 222px)',
-                        background: '#222',
+                        background: '#00374e',
                         color: '#c7e9ff',
                         titleBackground: '#000',
                         sliderBackground: '#000',

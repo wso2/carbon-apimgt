@@ -1,19 +1,18 @@
 /*
- *  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
 package org.wso2.carbon.apimgt.impl.recommendationmgt;
@@ -21,30 +20,41 @@ package org.wso2.carbon.apimgt.impl.recommendationmgt;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+
+import javax.cache.Cache;
 
 public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(RecommenderDetailsExtractor.class);
     private static String streamID = "org.wso2.apimgt.recommendation.event.stream:1.0.0";
     private boolean tenantFlowStarted = false;
+    protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     private int applicationId;
     private API api;
-    private String userId;
     private String userName;
     private String searchQuery;
     private String tenantDomain;
@@ -53,54 +63,71 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     private ApiTypeWrapper clickedApi;
 
     public RecommenderDetailsExtractor(API api, String tenantDomain) {
+
         this.publishingDetailType = APIConstants.ADD_API;
         this.api = api;
         this.tenantDomain = tenantDomain;
     }
 
-    public RecommenderDetailsExtractor(Application application, String userId, int applicationId) {
+    public RecommenderDetailsExtractor(Application application, String userName, int applicationId) {
+
         this.publishingDetailType = APIConstants.ADD_NEW_APPLICATION;
         this.application = application;
-        this.userId = userId;
+        this.userName = userName;
         this.applicationId = applicationId;
+        this.tenantDomain = MultitenantUtils.getTenantDomain(userName);
     }
 
-    public RecommenderDetailsExtractor(Application application) {
+    public RecommenderDetailsExtractor(Application application, String tenantDomain) {
+
         this.publishingDetailType = APIConstants.UPDATED_APPLICATION;
         this.application = application;
+        this.tenantDomain = tenantDomain;
     }
 
-    public RecommenderDetailsExtractor(int applicationId) {
+    public RecommenderDetailsExtractor(int applicationId, String tenantDomain) {
+
         this.publishingDetailType = APIConstants.DELETE_APPLICATION;
         this.applicationId = applicationId;
+        this.tenantDomain = tenantDomain;
     }
 
     public RecommenderDetailsExtractor(ApiTypeWrapper clickedApi, String userName) {
+
         this.publishingDetailType = APIConstants.ADD_USER_CLICKED_API;
         this.clickedApi = clickedApi;
         this.userName = userName;
+        this.tenantDomain = MultitenantUtils.getTenantDomain(userName);
     }
 
     public RecommenderDetailsExtractor(String searchQuery, String userName) {
+
         this.publishingDetailType = APIConstants.ADD_USER_SEARCHED_QUERY;
         this.searchQuery = searchQuery;
         this.userName = userName;
+        this.tenantDomain = MultitenantUtils.getTenantDomain(userName);
     }
 
     public void run() {
+
+        if (tenantDomain == null) {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         try {
-            if (publishingDetailType.equals(APIConstants.ADD_API)) {
-                publishAPIdetails(api, tenantDomain);
-            } else if (publishingDetailType.equals(APIConstants.ADD_NEW_APPLICATION)) {
-                publishNewApplication(application, userId, applicationId);
-            } else if (publishingDetailType.equals(APIConstants.UPDATED_APPLICATION)) {
-                publishUpdatedApplication(application);
-            } else if (publishingDetailType.equals(APIConstants.DELETE_APPLICATION)) {
-                publishedDeletedApplication(applicationId);
-            } else if (publishingDetailType.equals(APIConstants.ADD_USER_CLICKED_API)) {
-                publishClickedApi(clickedApi, userName);
-            } else if (publishingDetailType.equals(APIConstants.ADD_USER_SEARCHED_QUERY)) {
-                publishSearchQueries(searchQuery, userName);
+            if (isRecommendationEnabled(tenantDomain)) {
+                if (APIConstants.ADD_API.equals(publishingDetailType)) {
+                    publishAPIdetails(api, tenantDomain);
+                } else if (APIConstants.ADD_NEW_APPLICATION.equals(publishingDetailType)) {
+                    publishNewApplication(application, userName, applicationId);
+                } else if (APIConstants.UPDATED_APPLICATION.equals(publishingDetailType)) {
+                    publishUpdatedApplication(application);
+                } else if (APIConstants.DELETE_APPLICATION.equals(publishingDetailType)) {
+                    publishedDeletedApplication(applicationId);
+                } else if (APIConstants.ADD_USER_CLICKED_API.equals(publishingDetailType)) {
+                    publishClickedApi(clickedApi, userName);
+                } else if (APIConstants.ADD_USER_SEARCHED_QUERY.equals(publishingDetailType)) {
+                    publishSearchQueries(searchQuery, userName);
+                }
             }
         } catch (IOException e) {
             log.error("When extracting data for the recommendation system !", e);
@@ -109,6 +136,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     @Override
     public void publishAPIdetails(API api, String tenantDomain) throws IOException {
+
         String apiName = api.getId().getApiName();
         String apiStatus = api.getStatus();
         String apiId = api.getUUID();
@@ -121,7 +149,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             String apiContext = api.getContext();
             String apiTags = api.getTags().toString();
             Set<URITemplate> uriTemplates = api.getUriTemplates();
-            ArrayList<String> resources = new ArrayList<String>();
+            List<String> resources = new ArrayList<String>();
 
             for (URITemplate uriTemplate : uriTemplates) {
                 String resource = uriTemplate.getUriTemplate();
@@ -154,12 +182,14 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     }
 
     @Override
-    public void publishNewApplication(Application application, String userId, int applicationId) {
+    public void publishNewApplication(Application application, String userName, int applicationId) {
+
         String appName = application.getName();
         String appDescription = application.getDescription();
+        String userID = getUserId(userName);
 
         JSONObject obj = new JSONObject();
-        obj.put("user", userId);
+        obj.put("user", userID);
         obj.put("application_id", applicationId);
         obj.put("application_name", appName);
         obj.put("application_description", appDescription);
@@ -172,6 +202,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     @Override
     public void publishUpdatedApplication(Application application) {
+
         String appName = application.getName();
         String appDescription = application.getDescription();
         int appId = application.getId();
@@ -189,6 +220,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     @Override
     public void publishedDeletedApplication(int appId) {
+
         JSONObject obj = new JSONObject();
         obj.put("appid", appId);
 
@@ -200,22 +232,28 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     @Override
     public void publishClickedApi(ApiTypeWrapper api, String userName) {
-        String apiName = api.getName();
-        JSONObject obj = new JSONObject();
-        obj.put("user", userName);
-        obj.put("api_name", apiName);
 
-        JSONObject payload = new JSONObject();
-        payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_USER_CLICKED_API);
-        payload.put(APIConstants.PAYLOAD_STRING, obj);
-        publishEvent(payload.toString());
+        if (userName != APIConstants.WSO2_ANONYMOUS_USER) {
+            String userID = getUserId(userName);
+            String apiName = api.getName();
+            JSONObject obj = new JSONObject();
+            obj.put("user", userID);
+            obj.put("api_name", apiName);
+
+            JSONObject payload = new JSONObject();
+            payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_USER_CLICKED_API);
+            payload.put(APIConstants.PAYLOAD_STRING, obj);
+            publishEvent(payload.toString());
+        }
     }
 
     @Override
     public void publishSearchQueries(String query, String username) {
+
+        String userID = getUserId(userName);
         query = query.split("&", 2)[0];
         JSONObject obj = new JSONObject();
-        obj.put("user", username);
+        obj.put("user", userID);
         obj.put("search_query", query);
 
         JSONObject payload = new JSONObject();
@@ -226,12 +264,13 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     }
 
     public void publishEvent(String payload) {
+
         Object[] objects = new Object[]{payload};
         Event event = new Event(streamID, System.currentTimeMillis(), null, null, objects);
         try {
-            startTenantFlow();
+            startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
-                    .publish("recommendationEventPublisher", Collections.EMPTY_MAP, event);
+                    .publish(APIConstants.RECOMMENDATIONS_WSO2_EVENT_PUBLISHER, Collections.EMPTY_MAP, event);
             if (log.isDebugEnabled()) {
                 log.debug("Event Published for recommendation server with payload " + payload);
             }
@@ -245,13 +284,78 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     }
 
     private void endTenantFlow() {
+
         PrivilegedCarbonContext.endTenantFlow();
+        tenantFlowStarted = false;
     }
 
-    private void startTenantFlow() {
+    private void startTenantFlow(String tenantDomain) {
+
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                setTenantDomain(tenantDomain, true);
         tenantFlowStarted = true;
+    }
+
+    private String getUserId(String userName) {
+
+        String userID = null;
+        try {
+            userID = apiMgtDAO.getUserID(userName);
+        } catch (APIManagementException e) {
+            log.error("Error occurred when getting the userID for user " + userName, e);
+        }
+        return userID;
+    }
+
+    private boolean isRecommendationEnabled(String tenantDomain) {
+
+        RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
+        if (recommendationEnvironment != null) {
+            if (recommendationEnvironment.isApplyForAllTenants()) {
+                return true;
+            } else {
+                try {
+                    JSONObject tenantConfig = null;
+                    startTenantFlow(tenantDomain);
+                    Cache tenantConfigCache = APIUtil.getCache(
+                            APIConstants.API_MANAGER_CACHE_MANAGER,
+                            APIConstants.TENANT_CONFIG_CACHE_NAME,
+                            APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
+                            APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
+                    String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
+                    if (tenantConfigCache.containsKey(cacheName)) {
+                        tenantConfig = (JSONObject) tenantConfigCache.get(cacheName);
+                    } else {
+                        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                .getTenantId(tenantDomain);
+                        APIUtil.loadTenantRegistry(tenantId);
+                        Registry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                                .getConfigSystemRegistry(tenantId);
+                        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                            APIUtil.loadTenantConf(tenantId);
+                        }
+                        if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                            Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
+                            String content = new String((byte[]) resource.getContent());
+                            tenantConfig = new JSONObject(content);
+                            tenantConfigCache.put(cacheName, tenantConfig);
+                        }
+                    }
+                    if (tenantConfig.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
+                        Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
+                        return Boolean.parseBoolean(value.toString());
+                    }
+                } catch (RegistryException | UserStoreException | NullPointerException | APIManagementException e) {
+                    log.error("Error while retrieving Recommendation config from registry", e);
+                } finally {
+                    if (tenantFlowStarted) {
+                        endTenantFlow();
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

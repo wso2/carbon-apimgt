@@ -366,6 +366,11 @@
     <OAuthConfigurations>
         <!-- Remove OAuth headers from outgoing message. -->
         <RemoveOAuthHeadersFromOutMessage>{{not apim.oauth_config.enable_outbound_auth_header}}</RemoveOAuthHeadersFromOutMessage>
+
+        {% if apim.oauth_config.set_jwt_as_opaque_token is defined %}
+        <!-- Consider incoming jwt token as an opaque token. -->
+        <JWTAsOpaqueToken>{{apim.oauth_config.set_jwt_as_opaque_token}}</JWTAsOpaqueToken>
+        {% endif %}
         {% if apim.oauth_config.auth_header is defined %}
         <!--Authorization header-->
         <AuthorizationHeader>{{apim.oauth_config.auth_header}}</AuthorizationHeader>
@@ -924,10 +929,22 @@
 
     {% if apim.devportal.recommendations is defined %}
     <APIRecommendations>
-        <recommendationEndpoint>{{apim.devportal.recommendations.recommendations_endpoint}}</recommendationEndpoint>
-        <eventPublishingEndpoint>{{apim.devportal.recommendations.event_publishing_endpoint}}</eventPublishingEndpoint>
-        <username>{{apim.devportal.recommendations.username}}</username>
+        <recommendationAPI>{{apim.devportal.recommendations.recommendations_api}}</recommendationAPI>
+        {% if apim.devportal.recommendations.oauth_endpoint is defined %}
+        <authenticationEndpoint>{{apim.devportal.recommendations.oauth_endpoint}}</authenticationEndpoint>
+        <consumerKey>{{apim.devportal.recommendations.consumer_key}}</consumerKey>
+        <consumerSecret>{{apim.devportal.recommendations.consumer_secret}}</consumerSecret>
+        {% endif %}
+        {% if apim.devportal.recommendations.max_recommendations is defined %}
+        <maxRecommendations>{{apim.devportal.recommendations.max_recommendations}}</maxRecommendations>
+        {% endif %}
+        {% if apim.devportal.recommendations.apply_for_all_tenants is defined %}
+        <applyForAllTenants>{{apim.devportal.recommendations.apply_for_all_tenants}}</applyForAllTenants>
+        {% endif %}
+        {% if apim.devportal.recommendations.username is defined %}
+        <userName>{{apim.devportal.recommendations.username}}</userName>
         <password>{{apim.devportal.recommendations.password}}</password>
+        {% endif %}
     </APIRecommendations>
     {% endif %}
 

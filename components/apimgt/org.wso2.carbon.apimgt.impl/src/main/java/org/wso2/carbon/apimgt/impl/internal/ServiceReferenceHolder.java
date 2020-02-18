@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -39,6 +40,7 @@ public class ServiceReferenceHolder {
     private OutputEventAdapterService outputEventAdapterService;
     private APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher;
     private KeyStore trustStore;
+    private AccessTokenGenerator accessTokenGenerator;
 
     public static ConfigurationContextService getContextService() {
         return contextService;
@@ -117,5 +119,16 @@ public class ServiceReferenceHolder {
 
     public void setTrustStore(KeyStore trustStore) {
         this.trustStore = trustStore;
+    }
+
+    public AccessTokenGenerator getAccessTokenGenerator() {
+
+        return accessTokenGenerator;
+    }
+
+    public void setAccessTokenGenerator(
+            AccessTokenGenerator accessTokenGenerator) {
+
+        this.accessTokenGenerator = accessTokenGenerator;
     }
 }

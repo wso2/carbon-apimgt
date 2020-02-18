@@ -24,6 +24,8 @@ import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 // import MaterialDesignCustomTheme from 'AppComponents/Shared/CustomTheme';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Api from 'AppData/api';
+import User from 'AppData/User';
+import Utils from 'AppData/Utils';
 import Base from 'AppComponents/Base';
 import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
@@ -35,6 +37,7 @@ import { IntlProvider } from 'react-intl';
 import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import SettingsBase from 'AppComponents/Apis/Settings/SettingsBase';
 import Progress from 'AppComponents/Shared/Progress';
+import Configurations from 'Config';
 
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
 const DeferredAPIs = () => (
@@ -63,8 +66,12 @@ export default class Protected extends Component {
         super(props);
         this.state = {
             settings: null,
+            clientId: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_CLIENT_ID),
+            sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_SESSION_STATE),
         };
         this.environments = [];
+        this.checkSession = this.checkSession.bind(this);
+        this.handleMessage = this.handleMessage.bind(this);
     }
 
     /**
@@ -75,9 +82,11 @@ export default class Protected extends Component {
         const user = AuthManager.getUser();
         const api = new Api();
         const settingPromise = api.getSettings();
+        window.addEventListener('message', this.handleMessage);
         if (user) {
             this.setState({ user });
             settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
+            this.checkSession();
         } else {
             // If no user data available , Get the user info from existing token information
             // This could happen when OAuth code authentication took place and could send
@@ -89,14 +98,37 @@ export default class Protected extends Component {
     }
 
     /**
+     * Handle iframe message
+     * @param {event} e Event
+     */
+    handleMessage(e) {
+        if (e.data === 'changed') {
+            window.location = Configurations.app.context + '/services/auth/login?not-Login';
+        }
+    }
+
+    /**
+     * Invoke checksession oidc endpoint.
+     */
+    checkSession() {
+        setInterval(() => {
+            const { clientId, sessionStateCookie } = this.state;
+            const msg = clientId + ' ' + sessionStateCookie;
+            document.getElementById('iframeOP').contentWindow.postMessage(msg, 'https://' + window.location.host);
+        }, 2000);
+    }
+
+    /**
      * @returns {React.Component} @inheritDoc
      * @memberof Protected
      */
     render() {
         const { user = AuthManager.getUser(), messages } = this.state;
         const header = <Header avatar={<Avatar user={user} />} user={user} />;
-        const { settings } = this.state;
-
+        const { settings, clientId } = this.state;
+        const checkSessionURL = 'https://' + window.location.host + '/oidc/checksession?client_id='
+        + clientId + '&redirect_uri=https://' + window.location.host
+        + Configurations.app.context + '/services/auth/callback/login';
         if (!user) {
             return (
                 <IntlProvider locale={language} messages={messages}>
@@ -108,6 +140,13 @@ export default class Protected extends Component {
             <MuiThemeProvider theme={theme}>
                 <AppErrorBoundary>
                     <Base header={header}>
+                        <iframe
+                            title='iframeOP'
+                            id='iframeOP'
+                            src={checkSessionURL}
+                            width='0px'
+                            height='0px'
+                        />
                         {settings ? (
                             <AppContextProvider value={{ settings, user }}>
                                 <Switch>

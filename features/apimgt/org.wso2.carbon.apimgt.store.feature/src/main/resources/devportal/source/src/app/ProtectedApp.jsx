@@ -30,6 +30,7 @@ import Base from './components/Base/index';
 import AuthManager from './data/AuthManager';
 import Loading from './components/Base/Loading/Loading';
 import Utils from './data/Utils';
+import User from './data/User';
 import ConfigManager from './data/ConfigManager';
 import AppRouts from './AppRouts';
 import TenantListing from './TenantListing';
@@ -65,9 +66,13 @@ class ProtectedApp extends Component {
             scopesFound: false,
             tenantResolved: false,
             tenantList: [],
+            clientId: Utils.getCookieWithoutEnvironment(User.CONST.DEVPORTAL_CLIENT_ID),
+            sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.DEVPORTAL_SESSION_STATE),
         };
         this.environments = [];
         this.loadLocale = this.loadLocale.bind(this);
+        this.checkSession = this.checkSession.bind(this);
+        this.handleMessage = this.handleMessage.bind(this);
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb */
     }
 
@@ -88,7 +93,7 @@ class ProtectedApp extends Component {
             }
         }
         this.loadLocale(locale);
-
+        window.addEventListener('message', this.handleMessage);
         const { location: { search } } = this.props;
         const { setTenantDomain, setSettings } = this.context;
         const { tenant } = queryString.parse(search);
@@ -125,6 +130,7 @@ class ProtectedApp extends Component {
         if (user) { // If token exisit in cookies and user info available in local storage
             const hasViewScope = user.scopes.includes('apim:subscribe');
             if (hasViewScope) {
+                this.checkSession();
                 this.setState({ userResolved: true, scopesFound: true });
             } else {
                 console.log('No relevant scopes found, redirecting to Anonymous View');
@@ -156,6 +162,7 @@ class ProtectedApp extends Component {
                                         error,
                                     );
                                 });
+                                this.checkSession();
                         } else {
                             console.log('No relevant scopes found, redirecting to Anonymous View');
                             this.setState({ userResolved: true });
@@ -174,6 +181,23 @@ class ProtectedApp extends Component {
                     }
                 });
         }
+    }
+
+    handleMessage(e) {
+        if (e.data === 'changed') {
+            window.location = Settings.app.context + '/services/configs?not-Login';
+        }
+    }
+
+    /**
+     * Invoke checksession oidc endpoint.
+     */
+    checkSession() {
+        setInterval(() => {
+            const { clientId, sessionStateCookie } = this.state;
+            const msg = clientId + ' ' + sessionStateCookie; 
+            document.getElementById('iframeOP').contentWindow.postMessage(msg, 'https://' + window.location.host);
+        }, 2000);
     }
 
     /**
@@ -227,8 +251,11 @@ class ProtectedApp extends Component {
      */
     render() {
         const {
-            userResolved, tenantList, notEnoughPermission, tenantResolved,
+            userResolved, tenantList, notEnoughPermission, tenantResolved, clientId
         } = this.state;
+        const checkSessionURL = 'https://'+ window.location.host + '/oidc/checksession?client_id='
+        + clientId + '&redirect_uri=https://' + window.location.host
+        + Settings.app.context + '/services/auth/callback/login';
         const { tenantDomain } = this.context;
         if (!userResolved) {
             return <Loading />;
@@ -262,6 +289,13 @@ class ProtectedApp extends Component {
         return (
             <IntlProvider locale={language} messages={messages}>
                 <Base>
+                    <iframe
+                        title='iframeOP'
+                        id='iframeOP'
+                        src={checkSessionURL}
+                        width='0px'
+                        height='0px'
+                    />     
                     <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
                 </Base>
             </IntlProvider>

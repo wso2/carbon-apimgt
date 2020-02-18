@@ -30,8 +30,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import LaunchIcon from '@material-ui/icons/Launch';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { getOperationScopes } from '../../operationUtils';
@@ -169,6 +167,12 @@ rate limiting per operation
                     margin='dense'
                     variant='outlined'
                 >
+                    <MenuItem
+                        value=''
+                        dense
+                    >
+                        None
+                    </MenuItem>
                     {api.scopes.length !== 0
                         ? api.scopes.map((scope) => (
                             <MenuItem
@@ -191,16 +195,7 @@ rate limiting per operation
                         )}
                 </TextField>
             </Grid>
-            <Grid item md={5}>
-                <Tooltip title='Remove scope'>
-                    <IconButton
-                        disabled={disableUpdate}
-                        onClick={() => operationsDispatcher({ action: 'scopes', data: { target, verb, value: [] } })}
-                        aria-label='delete'
-                    >
-                        <DeleteIcon fontSize='small' />
-                    </IconButton>
-                </Tooltip>
+            <Grid item md={5} style={{ marginTop: '14px' }}>
                 {!disableUpdate && (
                     <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
                         <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>

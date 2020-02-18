@@ -659,6 +659,8 @@ public class OAS2Parser extends APIDefinition {
                 OASParserUtil.getTransportSecurity(api.getApiSecurity(), api.getTransports()));
         swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_APP_SECURITY,
                 OASParserUtil.getAppSecurity(api.getApiSecurity()));
+        swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_RESPONSE_CACHE,
+                OASParserUtil.getResponseCacheConfig(api.getResponseCache(), api.getCacheTimeout()));
 
         return getSwaggerJsonString(swagger);
     }

@@ -18,13 +18,14 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.xml.namespace.QName;
 
 /**
  * This class represents the constants that are used for APIManager implementation
@@ -104,6 +105,11 @@ public final class APIConstants {
     public static final String API_TENANT_CONF = "tenant-conf.json";
 
     public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/" + API_TENANT_CONF;
+
+    public static final String API_TENANT_CONF_MEDIA_TYPE = "tenant-config";
+    public static final String TENANT_CONFIG_CACHE_NAME = "tenantConfigCache";
+    public static final long TENANT_CONFIG_CACHE_MODIFIED_EXPIRY = 900; // cache set to 15 minutes
+    public static final long TENANT_CONFIG_CACHE_ACCESS_EXPIRY = 900;
 
     public static final String RESOURCE_FOLDER_LOCATION = "repository" + File.separator + "resources";
 
@@ -421,6 +427,7 @@ public final class APIConstants {
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT = "true";
     public static final String REMOVE_OAUTH_HEADERS_FROM_MESSAGE = OAUTH_CONFIGS + "RemoveOAuthHeadersFromOutMessage";
+    public static final String JWT_AS_OPAQUE_TOKEN = OAUTH_CONFIGS + "JWTAsOpaqueToken";
     public static final String APPLICATION_TOKEN_SCOPE = OAUTH_CONFIGS + "ApplicationTokenScope";
     public static final String WHITELISTED_SCOPES = OAUTH_CONFIGS + "ScopeWhitelist.Scope";
     public static final String TOKEN_ENDPOINT_NAME = OAUTH_CONFIGS + "TokenEndPointName";
@@ -1217,9 +1224,12 @@ public final class APIConstants {
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
     public static final String SWAGGER_X_WSO2_SECURITY = "x-wso2-security";
     public static final String SWAGGER_X_WSO2_APP_SECURITY = "x-wso2-application-security";
+    public static final String SWAGGER_X_WSO2_RESPONSE_CACHE = "x-wso2-response-cache";
     public static final String WSO2_APP_SECURITY_TYPES = "security-types";
     public static final String OPTIONAL = "optional";
     public static final String MANDATORY = "mandatory";
+    public static final String RESPONSE_CACHING_ENABLED = "enabled";
+    public static final String RESPONSE_CACHING_TIMEOUT = "cacheTimeoutInSeconds";
     public static final String SWAGGER_X_WSO2_SCOPES = "x-wso2-scopes";
     public static final String SWAGGER_X_EXAMPLES = "x-examples";
     public static final String SWAGGER_SCOPE_KEY = "key";
@@ -1901,10 +1911,14 @@ public final class APIConstants {
      *
      * */
     public static final String API_RECOMMENDATION = "APIRecommendations";
-    public static final String RECOMMENDATION_ENDPOINT = API_RECOMMENDATION + ".recommendationEndpoint";
-    public static final String EVENT_PUBLISHING_ENDPOINT = API_RECOMMENDATION + ".eventPublishingEndpoint";
-    public static final String RECOMMENDATION_USERNAME = API_RECOMMENDATION + ".username";
-    public static final String RECOMMENDATION_PASSWORD = API_RECOMMENDATION + ".password";
+    public static final String RECOMMENDATION_ENDPOINT = "recommendationAPI";
+    public static final String AUTHENTICATION_ENDPOINT = "authenticationEndpoint";
+    public static final String RECOMMENDATION_API_CONSUMER_KEY = "consumerKey";
+    public static final String RECOMMENDATION_API_CONSUMER_SECRET = "consumerSecret";
+    public static final String MAX_RECOMMENDATIONS = "maxRecommendations";
+    public static final String APPLY_RECOMMENDATIONS_FOR_ALL_APIS = "applyForAllTenants";
+    public static final String RECOMMENDATION_USERNAME = "userName";
+    public static final String RECOMMENDATION_PASSWORD = "password";
     public static final String ADD_API = "ADD_API";
     public static final String DELETE_API = "DELETE_API";
     public static final String ADD_NEW_APPLICATION = "ADD_NEW_APPLICATION";
@@ -1916,6 +1930,21 @@ public final class APIConstants {
     public static final String DELETED_STATUS = "DELETED";
     public static final String ACTION_STRING = "action";
     public static final String PAYLOAD_STRING = "payload";
+    public static final String API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY = "EnableRecommendation";
+    public static final String RECOMMENDATIONS_WSO2_EVENT_PUBLISHER = "recommendationEventPublisher";
+    public static final String RECOMMENDATIONS_GET_RESOURCE = "/getRecommendations";
+    public static final String RECOMMENDATIONS_PUBLISH_RESOURCE = "/publishEvents";
+    public static final String RECOMMENDATIONS_USER_HEADER = "User";
+    public static final String RECOMMENDATIONS_ACCOUNT_HEADER = "Account";
+    public static final String ACCESS_TOKEN = "access_token";
+    public static final String CONTENT_TYPE_HEADER = "Content-Type";
+    public static final String CONTENT_TYPE_APPLICATION_FORM = "application/x-www-form-urlencoded";
+    public static final String AUTHORIZATION_BASIC = "Basic ";
+    public static final String AUTHORIZATION_BEARER = "Bearer ";
+    public static final String TOKEN_GRANT_TYPE_KEY = "grant_type";
+    public static final String TOKEN_KEY = "token";
+    public static final String GRANT_TYPE_VALUE = "client_credentials";
+
 
     public static class CertificateReLoaderConfiguration {
 

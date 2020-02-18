@@ -928,12 +928,6 @@ public interface APIConsumer extends APIManager {
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
 
     /**
-     * Checks whether the API recommendation feature is enabled.
-     * @throws APIManagementException if an error occurs while reading configs
-     */
-    boolean isRecommendationEnabled() throws APIManagementException;
-
-    /**
      * This methods loads the monetization implementation class
      *
      * @return monetization implementation class
@@ -1001,10 +995,25 @@ public interface APIConsumer extends APIManager {
     void publishClickedAPI(ApiTypeWrapper api, String username) throws APIManagementException;
 
     /**
+     * Checks whether the API recommendation feature is enabled.
+     *
+     * @param tenantDomain       tenant domain
+     * @throws APIManagementException if an error occurs while reading configs
+     */
+    boolean isRecommendationEnabled(String tenantDomain) throws APIManagementException;
+
+    /**
      * Get API recommendations for a given user..
      *
      * @param userName API clicked by the user
+     * @param tenantDomain Tenant Domain
      * @throws APIManagementException If an error occurs while publishing clicked API
      */
-    String getApiRecommendations(String userName) throws APIManagementException;
+    String getApiRecommendations(String userName, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get the requested tenant Domain from consumer.
+     *
+     */
+    String getRequestedTenant();
 }

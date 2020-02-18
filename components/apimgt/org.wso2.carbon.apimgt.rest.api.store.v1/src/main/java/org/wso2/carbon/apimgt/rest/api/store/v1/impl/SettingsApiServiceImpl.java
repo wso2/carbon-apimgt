@@ -18,17 +18,14 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIConsumerImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SettingsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
@@ -39,9 +36,10 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.ws.rs.core.Response;
 
 public class SettingsApiServiceImpl implements SettingsApiService {
 
@@ -53,8 +51,9 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(username);
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            String requestedTenantDomain = apiConsumer.getRequestedTenant();
             boolean monetizationEnabled = apiConsumer.isMonetizationEnabled(tenantDomain);
-            boolean recommendationEnabled = apiConsumer.isRecommendationEnabled();
+            boolean recommendationEnabled = apiConsumer.isRecommendationEnabled(requestedTenantDomain);
             boolean isUserAvailable = false;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
                 isUserAvailable = true;
