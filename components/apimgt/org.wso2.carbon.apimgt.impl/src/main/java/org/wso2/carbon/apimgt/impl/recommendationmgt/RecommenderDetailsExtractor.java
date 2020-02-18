@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.apimgt.impl.recommendationmgt;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,11 +153,20 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             String apiContext = api.getContext();
             String apiTags = api.getTags().toString();
             Set<URITemplate> uriTemplates = api.getUriTemplates();
-            List<String> resources = new ArrayList<String>();
+            JSONObject swaggerDef = new JSONObject(api.getSwaggerDefinition());
+            JSONArray resourceArray = new JSONArray();
+            JSONObject resourceObj;
 
             for (URITemplate uriTemplate : uriTemplates) {
+                resourceObj = new JSONObject();
                 String resource = uriTemplate.getUriTemplate();
-                resources.add(resource);
+                String resourceMethod = uriTemplate.getHTTPVerb();
+                String summary = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod,"summary");
+                String description = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod,"description");
+                resourceObj.put("resource", resource);
+                resourceObj.put("summary", summary);
+                resourceObj.put("description", description);
+                resourceArray.put(resourceObj);
             }
 
             JSONObject obj = new JSONObject();
@@ -165,7 +176,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             obj.put("context", apiContext);
             obj.put("tenant", tenantDomain);
             obj.put("tags", apiTags);
-            obj.put("resources", resources.toString());
+            obj.put("resources", resourceArray);
 
             JSONObject payload = new JSONObject();
             payload.put("action", APIConstants.ADD_API);
@@ -289,6 +300,18 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             log.error("Error occurred when getting the userID for user " + userName, e);
         }
         return userID;
+    }
+
+    private String getDescriptionFromSwagger(JSONObject swaggerDef, String resource, String resourceMethod,
+                                             String keyWord){
+        String description = null;
+        try {
+            description = (String) swaggerDef.getJSONObject("paths").getJSONObject(resource)
+                    .getJSONObject(resourceMethod.toLowerCase()).get(keyWord);
+        } catch (JSONException e){
+            log.debug(keyWord + " is not found for " + resource);
+        }
+        return description;
     }
 
     private boolean isRecommendationEnabled(String tenantDomain) {
