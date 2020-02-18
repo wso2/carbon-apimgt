@@ -30,7 +30,6 @@ import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-import { API_SECURITY_MUTUAL_SSL } from './APISecurity/components/apiSecurityConstants';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -45,23 +44,15 @@ const useStyles = makeStyles((theme) => ({
  * @returns
  */
 export default function Transports(props) {
-    const { api, configDispatcher, securityScheme } = props;
+    const { api, configDispatcher } = props;
     const [apiFromContext] = useAPI();
     const classes = useStyles();
-    const isMutualSSLEnabled = securityScheme.includes(API_SECURITY_MUTUAL_SSL);
     const Validate = () => {
         if (api.transport && api.transport.length === 0) {
             return (
                 <FormattedMessage
                     id='Apis.Details.Configuration.components.transport.empty'
                     defaultMessage='Please select at least one transport!'
-                />
-            );
-        } else if (isMutualSSLEnabled && !api.transport.includes('https')) {
-            return (
-                <FormattedMessage
-                    id='Apis.Details.Configuration.components.transport.sslHttps'
-                    defaultMessage='Please select Https as transport with mutual SSL!'
                 />
             );
         }
