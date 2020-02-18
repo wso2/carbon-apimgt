@@ -1,6 +1,11 @@
 const Configurations = {
     themes: {
         light: {
+            custom: {
+                thumbnail: {
+                },
+            },
+            /*
             direction: 'ltr',
             palette: {
                 primary: {
@@ -290,6 +295,7 @@ const Configurations = {
                     minWidth: 60, // Width of the language switcher in pixles
                 },
             },
+            */
         },
     },
 };

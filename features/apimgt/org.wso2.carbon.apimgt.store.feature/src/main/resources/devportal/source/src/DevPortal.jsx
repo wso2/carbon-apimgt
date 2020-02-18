@@ -20,6 +20,7 @@ import React, { Suspense, lazy } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import Configurations from 'Config';
+import merge from 'lodash.merge';
 import Settings from 'Settings';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Logout from './app/components/Logout';
@@ -27,6 +28,7 @@ import Progress from './app/components/Shared/Progress';
 import { SettingsProvider } from './app/components/Shared/SettingsContext';
 import API from './app/data/api';
 import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
+import DefaultConfigurations from './defaultTheme';
 const protectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApp" */));
 
 /**
@@ -48,7 +50,8 @@ class DevPortal extends React.Component {
             tenantDomain: null,
             theme: null,
         };
-        this.SetTenantTheme = this.setTenantTheme.bind(this);
+        this.systemTheme = merge(DefaultConfigurations, Configurations);
+        this.setTenantTheme = this.setTenantTheme.bind(this);
         this.setSettings = this.setSettings.bind(this);
     }
 
@@ -69,7 +72,7 @@ class DevPortal extends React.Component {
             });
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('tenant') === null || urlParams.get('tenant') === 'carbon.super') {
-            this.setState({ theme: Configurations.themes.light });
+            this.setState({ theme: this.systemTheme });
         } else {
             this.setTenantTheme(urlParams.get('tenant'));
         }
@@ -83,7 +86,7 @@ class DevPortal extends React.Component {
     setTenantDomain = (tenantDomain) => {
         this.setState({ tenantDomain });
         if (tenantDomain === 'carbon.super') {
-            this.setState({ theme: Configurations.themes.light });
+            this.setState({ theme: this.systemTheme });
         } else {
             this.setTenantTheme(tenantDomain);
         }
@@ -111,10 +114,12 @@ class DevPortal extends React.Component {
         fetch(`${Settings.app.context}/site/public/tenant_themes/${tenant}/apim/defaultTheme.json`)
             .then((resp) => resp.json())
             .then((data) => {
-                this.setState({ theme: data.themes.light });
+                // Merging with the system theme.
+                const tenantMergedTheme = merge(this.systemTheme, data);
+                this.setState({ theme: tenantMergedTheme });
             })
             .catch(() => {
-                this.setState({ theme: Configurations.themes.light });
+                this.setState({ theme: this.systemTheme });
             });
     }
 
