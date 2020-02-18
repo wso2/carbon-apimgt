@@ -42,9 +42,15 @@ import Badge from '@material-ui/core/Badge';
 import APIValidation from 'AppData/APIValidation';
 import Alert from 'AppComponents/Shared/Alert';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
     formControl: {
         minWidth: 120,
+    },
+    paper: {
+        paddingLeft: theme.spacing(4),
+        paddingTop: theme.spacing(1.5),
+        paddingBottom: theme.spacing(0.5),
+        marginTop: '12px',
     },
 }));
 
@@ -156,7 +162,7 @@ function AddOperation(props) {
         clearInputs();
     }
     return (
-        <Paper style={{ marginTop: '12px' }}>
+        <Paper className={classes.paper}>
             <Grid container direction='row' spacing={0} justify='center' alignItems='center'>
                 <Grid item md={5} xs={12}>
                     <FormControl margin='dense' variant='outlined' className={classes.formControl}>
