@@ -166,9 +166,10 @@ export default class Application extends Resource {
      * @param  {string} callbackUrl callback url
      * @param  {String} consumerKey Consumer key of application
      * @param  {String} consumerSecret Consumer secret of application
+     * @param  {String} additionalProperties Additional properties for the oauth application
      * @returns {promise} Update the callbackURL and/or supportedGrantTypes
      */
-    updateKeys(tokenType, keyType, supportedGrantTypes, callbackUrl, consumerKey, consumerSecret) {
+    updateKeys(tokenType, keyType, supportedGrantTypes, callbackUrl, consumerKey, consumerSecret, additionalProperties) {
         const promisedPut = this.client.then((client) => {
             const requestContent = {
                 consumerKey,
@@ -177,6 +178,7 @@ export default class Application extends Resource {
                 callbackUrl,
                 keyType,
                 tokenType,
+                additionalProperties
             };
             const payload = { applicationId: this.id, keyType, body: requestContent };
             return client.apis['Application Keys'].put_applications__applicationId__keys__keyType_(payload);
