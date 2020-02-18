@@ -17,6 +17,7 @@
  * under the License.
  */
 
+(function () {
     include("/services/constants.jag");
     var appUtils = require("/services/utils.js");
     include("/services/constants.jag");
@@ -153,5 +154,5 @@
     } else {
         response.sendRedirect(app.context);
     }
-
+}());
 %>
