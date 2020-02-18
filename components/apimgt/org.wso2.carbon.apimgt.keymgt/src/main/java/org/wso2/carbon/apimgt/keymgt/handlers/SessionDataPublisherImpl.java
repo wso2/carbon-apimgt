@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIMgtDAOException;
+import org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
+import org.wso2.carbon.apimgt.impl.dto.SystemApplicationDTO;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
@@ -41,9 +44,7 @@ import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.wso2.carbon.identity.oauth.OAuthUtil.handleError;
@@ -56,10 +57,7 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
 
     public static final Log log = LogFactory.getLog(SessionDataPublisherImpl.class);
     private static final String handlerName = "APIMSessionDataPublisherImpl";
-    private static final String DEVPORTAL_CLIENT_APP_NAME = "admin_apim_devportal";
-    private static final String DEVPORTAL_CLIENT_APP_NAME_OLD = "admin_store";
-    private static final String PUBLISHER_CLIENT_APP_NAME_OLD = "admin_publisher";
-    private static final String PUBLISHER_CLIENT_APP_NAME = "admin_apim_publisher";
+    private static final String user = "user";
 
     @Override public void doPublishAuthenticationStepSuccess(AuthenticationData authenticationData) {
 
@@ -108,11 +106,13 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
             SessionContext sessionContext, Map<String, Object> params) {
 
         OAuthConsumerAppDTO[] appDTOs = new OAuthConsumerAppDTO[0];
-        AuthenticatedUser authenticatedUser = (AuthenticatedUser) params.get("user");
+        List<OAuthConsumerAppDTO> revokeAppList = new ArrayList<>();
+        AuthenticatedUser authenticatedUser = (AuthenticatedUser) params.get(user);
         String username = authenticatedUser.getUserName();
         String tenantDomain = authenticatedUser.getTenantDomain();
         String userStoreDomain = authenticatedUser.getUserStoreDomain();
         AuthenticatedUser federatedUser;
+        SystemApplicationDTO[] systemApplicationDTOS = new SystemApplicationDTO[0];
 
         if (authenticatedUser.isFederatedUser()) {
             try {
@@ -123,6 +123,18 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
                         .getUserName(), e);
             }
         }
+        SystemApplicationDAO systemApplicationDAO = new SystemApplicationDAO();
+        try {
+            systemApplicationDTOS = systemApplicationDAO.getApplications(tenantDomain);
+            if (systemApplicationDTOS.length < 0) {
+                if (log.isDebugEnabled()) {
+                    log.debug("The tenant: " + tenantDomain + " doesn't have any system apps");
+                }
+            }
+        } catch (APIMgtDAOException e) {
+            log.error("Error thrown while retrieving system applications for the tenant domain " + tenantDomain, e);
+        }
+
         try {
             appDTOs = getAppsAuthorizedByUser(authenticatedUser);
             if (appDTOs.length > 0) {
@@ -137,10 +149,14 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
         }
 
         for (OAuthConsumerAppDTO appDTO : appDTOs) {
-            if (StringUtils.equalsIgnoreCase(DEVPORTAL_CLIENT_APP_NAME_OLD, appDTO.getApplicationName()) ||
-                    StringUtils.equalsIgnoreCase(DEVPORTAL_CLIENT_APP_NAME, appDTO.getApplicationName()) ||
-                    StringUtils.equalsIgnoreCase(PUBLISHER_CLIENT_APP_NAME_OLD, appDTO.getApplicationName()) ||
-                    StringUtils.equalsIgnoreCase(PUBLISHER_CLIENT_APP_NAME, appDTO.getApplicationName())) {
+            for (SystemApplicationDTO systemApplicationDTO : systemApplicationDTOS) {
+                if (StringUtils.equalsIgnoreCase(appDTO.getOauthConsumerKey(), systemApplicationDTO.getConsumerKey())) {
+                    revokeAppList.add(appDTO);
+                }
+            }
+        }
+
+        for (OAuthConsumerAppDTO appDTO : revokeAppList) {
                 Set<AccessTokenDO> accessTokenDOs = null;
                 try {
                     // Retrieve all ACTIVE or EXPIRED access tokens for particular client authorized by this user
@@ -199,7 +215,6 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
                     }
                 }
             }
-        }
     }
 
     /**

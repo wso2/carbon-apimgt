@@ -3403,6 +3403,9 @@ public class SQLConstants {
                 "INSERT INTO AM_SYSTEM_APPS " + "(NAME,CONSUMER_KEY,CONSUMER_SECRET,TENANT_DOMAIN,CREATED_TIME) " +
                         "VALUES (?,?,?,?,?)";
 
+        public static final String GET_APPLICATIONS =
+                "SELECT * FROM " + "AM_SYSTEM_APPS WHERE TENANT_DOMAIN = ?";
+
         public static final String GET_CLIENT_CREDENTIALS_FOR_APPLICATION =
                 "SELECT CONSUMER_KEY,CONSUMER_SECRET FROM " + "AM_SYSTEM_APPS WHERE NAME = ? AND TENANT_DOMAIN = ?";
 
