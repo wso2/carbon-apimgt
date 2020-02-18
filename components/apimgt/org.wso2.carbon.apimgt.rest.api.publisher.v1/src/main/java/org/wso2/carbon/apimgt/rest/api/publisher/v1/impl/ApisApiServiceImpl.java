@@ -472,22 +472,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         //attach micro-geteway labels
         assignLabelsToDTO(body, apiToAdd);
 
-        // set default API Level Policy
-        if (apiToAdd.getApiLevelPolicy() != null) {
-            Policy[] apiPolicies = apiProvider.getPolicies(username, PolicyConstants.POLICY_LEVEL_API);
-            if (apiPolicies.length > 0) {
-                for (Policy policy : apiPolicies) {
-                    if (policy.getPolicyName().equals(APIConstants.UNLIMITED_TIER)) {
-                        apiToAdd.setApiLevelPolicy(APIConstants.UNLIMITED_TIER);
-                        break;
-                    }
-                }
-                if (StringUtils.isBlank(apiToAdd.getApiLevelPolicy())) {
-                    apiToAdd.setApiLevelPolicy(apiPolicies[0].getPolicyName());
-                }
-            }
-        }
-
         return apiToAdd;
     }
 
