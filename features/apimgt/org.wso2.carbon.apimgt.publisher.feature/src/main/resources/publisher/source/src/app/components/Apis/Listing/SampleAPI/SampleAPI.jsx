@@ -113,8 +113,7 @@ class SampleAPI extends Component {
                         Alert.error(error);
                     });
             });
-        }
-        else {
+        }else {
             swaggerUpdatePromise.then((sampleApi) => {
                 this.setState({published: true, api: sampleApi});
                 Alert.info(intl.formatMessage({
