@@ -98,11 +98,11 @@ class SampleAPI extends Component {
             console.error(error);
             Alert.error(error);
         });
-        if(!AuthManager.isNotPublisher()) {
+        if (!AuthManager.isNotPublisher()) {
             swaggerUpdatePromise.then((sampleAPI) => {
                 sampleAPI.publish()
                     .then(() => {
-                        this.setState({ published: true, api: sampleAPI }); 
+                        this.setState({ published: true, api: sampleAPI });
                         Alert.info(intl.formatMessage({
                             id: 'Apis.Listing.SampleAPI.SampleAPI.created',
                             defaultMessage: 'Sample PizzaShackAPI API created successfully',
@@ -113,17 +113,17 @@ class SampleAPI extends Component {
                         Alert.error(error);
                     });
             });
-        }else {
+        } else {
             swaggerUpdatePromise.then((sampleApi) => {
-                this.setState({published: true, api: sampleApi});
+                this.setState({ published: true, api: sampleApi });
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Listing.SampleAPI.SampleAPI.created',
                     defaultMessage: 'Sample PizzaShackAPI API created successfully',
                 }));
             })
-            .catch((error) => {
-                Alert.error(error);
-            })
+                .catch((error) => {
+                    Alert.error(error);
+                });
         }
     }
 
