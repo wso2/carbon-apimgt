@@ -1947,6 +1947,7 @@ public final class APIConstants {
     public static final String TOKEN_GRANT_TYPE_KEY = "grant_type";
     public static final String TOKEN_KEY = "token";
     public static final String GRANT_TYPE_VALUE = "client_credentials";
+    public static final String RECOMMENDATIONS_CACHE_NAME = "APIRecommendationsCache";
 
 
     public static class CertificateReLoaderConfiguration {

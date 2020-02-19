@@ -17,6 +17,11 @@
 
 package org.wso2.carbon.apimgt.impl.recommendationmgt;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,9 +46,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import javax.cache.Cache;
@@ -89,11 +94,12 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         this.tenantDomain = MultitenantUtils.getTenantDomain(userName);
     }
 
-    public RecommenderDetailsExtractor(int applicationId, String tenantDomain) {
+    public RecommenderDetailsExtractor(int applicationId, String userName) {
 
         this.publishingDetailType = APIConstants.DELETE_APPLICATION;
         this.applicationId = applicationId;
-        this.tenantDomain = tenantDomain;
+        this.userName = userName;
+        this.tenantDomain = MultitenantUtils.getTenantDomain(userName);
     }
 
     public RecommenderDetailsExtractor(ApiTypeWrapper clickedApi, String userName) {
@@ -132,6 +138,10 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 } else if (APIConstants.ADD_USER_SEARCHED_QUERY.equals(publishingDetailType)) {
                     publishSearchQueries(searchQuery, userName);
                 }
+
+                if (!APIConstants.ADD_API.equals(publishingDetailType)) {
+                    updateRecommendationsCache(userName, tenantDomain);
+                }
             }
         } catch (IOException e) {
             log.error("When extracting data for the recommendation system !", e);
@@ -161,8 +171,8 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 resourceObj = new JSONObject();
                 String resource = uriTemplate.getUriTemplate();
                 String resourceMethod = uriTemplate.getHTTPVerb();
-                String summary = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod,"summary");
-                String description = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod,"description");
+                String summary = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod, "summary");
+                String description = getDescriptionFromSwagger(swaggerDef, resource, resourceMethod, "description");
                 resourceObj.put("resource", resource);
                 resourceObj.put("summary", summary);
                 resourceObj.put("description", description);
@@ -303,12 +313,13 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     }
 
     private String getDescriptionFromSwagger(JSONObject swaggerDef, String resource, String resourceMethod,
-                                             String keyWord){
+                                             String keyWord) {
+
         String description = null;
         try {
             description = (String) swaggerDef.getJSONObject("paths").getJSONObject(resource)
                     .getJSONObject(resourceMethod.toLowerCase()).get(keyWord);
-        } catch (JSONException e){
+        } catch (JSONException e) {
             log.debug(keyWord + " is not found for " + resource);
         }
         return description;
@@ -363,5 +374,69 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             }
         }
         return false;
+    }
+
+    /**
+     * Update the recommendationsCache by  connecting with the recommendation engine and getting recommendations for
+     * the given user for given tenant domain. A user can have several entries cache for different tenants
+     *
+     * @param userName     User's Name
+     * @param tenantDomain tenantDomain
+     */
+    public void updateRecommendationsCache(String userName, String tenantDomain) {
+
+        RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
+        String recommendationEndpointURL = recommendationEnvironment.getRecommendationServerURL()
+                + APIConstants.RECOMMENDATIONS_GET_RESOURCE;
+        try {
+            startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            String userID = apiMgtDAO.getUserID(userName);
+            URL serverURL = new URL(recommendationEndpointURL);
+            int serverPort = serverURL.getPort();
+            String serverProtocol = serverURL.getProtocol();
+
+            HttpGet method = new HttpGet(recommendationEndpointURL);
+            HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
+            if (recommendationEnvironment.getOauthURL() != null) {
+                String accessToken = ServiceReferenceHolder.getInstance().getAccessTokenGenerator().getAccessToken();
+                method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                        APIConstants.AUTHORIZATION_BEARER + accessToken);
+            } else {
+                byte[] credentials = org.apache.commons.codec.binary.Base64.encodeBase64(
+                        (recommendationEnvironment.getUserName() + ":" + recommendationEnvironment.getPassword())
+                                .getBytes(StandardCharsets.UTF_8));
+                method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                        APIConstants.AUTHORIZATION_BASIC + new String(credentials, StandardCharsets.UTF_8));
+            }
+            method.setHeader(APIConstants.RECOMMENDATIONS_USER_HEADER, userID);
+            method.setHeader(APIConstants.RECOMMENDATIONS_ACCOUNT_HEADER, tenantDomain);
+
+            HttpResponse httpResponse = httpClient.execute(method);
+            if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                String contentString = EntityUtils.toString(httpResponse.getEntity());
+                if (log.isDebugEnabled()) {
+                    log.debug("Recommendations received for user " + userName + " is " + contentString);
+                }
+                Cache recommendationCache = APIUtil.getCache(
+                        APIConstants.API_MANAGER_CACHE_MANAGER,
+                        APIConstants.RECOMMENDATIONS_CACHE_NAME,
+                        APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
+                        APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
+                String cacheName = userName + "_" + tenantDomain;
+                recommendationCache.put(cacheName, contentString);
+            } else {
+                log.warn("Error getting recommendations from server. Server responded with "
+                        + httpResponse.getStatusLine().getStatusCode());
+            }
+        } catch (IOException e) {
+            log.error("Connection failure for the recommendation engine", e);
+        } catch (APIManagementException e) {
+            log.error("Error while getting recommendations for user " + userName, e);
+        } finally {
+            if (tenantFlowStarted) {
+                endTenantFlow();
+            }
+        }
     }
 }
