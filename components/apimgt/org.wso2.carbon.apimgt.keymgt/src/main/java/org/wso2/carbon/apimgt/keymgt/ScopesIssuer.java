@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.keymgt;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.oauth.callback.OAuthCallback;
@@ -37,6 +40,7 @@ public class ScopesIssuer {
     private List<String> scopeSkipList = new ArrayList<>();
     private static Map<String, AbstractScopesIssuer> scopesIssuers;
     private static final String DEFAULT_SCOPE_NAME = "default";
+    private static final String CONFIG_ELEM_SCOPE_ISSUER = "OAuthConfigurations.ScopeIssuer";
     /**
      * Singleton of ScopeIssuer.*
      */
@@ -46,9 +50,27 @@ public class ScopesIssuer {
 
     }
 
-    public static void loadInstance(List<String> whitelist) {
-
-        scopesIssuer = new ScopesIssuer();
+    public static void loadInstance(List<String> whitelist) throws APIKeyMgtException{
+        APIManagerConfiguration configParser = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        if (configParser != null) {
+            String scopeIssuerClass = configParser.getFirstProperty(CONFIG_ELEM_SCOPE_ISSUER);
+            if (scopeIssuerClass != null) {
+                try {
+                    scopesIssuer = (ScopesIssuer) APIUtil.getClassForName(scopeIssuerClass).newInstance();
+                } catch (ClassNotFoundException ex) {
+                    throw new APIKeyMgtException("Class " + scopeIssuerClass + " could not be found", ex);
+                } catch (InstantiationException ex) {
+                    throw new APIKeyMgtException("Class " + scopeIssuerClass + " could not be instantiated", ex);
+                } catch (IllegalAccessException ex) {
+                    throw new APIKeyMgtException("Class " + scopeIssuerClass + " could not be accessed", ex);
+                }
+            } else {
+                scopesIssuer = new ScopesIssuer();
+            }
+        } else {
+            scopesIssuer = new ScopesIssuer();
+        }
         if (whitelist != null && !whitelist.isEmpty()) {
             scopesIssuer.scopeSkipList.addAll(whitelist);
         }
