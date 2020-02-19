@@ -71,7 +71,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
                             API api = apiWrapper.getApi();
                             APIIdentifier apiIdentifier = api.getId();
                             boolean isApiSubscribed = apiConsumer.isSubscribed(apiIdentifier, userName);
-                            if (!isApiSubscribed && recommendedApis.size() <= maxRecommendations) {
+                            if (!isApiSubscribed && recommendedApis.size() < maxRecommendations) {
                                 JSONObject apiDetails = new JSONObject();
                                 apiDetails.put("id", apiId);
                                 apiDetails.put("name", apiWrapper.getName());

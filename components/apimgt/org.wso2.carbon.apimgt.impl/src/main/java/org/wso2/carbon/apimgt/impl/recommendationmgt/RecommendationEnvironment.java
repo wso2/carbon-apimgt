@@ -25,7 +25,7 @@ public class RecommendationEnvironment {
     private String consumerSecret;
     private String userName;
     private String password;
-    private int maxRecommendations = 5;
+    private int maxRecommendations = 6;
     private boolean applyForAllTenants = true;
 
     public String getRecommendationServerURL() {
