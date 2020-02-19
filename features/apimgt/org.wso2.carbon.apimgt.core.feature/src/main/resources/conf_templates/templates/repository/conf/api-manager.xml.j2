@@ -366,7 +366,9 @@
     <OAuthConfigurations>
         <!-- Remove OAuth headers from outgoing message. -->
         <RemoveOAuthHeadersFromOutMessage>{{not apim.oauth_config.enable_outbound_auth_header}}</RemoveOAuthHeadersFromOutMessage>
-
+        {% if apim.oauth_config.scope_issuer is defined %}
+        <ScopeIssuer>{{apim.oauth_config.scope_issuer}}</ScopeIssuer>
+        {% endif %}
         {% if apim.oauth_config.set_jwt_as_opaque_token is defined %}
         <!-- Consider incoming jwt token as an opaque token. -->
         <JWTAsOpaqueToken>{{apim.oauth_config.set_jwt_as_opaque_token}}</JWTAsOpaqueToken>
