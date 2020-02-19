@@ -46,7 +46,7 @@ public class ScopesIssuer {
      */
     private static ScopesIssuer scopesIssuer;
 
-    private ScopesIssuer() {
+    public ScopesIssuer() {
 
     }
 
