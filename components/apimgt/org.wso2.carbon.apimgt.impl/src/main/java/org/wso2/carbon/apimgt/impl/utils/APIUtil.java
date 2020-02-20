@@ -3958,6 +3958,9 @@ public final class APIUtil {
             throws APIManagementException {
         // TODO: Merge different resource loading methods and create a single method.
         try {
+            String workflowExtensionLocation =
+                    CarbonUtils.getCarbonHome() + File.separator + APIConstants.WORKFLOW_EXTENSION_LOCATION;
+
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
@@ -3969,8 +3972,7 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding External Stores configuration to the tenant's registry");
             }
-            InputStream inputStream =
-                    APIManagerComponent.class.getResourceAsStream("/workflowextensions/default-workflow-extensions.xml");
+            InputStream inputStream = new FileInputStream(workflowExtensionLocation);
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
             resource.setContent(data);
@@ -3978,9 +3980,10 @@ public final class APIUtil {
             govRegistry.put(APIConstants.WORKFLOW_EXECUTOR_LOCATION, resource);
 
         } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving External Stores configuration information to the registry", e);
+            throw new APIManagementException("Error while saving Workflow configuration information to the registry",
+                    e);
         } catch (IOException e) {
-            throw new APIManagementException("Error while reading External Stores configuration file content", e);
+            throw new APIManagementException("Error while reading Workflow configuration file content", e);
         }
     }
 
