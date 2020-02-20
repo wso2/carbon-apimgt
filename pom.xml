@@ -1621,13 +1621,13 @@
 
         <carbon.analytics.common.version>5.2.21</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.6.0-beta</carbon.kernel.version>
-        <carbon.kernel.feature.version>4.6.0-beta</carbon.kernel.feature.version>
+        <carbon.kernel.version>4.6.0-beta2</carbon.kernel.version>
+        <carbon.kernel.feature.version>4.6.0-beta2</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.7.23</carbon.commons.version>
         <carbon.registry.version>4.7.29</carbon.registry.version>
-        <carbon.mediation.version>4.7.33</carbon.mediation.version>
+        <carbon.mediation.version>4.7.34</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
         <carbon.identity.version>5.16.83</carbon.identity.version>
@@ -1709,7 +1709,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-        <synapse.version>2.1.7-wso2v143</synapse.version>
+        <synapse.version>2.1.7-wso2v146</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
