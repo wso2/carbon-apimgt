@@ -17,9 +17,11 @@
  * under the License.
  */
 
+(function () {
     include("/services/constants.jag");
     var appUtils = require("/services/utils.js");
     var app = require("/site/public/theme/settings.js").Settings.app;
+    var log = new Log();
     app.context = appUtils.getTenantBaseStoreContext();
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var serverUrl = "";
@@ -30,102 +32,112 @@
         serverUrl = utils.getServerURL();
     }
     if(request.getParameter("error") === "login_required"){
-       response.sendRedirect(serverUrl + app.context + "/services/configs");  
+       response.sendRedirect(serverUrl + app.context + "/services/configs");
     } else if(request.getParameter("code") != null){
-    var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
-    if(loginCallbackUrl == null){
-        loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
-     }
-    var tokenRequestData = {
-        "grant_type": "authorization_code",
-        "code": request.getParameter("code","UTF-8"),
-        "redirect_uri": loginCallbackUrl
-    };
-     var tenantDomain = "carbon.super" ;
-     if(appUtils.isPerTenantServiceProviderEnabled()){
-        tenantDomain = appUtils.getTenantDomain();
-      }
-    var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
-    var systemApplicationDAO = new SystemApplicationDTO();
-    // this is to support migration from admin_store to admin_devportal
-    var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME,tenantDomain);
-    if (systemApplicationDTO === null) {
-        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD,tenantDomain);
+        var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
+        if (loginCallbackUrl == null) {
+            loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
+        }
+        var tokenRequestData = {
+            "grant_type": "authorization_code",
+            "code": request.getParameter("code","UTF-8"),
+            "redirect_uri": loginCallbackUrl
+        };
+        var tenantDomain = "carbon.super" ;
+        if (appUtils.isPerTenantServiceProviderEnabled()) {
+            tenantDomain = appUtils.getTenantDomain();
+        }
+        var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
+        var systemApplicationDAO = new SystemApplicationDTO();
+        // this is to support migration from admin_store to admin_devportal
+        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME,tenantDomain);
+        if (systemApplicationDTO === null) {
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME_OLD,tenantDomain);
+        }
+        var clientId = systemApplicationDTO.getConsumerKey();
+        var clientSecret = systemApplicationDTO.getConsumerSecret();
+        var Base64 = org.apache.axiom.om.util.Base64;
+        var String = Packages.java.lang.String;
+        var Integer = Packages.java.lang.Integer;
+        var base64encoded = Base64.encode ( new String (clientId + ":" + clientSecret).getBytes());
+        var tokenEndpoint = appUtils.getLoopbackOrigin() + TOKEN_URL_SUFFIX;
+        var result = post(tokenEndpoint, tokenRequestData,{"Authorization": "Basic " + base64encoded});
+
+        response.contentType = "application/json";
+        var tokenResponse;
+        try {
+            tokenResponse = JSON.parse(result.data);
+            if (!tokenResponse.access_token) {
+                log.error("Could not retrieve access token. Response: " + result.data);
+                return;
+            }
+        } catch (e) {
+            log.error ("Error while generating token", e);
+            return;
+        }
+
+        var tokenLength = tokenResponse.access_token.length;
+        var accessToken = String(tokenResponse.access_token);
+
+        var idTokenLength = tokenResponse.id_token.length;
+        var idToken = String(tokenResponse.id_token);
+
+        var idTokenPart1 = idToken.substring(0,idTokenLength/2);
+        var idTokenPart2 = idToken.substring(idTokenLength/2,idTokenLength);
+
+        var accessTokenPart1 = accessToken.substring(0, tokenLength/2);
+        var accessTokenPart2 = accessToken.substring(tokenLength/2, tokenLength);
+
+        var refreshToken = String(tokenResponse.refresh_token);
+        tokenLength = tokenResponse.refresh_token.length;
+        var refreshTokenPart1 = refreshToken.substring(0, tokenLength/2);
+        var refreshTokenPart2 = refreshToken.substring(tokenLength/2, tokenLength);
+
+        // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/store
+        // because partial HTTP only cookie is required for get the user information from access token,
+        // hence setting the HTTP only access token path to /store/
+        var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': app.context + "/", "httpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
+        response.addCookie(cookie);
+
+        cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': "/api/am/store/", "httpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
+        response.addCookie(cookie);
+
+        cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': refreshTokenPart2, 'path': app.context + "/", "httpOnly": true, "secure": true,
+                    "maxAge": 86400 // TODO: Default value a day, need to get this from idn configs ~tmkb
+                };
+        response.addCookie(cookie);
+
+        cookie = {
+            'name': 'WSO2_AM_REFRESH_TOKEN_1_Default',
+            'value': refreshTokenPart1,
+            'path': app.context + "/",
+            "secure": true,
+            "maxAge": 86400 // TODO: Default value a day, need to get this from idn configs ~tmkb
+        };
+        response.addCookie(cookie);
+
+        cookie = {'name': 'WSO2_AM_TOKEN_1_Default', 'value': accessTokenPart1, 'path': app.context + "/", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
+        response.addCookie(cookie);
+
+        cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P2', 'value':idTokenPart2, 'path': app.context + "/services/logout", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
+        response.addCookie(cookie);
+
+        cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':idTokenPart1, 'path': app.context + "/services/logout", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
+        response.addCookie(cookie);
+
+        cookie = {'name': 'IS_LOGIN_DEFAULT', 'value':'true', 'path': app.context, "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
+        response.addCookie(cookie);
+
+        cookie = {'name': 'devportal_session_state', 'value': request.getParameter("session_state", "UTF-8"), 'path': app.context + "/", "secure": true, "maxAge": Integer(-1)};
+        response.addCookie(cookie);
+
+        var state = request.getParameter("state");
+        if (state !== null) {
+            state = decodeURI(state);
+            response.sendRedirect(app.context + state);
+        } else {
+            response.sendRedirect(app.context + "/apis");
+        }
     }
-    var clientId = systemApplicationDTO.getConsumerKey();
-    var clientSecret = systemApplicationDTO.getConsumerSecret();
-    var Base64 = org.apache.axiom.om.util.Base64;
-    var String = Packages.java.lang.String;
-    var Integer = Packages.java.lang.Integer;
-    var base64encoded = Base64.encode ( new String (clientId + ":" + clientSecret).getBytes());
-    var tokenEndpoint = appUtils.getLoopbackOrigin() + TOKEN_URL_SUFFIX;
-    var result = post(tokenEndpoint, tokenRequestData,{"Authorization": "Basic " + base64encoded});
-
-    response.contentType = "application/json";
-    var tokenResponse = JSON.parse(result.data);
-
-    var tokenLength = tokenResponse.access_token.length;
-    var accessToken = String(tokenResponse.access_token);
-
-    var idTokenLength = tokenResponse.id_token.length;
-    var idToken = String(tokenResponse.id_token);
-
-    var idTokenPart1 = idToken.substring(0,idTokenLength/2);
-    var idTokenPart2 = idToken.substring(idTokenLength/2,idTokenLength);
-
-    var accessTokenPart1 = accessToken.substring(0, tokenLength/2);
-    var accessTokenPart2 = accessToken.substring(tokenLength/2, tokenLength);
-
-    var refreshToken = String(tokenResponse.refresh_token);
-    tokenLength = tokenResponse.refresh_token.length;
-    var refreshTokenPart1 = refreshToken.substring(0, tokenLength/2);
-    var refreshTokenPart2 = refreshToken.substring(tokenLength/2, tokenLength);
-
-    // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/store
-    // because partial HTTP only cookie is required for get the user information from access token,
-    // hence setting the HTTP only access token path to /store/
-    var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': app.context + "/", "httpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
-    response.addCookie(cookie);
-
-    cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': "/api/am/store/", "httpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
-    response.addCookie(cookie);
-
-    cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': refreshTokenPart2, 'path': app.context + "/", "httpOnly": true, "secure": true,
-                "maxAge": 86400 // TODO: Default value a day, need to get this from idn configs ~tmkb
-            };
-    response.addCookie(cookie);
-
-    cookie = {
-        'name': 'WSO2_AM_REFRESH_TOKEN_1_Default',
-        'value': refreshTokenPart1,
-        'path': app.context + "/",
-        "secure": true,
-        "maxAge": 86400 // TODO: Default value a day, need to get this from idn configs ~tmkb
-    };
-    response.addCookie(cookie);
-
-    cookie = {'name': 'WSO2_AM_TOKEN_1_Default', 'value': accessTokenPart1, 'path': app.context + "/", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
-    response.addCookie(cookie);
-
-    cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P2', 'value':idTokenPart2, 'path': app.context + "/services/logout", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
-    response.addCookie(cookie);
-
-    cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':idTokenPart1, 'path': app.context + "/services/logout", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
-    response.addCookie(cookie);
-
-    cookie = {'name': 'IS_LOGIN_DEFAULT', 'value':'true', 'path': app.context, "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
-    response.addCookie(cookie);
-
-    cookie = {'name': 'devportal_session_state', 'value': request.getParameter("session_state", "UTF-8"), 'path': app.context + "/", "secure": true, "maxAge": Integer(-1)};
-    response.addCookie(cookie);
-
-    var state = request.getParameter("state");
-    if (state !== null) {
-        state = decodeURI(state);
-        response.sendRedirect(app.context + state);
-    } else {
-        response.sendRedirect(app.context + "/apis");
-    }
-    }
-
+}());
 %>
