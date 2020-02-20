@@ -56,6 +56,7 @@ import javax.cache.Cache;
 public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(RecommenderDetailsExtractor.class);
+    private static final long waitDuration = 9000000; //wait duration to send getRecommendations Request
     private static String streamID = "org.wso2.apimgt.recommendation.event.stream:1.0.0";
     private boolean tenantFlowStarted = false;
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
@@ -65,6 +66,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     private String userName;
     private String searchQuery;
     private String tenantDomain;
+    private String requestTenantDomain;
     private String publishingDetailType;
     private Application application;
     private ApiTypeWrapper clickedApi;
@@ -76,46 +78,52 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         this.tenantDomain = tenantDomain;
     }
 
-    public RecommenderDetailsExtractor(Application application, String userName, int applicationId) {
+    public RecommenderDetailsExtractor(Application application, String userName, int applicationId,
+                                       String requestedTenant) {
 
         this.publishingDetailType = APIConstants.ADD_NEW_APPLICATION;
         this.application = application;
         this.applicationId = applicationId;
         this.userName = userName;
         this.tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        this.requestTenantDomain = requestedTenant;
     }
 
-    public RecommenderDetailsExtractor(Application application, String userName) {
+    public RecommenderDetailsExtractor(Application application, String userName, String requestedTenant) {
 
         this.publishingDetailType = APIConstants.UPDATED_APPLICATION;
         this.application = application;
         this.applicationId = application.getId();
         this.userName = userName;
         this.tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        this.requestTenantDomain = requestedTenant;
     }
 
-    public RecommenderDetailsExtractor(int applicationId, String userName) {
+    public RecommenderDetailsExtractor(int applicationId, String userName, String requestedTenant) {
 
         this.publishingDetailType = APIConstants.DELETE_APPLICATION;
         this.applicationId = applicationId;
         this.userName = userName;
         this.tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        this.requestTenantDomain = requestedTenant;
     }
 
-    public RecommenderDetailsExtractor(ApiTypeWrapper clickedApi, String userName) {
+    public RecommenderDetailsExtractor(ApiTypeWrapper clickedApi, String userName, String requestedTenant) {
 
         this.publishingDetailType = APIConstants.ADD_USER_CLICKED_API;
         this.clickedApi = clickedApi;
         this.userName = userName;
         this.tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        this.requestTenantDomain = requestedTenant;
     }
 
-    public RecommenderDetailsExtractor(String searchQuery, String userName) {
+    public RecommenderDetailsExtractor(String searchQuery, String userName, String requestedTenant) {
 
         this.publishingDetailType = APIConstants.ADD_USER_SEARCHED_QUERY;
         this.searchQuery = searchQuery;
         this.userName = userName;
         this.tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        this.requestTenantDomain = requestedTenant;
     }
 
     public void run() {
@@ -140,7 +148,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 }
 
                 if (!APIConstants.ADD_API.equals(publishingDetailType)) {
-                    updateRecommendationsCache(userName, tenantDomain);
+                    updateRecommendationsCache(userName, requestTenantDomain);
                 }
             }
         } catch (IOException e) {
@@ -385,6 +393,35 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
      */
     public void updateRecommendationsCache(String userName, String tenantDomain) {
 
+        long currentTime = System.currentTimeMillis();
+        long lastUpdatedTime = 0;
+        Cache recommendationsCache = APIUtil.getCache(
+                APIConstants.API_MANAGER_CACHE_MANAGER,
+                APIConstants.RECOMMENDATIONS_CACHE_NAME,
+                APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
+                APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
+        String cacheName = userName + "_" + tenantDomain;
+        JSONObject cachedObject = (JSONObject) recommendationsCache.get(cacheName);
+        if (cachedObject != null) {
+            lastUpdatedTime = (long) cachedObject.get(APIConstants.LAST_UPDATED_CACHE_KEY);
+        }
+        if (currentTime - lastUpdatedTime < waitDuration) { // double checked locking to avoid unnecessary locking
+            return;
+        }
+        synchronized (RecommenderDetailsExtractor.class) {
+            // Only get recommendations if the last update was was performed more than 15 minutes ago
+            if (currentTime - lastUpdatedTime < waitDuration) {
+                return;
+            }
+            String recommendations = getRecommendations(userName,tenantDomain);
+            JSONObject object = new JSONObject();
+            object.put(APIConstants.RECOMMENDATIONS_CACHE_KEY, recommendations);
+            object.put(APIConstants.LAST_UPDATED_CACHE_KEY, System.currentTimeMillis());
+            recommendationsCache.put(cacheName, object);
+        }
+    }
+
+    public String getRecommendations(String userName, String tenantDomain) {
         RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
         String recommendationEndpointURL = recommendationEnvironment.getRecommendationServerURL()
@@ -418,13 +455,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 if (log.isDebugEnabled()) {
                     log.debug("Recommendations received for user " + userName + " is " + contentString);
                 }
-                Cache recommendationCache = APIUtil.getCache(
-                        APIConstants.API_MANAGER_CACHE_MANAGER,
-                        APIConstants.RECOMMENDATIONS_CACHE_NAME,
-                        APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
-                        APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
-                String cacheName = userName + "_" + tenantDomain;
-                recommendationCache.put(cacheName, contentString);
+                return contentString;
             } else {
                 log.warn("Error getting recommendations from server. Server responded with "
                         + httpResponse.getStatusLine().getStatusCode());
@@ -438,5 +469,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 endTenantFlow();
             }
         }
+        return null;
     }
 }

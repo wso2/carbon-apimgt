@@ -3397,7 +3397,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, userId, applicationId);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, userId, applicationId,
+                    requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -3551,7 +3552,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, username);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, username, requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -3727,7 +3728,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(applicationId, username);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(applicationId, username, requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -5747,7 +5748,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void publishSearchQuery(String query, String username) {
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(query, username);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(query, username, requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -5755,7 +5756,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void publishClickedAPI(ApiTypeWrapper clickedApi, String username) {
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(clickedApi, username);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(clickedApi, username, requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -5817,7 +5818,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public String getApiRecommendations(String userName, String tenantDomain) {
 
         if (isRecommendationEnabled(tenantDomain)) {
-            String recommendations;
             Cache recommendationsCache = APIUtil.getCache(
                     APIConstants.API_MANAGER_CACHE_MANAGER,
                     APIConstants.RECOMMENDATIONS_CACHE_NAME,
@@ -5825,8 +5825,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
             String cacheName = userName + "_" + tenantDomain;
             if (recommendationsCache.containsKey(cacheName)) {
-                recommendations = (String) recommendationsCache.get(cacheName);
-                return recommendations;
+                JSONObject cachedObject = (JSONObject) recommendationsCache.get(cacheName);
+                if (cachedObject != null) {
+                    return (String) cachedObject.get(APIConstants.RECOMMENDATIONS_CACHE_KEY);
+                }
             }
         }
         return null;
