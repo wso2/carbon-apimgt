@@ -270,8 +270,6 @@ export default function RuntimeConfiguration() {
         }
     }
     const { api, updateAPI } = useContext(APIContext);
-    const isPrototypedAvailable = api.endpointConfig !== null
-        && api.endpointConfig.implementation_status === 'prototyped';
     const [isUpdating, setIsUpdating] = useState(false);
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
     const classes = useStyles();

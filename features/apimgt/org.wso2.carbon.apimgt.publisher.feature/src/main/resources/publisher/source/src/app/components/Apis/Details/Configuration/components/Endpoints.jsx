@@ -30,7 +30,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Box from '@material-ui/core/Box';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import { makeStyles } from '@material-ui/core/styles';
-import Grid from "@material-ui/core/Grid";
 
 const showEndpoint = function (api, type) {
     if (api.endpointConfig) {
@@ -128,13 +127,13 @@ function Endpoints(props) {
                                                     info when it's available with the api object */}
 
                                     { !isPrototypedAvailable ? (
-                                    <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Configuration.components.Endpoints.production'
-                                            defaultMessage='Production'
-                                        />
-                                    </Typography>
-                                        ):(
+                                        <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Configuration.components.Endpoints.production'
+                                                defaultMessage='Production'
+                                            />
+                                        </Typography>
+                                    ) : (
                                         <Typography component='p' variant='subtitle2' className={classes.subtitle}>
                                             <FormattedMessage
                                                 id='Apis.Details.Configuration.components.Endpoints.prototype'
@@ -169,38 +168,39 @@ function Endpoints(props) {
                                 </Box>
                                 {!isPrototypedAvailable && (
                                     <Box pb={2}>
-                                    {/* Sandbox Endpoint (TODO) fix the endpoint info when
+                                        {/* Sandbox Endpoint (TODO) fix the endpoint info when
                                                 it's available with the api object */}
-                                    <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Configuration.components.Endpoints.sandbox'
-                                            defaultMessage='Sandbox'
-                                        />
-                                    </Typography>
-                                    {showEndpoint(api, 'sand')
-                                && (
-                                    <Tooltip
-                                        title={showEndpoint(api, 'sand')}
-                                        interactive
-                                    >
-                                        <Typography component='p' variant='body1' className={classes.textTrim}>
-                                            <>
-                                                {showEndpoint(api, 'sand')}
-                                            </>
+                                        <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Configuration.components.Endpoints.sandbox'
+                                                defaultMessage='Sandbox'
+                                            />
                                         </Typography>
-                                    </Tooltip>
-                                )}
-                                    <Typography component='p' variant='body1' className={classes.notConfigured}>
-                                        {!showEndpoint(api, 'sand') && (
-                                            <>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Configuration.components.Endpoints.sandbox.not.set'
-                                                    defaultMessage='-'
-                                                />
-                                            </>
-                                        )}
-                                    </Typography>
-                                </Box>
+                                        {showEndpoint(api, 'sand')
+                                    && (
+                                        <Tooltip
+                                            title={showEndpoint(api, 'sand')}
+                                            interactive
+                                        >
+                                            <Typography component='p' variant='body1' className={classes.textTrim}>
+                                                <>
+                                                    {showEndpoint(api, 'sand')}
+                                                </>
+                                            </Typography>
+                                        </Tooltip>
+                                    )}
+                                        <Typography component='p' variant='body1' className={classes.notConfigured}>
+                                            {!showEndpoint(api, 'sand') && (
+                                                <>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Configuration.components.Endpoints.sandbox.
+                                                        not.set'
+                                                        defaultMessage='-'
+                                                    />
+                                                </>
+                                            )}
+                                        </Typography>
+                                    </Box>
                                 )}
                             </>
                         )}
