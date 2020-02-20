@@ -21,6 +21,7 @@ import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import CardMedia from '@material-ui/core/CardMedia';
+import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import { withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
@@ -398,6 +399,12 @@ class ApiThumb extends React.Component {
                                 </Typography>
                             </div>
                         </div>
+                        <CardActions className={classes.apiActions}>
+                            <Chip
+                                label={api.apiType === 'APIProduct' ? api.state : api.lifeCycleStatus}
+                                color='default'
+                            />
+                        </CardActions>
                     </CardContent>
                 )}
             </Card>
