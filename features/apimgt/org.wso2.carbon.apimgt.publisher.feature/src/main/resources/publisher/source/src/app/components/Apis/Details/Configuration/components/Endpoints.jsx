@@ -30,6 +30,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Box from '@material-ui/core/Box';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import { makeStyles } from '@material-ui/core/styles';
+import Grid from "@material-ui/core/Grid";
 
 const showEndpoint = function (api, type) {
     if (api.endpointConfig) {
@@ -78,6 +79,8 @@ const useStyles = makeStyles((theme) => ({
 function Endpoints(props) {
     const { api } = props;
     const classes = useStyles();
+    const isPrototypedAvailable = api.endpointConfig !== null
+        && api.endpointConfig.implementation_status === 'prototyped';
 
     /**
      * Check whether the endpoint configuration is dynamic
@@ -124,12 +127,21 @@ function Endpoints(props) {
                                     {/* Production Endpoint (TODO) fix the endpoint
                                                     info when it's available with the api object */}
 
+                                    { !isPrototypedAvailable ? (
                                     <Typography component='p' variant='subtitle2' className={classes.subtitle}>
                                         <FormattedMessage
                                             id='Apis.Details.Configuration.components.Endpoints.production'
                                             defaultMessage='Production'
                                         />
                                     </Typography>
+                                        ):(
+                                        <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Configuration.components.Endpoints.prototype'
+                                                defaultMessage='Prototype'
+                                            />
+                                        </Typography>
+                                    )}
                                     {showEndpoint(api, 'prod')
                                 && (
                                     <Tooltip
@@ -148,14 +160,15 @@ function Endpoints(props) {
                                             <>
                                                 <FormattedMessage
                                                     id={'Apis.Details.Configuration.'
-                                                    + 'components.Endpoints.production.not.set'}
+                                                    + 'components.Endpoints.not.set'}
                                                     defaultMessage='-'
                                                 />
                                             </>
                                         )}
                                     </Typography>
                                 </Box>
-                                <Box pb={2}>
+                                {!isPrototypedAvailable && (
+                                    <Box pb={2}>
                                     {/* Sandbox Endpoint (TODO) fix the endpoint info when
                                                 it's available with the api object */}
                                     <Typography component='p' variant='subtitle2' className={classes.subtitle}>
@@ -188,6 +201,7 @@ function Endpoints(props) {
                                         )}
                                     </Typography>
                                 </Box>
+                                )}
                             </>
                         )}
                     <Box width='100%' textAlign='right' m={1}>

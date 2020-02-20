@@ -417,17 +417,13 @@ export default function RuntimeConfiguration() {
                             />
                         </Typography>
                         <Paper className={classes.paper} style={{ height: 'calc(100% - 75px)' }} elevation={0}>
-                            {!api.isAPIProduct() && !isPrototypedAvailable && (
+                            {!api.isAPIProduct() && (
                                 <>
                                     <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
                                     <Endpoints api={api} />
                                 </>
                             )}
-                            {!api.isAPIProduct() && isPrototypedAvailable && (
-                                <>
-                                    <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
-                                </>
-                            )}
+
                             {api.isAPIProduct() && (
                                 <Box alignItems='center' justifyContent='center' className={classes.info}>
                                     <Typography variant='body1'>
