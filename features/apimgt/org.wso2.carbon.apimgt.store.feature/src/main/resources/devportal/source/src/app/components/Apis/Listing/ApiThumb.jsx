@@ -21,7 +21,6 @@ import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import CardMedia from '@material-ui/core/CardMedia';
-import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import { withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
@@ -79,6 +78,13 @@ const styles = theme => ({
         width: '25%',
         'padding-left': '5px',
         'padding-right': '65px',
+    },
+    thumbLeftAction: {
+        alignSelf: 'flex-start',
+        flex: 1,
+        width: '25%',
+        'padding-left': '5px',
+        'padding-right': '10px',
     },
     thumbRight: {
         alignSelf: 'flex-end',
@@ -368,7 +374,7 @@ class ApiThumb extends React.Component {
                             </div>
                         </div>
                         <div className={classes.thumbInfo}>
-                            {showRating && <div className={classes.thumbLeft}>
+                            {showRating && <div className={classes.thumbLeftAction}>
                                 <Typography
                                     variant='subtitle1'
                                     gutterBottom
@@ -396,15 +402,15 @@ class ApiThumb extends React.Component {
                                             color='primary'
                                         />
                                     )}
+                                    {(api.lifeCycleStatus === 'PROTOTYPED') && (
+                                        <Chip
+                                        label={api.apiType === 'APIProduct' ? api.state : api.lifeCycleStatus}
+                                        color='default'
+                                    />
+                                    )}
                                 </Typography>
                             </div>
                         </div>
-                        <CardActions className={classes.apiActions}>
-                            <Chip
-                                label={api.apiType === 'APIProduct' ? api.state : api.lifeCycleStatus}
-                                color='default'
-                            />
-                        </CardActions>
                     </CardContent>
                 )}
             </Card>
