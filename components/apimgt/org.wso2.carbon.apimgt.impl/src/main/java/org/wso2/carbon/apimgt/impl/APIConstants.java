@@ -1260,6 +1260,7 @@ public final class APIConstants {
     public static final String SWAGGER_RESPONSE_200 = "200";
     public static final String SWAGGER_SECURITY_DEFINITIONS = "securityDefinitions";
     public static final String SWAGGER_APIM_DEFAULT_SECURITY = "default";
+    public static final String SWAGGER_APIM_RESTAPI_SECURITY = "OAuth2Security";
     public static final String OPEN_API_V3 = "3.0.x";
     public static final String OPEN_API = "openapi";
     public static final String OPEN_API_VERSION_REGEX = "3\\.0\\.\\d{1,}";

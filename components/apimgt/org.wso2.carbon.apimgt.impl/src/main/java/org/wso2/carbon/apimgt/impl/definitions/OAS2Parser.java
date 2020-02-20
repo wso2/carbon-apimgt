@@ -83,6 +83,8 @@ import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_APIM_RESTAPI_SECURITY;
 
 /**
  * Models API definition using OAS (swagger 2.0) parser
@@ -896,14 +898,26 @@ public class OAS2Parser extends APIDefinition {
     private String getOAuth2SecuritySchemeKey(Swagger swagger) {
         final String oauth2Type = new OAuth2Definition().getType();
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        boolean hasDefaultKey = false;
+        boolean hasRESTAPIScopeKey = false;
         if (securityDefinitions != null) {
             for (Map.Entry<String, SecuritySchemeDefinition> definitionEntry : securityDefinitions.entrySet()) {
                 if (oauth2Type.equals(definitionEntry.getValue().getType())) {
-                    return definitionEntry.getKey();
+                    //sets hasDefaultKey to true if at least once SWAGGER_APIM_DEFAULT_SECURITY becomes the key
+                    hasDefaultKey = hasDefaultKey || SWAGGER_APIM_DEFAULT_SECURITY.equals(definitionEntry.getKey());
+                    //sets hasRESTAPIScopeKey to true if at least once SWAGGER_APIM_RESTAPI_SECURITY becomes the key
+                    hasRESTAPIScopeKey = hasRESTAPIScopeKey
+                            || SWAGGER_APIM_RESTAPI_SECURITY.equals(definitionEntry.getKey());
                 }
             }
         }
-        return null;
+        if (hasDefaultKey) {
+            return SWAGGER_APIM_DEFAULT_SECURITY;
+        } else if (hasRESTAPIScopeKey) {
+            return SWAGGER_APIM_RESTAPI_SECURITY;
+        } else {
+            return null;
+        }
     }
 
     /**
