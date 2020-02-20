@@ -932,5 +932,6 @@
   "unblock": "Unblock",
   "upload.image": "Click or drag the image to upload.",
   "version": "Version",
-  "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager"
+  "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager",
+  "Api.category.dropdown.tooltip": "API categories can be added via admin portal UI or admin REST API. There has to be pre-defined API categories in the environment in order to be attched to an API."
 }

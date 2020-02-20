@@ -24,13 +24,25 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Checkbox from '@material-ui/core/Checkbox';
 import Box from '@material-ui/core/Box';
+import Tooltip from '@material-ui/core/Tooltip';
+import HelpOutline from '@material-ui/icons/HelpOutline';
+import { makeStyles } from '@material-ui/core/styles';
 
 import API from 'AppData/api';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
+const useStyles = makeStyles((theme) => ({
+    tooltip: {
+        position: 'absolute',
+        right: theme.spacing(-4),
+        top: theme.spacing(1),
+    },
+}));
+
 function APICategories(props) {
     const [categories, setCategories] = useState({});
     const { api, configDispatcher } = props;
+    const classes = useStyles();
 
     console.log(api.selectedCategories);
 
@@ -42,7 +54,7 @@ function APICategories(props) {
         return null;
     } else {
         return (
-            <Box style={{ marginTop: 10 }}>
+            <Box style={{ position: 'relative', marginTop: 10 }}>
                 <TextField
                     fullWidth
                     select
@@ -91,6 +103,26 @@ function APICategories(props) {
                             ))
                         )}
                 </TextField>
+                <Tooltip
+                    title={(
+                        <>
+                            <p>
+                                <FormattedMessage
+                                    id='Api.category.dropdown.tooltip'
+                                    defaultMessage={'API categories can be added via admin portal UI or admin REST'
+                                        + ' API. There has to be pre-defined API categories in the environment in order'
+                                        + ' to be attched to an API.'}
+                                />
+                            </p>
+                        </>
+                    )}
+                    aria-label='API Categories'
+                    placement='right-end'
+                    interactive
+                    className={classes.tooltip}
+                >
+                    <HelpOutline />
+                </Tooltip>
             </Box>
         );
     }
