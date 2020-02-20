@@ -125,10 +125,6 @@
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-io.wso2</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.user.registration.stub</artifactId>
         </dependency>
@@ -238,6 +234,7 @@
                             org.wso2.carbon.user.mgt.*;version="${carbon.identity.imp.pkg.version}",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.apache.commons.*,
                             *;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>
