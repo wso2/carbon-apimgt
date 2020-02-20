@@ -1153,6 +1153,8 @@ public final class APIConstants {
     public static final String API_STORE_REST_API_GROUP_EXTRACTOR_IMPLEMENTATION = API_STORE + "RESTApiGroupingExtractor";
     public static final String API_CUSTOM_SEQUENCES_FOLDER_LOCATION =
             "repository" + File.separator + "resources" + File.separator + "customsequences";
+    public static final String WORKFLOW_EXTENSION_LOCATION =
+            "repository" + File.separator + "resources" + File.separator + "default-workflow-extensions.xml";
     public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
     public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
     public static final String API_CUSTOM_SEQUENCE_TYPE_FAULT = "fault";

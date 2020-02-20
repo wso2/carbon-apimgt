@@ -2,6 +2,7 @@ instructions.configure = \
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/sql/,target:${installFolder}/../../../dbscripts/apimgt,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/rxts/,target:${installFolder}/../../rxts,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/tenant/,target:${installFolder}/../../resources/tenant,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/workflowextensions/,target:${installFolder}/../../resources/workflowextensions,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/config/api-manager.xml/,target:${installFolder}/../../conf/api-manager.xml,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/conf/master-datasources.xml/,target:${installFolder}/../../conf/datasources/master-datasources.xml,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/repository/database/WSO2AM_DB.mv.db/,target:${installFolder}/../../database/WSO2AM_DB.mv.db,overwrite:true);\
