@@ -234,7 +234,7 @@
                             org.wso2.carbon.user.mgt.*;version="${carbon.identity.imp.pkg.version}",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.apache.commons.*,
+                            org.apache.commons.io.*,
                             *;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>
