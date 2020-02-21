@@ -421,6 +421,7 @@ export default function RuntimeConfiguration() {
                                     <Endpoints api={api} />
                                 </>
                             )}
+
                             {api.isAPIProduct() && (
                                 <Box alignItems='center' justifyContent='center' className={classes.info}>
                                     <Typography variant='body1'>
