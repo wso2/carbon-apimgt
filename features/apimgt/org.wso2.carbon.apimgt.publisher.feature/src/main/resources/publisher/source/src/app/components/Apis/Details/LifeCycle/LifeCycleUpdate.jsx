@@ -194,7 +194,7 @@ class LifeCycleUpdate extends Component {
                     displayName,
                     disabled:
                         api.endpointConfig == null
-                        || api.policies.length === 0
+                        || (api.policies.length === 0 && !api.securityScheme.includes('mutualssl_mandatory'))
                         || api.endpointConfig.implementation_status === 'prototyped',
                 };
             }
