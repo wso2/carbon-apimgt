@@ -1,4 +1,5 @@
 {
+  "Api.category.dropdown.tooltip": "API categories can be added via admin portal UI or admin REST API. There has to be pre-defined API categories in the environment in order to be attched to an API.",
   "Apis.APIsNavigation.alerts": "Alerts",
   "Apis.Base.Header.settings.SettingsButton.settings.caption": "Settings",
   "Apis.Create.APIProduct.APIProductCreateWrapper.back": "Back",
@@ -133,8 +134,8 @@
   "Apis.Details.Configuration.Components.APISecurity.Components.\n                                    TransportLevel.transport.level.security": "Transport Level Security",
   "Apis.Details.Configuration.Components.MaxBackendTps.maximum.backend.throughput": "Backend Throughput",
   "Apis.Details.Configuration.Configuration.AuthHeader.tooltip": "The header name that is used to send the authorization information. \"Authorization\" is the default header.",
-  "Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading": "Configure your API's\n                                        visibility and define what your API offers.",
-  "Apis.Details.Configuration.Configuration.Design.sub.heading": "Configure your API's visibility\n                                        and define what your API offers.",
+  "Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading": "Configure API Product visibility.",
+  "Apis.Details.Configuration.Configuration.Design.sub.heading": "Configure API visibility.",
   "Apis.Details.Configuration.Configuration.Design.topic.header": "Design Configurations",
   "Apis.Details.Configuration.Configuration.Endpoints.edit.api.endpoints": "Edit API Endpoints",
   "Apis.Details.Configuration.Configuration.auth.header.label": "Authorization Header",
@@ -932,6 +933,5 @@
   "unblock": "Unblock",
   "upload.image": "Click or drag the image to upload.",
   "version": "Version",
-  "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager",
-  "Api.category.dropdown.tooltip": "API categories can be added via admin portal UI or admin REST API. There has to be pre-defined API categories in the environment in order to be attched to an API."
+  "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager"
 }

@@ -225,8 +225,7 @@ export default function DesignConfigurations() {
                                 <Typography variant='caption'>
                                     <FormattedMessage
                                         id='Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading'
-                                        defaultMessage="Configure your API's
-                                        visibility and define what your API offers."
+                                        defaultMessage='Configure API Product visibility.'
                                     />
                                 </Typography>
                             )
@@ -234,8 +233,7 @@ export default function DesignConfigurations() {
                                 <Typography variant='caption'>
                                     <FormattedMessage
                                         id='Apis.Details.Configuration.Configuration.Design.sub.heading'
-                                        defaultMessage="Configure your API's visibility
-                                        and define what your API offers."
+                                        defaultMessage='Configure API visibility.'
                                     />
                                 </Typography>
                             )}
