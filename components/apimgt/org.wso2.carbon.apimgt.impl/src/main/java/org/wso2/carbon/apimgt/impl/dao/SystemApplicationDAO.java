@@ -32,7 +32,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.Semaphore;
 
@@ -126,6 +128,47 @@ public class SystemApplicationDAO {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
         }
         return result;
+    }
+
+    /**
+     * Method to retrieve all the system Applications for the given tenant
+     *
+     * @param tenantDomain required parameter
+     * @return SystemApplicationDTO which hold the retrieved client credentials
+     * @throws APIMgtDAOException
+     */
+    public SystemApplicationDTO[] getApplications(String tenantDomain)
+            throws APIMgtDAOException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        SystemApplicationDTO systemApplicationDTO = null;
+        List<SystemApplicationDTO> systemApplicationDTOS = new ArrayList<>();
+        String getCredentialsQuery = SQLConstants.SystemApplicationConstants.GET_APPLICATIONS;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            connection.commit();
+            preparedStatement = connection.prepareStatement(getCredentialsQuery);
+            preparedStatement.setString(1, tenantDomain);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                systemApplicationDTO = new SystemApplicationDTO();
+                systemApplicationDTO.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
+                systemApplicationDTO.setConsumerSecret(resultSet.getString("CONSUMER_SECRET"));
+                systemApplicationDTOS.add(systemApplicationDTO);
+            }
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving system applications for tenant: " + tenantDomain);
+            }
+            handleException("Error while retrieving system applications for tenant: " + tenantDomain, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return systemApplicationDTOS.toArray(new SystemApplicationDTO[systemApplicationDTOS.size()]);
     }
 
     /**
