@@ -1847,6 +1847,7 @@
         <org.json.version.range>[3.0.0,4.0.0)</org.json.version.range>
         <pax.logging.api.version>1.11.2</pax.logging.api.version>
         <import.package.version.commons.logging>[1.2.0,2.0.0)</import.package.version.commons.logging>
+        <import.package.version.commons.io>[2.4.0,2.5.0)</import.package.version.commons.io>
 
         <com.amazonaws.version>1.11.253</com.amazonaws.version>
         <software.amazon.ion.version>1.0.2</software.amazon.ion.version>
