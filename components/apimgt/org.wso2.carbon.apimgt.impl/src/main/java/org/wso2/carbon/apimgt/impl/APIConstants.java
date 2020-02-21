@@ -1902,6 +1902,7 @@ public final class APIConstants {
     public static final int AWS_DEFAULT_CONNECTION_TIMEOUT = 50000;
     public static final String AMZN_ACCESS_KEY = "amznAccessKey";
     public static final String AMZN_SECRET_KEY = "amznSecretKey";
+    public static final String AMZN_REGION = "amznRegion";
     public static final String NO_ENTITY_BODY = "NO_ENTITY_BODY";
 
     public static final String JWT_AUTHENTICATION_CONFIG = "JWTAuthentication";

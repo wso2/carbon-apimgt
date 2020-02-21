@@ -751,13 +751,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                 JSONObject endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
                 if (endpointConfig != null) {
                     if (endpointConfig.containsKey(APIConstants.AMZN_ACCESS_KEY) &&
-                            endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                            endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY) &&
+                                endpointConfig.containsKey(APIConstants.AMZN_REGION)) {
                         String accessKey = (String) endpointConfig.get(APIConstants.AMZN_ACCESS_KEY);
                         String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                        String region = (String) endpointConfig.get(APIConstants.AMZN_REGION);
                         AWSCredentialsProvider credentialsProvider;
-                        if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
+                        if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey) &&
+                            StringUtils.isEmpty(region)) {
                             credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
-                        } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)) {
+                        } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey) &&
+                                    !StringUtils.isEmpty(region)) {
                             if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
                                 CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                                 secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
@@ -771,6 +775,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         }
                         AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
                                 .withCredentials(credentialsProvider)
+                                .withRegion(region)
                                 .build();
                         ListFunctionsResult listFunctionsResult = awsLambda.listFunctions();
                         List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
