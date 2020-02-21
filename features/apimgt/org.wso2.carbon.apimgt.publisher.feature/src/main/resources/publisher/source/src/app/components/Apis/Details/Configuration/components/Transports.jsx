@@ -25,6 +25,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Tooltip from '@material-ui/core/Tooltip';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
+import Typography from '@material-ui/core/Typography';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
@@ -50,10 +51,12 @@ export default function Transports(props) {
     const Validate = () => {
         if (api.transport && api.transport.length === 0) {
             return (
-                <FormattedMessage
-                    id='Apis.Details.Configuration.components.transport.empty'
-                    defaultMessage='Please select at least one transport!'
-                />
+                <Typography>
+                    <FormattedMessage
+                        id='Apis.Details.Configuration.components.transport.empty'
+                        defaultMessage='Please select at least one transport!'
+                    />
+                </Typography>
             );
         }
         return null; // No errors :-)

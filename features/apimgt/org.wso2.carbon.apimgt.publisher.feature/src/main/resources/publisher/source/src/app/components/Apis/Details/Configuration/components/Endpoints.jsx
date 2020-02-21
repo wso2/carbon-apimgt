@@ -78,6 +78,8 @@ const useStyles = makeStyles((theme) => ({
 function Endpoints(props) {
     const { api } = props;
     const classes = useStyles();
+    const isPrototypedAvailable = api.endpointConfig !== null
+        && api.endpointConfig.implementation_status === 'prototyped';
 
     /**
      * Check whether the endpoint configuration is dynamic
@@ -124,12 +126,21 @@ function Endpoints(props) {
                                     {/* Production Endpoint (TODO) fix the endpoint
                                                     info when it's available with the api object */}
 
-                                    <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Configuration.components.Endpoints.production'
-                                            defaultMessage='Production'
-                                        />
-                                    </Typography>
+                                    { !isPrototypedAvailable ? (
+                                        <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Configuration.components.Endpoints.production'
+                                                defaultMessage='Production'
+                                            />
+                                        </Typography>
+                                    ) : (
+                                        <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Configuration.components.Endpoints.prototype'
+                                                defaultMessage='Prototype'
+                                            />
+                                        </Typography>
+                                    )}
                                     {showEndpoint(api, 'prod')
                                 && (
                                     <Tooltip
@@ -148,46 +159,49 @@ function Endpoints(props) {
                                             <>
                                                 <FormattedMessage
                                                     id={'Apis.Details.Configuration.'
-                                                    + 'components.Endpoints.production.not.set'}
+                                                    + 'components.Endpoints.not.set'}
                                                     defaultMessage='-'
                                                 />
                                             </>
                                         )}
                                     </Typography>
                                 </Box>
-                                <Box pb={2}>
-                                    {/* Sandbox Endpoint (TODO) fix the endpoint info when
+                                {!isPrototypedAvailable && (
+                                    <Box pb={2}>
+                                        {/* Sandbox Endpoint (TODO) fix the endpoint info when
                                                 it's available with the api object */}
-                                    <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Configuration.components.Endpoints.sandbox'
-                                            defaultMessage='Sandbox'
-                                        />
-                                    </Typography>
-                                    {showEndpoint(api, 'sand')
-                                && (
-                                    <Tooltip
-                                        title={showEndpoint(api, 'sand')}
-                                        interactive
-                                    >
-                                        <Typography component='p' variant='body1' className={classes.textTrim}>
-                                            <>
-                                                {showEndpoint(api, 'sand')}
-                                            </>
+                                        <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Configuration.components.Endpoints.sandbox'
+                                                defaultMessage='Sandbox'
+                                            />
                                         </Typography>
-                                    </Tooltip>
+                                        {showEndpoint(api, 'sand')
+                                    && (
+                                        <Tooltip
+                                            title={showEndpoint(api, 'sand')}
+                                            interactive
+                                        >
+                                            <Typography component='p' variant='body1' className={classes.textTrim}>
+                                                <>
+                                                    {showEndpoint(api, 'sand')}
+                                                </>
+                                            </Typography>
+                                        </Tooltip>
+                                    )}
+                                        <Typography component='p' variant='body1' className={classes.notConfigured}>
+                                            {!showEndpoint(api, 'sand') && (
+                                                <>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Configuration.components.Endpoints.sandbox.
+                                                        not.set'
+                                                        defaultMessage='-'
+                                                    />
+                                                </>
+                                            )}
+                                        </Typography>
+                                    </Box>
                                 )}
-                                    <Typography component='p' variant='body1' className={classes.notConfigured}>
-                                        {!showEndpoint(api, 'sand') && (
-                                            <>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Configuration.components.Endpoints.sandbox.not.set'
-                                                    defaultMessage='-'
-                                                />
-                                            </>
-                                        )}
-                                    </Typography>
-                                </Box>
                             </>
                         )}
                     <Box width='100%' textAlign='right' m={1}>
