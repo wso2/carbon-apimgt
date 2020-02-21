@@ -277,10 +277,11 @@ const DefaultConfigurations = {
                     text: 'Sinhala',
                 },
                 {
-                    key: 'fr',
-                    image: '/site/public/images/flags/fr.png',
+                    key: 'ar',
+                    image: '/site/public/images/flags/ar.png',
                     imageWidth: 24, // in pixles
-                    text: 'French',
+                    text: 'Arabic',
+                    direction: 'rtl',
                 },
             ],
             showFlag: true,

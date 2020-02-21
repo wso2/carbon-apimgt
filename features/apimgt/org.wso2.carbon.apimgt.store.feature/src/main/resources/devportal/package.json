@@ -35,6 +35,7 @@
         "eslint-plugin-jsx-a11y": "^6.1.2",
         "file-loader": "^0.11.2",
         "js-file-download": "^0.4.1",
+        "jss-rtl": "^0.3.0",
         "lodash.clonedeep": "^4.5.0",
         "lodash.isplainobject": "^4.0.6",
         "lodash.merge": "^4.6.2",
