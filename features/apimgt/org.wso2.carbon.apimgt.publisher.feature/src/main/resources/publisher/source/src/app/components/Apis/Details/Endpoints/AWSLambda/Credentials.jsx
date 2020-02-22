@@ -285,7 +285,7 @@ export default function Credentials(props) {
                     variant='outlined'
                     disabled={endpointConfig.access_method === 'role-supplied'}
                 >
-                    <InputLabel ref={inputLabel}>
+                    <InputLabel ref={inputLabel} id='region-label'>
                         <FormattedMessage
                             id={'Apis.Details.Endpoints.EndpointOverview.awslambda'
                             + '.endpoint.region'}
@@ -293,7 +293,7 @@ export default function Credentials(props) {
                         />
                     </InputLabel>
                     <Select
-                        labelId='demo-simple-select-outlined-label'
+                        labelId='region-label'
                         autoWidth={false}
                         className={classes.selectField}
                         onChange={(event) => {
