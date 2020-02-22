@@ -478,7 +478,11 @@ export default function Resources(props) {
                     alignItems='center'
                 >
                     {!disableUpdate && (
-                        <SaveOperations operationsDispatcher={operationsDispatcher} updateOpenAPI={updateOpenAPI} />
+                        <SaveOperations
+                            operationsDispatcher={operationsDispatcher}
+                            updateOpenAPI={updateOpenAPI}
+                            api={api}
+                        />
                     )}
                     {!hideAPIDefinitionLink && <GoToDefinitionLink api={api} />}
                 </Grid>

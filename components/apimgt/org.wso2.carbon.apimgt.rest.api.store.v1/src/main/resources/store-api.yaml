@@ -4781,6 +4781,7 @@ definitions:
               - INLINE
               - URL
               - FILE
+              - MARKDOWN
             example: INLINE
           sourceUrl:
             type: string
