@@ -285,7 +285,7 @@ export default function Credentials(props) {
                     variant='outlined'
                     disabled={endpointConfig.access_method === 'role-supplied'}
                 >
-                    <InputLabel ref={inputLabel} id='demo-simple-select-outlined-label'>
+                    <InputLabel ref={inputLabel}>
                         <FormattedMessage
                             id={'Apis.Details.Endpoints.EndpointOverview.awslambda'
                             + '.endpoint.region'}
