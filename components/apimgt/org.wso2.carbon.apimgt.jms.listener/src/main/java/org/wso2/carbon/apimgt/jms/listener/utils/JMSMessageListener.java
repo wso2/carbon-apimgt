@@ -26,6 +26,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
+import org.wso2.carbon.apimgt.gateway.dto.IPRange;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
@@ -262,6 +263,8 @@ public class JMSMessageListener implements MessageListener {
         String condition = map.get(APIConstants.BLOCKING_CONDITION_KEY).toString();
         String conditionValue = map.get(APIConstants.BLOCKING_CONDITION_VALUE).toString();
         String conditionState = map.get(APIConstants.BLOCKING_CONDITION_STATE).toString();
+        int conditionId = (int) map.get(APIConstants.BLOCKING_CONDITION_ID);
+        String tenantDomain = map.get(APIConstants.BLOCKING_CONDITION_DOMAIN).toString();
 
         if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(condition)) {
             if (ThrottleConstants.TRUE.equals(conditionState)) {
@@ -281,14 +284,17 @@ public class JMSMessageListener implements MessageListener {
                 ServiceReferenceHolder.getInstance().getThrottleDataHolder().addUserBlockingCondition(conditionValue,
                         conditionValue);
             } else {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeUserBlockingCondition(conditionValue);
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder()
+                        .removeUserBlockingCondition(conditionValue);
             }
-        } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(condition)) {
+        } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(condition) ||
+                APIConstants.BLOCK_CONDITION_IP_RANGE.equals(condition)) {
             if (ThrottleConstants.TRUE.equals(conditionState)) {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().addIplockingCondition(conditionValue,
-                        conditionValue);
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder()
+                        .addIplockingCondition(tenantDomain, conditionId, conditionValue, condition);
             } else {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeIpBlockingCondition(conditionValue);
+                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeIpBlockingCondition(tenantDomain,
+                        conditionId);
             }
         }
     }

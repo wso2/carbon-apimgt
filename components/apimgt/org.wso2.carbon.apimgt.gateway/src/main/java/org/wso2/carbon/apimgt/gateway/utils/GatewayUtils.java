@@ -37,6 +37,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.dto.IPRange;
 import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -63,9 +64,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.cert.Certificate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -92,6 +97,30 @@ public class GatewayUtils {
             map.put(el.toString(), el);
         }
         return map;
+    }
+
+    public static Map<String, Set<IPRange>> generateIpRangeMap(List<IPRange> ipRangeList) {
+
+        Map<String, Set<IPRange>> ipRangeMap = new HashMap<>();
+        for (IPRange ipRange : ipRangeList) {
+            Set<IPRange> tenantWiseIpRangeList;
+            if (!ipRangeMap.containsKey(ipRange.getTenantDomain())) {
+                tenantWiseIpRangeList = new HashSet<>();
+            } else {
+                tenantWiseIpRangeList = ipRangeMap.get(ipRange.getTenantDomain());
+            }
+            if (APIConstants.BLOCK_CONDITION_IP_RANGE.equals(ipRange.getType())) {
+                convertIpRangeBigIntValue(ipRange);
+            }
+            tenantWiseIpRangeList.add(ipRange);
+            ipRangeMap.put(ipRange.getTenantDomain(), tenantWiseIpRangeList);
+        }
+        return ipRangeMap;
+    }
+
+    private static void convertIpRangeBigIntValue(IPRange ipRange){
+        ipRange.setStartingIpBigIntValue(APIUtil.ipToBigInteger(ipRange.getStartingIP()));
+        ipRange.setEndingIpBigIntValue(APIUtil.ipToBigInteger(ipRange.getEndingIp()));
     }
 
     /**

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -31,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.ThrottlingApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyListDTO;
@@ -53,10 +55,12 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.Response;
 
 /**
  * This is the service implementation class for Admin Portal Throttling related operations
@@ -847,7 +851,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             BlockingConditionListDTO listDTO = BlockingConditionMappingUtil
                     .fromBlockConditionListToListDTO(blockConditions);
             return Response.ok().entity(listDTO).build();
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | ParseException e) {
             String errorMessage = "Error while retrieving Block Conditions";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
@@ -867,7 +871,19 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             //Add the block condition. It will throw BlockConditionAlreadyExistsException if the condition already
             //  exists in the system
-            String uuid = apiProvider.addBlockCondition(body.getConditionType(), body.getConditionValue());
+            String uuid = null;
+            if (APIConstants.BLOCKING_CONDITIONS_API.equals(body.getConditionType()) ||
+                    APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(body.getConditionType()) ||
+                    APIConstants.BLOCKING_CONDITIONS_USER.equals(body.getConditionType())){
+                uuid = apiProvider.addBlockCondition(body.getConditionType(), (String) body.getConditionValue());
+            } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(body.getConditionType()) ||
+                    APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(body.getConditionType())){
+                if (body.getConditionValue() instanceof Map){
+                    JSONObject jsonObject =  new JSONObject();
+                    jsonObject.putAll((Map) body.getConditionValue());
+                    uuid = apiProvider.addBlockCondition(body.getConditionType(), jsonObject.toJSONString());
+                }
+            }
 
             //retrieve the new blocking condition and send back as the response
             BlockConditionsDTO newBlockingCondition = apiProvider.getBlockConditionByUUID(uuid);
@@ -887,7 +903,7 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
                                 + body.getConditionValue();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | ParseException e) {
             String errorMessage = "Error while retrieving Blocking Condition resource location. Condition type: " + body
                     .getConditionType() + ", value: " + body.getConditionValue();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -925,6 +941,9 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
                 String errorMessage = "Error while retrieving Block Condition. Id : " + conditionId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        } catch (ParseException e) {
+            String errorMessage = "Error while retrieving Blocking Conditions";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

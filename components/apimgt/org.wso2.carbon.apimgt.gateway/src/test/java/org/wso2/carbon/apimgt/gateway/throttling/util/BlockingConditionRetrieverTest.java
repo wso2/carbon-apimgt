@@ -41,8 +41,8 @@ public class BlockingConditionRetrieverTest {
     @Test
     public void run() throws Exception {
         String content = "{\"api\":[\"/pizzashack/1.0.0\"],\"application\":[\"admin:DefaultApplication\"]," +
-                "\"ip\":[\"carbon.super:carbon.super:127.0.0.1\"],\"user\":[\"admin\"]," +
-                "\"custom\":[]}";
+                "\"ip\":[{\"fixedIp\":\"127.0.0.1\",\"invert\":false,\"type\":\"IP\",\"tenantDomain\":\"carbon" +
+                ".super\"}],\"user\":[\"admin\"],\"custom\":[]}";
         PowerMockito.mockStatic(APIUtil.class);
         HttpClient httpClient = Mockito.mock(HttpClient.class);
         HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
@@ -64,6 +64,6 @@ public class BlockingConditionRetrieverTest {
                 throttleDataHolder);
         blockingConditionRetriever.run();
         Assert.assertTrue(throttleDataHolder.isRequestBlocked("/pizzashack/1.0.0", "admin:DefaultApplication",
-                "admin", "127.0.0.1"));
+                "admin", "127.0.0.1", "carbon.super"));
     }
 }
