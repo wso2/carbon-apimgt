@@ -1,5 +1,4 @@
-const Configurations = {
-    /*
+const DefaultConfigurations = {
     direction: 'ltr',
     palette: {
         primary: {
@@ -278,10 +277,11 @@ const Configurations = {
                     text: 'Sinhala',
                 },
                 {
-                    key: 'fr',
-                    image: '/site/public/images/flags/fr.png',
+                    key: 'ar',
+                    image: '/site/public/images/flags/ar.png',
                     imageWidth: 24, // in pixles
-                    text: 'French',
+                    text: 'Arabic',
+                    direction: 'rtl',
                 },
             ],
             showFlag: true,
@@ -289,5 +289,6 @@ const Configurations = {
             minWidth: 60, // Width of the language switcher in pixles
         },
     },
-    */
 };
+
+export default DefaultConfigurations;

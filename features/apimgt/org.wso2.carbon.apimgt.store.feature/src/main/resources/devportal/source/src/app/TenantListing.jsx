@@ -31,7 +31,7 @@ const styles = theme => ({
         flexGrow: 1,
         display: 'flex',
         background: theme.palette.background.default,
-        height: '100%',
+        height: '100vh',
 
     },
     paper: {

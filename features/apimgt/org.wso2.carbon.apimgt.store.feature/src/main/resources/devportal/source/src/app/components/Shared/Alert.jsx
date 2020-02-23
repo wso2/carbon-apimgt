@@ -23,7 +23,7 @@ import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Message from './Message';
 
-const theme = createMuiTheme(Configurations.themes.light);
+const theme = createMuiTheme(Configurations);
 
 /**
  * Common alerting/message displaying component for Store application, Pre-set vertical: 'top',
