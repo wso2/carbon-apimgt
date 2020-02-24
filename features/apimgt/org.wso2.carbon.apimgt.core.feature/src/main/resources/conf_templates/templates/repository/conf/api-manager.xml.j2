@@ -532,6 +532,14 @@
     <RESTAPI>
         <!--Configure white-listed URIs of REST API. Accessing white-listed URIs does not require credentials (does not require Authorization header). -->
         <WhiteListedURIs>
+         {% if apim.rest_api.whitelisted_uri is defined %}
+            {% for uri in apim.rest_api.whitelisted_uri %}
+                <WhiteListedURI>
+                <URI>{{uri.uri_path}}</URI>
+                <HTTPMethods>{{uri.http_method}}</HTTPMethods>
+                </WhiteListedURI>
+            {% endfor %}
+         {% endif %}
              <WhiteListedURI>
                 <URI>/api/am/store/{version}/tenants</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
