@@ -41,19 +41,22 @@ public class ScopesIssuer {
      * Singleton of ScopeIssuer.*
      */
     private static ScopesIssuer scopesIssuer;
-    
+
     private ScopesIssuer() {
+
     }
 
     public static void loadInstance(List<String> whitelist) {
+
         scopesIssuer = new ScopesIssuer();
         if (whitelist != null && !whitelist.isEmpty()) {
             scopesIssuer.scopeSkipList.addAll(whitelist);
         }
         scopesIssuers = APIKeyMgtDataHolder.getScopesIssuers();
-    }  
+    }
 
     public static ScopesIssuer getInstance() {
+
         return scopesIssuer;
     }
 
@@ -77,7 +80,6 @@ public class ScopesIssuer {
 
         // if no issuers are defined
         if (scopesIssuers == null || scopesIssuers.isEmpty()) {
-
             if (log.isDebugEnabled()) {
                 log.debug("Scope Issuers are not loaded");
             }
