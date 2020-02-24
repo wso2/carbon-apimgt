@@ -405,7 +405,7 @@ public final class APIImportUtil {
 
             //Since Image, documents, sequences and WSDL are optional, exceptions are logged and ignored in implementation
             addAPIImage(pathToArchive, importedApi, apiProvider);
-            addAPIDocuments(pathToArchive, importedApi, apiProvider, overwrite);
+            addAPIDocuments(pathToArchive, importedApi, apiProvider);
             addAPISequences(pathToArchive, importedApi, registry);
             addAPISpecificSequences(pathToArchive, importedApi, registry);
             addAPIWsdl(pathToArchive, importedApi, apiProvider, registry);
@@ -536,8 +536,7 @@ public final class APIImportUtil {
      * @param pathToArchive location of the extracted folder of the API
      * @param importedApi   the imported API object
      */
-    private static void addAPIDocuments(String pathToArchive, API importedApi, APIProvider apiProvider,
-            boolean overwrite) {
+    private static void addAPIDocuments(String pathToArchive, API importedApi, APIProvider apiProvider) {
 
         String jsonContent = null;
         String pathToYamlFile = pathToArchive + APIImportExportConstants.YAML_DOCUMENT_FILE_LOCATION;
@@ -546,6 +545,13 @@ public final class APIImportUtil {
         Documentation[] documentations;
         String docDirectoryPath = pathToArchive + File.separator + APIImportExportConstants.DOCUMENT_DIRECTORY;
         try {
+            //remove all documents associated with the API before update
+            List<Documentation> documents = apiProvider.getAllDocumentation(apiIdentifier);
+            if (documents != null) {
+                for (Documentation documentation : documents) {
+                    apiProvider.removeDocumentation(apiIdentifier, documentation.getId());
+                }
+            }
             //load document file if exists
             if (CommonUtil.checkFileExistence(pathToYamlFile)) {
                 if (log.isDebugEnabled()) {
@@ -564,12 +570,6 @@ public final class APIImportUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("No document definition found, Skipping documentation import for API: "
                             + importedApi.getId().getApiName());
-                }
-                if (overwrite) {
-                    List<Documentation> documents = apiProvider.getAllDocumentation(apiIdentifier);
-                    for (Documentation documentation : documents) {
-                        apiProvider.removeDocumentation(apiIdentifier, documentation.getId());
-                    }
                 }
                 return;
             }
@@ -608,13 +608,9 @@ public final class APIImportUtil {
                     }
                 }
 
-                //Check if documentations exists with same name for given API name, provider and version.
-                //Update or create documentation accordingly.
-                if (apiProvider.isDocumentationExist(apiIdentifier, doc.getName())) {
-                    apiProvider.updateDocumentation(apiIdentifier, doc);
-                } else {
-                    apiProvider.addDocumentation(apiIdentifier, doc);
-                }
+                //Add documentation accordingly.
+                apiProvider.addDocumentation(apiIdentifier, doc);
+
                 if (docContentExists) {
                     //APIProvider.addDocumentationContent method handles both create/update documentation content
                     apiProvider.addDocumentationContent(importedApi, doc.getName(), inlineContent);
