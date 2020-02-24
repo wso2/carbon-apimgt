@@ -1919,6 +1919,7 @@ public final class APIConstants {
     public static final String RECOMMENDATION_API_CONSUMER_KEY = "consumerKey";
     public static final String RECOMMENDATION_API_CONSUMER_SECRET = "consumerSecret";
     public static final String MAX_RECOMMENDATIONS = "maxRecommendations";
+    public static final String WAIT_DURATION = "waitDuration";
     public static final String APPLY_RECOMMENDATIONS_FOR_ALL_APIS = "applyForAllTenants";
     public static final String RECOMMENDATION_USERNAME = "userName";
     public static final String RECOMMENDATION_PASSWORD = "password";

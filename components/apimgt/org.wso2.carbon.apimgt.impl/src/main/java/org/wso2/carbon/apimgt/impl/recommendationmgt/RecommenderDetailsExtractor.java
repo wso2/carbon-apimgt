@@ -70,6 +70,8 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     private String publishingDetailType;
     private Application application;
     private ApiTypeWrapper clickedApi;
+    private RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
+            .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
 
     public RecommenderDetailsExtractor(API api, String tenantDomain) {
 
@@ -153,6 +155,10 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             }
         } catch (IOException e) {
             log.error("When extracting data for the recommendation system !", e);
+        } finally {
+            if (tenantFlowStarted) {
+                endTenantFlow();
+            }
         }
     }
 
@@ -335,8 +341,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     private boolean isRecommendationEnabled(String tenantDomain) {
 
-        RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
         if (recommendationEnvironment != null) {
             if (recommendationEnvironment.isApplyForAllTenants()) {
                 return true;
@@ -395,6 +399,8 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
         long currentTime = System.currentTimeMillis();
         long lastUpdatedTime = 0;
+        long waitDuration = recommendationEnvironment.getWaitDuration() * 60 * 1000;
+        startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         Cache recommendationsCache = APIUtil.getCache(
                 APIConstants.API_MANAGER_CACHE_MANAGER,
                 APIConstants.RECOMMENDATIONS_CACHE_NAME,
@@ -413,21 +419,23 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             if (currentTime - lastUpdatedTime < waitDuration) {
                 return;
             }
-            String recommendations = getRecommendations(userName,tenantDomain);
+            String recommendations = getRecommendations(userName, tenantDomain);
             JSONObject object = new JSONObject();
             object.put(APIConstants.RECOMMENDATIONS_CACHE_KEY, recommendations);
             object.put(APIConstants.LAST_UPDATED_CACHE_KEY, System.currentTimeMillis());
             recommendationsCache.put(cacheName, object);
         }
+        if (tenantFlowStarted) {
+            endTenantFlow();
+        }
     }
 
     public String getRecommendations(String userName, String tenantDomain) {
-        RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
+
         String recommendationEndpointURL = recommendationEnvironment.getRecommendationServerURL()
                 + APIConstants.RECOMMENDATIONS_GET_RESOURCE;
+        AccessTokenGenerator accessTokenGenerator = ServiceReferenceHolder.getInstance().getAccessTokenGenerator();
         try {
-            startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             String userID = apiMgtDAO.getUserID(userName);
             URL serverURL = new URL(recommendationEndpointURL);
             int serverPort = serverURL.getPort();
@@ -436,7 +444,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             HttpGet method = new HttpGet(recommendationEndpointURL);
             HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
             if (recommendationEnvironment.getOauthURL() != null) {
-                String accessToken = ServiceReferenceHolder.getInstance().getAccessTokenGenerator().getAccessToken();
+                String accessToken = accessTokenGenerator.getAccessToken();
                 method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                         APIConstants.AUTHORIZATION_BEARER + accessToken);
             } else {
@@ -456,6 +464,10 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                     log.debug("Recommendations received for user " + userName + " is " + contentString);
                 }
                 return contentString;
+            } else if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED &&
+                    accessTokenGenerator != null){
+                log.warn("Error getting recommendations from server. Invalid credentials used");
+                accessTokenGenerator.setValidToken(false);
             } else {
                 log.warn("Error getting recommendations from server. Server responded with "
                         + httpResponse.getStatusLine().getStatusCode());
@@ -464,10 +476,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             log.error("Connection failure for the recommendation engine", e);
         } catch (APIManagementException e) {
             log.error("Error while getting recommendations for user " + userName, e);
-        } finally {
-            if (tenantFlowStarted) {
-                endTenantFlow();
-            }
         }
         return null;
     }

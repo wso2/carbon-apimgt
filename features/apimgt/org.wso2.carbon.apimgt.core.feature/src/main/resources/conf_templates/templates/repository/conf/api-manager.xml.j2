@@ -932,6 +932,8 @@
         <recommendationAPI>{{apim.devportal.recommendations.recommendations_api}}</recommendationAPI>
         {% if apim.devportal.recommendations.oauth_endpoint is defined %}
         <authenticationEndpoint>{{apim.devportal.recommendations.oauth_endpoint}}</authenticationEndpoint>
+        {% endif %}
+        {% if apim.devportal.recommendations.consumer_key is defined %}
         <consumerKey>{{apim.devportal.recommendations.consumer_key}}</consumerKey>
         <consumerSecret>{{apim.devportal.recommendations.consumer_secret}}</consumerSecret>
         {% endif %}
@@ -940,6 +942,9 @@
         {% endif %}
         {% if apim.devportal.recommendations.apply_for_all_tenants is defined %}
         <applyForAllTenants>{{apim.devportal.recommendations.apply_for_all_tenants}}</applyForAllTenants>
+        {% endif %}
+        {% if apim.devportal.recommendations.wait_duration is defined %}
+        <waitDuration>{{apim.devportal.recommendations.wait_duration}}</waitDuration>
         {% endif %}
         {% if apim.devportal.recommendations.username is defined %}
         <userName>{{apim.devportal.recommendations.username}}</userName>

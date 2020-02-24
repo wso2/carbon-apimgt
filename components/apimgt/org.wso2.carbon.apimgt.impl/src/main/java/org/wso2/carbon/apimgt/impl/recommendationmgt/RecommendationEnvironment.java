@@ -27,6 +27,7 @@ public class RecommendationEnvironment {
     private String password;
     private int maxRecommendations = 6;
     private boolean applyForAllTenants = true;
+    private long waitDuration = 15;     //wait duration between two getRecommendations for a user
 
     public String getRecommendationServerURL() {
 
@@ -106,6 +107,16 @@ public class RecommendationEnvironment {
     public void setPassword(String password) {
 
         this.password = password;
+    }
+
+    public long getWaitDuration() {
+
+        return waitDuration;
+    }
+
+    public void setWaitDuration(long waitDuration) {
+
+        this.waitDuration = waitDuration;
     }
 }
 

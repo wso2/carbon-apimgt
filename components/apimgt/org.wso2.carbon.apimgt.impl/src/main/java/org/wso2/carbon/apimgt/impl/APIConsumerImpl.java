@@ -5825,7 +5825,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
             String cacheName = userName + "_" + tenantDomain;
             if (recommendationsCache.containsKey(cacheName)) {
-                JSONObject cachedObject = (JSONObject) recommendationsCache.get(cacheName);
+                org.json.JSONObject cachedObject = (org.json.JSONObject) recommendationsCache.get(cacheName);
                 if (cachedObject != null) {
                     return (String) cachedObject.get(APIConstants.RECOMMENDATIONS_CACHE_KEY);
                 }
