@@ -40,7 +40,6 @@ public class AccessTokenGenerator {
 
     private static final Log log = LogFactory.getLog(AccessTokenGenerator.class);
 
-    private static volatile AccessTokenGenerator accessTokenGenerator = null;
     private long expiryTime = 0;
     private long buffer = 20000; // buffer time is set to 20 seconds
     private String accessToken = null;
@@ -157,5 +156,10 @@ public class AccessTokenGenerator {
     public void setValidToken(boolean validToken) {
 
         this.validToken = validToken;
+    }
+
+    public void setOauthUrl(String oauthUrl) {
+
+        this.oauthUrl = oauthUrl;
     }
 }

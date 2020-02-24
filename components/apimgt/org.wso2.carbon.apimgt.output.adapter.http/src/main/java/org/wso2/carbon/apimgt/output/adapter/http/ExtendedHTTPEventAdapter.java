@@ -41,6 +41,7 @@ import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterExc
 import org.wso2.carbon.event.output.adapter.core.exception.TestConnectionNotSupportedException;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,6 +68,7 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
     private static HttpClient httpClient = null;
     private HostConfiguration hostConfiguration = null;
     private AccessTokenGenerator accessTokenGenerator;
+    private String oauthURL;
 
     public ExtendedHTTPEventAdapter(OutputEventAdapterConfiguration eventAdapterConfiguration,
                                     Map<String, String> globalProperties) {
@@ -145,11 +147,12 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
             connectionManager.getParams().setMaxTotalConnections(maxTotalConnections);
 
             Map<String, String> staticProperties = eventAdapterConfiguration.getStaticProperties();
-            if (staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_URL) != null) {
+            if (staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_CONSUMER_KEY) != null) {
                 accessTokenGenerator = new AccessTokenGenerator(
                         staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_URL),
                         staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_CONSUMER_KEY),
                         staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_CONSUMER_SECRET));
+                this.oauthURL = staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_URL);
             }
         }
     }
@@ -179,6 +182,17 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
 
         try {
             if (accessTokenGenerator != null) {
+                if (this.oauthURL == null) {
+                    try {
+                        URL endpointURL = new URL(url);
+                        this.oauthURL = endpointURL.getProtocol() + "://" + endpointURL.getHost() + ":"
+                                + endpointURL.getPort();
+                        accessTokenGenerator.setOauthUrl(oauthURL);
+                    } catch (MalformedURLException e) {
+                        EventAdapterUtil.logAndDrop(eventAdapterConfiguration.getName(), message,
+                                "Incorrect end point configurations", log, tenantId);
+                    }
+                }
                 String accessToken = accessTokenGenerator.getAccessToken();
                 executorService.execute(new HTTPSender(url, payload, accessToken, headers, httpClient));
             } else if (username != null && password != null) {
