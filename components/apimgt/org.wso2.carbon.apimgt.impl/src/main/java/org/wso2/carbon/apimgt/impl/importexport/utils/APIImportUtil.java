@@ -405,7 +405,7 @@ public final class APIImportUtil {
 
             //Since Image, documents, sequences and WSDL are optional, exceptions are logged and ignored in implementation
             addAPIImage(pathToArchive, importedApi, apiProvider);
-            addAPIDocuments(pathToArchive, importedApi, apiProvider);
+            addAPIDocuments(pathToArchive, importedApi, apiProvider, overwrite);
             addAPISequences(pathToArchive, importedApi, registry);
             addAPISpecificSequences(pathToArchive, importedApi, registry);
             addAPIWsdl(pathToArchive, importedApi, apiProvider, registry);
@@ -536,7 +536,8 @@ public final class APIImportUtil {
      * @param pathToArchive location of the extracted folder of the API
      * @param importedApi   the imported API object
      */
-    private static void addAPIDocuments(String pathToArchive, API importedApi, APIProvider apiProvider) {
+    private static void addAPIDocuments(String pathToArchive, API importedApi, APIProvider apiProvider,
+            boolean overwrite) {
 
         String jsonContent = null;
         String pathToYamlFile = pathToArchive + APIImportExportConstants.YAML_DOCUMENT_FILE_LOCATION;
@@ -563,6 +564,12 @@ public final class APIImportUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("No document definition found, Skipping documentation import for API: "
                             + importedApi.getId().getApiName());
+                }
+                if (overwrite) {
+                    List<Documentation> documents = apiProvider.getAllDocumentation(apiIdentifier);
+                    for (Documentation documentation : documents) {
+                        apiProvider.removeDocumentation(apiIdentifier, documentation.getId());
+                    }
                 }
                 return;
             }
