@@ -605,6 +605,10 @@ public final class APIImportUtil {
                         APIUtil.setResourcePermissions(importedApi.getId().getProviderName(),
                                 importedApi.getVisibility(), visibleRoles, filePathDoc);
                         doc.setFilePath(apiProvider.addResourceFile(importedApi.getId(), filePathDoc, apiDocument));
+                    } catch (FileNotFoundException e) {
+                        //this error is logged and ignored because documents are optional in an API
+                        log.error("Failed to locate the document files of the API: " + apiIdentifier.getApiName(), e);
+                        continue;
                     }
                 }
 
