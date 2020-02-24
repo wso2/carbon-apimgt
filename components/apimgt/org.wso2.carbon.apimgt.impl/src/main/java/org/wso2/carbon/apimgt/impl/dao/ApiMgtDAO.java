@@ -5069,6 +5069,39 @@ public class ApiMgtDAO {
                 subscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
             }
 
+            prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
+            prepStmtGetConsumerKey.setInt(1, application.getId());
+            rs = prepStmtGetConsumerKey.executeQuery();
+            List<String> consumerKeys = new ArrayList<>();
+
+            deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery);
+            while (rs.next()) {
+                String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
+
+                // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
+                String mode = rs.getString("CREATE_MODE");
+                if (consumerKey != null) {
+                    deleteDomainApp.setString(1, consumerKey);
+                    deleteDomainApp.addBatch();
+
+                    KeyManagerHolder.getKeyManagerInstance().deleteMappedApplication(consumerKey);
+                    // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
+                    // call delete.
+                    if (!APIConstants.OAuthAppMode.MAPPED.equals(mode)) {
+                        // Adding clients to be deleted.
+                        consumerKeys.add(consumerKey);
+                    }
+                }
+            }
+
+            for (String consumerKey : consumerKeys) {
+                //delete on oAuthorization server.
+                if (log.isDebugEnabled()) {
+                    log.debug("Deleting Oauth application with consumer key " + consumerKey + " from the Oauth server");
+                }
+                KeyManagerHolder.getKeyManagerInstance().deleteApplication(consumerKey);
+            }
+
             deleteMappingQuery = connection.prepareStatement(deleteKeyMappingQuery);
             for (Integer subscriptionId : subscriptions) {
                 deleteMappingQuery.setInt(1, subscriptionId);
@@ -5098,31 +5131,6 @@ public class ApiMgtDAO {
                 log.debug("Subscription details are deleted successfully for Application - " + application.getName());
             }
 
-            prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
-            prepStmtGetConsumerKey.setInt(1, application.getId());
-            rs = prepStmtGetConsumerKey.executeQuery();
-            ArrayList<String> consumerKeys = new ArrayList<String>();
-
-            deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery);
-            while (rs.next()) {
-                String consumerKey = rs.getString("CONSUMER_KEY");
-
-                // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
-                String mode = rs.getString("CREATE_MODE");
-                if (consumerKey != null) {
-                    deleteDomainApp.setString(1, consumerKey);
-                    deleteDomainApp.addBatch();
-
-                    KeyManagerHolder.getKeyManagerInstance().deleteMappedApplication(consumerKey);
-                    // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
-                    // call delete.
-                    if (!"MAPPED".equals(mode)) {
-                        // Adding clients to be deleted.
-                        consumerKeys.add(consumerKey);
-                    }
-
-                }
-            }
             deleteDomainApp.executeBatch();
 
             deleteAppKey = connection.prepareStatement(deleteApplicationKeyQuery);
@@ -5146,10 +5154,6 @@ public class ApiMgtDAO {
                 connection.commit();
             }
 
-            for (String consumerKey : consumerKeys) {
-                //delete on oAuthorization server.
-                KeyManagerHolder.getKeyManagerInstance().deleteApplication(consumerKey);
-            }
         } catch (SQLException e) {
             handleException("Error while removing application details from the database", e);
         } finally {
