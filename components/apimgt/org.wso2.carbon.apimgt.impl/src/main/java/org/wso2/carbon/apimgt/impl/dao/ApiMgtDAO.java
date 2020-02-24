@@ -5076,7 +5076,7 @@ public class ApiMgtDAO {
 
             deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery);
             while (rs.next()) {
-                String consumerKey = rs.getString("CONSUMER_KEY");
+                String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
 
                 // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
                 String mode = rs.getString("CREATE_MODE");
@@ -5087,11 +5087,10 @@ public class ApiMgtDAO {
                     KeyManagerHolder.getKeyManagerInstance().deleteMappedApplication(consumerKey);
                     // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
                     // call delete.
-                    if (!"MAPPED".equals(mode)) {
+                    if (!APIConstants.OAuthAppMode.MAPPED.equals(mode)) {
                         // Adding clients to be deleted.
                         consumerKeys.add(consumerKey);
                     }
-
                 }
             }
 
