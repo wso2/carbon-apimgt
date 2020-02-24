@@ -118,14 +118,14 @@ export default function OperationGovernance(props) {
                             : (
                                 <div>
                                     <FormattedMessage
-                                        id='Apis.Details.Resources.components.operationComponents.
-                            OperationGovernance.rate.limiting.governed.by'
+                                        id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.governed.by'}
                                         defaultMessage='Rate limiting is governed by '
                                     />
                                     <Box fontWeight='fontWeightBold' display='inline' color='primary.main'>
                                         <FormattedMessage
-                                            id='Apis.Details.Resources.components.operationComponents.
-                            OperationGovernance.rate.limiting.API.level'
+                                            id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.API.level'}
                                             defaultMessage='API Level'
                                         />
                                     </Box>
@@ -149,32 +149,32 @@ export default function OperationGovernance(props) {
                             : (
                                 <span>
                                     <FormattedMessage
-                                        id='Apis.Details.Resources.components.operationComponents.
-                            OperationGovernance.rate.limiting.helperText.section1'
+                                        id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.helperText.section1'}
                                         defaultMessage='Use '
                                     />
                                     <Box fontWeight='fontWeightBold' display='inline' color='primary.main'>
                                         <FormattedMessage
-                                            id='Apis.Details.Resources.components.operationComponents.
-                            OperationGovernance.rate.limiting.helperText.section2'
+                                            id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.helperText.section2'}
                                             defaultMessage='Operation Level'
                                         />
                                     </Box>
                                     <FormattedMessage
-                                        id='Apis.Details.Resources.components.operationComponents.
-                            OperationGovernance.rate.limiting.helperText.section3'
+                                        id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.helperText.section3'}
                                         defaultMessage=' rate limiting to '
                                     />
                                     <b>
                                         <FormattedMessage
-                                            id='Apis.Details.Resources.components.operationComponents.
-                            OperationGovernance.rate.limiting.helperText.section4'
+                                            id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.helperText.section4'}
                                             defaultMessage='enable'
                                         />
                                     </b>
                                     <FormattedMessage
-                                        id='Apis.Details.Resources.components.operationComponents.
-                            OperationGovernance.rate.limiting.helperText.section5'
+                                        id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.helperText.section5'}
                                         defaultMessage=' rate limiting per operation'
                                     />
                                 </span>
@@ -215,8 +215,8 @@ export default function OperationGovernance(props) {
                         })}
                         helperText={(
                             <FormattedMessage
-                                id='Apis.Details.Resources.components.operationComponents.
-                                OperationGovernance.operation.scope.helperText'
+                                id={'Apis.Details.Resources.components.operationComponents.'
+                                + 'OperationGovernance.operation.scope.helperText'}
                                 defaultMessage='Select a scope to control permissions to this operation'
                             />
                         )}
@@ -228,8 +228,8 @@ export default function OperationGovernance(props) {
                             dense
                         >
                             <FormattedMessage
-                                id='Apis.Details.Resources.components.operationComponents.
-                                OperationGovernance.operation.scope.select.none'
+                                id={'Apis.Details.Resources.components.operationComponents.'
+                                + 'OperationGovernance.operation.scope.select.none'}
                                 defaultMessage='None'
                             />
                         </MenuItem>
@@ -250,8 +250,8 @@ export default function OperationGovernance(props) {
                                         dense
                                     >
                                         <FormattedMessage
-                                            id='Apis.Details.Resources.components.operationComponents.
-                                OperationGovernance.operation.scope.create.new.scope'
+                                            id={'Apis.Details.Resources.components.operationComponents.'
+                                + 'OperationGovernance.operation.scope.create.new.scope'}
                                             defaultMessage='Create New Scope'
                                         />
                                     </MenuItem>
@@ -265,8 +265,8 @@ export default function OperationGovernance(props) {
                     <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
                         <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
                             <FormattedMessage
-                                id='Apis.Details.Resources.components.operationComponents.
-                                OperationGovernance.operation.scope.create.new.scope'
+                                id={'Apis.Details.Resources.components.operationComponents.'
+                                + 'OperationGovernance.operation.scope.create.new.scope'}
                                 defaultMessage='Create New Scope'
                             />
                             <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
