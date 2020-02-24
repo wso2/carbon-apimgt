@@ -521,6 +521,7 @@ public final class APIConstants {
 
     public static final String PASSWORD_RESOLVER_IMPL_CLASS = "PasswordResolverImpl";
     public static final String CACHE_INVALIDATION_TYPE = "type";
+    public static final String BLOCKING_CONDITION_ID = "id";
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
@@ -1486,7 +1487,12 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_API = "API";
     public static final String BLOCKING_CONDITIONS_USER = "USER";
     public static final String BLOCKING_CONDITIONS_IP = "IP";
-
+    public static final String BLOCK_CONDITION_IP_RANGE = "IPRANGE";
+    public static final String BLOCK_CONDITION_FIXED_IP = "fixedIp";
+    public static final String BLOCK_CONDITION_START_IP = "startingIp";
+    public static final String BLOCK_CONDITION_ENDING_IP = "endingIp";
+    public static final String BLOCK_CONDITION_INVERT = "invert";
+    public static final String BLOCK_CONDITION_IP_TYPE = "type";
     public static final String REVOKED_TOKEN_KEY = "revokedToken";
     public static final String REVOKED_TOKEN_EXPIRY_TIME = "expiryTime";
 
