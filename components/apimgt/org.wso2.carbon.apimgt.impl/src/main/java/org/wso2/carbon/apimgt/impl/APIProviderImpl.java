@@ -2171,14 +2171,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         api.setApiSecurity(apiSecurity);
-        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
-                !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
-            if (log.isDebugEnabled()) {
-                log.debug("API " + api.getId() + " does not supports oauth2 security, hence removing all the "
-                        + "subscription tiers associated with it");
-            }
-            api.removeAllTiers();
-        }
     }
 
     /**
@@ -2198,17 +2190,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("APIProduct " + apiProduct.getId() + " has following enabled protocols : " + apiSecurity);
         }
         apiProduct.setApiSecurity(apiSecurity);
-
-
-        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
-                !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
-            if (log.isDebugEnabled()) {
-                log.debug( "API Product " + apiProduct.getId() + " does not supports oauth2 security, hence removing all the "
-                        + "subscription tiers associated with it");
-            }
-            apiProduct.removeAllTiers();
-
-        }
     }
 
     private void checkIfValidTransport(String transport) throws APIManagementException {
