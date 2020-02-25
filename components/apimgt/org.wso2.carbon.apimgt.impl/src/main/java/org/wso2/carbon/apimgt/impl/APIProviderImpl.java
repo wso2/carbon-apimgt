@@ -3187,7 +3187,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             int tenantId;
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            String tenantDomain =
+                    MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             try {
                 tenantId = getTenantId(tenantDomain);
 
