@@ -30,7 +30,6 @@ import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import LifeCycleUpdate from './LifeCycleUpdate';
 import LifeCycleHistory from './LifeCycleHistory';
 
-
 const styles = (theme) => ({
     root: {
         flexGrow: 1,
@@ -86,7 +85,6 @@ class LifeCycle extends Component {
         this.setState({ checkList });
     };
 
-
     /**
      *
      *
@@ -95,13 +93,9 @@ class LifeCycle extends Component {
     updateData() {
         const { api: { id } } = this.props;
         const promisedAPI = Api.get(id);
-        // const promised_tiers = Api.policies('api');
         const promisedLcState = this.api.getLcState(id);
         const privateJetModeEnabled = false;
-
         const promisedLcHistory = this.api.getLcHistory(id);
-        // const promised_labels = this.api.labels();
-
         const promisedClientCerts = Api.getAllClientCertificates(id);
         Promise.all([promisedAPI, promisedLcState, promisedLcHistory, promisedClientCerts])
             .then((response) => {
@@ -138,7 +132,6 @@ class LifeCycle extends Component {
                     });
                     index++;
                 }
-
                 this.setState({
                     api,
                     lcState,
@@ -184,7 +177,6 @@ class LifeCycle extends Component {
                 </Grid>
             );
         }
-
         if (!lcState) {
             return <Progress />;
         }
