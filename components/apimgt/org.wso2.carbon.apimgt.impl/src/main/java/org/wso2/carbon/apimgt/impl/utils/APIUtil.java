@@ -9063,7 +9063,8 @@ public final class APIUtil {
             String msg = "Error while retrieving Security Audit attributes from tenant registry.";
             throw new APIManagementException(msg, exception);
         } catch (ParseException parseException) {
-            String msg = "Couldn't create json object from Swagger object for custom security audit attributes.";
+            String msg = "Cannot read the security audit attributes. "
+                    + "Please make sure the properties are in the correct format";
             throw new APIManagementException(msg, parseException);
         }
         return null;
