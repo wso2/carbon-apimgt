@@ -35,6 +35,8 @@ import Banner from 'AppComponents/Shared/Banner';
 import LifeCycleImage from './LifeCycleImage';
 import CheckboxLabels from './CheckboxLabels';
 import LifecyclePending from './LifecyclePending';
+import { API_SECURITY_MUTUAL_SSL_MANDATORY, API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY }
+    from '../Configuration/components/APISecurity/components/apiSecurityConstants';
 
 const styles = (theme) => ({
     buttonsWrapper: {
@@ -152,13 +154,14 @@ class LifeCycleUpdate extends Component {
         this.updateLCStateOfAPI(apiUUID, action);
     }
 
+
     /**
      * @inheritdoc
      * @memberof LifeCycleUpdate
      */
     render() {
         const {
-            api, lcState, classes, theme, handleChangeCheckList, checkList,
+            api, lcState, classes, theme, handleChangeCheckList, checkList, certList,
         } = this.props;
         const lifecycleStates = [...lcState.availableTransitions];
         const { newState, pageError } = this.state;
@@ -171,6 +174,10 @@ class LifeCycleUpdate extends Component {
         lcMap.set('Created', 'Create');
         lcMap.set('Retired', 'Retire');
         const isPrototype = api.endpointConfig && api.endpointConfig.implementation_status === 'prototyped';
+        const isMutualSSLEnabled = api.securityScheme.includes(API_SECURITY_MUTUAL_SSL_MANDATORY);
+        const isAppLayerSecurityMandatory = api.securityScheme.includes(
+            API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY,
+        );
         const lifecycleButtons = lifecycleStates.map((item) => {
             const state = { ...item, displayName: item.event };
             if (state.event === 'Deploy as a Prototype') {
@@ -193,8 +200,9 @@ class LifeCycleUpdate extends Component {
                     ...state,
                     displayName,
                     disabled:
-                        api.endpointConfig == null
-                        || (api.policies.length === 0 && !api.securityScheme.includes('mutualssl_mandatory'))
+                        api.endpointConfig === null
+                        || (isMutualSSLEnabled && certList.length === 0)
+                        || (isAppLayerSecurityMandatory && api.policies.length === 0)
                         || api.endpointConfig.implementation_status === 'prototyped',
                 };
             }
@@ -221,7 +229,12 @@ class LifeCycleUpdate extends Component {
                                 {(api.lifeCycleStatus === 'CREATED'
                                     || api.lifeCycleStatus === 'PROTOTYPED') && (
                                     <Grid item xs={3}>
-                                        <CheckboxLabels api={api} />
+                                        <CheckboxLabels
+                                            api={api}
+                                            isMutualSSLEnabled={isMutualSSLEnabled}
+                                            isAppLayerSecurityMandatory={isAppLayerSecurityMandatory}
+                                            isCertAvailable={certList.length !== 0}
+                                        />
                                     </Grid>
                                 )}
                             </Grid>

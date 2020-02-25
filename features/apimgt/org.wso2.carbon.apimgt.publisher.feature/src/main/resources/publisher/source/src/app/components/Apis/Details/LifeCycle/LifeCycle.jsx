@@ -30,6 +30,7 @@ import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import LifeCycleUpdate from './LifeCycleUpdate';
 import LifeCycleHistory from './LifeCycleHistory';
 
+
 const styles = (theme) => ({
     root: {
         flexGrow: 1,
@@ -64,6 +65,7 @@ class LifeCycle extends Component {
         this.state = {
             lcHistory: null,
             checkList: [],
+            certList: [],
         };
         this.updateData = this.updateData.bind(this);
         this.handleChangeCheckList = this.handleChangeCheckList.bind(this);
@@ -84,6 +86,7 @@ class LifeCycle extends Component {
         this.setState({ checkList });
     };
 
+
     /**
      *
      *
@@ -98,11 +101,14 @@ class LifeCycle extends Component {
 
         const promisedLcHistory = this.api.getLcHistory(id);
         // const promised_labels = this.api.labels();
-        Promise.all([promisedAPI, promisedLcState, promisedLcHistory])
+
+        const promisedClientCerts = Api.getAllClientCertificates(id);
+        Promise.all([promisedAPI, promisedLcState, promisedLcHistory, promisedClientCerts])
             .then((response) => {
                 const api = response[0];
                 const lcState = response[1].body;
                 const lcHistory = response[2].body.list;
+                const clientCerts = response[3].body;
 
                 if (privateJetModeEnabled) {
                     if (!api.hasOwnGateway) {
@@ -132,12 +138,14 @@ class LifeCycle extends Component {
                     });
                     index++;
                 }
+
                 this.setState({
                     api,
                     lcState,
                     lcHistory,
                     privateJetModeEnabled,
                     checkList,
+                    certList: [...clientCerts.certificates],
                 });
             })
             .catch((error) => {
@@ -156,7 +164,7 @@ class LifeCycle extends Component {
     render() {
         const { classes } = this.props;
         const {
-            api, lcState, privateJetModeEnabled, checkList, lcHistory,
+            api, lcState, privateJetModeEnabled, checkList, lcHistory, certList,
         } = this.state;
         const apiFromContext = this.context.api;
         if (apiFromContext && isRestricted(['apim:api_publish'], apiFromContext)) {
@@ -195,6 +203,7 @@ class LifeCycle extends Component {
                                 handleChangeCheckList={this.handleChangeCheckList}
                                 api={api}
                                 privateJetModeEnabled={privateJetModeEnabled}
+                                certList={certList}
                             />
                         </Grid>
                         <Grid item xs={12}>
