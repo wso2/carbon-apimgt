@@ -93,8 +93,12 @@ function LeftMenuItem(props) {
     const { leftMenu } = theme.custom;
     const strokeColor = theme.palette.getContrastText(leftMenu.background);
     const { iconSize } = leftMenu;
-    const ditectCurrentMenu = (location) => {
+    const ditectCurrentMenu = (location = null) => {
+        if(!location) {
+            location = window.location;
+        }
         const { pathname } = location;
+        
         const test1 = new RegExp('/' + routeToCheck + '$', 'g');
         const test2 = new RegExp('/' + routeToCheck + '/', 'g');
         if (pathname.match(test1) || pathname.match(test2)) {
@@ -102,10 +106,11 @@ function LeftMenuItem(props) {
         } else {
             setSelected(false);
         }
+        
+        
     };
     useEffect(() => {
-        const { location } = history;
-        ditectCurrentMenu(location);
+        ditectCurrentMenu();
     }, []);
     history.listen((location) => {
         ditectCurrentMenu(location);
