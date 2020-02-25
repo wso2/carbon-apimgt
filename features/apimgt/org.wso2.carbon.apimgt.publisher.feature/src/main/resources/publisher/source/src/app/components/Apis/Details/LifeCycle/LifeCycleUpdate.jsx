@@ -178,6 +178,8 @@ class LifeCycleUpdate extends Component {
         const isAppLayerSecurityMandatory = api.securityScheme.includes(
             API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY,
         );
+        const isCertAvailable = certList.length !== 0;
+        const isBusinessPlanAvailable = api.policies.length !== 0;
         const lifecycleButtons = lifecycleStates.map((item) => {
             const state = { ...item, displayName: item.event };
             if (state.event === 'Deploy as a Prototype') {
@@ -201,8 +203,8 @@ class LifeCycleUpdate extends Component {
                     displayName,
                     disabled:
                         api.endpointConfig === null
-                        || (isMutualSSLEnabled && certList.length === 0)
-                        || (isAppLayerSecurityMandatory && api.policies.length === 0)
+                        || (isMutualSSLEnabled && !isCertAvailable)
+                        || (isAppLayerSecurityMandatory && !isBusinessPlanAvailable)
                         || api.endpointConfig.implementation_status === 'prototyped',
                 };
             }
@@ -233,7 +235,8 @@ class LifeCycleUpdate extends Component {
                                             api={api}
                                             isMutualSSLEnabled={isMutualSSLEnabled}
                                             isAppLayerSecurityMandatory={isAppLayerSecurityMandatory}
-                                            isCertAvailable={certList.length !== 0}
+                                            isCertAvailable={isCertAvailable}
+                                            isBusinessPlanAvailable={isBusinessPlanAvailable}
                                         />
                                     </Grid>
                                 )}

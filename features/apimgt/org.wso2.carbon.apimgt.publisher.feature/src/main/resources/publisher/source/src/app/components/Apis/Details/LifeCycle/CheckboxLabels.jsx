@@ -71,10 +71,9 @@ const useStyles = makeStyles((theme) => ({
 export default function CheckboxLabels(props) {
     const classes = useStyles();
     const {
-        api, isMutualSSLEnabled, isCertAvailable, isAppLayerSecurityMandatory,
+        api, isMutualSSLEnabled, isCertAvailable, isAppLayerSecurityMandatory, isBusinessPlanAvailable,
     } = props;
     const isEndpointAvailable = api.endpointConfig !== null && !api.endpointConfig.implementation_status;
-    const isTierAvailable = api.policies.length !== 0;
     const isPrototypedAvailable = (api.endpointConfig !== null
         && api.endpointConfig.implementation_status === 'prototyped')
         || api.endpointImplementationType === 'INLINE';
@@ -126,7 +125,7 @@ export default function CheckboxLabels(props) {
                         <>
                             {isAppLayerSecurityMandatory && (
                                 <Grid xs={12} className={classes.grid}>
-                                    {isTierAvailable ? (
+                                    {isBusinessPlanAvailable ? (
                                         <CheckIcon className={classes.iconTrue} />
                                     ) : (
                                         <CloseIcon className={classes.iconFalse} />
