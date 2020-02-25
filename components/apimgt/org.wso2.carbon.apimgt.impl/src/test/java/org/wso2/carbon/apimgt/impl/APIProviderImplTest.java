@@ -129,7 +129,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.cache.Caching;
-import javax.print.Doc;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -2701,25 +2700,6 @@ public class APIProviderImplTest {
 
         PowerMockito.when(APIUtil.getLcStateFromArtifact((GovernanceArtifact) any()))
                 .thenReturn(APIConstants.PUBLISHED);
-
-//        List<Documentation> documentationList = getDocumentationList();
-//        Documentation documentation = documentationList.get(1);
-//        Mockito.when(APIUtil.getAPIDocPath(api.getId())).thenReturn(documentation.getFilePath());
-//        APIProviderImplWrapper apiProviderImplWrapper = new APIProviderImplWrapper(apimgtDAO, null, null);
-//        Resource docResource = Mockito.mock(Resource.class);
-//        Mockito.when(docResource.getUUID()).thenReturn(documentation.getId());
-//        Mockito.when(apiProviderImplWrapper.registry.get(documentation.getFilePath())).thenReturn(docResource);
-//
-//        GenericArtifact docArtifact = Mockito.mock(GenericArtifact.class);
-//        Mockito.when(artifactManager.getGenericArtifact(documentation.getId())).thenReturn(docArtifact);
-//        Mockito.when(APIUtil.getDocumentation(docArtifact)).thenReturn(documentation);
-//        Mockito.when(docArtifact.getPath()).thenReturn("artifact/path");
-//        PowerMockito.doNothing().when(APIUtil.class, "clearResourcePermissions", Mockito.any(), Mockito.any(),
-//                Mockito.anyInt());
-//
-//        String[] roles = {"admin", "subscriber"};
-//        APIUtil.setResourcePermissions("admin", "Public", roles, "artifact/path");
-//        Mockito.when(docArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("docFilePath");
 
         final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
 

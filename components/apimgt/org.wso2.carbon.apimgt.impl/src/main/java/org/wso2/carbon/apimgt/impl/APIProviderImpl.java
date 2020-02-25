@@ -3171,7 +3171,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to update visibility
      */
     private void updateDocVisibility(API api, Documentation documentation) throws APIManagementException {
-        System.out.println("-----------------" + documentation.getId());
         try {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,APIConstants.DOCUMENTATION_KEY);
             if (artifactManager == null) {
@@ -3195,22 +3194,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 GenericArtifact updateApiArtifact = APIUtil.createDocArtifactContent(artifact, api.getId(), documentation);
                 artifactManager.updateGenericArtifact(updateApiArtifact);
                 APIUtil.clearResourcePermissions(artifact.getPath(), api.getId(), tenantId);
-                System.out.println("======1 "+ artifact.getPath());
-                System.out.println("======2 "+ api.getId());
-                System.out.println("======3 "+ tenantId);
 
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), authorizedRoles,
                         artifact.getPath(), registry);
 
                 String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
-                System.out.println("======4 "+ docFilePath);
                 if (org.apache.commons.lang.StringUtils.isEmpty(docFilePath)) {
                     int startIndex = docFilePath.indexOf("governance") + "governance".length();
-                    System.out.println("======5 "+ startIndex);
                     String filePath = docFilePath.substring(startIndex, docFilePath.length());
-                    System.out.println("======6 "+ filePath);
-                    APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), authorizedRoles, filePath,
-                            registry);
+                    APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                            authorizedRoles, filePath, registry);
                 }
             } catch (UserStoreException e) {
                 throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
