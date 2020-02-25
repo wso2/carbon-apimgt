@@ -1285,7 +1285,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 contextCache.remove(oldApi.getContext());
                 contextCache.put(api.getContext(), Boolean.TRUE);
             }
-
+            //update doc visibility
+            List<Documentation> docsList = getAllDocumentation(api.getId());
+            if (docsList != null) {
+                Iterator it = docsList.iterator();
+                while (it.hasNext()) {
+                    Object docsObject = it.next();
+                    Documentation docs = (Documentation) docsObject;
+                    updateDocVisibility(api,docs);
+                }
+            }
 
         } else {
             // We don't allow API status updates via this method.
@@ -3154,6 +3163,63 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * Updates a visibility of the documentation
+     *
+     * @param api               API
+     * @param documentation    Documentation
+     * @throws APIManagementException if failed to update visibility
+     */
+    private void updateDocVisibility(API api, Documentation documentation) throws APIManagementException {
+        System.out.println("-----------------" + documentation.getId());
+        try {
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,APIConstants.DOCUMENTATION_KEY);
+            if (artifactManager == null) {
+                String errorMessage = "Artifact manager is null when updating documentation of API " +
+                        api.getId().getApiName();
+                throw new APIManagementException(errorMessage);
+            }
+
+            GenericArtifact artifact = artifactManager.getGenericArtifact(documentation.getId());
+            String[] authorizedRoles = new String[0];
+            String visibleRolesList = api.getVisibleRoles();
+            if (visibleRolesList != null) {
+                authorizedRoles = visibleRolesList.split(",");
+            }
+
+            int tenantId;
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            try {
+                tenantId = getTenantId(tenantDomain);
+
+                GenericArtifact updateApiArtifact = APIUtil.createDocArtifactContent(artifact, api.getId(), documentation);
+                artifactManager.updateGenericArtifact(updateApiArtifact);
+                APIUtil.clearResourcePermissions(artifact.getPath(), api.getId(), tenantId);
+                System.out.println("======1 "+ artifact.getPath());
+                System.out.println("======2 "+ api.getId());
+                System.out.println("======3 "+ tenantId);
+
+                APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), authorizedRoles,
+                        artifact.getPath(), registry);
+
+                String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
+                System.out.println("======4 "+ docFilePath);
+                if (org.apache.commons.lang.StringUtils.isEmpty(docFilePath)) {
+                    int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                    System.out.println("======5 "+ startIndex);
+                    String filePath = docFilePath.substring(startIndex, docFilePath.length());
+                    System.out.println("======6 "+ filePath);
+                    APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), authorizedRoles, filePath,
+                            registry);
+                }
+            } catch (UserStoreException e) {
+                throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
+                        + api.getId().getApiName(), e);
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to update visibility of documentation", e);
+        }
+    }
     /**
      * Updates a given documentation
      *
