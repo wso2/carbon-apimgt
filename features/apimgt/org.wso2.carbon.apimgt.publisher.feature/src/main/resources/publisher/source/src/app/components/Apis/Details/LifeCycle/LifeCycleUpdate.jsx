@@ -256,7 +256,8 @@ class LifeCycleUpdate extends Component {
                                     return (
                                         <Button
                                             disabled={transitionState.disabled || this.state.isUpdating}
-                                            variant='outlined'
+                                            variant='contained'
+                                            color='primary'
                                             className={classes.stateButton}
                                             key={transitionState.event}
                                             data-value={transitionState.event}
