@@ -38,6 +38,7 @@ import TableRow from '@material-ui/core/TableRow';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import APIContext, { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import API from 'AppData/api.js';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import { isRestricted } from 'AppData/AuthManager';
 import Alert from 'AppComponents/Shared/Alert';
@@ -320,12 +321,20 @@ function Properties(props) {
     const { intl } = props;
     const classes = useStyles();
 
+    const headingId = (api.apiType === API.CONSTS.APIProduct
+        ? 'Apis.Details.Properties.Properties.api.product.properties'
+        : 'Apis.Details.Properties.Properties.api.properties');
+
+    const descriptionId = (api.apiType === API.CONSTS.APIProduct
+        ? 'Apis.Details.Properties.Properties.APIProduct.add.new.property.message.content'
+        : 'Apis.Details.Properties.Properties.add.new.property.message.content');
+
     return (
         <>
             <div className={classes.titleWrapper}>
                 <Typography variant='h4' align='left' className={classes.mainTitle}>
                     <FormattedMessage
-                        id='Apis.Details.Properties.Properties.api.properties'
+                        id={headingId}
                         defaultMessage='API Properties'
                     />
                 </Typography>
@@ -356,7 +365,7 @@ function Properties(props) {
                             </Typography>
                             <Typography component='p' className={classes.content}>
                                 <FormattedMessage
-                                    id='Apis.Details.Properties.Properties.add.new.property.message.content'
+                                    id={descriptionId}
                                     defaultMessage={
                                         'Add specific custom properties to your '
                                         + 'API here.'

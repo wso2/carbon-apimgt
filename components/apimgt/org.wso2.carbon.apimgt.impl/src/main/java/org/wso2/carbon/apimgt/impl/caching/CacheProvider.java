@@ -94,6 +94,12 @@ public class CacheProvider {
     public static Cache getRESTAPIInvalidTokenCache() {
         return getCache(APIConstants.REST_API_INVALID_TOKEN_CACHE_NAME);
     }
+    /**
+     * @return Product REST API invalid token cache
+     */
+    public static Cache getGatewayJWTTokenCache() {
+        return getCache(APIConstants.GATEWAY_JWT_TOKEN_CACHE);
+    }
 
     /**
      * @return APIManagerConfiguration
@@ -277,6 +283,23 @@ public class CacheProvider {
     }
 
     /**
+     * Create and return the Gateway JWT Token Cache
+     */
+    public static Cache createGatewayJWTTokenCache() {
+
+        String restAPICacheExpiry =
+                getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (restAPICacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_JWT_TOKEN_CACHE,
+                    Long.parseLong(restAPICacheExpiry), Long.parseLong(restAPICacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_JWT_TOKEN_CACHE,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
      * remove caches
      */
     public static void removeAllCaches() {
@@ -298,5 +321,7 @@ public class CacheProvider {
                 createRESTAPITokenCache().getName());
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
                 createRESTAPIInvalidTokenCache().getName());
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
+                getGatewayJWTTokenCache().getName());
     }
 }

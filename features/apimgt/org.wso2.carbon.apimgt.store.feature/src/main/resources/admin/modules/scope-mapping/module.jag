@@ -1,0 +1,10 @@
+<%
+jagg.module("scope-mapping", {
+    getTenantConfig:function () {
+        return jagg.require(jagg.getModulesDir() + "scope-mapping/scope-mapping.jag").getTenantConfig.apply(this, arguments);
+    },
+    updateTenantConf:function () {
+        return jagg.require(jagg.getModulesDir() + "scope-mapping/scope-mapping.jag").updateTenantConf.apply(this, arguments);
+    },
+});
+%>

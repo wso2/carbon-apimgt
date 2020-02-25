@@ -117,6 +117,12 @@
           "roles": "admin",
           "name": "apim:tenantInfo",
           "key": "apim:tenantInfo"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:admin_operations",
+          "key": "apim:admin_operations"
         }
       ]
     }
@@ -2656,6 +2662,141 @@
           }
         }
       }
+    },
+    "/api-categories": {
+      "get": {
+        "x-scope": "apim:admin_operations",
+        "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.16/api-categories\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v0.16/api-categories\"",
+        "x-wso2-response": "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}",
+        "summary": "Get all API categories",
+        "description": "Get all API categories\n",
+        "tags": [
+          "API Category (Collection)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nCategories returned\n",
+            "schema": {
+              "$ref": "#/definitions/APICategoryList"
+            }
+          }
+        }
+      },
+      "post": {
+        "x-scope": "apim:admin_operations",
+        "x-wso2-curl": "curl -k -X POST -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://apis.wso2.com/api/am/admin/v0.16/api-categories -d @data.json",
+        "x-wso2-request": "POST https://localhost:9443/api/am/admin/v0.16/api-categories\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n -d  {\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n }",
+        "x-wso2-response": "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}",
+        "summary": "Add a new API Category",
+        "description": "Add a new API Category\n",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "API Category object that should to be added\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/APICategory"
+            }
+          }
+        ],
+        "tags": [
+          "API Category (Individual)"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created.\nSuccessful response with the newly created object as entity in the body.\n",
+            "schema": {
+              "$ref": "#/definitions/APICategory"
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/api-categories/{apiCategoryId}": {
+      "put": {
+        "x-scope": "apim:admin_operations",
+        "x-wso2-curl": "curl -k -X PUT -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779 -d @data.json",
+        "x-wso2-request": "PUT https://localhost:9443/api/am/admin/v0.16/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"update_internal\",\r\n  \"description\":\"Updated label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n     }",
+        "x-wso2-response": "HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}",
+        "summary": "Update an API Category",
+        "description": "Update an API Category by category Id\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiCategoryId"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "API Category object with updated information\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/APICategory"
+            }
+          }
+        ],
+        "tags": [
+          "API Category (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nLabel updated.\n",
+            "schema": {
+              "$ref": "#/definitions/APICategory"
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "x-scope": "apim:admin_operations",
+        "x-wso2-response": "HTTP/1.1 200 OK",
+        "summary": "Delete an API Category",
+        "description": "Delete an API Category by API Category Id\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiCategoryId"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "API Category (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nAPI Category successfully deleted.\n"
+          },
+          "404": {
+            "description": "Not Found.\nAPI Category to be deleted does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "parameters": {
@@ -2767,6 +2908,13 @@
       "description": "Workflow reference id\n",
       "required": true,
       "type": "string"
+    },
+    "apiCategoryId": {
+      "name": "apiCategoryId",
+      "in": "path",
+      "description": "API Category UUID\n",
+      "type": "string",
+      "required": true
     }
   },
   "definitions": {
@@ -3683,6 +3831,57 @@
         "tenantId": {
           "type": "integer",
           "example": -1234
+        }
+      }
+    },
+    "APICategory": {
+      "title": "API Category",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "01234567-0123-0123-0123-012345678901"
+        },
+        "name": {
+          "type": "string",
+          "example": "Finance"
+        },
+        "description": {
+          "type": "string",
+          "example": "Finance related APIs"
+        }
+      }
+    },
+    "APICategoryList": {
+      "title": "API Category List",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of API categories returned.\n",
+          "example": 1
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/APICategory"
+          }
+        }
+      }
+    },
+    "FileInfo": {
+      "title": "File Information including meta data",
+      "properties": {
+        "relativePath": {
+          "type": "string",
+          "description": "relative location of the file (excluding the base context and host of the Admin API)",
+          "example": "api-categories/01234567-0123-0123-0123-012345678901/thumbnail"
+        },
+        "mediaType": {
+          "type": "string",
+          "description": "media-type of the file",
+          "example": "image/jpeg"
         }
       }
     }

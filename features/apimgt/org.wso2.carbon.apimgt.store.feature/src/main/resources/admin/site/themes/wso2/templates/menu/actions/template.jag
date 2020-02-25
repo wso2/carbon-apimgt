@@ -44,7 +44,13 @@
     var labelAddMappedUrl = "/label-add";
 
     var changeOwnerUrl = "/changeOwner";
-    var changeOwnerMappedUrl = "/changeOwner";   
+    var changeOwnerMappedUrl = "/changeOwner";
+
+    var categoryListUrl = "/api-category-list";
+    var categoryListMappedUrl = "/api-category-list";
+
+    var categoryAddUrl = "/api-category-add";
+    var categoryAddMappedUrl = "/api-category-add";
     %>
 
 
@@ -218,6 +224,28 @@
                                         <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Add Tier")%>"></i>
                                     </span>
                                     <%=i18n.localize("Add New Policy")%>
+                                </a>
+                            </li>
+                        <%} %>
+                        <% if (reqUrl.indexOf(categoryListUrl) >= 0 || reqUrl.indexOf(categoryListMappedUrl) >= 0) { %>
+                            <li>
+                                <a href="<%= jagg.url('/api-category-add')%>">
+                                    <span class="icon fw-stack">
+                                         <i class="fw fw-add fw-stack-1x"></i>
+                                         <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                    </span>
+                                    <%=i18n.localize("Add API Category")%>
+                                </a>
+                            </li>
+                        <%} %>
+                        <% if (reqUrl.indexOf(categoryAddUrl) >= 0 || reqUrl.indexOf(categoryAddMappedUrl) >= 0) { %>
+                            <li>
+                                <a href="<%= jagg.url('/api-category-list') %>" title="<%=i18n.localize("Go Back")%>">
+                                    <span class="icon fw-stack">
+                                        <i class="fw fw-left fw-stack-1x" title="<%=i18n.localize("Go Back")%>"></i>
+                                        <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Go Back")%>"></i>
+                                    </span>
+                                    <%=i18n.localize("Go Back")%>
                                 </a>
                             </li>
                         <%} %>

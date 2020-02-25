@@ -34,6 +34,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
+import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -42,6 +43,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoader;
+import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -90,11 +93,7 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
 import javax.cache.Cache;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -236,9 +235,12 @@ public class APIManagerComponent {
             String trustStorePassword = config.getFirstProperty(APIConstants.TRUST_STORE_PASSWORD);
             String trustStoreLocation = config.getFirstProperty(APIConstants.TRUST_STORE_LOCATION);
             if (trustStoreLocation != null && trustStorePassword != null) {
+                File trustStoreFile = new File(trustStoreLocation);
                 try (FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation))) {
                     KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
                     trustStore.load(trustStoreStream, trustStorePassword.toCharArray());
+                    CertificateReLoaderUtil.setLastUpdatedTimeStamp(trustStoreFile.lastModified());
+                    CertificateReLoaderUtil.startCertificateReLoader();
                     ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
                 } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
                     log.error("Error in loading trust store.", e);
@@ -250,6 +252,8 @@ public class APIManagerComponent {
             //Initialize product REST API token caches
             CacheProvider.createRESTAPITokenCache();
             CacheProvider.createRESTAPIInvalidTokenCache();
+            CacheProvider.createGatewayJWTTokenCache();
+            configureRecommendationEventPublisherProperties();
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
@@ -262,6 +266,7 @@ public class APIManagerComponent {
         if (log.isDebugEnabled()) {
             log.debug("Deactivating API manager component");
         }
+        CertificateReLoaderUtil.shutDownCertificateReLoader();
         registration.unregister();
         APIManagerFactory.getInstance().clearAll();
         org.wso2.carbon.apimgt.impl.utils.AuthorizationManager.getInstance().destroy();
@@ -659,6 +664,39 @@ public class APIManagerComponent {
      */
     protected void unsetOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(null);
+    }
+
+    private void configureRecommendationEventPublisherProperties() {
+        OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
+        adapterConfiguration.setName("recommendationEventPublisher");
+        adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
+        adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
+        Map<String, String> adapterParameters = new HashMap<>();
+        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
+            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            if (configuration.getApiRecommendationEnvironment() != null) {
+                try {
+                    String receiverPort = System.getProperty(configuration.RECEIVER_URL_PORT);
+                    String authPort = System.getProperty(configuration.AUTH_URL_PORT);
+                    adapterParameters.put(APIConstants.RECEIVER_URL, "tcp://localhost:" + receiverPort);
+                    adapterParameters.put(APIConstants.AUTHENTICATOR_URL, "ssl://localhost:" + authPort);
+                    adapterParameters.put(APIConstants.USERNAME, APIUtil.getAdminUsername());
+                    adapterParameters.put(APIConstants.PASSWORD, APIUtil.getAdminPassword());
+                    adapterParameters.put(APIConstants.PROTOCOL, "Binary");
+                    adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
+                    adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
+                    adapterConfiguration.setStaticProperties(adapterParameters);
+                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
+                    log.info("API Recommendation system for dev portal is activated");
+                } catch (OutputEventAdapterException e) {
+                    log.error("Exception occurred while creating recommendationEventPublisher Adapter." +
+                            " Request Blocking may not work properly", e);
+                } catch (APIMgtInternalException e) {
+                    log.error("Exception occurred while reading the admin username and password", e);
+                }
+            }
+        }
     }
 }
 

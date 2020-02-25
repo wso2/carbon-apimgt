@@ -156,9 +156,9 @@ public class ApplicationImportExportManager {
                         apiTypeWrapper.setTier(tier.getName());
                         // add subscription if update flag is not specified
                         // it will throw an error if subscriber already exists
-                        if (!update) {
+                        if (update == null || !update) {
                             apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
-                        } else if (!apiConsumer.isSubscribed(subscribedAPI.getApiId(), userId)) {
+                        } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId, appId)) {
                             // on update skip subscriptions that already exists
                             apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
                         }

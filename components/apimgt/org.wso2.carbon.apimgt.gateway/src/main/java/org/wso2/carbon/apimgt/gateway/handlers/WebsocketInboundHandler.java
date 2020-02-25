@@ -245,7 +245,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
                     AuthenticationContext authenticationContext =
-                            new JWTValidator(null).
+                            new JWTValidator(null, null).
                                     authenticateForWebSocket(apiKey, apiContextUri, version);
                     if(authenticationContext == null || !authenticationContext.isAuthenticated()) {
                         return false;

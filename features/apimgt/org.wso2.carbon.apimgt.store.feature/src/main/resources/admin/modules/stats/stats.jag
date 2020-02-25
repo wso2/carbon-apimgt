@@ -1,7 +1,6 @@
 <%
 
 log = new Log(),
-        usageClient = jagg.module("manager").getUsageClient(),
         user = jagg.getUser();
 var gson = com.google.gson.Gson();
 var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -10,7 +9,7 @@ function isDataPublishingEnabled(providerName, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = org.wso2.carbon.apimgt.usage.client.UsageClient.isDataPublishingEnabled();
+        usage = org.wso2.carbon.apimgt.impl.utils.APIUtil.isAnalyticsEnabled();
         if (log.isDebugEnabled()) {
             log.debug("isDataPublishingEnabled check");
         }

@@ -160,6 +160,7 @@ class APIDefinition extends React.Component {
             });
     }
 
+
     /**
       * Set isAuditApiClicked to true when Audit API is clicked
       */
@@ -182,12 +183,17 @@ class APIDefinition extends React.Component {
         this.setState({ swagger: formattedString, format: convertTo, convertTo: format });
     }
 
-    setSchemaDefinition = (swagger, graphQL) => {
-        if (swagger) {
-            this.setState({ swagger });
-        }
-        if (graphQL) {
-            this.setState({ graphQL });
+    setSchemaDefinition = (schemaContent, contentType) => {
+        const { api } = this.props;
+        const isGraphql = api.isGraphql();
+        if (isGraphql) {
+            this.setState({ graphQL: schemaContent });
+        } else {
+            this.setState({
+                swagger: schemaContent,
+                convertTo: this.getConvertToFormat(contentType),
+                format: contentType,
+            });
         }
     };
 
@@ -427,8 +433,9 @@ class APIDefinition extends React.Component {
                                 <SwapHorizontalCircle className={classes.buttonIcon} />
                                 <FormattedMessage
                                     id='Apis.Details.APIDefinition.APIDefinition.convert.to'
-                                    defaultMessage='Convert to '
+                                    defaultMessage='Convert to'
                                 />
+                                {' '}
                                 {convertTo}
                             </Button>
                         </div>

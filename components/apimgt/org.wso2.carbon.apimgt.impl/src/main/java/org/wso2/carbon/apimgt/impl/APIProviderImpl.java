@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -319,18 +320,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Association[] associations = registry.getAssociations(providerPath, APIConstants.PROVIDER_ASSOCIATION);
             for (Association association : associations) {
                 String apiPath = association.getDestinationPath();
-                Resource resource = registry.get(apiPath);
-                String apiArtifactId = resource.getUUID();
-                if (apiArtifactId != null) {
-                    GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
-                    if (apiArtifact != null) {
-                        String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
-                        if (!APIConstants.API_PRODUCT.equals(type)) {
-                            apiSortedList.add(getAPI(apiArtifact));
+                if (registry.resourceExists(apiPath)) {
+                    Resource resource = registry.get(apiPath);
+                    String apiArtifactId = resource.getUUID();
+                    if (apiArtifactId != null) {
+                        GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
+                        if (apiArtifact != null) {
+                            String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+                            if (!APIConstants.API_PRODUCT.equals(type)) {
+                                apiSortedList.add(getAPI(apiArtifact));
+                            }
                         }
+                    } else {
+                        throw new GovernanceException("artifact id is null of " + apiPath);
                     }
-                } else {
-                    throw new GovernanceException("artifact id is null of " + apiPath);
                 }
             }
 
@@ -1422,6 +1425,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                         artifactPath, registry);
             }
+            //attaching api categories to the API
+            List<APICategory> attachedApiCategories = api.getApiCategories();
+            artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
+            if (attachedApiCategories != null) {
+                for (APICategory category : attachedApiCategories) {
+                    artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+                }
+            }
             registry.commitTransaction();
             transactionCommitted = true;
             if (updatePermissions) {
@@ -1654,7 +1665,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api != null) {
                 String currentStatus = api.getStatus();
 
-                if (!currentStatus.equals(newStatus)) {
+                if (APIConstants.PUBLISHED.equals(newStatus) || !currentStatus.equals(newStatus)) {
                     api.setStatus(newStatus);
 
                     APIManagerConfiguration config = getAPIManagerConfiguration();
@@ -2731,54 +2742,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         addResourceFile(api.getId(), APIUtil.getIconPath(newApiId), icon));
             }
             // If the API has custom mediation policy, copy it to new version.
-
-            String inSeqFilePath = APIUtil.getSequencePath(api.getId(), "in");
-
-            if (registry.resourceExists(inSeqFilePath)) {
-
-                APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
-                        api.getId().getApiName(), newVersion);
-
-                String inSeqNewFilePath = APIUtil.getSequencePath(newApiId, "in");
-                org.wso2.carbon.registry.api.Collection inSeqCollection =
-                        (org.wso2.carbon.registry.api.Collection) registry.get(inSeqFilePath);
-                if (inSeqCollection != null) {
-                    String[] inSeqChildPaths = inSeqCollection.getChildren();
-                    for (String inSeqChildPath : inSeqChildPaths) {
-                        Resource inSequence = registry.get(inSeqChildPath);
-
-                        ResourceFile seqFile = new ResourceFile(inSequence.getContentStream(), inSequence.getMediaType());
-                        OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
-                        String seqFileName = seqElment.getAttributeValue(new QName("name"));
-                        addResourceFile(api.getId(), inSeqNewFilePath + seqFileName, seqFile);
-                    }
-                }
-            }
-
-
-            String outSeqFilePath = APIUtil.getSequencePath(api.getId(), "out");
-
-            if (registry.resourceExists(outSeqFilePath)) {
-
-                APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
-                        api.getId().getApiName(), newVersion);
-
-                String outSeqNewFilePath = APIUtil.getSequencePath(newApiId, "out");
-                org.wso2.carbon.registry.api.Collection outSeqCollection =
-                        (org.wso2.carbon.registry.api.Collection) registry.get(outSeqFilePath);
-                if (outSeqCollection != null) {
-                    String[] outSeqChildPaths = outSeqCollection.getChildren();
-                    for (String outSeqChildPath : outSeqChildPaths) {
-                        Resource outSequence = registry.get(outSeqChildPath);
-
-                        ResourceFile seqFile = new ResourceFile(outSequence.getContentStream(), outSequence.getMediaType());
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        String seqFileName = seqElment.getAttributeValue(new QName("name"));
-                        addResourceFile(api.getId(), outSeqNewFilePath + seqFileName, seqFile);
-                    }
-                }
-            }
-
+            copySequencesToNewVersion(api, newVersion, "in");
+            copySequencesToNewVersion(api, newVersion, "out");
+            copySequencesToNewVersion(api, newVersion, "fault");
 
             // Here we keep the old context
             String oldContext = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
@@ -2969,6 +2935,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             } catch (RegistryException ex) {
                 handleException("Error while rolling back the transaction for API: " + api.getId(), ex);
+            }
+        }
+    }
+
+    private void copySequencesToNewVersion(API api, String newVersion, String pathFlow) throws Exception {
+        String seqFilePath = APIUtil.getSequencePath(api.getId(), pathFlow);
+
+        if (registry.resourceExists(seqFilePath)) {
+            APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
+                    api.getId().getApiName(), newVersion);
+
+            String seqNewFilePath = APIUtil.getSequencePath(newApiId, pathFlow);
+            org.wso2.carbon.registry.api.Collection seqCollection =
+                    (org.wso2.carbon.registry.api.Collection) registry.get(seqFilePath);
+
+            if (seqCollection != null) {
+                String[] seqChildPaths = seqCollection.getChildren();
+
+                for (String seqChildPath : seqChildPaths) {
+                    Resource sequence = registry.get(seqChildPath);
+
+                    ResourceFile seqFile = new ResourceFile(sequence.getContentStream(), sequence.getMediaType());
+                    OMElement seqElement = APIUtil.buildOMElement(sequence.getContentStream());
+                    String seqFileName = seqElement.getAttributeValue(new QName("name"));
+                    addResourceFile(api.getId(), seqNewFilePath + seqFileName, seqFile);
+                }
             }
         }
     }
@@ -6911,7 +6903,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateApiProductInfo(product);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
-        createAPIProduct(product);
 
         if (log.isDebugEnabled()) {
             log.debug("API Product details successfully added to the registry. API Product Name: " + product.getId().getName()
@@ -6935,6 +6926,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 continue;
             }
             if (api != null) {
+                validateApiLifeCycleForApiProducts(api);
+
                 api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
                 if (!apiToProductResourceMapping.containsKey(api)) {
                     apiToProductResourceMapping.put(api, new ArrayList<>());
@@ -6974,6 +6967,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         product.setProductResources(validResources);
         //now we have validated APIs and it's resources inside the API product. Add it to database
 
+        // Create registry artifact
+        createAPIProduct(product);
+
+        // Add to database
         apiMgtDAO.addAPIProduct(product, tenantDomain);
 
         return apiToProductResourceMapping;
@@ -7236,6 +7233,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException {
         return apiMgtDAO.getResourcePathsOfAPI(apiId);
+    }
+
+    private void validateApiLifeCycleForApiProducts(API api) throws APIManagementException {
+        String status = api.getStatus();
+
+        if (APIConstants.BLOCKED.equals(status) ||
+            APIConstants.PROTOTYPED.equals(status) ||
+            APIConstants.DEPRECATED.equals(status) ||
+            APIConstants.RETIRED.equals(status)) {
+            throw new APIManagementException("Cannot create API Product using API with following status: " + status,
+                    ExceptionCodes.from(ExceptionCodes.API_PRODUCT_WITH_UNSUPPORTED_LIFECYCLE_API, status));
+        }
     }
 
     /**

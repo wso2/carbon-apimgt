@@ -2946,6 +2946,143 @@ Location: https://localhost:9443/api/am/publisher/v1/apis/35ee8a2d-d9ef-4d6d-862
                 </tbody>
             </table>
             <hr/>
+            <h4 class="operation-heading"><a name="getWSDLInfoOfAPI"></a>Get WSDL definition</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1/apis/{apiId}/wsdl-info</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to retrieve the WSDL meta information of an API. It states whether the API is a SOAP
+API. If the API is a SOAP API, it states whether it has a single WSDL or a WSDL archive.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_view</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u>Retrieve the WSDL Information of an API</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-getWSDLInfoOfAPI">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-getWSDLInfoOfAPI"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl-info HTTP 1/1
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-getWSDLInfoOfAPI">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-getWSDLInfoOfAPI" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Type: application/json
+
+{
+  &quot;type&quot; : &quot;WSDL&quot;
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl-info&#39; -H &#39;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&#39; </code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Requested WSDL meta information of the API is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#WSDLInfo">WSDLInfo</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist or the API is not a SOAP API. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
             <h4 class="operation-heading"><a name="getWSDLOfAPI"></a>Get WSDL definition</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1/apis/{apiId}/wsdl</code>
             <p class="marked"></p>
 
@@ -4780,8 +4917,8 @@ Content-Length: 0</code></div>
                         <td class="param-name">
                             <p>file</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td>

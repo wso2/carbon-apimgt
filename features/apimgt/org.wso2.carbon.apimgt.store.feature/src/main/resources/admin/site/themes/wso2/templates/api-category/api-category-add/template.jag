@@ -1,0 +1,97 @@
+<% jagg.template("api-category/api-category-add", function(inputs, outputs, jagg) { %>
+
+    <%
+    var uuid = request.getParameter("uuid");
+    var action = request.getParameter("action");
+    var pageTitle = i18n.localize("Add API Category");
+    var nameFieldDisableStatus = "";
+
+    if (action == null) {
+        action = "categoryAction";
+    }
+    if (uuid != null) {
+        nameFieldDisableStatus = "readonly";
+        pageTitle = i18n.localize("Edit API Category");
+        var categories = session.get("categoryList");
+        var APICategory = Packages.org.wso2.carbon.apimgt.api.model.APICategory;
+        var category = new APICategory();
+
+        for (i=0; i < categories.size(); i++) {
+        	if (uuid.equalsIgnoreCase(categories.get(i).getId())) {
+                category = categories.get(i);
+                break;
+            }
+        }
+        var name = category.getName();
+        var description = category.getDescription() == null ? "" : category.getDescription();
+   	}
+%>
+
+ <form class="apim-form form-horizontal">
+    <div class="page-header">
+        <h2 id="tierTopic"><%=pageTitle%></h2>
+        <p class="lead"></p>
+    </div>
+    <input type='hidden' id='errorMessageTooLengthy' name='errorMessageTooLengthy'
+                value='<%=i18n.localize("Maximum length is 255")%>'/>
+    <input type='hidden' id='errorMsgRequired' name='errorMsgRequired'
+                value='<%=i18n.localize("Required")%>'/>
+    <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid'
+                value='<%=i18n.localize("Invalid")%>'/>
+    <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar'
+                value='<%=i18n.localize("API Category contains one or more illegal characters")%> ( [ ~ ! $ & @ # ; % ^ & * + = { } | <> \"  , ] ). '/>
+    <input type="hidden" id="uuid" name="uuid" value="<%=encode.forHtmlAttribute(uuid)%>" />
+    <input type="hidden" id="action" name="action" value="<%=encode.forHtmlAttribute(action)%>"/>
+    <input type='hidden' id='errorMessageSpaces' name='errorMessageSpaces' value='<%=i18n.localize("API Category name contains spaces")%>'/>
+    <input type='hidden' id='categoryNameExists' name='categoryNameExists' value='<%=i18n.localize("API Category name already Exists")%>'/>
+    <div class="page-header">
+	    <h2><br></h2>
+	    <p class="lead"><%=i18n.localize("General Details")%></p>
+	</div>
+    <div class="form-group">
+        <label class="control-label col-sm-3"><%=i18n.localize("API Category")%>  <span class="requiredAstrix">*</span></label>
+        <div class="col-md-9">
+		<input class="form-control" type="text" id="categoryName" name="categoryName" <%=nameFieldDisableStatus%>/>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-sm-3"><%=i18n.localize("Description")%></label>
+        <div class="col-md-9">
+		<textarea class="form-control" id="description" class="text" name="description" ></textarea>
+        </div>
+	</div>
+
+	<div class="form-group">
+        <button type="button" id="add-api-category-btn" onclick="addAPICategory()" name="save-api-category-btn" class="btn btn-primary has-spinner">
+        	<span class="icon fw-stack">
+                <i class="fw fw-save fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+        	</span>
+        	<%=i18n.localize("Save")%>
+        </button>
+        <button type="button" id="cancel-api-category-btn" class="btn btn-secondary">
+        	<span class="icon fw-stack">
+                <i class="fw fw-cancel fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+        	</span>
+        	<%=i18n.localize("Cancel")%>
+        </button>
+	</div>
+</form>
+
+<script>
+   $(document).ready(function() {
+    	$('#cancel-api-category-btn').on('click',function(){
+            location.href = "<%= jagg.url('/api-category-list')%>";
+       });
+        var isNewAPICategory = true;
+        if ('<%=encode.forHtmlAttribute(uuid)%>' != 'null') {
+            isNewAPICategory = false;
+        }
+        if (!isNewAPICategory) {
+            $('#categoryName').val("<%=name%>");
+            $('#description').val("<%=description%>");
+        }
+   });
+</script>
+<%});%>

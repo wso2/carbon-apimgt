@@ -37,7 +37,7 @@ public class SOAPOperationBindingTestCase {
 
     @Test
     public void testGetSoapOperationMapping() throws Exception {
-        String mapping = SOAPOperationBindingUtils.getSoapOperationMapping(Thread.currentThread().getContextClassLoader()
+        String mapping = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(Thread.currentThread().getContextClassLoader()
                 .getResource("wsdls/phoneverify.wsdl").toExternalForm());
         Assert.assertTrue("Failed getting soap operation mapping from the WSDL", !mapping.isEmpty());
     }
@@ -54,7 +54,7 @@ public class SOAPOperationBindingTestCase {
 
     @Test
     public void testGetSwaggerFromWSDL() throws Exception {
-        String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(Thread.currentThread().getContextClassLoader()
+        String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(Thread.currentThread().getContextClassLoader()
                 .getResource("wsdls/phoneverify.wsdl").toExternalForm());
 
         Swagger swagger = new SwaggerParser().parse(swaggerStr);
@@ -77,7 +77,7 @@ public class SOAPOperationBindingTestCase {
                 + "  },\n" + "  \"info\": {\n" + "    \"title\": \"\",\n" + "    \"version\": \"\"\n" + "  },\n"
                 + "  \"definitions\": {\n" + "    \"getCustomerOutput\": {\n" + "      \"type\": \"object\"\n"
                 + "    }\n" + "  }\n" + "}";
-        String generatedSwagger = SOAPOperationBindingUtils.getSoapOperationMapping(
+        String generatedSwagger = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(
                 Thread.currentThread().getContextClassLoader().getResource("wsdls/simpleCustomerService.wsdl")
                         .toExternalForm());
         Swagger swagger = new SwaggerParser().parse(generatedSwagger);
@@ -88,7 +88,7 @@ public class SOAPOperationBindingTestCase {
 
     @Test
     public void testVendorExtensions() throws Exception {
-        String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(
+        String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(
                 Thread.currentThread().getContextClassLoader().getResource("wsdls/simpleCustomerService.wsdl")
                         .toExternalForm());
         Swagger swagger = new SwaggerParser().parse(swaggerStr);

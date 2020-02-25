@@ -24,6 +24,7 @@ features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources
 features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources/api-docs/package.json
 features/apimgt/org.wso2.carbon.apimgt.rest.api.admin.feature/src/main/resources/api-docs/main.js
 features/apimgt/org.wso2.carbon.apimgt.rest.api.admin.feature/src/main/resources/api-docs/package.json
+features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/tenant/tenant-conf.json
 components/apimgt/org.wso2.carbon.apimgt.hybrid.gateway/org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher/src/test/resources/carbon-home/api-usage-data/api-usage-data.dat
 components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/publisher-api.yaml
 components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/store-api.yaml

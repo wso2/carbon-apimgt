@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.impl.wsdl;
 
 import io.swagger.models.ModelImpl;
+import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
 import org.junit.Assert;
@@ -138,10 +139,10 @@ public class WSDLSOAPOperationExtractorImplTestCase {
         Assert.assertEquals(5, parameterModelMap.get("ItemSearchRequest").getProperties().size());
         Assert.assertNotNull(parameterModelMap.get("ItemSearchRequest").getProperties().get("Tracks"));
         Assert.assertNotNull(parameterModelMap.get("ItemSearchRequest").getProperties().get("Tracks"));
-        Assert.assertEquals(ObjectProperty.TYPE,
+        Assert.assertEquals(ArrayProperty.TYPE,
                 parameterModelMap.get("ItemSearchRequest").getProperties().get("Tracks").getType());
-        Assert.assertNotNull(((ObjectProperty) parameterModelMap.get("ItemSearchRequest").getProperties().get("Tracks"))
-                .getProperties());
+        Assert.assertNotNull(((ArrayProperty) parameterModelMap.get("ItemSearchRequest").getProperties().get("Tracks"))
+                .getItems());
     }
 
     @Test

@@ -118,6 +118,7 @@ const AppThemes = {
             goToSearch: 2,
         },
         custom: {
+            wrapperBackground: '#f9f9f9',
             starColor: '#f2c73a',
             disableColor: '#D3D3D3',
             leftMenuWidth: 210,
@@ -126,7 +127,6 @@ const AppThemes = {
             logo: '/site/public/images/logo.svg',
             logoHeight: 40,
             logoWidth: 222,
-            title: 'WSO2 APIM Publisher',
             defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
             showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
             leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
@@ -148,6 +148,14 @@ const AppThemes = {
                 query: '#b3e6fe',
                 mutation: '#c1dea0',
                 subscription: '#ffcc80',
+            },
+            overviewStepper: {
+                backgrounds: {
+                    completed: '#eeeeee',
+                    active: '#fff',
+                    inactive: '#e0e0e0',
+                },
+                iconSize: 32,
             },
             thumbnail: {
                 backgrounds: [ // These backgrounds are use to generate the thumbnails.
@@ -176,6 +184,10 @@ const AppThemes = {
                 backgroundChip: '#5aebf9',
             },
             warningColor: '#ffc439',
+            title: {
+                prefix: '[Devportal]',
+                sufix: '- WSO2 APIM',
+            },
         },
     },
     // mediatorIcons,

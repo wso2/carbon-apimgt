@@ -21,13 +21,14 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.AlertSubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SdkGenApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SearchApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SelfSignupApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SettingsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.TagsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ThrottlingPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SwaggerYamlApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.TenantsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApiCategoriesApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApi"/>
 
         </jaxrs:serviceBeans>
         <jaxrs:providers>
@@ -53,6 +54,11 @@
                 <value>Authorization</value>
                 <value>X-WSO2-Tenant</value>
                 <value>content-type</value>
+            </list>
+        </property>
+        <property name="exposeHeaders">
+            <list>
+                <value>Content-Disposition</value>
             </list>
         </property>
         <property name="allowCredentials" value="true"/>

@@ -29,6 +29,7 @@ import AuthManager from 'AppData/AuthManager';
 import withSettings from 'AppComponents/Shared/withSettingsContext';
 import Alert from 'AppComponents/Shared/Alert';
 import classNames from 'classnames';
+import { Helmet } from 'react-helmet';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { ResourceNotFound } from '../../Base/Errors/index';
@@ -39,7 +40,7 @@ import Wizard from './Credentials/Wizard/Wizard';
 
 const ApiConsole = lazy(() => import('./ApiConsole/ApiConsole' /* webpackChunkName: "APIConsole" */));
 const Overview = lazy(() => import('./Overview' /* webpackChunkName: "APIOverview" */));
-const Documentation = lazy(() => import('./Documents/Documentation' /* webpackChunkName: "APIDocumentation" */));
+const Documents = lazy(() => import('./Documents/Documents' /* webpackChunkName: "APIDocuments" */));
 const Credentials = lazy(() => import('./Credentials/Credentials' /* webpackChunkName: "APICredentials" */));
 const Comments = lazy(() => import('./Comments/Comments' /* webpackChunkName: "APIComments" */));
 const Sdk = lazy(() => import('./Sdk' /* webpackChunkName: "APISdk" */));
@@ -55,7 +56,7 @@ const LoadableSwitch = withRouter((props) => {
             <Switch>
                 <Redirect exact from={`/apis/${apiUuid}`} to={redirectURL} />
                 <Route path='/apis/:apiUuid/overview' render={() => <Overview {...props} />} />
-                <Route path='/apis/:apiUuid/documents' component={Documentation} />
+                <Route path='/apis/:apiUuid/documents' component={Documents} />
                 <Route exact path='/apis/:apiUuid/credentials/wizard' component={Wizard} />
                 {!advertised && <Route path='/apis/:apiUuid/comments' component={Comments} />}
                 {!advertised && <Route path='/apis/:apiUuid/credentials' component={Credentials} />}
@@ -305,6 +306,9 @@ class Details extends React.Component {
                 apiDetailPages: {
                     showCredentials, showComments, showTryout, showDocuments, showSdks,
                 },
+                title: {
+                    prefix, sufix,
+                }
             },
         } = theme;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
@@ -315,6 +319,9 @@ class Details extends React.Component {
 
         return api ? (
             <ApiContext.Provider value={this.state}>
+                <Helmet>
+                    <title>{`${prefix} ${api.name}${sufix}`}</title>
+                </Helmet>
                 <style>{globalStyle}</style>
                 <div
                     className={classNames(
@@ -354,8 +361,8 @@ class Details extends React.Component {
                                     <LeftMenuItem
                                         text={
                                             <FormattedMessage
-                                                id='Apis.Details.index.credentials'
-                                                defaultMessage='Credentials'
+                                                id='Apis.Details.index.subscriptions'
+                                                defaultMessage='Subscriptions'
                                             />
                                         }
                                         route='credentials'

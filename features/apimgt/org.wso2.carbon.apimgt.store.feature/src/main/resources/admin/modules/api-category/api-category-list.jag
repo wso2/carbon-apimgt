@@ -1,0 +1,44 @@
+<%
+var log = new Log();
+
+var getAllAPICategories = function() {
+    try {
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
+        var apiAdmin = new APIAdminImpl();
+
+        var categoryList = apiAdmin.getAllAPICategoriesOfTenantForAdminListing(jagg.getUser().username);
+        return {
+            error: false,
+            categoryList:categoryList
+        };
+    } catch (e) {
+        var errorMessage = "Error occurred while getting API Categories. (Cause:" + e.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+
+var deleteAPICategory = function (uuid) {
+    try {
+        var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
+        var apiAdmin = new APIAdminImpl();
+        apiAdmin.deleteCategory(uuid, jagg.getUser().username);
+        if (log.isDebugEnabled()) {
+            log.debug("API Category " + uuid + " was deleted successfully.");
+        }
+        return {
+            error: false
+        };
+    } catch (e) {
+        return {
+            error: true,
+            message: e.message.split(":")[1]
+        };
+    }
+};
+%>

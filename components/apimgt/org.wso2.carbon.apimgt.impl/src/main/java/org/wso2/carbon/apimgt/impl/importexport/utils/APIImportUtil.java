@@ -676,15 +676,15 @@ public final class APIImportUtil {
                 + importedApi.getId().getApiName() + RegistryConstants.PATH_SEPARATOR
                 + importedApi.getId().getVersion() + RegistryConstants.PATH_SEPARATOR;
 
-        String inSequenceFileName = importedApi.getInSequence() + APIConstants.XML_EXTENSION;
+        String inSequenceFileName = importedApi.getInSequence();
         String inSequenceFileLocation = pathToArchive + APIImportExportConstants.IN_SEQUENCE_LOCATION
                 + APIImportExportConstants.CUSTOM_TYPE + File.separator + inSequenceFileName;
 
         //Adding in-sequence, if any
-        if (CommonUtil.checkFileExistence(inSequenceFileLocation)) {
+        if (CommonUtil.checkFileExistence(inSequenceFileLocation + APIConstants.XML_EXTENSION)) {
             String inSequencePath = APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN + RegistryConstants.PATH_SEPARATOR
                     + inSequenceFileName;
-            addSequenceToRegistry(true, registry, inSequenceFileLocation, regResourcePath + inSequencePath);
+            addSequenceToRegistry(true, registry, inSequenceFileLocation + APIConstants.XML_EXTENSION, regResourcePath + inSequencePath);
         }
 
         String outSequenceFileName = importedApi.getOutSequence() + APIConstants.XML_EXTENSION;

@@ -202,31 +202,6 @@ public class APIMTokenIssuerUtil {
             jwtTokenInfoDTO.setKeyType(application.getKeyType());
             jwtTokenInfoDTO.setConsumerKey(clientId);
 
-            // Generate JWT token to be sent to the backend
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            boolean backendJwtGenerationEnabled = Boolean.parseBoolean(config.getFirstProperty(
-                    APIConstants.ENABLE_JWT_GENERATION));
-            if (log.isDebugEnabled()) {
-                log.debug("JWT Generation for backend enabled : " + backendJwtGenerationEnabled);
-            }
-            if (backendJwtGenerationEnabled) {
-                TokenGenerator jwtGenerator = APIKeyMgtDataHolder.getTokenGenerator();
-                if (jwtGenerator != null) {
-                    TokenValidationContext validationContext = new TokenValidationContext();
-                    APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
-                    apiKeyValidationInfoDTO.setEndUserName(endUser.toFullQualifiedUsername());
-                    apiKeyValidationInfoDTO.setSubscriber(application.getOwner());
-                    apiKeyValidationInfoDTO.setApplicationName(application.getName());
-                    apiKeyValidationInfoDTO.setApplicationId(String.valueOf(application.getId()));
-                    apiKeyValidationInfoDTO.setType(application.getKeyType());
-                    apiKeyValidationInfoDTO.setApplicationTier(application.getTier());
-                    validationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
-                    validationContext.setUser(endUser);
-                    validationContext.setAuthorizationCode(jwtAccessTokenIssuerDTO.getAuthCode());
-                    jwtTokenInfoDTO.setBackendJwt(jwtGenerator.generateToken(validationContext));
-                }
-            }
             APIMJWTGenerator apimjwtGenerator = new APIMJWTGenerator();
             accessToken = apimjwtGenerator.generateJWT(jwtTokenInfoDTO);
 

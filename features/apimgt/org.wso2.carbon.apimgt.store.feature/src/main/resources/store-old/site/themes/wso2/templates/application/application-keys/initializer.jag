@@ -1,9 +1,0 @@
-<%
-jagg.initializer("application/application-keys", {
-
-    preInitialize:function () {
-        jagg.addFooterJS("application/keys", "application-keys", "templates/application/application-keys/js/application-keys.js");
-        
-    }
-});
-%>

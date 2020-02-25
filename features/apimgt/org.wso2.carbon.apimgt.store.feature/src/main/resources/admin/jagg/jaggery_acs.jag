@@ -125,6 +125,7 @@
             }
 
             ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session);
+            ssoRelyingParty.addSession(session);
             session.put("showLogin", "false");
             session.put("LOGGED_IN_USER", ssoRelyingParty.getLoggedInUser(sessionId));
 

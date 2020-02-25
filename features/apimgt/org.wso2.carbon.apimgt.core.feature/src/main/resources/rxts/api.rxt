@@ -274,6 +274,14 @@
                 <name label="Label Name">labelName</name>
             </field>
         </table>
+        <table name="API Categories" columns="1"  maxoccurs="unbounded">
+            <subheading>
+                <heading>Category Name</heading>
+            </subheading>
+            <field type="text">
+                <name label="Category Name">categoryName</name>
+            </field>
+        </table>
 </content>
 
 </artifactType>

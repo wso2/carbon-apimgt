@@ -20,9 +20,74 @@
 var app = require('/site/public/theme/settings.js').Settings.app;
 
 var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+include("/services/constants.jag");
 
 var getLoopbackOrigin = function() {
     var mgtTransportPort = utils.getCarbonTransportPort("https");
     var origin = 'https://' + app.origin.host + ":" + mgtTransportPort;
     return origin;
+};
+
+var getTenantBaseStoreContext = function() {
+    var tenantDomain = getTenantDomain();
+    var tenantContext = utils.getTenantBasedDevPortalContext(tenantDomain);
+    if (tenantContext != null) {
+        return tenantContext
+    } else {
+        return app.context;
+    }
+};
+
+var getTenantBasedLoginCallBack = function() {
+    var tenantDomain = getTenantDomain();
+    var storeDomainMapping = utils.getTenantBasedStoreDomainMapping(tenantDomain);
+    if (storeDomainMapping != null) {
+       if (storeDomainMapping.get('login') != null) {
+        return storeDomainMapping.get('login');
+       }
+        return "https://"+storeDomainMapping.get('customUrl')+LOGIN_CALLBACK_URL_SUFFIX;
+    }else{
+    return null;
+    }
+};
+
+var getTenantBasedLogoutCallBack = function() {
+    var tenantDomain = getTenantDomain();
+    var storeDomainMapping = utils.getTenantBasedStoreDomainMapping(tenantDomain);
+    if (storeDomainMapping != null) {
+       if (storeDomainMapping.get('logout') != null) {
+        return storeDomainMapping.get('logout');
+       }
+        return "https://"+storeDomainMapping.get('customUrl')+LOGOUT_CALLBACK_URL_SUFFIX;
+    } else {
+    return null;
+    }
+};
+
+var isPerTenantServiceProviderEnabled = function(){
+    var tenantDomain = getTenantDomain();
+
+    var perTenantServiceProviderEnabled = utils.isPerTenantServiceProviderEnabled(tenantDomain);
+    return perTenantServiceProviderEnabled;
+};
+
+var getTenantDomain = function(){
+
+    var tenantDomain = request.getParameter("tenant");
+    if (tenantDomain == null) {
+        tenantDomain = request.getHeader("X-WSO2-Tenant");
+        if (tenantDomain == null) {
+            tenantDomain = "carbon.super";
+        }
+    }
+    return tenantDomain;
+};
+
+var getServiceProviderTenantDomain = function(){
+    var tenantDomain = getTenantDomain();
+    if (isPerTenantServiceProviderEnabled()) {
+        return tenantDomain;
+    } else {
+        return "carbon.super";
+    }
 };
