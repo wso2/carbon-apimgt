@@ -171,8 +171,10 @@ User.CONST = {
     WSO2_AM_TOKEN_MSF4J: 'WSO2_AM_TOKEN_MSF4J',
     WSO2_AM_TOKEN_1: 'WSO2_AM_TOKEN_1',
     WSO2_AM_REFRESH_TOKEN_1: 'WSO2_AM_REFRESH_TOKEN_1',
+    PUBLISHER_CLIENT_ID: 'CLIENT_ID',
     LOCAL_STORAGE_USER: 'wso2_user_publisher',
     USER_EXPIRY_TIME: 'user_expiry_time',
+    PUBLISHER_SESSION_STATE: 'publisher_session_state',
 };
 /**
  * Map of users (key = environmentLabel, value = User instance)

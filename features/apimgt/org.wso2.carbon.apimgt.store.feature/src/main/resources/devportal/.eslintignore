@@ -17,6 +17,7 @@ source/src/app/data/*
 /source/src/app/ProtectedApp.jsx
 /source/src/app/TenantListing.jsx
 /source/src/DevPortal.jsx
+/source/src/defaultTheme.js
 /source/Tests/*
 /source/customPolyfill.js
 /source/index.jsx

@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -52,6 +53,8 @@ import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
@@ -90,8 +93,11 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
-import javax.cache.Cache;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -100,6 +106,8 @@ import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.cache.Cache;
 
 @Component(
          name = "org.wso2.apimgt.impl.services",
@@ -233,9 +241,12 @@ public class APIManagerComponent {
             String trustStorePassword = config.getFirstProperty(APIConstants.TRUST_STORE_PASSWORD);
             String trustStoreLocation = config.getFirstProperty(APIConstants.TRUST_STORE_LOCATION);
             if (trustStoreLocation != null && trustStorePassword != null) {
+                File trustStoreFile = new File(trustStoreLocation);
                 try (FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation))) {
                     KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
                     trustStore.load(trustStoreStream, trustStorePassword.toCharArray());
+                    CertificateReLoaderUtil.setLastUpdatedTimeStamp(trustStoreFile.lastModified());
+                    CertificateReLoaderUtil.startCertificateReLoader();
                     ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
                 } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
                     log.error("Error in loading trust store.", e);
@@ -248,7 +259,9 @@ public class APIManagerComponent {
             CacheProvider.createRESTAPITokenCache();
             CacheProvider.createRESTAPIInvalidTokenCache();
             CacheProvider.createGatewayJWTTokenCache();
+            //Initialize Recommendation wso2event output publisher
             configureRecommendationEventPublisherProperties();
+            setupAccessTokenGenerator();
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
@@ -261,6 +274,7 @@ public class APIManagerComponent {
         if (log.isDebugEnabled()) {
             log.debug("Deactivating API manager component");
         }
+        CertificateReLoaderUtil.shutDownCertificateReLoader();
         registration.unregister();
         APIManagerFactory.getInstance().clearAll();
         org.wso2.carbon.apimgt.impl.utils.AuthorizationManager.getInstance().destroy();
@@ -662,7 +676,7 @@ public class APIManagerComponent {
 
     private void configureRecommendationEventPublisherProperties() {
         OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
-        adapterConfiguration.setName("recommendationEventPublisher");
+        adapterConfiguration.setName(APIConstants.RECOMMENDATIONS_WSO2_EVENT_PUBLISHER);
         adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
         adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
         Map<String, String> adapterParameters = new HashMap<>();
@@ -690,6 +704,19 @@ public class APIManagerComponent {
                     log.error("Exception occurred while reading the admin username and password", e);
                 }
             }
+        }
+    }
+
+    private void setupAccessTokenGenerator(){
+
+        RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
+        if (recommendationEnvironment != null && recommendationEnvironment.getOauthURL()!= null){
+            AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(
+                    recommendationEnvironment.getOauthURL(),
+                    recommendationEnvironment.getConsumerKey(),
+                    recommendationEnvironment.getConsumerSecret());
+            ServiceReferenceHolder.getInstance().setAccessTokenGenerator(accessTokenGenerator);
         }
     }
 }

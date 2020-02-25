@@ -10,6 +10,7 @@
     "apim.throttling.blacklist_condition.start_delay" : "ms",
     "apim.throttling.blacklist_condition.period" : "ms",
     "apim.throttling.jms.start_delay" : "ms",
-    "apim.jwt.expiry_time": "s"
+    "apim.jwt.expiry_time": "s",
+    "apim.certificate_reloader.period": "s"
   }
 }

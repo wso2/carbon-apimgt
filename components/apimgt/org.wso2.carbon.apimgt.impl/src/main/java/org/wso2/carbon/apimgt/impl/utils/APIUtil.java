@@ -111,7 +111,13 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.IDPConfiguration;
+import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
+import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
@@ -201,6 +207,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
@@ -210,6 +217,7 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -217,6 +225,7 @@ import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.security.InvalidKeyException;
@@ -225,6 +234,8 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -232,10 +243,14 @@ import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -252,10 +267,13 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.security.cert.CertificateEncodingException;
+import javax.security.cert.X509Certificate;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -3623,8 +3641,8 @@ public final class APIUtil {
                     publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST);
                 }
 
-                if (visibility.equalsIgnoreCase(APIConstants.API_GLOBAL_VISIBILITY)
-                        || visibility.equalsIgnoreCase(APIConstants.API_PRIVATE_VISIBILITY)) {
+                if (APIConstants.API_GLOBAL_VISIBILITY.equalsIgnoreCase(visibility)
+                        || APIConstants.API_PRIVATE_VISIBILITY.equalsIgnoreCase(visibility)) {
                     registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, APIConstants.NULL_USER_ROLE_LIST);
                     publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST); // set publisher
                     // access roles null since store visibility is global. We do not need to add any roles to
@@ -3940,6 +3958,9 @@ public final class APIUtil {
             throws APIManagementException {
         // TODO: Merge different resource loading methods and create a single method.
         try {
+            String workflowExtensionLocation =
+                    CarbonUtils.getCarbonHome() + File.separator + APIConstants.WORKFLOW_EXTENSION_LOCATION;
+
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
@@ -3951,8 +3972,7 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding External Stores configuration to the tenant's registry");
             }
-            InputStream inputStream =
-                    APIManagerComponent.class.getResourceAsStream("/workflowextensions/default-workflow-extensions.xml");
+            InputStream inputStream = new FileInputStream(workflowExtensionLocation);
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
             resource.setContent(data);
@@ -3960,9 +3980,10 @@ public final class APIUtil {
             govRegistry.put(APIConstants.WORKFLOW_EXECUTOR_LOCATION, resource);
 
         } catch (RegistryException e) {
-            throw new APIManagementException("Error while saving External Stores configuration information to the registry", e);
+            throw new APIManagementException("Error while saving Workflow configuration information to the registry",
+                    e);
         } catch (IOException e) {
-            throw new APIManagementException("Error while reading External Stores configuration file content", e);
+            throw new APIManagementException("Error while reading Workflow configuration file content", e);
         }
     }
 
@@ -4051,7 +4072,7 @@ public final class APIUtil {
 
     private static void updateTenantConf(UserRegistry registry, byte[] data) throws RegistryException {
         Resource resource = registry.newResource();
-        resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+        resource.setMediaType(APIConstants.API_TENANT_CONF_MEDIA_TYPE);
         resource.setContent(data);
         registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
     }
@@ -4115,8 +4136,10 @@ public final class APIUtil {
         JSONObject tenantConf = getTenantConfig(tenantId);
         JSONObject scopesConfigTenant = getRESTAPIScopesFromTenantConfig(tenantConf);
         JSONObject scopeConfigLocal = getRESTAPIScopesConfigFromFileSystem();
-        Map<String, String> scopesTenant = getRESTAPIScopesFromConfig(scopesConfigTenant);
-        Map<String, String> scopesLocal = getRESTAPIScopesFromConfig(scopeConfigLocal);
+        JSONObject roleMappingConfigTenant = getRESTAPIScopeRoleMappingsFromTenantConfig(tenantConf);
+        JSONObject roleMappingConfigLocal = getRESTAPIRoleMappingsConfigFromFileSystem();
+        Map<String, String> scopesTenant = getRESTAPIScopesFromConfig(scopesConfigTenant, roleMappingConfigTenant);
+        Map<String, String> scopesLocal = getRESTAPIScopesFromConfig(scopeConfigLocal, roleMappingConfigLocal);
         JSONArray tenantScopesArray = (JSONArray)scopesConfigTenant.get(APIConstants.REST_API_SCOPE);
         boolean isRoleUpdated = false;
         boolean isMigrated = false;
@@ -4213,6 +4236,36 @@ public final class APIUtil {
                 throw new APIManagementException("tenant-conf.json (in file system) should have RESTAPIScopes config");
             }
             return restAPIScopes;
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading tenant conf file content from file system", e);
+        } catch (ParseException e) {
+            throw new APIManagementException("ParseException thrown when parsing tenant config json from string " +
+                    "content", e);
+        }
+    }
+
+    /**
+     * Returns the REST API role mappings JSONObject from the tenant-conf.json in the file system
+     *
+     * @return REST API role mappings JSONObject from the tenant-conf.json in the file system
+     * @throws APIManagementException when error occurred while retrieving local REST API role mappings.
+     */
+    private static JSONObject getRESTAPIRoleMappingsConfigFromFileSystem() throws APIManagementException {
+        try {
+            byte[] tenantConfData = getLocalTenantConfFileData();
+            String tenantConfDataStr = new String(tenantConfData, Charset.defaultCharset());
+            JSONParser parser = new JSONParser();
+            JSONObject tenantConfJson = (JSONObject) parser.parse(tenantConfDataStr);
+            if (tenantConfJson == null) {
+                throw new APIManagementException("tenant-conf.json (in file system) content cannot be null");
+            }
+            JSONObject roleMappings = getRESTAPIScopeRoleMappingsFromTenantConfig(tenantConfJson);
+            if (roleMappings == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Scope role mappings are not defined in the tenant-conf.json in file system");
+                }
+            }
+            return roleMappings;
         } catch (IOException e) {
             throw new APIManagementException("Error while reading tenant conf file content from file system", e);
         } catch (ParseException e) {
@@ -7115,6 +7168,26 @@ public final class APIUtil {
         return restAPIConfigJSON;
     }
 
+    /**
+     * @param tenantDomain Tenant domain to be used to get configurations for REST API scopes
+     * @return JSON object which contains configuration for REST API scopes
+     * @throws APIManagementException
+     */
+    public static JSONObject getTenantRESTAPIScopeRoleMappingsConfig(String tenantDomain) throws APIManagementException {
+        JSONObject restAPIConfigJSON = null;
+        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
+        JSONObject tenantConfJson = getTenantConfig(tenantId);
+        if (tenantConfJson != null) {
+            restAPIConfigJSON = getRESTAPIScopeRoleMappingsFromTenantConfig(tenantConfJson);
+            if (restAPIConfigJSON == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No REST API role mappings are defined for the tenant " + tenantDomain);
+                }
+            }
+        }
+        return restAPIConfigJSON;
+    }
+
     public static JSONObject getTenantConfig(String tenantDomain) throws APIManagementException {
         int tenantId = getTenantIdFromTenantDomain(tenantDomain);
         return getTenantConfig(tenantId);
@@ -7155,6 +7228,10 @@ public final class APIUtil {
         return (JSONObject) tenantConf.get(APIConstants.REST_API_SCOPES_CONFIG);
     }
 
+    private static JSONObject getRESTAPIScopeRoleMappingsFromTenantConfig(JSONObject tenantConf) {
+        return (JSONObject) tenantConf.get(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
+    }
+
     /**
      * This method gets the RESTAPIScopes configuration from REST_API_SCOPE_CACHE if available, if not from
      * tenant-conf.json in registry.
@@ -7170,8 +7247,8 @@ public final class APIUtil {
                 .get(tenantDomain);
         if (restAPIScopes == null) {
             try {
-                restAPIScopes =
-                        APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain));
+                restAPIScopes = APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain),
+                        APIUtil.getTenantRESTAPIScopeRoleMappingsConfig(tenantDomain));
                 //call load tenant config for rest API.
                 //then put cache
                 Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
@@ -7225,16 +7302,38 @@ public final class APIUtil {
     }
 
     /**
-     * @param config JSON configuration object with scopes and associated roles
+     * @param scopesConfig JSON configuration object with scopes and associated roles
+     * @param roleMappings JSON Configuration object with role mappings
      * @return Map of scopes which contains scope names and associated role list
      */
-    public static Map<String, String> getRESTAPIScopesFromConfig(JSONObject config) {
+    public static Map<String, String> getRESTAPIScopesFromConfig(JSONObject scopesConfig, JSONObject roleMappings) {
         Map<String, String> scopes = new HashMap<String, String>();
-        JSONArray scopesArray = (JSONArray) config.get("Scope");
+        JSONArray scopesArray = (JSONArray) scopesConfig.get("Scope");
         for (Object scopeObj : scopesArray) {
             JSONObject scope = (JSONObject) scopeObj;
             String scopeName = scope.get(APIConstants.REST_API_SCOPE_NAME).toString();
             String scopeRoles = scope.get(APIConstants.REST_API_SCOPE_ROLE).toString();
+            if (roleMappings != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("REST API scope role mappings exist. Hence proceeding to swap original scope roles "
+                            + "for mapped scope roles.");
+                }
+                //split role list string read using comma separator
+                List<String> originalRoles = Arrays.asList(scopeRoles.split("\\s*,\\s*"));
+                List<String> mappedRoles = new ArrayList<String>();
+                for (String role : originalRoles) {
+                    String mappedRole = (String) roleMappings.get(role);
+                    if (mappedRole != null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(role + " was mapped to " + mappedRole);
+                        }
+                        mappedRoles.add(mappedRole);
+                    } else {
+                        mappedRoles.add(role);
+                    }
+                }
+                scopeRoles = String.join(",", mappedRoles);
+            }
             scopes.put(scopeName, scopeRoles);
         }
         return scopes;
@@ -8072,6 +8171,28 @@ public final class APIUtil {
 
         }
         return result;
+    }
+
+    /**
+     * This method provides the BigInteger value for the given IP address. This supports both IPv4 and IPv6 address
+     * @param ipAddress ip address
+     * @return BigInteger value for the given ip address. returns 0 for unknown host
+     */
+    public static BigInteger ipToBigInteger(String ipAddress) {
+        InetAddress address;
+        try {
+            address = getAddress(ipAddress);
+            byte[] bytes = address.getAddress();
+            return new BigInteger(1, bytes);
+        } catch (UnknownHostException e) {
+            //ignore the error and log it
+            log.error("Error while parsing host IP " + ipAddress, e);
+        }
+        return BigInteger.ZERO;
+    }
+    
+    public static InetAddress getAddress(String ipAddress) throws UnknownHostException {
+        return InetAddress.getByName(ipAddress);
     }
 
     public String getFullLifeCycleData(Registry registry) throws XMLStreamException, RegistryException {
@@ -8942,7 +9063,8 @@ public final class APIUtil {
             String msg = "Error while retrieving Security Audit attributes from tenant registry.";
             throw new APIManagementException(msg, exception);
         } catch (ParseException parseException) {
-            String msg = "Couldn't create json object from Swagger object for custom security audit attributes.";
+            String msg = "Cannot read the security audit attributes. "
+                    + "Please make sure the properties are in the correct format";
             throw new APIManagementException(msg, parseException);
         }
         return null;
@@ -10044,9 +10166,11 @@ public final class APIUtil {
         return null;
     }
 
-    public static boolean isPerTenantServiceProviderEnabled(String tenantDomain) throws APIManagementException {
+        public static boolean isPerTenantServiceProviderEnabled(String tenantDomain) throws APIManagementException,
+                RegistryException {
 
         int tenantId = getTenantIdFromTenantDomain(tenantDomain);
+        loadTenantRegistry(tenantId);
         JSONObject tenantConfig = getTenantConfig(tenantId);
         if (tenantConfig.containsKey(APIConstants.ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION)) {
             return (boolean) tenantConfig.get(APIConstants.ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION);
@@ -10087,4 +10211,37 @@ public final class APIUtil {
         }
         return state;
     }
+
+    /**
+     * Validate Certificate exist in TrustStore
+     * @param certificate
+     * @return true if certificate exist in truststore
+     * @throws APIManagementException
+     */
+    public static boolean isCertificateExistsInTrustStore(X509Certificate certificate) throws APIManagementException {
+
+        if (certificate != null) {
+            try {
+                KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
+                if (trustStore != null) {
+                    CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                    byte[] certificateEncoded = certificate.getEncoded();
+                    try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(certificateEncoded)) {
+                        java.security.cert.X509Certificate x509Certificate =
+                                (java.security.cert.X509Certificate) cf.generateCertificate(byteArrayInputStream);
+                        String certificateAlias = trustStore.getCertificateAlias(x509Certificate);
+                        if (certificateAlias != null) {
+                            return true;
+                        }
+                    }
+                }
+            } catch (KeyStoreException | CertificateException | CertificateEncodingException | IOException e) {
+                String msg = "Error in validating certificate existence";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+        }
+        return false;
+    }
+
 }

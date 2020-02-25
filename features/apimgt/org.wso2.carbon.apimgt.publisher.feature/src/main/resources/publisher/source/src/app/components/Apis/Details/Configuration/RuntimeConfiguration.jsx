@@ -356,6 +356,7 @@ export default function RuntimeConfiguration() {
                                             type='IN'
                                             updateMediationPolicy={updateInMediationPolicy}
                                             selectedMediationPolicy={inPolicy}
+                                            isRestricted={isRestricted(['apim:api_create'], api)}
                                         />
                                     )}
                                 </Paper>
@@ -377,6 +378,7 @@ export default function RuntimeConfiguration() {
                                                     type='OUT'
                                                     updateMediationPolicy={updateOutMediationPolicy}
                                                     selectedMediationPolicy={outPolicy}
+                                                    isRestricted={isRestricted(['apim:api_create'], api)}
                                                 />
                                             </Box>
                                         )}
@@ -400,6 +402,7 @@ export default function RuntimeConfiguration() {
                                                 type='FAULT'
                                                 updateMediationPolicy={updateFaultMediationPolicy}
                                                 selectedMediationPolicy={faultPolicy}
+                                                isRestricted={isRestricted(['apim:api_create'], api)}
                                             />
                                         </Paper>
                                     </Grid>
@@ -421,6 +424,7 @@ export default function RuntimeConfiguration() {
                                     <Endpoints api={api} />
                                 </>
                             )}
+
                             {api.isAPIProduct() && (
                                 <Box alignItems='center' justifyContent='center' className={classes.info}>
                                     <Typography variant='body1'>
@@ -440,7 +444,8 @@ export default function RuntimeConfiguration() {
                         <Grid item>
                             <Button
                                 disabled={isUpdating
-                                || ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0))}
+                                || ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0)
+                                    || isRestricted(['apim:api_create'], api))}
                                 type='submit'
                                 variant='contained'
                                 color='primary'

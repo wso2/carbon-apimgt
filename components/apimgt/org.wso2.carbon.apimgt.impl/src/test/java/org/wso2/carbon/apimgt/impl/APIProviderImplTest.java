@@ -802,12 +802,13 @@ public class APIProviderImplTest {
     @Test
     public void testAddBlockCondition() throws APIManagementException {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
-        Mockito.when(apimgtDAO.addBlockConditions(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).
-                thenReturn("testID");
+        BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
+        blockConditionsDTO.setUUID("12345");
+        Mockito.when(apimgtDAO.addBlockConditions(Mockito.any(BlockConditionsDTO.class))).thenReturn(blockConditionsDTO);
         //condition type IP
-        assertEquals("testID", apiProvider.addBlockCondition("IP", "testValue"));
+        assertEquals("12345", apiProvider.addBlockCondition("IP", "testValue"));
         //condition type User
-        assertEquals("testID", apiProvider.addBlockCondition("USER", "testValue"));
+        assertEquals("12345", apiProvider.addBlockCondition("USER", "testValue"));
     }
 
     @Test

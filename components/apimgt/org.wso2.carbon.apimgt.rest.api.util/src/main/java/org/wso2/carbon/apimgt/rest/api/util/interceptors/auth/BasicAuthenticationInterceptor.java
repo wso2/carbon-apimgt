@@ -156,13 +156,14 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         String path = (String) inMessage.get(Message.REQUEST_URI);
         String verb = (String) inMessage.get(Message.HTTP_REQUEST_METHOD);
         String resource = path.substring(basePath.length() - 1);
+        String version = (String) inMessage.get(RestApiConstants.API_VERSION);
         String[] userRoles;
         Map<String, String> restAPIScopes;
         //get all the URI templates of the REST API from the base path
-        Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath);
+        Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath + version);
         if (uriTemplates.isEmpty()) {
             if (log.isDebugEnabled()) {
-                log.debug("No matching scopes found for request with path: " + basePath
+                log.debug("No matching scopes found for request with path: " + basePath + version
                         + ". Skipping role validation.");
             }
             return true;

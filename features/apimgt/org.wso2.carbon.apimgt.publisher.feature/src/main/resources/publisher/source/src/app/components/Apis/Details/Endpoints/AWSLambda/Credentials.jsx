@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
     Grid,
@@ -25,7 +25,11 @@ import {
     Typography,
     Tooltip,
     RadioGroup,
+    FormControl,
     FormControlLabel,
+    MenuItem,
+    InputLabel,
+    Select,
     Radio,
 } from '@material-ui/core';
 import Icon from '@material-ui/core/Icon';
@@ -40,6 +44,11 @@ const useStyles = makeStyles((theme) => ({
         display: 'inline-block',
     },
     textField: {
+        marginLeft: theme.spacing(1),
+        marginRight: theme.spacing(1),
+        width: 300,
+    },
+    selectField: {
         marginLeft: theme.spacing(1),
         marginRight: theme.spacing(1),
         width: 300,
@@ -68,14 +77,94 @@ export default function Credentials(props) {
     } = props;
     const classes = useStyles();
     const [pageError, setPageError] = useState(null);
+    const inputLabel = useRef(null);
     const handleChange = (event) => {
         const newEndpointConfig = { ...endpointConfig };
         newEndpointConfig.access_method = event.target.value;
         newEndpointConfig.amznAccessKey = '';
         newEndpointConfig.amznSecretKey = '';
+        newEndpointConfig.amznRegion = '';
         endpointsDispatcher({ action: 'set_awsCredentials', value: newEndpointConfig });
         setPageError(null);
     };
+    const regionsList = [
+        {
+            key: 'us-east-1',
+            value: 'us-east-1: US East (N. Virginia)',
+        },
+        {
+            key: 'us-east-2',
+            value: 'us-east-2: US East (Ohio)',
+        },
+        {
+            key: 'us-west-1',
+            value: 'us-west-1: US West (N. California)',
+        },
+        {
+            key: 'us-west-2',
+            value: 'us-west-2: US West (Oregon)',
+        },
+        {
+            key: 'ap-east-1',
+            value: 'ap-east-1: Asia Pacific (Hong Kong)',
+        },
+        {
+            key: 'ap-south-1',
+            value: 'ap-south-1: Asia Pacific (Mumbai)',
+        },
+        {
+            key: 'ap-northeast-1',
+            value: 'ap-northeast-1: Asia Pacific (Tokyo)',
+        },
+        {
+            key: 'ap-northeast-2',
+            value: 'ap-northeast-2: Asia Pacific (Seoul)',
+        },
+        {
+            key: 'ap-northeast-3',
+            value: 'ap-northeast-3: Asia Pacific (Osaka-Local)',
+        },
+        {
+            key: 'ap-southeast-1',
+            value: 'ap-southeast-1: Asia Pacific (Singapore)',
+        },
+        {
+            key: 'ap-southeast-2',
+            value: 'ap-southeast-2: Asia Pacific (Sydney)',
+        },
+        {
+            key: 'ca-central-1',
+            value: 'ca-central-1: Canada (Central)',
+        },
+        {
+            key: 'eu-central-1',
+            value: 'eu-central-1: Europe (Frankfurt)',
+        },
+        {
+            key: 'eu-west-1',
+            value: 'eu-west-1: Europe (Ireland)',
+        },
+        {
+            key: 'eu-west-2',
+            value: 'eu-west-2: Europe (London)',
+        },
+        {
+            key: 'eu-west-3',
+            value: 'eu-west-3: Europe (Paris)',
+        },
+        {
+            key: 'eu-north-1',
+            value: 'eu-north-1: Europe (Stockholm)',
+        },
+        {
+            key: 'me-south-1',
+            value: 'me-south-1: Middle East (Bahrain)',
+        },
+        {
+            key: 'sa-east-1',
+            value: 'sa-east-1: South America (São Paulo)',
+        },
+    ];
     useEffect(() => {
         API.getAmznResourceNames(apiId)
             .catch((error) => {
@@ -190,6 +279,37 @@ export default function Credentials(props) {
                         endpointsDispatcher({ action: 'set_awsCredentials', value: newEndpointConfig });
                     }}
                 />
+                <FormControl
+                    required
+                    margin='normal'
+                    variant='outlined'
+                    disabled={endpointConfig.access_method === 'role-supplied'}
+                >
+                    <InputLabel ref={inputLabel} id='region-label'>
+                        <FormattedMessage
+                            id={'Apis.Details.Endpoints.EndpointOverview.awslambda'
+                            + '.endpoint.region'}
+                            defaultMessage='Region'
+                        />
+                    </InputLabel>
+                    <Select
+                        labelId='region-label'
+                        autoWidth={false}
+                        className={classes.selectField}
+                        onChange={(event) => {
+                            const newEndpointConfig = { ...endpointConfig };
+                            newEndpointConfig.amznRegion = event.target.value;
+                            endpointsDispatcher({ action: 'set_awsCredentials', value: newEndpointConfig });
+                        }}
+                        value={endpointConfig.amznRegion}
+                    >
+                        {regionsList.map((region) => ((
+                            <MenuItem key={region.key} value={region.key}>
+                                {region.value}
+                            </MenuItem>
+                        )))}
+                    </Select>
+                </FormControl>
             </Grid>
             <Grid item>
                 <Link to={`/apis/${apiId}/resources`}>

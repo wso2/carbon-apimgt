@@ -55,6 +55,7 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.converter.SwaggerConverter;
+import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -90,6 +91,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -165,6 +167,7 @@ public class OASParserUtil {
      * @throws APIManagementException If error occurred while parsing definition.
      */
     public static APIDefinition getOASParser(String apiDefinition) throws APIManagementException {
+
         SwaggerVersion swaggerVersion = getSwaggerVersion(apiDefinition);
 
         if (swaggerVersion == SwaggerVersion.SWAGGER) {
@@ -198,6 +201,18 @@ public class OASParserUtil {
         }
 
         throw new APIManagementException("Invalid OAS definition provided.");
+    }
+
+    public static String generateExamples(String apiDefinition) throws APIManagementException {
+        SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
+
+        if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
+            return oas3Parser.generateExample(apiDefinition);
+        } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) {
+            return oas2Parser.generateExample(apiDefinition);
+        } else {
+            throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
+        }
     }
 
     public static String updateAPIProductSwaggerOperations(Map<API, List<APIProductResource>> apiToProductResourceMapping,
@@ -1105,20 +1120,78 @@ public class OASParserUtil {
     }
 
     /**
-     * Get Application level security
-     * @param security string
+     * Get Application level security types
+     * @param security list of security types
      * @return List of api security
      */
-    public static List<String> getAPISecurity(String security) {
+    private static List<String> getAPISecurity(List<String> security) {
         List<String> apiSecurityList = new ArrayList<>();
-        if (security != null) {
-            String[] securityList = security.split(",");
-            for (String securityType : securityList) {
-                if (APIConstants.APPLICATION_LEVEL_SECURITY.contains(securityType)) {
-                    apiSecurityList.add(securityType);
-                }
+        for (String securityType : security) {
+            if (APIConstants.APPLICATION_LEVEL_SECURITY.contains(securityType)) {
+                apiSecurityList.add(securityType);
             }
         }
         return apiSecurityList;
+    }
+
+    /**
+     * generate app security information for OAS definition
+     *
+     * @param security          application security
+     * @return JsonNode
+     */
+     static JsonNode getAppSecurity(String security) {
+         List<String> appSecurityList = new ArrayList<>();
+         ObjectNode endpointResult = objectMapper.createObjectNode();
+         boolean appSecurityOptional = false;
+         if (security != null) {
+             List<String> securityList = Arrays.asList(security.split(","));
+             appSecurityList = getAPISecurity(securityList);
+             appSecurityOptional = !securityList.contains(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+         }
+        ArrayNode appSecurityTypes = objectMapper.valueToTree(appSecurityList);
+        endpointResult.set(APIConstants.WSO2_APP_SECURITY_TYPES, appSecurityTypes);
+        endpointResult.put(APIConstants.OPTIONAL, appSecurityOptional);
+        return endpointResult;
+    }
+
+    /**
+     * generate response cache configuration for OAS definition.
+     *
+     * @param responseCache     response cache Enabled/Disabled
+     * @param cacheTimeout      cache timeout in seconds
+     * @return JsonNode
+     */
+     static JsonNode getResponseCacheConfig(String responseCache, int cacheTimeout) {
+         ObjectNode responseCacheConfig = objectMapper.createObjectNode();
+         boolean enabled = APIConstants.ENABLED.equalsIgnoreCase(responseCache);
+         responseCacheConfig.put(APIConstants.RESPONSE_CACHING_ENABLED, enabled);
+         responseCacheConfig.put(APIConstants.RESPONSE_CACHING_TIMEOUT, cacheTimeout);
+         return responseCacheConfig;
+    }
+
+    /**
+     * generate app security information for OAS definition
+     *
+     * @param security          application security
+     * @param transport          transport security
+     * @return JsonNode
+     */
+     static JsonNode getTransportSecurity(String security, String transport) {
+         ObjectNode endpointResult = objectMapper.createObjectNode();
+         if (transport != null) {
+             List<String> transportTypes = Arrays.asList(transport.split(","));
+             endpointResult.put(Constants.TRANSPORT_HTTP, transportTypes.contains(Constants.TRANSPORT_HTTP));
+             endpointResult.put(Constants.TRANSPORT_HTTPS, transportTypes.contains(Constants.TRANSPORT_HTTPS));
+         }
+         if (security != null) {
+             List<String> securityList = Arrays.asList(security.split(","));
+             if (securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                 String mutualSSLOptional = !securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY) ?
+                         APIConstants.OPTIONAL : APIConstants.MANDATORY;
+                 endpointResult.put(APIConstants.API_SECURITY_MUTUAL_SSL, mutualSSLOptional);
+             }
+         }
+        return endpointResult;
     }
 }

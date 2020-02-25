@@ -41,6 +41,7 @@ import OperationGovernance from './operationComponents/OperationGovernance';
 import AWSLambdaSettings from './operationComponents/AWSLambdaSettings';
 import Parameters from './operationComponents/Parameters';
 import SOAPToRESTListing from './operationComponents/SOAPToREST/SOAPToRESTListing';
+import { getOperationScopes } from '../operationUtils';
 
 /**
  *
@@ -178,9 +179,9 @@ function Operation(props) {
                                 </Typography>
                             </Typography>
                         </Grid>
-                        {Boolean(isUsedInAPIProduct) && (
-                            <Grid item md={4}>
-                                <Box display='flex'>
+                        {(isUsedInAPIProduct) ? (
+                            <Grid item md={3}>
+                                <Box display='flex' justifyContent='center'>
                                     <ReportProblemOutlinedIcon fontSize='small' />
                                     <Box display='flex' ml={1} mt={1 / 4} fontSize='caption.fontSize'>
                                         This operation is used in
@@ -191,9 +192,23 @@ API product(s)
                                     </Box>
                                 </Box>
                             </Grid>
+                        ) : (
+                            <Grid item md={3} />
                         )}
+                        <Grid item md={2}>
+                            <Typography
+                                display='inline'
+                                style={{ margin: '0px 30px' }}
+                                variant='caption'
+                                gutterBottom
+                            >
+                                <b>{ getOperationScopes(operation, spec)[0] != null && 'Scope : ' }</b>
+                                { getOperationScopes(operation, spec)[0] != null
+                                    && getOperationScopes(operation, spec)[0] }
+                            </Typography>
+                        </Grid>
                         {!(disableDelete || markAsDelete) && (
-                            <Grid item md={1}>
+                            <Grid item md={1} justify='flex-end' container>
                                 <Tooltip
                                     title={
                                         isUsedInAPIProduct

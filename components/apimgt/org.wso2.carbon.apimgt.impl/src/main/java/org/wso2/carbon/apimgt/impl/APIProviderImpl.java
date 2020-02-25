@@ -5927,20 +5927,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException {
 
-        if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType)) {
-            conditionValue = tenantDomain + ":" + conditionValue.trim();
-        }
         if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
             conditionValue = MultitenantUtils.getTenantAwareUsername(conditionValue);
             conditionValue = conditionValue + "@" + tenantDomain;
         }
-        String uuid = apiMgtDAO.addBlockConditions(conditionType, conditionValue, tenantDomain);
+        BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
+        blockConditionsDTO.setConditionType(conditionType);
+        blockConditionsDTO.setConditionValue(conditionValue);
+        blockConditionsDTO.setTenantDomain(tenantDomain);
+        blockConditionsDTO.setEnabled(true);
+        blockConditionsDTO.setUUID(UUID.randomUUID().toString());
+        BlockConditionsDTO createdBlockConditionsDto = apiMgtDAO.addBlockConditions(blockConditionsDTO);
 
-        if (uuid != null) {
-            publishBlockingEvent(conditionType, conditionValue, "true");
+        if (createdBlockConditionsDto != null) {
+            publishBlockingEvent(createdBlockConditionsDto, "true");
         }
 
-        return uuid;
+        return createdBlockConditionsDto.getUUID();
     }
 
     @Override
@@ -5978,8 +5981,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
             blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
             blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
+            blockCondition.setConditionValue(blockingConditionValue);
         }
-        publishBlockingEvent(blockingConditionType, blockingConditionValue, "delete");
+        publishBlockingEvent(blockCondition, "delete");
     }
 
     @Override
@@ -6051,22 +6055,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
                 blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
                 blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
+                blockCondition.setConditionValue(blockingConditionValue);
             }
 
-            publishBlockingEvent(blockingConditionType, blockingConditionValue, Boolean.toString(blockCondition
-                    .isEnabled()));
+            publishBlockingEvent(blockCondition, Boolean.toString(blockCondition.isEnabled()));
         }
     }
 
     /**
      * Publishes the changes on blocking conditions.
-     *
-     * @param conditionType  -
-     * @param conditionValue
+     * @param blockConditionsDTO Blockcondition Dto event
      */
-    private void publishBlockingEvent(String conditionType, String conditionValue, String state) {
+    private void publishBlockingEvent(BlockConditionsDTO blockConditionsDTO, String state) {
         OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
-        Object[] objects = new Object[]{conditionType,conditionValue,state,tenantDomain};
+
+        Object[] objects = new Object[]{blockConditionsDTO.getConditionId(), blockConditionsDTO.getConditionType(),
+                blockConditionsDTO.getConditionValue(),state, tenantDomain};
         Event blockingMessage = new Event(APIConstants.BLOCKING_CONDITIONS_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
         ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
@@ -7716,6 +7720,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         JSONObject securityAuditConfig = APIUtil.getSecurityAuditAttributesFromRegistry(tenantId);
         if (securityAuditConfig != null) {
             if ((securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) != null) &&
+                    securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) instanceof Boolean &&
                     (Boolean) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL)) {
                 String apiToken = (String) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_API_TOKEN);
                 String collectionId = (String) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID);

@@ -120,16 +120,18 @@ export default class Application extends Resource {
      * @param {string[]} supportedGrantTypes Grant types supported
      * @param  {string} callbackUrl callback url
      * @param  {string} tokenType Token type either `OAUTH` or `JWT`
+     * @param {string} additionalProperties additional properties that needed for application.
      * @returns {promise} Set the generated token into current instance and return tokenObject
      * received as Promise object
      */
-    generateKeys(keyType, supportedGrantTypes, callbackUrl, validityTime) {
+    generateKeys(keyType, supportedGrantTypes, callbackUrl, validityTime, additionalProperties) {
         const promisedKeys = this.client.then((client) => {
             const requestContent = {
                 keyType, /* TODO: need to support dynamic key types ~tmkb */
                 grantTypesToBeSupported: supportedGrantTypes,
                 callbackUrl,
                 validityTime,
+                additionalProperties
             };
             const payload = { applicationId: this.id, body: requestContent };
             return client.apis['Application Keys'].post_applications__applicationId__generate_keys(payload);
@@ -164,9 +166,10 @@ export default class Application extends Resource {
      * @param  {string} callbackUrl callback url
      * @param  {String} consumerKey Consumer key of application
      * @param  {String} consumerSecret Consumer secret of application
+     * @param  {String} additionalProperties Additional properties for the oauth application
      * @returns {promise} Update the callbackURL and/or supportedGrantTypes
      */
-    updateKeys(tokenType, keyType, supportedGrantTypes, callbackUrl, consumerKey, consumerSecret) {
+    updateKeys(tokenType, keyType, supportedGrantTypes, callbackUrl, consumerKey, consumerSecret, additionalProperties) {
         const promisedPut = this.client.then((client) => {
             const requestContent = {
                 consumerKey,
@@ -175,6 +178,7 @@ export default class Application extends Resource {
                 callbackUrl,
                 keyType,
                 tokenType,
+                additionalProperties
             };
             const payload = { applicationId: this.id, keyType, body: requestContent };
             return client.apis['Application Keys'].put_applications__applicationId__keys__keyType_(payload);

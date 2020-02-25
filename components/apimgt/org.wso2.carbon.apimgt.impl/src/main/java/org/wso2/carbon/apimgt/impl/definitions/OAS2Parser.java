@@ -24,9 +24,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.swagger.inflector.examples.ExampleBuilder;
+import io.swagger.inflector.examples.models.Example;
+import io.swagger.inflector.processors.JsonNodeExampleSerializer;
 import io.swagger.models.Contact;
 import io.swagger.models.HttpMethod;
 import io.swagger.models.Info;
+import io.swagger.models.Model;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.RefModel;
@@ -44,13 +49,13 @@ import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -63,12 +68,12 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -76,12 +81,134 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_APIM_RESTAPI_SECURITY;
+
 /**
  * Models API definition using OAS (swagger 2.0) parser
  */
 public class OAS2Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS2Parser.class);
     private static final String SWAGGER_SECURITY_SCHEMA_KEY = "default";
+
+    /**
+     * This method  generates Sample/Mock payloads for Swagger (2.0) definitions
+     *
+     * @param swaggerDef Swagger Definition
+     * @return
+     */
+    @Override
+    public String generateExample(String swaggerDef) {
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(swaggerDef);
+        Swagger swagger = parseAttemptForV2.getSwagger();
+        for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
+            String path = entry.getKey();
+            int responseCode = 0;
+            int minResponseCode = 0;
+            Map<String, Model> definitions = swagger.getDefinitions();
+            ArrayList<Integer> responseCodes = new ArrayList<Integer>();
+            List<Operation> operations = swagger.getPaths().get(path).getOperations();
+            for (Operation op : operations) {
+                StringBuilder genCode = new StringBuilder();
+                StringBuilder responseSection = new StringBuilder();
+                for (String responseEntry : op.getResponses().keySet()) {
+                    if (!responseEntry.equals("default")) {
+                        responseCode = Integer.parseInt(responseEntry);
+                        responseCodes.add(responseCode);
+                        minResponseCode = Collections.min(responseCodes);
+                    }
+                    if (op.getResponses().get(responseEntry).getResponseSchema() != null) {
+                        Model model = op.getResponses().get(responseEntry).getResponseSchema();
+                        String schemaExample = getSchemaExample(model, definitions, new HashSet<String>());
+                        genCode.append(getGeneratedResponseVar(responseEntry, schemaExample, "json"));
+                        if (responseCode == minResponseCode) {
+                            responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
+                        }
+                    }
+                    if (op.getResponses().get(responseEntry).getExamples() != null) {
+                        Object applicationJson = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_JSON_MEDIA_TYPE);
+                        Object applicationXml = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_XML_MEDIA_TYPE);
+                        if (applicationJson != null) {
+                            String jsonExample = Json.pretty(applicationJson);
+                            genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
+                            if (responseCode == minResponseCode) {
+                                responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
+                                if (applicationXml != null) {
+                                    responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
+                                }
+                            }
+                        }
+                        if (applicationXml != null) {
+                            String xmlExample = applicationXml.toString();
+                            genCode.append(getGeneratedResponseVar(responseEntry, xmlExample, "xml"));
+                            if (responseCode == minResponseCode) {
+                                if (applicationJson == null) {
+                                    responseSection.append(getGeneratedSetResponse(responseEntry, "xml"));
+                                }
+                            }
+                        }
+                        if (applicationJson==null && applicationXml==null){
+                            setDefaultGeneratedResponse(genCode);
+                        }
+                    }
+                }
+                genCode.append(responseSection);
+                op.setVendorExtension("x-mediation-script", genCode);
+            }
+        }
+        return Json.pretty(swagger);
+    }
+
+    /**
+     * This method  generates Sample/Mock payloads of Schema Examples for operations in the swagger definition
+     * @param model
+     * @param definitions
+     * @return
+     */
+    private String getSchemaExample(Model model, Map<String, Model> definitions, HashSet<String> strings){
+        Example example = ExampleBuilder.fromModel("Model", model, definitions, new HashSet<String>());
+        SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
+        Json.mapper().registerModule(simpleModule);
+        return Json.pretty(example);
+    }
+
+    /**
+     *Sets default script
+     *
+     * @param genCode String builder
+     */
+    private void setDefaultGeneratedResponse(StringBuilder genCode) {
+        genCode.append("/* mc.setProperty('CONTENT_TYPE', 'application/json');\n\t" +
+                "mc.setPayloadJSON('{ \"data\" : \"sample JSON\"}');*/\n" +
+                "/*Uncomment the above comment block to send a sample response.*/");
+    }
+
+    /**
+     * Generates string for variables in Payload Generation
+     *
+     * @param responseCode response Entry Code
+     * @param example generated Example Json/Xml
+     * @param type  mediaType (Json/Xml)
+     * @return generatedString
+     */
+    private String getGeneratedResponseVar(String responseCode, String example, String type){
+        return "\nvar response" + responseCode + type + " = "+ example+"\n\n";
+    }
+
+    /**
+     * Generates string for methods in Payload Generation
+     *
+     * @param responseCode response Entry Code
+     * @param type mediaType (Json/Xml)
+     * @return manualCode
+     */
+    private String getGeneratedSetResponse(String responseCode, String type) {
+        return "mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
+                "mc.setPayloadJSON(response" + responseCode + type + ");";
+    }
 
     /**
      * This method returns URI templates according to the given swagger file
@@ -531,11 +658,13 @@ public class OAS2Parser extends APIDefinition {
             swagger.setVendorExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandEndpointObj);
         }
         swagger.setVendorExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());
-        if (api.getTransports() != null) {
-            swagger.setVendorExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
-        }
-        swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_API_SECURITY,
-                OASParserUtil.getAPISecurity(api.getApiSecurity()));
+        swagger.setVendorExtension(APIConstants.X_WSO2_TRANSPORTS,
+                OASParserUtil.getTransportSecurity(api.getApiSecurity(), api.getTransports()));
+        swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_APP_SECURITY,
+                OASParserUtil.getAppSecurity(api.getApiSecurity()));
+        swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_RESPONSE_CACHE,
+                OASParserUtil.getResponseCacheConfig(api.getResponseCache(), api.getCacheTimeout()));
+
         return getSwaggerJsonString(swagger);
     }
 
@@ -769,14 +898,26 @@ public class OAS2Parser extends APIDefinition {
     private String getOAuth2SecuritySchemeKey(Swagger swagger) {
         final String oauth2Type = new OAuth2Definition().getType();
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        boolean hasDefaultKey = false;
+        boolean hasRESTAPIScopeKey = false;
         if (securityDefinitions != null) {
             for (Map.Entry<String, SecuritySchemeDefinition> definitionEntry : securityDefinitions.entrySet()) {
                 if (oauth2Type.equals(definitionEntry.getValue().getType())) {
-                    return definitionEntry.getKey();
+                    //sets hasDefaultKey to true if at least once SWAGGER_APIM_DEFAULT_SECURITY becomes the key
+                    hasDefaultKey = hasDefaultKey || SWAGGER_APIM_DEFAULT_SECURITY.equals(definitionEntry.getKey());
+                    //sets hasRESTAPIScopeKey to true if at least once SWAGGER_APIM_RESTAPI_SECURITY becomes the key
+                    hasRESTAPIScopeKey = hasRESTAPIScopeKey
+                            || SWAGGER_APIM_RESTAPI_SECURITY.equals(definitionEntry.getKey());
                 }
             }
         }
-        return null;
+        if (hasDefaultKey) {
+            return SWAGGER_APIM_DEFAULT_SECURITY;
+        } else if (hasRESTAPIScopeKey) {
+            return SWAGGER_APIM_RESTAPI_SECURITY;
+        } else {
+            return null;
+        }
     }
 
     /**

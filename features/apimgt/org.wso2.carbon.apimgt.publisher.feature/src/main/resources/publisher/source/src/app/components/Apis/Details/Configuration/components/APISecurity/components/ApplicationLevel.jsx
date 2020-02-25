@@ -114,9 +114,7 @@ export default function ApplicationLevel(props) {
                                             + ' that will be used to secure this API. An API can be secured '
                                             + 'with either OAuth2/Basic/ApiKey or it can be secured with all of them. '
                                             + 'If OAuth2 option is selected, relevant API will require a valid '
-                                            + 'OAuth2 token for successful invocation. If Mutual SSL option is '
-                                            + 'selected, a trusted client certificate should be presented to access'
-                                            + 'the API'
+                                            + 'OAuth2 token for successful invocation.'
                                         }
                                     />
                                 )}

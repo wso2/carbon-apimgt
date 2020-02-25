@@ -102,6 +102,27 @@ public class CacheProvider {
     }
 
     /**
+     * @return Gateway API Key cache
+     */
+    public static Cache getGatewayApiKeyCache() {
+        return getCache(APIConstants.GATEWAY_API_KEY_CACHE_NAME);
+    }
+
+    /**
+     * @return Gateway API Key data cache
+     */
+    public static Cache getGatewayApiKeyDataCache() {
+        return getCache(APIConstants.GATEWAY_API_KEY_DATA_CACHE_NAME);
+    }
+
+    /**
+     * @return Gateway API Key invalid data cache
+     */
+    public static Cache getInvalidGatewayApiKeyCache() {
+        return getCache(APIConstants.GATEWAY_INVALID_API_KEY_CACHE_NAME);
+    }
+
+    /**
      * @return APIManagerConfiguration
      */
     private static APIManagerConfiguration getApiManagerConfiguration() {
@@ -154,6 +175,57 @@ public class CacheProvider {
                     getDefaultCacheTimeout();
             return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_KEY_CACHE_NAME,
                     defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
+     * Create and return gateway key cache for API Keys
+     */
+    public static Cache createGatewayApiKeyCache() {
+
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (apimGWCacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_API_KEY_CACHE_NAME,
+                    Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
+        } else {
+            long defaultCacheTimeout =
+                    getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_API_KEY_CACHE_NAME,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
+     * Create and return gateway key data cache for API Keys
+     */
+    public static Cache createGatewayApiKeyDataCache() {
+
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (apimGWCacheExpiry != null) {
+            return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
+                    APIConstants.GATEWAY_API_KEY_DATA_CACHE_NAME, Long.parseLong(apimGWCacheExpiry),
+                    Long.parseLong(apimGWCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
+                    APIConstants.GATEWAY_API_KEY_DATA_CACHE_NAME, defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
+     * Create and return gateway invalid key cache for API Keys
+     */
+    public static Cache createInvalidGatewayApiKeyCache() {
+
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (apimGWCacheExpiry != null) {
+            return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
+                    APIConstants.GATEWAY_INVALID_API_KEY_CACHE_NAME, Long.parseLong(apimGWCacheExpiry),
+                    Long.parseLong(apimGWCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
+                    APIConstants.GATEWAY_INVALID_API_KEY_CACHE_NAME, defaultCacheTimeout, defaultCacheTimeout);
         }
     }
 
@@ -323,5 +395,11 @@ public class CacheProvider {
                 createRESTAPIInvalidTokenCache().getName());
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
                 getGatewayJWTTokenCache().getName());
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
+                getGatewayApiKeyCache().getName());
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
+                getGatewayApiKeyDataCache().getName());
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
+                getInvalidGatewayApiKeyCache().getName());
     }
 }

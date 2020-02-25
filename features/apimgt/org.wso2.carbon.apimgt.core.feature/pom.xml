@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.6.38-SNAPSHOT</version>
+        <version>6.6.93-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -153,6 +153,7 @@
                                     </directory>
                                     <includes>
                                         <include>tenant/tenant-conf.json</include>
+                                        <include>workflowextensions/default-workflow-extensions.xml</include>
                                     </includes>
                                 </resource>
                                 <resource>

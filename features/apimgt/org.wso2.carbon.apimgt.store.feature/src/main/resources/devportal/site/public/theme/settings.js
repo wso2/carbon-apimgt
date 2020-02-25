@@ -8,6 +8,7 @@ const Settings = {
         origin: {
             host: 'localhost',
         },
+        subscriptionLimit: 1000,
     },
     grantTypes: {
         authorization_code: 'Code',

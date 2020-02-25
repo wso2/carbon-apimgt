@@ -75,7 +75,7 @@ public class PermissionBasedScopeIssuerTestCase {
         PowerMockito.when(APIUtil.getTenantRESTAPIScopesConfig(Mockito.anyString())).thenReturn(new JSONObject());
         Map<String, String> scopes = new HashMap<String, String>();
         scopes.put("default", "default");
-        PowerMockito.when(APIUtil.getRESTAPIScopesFromConfig(Mockito.any())).thenReturn(scopes);
+        PowerMockito.when(APIUtil.getRESTAPIScopesFromConfig(Mockito.any(), Mockito.any())).thenReturn(scopes);
         Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
@@ -144,9 +144,14 @@ public class PermissionBasedScopeIssuerTestCase {
         PermissionBasedScopeIssuer permissionBasedScopeIssuer =
                 new PermissionBasedScopesIssuerWrapper(cacheManager, realmService, apiMgtDAO);
 
+        AuthenticatedUser authenticatedUser = new AuthenticatedUser();
+        authenticatedUser.setTenantDomain("carbon.super");
+        authenticatedUser.setUserName("admin");
+        authenticatedUser.setUserStoreDomain("admin.user.store.domain");
         OAuth2AccessTokenReqDTO tokenDTO = new OAuth2AccessTokenReqDTO();
         tokenDTO.setClientId("clientId");
         OAuthTokenReqMessageContext msgContext = new OAuthTokenReqMessageContext(tokenDTO);
+        msgContext.setAuthorizedUser(authenticatedUser);
         msgContext.setScope(new String[]{"scope 1", "scope 2"});
         ArrayList<String> whiteListedScopes = new ArrayList<String>();
         whiteListedScopes.add("scope 3");

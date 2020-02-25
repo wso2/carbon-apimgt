@@ -713,6 +713,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     JsonObject jsonParams = new JsonObject();
                     jsonParams.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);
                     jsonParams.addProperty(APIConstants.JSON_USERNAME, username);
+                    jsonParams.addProperty(APIConstants.JSON_ADDITIONAL_PROPERTIES, body.getAdditionalProperties());
                     OAuthApplicationInfo updatedData = apiConsumer.updateAuthClient(username, application.getName(),
                             keyType, body.getCallbackUrl(), null, null, null, body.getGroupId(),
                             new Gson().toJson(jsonParams));
@@ -726,6 +727,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     applicationKeyDTO.setConsumerKey(updatedData.getClientId());
                     applicationKeyDTO.setConsumerSecret(updatedData.getClientSecret());
                     applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(keyType));
+                    Object additionalProperties = updatedData.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+                    if (additionalProperties != null) {
+                        applicationKeyDTO.setAdditionalProperties((String) additionalProperties);
+                    }
                     return Response.ok().entity(applicationKeyDTO).build();
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);

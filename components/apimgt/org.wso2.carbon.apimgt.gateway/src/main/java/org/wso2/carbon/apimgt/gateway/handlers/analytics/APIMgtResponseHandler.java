@@ -26,6 +26,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -242,7 +243,8 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             stream.setCorrelationID(correlationID);
             stream.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
             stream.setLabel(APIMgtGatewayConstants.SYNAPDE_GW_LABEL);
-            
+            Map<String, String> properties = Utils.getCustomAnalyticsProperties(mc);
+            stream.setProperties(properties);
             if (log.isDebugEnabled()) {
                 log.debug("Publishing success API invocation event from gateway to analytics for: "
                         + mc.getProperty(APIMgtGatewayConstants.CONTEXT) + " with ID: " +

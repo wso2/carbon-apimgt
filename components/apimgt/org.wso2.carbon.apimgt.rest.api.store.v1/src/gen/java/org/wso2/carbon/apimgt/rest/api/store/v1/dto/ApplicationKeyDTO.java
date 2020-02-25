@@ -59,6 +59,7 @@ public enum KeyTypeEnum {
     private KeyTypeEnum keyType = null;
     private String groupId = null;
     private ApplicationTokenDTO token = null;
+    private String additionalProperties = null;
 
   /**
    * Consumer key of the application
@@ -203,6 +204,24 @@ public enum KeyTypeEnum {
     this.token = token;
   }
 
+  /**
+   * additionalProperties (if any).
+   **/
+  public ApplicationKeyDTO additionalProperties(String additionalProperties) {
+    this.additionalProperties = additionalProperties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "additionalProperties (if any).")
+  @JsonProperty("additionalProperties")
+  public String getAdditionalProperties() {
+    return additionalProperties;
+  }
+  public void setAdditionalProperties(String additionalProperties) {
+    this.additionalProperties = additionalProperties;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -220,12 +239,13 @@ public enum KeyTypeEnum {
         Objects.equals(keyState, applicationKey.keyState) &&
         Objects.equals(keyType, applicationKey.keyType) &&
         Objects.equals(groupId, applicationKey.groupId) &&
-        Objects.equals(token, applicationKey.token);
+        Objects.equals(token, applicationKey.token) &&
+        Objects.equals(additionalProperties, applicationKey.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(consumerKey, consumerSecret, supportedGrantTypes, callbackUrl, keyState, keyType, groupId, token);
+    return Objects.hash(consumerKey, consumerSecret, supportedGrantTypes, callbackUrl, keyState, keyType, groupId, token, additionalProperties);
   }
 
   @Override
@@ -241,6 +261,7 @@ public enum KeyTypeEnum {
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
     sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");
     sb.append("    token: ").append(toIndentedString(token)).append("\n");
+    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -21,6 +21,7 @@ import { Link } from 'react-router-dom';
 import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import merge from 'lodash.merge';
 import queryString from 'query-string';
 import API from 'AppData/api';
 import { withTheme } from '@material-ui/styles';
@@ -31,6 +32,7 @@ import Loading from 'AppComponents/Base/Loading/Loading';
 import Alert from 'AppComponents/Shared/Alert';
 import Icon from '@material-ui/core/Icon';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import DefaultConfigurations from '../../../../defaultTheme';
 import ImageGenerator from './ImageGenerator';
 import ApiThumb from './ApiThumb';
 import DocThumb from './DocThumb';
@@ -156,7 +158,8 @@ class ApiTableView extends React.Component {
                 },
             };
         }
-        muiTheme = Object.assign(muiTheme, themeAdditions, Configurations.themes.light);
+        const systemTheme = merge(DefaultConfigurations, Configurations);
+        muiTheme = Object.assign(muiTheme, themeAdditions, systemTheme);
         return createMuiTheme(muiTheme);
     };
 

@@ -5,7 +5,7 @@ let rawdata = fs.readFileSync('../en.json');
 
 translate.engine = 'google';
 translate.key = '<your-api-key>'; // Provide your google api key
-const lanuageCode = 'fr'; // lanuage code without region code
+const lanuageCode = 'si'; // lanuage code without region code
 
 let langJSON = JSON.parse(rawdata);
 

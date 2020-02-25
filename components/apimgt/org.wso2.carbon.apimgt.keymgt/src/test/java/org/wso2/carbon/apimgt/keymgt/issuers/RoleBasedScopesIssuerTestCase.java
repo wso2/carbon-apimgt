@@ -110,7 +110,7 @@ public class RoleBasedScopesIssuerTestCase {
         PowerMockito.when(APIUtil.getTenantRESTAPIScopesConfig(Mockito.anyString())).thenReturn(new JSONObject());
         Map<String, String> scopes = new HashMap<String, String>();
         scopes.put("default", "default");
-        PowerMockito.when(APIUtil.getRESTAPIScopesFromConfig(Mockito.any())).thenReturn(scopes);
+        PowerMockito.when(APIUtil.getRESTAPIScopesFromConfig(Mockito.any(), Mockito.any())).thenReturn(scopes);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
@@ -128,6 +128,9 @@ public class RoleBasedScopesIssuerTestCase {
         authenticatedUser.setUserStoreDomain("admin.user.store.domain");
         tokReqMsgCtx.setAuthorizedUser(authenticatedUser);
 
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        Map<String, String> appScopes = new HashMap<String, String>();
+        Mockito.when(apiMgtDAO.getScopeRolesOfApplication("clientId")).thenReturn(appScopes);
         RoleBasedScopesIssuer roleBasedScopesIssuer = new RoleBasedScopesIssuerWrapper(cacheManager, realmService
                 , apiMgtDAO);
         ArrayList<String> whiteListedScopes = new ArrayList<String>();
@@ -387,7 +390,9 @@ public class RoleBasedScopesIssuerTestCase {
         whiteListedScopes.add("scope 3");
         whiteListedScopes.add("scope 4");
 
-        Assert.assertNull(roleBasedScopesIssuer.getScopes(tokReqMsgCtx, whiteListedScopes));
+        List<String> defaultScopes = roleBasedScopesIssuer.getScopes(tokReqMsgCtx, whiteListedScopes);
+        Assert.assertEquals(1, defaultScopes.size());
+        Assert.assertEquals("default", defaultScopes.get(0));
     }
 
     @Test
@@ -534,7 +539,7 @@ public class RoleBasedScopesIssuerTestCase {
         PowerMockito.when(APIUtil.getTenantRESTAPIScopesConfig(Mockito.anyString())).thenReturn(new JSONObject());
         Map<String, String> scopes = new HashMap<String, String>();
         scopes.put("default", "default");
-        PowerMockito.when(APIUtil.getRESTAPIScopesFromConfig(Mockito.any())).thenReturn(scopes);
+        PowerMockito.when(APIUtil.getRESTAPIScopesFromConfig(Mockito.any(), Mockito.any())).thenReturn(scopes);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);

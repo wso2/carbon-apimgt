@@ -48,6 +48,29 @@ class Utils {
         return cookie;
     }
 
+     /**
+     * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
+     * @param {String} name - Name of the cookie which need to be retrieved
+     * @returns {String|null} - If found a cookie with given name , return its value,Else null value is returned
+     */
+    static getCookieWithoutEnvironment(name) {
+        const pairs = document.cookie.split(';');
+        let cookie = null;
+        for (let pair of pairs) {
+            pair = pair.split('=');
+            const cookieName = pair[0].trim();
+            if (pair[1] !== 'undefined') {
+                const value = encodeURIComponent(pair[1]);
+                if (cookieName === name) {
+                    cookie = value;
+                    break;
+                }
+            }
+        }
+        return cookie;
+    }
+
+
     /**
      * Delete a browser cookie given its name
      * @param {String} name : Name of the cookie which need to be deleted

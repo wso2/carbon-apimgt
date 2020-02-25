@@ -203,15 +203,15 @@
         <Streams>
             <Request>
                 <Name>org.wso2.apimgt.statistics.request</Name>
-                <Version>3.0.0</Version>
+                <Version>3.1.0</Version>
             </Request>
             <Fault>
                 <Name>org.wso2.apimgt.statistics.fault</Name>
-                <Version>3.0.0</Version>
+                <Version>3.1.0</Version>
             </Fault>
             <Throttle>
                 <Name>org.wso2.apimgt.statistics.throttle</Name>
-                <Version>3.0.0</Version>
+                <Version>3.1.0</Version>
             </Throttle>
             <Workflow>
                 <Name>org.wso2.apimgt.statistics.workflow</Name>
@@ -760,5 +760,11 @@
     <JWTAuthentication>
         <EnableSubscriptionValidationViaKeyManager>false</EnableSubscriptionValidationViaKeyManager>
     </JWTAuthentication>
-
+    <CertificateReLoaderConfiguration>
+        <Period>10</Period>
+    </CertificateReLoaderConfiguration>
+    <MutualSSL>
+        <ClientCertificateHeader>X-WSO2-CLIENT-CERTIFICATE</ClientCertificateHeader>
+        <EnableClientCertificateValidation>true</EnableClientCertificateValidation>
+    </MutualSSL>
 </APIManager>

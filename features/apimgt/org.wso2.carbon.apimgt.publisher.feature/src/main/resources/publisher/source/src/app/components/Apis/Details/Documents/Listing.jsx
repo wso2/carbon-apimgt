@@ -419,10 +419,6 @@ class Listing extends React.Component {
             },
         ];
 
-        const descriptionId = (api.apiType === API.CONSTS.APIProduct
-            ? 'Apis.Details.Documents.Listing.APIProduct.add.new.msg.content'
-            : 'Apis.Details.Documents.Listing.add.new.msg.content');
-
         return (
             <React.Fragment>
                 {docsToDelete && (
@@ -476,9 +472,11 @@ class Listing extends React.Component {
                                         defaultMessage='Create Documents'
                                     />
                                 </Typography>
+                                {api.apiType === API.CONSTS.APIProduct
+                                    ? 
                                 <Typography component='p' className={classes.content}>
                                     <FormattedMessage
-                                        id={descriptionId}
+                                        id='Apis.Details.Documents.Listing.APIProduct.add.new.msg.content'
                                         defaultMessage={
                                             'You can add different types of documents to an API.' +
                                             ' Proper documentation helps API publishers to market their ' +
@@ -486,6 +484,18 @@ class Listing extends React.Component {
                                         }
                                     />
                                 </Typography>
+                                    : 
+                                <Typography component='p' className={classes.content}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Documents.Listing.add.new.msg.content'
+                                        defaultMessage={
+                                            'You can add different types of documents to an API.' +
+                                            ' Proper documentation helps API publishers to market their ' +
+                                            ' APIs better and sustain competition. '
+                                        }
+                                    />
+                                </Typography>
+                                }
                                 <div className={classes.actions}>
                                     <Link to={!isRestricted(['apim:api_create', 'apim:api_publish'], api) && url}>
                                         <Button

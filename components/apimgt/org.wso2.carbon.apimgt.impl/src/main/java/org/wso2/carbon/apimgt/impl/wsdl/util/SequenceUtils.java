@@ -69,9 +69,12 @@ public class SequenceUtils {
      * @throws APIManagementException throws errors on if the resource persistence gets unsuccessful
      */
     public static void saveRestToSoapConvertedSequence(UserRegistry registry, String sequence, String method,
-            String resourcePath) throws APIManagementException {
+            String resourcePath, String apiResourceName) throws APIManagementException {
         try {
             Resource regResource;
+            if (apiResourceName.startsWith(SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR)) {
+                apiResourceName = apiResourceName.substring(1);
+            }
             if (!registry.resourceExists(resourcePath)) {
                 regResource = registry.newResource();
             } else {
@@ -79,6 +82,10 @@ public class SequenceUtils {
             }
             regResource.setContent(sequence);
             regResource.addProperty(SOAPToRESTConstants.METHOD, method);
+            if (regResource.getProperty(SOAPToRESTConstants.Template.RESOURCE_PATH) != null) {
+                regResource.removeProperty(SOAPToRESTConstants.Template.RESOURCE_PATH);
+            }
+            regResource.addProperty(SOAPToRESTConstants.Template.RESOURCE_PATH, apiResourceName);
             regResource.setMediaType("text/xml");
             registry.put(resourcePath, regResource);
         } catch (RegistryException e) {
@@ -361,7 +368,13 @@ public class SequenceUtils {
                 for (String path : resources) {
                     Resource resource = registry.get(path);
                     String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                    String resourceName = ((ResourceImpl) resource).getName();
+                    String resourceName;
+                    if (resource.getProperty(SOAPToRESTConstants.Template.RESOURCE_PATH) != null) {
+                        resourceName = resource.getProperty(SOAPToRESTConstants.Template.RESOURCE_PATH) + "_"
+                                + resource.getProperty(SOAPToRESTConstants.METHOD);
+                    } else {
+                        resourceName = ((ResourceImpl) resource).getName();
+                    }
                     resourceName = resourceName.replaceAll(SOAPToRESTConstants.SequenceGen.XML_FILE_RESOURCE_PREFIX,
                             SOAPToRESTConstants.EMPTY_STRING);
                     String httpMethod = resource.getProperty(SOAPToRESTConstants.METHOD);
@@ -412,13 +425,19 @@ public class SequenceUtils {
                 for (String path : resources) {
                     Resource resource = registry.get(path);
                     String method = resource.getProperty(SOAPToRESTConstants.METHOD);
-                    String resourceName = ((ResourceImpl) resource).getName();
-                    resourceName = resourceName.replaceAll(SOAPToRESTConstants.SequenceGen.XML_FILE_RESOURCE_PREFIX,
-                            SOAPToRESTConstants.EMPTY_STRING);
-                    resourceName = resourceName
-                            .replaceAll(SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method,
-                                    SOAPToRESTConstants.EMPTY_STRING);
-                    resourceName = SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR + resourceName;
+                    String registryResourceProp = resource.getProperty(SOAPToRESTConstants.Template.RESOURCE_PATH);
+                    String resourceName;
+                    if (registryResourceProp != null) {
+                        resourceName = SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR + registryResourceProp;
+                    } else {
+                        resourceName  = ((ResourceImpl) resource).getName();
+                        resourceName = resourceName.replaceAll(SOAPToRESTConstants.SequenceGen.XML_FILE_RESOURCE_PREFIX,
+                                SOAPToRESTConstants.EMPTY_STRING);
+                        resourceName = resourceName
+                                .replaceAll(SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method,
+                                        SOAPToRESTConstants.EMPTY_STRING);
+                        resourceName = SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR + resourceName;
+                    }
                     String content = RegistryUtils.decodeBytes((byte[]) resource.getContent());
                     JSONObject contentObj = new JSONObject();
                     contentObj.put(method, content);

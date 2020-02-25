@@ -56,7 +56,7 @@ public enum DocTypeEnum {
 @XmlEnum(String.class)
 public enum SourceTypeEnum {
 
-    @XmlEnumValue("INLINE") INLINE(String.valueOf("INLINE")), @XmlEnumValue("URL") URL(String.valueOf("URL")), @XmlEnumValue("FILE") FILE(String.valueOf("FILE"));
+    @XmlEnumValue("INLINE") INLINE(String.valueOf("INLINE")), @XmlEnumValue("URL") URL(String.valueOf("URL")), @XmlEnumValue("FILE") FILE(String.valueOf("FILE")), @XmlEnumValue("MARKDOWN") MARKDOWN(String.valueOf("MARKDOWN"));
 
 
     private String value;

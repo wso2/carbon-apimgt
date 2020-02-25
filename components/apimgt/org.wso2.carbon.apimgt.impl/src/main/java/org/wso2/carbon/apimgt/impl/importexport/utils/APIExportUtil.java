@@ -451,7 +451,7 @@ public class APIExportUtil {
                         //If sequence doesn't exist in 'apimgt/customsequences/{in/out/fault}' directory check in API
                         //specific registry path
                         sequenceDetails = getAPISpecificSequence(api.getId(), sequenceName, direction, registry);
-                        pathToExportedSequence += APIImportExportConstants.CUSTOM_TYPE;
+                        pathToExportedSequence += APIImportExportConstants.CUSTOM_TYPE + File.separator;
                     }
                     writeSequenceToFile(pathToExportedSequence, sequenceDetails, apiIdentifier);
                 }
@@ -531,8 +531,7 @@ public class APIExportUtil {
                     Resource sequence = registry.get(childPath);
                     OMElement seqElement = APIUtil.buildOMElement(sequence.getContentStream());
                     if (sequenceName.equals(seqElement.getAttributeValue(new QName("name")))) {
-                        String sequenceFileName = sequence.getPath().
-                                substring(sequence.getPath().lastIndexOf(RegistryConstants.PATH_SEPARATOR));
+                        String sequenceFileName = sequenceName + APIConstants.XML_EXTENSION;
                         sequenceDetails = new AbstractMap.SimpleEntry<>(sequenceFileName, seqElement);
                         break;
                     }
@@ -717,13 +716,21 @@ public class APIExportUtil {
             throws APIImportExportException {
 
         JSONObject endpointConfig;
-        JSONTokener tokener = new JSONTokener(api.getEndpointConfig());
         List<String> productionEndpoints;
         List<String> sandboxEndpoints;
         Set<String> uniqueEndpointURLs = new HashSet<>();
         List<CertificateDetail> endpointCertificatesDetails = new ArrayList<>();
+        String endpointConfigString = api.getEndpointConfig();
 
+        if (StringUtils.isEmpty(endpointConfigString)) {
+            if(log.isDebugEnabled()) {
+                log.debug("Endpoint Details are empty for API: " + api.getId().getApiName() + StringUtils.SPACE
+                        + APIConstants.API_DATA_VERSION + ": " + api.getId().getVersion());
+            }
+            return;
+        }
         try {
+            JSONTokener tokener = new JSONTokener(endpointConfigString);
             endpointConfig = new JSONObject(tokener);
             productionEndpoints = getEndpointURLs(endpointConfig, APIConstants.API_DATA_PRODUCTION_ENDPOINTS,
                     api.getId().getApiName());

@@ -32,6 +32,7 @@ import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.RelatesTo;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,26 +45,38 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLDecoder;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.cache.Caching;
+import javax.security.cert.CertificateException;
+import javax.security.cert.X509Certificate;
 import javax.xml.namespace.QName;
 
 public class Utils {
     
     private static final Log log = LogFactory.getLog(Utils.class);
-    private static APIManagerConfiguration config= ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-    
+
     public static void sendFault(MessageContext messageContext, int status) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
@@ -326,6 +339,16 @@ public class Utils {
     }
 
     /**
+     * Remove a token from gateway API Key token cache
+     *
+     * @param key signature of JWT token which should be removed from the cache
+     */
+    public static void removeCacheEntryFromGatewayAPiKeyCache(String key) {
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_API_KEY_CACHE_NAME)
+                .remove(key);
+    }
+
+    /**
      * Add a token to the invalid token cache of the given tenant domain
      *
      * @param cachedToken   Access token to be added to the invalid token cache
@@ -345,5 +368,113 @@ public class Utils {
     public static String getCachedTenantDomain(String token) {
         return (String) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                 .getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).get(token);
+    }
+
+    public static String getClientCertificateHeader() {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null) {
+            String clientCertificateHeader =
+                    apiManagerConfiguration.getFirstProperty(APIConstants.MutualSSL.CLIENT_CERTIFICATE_HEADER);
+            if (StringUtils.isNotEmpty(clientCertificateHeader)) {
+                return clientCertificateHeader;
+            }
+        }
+        return APIMgtGatewayConstants.BASE64_ENCODED_CLIENT_CERTIFICATE_HEADER;
+    }
+
+    public static X509Certificate getClientCertificate(org.apache.axis2.context.MessageContext axis2MessageContext)
+            throws APIManagementException {
+
+        Map headers =
+                (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
+        X509Certificate certificateFromMessageContext = null;
+        if (sslCertObject != null) {
+            X509Certificate[] certs = (X509Certificate[]) sslCertObject;
+            certificateFromMessageContext = certs[0];
+        }
+        if (headers.containsKey(Utils.getClientCertificateHeader())) {
+
+            try {
+                if (!isClientCertificateValidationEnabled() || APIUtil
+                        .isCertificateExistsInTrustStore(certificateFromMessageContext)){
+                    String base64EncodedCertificate = (String) headers.get(Utils.getClientCertificateHeader());
+                    if (base64EncodedCertificate != null) {
+                        base64EncodedCertificate = URLDecoder.decode(base64EncodedCertificate).
+                                replaceAll(APIMgtGatewayConstants.BEGIN_CERTIFICATE_STRING, "")
+                                .replaceAll(APIMgtGatewayConstants.END_CERTIFICATE_STRING, "");
+
+                        byte[] bytes = Base64.decodeBase64(base64EncodedCertificate);
+                        try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
+                            X509Certificate x509Certificate = X509Certificate.getInstance(inputStream);
+                            if (APIUtil.isCertificateExistsInTrustStore(x509Certificate)) {
+                                return x509Certificate;
+                            }else{
+                                log.debug("Certificate in Header didn't exist in truststore");
+                                return null;
+                            }
+                        } catch (IOException | CertificateException | APIManagementException e) {
+                            String msg = "Error while converting into X509Certificate";
+                            log.error(msg, e);
+                            throw new APIManagementException(msg, e);
+                        }
+                    }
+
+                }
+            } catch (APIManagementException e) {
+                String msg = "Error while validating into Certificate Existence";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+
+            }
+
+        }
+        return certificateFromMessageContext;
+    }
+    private static boolean isClientCertificateValidationEnabled() {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null) {
+            String firstProperty = apiManagerConfiguration
+                    .getFirstProperty(APIConstants.MutualSSL.ENABLE_CLIENT_CERTIFICATE_VALIDATION);
+            return Boolean.parseBoolean(firstProperty);
+        }
+        return false;
+    }
+
+    /**
+     * Populate custom properties define in a mediation sequence
+     *
+     * @param messageContext MessageContext
+     * @return Map<String, String> with custom properties
+     */
+    public static Map<String, String> getCustomAnalyticsProperties(MessageContext messageContext) {
+        Map<String, String> requestProperties = getCustomAnalyticsProperties(messageContext,
+                APIMgtGatewayConstants.CUSTOM_ANALYTICS_REQUEST_PROPERTIES);
+        Map<String, String> responseProperties = getCustomAnalyticsProperties(messageContext,
+                APIMgtGatewayConstants.CUSTOM_ANALYTICS_RESPONSE_PROPERTIES);
+        Map<String, String> properties = new HashMap<>(requestProperties);
+        properties.putAll(responseProperties);
+        return properties;
+    }
+
+    private static Map<String, String> getCustomAnalyticsProperties(MessageContext messageContext,
+            String propertyPathKey) {
+        Set<String> keys = messageContext.getPropertyKeySet();
+        String properties = (String) messageContext.getProperty(propertyPathKey);
+        if (StringUtils.isBlank(properties)) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> propertyMap = new HashMap<>();
+        String[] propertyKeys = properties.split(APIMgtGatewayConstants.CUSTOM_ANALYTICS_PROPERTY_SEPARATOR);
+        for (String propertyKey : propertyKeys) {
+            if (keys.contains(propertyKey.trim())) {
+                propertyMap.put(propertyKey, (String) messageContext.getProperty(propertyKey.trim()));
+            }
+        }
+        return propertyMap;
     }
 }
