@@ -92,7 +92,6 @@ public class Utils {
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (headers != null) {
             headers.remove(HttpHeaders.AUTHORIZATION);
-            headers.remove(HttpHeaders.AUTHORIZATION);
 
             headers.remove(HttpHeaders.HOST);
         }
