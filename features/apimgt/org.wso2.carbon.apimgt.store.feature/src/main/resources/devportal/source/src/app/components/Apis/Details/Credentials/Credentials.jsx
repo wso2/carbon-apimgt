@@ -309,7 +309,6 @@ class Credentials extends React.Component {
                 );
             } else if (isOnlyMutualSSL || isOnlyBasicAuth) {
                 return (
-                <>
                         <InlineMessage type='info' className={classes.dialogContainer}>
                             <Typography component='p'>
                             <FormattedMessage
@@ -319,7 +318,6 @@ class Credentials extends React.Component {
                                     />
                             </Typography>
                         </InlineMessage>
-                </>
                 );
             } else if (applicationsAvailable.length === 0 && subscribedApplications.length === 0) {
                 return (
