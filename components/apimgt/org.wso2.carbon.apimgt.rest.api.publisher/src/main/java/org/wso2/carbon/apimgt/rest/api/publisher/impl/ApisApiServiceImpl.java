@@ -122,7 +122,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, Boolean expand,
                             String targetTenantDomain) {
-        List<Object> allMatchedApis = new ArrayList<>();
+        List<API> allMatchedApis = new ArrayList<>();
         APIListDTO apiListDTO;
 
         //pre-processing
@@ -132,7 +132,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         query = query == null ? "" : query;
         expand = (expand != null && expand) ? true : false;
         try {
-            String newSearchQuery = APIUtil.constructNewSearchQuery(query);
+            String newSearchQuery = APIUtil.constructApisGetQuery(query);
 
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
             if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
@@ -157,7 +157,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             Map<String, Object> result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain,
                                         offset, limit, false);
-            Set<Object> apis = (Set<Object>) result.get("apis");
+            Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
 
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, expand);
