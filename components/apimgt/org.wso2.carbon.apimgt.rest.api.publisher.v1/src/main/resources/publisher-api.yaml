@@ -7191,6 +7191,60 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The "Deployments" resource APIs
+######################################################
+
+  /deployments:
+    #----------------------------------------------------------
+    # Retrieving the deployments details from tenant-conf.json
+    #----------------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      produces:
+        - application/json
+      x-wso2-curl: "curl -X GET -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" \"https://localhost:9443/api/am/publisher/v1/deployments\""
+      x-wso2-request: "GET https://localhost:9443/api/am/publisher/v1/deployments"
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Retrieve deployment environments details
+      operationId: deploymentsGet
+      description: |
+        This operation can be used to retrieve cloud clusters information defines in tenant-conf.json file.
+
+        With that you can deploy an API to selected cloud environments.
+      tags:
+        - Deployments
+      responses:
+        '200':
+          description: >
+            OK. Successful response with the list of deployment environments
+            information in the body.
+          schema:
+            $ref: '#/definitions/DeploymentList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        '400':
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: |
+            Not Found.
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: |
+            Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:

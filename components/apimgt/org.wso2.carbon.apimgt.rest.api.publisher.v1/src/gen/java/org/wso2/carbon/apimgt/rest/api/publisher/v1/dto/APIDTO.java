@@ -764,7 +764,7 @@ public enum EndpointImplementationTypeEnum {
   }
 
   /**
-   * List of selected deployment environments and clusters 
+   * List of selected deployment environments and clusters
    **/
   public APIDTO deploymentEnvironments(List<DeploymentEnvironmentsDTO> deploymentEnvironments) {
     this.deploymentEnvironments = deploymentEnvironments;

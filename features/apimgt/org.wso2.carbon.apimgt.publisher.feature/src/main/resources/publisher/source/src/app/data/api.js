@@ -652,6 +652,15 @@ class API extends Resource {
             return promise_get_Scope_detail;
         }
     }
+        /**
+         * Get deployments details from tenant-conf
+         */
+        getDeployments() {
+            const promisedDeployments = this.client.then(client => {
+                return client.apis['Deployments'].deploymentsGet();
+            });
+            return promisedDeployments.then(response => response.body);
+        }
 
     getDeployments() {
         return this.client.then(client => {

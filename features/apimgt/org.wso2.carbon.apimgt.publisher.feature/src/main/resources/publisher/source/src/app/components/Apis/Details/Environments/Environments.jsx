@@ -78,6 +78,10 @@ export default function Environments() {
      * Handle the Environments save button action
      */
     function addEnvironments() {
+        console.log(api);
+        console.log(settings);
+        console.log(allDeployments);
+        console.log('swlectefjhdsf', selectedDeployments);
         setUpdating(true);
         updateAPI({
             gatewayEnvironments,

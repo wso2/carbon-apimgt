@@ -16,7 +16,8 @@
  * under the License.
  */
 
-import React from 'react';
+// import React from 'react';
+import React, { useContext } from 'react';
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
