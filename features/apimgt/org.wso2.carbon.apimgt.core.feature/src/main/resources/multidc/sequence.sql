@@ -6,8 +6,8 @@ CREATE OR REPLACE TRIGGER REG_LOG_TRIGGER
                     REFERENCING NEW AS NEW
                     FOR EACH ROW
                     BEGIN
-                       SELECT REG_LOG_SEQUENCE.nextval INTO :NEW.REG_LOG_ID FROM dual;
-           		    END;
+                        SELECT REG_LOG_SEQUENCE.nextval INTO :NEW.REG_LOG_ID FROM dual;
+                    END;
 /
 CREATE SEQUENCE REG_PATH_SEQUENCE START WITH 1 INCREMENT BY 1 NOCACHE
 /
@@ -17,8 +17,8 @@ CREATE OR REPLACE TRIGGER REG_PATH_TRIGGER
                     REFERENCING NEW AS NEW
                     FOR EACH ROW
                     BEGIN
-                       SELECT REG_PATH_SEQUENCE.nextval INTO :NEW.REG_PATH_ID FROM dual;
- 			        END;
+                        SELECT REG_PATH_SEQUENCE.nextval INTO :NEW.REG_PATH_ID FROM dual;
+                    END;
 /                   
 CREATE SEQUENCE REG_CONTENT_SEQUENCE START WITH 1 INCREMENT BY 1 NOCACHE
 /
