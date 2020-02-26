@@ -5817,7 +5817,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     public String getApiRecommendations(String userName, String tenantDomain) {
 
-        String recommendations = null;
         if (tenantDomain != null && userName != null) {
             Cache recommendationsCache = APIUtil.getCache(
                     APIConstants.API_MANAGER_CACHE_MANAGER,
@@ -5828,10 +5827,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (recommendationsCache.containsKey(cacheName)) {
                 org.json.JSONObject cachedObject = (org.json.JSONObject) recommendationsCache.get(cacheName);
                 if (cachedObject != null) {
-                    recommendations = (String) cachedObject.get(APIConstants.RECOMMENDATIONS_CACHE_KEY);
+                    return (String) cachedObject.get(APIConstants.RECOMMENDATIONS_CACHE_KEY);
                 }
             }
         }
-        return recommendations;
+        return null;
     }
 }
