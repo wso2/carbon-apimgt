@@ -56,9 +56,9 @@ import javax.cache.Cache;
 public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(RecommenderDetailsExtractor.class);
-    private static final long waitDuration = 9000000; //wait duration to send getRecommendations Request
     private static String streamID = "org.wso2.apimgt.recommendation.event.stream:1.0.0";
     private boolean tenantFlowStarted = false;
+    private boolean superAdminTenantFlowStarted = false;
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     private int applicationId;
@@ -133,6 +133,8 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         if (tenantDomain == null) {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
+        startTenantFlow(tenantDomain);
+        tenantFlowStarted = true;
         try {
             if (isRecommendationEnabled(tenantDomain)) {
                 if (APIConstants.ADD_API.equals(publishingDetailType)) {
@@ -149,7 +151,8 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                     publishSearchQueries(searchQuery, userName);
                 }
 
-                if (!APIConstants.ADD_API.equals(publishingDetailType)) {
+                if (!APIConstants.ADD_API.equals(publishingDetailType) && userName != null
+                        && requestTenantDomain != null) {
                     updateRecommendationsCache(userName, requestTenantDomain);
                 }
             }
@@ -287,6 +290,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         Event event = new Event(streamID, System.currentTimeMillis(), null, null, objects);
         try {
             startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            superAdminTenantFlowStarted = true;
             ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
                     .publish(APIConstants.RECOMMENDATIONS_WSO2_EVENT_PUBLISHER, Collections.EMPTY_MAP, event);
             if (log.isDebugEnabled()) {
@@ -295,7 +299,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         } catch (Exception e) {
             log.error("Exception occurred when publishing events to recommendation engine", e);
         } finally {
-            if (tenantFlowStarted) {
+            if (superAdminTenantFlowStarted) {
                 endTenantFlow();
             }
         }
@@ -304,7 +308,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     private void endTenantFlow() {
 
         PrivilegedCarbonContext.endTenantFlow();
-        tenantFlowStarted = false;
     }
 
     private void startTenantFlow(String tenantDomain) {
@@ -312,7 +315,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().
                 setTenantDomain(tenantDomain, true);
-        tenantFlowStarted = true;
     }
 
     private String getUserId(String userName) {
@@ -347,7 +349,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             } else {
                 try {
                     JSONObject tenantConfig = null;
-                    startTenantFlow(tenantDomain);
                     Cache tenantConfigCache = APIUtil.getCache(
                             APIConstants.API_MANAGER_CACHE_MANAGER,
                             APIConstants.TENANT_CONFIG_CACHE_NAME,
@@ -378,10 +379,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                     }
                 } catch (RegistryException | UserStoreException | NullPointerException | APIManagementException e) {
                     log.error("Error while retrieving Recommendation config from registry", e);
-                } finally {
-                    if (tenantFlowStarted) {
-                        endTenantFlow();
-                    }
                 }
             }
         }
@@ -400,7 +397,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         long currentTime = System.currentTimeMillis();
         long lastUpdatedTime = 0;
         long waitDuration = recommendationEnvironment.getWaitDuration() * 60 * 1000;
-        startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         Cache recommendationsCache = APIUtil.getCache(
                 APIConstants.API_MANAGER_CACHE_MANAGER,
                 APIConstants.RECOMMENDATIONS_CACHE_NAME,
@@ -424,9 +420,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             object.put(APIConstants.RECOMMENDATIONS_CACHE_KEY, recommendations);
             object.put(APIConstants.LAST_UPDATED_CACHE_KEY, System.currentTimeMillis());
             recommendationsCache.put(cacheName, object);
-        }
-        if (tenantFlowStarted) {
-            endTenantFlow();
         }
     }
 
