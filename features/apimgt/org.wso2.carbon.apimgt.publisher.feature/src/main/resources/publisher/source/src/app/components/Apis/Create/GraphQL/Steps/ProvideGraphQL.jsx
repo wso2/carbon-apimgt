@@ -52,6 +52,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function ProvideGraphQL(props) {
     const { apiInputs, inputsDispatcher, onValidate } = props;
+    const { inputValue } = apiInputs;
     const classes = useStyles();
     // If valid value is `null`,that means valid, else an error object will be there
     const [isValid, setValidity] = useState({ file: null });
@@ -95,11 +96,10 @@ export default function ProvideGraphQL(props) {
     }
 
     useEffect(() => {
-        const { inputValue } = apiInputs;
         if (inputValue) {
             onDrop([inputValue]);
         }
-    }, []);
+    }, [inputValue]);
 
     return (
         <>
