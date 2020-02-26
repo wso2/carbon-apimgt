@@ -209,6 +209,14 @@ public class APIMappingUtil {
                 }
             }
         }
+        if (dto.getDeployments() != null) {
+            Set<String> deployments = new HashSet<>();
+            List<String> deploymentsFromDTO = dto.getDeployments();
+            for (String deployment : deploymentsFromDTO) {
+                deployments.add(deployment);
+            }
+            model.setDeployments(deployments);
+        }
 
         if (dto.getSubscriptionAvailability() != null) {
             model.setSubscriptionAvailability(
@@ -1068,6 +1076,12 @@ public class APIMappingUtil {
         }
         dto.setCategories(categoryNameList);
         dto.setKeyManagers(model.getKeyManagers());
+
+        if(model.getDeployments() != null && !model.getDeployments().isEmpty()){
+            List<String> deploymentsList = new ArrayList<String>();
+            deploymentsList.addAll(model.getDeployments());
+            dto.setDeployments(deploymentsList);
+        }
         return dto;
     }
 

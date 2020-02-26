@@ -16,7 +16,8 @@
  * under the License.
  */
 
-import React from 'react';
+// import React from 'react';
+import React, { useContext } from 'react';
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
@@ -28,6 +29,8 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
+import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
+import { isRestricted } from 'AppData/AuthManager';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -61,14 +64,17 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function CloudClusters(props) {
     const classes = useStyles();
-    const { deployments } = props;
+    const { api } = useContext(APIContext);
+    const { getDeployments, selectedDeployments, setSelectedDeployments } = props;
+
+    console.log('get deployments', getDeployments);
 
     return (
         <>
             <Typography variant='h4' gutterBottom align='left' className={classes.mainTitle}>
                 <FormattedMessage
                     id='Apis.Details.Environments.Environments.CloudClusters'
-                    defaultMessage={deployments.name}
+                    defaultMessage={getDeployments.name}
                 />
             </Typography>
 
@@ -83,23 +89,31 @@ export default function CloudClusters(props) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {deployments.clusters.map((row) => (
-                            <TableRow key={row.clusterName}>
+                        {getDeployments.clusters.map((row) => (
+
+                            <TableRow key={row.clusterId}>
                                 <TableCell padding='checkbox'>
                                     <Checkbox
-                                        checked={console.log('checked ' + row.clusterName)}
+                                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                        checked={selectedDeployments.includes(row.clusterId)}
                                         onChange={
                                             (event) => {
+                                                console.log('row data', row);
+                                                console.log(event.target);
+                                                console.log('selected edp 1', selectedDeployments);
                                                 const { checked, name } = event.target;
-                                                console.log(checked + ' ' + name);
-                                            // if (checked) {
-                                            //     console.log("checked " + row.clusterName)
-                                            // } else {
-                                            //     );
-                                            // }
+                                                if (checked) {
+                                                    setSelectedDeployments([...selectedDeployments, name]);
+                                                    console.log('select dep if', selectedDeployments);
+                                                } else {
+                                                    setSelectedDeployments(
+                                                        selectedDeployments.filter((env) => env !== name),
+                                                    );
+                                                    console.log('selected dep else', selectedDeployments);
+                                                }
                                             }
                                         }
-                                        name={row.clusterName}
+                                        name={row.clusterId}
                                         color='primary'
                                     />
                                 </TableCell>

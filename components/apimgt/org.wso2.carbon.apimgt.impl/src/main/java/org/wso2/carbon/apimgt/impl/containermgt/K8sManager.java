@@ -119,7 +119,8 @@ public class K8sManager implements ContainerManager {
         String apiName = apiId.getApiName();
 
         Config config = new ConfigBuilder().withMasterUrl(clusterProperties.get(MASTER_URL))
-                .withOauthToken(clusterProperties.get(SATOKEN)).withNamespace(clusterProperties.get(NAMESPACE)).build();
+                .withOauthToken(clusterProperties.get(SATOKEN)).withNamespace(clusterProperties.get(NAMESPACE))
+                .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
 
         OpenShiftClient client = new DefaultOpenShiftClient(config);
         CustomResourceDefinition apiCRD = client.customResourceDefinitions().withName(API_CRD_NAME).get();
@@ -157,7 +158,8 @@ public class K8sManager implements ContainerManager {
         String apiName = apiId.getApiName();
 
         Config config = new ConfigBuilder().withMasterUrl(clusterProperties.get(MASTER_URL))
-                .withOauthToken(clusterProperties.get(SATOKEN)).withNamespace(clusterProperties.get(NAMESPACE)).build();
+                .withOauthToken(clusterProperties.get(SATOKEN)).withNamespace(clusterProperties.get(NAMESPACE))
+                .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
 
         OpenShiftClient client = new DefaultOpenShiftClient(config);
 
@@ -209,7 +211,8 @@ public class K8sManager implements ContainerManager {
 
 
         Config config = new ConfigBuilder().withMasterUrl(clusterProperties.get(MASTER_URL))
-                .withOauthToken(clusterProperties.get(SATOKEN)).withNamespace(clusterProperties.get(NAMESPACE)).build();
+                .withOauthToken(clusterProperties.get(SATOKEN)).withNamespace(clusterProperties.get(NAMESPACE))
+                .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
 
         OpenShiftClient client = new DefaultOpenShiftClient(config);
         applyAPICustomResourceDefinition(client, configMapName, Integer.parseInt(clusterProperties.get(REPLICAS))

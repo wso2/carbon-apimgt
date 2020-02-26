@@ -18,6 +18,8 @@ public class DeploymentClusterInfoDTO   {
     private String clusterName = null;
     private String masterURL = null;
     private String namespace = null;
+    private String ingressURL = null;
+    private String clusterId = null;
 
   /**
    **/
@@ -73,6 +75,42 @@ public class DeploymentClusterInfoDTO   {
     this.namespace = namespace;
   }
 
+  /**
+   **/
+  public DeploymentClusterInfoDTO ingressURL(String ingressURL) {
+    this.ingressURL = ingressURL;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://api.com", required = true, value = "")
+  @JsonProperty("ingressURL")
+  @NotNull
+  public String getIngressURL() {
+    return ingressURL;
+  }
+  public void setIngressURL(String ingressURL) {
+    this.ingressURL = ingressURL;
+  }
+
+  /**
+   **/
+  public DeploymentClusterInfoDTO clusterId(String clusterId) {
+    this.clusterId = clusterId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "kubernetes-minikube", required = true, value = "")
+  @JsonProperty("clusterId")
+  @NotNull
+  public String getClusterId() {
+    return clusterId;
+  }
+  public void setClusterId(String clusterId) {
+    this.clusterId = clusterId;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -85,12 +123,14 @@ public class DeploymentClusterInfoDTO   {
     DeploymentClusterInfoDTO deploymentClusterInfo = (DeploymentClusterInfoDTO) o;
     return Objects.equals(clusterName, deploymentClusterInfo.clusterName) &&
         Objects.equals(masterURL, deploymentClusterInfo.masterURL) &&
-        Objects.equals(namespace, deploymentClusterInfo.namespace);
+        Objects.equals(namespace, deploymentClusterInfo.namespace) &&
+        Objects.equals(ingressURL, deploymentClusterInfo.ingressURL) &&
+        Objects.equals(clusterId, deploymentClusterInfo.clusterId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(clusterName, masterURL, namespace);
+    return Objects.hash(clusterName, masterURL, namespace, ingressURL, clusterId);
   }
 
   @Override
@@ -101,6 +141,8 @@ public class DeploymentClusterInfoDTO   {
     sb.append("    clusterName: ").append(toIndentedString(clusterName)).append("\n");
     sb.append("    masterURL: ").append(toIndentedString(masterURL)).append("\n");
     sb.append("    namespace: ").append(toIndentedString(namespace)).append("\n");
+    sb.append("    ingressURL: ").append(toIndentedString(ingressURL)).append("\n");
+    sb.append("    clusterId: ").append(toIndentedString(clusterId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -155,6 +155,9 @@
          <field type="text">
             <name>Environments</name>
          </field>
+         <field type="text">
+            <name>Deployments</name>
+         </field>
         <field type="text-area">
             <name>Cors Configuration</name>
         </field>

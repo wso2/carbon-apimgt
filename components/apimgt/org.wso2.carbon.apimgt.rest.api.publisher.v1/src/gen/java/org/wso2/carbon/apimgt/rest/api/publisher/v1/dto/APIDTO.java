@@ -130,6 +130,8 @@ public enum VisibilityEnum {
     private APIEndpointSecurityDTO endpointSecurity = null;
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> gatewayEnvironments = new ArrayList<>();
+    @Scope(name = "apim:api_publish", description="", value ="")
+    private List<String> deployments = new ArrayList<>();
     private List<String> labels = new ArrayList<>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<>();
 
@@ -761,6 +763,24 @@ public enum EndpointImplementationTypeEnum {
   }
 
   /**
+   * List of selected deployment clusters 
+   **/
+  public APIDTO deployments(List<String> deployments) {
+    this.deployments = deployments;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"kubernetes-minikube\"]", value = "List of selected deployment clusters ")
+  @JsonProperty("deployments")
+  public List<String> getDeployments() {
+    return deployments;
+  }
+  public void setDeployments(List<String> deployments) {
+    this.deployments = deployments;
+  }
+
+  /**
    * Labels of micro-gateway environments attached to the API. 
    **/
   public APIDTO labels(List<String> labels) {
@@ -1147,6 +1167,7 @@ public enum EndpointImplementationTypeEnum {
         Objects.equals(visibleTenants, API.visibleTenants) &&
         Objects.equals(endpointSecurity, API.endpointSecurity) &&
         Objects.equals(gatewayEnvironments, API.gatewayEnvironments) &&
+        Objects.equals(deployments, API.deployments) &&
         Objects.equals(labels, API.labels) &&
         Objects.equals(mediationPolicies, API.mediationPolicies) &&
         Objects.equals(subscriptionAvailability, API.subscriptionAvailability) &&
@@ -1208,6 +1229,7 @@ public enum EndpointImplementationTypeEnum {
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
     sb.append("    endpointSecurity: ").append(toIndentedString(endpointSecurity)).append("\n");
     sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
+    sb.append("    deployments: ").append(toIndentedString(deployments)).append("\n");
     sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    mediationPolicies: ").append(toIndentedString(mediationPolicies)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");

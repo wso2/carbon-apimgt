@@ -7,9 +7,11 @@
     "ClassName": "org.wso2.carbon.apimgt.impl.containermgt.K8sManager",
     "ClusterInfo": [
       {
-        "Name": "",
+        "ClusterId": "",
         "Properties": {
+          "Name": "",
           "MasterURL": "",
+          "IngressURL": "",
           "SAToken": "",
           "Namespace": "default",
           "Replicas": 1,

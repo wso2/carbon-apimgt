@@ -60,18 +60,24 @@ export default function Environments() {
     const { settings } = useAppContext();
     const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
     const [selectedMgLabel, setSelectedMgLabel] = useState([...api.labels]);
-
+    const { allDeployments } = useAppContext();
     const [isUpdating, setUpdating] = useState(false);
+    const [selectedDeployments, setSelectedDeployments] = useState([...api.deployments]);
 
     /**
      *
      * Handle the Environments save button action
      */
     function addEnvironments() {
+        console.log(api);
+        console.log(settings);
+        console.log(allDeployments);
+        console.log('swlectefjhdsf', selectedDeployments);
         setUpdating(true);
         updateAPI({
             gatewayEnvironments,
             labels: selectedMgLabel,
+            deployments: selectedDeployments,
         })
             .then(() => Alert.info('API Update Successfully'))
             .catch((error) => {
@@ -168,16 +174,19 @@ export default function Environments() {
                         api={api}
                     />
                 )}
-            {(settings.deployments
+            {
+                allDeployments.list
                  && (
-                     settings.deployments.map((cluster) => (
+                     allDeployments.list.map((clusters) => (
                          <Kubernetes
-                             deployments={cluster}
+                             getDeployments={clusters}
+                             selectedDeployments={selectedDeployments}
+                             setSelectedDeployments={setSelectedDeployments}
+                             allDeployments={allDeployments}
                          />
                      ))
                  )
-
-            ) }
+            }
 
             <Grid
                 container

@@ -1615,15 +1615,13 @@
                 <version>${org.wso2.orbit.com.amazonaws.version}</version>
             </dependency>
             <dependency>
-<<<<<<< HEAD
+
                 <groupId>org.wso2.orbit.io.jaeger</groupId>
                 <artifactId>jaeger-client</artifactId>
                 <version>${jaeger.client.version}</version>
 
                 <groupId>io.fabric8</groupId>
-=======
                 <groupId>org.wso2.orbit.io.fabric8</groupId>
->>>>>>> adding osgi bundling of kubernetes dependencies
                 <artifactId>kubernetes-client</artifactId>
                 <version>${org.wso2.orbit.io.fabric8.kubernetes.version}</version>
             </dependency>
@@ -1640,8 +1638,7 @@
             <dependency>
                 <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
                 <artifactId>okhttp</artifactId>
-<<<<<<< HEAD
-                <version>${com.squareup.okhttp3.okhttp.version}</version>
+                <version>${org.wso2.orbit.com.squareup.okhttp.version}</version>
             </dependency>
 
             <dependency>
@@ -1649,9 +1646,8 @@
                 <artifactId>okio</artifactId>
                 <version>${com.squareup.okio.version}</version>
 
-=======
-                <version>${org.wso2.orbit.com.squareup.okhttp.version}</version>
->>>>>>> adding osgi bundling of kubernetes dependencies
+
+
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity.framework</groupId>
