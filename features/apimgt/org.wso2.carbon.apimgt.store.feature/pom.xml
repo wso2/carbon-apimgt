@@ -316,6 +316,7 @@
                     <include>devportal/package-lock.json</include>
                     <include>devportal/package.json</include>
                     <include>devportal/webpack.config.js</include>
+                    <include>devportal/Readme.txt</include>
                     <include>p2.inf</include>
                     <include>admin/**</include>
                     <include>apistore/**</include>
