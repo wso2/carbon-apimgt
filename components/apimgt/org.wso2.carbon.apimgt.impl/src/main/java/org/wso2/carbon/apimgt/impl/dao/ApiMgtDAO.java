@@ -5069,6 +5069,39 @@ public class ApiMgtDAO {
                 subscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
             }
 
+            prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
+            prepStmtGetConsumerKey.setInt(1, application.getId());
+            rs = prepStmtGetConsumerKey.executeQuery();
+            List<String> consumerKeys = new ArrayList<>();
+
+            deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery);
+            while (rs.next()) {
+                String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
+
+                // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
+                String mode = rs.getString("CREATE_MODE");
+                if (consumerKey != null) {
+                    deleteDomainApp.setString(1, consumerKey);
+                    deleteDomainApp.addBatch();
+
+                    KeyManagerHolder.getKeyManagerInstance().deleteMappedApplication(consumerKey);
+                    // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
+                    // call delete.
+                    if (!APIConstants.OAuthAppMode.MAPPED.equals(mode)) {
+                        // Adding clients to be deleted.
+                        consumerKeys.add(consumerKey);
+                    }
+                }
+            }
+
+            for (String consumerKey : consumerKeys) {
+                //delete on oAuthorization server.
+                if (log.isDebugEnabled()) {
+                    log.debug("Deleting Oauth application with consumer key " + consumerKey + " from the Oauth server");
+                }
+                KeyManagerHolder.getKeyManagerInstance().deleteApplication(consumerKey);
+            }
+
             deleteMappingQuery = connection.prepareStatement(deleteKeyMappingQuery);
             for (Integer subscriptionId : subscriptions) {
                 deleteMappingQuery.setInt(1, subscriptionId);
@@ -5098,31 +5131,6 @@ public class ApiMgtDAO {
                 log.debug("Subscription details are deleted successfully for Application - " + application.getName());
             }
 
-            prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
-            prepStmtGetConsumerKey.setInt(1, application.getId());
-            rs = prepStmtGetConsumerKey.executeQuery();
-            ArrayList<String> consumerKeys = new ArrayList<String>();
-
-            deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery);
-            while (rs.next()) {
-                String consumerKey = rs.getString("CONSUMER_KEY");
-
-                // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
-                String mode = rs.getString("CREATE_MODE");
-                if (consumerKey != null) {
-                    deleteDomainApp.setString(1, consumerKey);
-                    deleteDomainApp.addBatch();
-
-                    KeyManagerHolder.getKeyManagerInstance().deleteMappedApplication(consumerKey);
-                    // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
-                    // call delete.
-                    if (!"MAPPED".equals(mode)) {
-                        // Adding clients to be deleted.
-                        consumerKeys.add(consumerKey);
-                    }
-
-                }
-            }
             deleteDomainApp.executeBatch();
 
             deleteAppKey = connection.prepareStatement(deleteApplicationKeyQuery);
@@ -5146,10 +5154,6 @@ public class ApiMgtDAO {
                 connection.commit();
             }
 
-            for (String consumerKey : consumerKeys) {
-                //delete on oAuthorization server.
-                KeyManagerHolder.getKeyManagerInstance().deleteApplication(consumerKey);
-            }
         } catch (SQLException e) {
             handleException("Error while removing application details from the database", e);
         } finally {
@@ -12302,20 +12306,20 @@ public class ApiMgtDAO {
     /**
      * Add a block condition
      *
-     * @param conditionType  Type of the block condition
-     * @param conditionValue value related to the type
-     * @param tenantDomain   tenant domain the block condition should be effective
      * @return uuid of the block condition if successfully added
      * @throws APIManagementException
      */
-    public String addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
+    public BlockConditionsDTO addBlockConditions(BlockConditionsDTO blockConditionsDTO) throws
             APIManagementException {
         Connection connection = null;
         PreparedStatement insertPreparedStatement = null;
         boolean status = false;
         boolean valid = false;
         ResultSet rs = null;
-        String uuid = null;
+        String uuid = blockConditionsDTO.getUUID();
+        String conditionType  = blockConditionsDTO.getConditionType();
+        String conditionValue = blockConditionsDTO.getConditionValue();
+        String tenantDomain = blockConditionsDTO.getTenantDomain();
         try {
             String query = SQLConstants.ThrottleSQLConstants.ADD_BLOCK_CONDITIONS_SQL;
             if (APIConstants.BLOCKING_CONDITIONS_API.equals(conditionType)) {
@@ -12350,21 +12354,27 @@ public class ApiMgtDAO {
                 } else {
                     throw new APIManagementException("Invalid User in Tenant Domain " + tenantDomain);
                 }
-            } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType)) {
+            } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType) ||
+                    APIConstants.BLOCK_CONDITION_IP_RANGE.equals(conditionType)) {
                 valid = true;
             }
             if (valid) {
                 connection = APIMgtDBUtil.getConnection();
                 connection.setAutoCommit(false);
                 if (!isBlockConditionExist(conditionType, conditionValue, tenantDomain, connection)) {
-                    uuid = UUID.randomUUID().toString();
-                    insertPreparedStatement = connection.prepareStatement(query);
+                    String dbProductName = connection.getMetaData().getDatabaseProductName();
+                    insertPreparedStatement = connection.prepareStatement(query,
+                            new String[]{DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "CONDITION_ID")});
                     insertPreparedStatement.setString(1, conditionType);
                     insertPreparedStatement.setString(2, conditionValue);
                     insertPreparedStatement.setString(3, "TRUE");
                     insertPreparedStatement.setString(4, tenantDomain);
                     insertPreparedStatement.setString(5, uuid);
-                    status = insertPreparedStatement.execute();
+                    insertPreparedStatement.execute();
+                    ResultSet generatedKeys = insertPreparedStatement.getGeneratedKeys();
+                    if (generatedKeys != null && generatedKeys.next()){
+                        blockConditionsDTO.setConditionId(generatedKeys.getInt(1));
+                    }
                     connection.commit();
                     status = true;
                 } else {
@@ -12387,7 +12397,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(insertPreparedStatement, connection, null);
         }
         if (status) {
-            return uuid;
+            return blockConditionsDTO;
         } else {
             return null;
         }

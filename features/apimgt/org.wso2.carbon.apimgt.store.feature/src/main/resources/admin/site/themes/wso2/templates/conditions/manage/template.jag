@@ -13,11 +13,7 @@
                 if ("IP".equals(conditonsArray[i].getConditionType())) {
                     var value = conditonsArray[i].getConditionValue();
                     var index = value.indexOf(":");
-                    if (index > -1) {
-                        // Removing Tenant Domain from IP
-                        value = value.substring(index + 1, value.length());
-                        conditonsArray[i].setConditionValue(value);
-                    }
+                    conditonsArray[i].setConditionValue(value);
                 }
             }
     %>
@@ -68,9 +64,9 @@
                     </div>
                     </td>
                 </tr>
-            <% 
+            <%
             }
-            %>  
+            %>
     </table>
     <%} else {%>
     		<div class="message message-info">
@@ -91,9 +87,9 @@
         }, function (result) {
             if (result.error == false) {
                 if (result.response) {
-                jagg.message({content:i18n.t("Condition update successfully"),type:"info"});                    
+                jagg.message({content:i18n.t("Condition update successfully"),type:"info"});
                 }else{
-                jagg.message({content:i18n.t('Condition not updated successfully'),type:"warn"});                    
+                jagg.message({content:i18n.t('Condition not updated successfully'),type:"warn"});
                 }
             } else {
                 jagg.message({content:result.message,type:"error"});

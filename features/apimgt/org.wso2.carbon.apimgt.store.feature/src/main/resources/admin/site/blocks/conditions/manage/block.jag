@@ -14,7 +14,6 @@ jagg.block("conditions/manage", {
         var conditions, result;
         result = jagg.module("conditions").getAllconditions();
         conditions = result.conditions;
-
         // we put results to the session.
         session.put("conditions", conditions);
         return {
@@ -23,6 +22,3 @@ jagg.block("conditions/manage", {
     }
 });
 %>
-
-
-

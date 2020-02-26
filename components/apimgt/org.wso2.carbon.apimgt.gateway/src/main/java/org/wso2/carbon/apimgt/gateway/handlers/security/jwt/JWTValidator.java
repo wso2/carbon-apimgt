@@ -16,6 +16,14 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.jwt;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.util.DateUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang.StringUtils;
@@ -37,6 +45,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -45,13 +54,20 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
-import javax.cache.Cache;
+import java.io.IOException;
+import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
+
+import javax.cache.Cache;
 
 /**
  * A Validator class to validate JWT tokens in an API request.
@@ -65,15 +81,18 @@ public class JWTValidator {
     private APIKeyValidator apiKeyValidator;
     private boolean jwtGenerationEnabled;
     private AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator;
+    JWTConfigurationDto jwtConfigurationDto;
 
     public JWTValidator(String apiLevelPolicy, APIKeyValidator apiKeyValidator) {
         this.apiLevelPolicy = apiLevelPolicy;
         this.isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
         this.apiKeyValidator = apiKeyValidator;
-        JWTConfigurationDto jwtConfigurationDto =
+        jwtConfigurationDto =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
         jwtGenerationEnabled  = jwtConfigurationDto.isEnabled();
-        apiMgtGatewayJWTGenerator = ServiceReferenceHolder.getInstance().getAPIMgtGatewayJWTGenerator();
+        apiMgtGatewayJWTGenerator =
+                ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
+                        .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
 
     }
 
@@ -92,12 +111,11 @@ public class JWTValidator {
             throws APISecurityException {
         String[] splitToken = jwtToken.split("\\.");
 
-        JSONObject header = null;
-        JSONObject payload = null;
+        JWSHeader header;
+        JWTClaimsSet payload = null;
+        SignedJWT parsedJWTToken;
         boolean isVerified = false;
-
         String tokenSignature = splitToken[2];
-
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String httpMethod = (String) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
@@ -125,9 +143,9 @@ public class JWTValidator {
             } else if (getInvalidTokenCache().get(tokenSignature) != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils
-                            .getMaskedToken(splitToken));
+                            .getMaskedToken(splitToken[0]));
                 }
-                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken[0]));
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
@@ -135,9 +153,9 @@ public class JWTValidator {
             else if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
-                            getMaskedToken(splitToken));
+                            getMaskedToken(splitToken[0]));
                 }
-                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken[0]));
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
@@ -145,9 +163,9 @@ public class JWTValidator {
             if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
-                            getMaskedToken(splitToken));
+                            getMaskedToken(splitToken[0]));
                 }
-                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken[0]));
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
@@ -155,12 +173,14 @@ public class JWTValidator {
 
         if (!isVerified) {
             log.debug("Token not found in the caches and revoked jwt token map.");
-            try {
-                header = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[0])));
-                payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
-            } catch (JSONException | IllegalArgumentException e) {
+            try{
+                parsedJWTToken = (SignedJWT) JWTParser.parse(jwtToken);
+                header = parsedJWTToken.getHeader();
+                payload = transformJWTClaims(parsedJWTToken.getJWTClaimsSet());
+
+            } catch (JSONException | IllegalArgumentException | ParseException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Invalid JWT token. Token: " + GatewayUtils.getMaskedToken(splitToken));
+                    log.debug("Invalid JWT token. Token: " + GatewayUtils.getMaskedToken(splitToken[0]));
                 }
                 log.error("Invalid JWT token. Failed to decode the token.");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
@@ -168,11 +188,11 @@ public class JWTValidator {
             }
             log.debug("Verifying signature of JWT");
             String certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
-            if (header.has(APIConstants.JwtTokenConstants.KEY_ID)) {
-                certificateAlias = header.getString(APIConstants.JwtTokenConstants.KEY_ID);
+            if (header.getKeyID() != null) {
+                certificateAlias = header.getKeyID();
             }
 
-            isVerified = GatewayUtils.verifyTokenSignature(splitToken, certificateAlias);
+            isVerified = verifyTokenSignature(parsedJWTToken, certificateAlias);
             if (isGatewayTokenCacheEnabled) {
                 // Add token to tenant token cache
                 if (isVerified) {
@@ -215,11 +235,12 @@ public class JWTValidator {
                 log.debug("Token payload not found in the cache.");
                 if (payload == null) {
                     try {
-                        payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
-                    } catch (JSONException | IllegalArgumentException e) {
+                        parsedJWTToken = (SignedJWT) JWTParser.parse(jwtToken);
+                        payload = transformJWTClaims(parsedJWTToken.getJWTClaimsSet());
+                    } catch (JSONException | IllegalArgumentException | ParseException e) {
                         if (log.isDebugEnabled()) {
                             log.debug("Token decryption failure when retrieving payload. Token: "
-                                    + GatewayUtils.getMaskedToken(splitToken), e);
+                                    + GatewayUtils.getMaskedToken(splitToken[0]), e);
                         }
                         log.error("Invalid JWT token. Failed to decode the token");
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
@@ -227,7 +248,13 @@ public class JWTValidator {
                     }
                 }
                 checkTokenExpiration(tokenSignature, payload, tenantDomain);
-                validateScopes(synCtx, openAPI, payload);
+
+                try {
+                    validateScopes(synCtx, openAPI, payload);
+                } catch (ParseException e) {
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                            APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+                }
 
                 if (isGatewayTokenCacheEnabled) {
                     JWTTokenPayloadInfo jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
@@ -237,7 +264,7 @@ public class JWTValidator {
                 }
             }
 
-            JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload, splitToken, true);
+            net.minidev.json.JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload, splitToken, true);
 
             /*
              * Set api.ut.apiPublisher of the subscribed api to the message context.
@@ -263,12 +290,18 @@ public class JWTValidator {
                         log.debug("JWT authentication successful.");
                         String endUserToken = null;
                         if (jwtGenerationEnabled) {
-                            JWTInfoDto jwtInfoDto =
-                                    GatewayUtils.generateJWTInfoDto(payload, api, apiKeyValidationInfoDTO, synCtx);
-                            endUserToken = generateAndRetrieveJWTToken(tokenSignature, jwtInfoDto);
+                            JWTInfoDto jwtInfoDto;
+                            try {
+                                jwtInfoDto =
+                                        GatewayUtils.generateJWTInfoDto(payload, api, apiKeyValidationInfoDTO, synCtx);
+                                endUserToken = generateAndRetrieveJWTToken(tokenSignature, jwtInfoDto);
+                                return GatewayUtils.generateAuthenticationContext(tokenSignature, payload, null,
+                                        apiKeyValidationInfoDTO, getApiLevelPolicy(), endUserToken, true);
+                            } catch (ParseException e) {
+                                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+                            }
                         }
-                        return GatewayUtils.generateAuthenticationContext(tokenSignature, payload, null,
-                                apiKeyValidationInfoDTO, getApiLevelPolicy(), endUserToken, true);
                     } else {
                         log.debug("User is NOT authorized to access the Resource. API Subscription validation failed.");
                         throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
@@ -280,16 +313,21 @@ public class JWTValidator {
 
             log.debug("JWT authentication successful.");
             String endUserToken = null;
-            if (jwtGenerationEnabled) {
-                JWTInfoDto jwtInfoDto = GatewayUtils.generateJWTInfoDto(payload, api, null, synCtx);
-                endUserToken = generateAndRetrieveJWTToken(tokenSignature, jwtInfoDto);
+            try {
+                if (jwtGenerationEnabled) {
+                    JWTInfoDto jwtInfoDto = GatewayUtils.generateJWTInfoDto(payload, api, null, synCtx);
+                    endUserToken = generateAndRetrieveJWTToken(tokenSignature, jwtInfoDto);
+                }
+                return GatewayUtils
+                        .generateAuthenticationContext(tokenSignature, payload, api, null, getApiLevelPolicy(),
+                                endUserToken, true);
+            } catch (ParseException e) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
             }
-            return GatewayUtils
-                    .generateAuthenticationContext(tokenSignature, payload, api, null, getApiLevelPolicy(),
-                            endUserToken, true);
         }
         if (log.isDebugEnabled()) {
-            log.debug("Token signature verification failure. Token: " + GatewayUtils.getMaskedToken(splitToken));
+            log.debug("Token signature verification failure. Token: " + GatewayUtils.getMaskedToken(splitToken[0]));
         }
         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                 "Invalid JWT token. Signature verification failed.");
@@ -332,24 +370,31 @@ public class JWTValidator {
         return endUserToken;
     }
 
-    private APIKeyValidationInfoDTO validateSubscriptionUsingKeyManager(MessageContext synCtx, JSONObject payload)
+    private APIKeyValidationInfoDTO validateSubscriptionUsingKeyManager(MessageContext synCtx, JWTClaimsSet payload)
             throws APISecurityException {
+
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        try {
 
-        String consumerkey = null;
-        if (payload.has(APIConstants.JwtTokenConstants.CONSUMER_KEY)) {
-            consumerkey = payload.getString(APIConstants.JwtTokenConstants.CONSUMER_KEY);
-        } else if (payload.has(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY)) {
-            consumerkey = payload.getString(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY);
+            String consumerkey = null;
+            if (payload.getClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY) != null) {
+                consumerkey = payload.getStringClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY);
+            } else if (payload.getClaim(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY) != null) {
+                consumerkey = payload.getStringClaim(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY);
+            }
+            if (consumerkey != null) {
+                return apiKeyValidator.validateSubscription(apiContext, apiVersion, consumerkey);
+            }
+            log.debug("Cannot call Key Manager to validate subscription. " +
+                    "Payload of the token does not contain the Authorized party - the party to which the ID Token was " +
+                    "issued");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                    APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+        } catch (ParseException e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
-        if (consumerkey != null) {
-            return apiKeyValidator.validateSubscription(apiContext, apiVersion, consumerkey);
-        }
-        log.debug("Cannot call Key Manager to validate subscription. " +
-                "Payload of the token does not contain the Authorized party - the party to which the ID Token was issued");
-        throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
-                APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
     }
 
     /**
@@ -367,8 +412,8 @@ public class JWTValidator {
             throws APISecurityException {
 
         String[] splitToken = jwtToken.split("\\.");
-
-        JSONObject payload = null;
+        SignedJWT parsedJWT = null;
+        JWTClaimsSet payload = null;
         boolean isVerified = false;
 
         String tokenSignature = splitToken[2];
@@ -394,9 +439,9 @@ public class JWTValidator {
             } else if (getInvalidTokenCache().get(tokenSignature) != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils
-                            .getMaskedToken(splitToken));
+                            .getMaskedToken(splitToken[0]));
                 }
-                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken[0]));
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
@@ -404,9 +449,9 @@ public class JWTValidator {
             else if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
-                            getMaskedToken(splitToken));
+                            getMaskedToken(splitToken[0]));
                 }
-                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken[0]));
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
@@ -414,9 +459,9 @@ public class JWTValidator {
             if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenSignature)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the revoked jwt token map. Token: " + GatewayUtils.
-                            getMaskedToken(splitToken));
+                            getMaskedToken(splitToken[0]));
                 }
-                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken));
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(splitToken[0]));
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
@@ -425,17 +470,18 @@ public class JWTValidator {
         if (!isVerified) {
             log.debug("Token not found in the caches and revoked jwt token map.");
             try {
-                payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
-            } catch (JSONException | IllegalArgumentException e) {
+                parsedJWT = (SignedJWT) JWTParser.parse(jwtToken);
+                payload = parsedJWT.getJWTClaimsSet();
+            } catch (JSONException | IllegalArgumentException | ParseException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Invalid JWT token. Token: " + GatewayUtils.getMaskedToken(splitToken));
+                    log.debug("Invalid JWT token. Token: " + GatewayUtils.getMaskedToken(splitToken[0]));
                 }
                 log.error("Invalid JWT token. Failed to decode the token.");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token. Failed to decode the token.", e);
             }
             log.debug("Verifying signature of JWT");
-            isVerified = GatewayUtils.verifyTokenSignature(splitToken, APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS);
+            isVerified = verifyTokenSignature(parsedJWT, APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS);
             if (isGatewayTokenCacheEnabled) {
                 // Add token to tenant token cache
                 if (isVerified) {
@@ -479,11 +525,12 @@ public class JWTValidator {
                 log.debug("Token payload not found in the cache.");
                 if (payload == null) {
                     try {
-                        payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
-                    } catch (JSONException | IllegalArgumentException e) {
+                        parsedJWT = (SignedJWT) JWTParser.parse(jwtToken);
+                        payload = parsedJWT.getJWTClaimsSet();
+                    } catch (JSONException | IllegalArgumentException | ParseException e) {
                         if (log.isDebugEnabled()) {
                             log.debug("Token decryption failure when retrieving payload. Token: "
-                                    + GatewayUtils.getMaskedToken(splitToken), e);
+                                    + GatewayUtils.getMaskedToken(splitToken[0]), e);
                         }
                         log.error("Invalid JWT token. Failed to decode the token");
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
@@ -500,19 +547,28 @@ public class JWTValidator {
                 }
             }
 
-            JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload, splitToken, true);
+            net.minidev.json.JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload, splitToken, true);
 
             log.debug("JWT authentication successful.");
             String endUserToken = null;
+            try {
+
             if (jwtGenerationEnabled) {
-                JWTInfoDto jwtInfoDto = GatewayUtils.generateJWTInfoDto(payload, api, null, apiContext, apiVersion);
+                JWTInfoDto jwtInfoDto = null;
+                    jwtInfoDto = GatewayUtils.generateJWTInfoDto(payload, api, null, apiContext, apiVersion);
+
                 endUserToken = generateAndRetrieveJWTToken(tokenSignature, jwtInfoDto);
             }
             return GatewayUtils.generateAuthenticationContext(tokenSignature, payload, api, null, getApiLevelPolicy()
                     , endUserToken, true);
+            } catch (ParseException e) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+
+            }
         }
         if (log.isDebugEnabled()) {
-            log.debug("Token signature verification failure. Token: " + GatewayUtils.getMaskedToken(splitToken));
+            log.debug("Token signature verification failure. Token: " + GatewayUtils.getMaskedToken(splitToken[0]));
         }
         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                 "Invalid JWT token. Signature verification failed.");
@@ -527,8 +583,8 @@ public class JWTValidator {
      * @param payload The payload of the JWT token
      * @throws APISecurityException in case of scope validation failure
      */
-    private void validateScopes(MessageContext synCtx, OpenAPI openAPI, JSONObject payload)
-            throws APISecurityException {
+    private void validateScopes(MessageContext synCtx, OpenAPI openAPI, JWTClaimsSet payload)
+            throws APISecurityException, ParseException {
         if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
             HashMap<String, String>  operationScopeMappingList =
                     (HashMap<String, String>) synCtx.getProperty(APIConstants.SCOPE_OPERATION_MAPPING);
@@ -544,13 +600,14 @@ public class JWTValidator {
         }
     }
 
-    private void checkTokenWithTheScope(String resource, String resourceScope, JSONObject payload) throws APISecurityException {
+    private void checkTokenWithTheScope(String resource, String resourceScope, JWTClaimsSet payload)
+            throws APISecurityException, ParseException {
         if (StringUtils.isNotBlank(resourceScope)) {
-            if (!payload.has(APIConstants.JwtTokenConstants.SCOPE)) {
+            if (payload.getClaim(APIConstants.JwtTokenConstants.SCOPE) == null) {
                 log.error("Scopes not found in the token.");
                 throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
             }
-            String[] tokenScopes = payload.getString(APIConstants.JwtTokenConstants.SCOPE)
+            String[] tokenScopes = payload.getStringClaim(APIConstants.JwtTokenConstants.SCOPE)
                     .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER);
 
             boolean scopeFound = false;
@@ -563,15 +620,14 @@ public class JWTValidator {
             }
             if (!scopeFound) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Scope validation failed. User: " +
-                            payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
+                    log.debug("Scope validation failed. User: " + payload.getSubject());
                 }
                 log.error("Scope validation failed.");
                 throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
             }
             if (log.isDebugEnabled()) {
                 log.debug("Scope validation successful for the resource: " + resource + ", Resource Scope: " + resourceScope
-                        + ", User: " + payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
+                        + ", User: " + payload.getSubject());
             }
         }
         log.debug("No scopes assigned to the resource: " + resource);
@@ -585,30 +641,39 @@ public class JWTValidator {
      * @param tenantDomain   The tenant domain from which the token cache is retrieved
      * @throws APISecurityException if the token is expired
      */
-    private void checkTokenExpiration(String tokenSignature, JSONObject payload, String tenantDomain) throws APISecurityException {
-        // Check whether the token is expired or not.
-        long issuedTime = payload.getLong(APIConstants.JwtTokenConstants.ISSUED_TIME) * 1000;
-        long expiredTime = payload.getLong(APIConstants.JwtTokenConstants.EXPIRY_TIME) * 1000;
-        long validityPeriod = expiredTime - issuedTime;
-        long timestampSkew = OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds() * 1000;
-        long currentTime = System.currentTimeMillis();
+    private void checkTokenExpiration(String tokenSignature, JWTClaimsSet payload, String tenantDomain)
+            throws APISecurityException {
 
-        //If the validity period is not a never expiring value
-        if (validityPeriod != Long.MAX_VALUE && (currentTime - timestampSkew) > validityPeriod) {
-            if ((currentTime - timestampSkew) > expiredTime) {
-                if (isGatewayTokenCacheEnabled) {
-                    getGatewayTokenCache().remove(tokenSignature);
-                    getGatewayJWTTokenCache().remove(tokenSignature);
-                    getInvalidTokenCache().put(tokenSignature, tenantDomain);
-                }
-                log.error("JWT token is expired");
-                throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED,
-                        "JWT token is expired");
+        long timestampSkew = OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds();
+
+        Date now = new Date();
+        Date exp = payload.getExpirationTime();
+        if (exp != null && !DateUtils.isAfter(exp, now, timestampSkew)) {
+            if (isGatewayTokenCacheEnabled) {
+                getGatewayTokenCache().remove(tokenSignature);
+                getGatewayJWTTokenCache().remove(tokenSignature);
+                getInvalidTokenCache().put(tokenSignature, tenantDomain);
             }
+            log.error("JWT token is expired :" + GatewayUtils.getMaskedToken(tokenSignature));
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Token is not expired. User: " + payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
+    }
+
+    private JWTClaimsSet transformJWTClaims(JWTClaimsSet body) {
+
+        String issuer = body.getIssuer();
+        JWTTransformer jwtTransformer = null;
+        if (StringUtils.isNotEmpty(issuer)) {
+            jwtTransformer = ServiceReferenceHolder.getInstance().getJwtTransformerMap().get(issuer);
         }
+        if (jwtTransformer == null) {
+            jwtTransformer =
+                    ServiceReferenceHolder.getInstance().getJwtTransformerMap()
+                            .get(APIMgtGatewayConstants.DEFAULT_JWT_TRANSFORMER_ISSUER);
+        }
+
+        return jwtTransformer.transform(body);
     }
 
     private Cache getGatewayTokenCache() {
@@ -629,5 +694,50 @@ public class JWTValidator {
 
     private String getApiLevelPolicy() {
         return apiLevelPolicy;
+    }
+
+    private boolean verifyTokenSignature(SignedJWT parsedJWTToken, String certificateAlias)
+            throws APISecurityException {
+
+        try {
+            Map<String, TokenIssuerDto> tokenIssuerDtoMap = jwtConfigurationDto.getTokenIssuerDtoMap();
+            String issuer = parsedJWTToken.getJWTClaimsSet().getIssuer();
+            if (StringUtils.isNotEmpty(issuer)) {
+                TokenIssuerDto tokenIssuerDto = tokenIssuerDtoMap.get(issuer);
+                if (tokenIssuerDto != null) {
+                    if (tokenIssuerDto.getJwksConfigurationDTO().isEnabled() &&
+                            StringUtils.isNotEmpty(tokenIssuerDto.getJwksConfigurationDTO().getUrl())) {
+                        // Check JWKSet Available in Cache
+                        Object jwks = getJWKSCache().get(tokenIssuerDto.getIssuer());
+                        JWKSet jwkSet;
+                        if (jwks != null) {
+                            jwkSet = (JWKSet) jwks;
+                        } else {
+                            String jwksInfo = GatewayUtils
+                                    .retrieveJWKSConfiguration(tokenIssuerDto.getJwksConfigurationDTO().getUrl());
+                            jwkSet = JWKSet.parse(jwksInfo);
+                            getJWKSCache().put(tokenIssuerDto.getIssuer(), jwkSet);
+                        }
+
+                        if (jwkSet.getKeyByKeyId(certificateAlias) instanceof RSAKey) {
+                            RSAKey keyByKeyId = (RSAKey) jwkSet.getKeyByKeyId(certificateAlias);
+                            RSAPublicKey rsaPublicKey = keyByKeyId.toRSAPublicKey();
+                            if (rsaPublicKey != null) {
+                                return GatewayUtils.verifyTokenSignature(parsedJWTToken, rsaPublicKey);
+                            }
+                        } else {
+                            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                    "Key Algoritm not supported");
+                        }
+                    }
+                }
+            }
+        } catch (ParseException | JOSEException | IOException e) {
+            log.error("Error while parsing JWT", e);
+        }
+        return GatewayUtils.verifyTokenSignature(parsedJWTToken, certificateAlias);
+    }
+    private Cache getJWKSCache(){
+        return CacheProvider.getJWKSCache();
     }
 }
