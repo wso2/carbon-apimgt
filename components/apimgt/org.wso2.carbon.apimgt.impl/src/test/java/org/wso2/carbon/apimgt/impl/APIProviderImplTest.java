@@ -2291,12 +2291,13 @@ public class APIProviderImplTest {
         GenericArtifact docArtifact = Mockito.mock(GenericArtifact.class);
         Mockito.when(artifactManager.getGenericArtifact(documentation.getId())).thenReturn(docArtifact);
         Mockito.when(APIUtil.getDocumentation(docArtifact)).thenReturn(documentation);
-        Mockito.when(docArtifact.getPath()).thenReturn("artifact/path");
+        String artifactPath = "artifact/path";
+        Mockito.when(docArtifact.getPath()).thenReturn(artifactPath);
         PowerMockito.doNothing().when(APIUtil.class, "clearResourcePermissions", Mockito.any(), Mockito.any(),
                 Mockito.anyInt());
 
         String[] roles = {"admin", "subscriber"};
-        APIUtil.setResourcePermissions("admin", "Public", roles, "artifact/path");
+        APIUtil.setResourcePermissions("admin", "Public", roles, artifactPath);
         Mockito.when(docArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("docFilePath");
 
         final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, documentationList, null);
@@ -2442,12 +2443,13 @@ public class APIProviderImplTest {
         GenericArtifact docArtifact = Mockito.mock(GenericArtifact.class);
         Mockito.when(artifactManager.getGenericArtifact(documentation.getId())).thenReturn(docArtifact);
         Mockito.when(APIUtil.getDocumentation(docArtifact)).thenReturn(documentation);
-        Mockito.when(docArtifact.getPath()).thenReturn("artifact/path");
+        String artifactPath = "artifact/path";
+        Mockito.when(docArtifact.getPath()).thenReturn(artifactPath);
         PowerMockito.doNothing().when(APIUtil.class, "clearResourcePermissions", Mockito.any(), Mockito.any(),
                 Mockito.anyInt());
 
         String[] roles = {"admin", "subscriber"};
-        APIUtil.setResourcePermissions("admin", "Public", roles, "artifact/path");
+        APIUtil.setResourcePermissions("admin", "Public", roles, artifactPath);
         Mockito.when(docArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("docFilePath");
 
         final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, documentationList, null);
