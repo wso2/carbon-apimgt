@@ -161,184 +161,180 @@ public class APIMappingUtil {
         return api;
     }
 
-    public static APIDetailedDTO fromAPItoDTO(Object model) throws APIManagementException {
+    public static APIDetailedDTO fromAPItoDTO(API model) throws APIManagementException {
 
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
         APIDetailedDTO dto = new APIDetailedDTO();
-        API apiModel = null;
-        if (model instanceof API) {
-            apiModel = (API) model;
-            dto.setName(apiModel.getId().getApiName());
-            dto.setVersion(apiModel.getId().getVersion());
-            String providerName = apiModel.getId().getProviderName();
-            dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
-            dto.setId(apiModel.getUUID());
-            String context = apiModel.getContextTemplate();
-            if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
-                context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
-            }
-            dto.setContext(context);
-            dto.setDescription(apiModel.getDescription());
-
-            dto.setIsDefaultVersion(apiModel.isDefaultVersion());
-            dto.setResponseCaching(apiModel.getResponseCache());
-            dto.setCacheTimeout(apiModel.getCacheTimeout());
-            dto.setEndpointConfig(apiModel.getEndpointConfig());
-            if (!StringUtils.isBlank(apiModel.getThumbnailUrl())) {
-                dto.setThumbnailUri(getThumbnailUri(apiModel.getUUID()));
-            }
-            List<SequenceDTO> sequences = new ArrayList<>();
-
-            String inSequenceName = apiModel.getInSequence();
-            if (inSequenceName != null && !inSequenceName.isEmpty()) {
-                String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN;
-                boolean sharedStatus = getSharedStatus(inSequenceName, type, dto);
-                String uuid = getSequenceId(inSequenceName, type, dto);
-                SequenceDTO inSequence = new SequenceDTO();
-                inSequence.setName(inSequenceName);
-                inSequence.setType(type);
-                inSequence.setShared(sharedStatus);
-                inSequence.setId(uuid);
-                sequences.add(inSequence);
-            }
-
-            String outSequenceName = apiModel.getOutSequence();
-            if (outSequenceName != null && !outSequenceName.isEmpty()) {
-                String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT;
-                boolean sharedStatus = getSharedStatus(outSequenceName, type, dto);
-                String uuid = getSequenceId(outSequenceName, type, dto);
-                SequenceDTO outSequence = new SequenceDTO();
-                outSequence.setName(outSequenceName);
-                outSequence.setType(type);
-                outSequence.setShared(sharedStatus);
-                outSequence.setId(uuid);
-                sequences.add(outSequence);
-            }
-
-            String faultSequenceName = apiModel.getFaultSequence();
-            if (faultSequenceName != null && !faultSequenceName.isEmpty()) {
-                String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT;
-                boolean sharedStatus = getSharedStatus(faultSequenceName, type, dto);
-                String uuid = getSequenceId(faultSequenceName, type, dto);
-                SequenceDTO faultSequence = new SequenceDTO();
-                faultSequence.setName(faultSequenceName);
-                faultSequence.setType(type);
-                faultSequence.setShared(sharedStatus);
-                faultSequence.setId(uuid);
-                sequences.add(faultSequence);
-            }
-
-            dto.setSequences(sequences);
-
-            dto.setStatus(apiModel.getStatus());
-
-            String subscriptionAvailability = apiModel.getSubscriptionAvailability();
-            if (subscriptionAvailability != null) {
-                dto.setSubscriptionAvailability(mapSubscriptionAvailabilityFromAPItoDTO(subscriptionAvailability));
-            }
-
-            if (apiModel.getSubscriptionAvailableTenants() != null) {
-                dto.setSubscriptionAvailableTenants(Arrays.asList(apiModel.getSubscriptionAvailableTenants().split(",")));
-            }
-
-            //Get Swagger definition which has URL templates, scopes and resource details
-            String apiSwaggerDefinition;
-
-            apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(apiModel.getId());
-
-            dto.setApiDefinition(apiSwaggerDefinition);
-
-            Set<String> apiTags = apiModel.getTags();
-            List<String> tagsToReturn = new ArrayList<>();
-            tagsToReturn.addAll(apiTags);
-            dto.setTags(tagsToReturn);
-
-            Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = apiModel.getAvailableTiers();
-            List<String> tiersToReturn = new ArrayList<>();
-            for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
-                tiersToReturn.add(tier.getName());
-            }
-            dto.setTiers(tiersToReturn);
-            dto.setApiLevelPolicy(apiModel.getApiLevelPolicy());
-
-            //APIs created with type set to "NULL" will be considered as "HTTP"
-            if (apiModel.getType() == null || apiModel.getType().toLowerCase().equals("null")) {
-                dto.setType(APIDetailedDTO.TypeEnum.HTTP);
-            } else {
-                dto.setType(APIDetailedDTO.TypeEnum.valueOf(apiModel.getType()));
-            }
-
-            if (!APIConstants.APITransportType.WS.equals(apiModel.getType())) {
-                dto.setTransport(Arrays.asList(apiModel.getTransports().split(",")));
-            }
-            dto.setVisibility(mapVisibilityFromAPItoDTO(apiModel.getVisibility()));
-
-            if (apiModel.getVisibleRoles() != null) {
-                dto.setVisibleRoles(Arrays.asList(apiModel.getVisibleRoles().split(",")));
-            }
-
-            if (apiModel.getVisibleTenants() != null) {
-                dto.setVisibleRoles(Arrays.asList(apiModel.getVisibleTenants().split(",")));
-            }
-
-            if (apiModel.getAdditionalProperties() != null) {
-                JSONObject additionalProperties = apiModel.getAdditionalProperties();
-                Map<String, String> additionalPropertiesMap = new HashMap<>();
-                for (Object propertyKey : additionalProperties.keySet()) {
-                    String key = (String) propertyKey;
-                    additionalPropertiesMap.put(key, (String) additionalProperties.get(key));
-                }
-                dto.setAdditionalProperties(additionalPropertiesMap);
-            }
-
-            dto.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY.equals(apiModel.getAccessControl()) ?
-                    APIDetailedDTO.AccessControlEnum.RESTRICTED :
-                    APIDetailedDTO.AccessControlEnum.NONE);
-            if (apiModel.getAccessControlRoles() != null) {
-                dto.setAccessControlRoles(Arrays.asList(apiModel.getAccessControlRoles().split(",")));
-            }
-            APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
-            apiBusinessInformationDTO.setBusinessOwner(apiModel.getBusinessOwner());
-            apiBusinessInformationDTO.setBusinessOwnerEmail(apiModel.getBusinessOwnerEmail());
-            apiBusinessInformationDTO.setTechnicalOwner(apiModel.getTechnicalOwner());
-            apiBusinessInformationDTO.setTechnicalOwnerEmail(apiModel.getTechnicalOwnerEmail());
-            dto.setBusinessInformation(apiBusinessInformationDTO);
-            String gatewayEnvironments = StringUtils.join(apiModel.getEnvironments(), ",");
-            dto.setGatewayEnvironments(gatewayEnvironments);
-            APICorsConfigurationDTO apiCorsConfigurationDTO = new APICorsConfigurationDTO();
-            CORSConfiguration corsConfiguration = apiModel.getCorsConfiguration();
-            if (corsConfiguration == null) {
-                corsConfiguration = APIUtil.getDefaultCorsConfiguration();
-            }
-            apiCorsConfigurationDTO
-                    .setAccessControlAllowOrigins(corsConfiguration.getAccessControlAllowOrigins());
-            apiCorsConfigurationDTO
-                    .setAccessControlAllowHeaders(corsConfiguration.getAccessControlAllowHeaders());
-            apiCorsConfigurationDTO
-                    .setAccessControlAllowMethods(corsConfiguration.getAccessControlAllowMethods());
-            apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
-            apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
-            dto.setCorsConfiguration(apiCorsConfigurationDTO);
-            dto.setWsdlUri(apiModel.getWsdlUrl());
-            setEndpointSecurityFromModelToApiDTO(apiModel, dto);
-            setMaxTpsFromModelToApiDTO(apiModel, dto);
-
-            //setting micro-gateway labels if there are any
-            if (apiModel.getGatewayLabels() != null) {
-                List<LabelDTO> labels = new ArrayList<>();
-                List<Label> gatewayLabels = apiModel.getGatewayLabels();
-                for (Label label : gatewayLabels) {
-                    LabelDTO labelDTO = new LabelDTO();
-                    labelDTO.setName(label.getName());
-                    labelDTO.setDescription(label.getDescription());
-                    labels.add(labelDTO);
-                }
-                dto.setLabels(labels);
-            }
-            dto.setAuthorizationHeader(apiModel.getAuthorizationHeader());
-            dto.setApiSecurity(apiModel.getApiSecurity());
+        dto.setName(model.getId().getApiName());
+        dto.setVersion(model.getId().getVersion());
+        String providerName = model.getId().getProviderName();
+        dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+        dto.setId(model.getUUID());
+        String context = model.getContextTemplate();
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
+        dto.setContext(context);
+        dto.setDescription(model.getDescription());
+
+        dto.setIsDefaultVersion(model.isDefaultVersion());
+        dto.setResponseCaching(model.getResponseCache());
+        dto.setCacheTimeout(model.getCacheTimeout());
+        dto.setEndpointConfig(model.getEndpointConfig());
+        if (!StringUtils.isBlank(model.getThumbnailUrl())) {
+            dto.setThumbnailUri(getThumbnailUri(model.getUUID()));
+        }
+        List<SequenceDTO> sequences = new ArrayList<>();
+
+        String inSequenceName = model.getInSequence();
+        if (inSequenceName != null && !inSequenceName.isEmpty()) {
+            String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN;
+            boolean sharedStatus = getSharedStatus(inSequenceName,type,dto);
+            String uuid = getSequenceId(inSequenceName,type,dto);
+            SequenceDTO inSequence = new SequenceDTO();
+            inSequence.setName(inSequenceName);
+            inSequence.setType(type);
+            inSequence.setShared(sharedStatus);
+            inSequence.setId(uuid);
+            sequences.add(inSequence);
+        }
+
+        String outSequenceName = model.getOutSequence();
+        if (outSequenceName != null && !outSequenceName.isEmpty()) {
+            String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT;
+            boolean sharedStatus = getSharedStatus(outSequenceName,type,dto);
+            String uuid = getSequenceId(outSequenceName,type,dto);
+            SequenceDTO outSequence = new SequenceDTO();
+            outSequence.setName(outSequenceName);
+            outSequence.setType(type);
+            outSequence.setShared(sharedStatus);
+            outSequence.setId(uuid);
+            sequences.add(outSequence);
+        }
+
+        String faultSequenceName = model.getFaultSequence();
+        if (faultSequenceName != null && !faultSequenceName.isEmpty()) {
+            String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT;
+            boolean sharedStatus = getSharedStatus(faultSequenceName,type,dto);
+            String uuid = getSequenceId(faultSequenceName,type,dto);
+            SequenceDTO faultSequence = new SequenceDTO();
+            faultSequence.setName(faultSequenceName);
+            faultSequence.setType(type);
+            faultSequence.setShared(sharedStatus);
+            faultSequence.setId(uuid);
+            sequences.add(faultSequence);
+        }
+
+        dto.setSequences(sequences);
+
+        dto.setStatus(model.getStatus());
+
+        String subscriptionAvailability = model.getSubscriptionAvailability();
+        if (subscriptionAvailability != null) {
+            dto.setSubscriptionAvailability(mapSubscriptionAvailabilityFromAPItoDTO(subscriptionAvailability));
+        }
+
+        if (model.getSubscriptionAvailableTenants() != null) {
+            dto.setSubscriptionAvailableTenants(Arrays.asList(model.getSubscriptionAvailableTenants().split(",")));
+        }
+
+        //Get Swagger definition which has URL templates, scopes and resource details
+        String apiSwaggerDefinition;
+
+        apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
+
+        dto.setApiDefinition(apiSwaggerDefinition);
+
+        Set<String> apiTags = model.getTags();
+        List<String> tagsToReturn = new ArrayList<>();
+        tagsToReturn.addAll(apiTags);
+        dto.setTags(tagsToReturn);
+
+        Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
+        List<String> tiersToReturn = new ArrayList<>();
+        for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
+            tiersToReturn.add(tier.getName());
+        }
+        dto.setTiers(tiersToReturn);
+        dto.setApiLevelPolicy(model.getApiLevelPolicy());
+
+        //APIs created with type set to "NULL" will be considered as "HTTP"
+        if (model.getType() == null || model.getType().toLowerCase().equals("null")) {
+            dto.setType(APIDetailedDTO.TypeEnum.HTTP);
+        } else {
+            dto.setType(APIDetailedDTO.TypeEnum.valueOf(model.getType()));
+        }
+
+        if (!APIConstants.APITransportType.WS.equals(model.getType())) {
+            dto.setTransport(Arrays.asList(model.getTransports().split(",")));
+        }
+        dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
+
+        if (model.getVisibleRoles() != null) {
+            dto.setVisibleRoles(Arrays.asList(model.getVisibleRoles().split(",")));
+        }
+
+        if (model.getVisibleTenants() != null) {
+            dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
+        }
+
+        if (model.getAdditionalProperties() != null) {
+            JSONObject additionalProperties = model.getAdditionalProperties();
+            Map<String, String> additionalPropertiesMap = new HashMap<>();
+            for (Object propertyKey : additionalProperties.keySet()) {
+                String key = (String) propertyKey;
+                additionalPropertiesMap.put(key, (String) additionalProperties.get(key));
+            }
+            dto.setAdditionalProperties(additionalPropertiesMap);
+        }
+
+        dto.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY.equals(model.getAccessControl()) ?
+                APIDetailedDTO.AccessControlEnum.RESTRICTED :
+                APIDetailedDTO.AccessControlEnum.NONE);
+        if (model.getAccessControlRoles() != null) {
+            dto.setAccessControlRoles(Arrays.asList(model.getAccessControlRoles().split(",")));
+        }
+        APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
+        apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
+        apiBusinessInformationDTO.setBusinessOwnerEmail(model.getBusinessOwnerEmail());
+        apiBusinessInformationDTO.setTechnicalOwner(model.getTechnicalOwner());
+        apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
+        dto.setBusinessInformation(apiBusinessInformationDTO);
+        String gatewayEnvironments = StringUtils.join(model.getEnvironments(),",");
+        dto.setGatewayEnvironments(gatewayEnvironments);
+        APICorsConfigurationDTO apiCorsConfigurationDTO = new APICorsConfigurationDTO();
+        CORSConfiguration corsConfiguration = model.getCorsConfiguration();
+        if (corsConfiguration == null) {
+            corsConfiguration = APIUtil.getDefaultCorsConfiguration();
+        }
+        apiCorsConfigurationDTO
+                .setAccessControlAllowOrigins(corsConfiguration.getAccessControlAllowOrigins());
+        apiCorsConfigurationDTO
+                .setAccessControlAllowHeaders(corsConfiguration.getAccessControlAllowHeaders());
+        apiCorsConfigurationDTO
+                .setAccessControlAllowMethods(corsConfiguration.getAccessControlAllowMethods());
+        apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
+        apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
+        dto.setCorsConfiguration(apiCorsConfigurationDTO);
+        dto.setWsdlUri(model.getWsdlUrl());
+        setEndpointSecurityFromModelToApiDTO(model, dto);
+        setMaxTpsFromModelToApiDTO(model, dto);
+
+        //setting micro-gateway labels if there are any
+        if (model.getGatewayLabels() != null) {
+            List<LabelDTO> labels = new ArrayList<>();
+            List<Label> gatewayLabels = model.getGatewayLabels();
+            for (Label label : gatewayLabels) {
+                LabelDTO labelDTO = new LabelDTO();
+                labelDTO.setName(label.getName());
+                labelDTO.setDescription(label.getDescription());
+                labels.add(labelDTO);
+            }
+            dto.setLabels(labels);
+        }
+        dto.setAuthorizationHeader(model.getAuthorizationHeader());
+        dto.setApiSecurity(model.getApiSecurity());
         return dto;
     }
 
@@ -595,15 +591,15 @@ public class APIMappingUtil {
      * @param expand defines whether APIListDTO should contain APIINFODTOs or APIDTOs
      * @return APIListDTO object containing APIDTOs
      */
-    public static APIListDTO fromAPIListToDTO(List<Object> apiList, boolean expand) throws APIManagementException {
+    public static APIListDTO fromAPIListToDTO(List<API> apiList, boolean expand) throws APIManagementException {
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         if (apiList != null && !expand) {
-            for (Object api : apiList) {
+            for (API api : apiList) {
                 apiInfoDTOs.add(fromAPIToInfoDTO(api));
             }
         } else if (apiList != null && expand) {
-            for (Object api : apiList) {
+            for (API api : apiList) {
                 apiInfoDTOs.add(fromAPItoDTO(api));
             }
         }
@@ -649,27 +645,23 @@ public class APIMappingUtil {
      * @param api API object
      * @return a minimal representation DTO
      */
-    public static APIInfoDTO fromAPIToInfoDTO(Object api) {
+    public static APIInfoDTO fromAPIToInfoDTO(API api) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
-        API apiobject = null;
-        if (api instanceof API) {
-            apiobject = (API) api;
-            apiInfoDTO.setDescription(apiobject.getDescription());
-            String context = apiobject.getContextTemplate();
-            if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
-                context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
-            }
-            apiInfoDTO.setContext(context);
-            apiInfoDTO.setId(apiobject.getUUID());
-            APIIdentifier apiId = apiobject.getId();
-            apiInfoDTO.setName(apiId.getApiName());
-            apiInfoDTO.setVersion(apiId.getVersion());
-            String providerName = apiobject.getId().getProviderName();
-            apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
-            apiInfoDTO.setStatus(apiobject.getStatus().toString());
-            if (!StringUtils.isBlank(apiobject.getThumbnailUrl())) {
-                apiInfoDTO.setThumbnailUri(getThumbnailUri(apiobject.getUUID()));
-            }
+        apiInfoDTO.setDescription(api.getDescription());
+        String context = api.getContextTemplate();
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+        apiInfoDTO.setContext(context);
+        apiInfoDTO.setId(api.getUUID());
+        APIIdentifier apiId = api.getId();
+        apiInfoDTO.setName(apiId.getApiName());
+        apiInfoDTO.setVersion(apiId.getVersion());
+        String providerName = api.getId().getProviderName();
+        apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+        apiInfoDTO.setStatus(api.getStatus().toString());
+        if (!StringUtils.isBlank(api.getThumbnailUrl())) {
+            apiInfoDTO.setThumbnailUri(getThumbnailUri(api.getUUID()));
         }
         return apiInfoDTO;
     }
