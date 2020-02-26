@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
@@ -93,6 +93,13 @@ export default function ProvideGraphQL(props) {
                 inputsDispatcher({ action: 'inputValue', value: validFile });
             });
     }
+
+    useEffect(() => {
+        const { inputValue } = apiInputs;
+        if (inputValue) {
+            onDrop([inputValue]);
+        }
+    }, []);
 
     return (
         <>
