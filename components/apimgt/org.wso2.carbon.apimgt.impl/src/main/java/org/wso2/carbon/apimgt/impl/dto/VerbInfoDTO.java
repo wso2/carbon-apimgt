@@ -24,6 +24,8 @@ public class VerbInfoDTO implements Serializable {
     private String requestKey;
 
     private ConditionGroupDTO[] conditionGroups;
+    
+    private boolean contentAware;
 
     public String getThrottling() {
         return throttling;
@@ -101,5 +103,13 @@ public class VerbInfoDTO implements Serializable {
 
     public ConditionGroupDTO[] getConditionGroups() {
         return conditionGroups;
+    }
+    
+    public boolean isContentAware() {
+        return contentAware;
+    }
+
+    public void setContentAware(boolean contentAware) {
+        this.contentAware = contentAware;
     }
 }

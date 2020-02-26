@@ -17,6 +17,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 
@@ -26,6 +27,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.xml.stream.XMLStreamException;
@@ -202,8 +204,11 @@ public class DataProcessAndPublishingAgent implements Runnable {
 
         //this parameter will be used to capture message size and pass it to calculation logic
         long messageSizeInBytes = 0;
-        if (authenticationContext.isContentAwareTierPresent()) {
+        ArrayList<VerbInfoDTO> list = (ArrayList<VerbInfoDTO>) messageContext.getProperty(APIConstants.VERB_INFO_DTO);
+        VerbInfoDTO verbInfoDTO = list.get(0);
+        if (authenticationContext.isContentAwareTierPresent() || verbInfoDTO.isContentAware()) {
             //this request can match with with bandwidth policy. So we need to get message size.
+            log.debug("Content aware throttling tier present.");
             Object contentLength = null;
             if (transportHeaderMap != null) {
                 contentLength = transportHeaderMap.get(APIThrottleConstants.CONTENT_LENGTH);
@@ -231,6 +236,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
                         messageSizeInBytes = size.length;
                     }
                 }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Message size: " + messageSizeInBytes + "B");
             }
             jsonObMap.put(APIThrottleConstants.MESSAGE_SIZE, messageSizeInBytes);
             if (!StringUtils.isEmpty(authenticationContext.getApplicationName())) {

@@ -215,6 +215,25 @@ public class OASParserUtil {
         }
     }
 
+    public static String getOASDefinitionWithTierContentAwareProperty(String apiDefinition,
+            List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException {
+        if (contentAwareTiersList == null || contentAwareTiersList.isEmpty()) {
+            // no modifications if the list is empty
+            return apiDefinition;
+        }
+        SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
+
+        if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
+            return oas3Parser.getOASDefinitionWithTierContentAwareProperty(apiDefinition, contentAwareTiersList,
+                    apiLevelTier);
+        } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) {
+            return oas2Parser.getOASDefinitionWithTierContentAwareProperty(apiDefinition, contentAwareTiersList,
+                    apiLevelTier);
+        } else {
+            throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
+        }
+    }
+   
     public static String updateAPIProductSwaggerOperations(Map<API, List<APIProductResource>> apiToProductResourceMapping,
                                                            String destinationSwagger)
             throws APIManagementException {

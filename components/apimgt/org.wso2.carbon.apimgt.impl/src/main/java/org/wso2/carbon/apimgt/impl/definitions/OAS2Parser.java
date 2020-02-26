@@ -1089,4 +1089,42 @@ public class OAS2Parser extends APIDefinition {
         updateSwaggerSecurityDefinition(swagger, swaggerData, authUrl);
         return getSwaggerJsonString(swagger);
     }
+
+    @Override
+    public String getOASDefinitionWithTierContentAwareProperty(String oasDefinition,
+            List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException {
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(oasDefinition);
+        Swagger swagger = parseAttemptForV2.getSwagger();
+        // check if API Level tier is content aware. if so, we set a extension as a global property
+        if (contentAwareTiersList.contains(apiLevelTier)) {
+            swagger.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER_CONTENT_AWARE, true);
+            // no need to check resource levels since both cannot exist at the same time.
+            log.debug("API Level policy is content aware..");
+            return Json.pretty(swagger);
+        }
+        // if api level tier exists, skip checking for resource level tiers since both cannot exist at the same time.
+        if (apiLevelTier != null) {
+            log.debug("API Level policy is not content aware..");
+            return oasDefinition;
+        } else {
+            log.debug("API Level policy does not exist. Checking for resource level");
+            for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
+                String path = entry.getKey();
+                List<Operation> operations = swagger.getPaths().get(path).getOperations();
+                for (Operation op : operations) {
+                    if (contentAwareTiersList
+                            .contains(op.getVendorExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER))) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(
+                                    "API resource Level policy is content aware for operation " + op.getOperationId());
+                        }
+                        op.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER_CONTENT_AWARE, true);
+                    }
+                }
+            }
+            return Json.pretty(swagger);
+        }
+
+    }
 }

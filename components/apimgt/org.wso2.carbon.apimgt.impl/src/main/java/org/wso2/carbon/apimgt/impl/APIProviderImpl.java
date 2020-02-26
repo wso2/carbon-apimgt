@@ -1885,14 +1885,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
             api.setGraphQLSchema(getGraphqlSchema(api.getId()));
         }
-        api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
+
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
         } else {
             tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
-
+        //update the swagger definition with content-aware property for policies with bandwidth type.
+        List<String> policyNames = apiMgtDAO
+                .getNamesOfTierWithBandwidthQuotaType(APIUtil.getTenantIdFromTenantDomain(tenantDomain));
+        String definition = OASParserUtil.getOASDefinitionWithTierContentAwareProperty(
+                getOpenAPIDefinition(api.getId()), policyNames, api.getApiLevelPolicy());
+        api.setSwaggerDefinition(definition);
         try {
             builder = getAPITemplateBuilder(api);
         } catch (Exception e) {
