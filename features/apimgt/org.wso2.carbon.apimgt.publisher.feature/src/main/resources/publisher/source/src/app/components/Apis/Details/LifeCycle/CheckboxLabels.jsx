@@ -121,7 +121,6 @@ export default function CheckboxLabels(props) {
                                 <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
                             </Link>
                         </Grid>
-
                         <>
                             {isAppLayerSecurityMandatory && (
                                 <Grid xs={12} className={classes.grid}>
@@ -159,7 +158,6 @@ export default function CheckboxLabels(props) {
                                     </Link>
                                 </Grid>
                             ) }
-
                         </>
                     </Grid>
                     { api.type !== 'GRAPHQL' && (

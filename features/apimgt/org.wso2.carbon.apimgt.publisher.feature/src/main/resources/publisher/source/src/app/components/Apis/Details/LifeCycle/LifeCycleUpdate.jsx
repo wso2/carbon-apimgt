@@ -154,7 +154,6 @@ class LifeCycleUpdate extends Component {
         this.updateLCStateOfAPI(apiUUID, action);
     }
 
-
     /**
      * @inheritdoc
      * @memberof LifeCycleUpdate
