@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.6.88-SNAPSHOT</version>
+        <version>6.6.101-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -304,6 +304,19 @@
                     <include>devportal/site/**</include>
                     <include>devportal/services/**</include>
                     <include>devportal/jaggery.conf</include>
+                    <include>devportal/source/**</include>
+                    <include>devportal/override/**</include>
+                    <include>devportal/.eslintignore</include>
+                    <include>devportal/.eslintrc.js</include>
+                    <include>devportal/.npmrc</include>
+                    <include>devportal/babel.config.js</include>
+                    <include>devportal/jest.config.js</include>
+                    <include>devportal/jsconfig.json</include>
+                    <include>devportal/loader.js</include>
+                    <include>devportal/package-lock.json</include>
+                    <include>devportal/package.json</include>
+                    <include>devportal/webpack.config.js</include>
+                    <include>devportal/Readme.txt</include>
                     <include>p2.inf</include>
                     <include>admin/**</include>
                     <include>apistore/**</include>

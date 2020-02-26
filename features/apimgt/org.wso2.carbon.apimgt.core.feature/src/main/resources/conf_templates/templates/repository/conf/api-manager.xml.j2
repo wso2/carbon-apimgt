@@ -76,14 +76,11 @@
         <GatewayJWTGeneration>
             <ImplClass>{{apim.jwt.gateway_generator.impl}}</ImplClass>
             <Configuration>
-                <ClaimMappings>
+            <Claims>
                 {%- for claim in apim.jwt.gateway_generator.claims -%}
-                    <Claim>
-                    <RemoteClaim>{{claim.remote_claim}}</RemoteClaim>
-                    <LocalClaim>{{claim.local_claim}}</LocalClaim>
-                    </Claim>
-                    {% endfor %}
-                </ClaimMappings>
+                <Claim>{{claim}}</Claim>
+                {% endfor %}
+            </Claims>
             </Configuration>
         </GatewayJWTGeneration>
     </JWTConfiguration>
@@ -145,6 +142,26 @@
             {% endfor %}
         </Environments>
     </APIGateway>
+
+    <TokenIssuers>
+    {%- for issuer_1 in apim.jwt.issuer -%}
+    <TokenIssuer issuer ="{{issuer_1.name}}">
+    {% if issuer_1.jwks is defined %}
+      <JWKSConfiguration>
+        <URL>{{issuer_1.jwks.url}}</URL>
+      </JWKSConfiguration>
+    {% endif %}
+      <ClaimMappings>
+      {%- for claim in issuer_1.claim_mapping -%}
+         <ClaimMapping>
+           <RemoteClaim>{{claim.remote_claim}}</RemoteClaim>
+           <LocalClaim>{{claim.local_claim}}</LocalClaim>
+         </ClaimMapping>
+      {% endfor %}
+      </ClaimMappings>
+      </TokenIssuer>
+    {% endfor %}
+    </TokenIssuers>
 
     <CacheConfigurations>
 	    <!-- Enable/Disable token caching at the Gateway-->
@@ -942,6 +959,8 @@
         <recommendationAPI>{{apim.devportal.recommendations.recommendations_api}}</recommendationAPI>
         {% if apim.devportal.recommendations.oauth_endpoint is defined %}
         <authenticationEndpoint>{{apim.devportal.recommendations.oauth_endpoint}}</authenticationEndpoint>
+        {% endif %}
+        {% if apim.devportal.recommendations.consumer_key is defined %}
         <consumerKey>{{apim.devportal.recommendations.consumer_key}}</consumerKey>
         <consumerSecret>{{apim.devportal.recommendations.consumer_secret}}</consumerSecret>
         {% endif %}
@@ -950,6 +969,9 @@
         {% endif %}
         {% if apim.devportal.recommendations.apply_for_all_tenants is defined %}
         <applyForAllTenants>{{apim.devportal.recommendations.apply_for_all_tenants}}</applyForAllTenants>
+        {% endif %}
+        {% if apim.devportal.recommendations.wait_duration is defined %}
+        <waitDuration>{{apim.devportal.recommendations.wait_duration}}</waitDuration>
         {% endif %}
         {% if apim.devportal.recommendations.username is defined %}
         <userName>{{apim.devportal.recommendations.username}}</userName>

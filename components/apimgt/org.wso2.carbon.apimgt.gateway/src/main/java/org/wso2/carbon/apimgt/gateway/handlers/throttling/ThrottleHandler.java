@@ -197,13 +197,12 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
             //Do blocking if there are blocking conditions present
             if (getThrottleDataHolder().isBlockingConditionsPresent()) {
-                ipLevelBlockingKey = apiTenantDomain + ":" + clientIp;
                 appLevelBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
                 Timer timer = getTimer(MetricManager.name(
                         APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), BLOCKED_TEST));
                 Timer.Context context = timer.start();
-                isBlockedRequest = getThrottleDataHolder().isRequestBlocked(
-                        apiContext, appLevelBlockingKey, authorizedUser, ipLevelBlockingKey);
+                isBlockedRequest = getThrottleDataHolder()
+                        .isRequestBlocked(apiContext, appLevelBlockingKey, authorizedUser, clientIp, apiTenantDomain);
                 context.stop();
             }
 

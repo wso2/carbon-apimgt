@@ -1168,20 +1168,40 @@ public class APIMgtDAOTest {
         api.setContext("/testAddUpdateDeleteBlockCondition");
         api.setContextTemplate("/testAddUpdateDeleteBlockCondition/{version}");
         apiMgtDAO.addAPI(api, -1234);
-        String apiUUID = apiMgtDAO.addBlockConditions(APIConstants.BLOCKING_CONDITIONS_API,
-                "/testAddUpdateDeleteBlockCondition", "carbon.super");
-        String applicationUUID = apiMgtDAO.addBlockConditions(APIConstants.BLOCKING_CONDITIONS_APPLICATION,
-                "blockuser1:testAddUpdateDeleteBlockCondition", "carbon.super");
+        BlockConditionsDTO apiBlockConditionDto = new BlockConditionsDTO();
+        apiBlockConditionDto.setConditionValue("/testAddUpdateDeleteBlockCondition");
+        apiBlockConditionDto.setConditionType(APIConstants.BLOCKING_CONDITIONS_API);
+        apiBlockConditionDto.setUUID(UUID.randomUUID().toString());
+        apiBlockConditionDto.setTenantDomain("carbon.super");
+        BlockConditionsDTO apiUUID = apiMgtDAO.addBlockConditions(apiBlockConditionDto);
+        BlockConditionsDTO applicationBlockCondition = new BlockConditionsDTO();
+        applicationBlockCondition.setConditionValue("blockuser1:testAddUpdateDeleteBlockCondition");
+        applicationBlockCondition.setConditionType(APIConstants.BLOCKING_CONDITIONS_APPLICATION);
+        applicationBlockCondition.setUUID(UUID.randomUUID().toString());
+        applicationBlockCondition.setTenantDomain("carbon.super");
+        BlockConditionsDTO applicationUUID = apiMgtDAO.addBlockConditions(applicationBlockCondition);
         assertNotNull(applicationUUID);
-        String ipUUID = apiMgtDAO.addBlockConditions(APIConstants.BLOCKING_CONDITIONS_IP, "127.0.0.1", "carbon.super");
+        BlockConditionsDTO ipBlockcondition = new BlockConditionsDTO();
+        ipBlockcondition.setConditionValue("127.0.0.1");
+        ipBlockcondition.setConditionType(APIConstants.BLOCKING_CONDITIONS_IP);
+        ipBlockcondition.setUUID(UUID.randomUUID().toString());
+        ipBlockcondition.setTenantDomain("carbon.super");
+        BlockConditionsDTO ipUUID = apiMgtDAO.addBlockConditions(ipBlockcondition);
         assertNotNull(ipUUID);
-        String userUUID = apiMgtDAO.addBlockConditions(APIConstants.BLOCKING_CONDITIONS_USER, "admin", "carbon.super");
-        assertNotNull(apiMgtDAO.getBlockConditionByUUID(apiUUID));
-        assertNotNull(apiMgtDAO.updateBlockConditionState(apiMgtDAO.getBlockConditionByUUID(userUUID).getConditionId
-                (), "FALSE"));
-        assertNotNull(apiMgtDAO.updateBlockConditionStateByUUID(userUUID, "FALSE"));
-        apiMgtDAO.deleteBlockCondition(apiMgtDAO.getBlockConditionByUUID(userUUID).getConditionId());
-        apiMgtDAO.getBlockCondition(apiMgtDAO.getBlockConditionByUUID(ipUUID).getConditionId());
+        BlockConditionsDTO userBlockcondition = new BlockConditionsDTO();
+        userBlockcondition.setConditionValue("admin");
+        userBlockcondition.setConditionType(APIConstants.BLOCKING_CONDITIONS_USER);
+        userBlockcondition.setUUID(UUID.randomUUID().toString());
+        userBlockcondition.setTenantDomain("carbon.super");
+        BlockConditionsDTO userUUID = apiMgtDAO.addBlockConditions(userBlockcondition);
+        assertNotNull(apiMgtDAO.getBlockConditionByUUID(apiUUID.getUUID()));
+        assertNotNull(userUUID);
+        assertNotNull(apiMgtDAO
+                .updateBlockConditionState(apiMgtDAO.getBlockConditionByUUID(userUUID.getUUID()).getConditionId(),
+                        "FALSE"));
+        assertNotNull(apiMgtDAO.updateBlockConditionStateByUUID(userUUID.getUUID(), "FALSE"));
+        apiMgtDAO.deleteBlockCondition(apiMgtDAO.getBlockConditionByUUID(userUUID.getUUID()).getConditionId());
+        apiMgtDAO.getBlockCondition(apiMgtDAO.getBlockConditionByUUID(ipUUID.getUUID()).getConditionId());
 
         List<BlockConditionsDTO> blockConditions = apiMgtDAO.getBlockConditions("carbon.super");
         for (BlockConditionsDTO blockConditionsDTO : blockConditions) {

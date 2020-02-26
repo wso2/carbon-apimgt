@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -26,6 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class is responsible for mapping Block Condition model and its sub components into REST API DTOs and vice-versa
@@ -37,10 +41,9 @@ public class BlockingConditionMappingUtil {
      *
      * @param blockConditionList A List of Block Conditions
      * @return REST API List DTO object derived from Block Condition list
-     * @throws UnsupportedThrottleLimitTypeException
      */
     public static BlockingConditionListDTO fromBlockConditionListToListDTO(
-            List<BlockConditionsDTO> blockConditionList) throws UnsupportedThrottleLimitTypeException {
+            List<BlockConditionsDTO> blockConditionList) throws ParseException {
         BlockingConditionListDTO listDTO = new BlockingConditionListDTO();
         List<BlockingConditionDTO> blockingConditionDTOList = new ArrayList<>();
         if (blockConditionList != null) {
@@ -59,24 +62,22 @@ public class BlockingConditionMappingUtil {
      *
      * @param blockCondition Block condition model object
      * @return Block condition DTO object derived from block condition model object
-     * @throws UnsupportedThrottleLimitTypeException
      */
     public static BlockingConditionDTO fromBlockingConditionToDTO(
-            BlockConditionsDTO blockCondition) throws UnsupportedThrottleLimitTypeException {
+            BlockConditionsDTO blockCondition) throws ParseException {
+
         BlockingConditionDTO dto = new BlockingConditionDTO();
         dto.setConditionId(blockCondition.getUUID());
         dto.setConditionType(blockCondition.getConditionType());
-
-        String conditionValue = blockCondition.getConditionValue();
-        if (APIConstants.BLOCKING_CONDITIONS_IP.equals(blockCondition.getConditionType())) {
-            int index = conditionValue.indexOf(":");
-            if (index > -1) {
-                // Removing Tenant Domain from IP
-                conditionValue = conditionValue.substring(index + 1, conditionValue.length());
-            }
+        if (APIConstants.BLOCKING_CONDITIONS_API.equals(blockCondition.getConditionType()) ||
+                APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(blockCondition.getConditionType()) ||
+                APIConstants.BLOCKING_CONDITIONS_USER.equals(blockCondition.getConditionType())) {
+            dto.setConditionValue(blockCondition.getConditionValue());
+        } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(blockCondition.getConditionType()) ||
+                APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(blockCondition.getConditionType())) {
+            Object parse = new JSONParser().parse(blockCondition.getConditionValue());
+            dto.setConditionValue(parse);
         }
-        dto.setConditionValue(conditionValue);
         return dto;
     }
-
 }

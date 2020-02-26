@@ -18,12 +18,23 @@
 
 package org.wso2.carbon.apimgt.gateway.throttling;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.gateway.dto.IPRange;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -38,9 +49,9 @@ public class ThrottleDataHolder {
     private Map<String, String> blockedAPIConditionsMap = new ConcurrentHashMap<String, String>();
     private Map<String, String> blockedApplicationConditionsMap = new ConcurrentHashMap<String, String>();
     private Map<String, String> blockedUserConditionsMap = new ConcurrentHashMap<String, String>();
-    private Map<String, String> blockedIpConditionsMap = new ConcurrentHashMap<String, String>();
+    private Map<String, Set<IPRange>> blockedIpConditionsMap = new ConcurrentHashMap<>();
     private Map<String, String> keyTemplateMap = new ConcurrentHashMap<String, String>();
-    private boolean isBlockingConditionsPresent = false;
+    private boolean isBlockingConditionsPresent = true;
     private boolean isKeyTemplatesPresent = false;
     private Map<String, Long> throttleDataMap = new ConcurrentHashMap<String, Long>();
     private Map<String,Long> throttledAPIKeysMap = new ConcurrentHashMap<String, Long>();
@@ -115,88 +126,108 @@ public class ThrottleDataHolder {
     }
 
     public void addAPIBlockingCondition(String name, String value) {
-        isBlockingConditionsPresent = true;
         blockedAPIConditionsMap.put(name, value);
     }
 
     public void addApplicationBlockingCondition(String name, String value) {
-        isBlockingConditionsPresent = true;
         blockedApplicationConditionsMap.put(name, value);
     }
 
 
     public void addUserBlockingCondition(String name, String value) {
-        isBlockingConditionsPresent = true;
         blockedUserConditionsMap.put(name, value);
     }
 
-    public void addIplockingCondition(String name, String value) {
-        isBlockingConditionsPresent = true;
-        blockedIpConditionsMap.put(name, value);
+    public void addIplockingCondition(String tenantDomain, int conditionId, String value, String type) {
+
+        Set<IPRange> ipRanges = blockedIpConditionsMap.get(tenantDomain);
+        if (ipRanges == null){
+            ipRanges = new HashSet<>();
+        }
+
+        ipRanges.add(convertValueToIPRange(tenantDomain, conditionId, value, type));
+        blockedIpConditionsMap.put(tenantDomain, ipRanges);
     }
 
+    private IPRange convertValueToIPRange(String tenantDomain, int conditionId, String value, String type) {
+
+        IPRange ipRange = new IPRange();
+        ipRange.setId(conditionId);
+        ipRange.setTenantDomain(tenantDomain);
+        JsonObject ipLevelJson = (JsonObject) new JsonParser().parse(value);
+        if (APIConstants.BLOCKING_CONDITIONS_IP.equals(type)) {
+            ipRange.setType(APIConstants.BLOCKING_CONDITIONS_IP);
+            JsonElement fixedIpElement = ipLevelJson.get(APIConstants.BLOCK_CONDITION_FIXED_IP);
+            if (fixedIpElement != null && StringUtils.isNotEmpty(fixedIpElement.getAsString())) {
+                ipRange.setFixedIp(fixedIpElement.getAsString());
+            }
+        } else if (APIConstants.BLOCK_CONDITION_IP_RANGE.equals(type)) {
+            ipRange.setType(APIConstants.BLOCK_CONDITION_IP_RANGE);
+            JsonElement startingIpElement = ipLevelJson.get(APIConstants.BLOCK_CONDITION_START_IP);
+            if (startingIpElement != null && StringUtils.isNotEmpty(startingIpElement.getAsString())) {
+                ipRange.setStartingIP(startingIpElement.getAsString());
+                ipRange.setStartingIpBigIntValue(APIUtil.ipToBigInteger(startingIpElement.getAsString()));
+            }
+            JsonElement endingIpElement = ipLevelJson.get(APIConstants.BLOCK_CONDITION_ENDING_IP);
+            if (endingIpElement != null && StringUtils.isNotEmpty(endingIpElement.getAsString())) {
+                ipRange.setEndingIp(endingIpElement.getAsString());
+                ipRange.setEndingIpBigIntValue(APIUtil.ipToBigInteger(endingIpElement.getAsString()));
+            }
+        }
+        if (ipLevelJson.has(APIConstants.BLOCK_CONDITION_INVERT)) {
+            ipRange.setInvert(ipLevelJson.get(APIConstants.BLOCK_CONDITION_INVERT).getAsBoolean());
+        }
+        return ipRange;
+    }
     public void addUserBlockingConditionsFromMap(Map<String, String> data) {
         if(data.size() > 0) {
             blockedUserConditionsMap.putAll(data);
-            isBlockingConditionsPresent = true;
         }
     }
 
-    public void addIplockingConditionsFromMap(Map<String, String> data) {
+    public void addIplockingConditionsFromMap(Map<String, Set<IPRange>> data) {
         if(data.size() > 0) {
             blockedIpConditionsMap.putAll(data);
-            isBlockingConditionsPresent = true;
         }
     }
 
     public void addAPIBlockingConditionsFromMap(Map<String, String> data) {
         if(data.size() > 0) {
             blockedAPIConditionsMap.putAll(data);
-            isBlockingConditionsPresent = true;
         }
     }
 
     public void addApplicationBlockingConditionsFromMap(Map<String, String> data) {
         if(data.size() > 0) {
             blockedApplicationConditionsMap.putAll(data);
-            isBlockingConditionsPresent = true;
         }
     }
 
     public void removeAPIBlockingCondition(String name) {
         blockedAPIConditionsMap.remove(name);
-        if(isAnyBlockedMapContainsData()) {
-            isBlockingConditionsPresent = true;
-        } else {
-            isBlockingConditionsPresent = false;
-        }
     }
 
     public void removeApplicationBlockingCondition(String name) {
         blockedApplicationConditionsMap.remove(name);
-        if(isAnyBlockedMapContainsData()) {
-            isBlockingConditionsPresent = true;
-        } else {
-            isBlockingConditionsPresent = false;
-        }
     }
 
 
     public void removeUserBlockingCondition(String name) {
         blockedUserConditionsMap.remove(name);
-        if(isAnyBlockedMapContainsData()) {
-            isBlockingConditionsPresent = true;
-        } else {
-            isBlockingConditionsPresent = false;
-        }
     }
 
-    public void removeIpBlockingCondition(String name) {
-        blockedIpConditionsMap.remove(name);
-        if(isAnyBlockedMapContainsData()) {
-            isBlockingConditionsPresent = true;
-        } else {
-            isBlockingConditionsPresent = false;
+    public void removeIpBlockingCondition(String tenantDomain, int conditionId) {
+
+        Set<IPRange> ipRanges = blockedIpConditionsMap.get(tenantDomain);
+        if (ipRanges != null) {
+            Iterator<IPRange> iterator = ipRanges.iterator();
+            while (iterator.hasNext()) {
+                IPRange ipRange = iterator.next();
+                if (ipRange.getId() == conditionId) {
+                    iterator.remove();
+                    break;
+                }
+            }
         }
     }
 
@@ -226,11 +257,50 @@ public class ThrottleDataHolder {
     }
 
     public boolean isRequestBlocked(String apiBlockingKey, String applicationBlockingKey, String userBlockingKey,
-                                    String ipBlockingKey) {
+                                    String ipBlockingKey, String apiTenantDomain) {
         return (blockedAPIConditionsMap.containsKey(apiBlockingKey) ||
                 blockedApplicationConditionsMap.containsKey(applicationBlockingKey) ||
                 blockedUserConditionsMap.containsKey(userBlockingKey) ||
-                blockedIpConditionsMap.containsKey(ipBlockingKey));
+                isIpLevelBlocked(apiTenantDomain, ipBlockingKey));
+    }
+
+    private boolean isIpLevelBlocked(String apiTenantDomain, String ip) {
+
+        Set<IPRange> ipRanges = blockedIpConditionsMap.get(apiTenantDomain);
+        if (ipRanges != null && ipRanges.size() > 0) {
+            log.debug("Tenant " + apiTenantDomain + " contains block conditions");
+            for (IPRange ipRange : ipRanges) {
+                if (APIConstants.BLOCKING_CONDITIONS_IP.equals(ipRange.getType())) {
+                    if (ip.equals(ipRange.getFixedIp())) {
+                        if (!ipRange.isInvert()) {
+                            log.debug("Block IP selected for Blocked");
+                            return true;
+                        }
+                    } else {
+                        if (ipRange.isInvert()) {
+                            log.debug("Block IP selected for Blocked");
+                            return true;
+                        }
+                    }
+                } else if (APIConstants.BLOCK_CONDITION_IP_RANGE.equals(ipRange.getType())) {
+                    BigInteger ipBigIntegerValue = APIUtil.ipToBigInteger(ip);
+
+                    if (((ipBigIntegerValue.compareTo(ipRange.getStartingIpBigIntValue()) > 0) &&
+                            (ipBigIntegerValue.compareTo(ipRange.getEndingIpBigIntValue()) < 0))) {
+                        if (!ipRange.isInvert()) {
+                            log.debug("Block IPRange selected for Blocked");
+                            return true;
+                        }
+                    } else {
+                        if (ipRange.isInvert()) {
+                            log.debug("Block IPRange selected for Blocked");
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -270,18 +340,6 @@ public class ThrottleDataHolder {
 
     public boolean isBlockingConditionsPresent() {
         return isBlockingConditionsPresent;
-    }
-
-    public void setBlockingConditionsPresent(boolean blockingConditionsPresent) {
-        isBlockingConditionsPresent = blockingConditionsPresent;
-    }
-
-    private boolean isAnyBlockedMapContainsData() {
-        if (blockedAPIConditionsMap.size() > 0 || blockedIpConditionsMap.size() > 0
-                || blockedApplicationConditionsMap.size() > 0 || blockedUserConditionsMap.size() > 0) {
-            return true;
-        }
-        return false;
     }
 
     public boolean isKeyTemplatesPresent() {

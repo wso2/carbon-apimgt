@@ -20,6 +20,7 @@ const CONSTS = {
     HTTP_METHODS: ['get', 'put', 'post', 'delete', 'patch', 'head', 'options'],
     errorCodes: {
         INSUFFICIENT_PREVILEGES: '900403: Insufficient privileges to login',
+        UNEXPECTED_SERVER_ERROR: 'Unexpected token S in JSON at position 0',
         INVALID_TOKEN: '900401: Invalid token',
         NO_TOKEN_FOUND: '901401: No partial token found!',
     },
