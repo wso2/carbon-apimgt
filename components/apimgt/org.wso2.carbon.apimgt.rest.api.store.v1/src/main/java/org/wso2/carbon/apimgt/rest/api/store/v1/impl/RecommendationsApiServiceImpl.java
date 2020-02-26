@@ -24,7 +24,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
@@ -33,7 +32,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApiService;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +52,6 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
             String userName = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             String requestedTenantDomain = apiConsumer.getRequestedTenant();
-            String userTenantDomain = MultitenantUtils.getTenantDomain(userName);
 
             if (apiConsumer.isRecommendationEnabled(requestedTenantDomain) &&
                     userName != APIConstants.WSO2_ANONYMOUS_USER) {
@@ -69,11 +66,12 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
                         try {
                             JSONObject apiObj = apiList.getJSONObject(i);
                             apiId = apiObj.getString("id");
-                            ApiTypeWrapper apiWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, userTenantDomain);
+                            ApiTypeWrapper apiWrapper = apiConsumer
+                                    .getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
                             API api = apiWrapper.getApi();
                             APIIdentifier apiIdentifier = api.getId();
                             boolean isApiSubscribed = apiConsumer.isSubscribed(apiIdentifier, userName);
-                            if (!isApiSubscribed && recommendedApis.size() <= maxRecommendations) {
+                            if (!isApiSubscribed && recommendedApis.size() < maxRecommendations) {
                                 JSONObject apiDetails = new JSONObject();
                                 apiDetails.put("id", apiId);
                                 apiDetails.put("name", apiWrapper.getName());

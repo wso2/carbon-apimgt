@@ -1925,12 +1925,13 @@ public final class APIConstants {
     public static final String RECOMMENDATION_API_CONSUMER_KEY = "consumerKey";
     public static final String RECOMMENDATION_API_CONSUMER_SECRET = "consumerSecret";
     public static final String MAX_RECOMMENDATIONS = "maxRecommendations";
+    public static final String WAIT_DURATION = "waitDuration";
     public static final String APPLY_RECOMMENDATIONS_FOR_ALL_APIS = "applyForAllTenants";
     public static final String RECOMMENDATION_USERNAME = "userName";
     public static final String RECOMMENDATION_PASSWORD = "password";
     public static final String ADD_API = "ADD_API";
     public static final String DELETE_API = "DELETE_API";
-    public static final String ADD_NEW_APPLICATION = "ADD_NEW_APPLICATION";
+    public static final String ADD_NEW_APPLICATION = "ADD_APPLICATION";
     public static final String UPDATED_APPLICATION = "UPDATED_APPLICATION";
     public static final String DELETE_APPLICATION = "DELETE_APPLICATION";
     public static final String ADD_USER_CLICKED_API = "ADD_USER_CLICKED_API";
@@ -1953,6 +1954,9 @@ public final class APIConstants {
     public static final String TOKEN_GRANT_TYPE_KEY = "grant_type";
     public static final String TOKEN_KEY = "token";
     public static final String GRANT_TYPE_VALUE = "client_credentials";
+    public static final String RECOMMENDATIONS_CACHE_NAME = "APIRecommendationsCache";
+    public static final String RECOMMENDATIONS_CACHE_KEY = "Recommendations";
+    public static final String LAST_UPDATED_CACHE_KEY = "LastUpdated";
 
 
     public static class CertificateReLoaderConfiguration {
