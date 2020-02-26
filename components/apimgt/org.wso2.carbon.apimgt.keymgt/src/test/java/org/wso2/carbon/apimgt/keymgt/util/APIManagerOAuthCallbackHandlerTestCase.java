@@ -27,6 +27,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.RoleBasedScopesIssuer;
@@ -43,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest( {APIKeyMgtDataHolder.class})
+@PrepareForTest( {APIKeyMgtDataHolder.class, ServiceReferenceHolder.class})
 public class APIManagerOAuthCallbackHandlerTestCase {
 
     @Test
@@ -88,6 +90,14 @@ public class APIManagerOAuthCallbackHandlerTestCase {
         Map<String, AbstractScopesIssuer> scopesIssuerMap = new HashMap<String, AbstractScopesIssuer>();
         scopesIssuerMap.put("wso2", mockIssuer);
         BDDMockito.given(APIKeyMgtDataHolder.getScopesIssuers()).willReturn(scopesIssuerMap);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito
+                .mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(null);
         ScopesIssuer.loadInstance(Collections.<String>emptyList());
         handler.handle(callbacks);
 
@@ -112,6 +122,14 @@ public class APIManagerOAuthCallbackHandlerTestCase {
         Map<String, AbstractScopesIssuer> scopesIssuerMap = new HashMap<String, AbstractScopesIssuer>();
         scopesIssuerMap.put("wso2", mockIssuer);
         BDDMockito.given(APIKeyMgtDataHolder.getScopesIssuers()).willReturn(scopesIssuerMap);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito
+                .mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(null);
         ScopesIssuer.loadInstance(whiteListScopes);
         Mockito.when(mockIssuer.getScopes(oAuthCallback,whiteListScopes)).thenReturn(authorizedScopes);
         handler.handle(callbacks);
@@ -172,8 +190,15 @@ public class APIManagerOAuthCallbackHandlerTestCase {
         Map<String, AbstractScopesIssuer> scopesIssuerMap = new HashMap<String, AbstractScopesIssuer>();
         scopesIssuerMap.put("wso2", mockIssuer);
         BDDMockito.given(APIKeyMgtDataHolder.getScopesIssuers()).willReturn(scopesIssuerMap);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito
+                .mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(null);
         ScopesIssuer.loadInstance(Collections.<String>emptyList());
-
         handler.handle(callbacks);
         String[] scopes = oAuthCallback.getApprovedScope();
         Assert.assertEquals(1, scopes.length);
