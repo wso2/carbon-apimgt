@@ -71,6 +71,13 @@ const styles = theme => ({
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
     },
+    usernameField: {
+        width: theme.spacing(49),
+    },
+    passwordField: {
+        width: theme.spacing(49),
+        marginLeft: theme.spacing(2),
+    }
 });
 /**
  *
@@ -91,6 +98,8 @@ class ApiConsole extends React.Component {
         this.state = {
             showToken: false,
             securitySchemeType: 'OAUTH',
+            username: '',
+            password: '',
         };
         this.handleChanges = this.handleChanges.bind(this);
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
@@ -240,7 +249,11 @@ class ApiConsole extends React.Component {
      * @memberof ApiConsole
      */
     accessTokenProvider() {
-        const { accessToken } = this.state;
+        const { accessToken, securitySchemeType, username, password } = this.state;
+        if (securitySchemeType === 'BASIC') {
+            const credentials = username + ':' + password;
+            return btoa(credentials);    
+        }
         return accessToken;
     }
 
@@ -264,6 +277,12 @@ class ApiConsole extends React.Component {
                 break;
             case 'securityScheme':
                 this.setState({ securitySchemeType: value });
+                break;
+            case 'username':
+                this.setState({ username : value});
+                break;
+            case 'password':
+                this.setState({ password : value});
                 break;
             default:
                 this.setState({ [name]: value });
@@ -301,7 +320,6 @@ class ApiConsole extends React.Component {
     updateAccessToken() {
         const { keys, selectedKeyType } = this.state;
         let accessToken;
-
         if (keys.get(selectedKeyType)) {
             ({ accessToken } = keys.get(selectedKeyType).token);
         }
@@ -346,7 +364,7 @@ class ApiConsole extends React.Component {
         const { classes } = this.props;
         const {
             api, notFound, swagger, accessToken, showToken, subscriptions, selectedApplication, selectedKeyType,
-            selectedEnvironment, environments, labels, securitySchemeType,
+            selectedEnvironment, environments, labels, securitySchemeType, username, password,
         } = this.state;
         const user = AuthManager.getUser();
         const downloadSwagger = JSON.stringify({ ...swagger });
@@ -360,10 +378,14 @@ class ApiConsole extends React.Component {
             return 'API Not found !';
         }
         let isApiKeyEnabled = false;
+        let isBasicAuthEnabled = false;
+        let isOAuthEnabled = false;
         let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
         let prefix = 'Bearer';
         if (api && api.securityScheme) {
             isApiKeyEnabled = api.securityScheme.includes('api_key');
+            isBasicAuthEnabled = api.securityScheme.includes('basic_auth');
+            isOAuthEnabled = api.securityScheme.includes('oauth2');
             if (isApiKeyEnabled && securitySchemeType === 'API-KEY') {
                 authorizationHeader = 'apikey';
                 prefix = '';
@@ -481,7 +503,29 @@ class ApiConsole extends React.Component {
                                 </Box>
                                 <Box display='block' justifyContent='center'>
                                     <Grid x={12} md={6} className={classes.centerItems} item>
-                                        <TextField
+                                        {securitySchemeType === 'BASIC' ? (
+                                            <>
+                                            <TextField
+                                            margin='normal'
+                                            variant='outlined'
+                                            className={classes.usernameField}
+                                            label={<FormattedMessage id='username' defaultMessage='Username' />}
+                                            name='username'
+                                            onChange={this.handleChanges}
+                                            value={username || ''}
+                                            />
+                                            <TextField
+                                            margin='normal'
+                                            variant='outlined'
+                                            className={classes.passwordField}
+                                            label={<FormattedMessage id='password' defaultMessage='Password' />}
+                                            name='password'
+                                            onChange={this.handleChanges}
+                                            value={password || ''}
+                                            />
+                                            </>
+                                        ) : (
+                                            <TextField
                                             fullWidth
                                             margin='normal'
                                             variant='outlined'
@@ -518,9 +562,10 @@ class ApiConsole extends React.Component {
                                                 ),
                                             }}
                                         />
+                                        )}                                                                                         
                                     </Grid>
                                     <Grid x={12} md={6} className={classes.centerItems}>
-                                        {isApiKeyEnabled && (
+                                        {(isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && (
                                             <FormControl component='fieldset' >
                                                 <RadioGroup
                                                     name='securityScheme'
@@ -528,16 +573,27 @@ class ApiConsole extends React.Component {
                                                     onChange={this.handleChanges}
                                                     row
                                                 >
-                                                    <FormControlLabel
-                                                        value='OAUTH'
+                                                    {isOAuthEnabled && (
+                                                      <FormControlLabel
+                                                      value='OAUTH'
+                                                      control={<Radio />}
+                                                      label='OAUTH'
+                                                  />
+                                                    )}
+                                                    {isBasicAuthEnabled && (
+                                                        <FormControlLabel
+                                                        value='BASIC'
                                                         control={<Radio />}
-                                                        label='OAUTH'
+                                                        label='BASIC'
                                                     />
-                                                    <FormControlLabel
+                                                    )}
+                                                    {isApiKeyEnabled && (
+                                                        <FormControlLabel
                                                         value='API-KEY'
                                                         control={<Radio />}
                                                         label='API-KEY'
                                                     />
+                                                    )}
                                                 </RadioGroup>
                                             </FormControl>
                                         )}
@@ -569,6 +625,7 @@ class ApiConsole extends React.Component {
                         accessTokenProvider={this.accessTokenProvider}
                         spec={swagger}
                         authorizationHeader={authorizationHeader}
+                        securitySchemeType={securitySchemeType}
                     />
                 </Paper>
             </React.Fragment>
