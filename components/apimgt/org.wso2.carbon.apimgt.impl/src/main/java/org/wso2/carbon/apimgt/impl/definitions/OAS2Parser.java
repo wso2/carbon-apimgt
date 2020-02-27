@@ -1098,7 +1098,7 @@ public class OAS2Parser extends APIDefinition {
         Swagger swagger = parseAttemptForV2.getSwagger();
         // check if API Level tier is content aware. if so, we set a extension as a global property
         if (contentAwareTiersList.contains(apiLevelTier)) {
-            swagger.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER_CONTENT_AWARE, true);
+            swagger.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH, true);
             // no need to check resource levels since both cannot exist at the same time.
             log.debug("API Level policy is content aware..");
             return Json.pretty(swagger);
@@ -1119,7 +1119,7 @@ public class OAS2Parser extends APIDefinition {
                             log.debug(
                                     "API resource Level policy is content aware for operation " + op.getOperationId());
                         }
-                        op.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER_CONTENT_AWARE, true);
+                        op.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH, true);
                     }
                 }
             }

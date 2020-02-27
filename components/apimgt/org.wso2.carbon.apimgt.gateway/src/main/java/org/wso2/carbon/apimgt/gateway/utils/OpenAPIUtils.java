@@ -179,8 +179,8 @@ public class OpenAPIUtils {
         if (openAPI != null) {
             vendorExtensions = openAPI.getExtensions();
             if (vendorExtensions != null
-                    && vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER_CONTENT_AWARE) != null
-                    && (boolean) vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER_CONTENT_AWARE)) {
+                    && vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH) != null
+                    && (boolean) vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH)) {
                 // check for api level policy
                 status = true;
             } 
@@ -188,8 +188,8 @@ public class OpenAPIUtils {
             if(!status) {
                 vendorExtensions = getPathItemExtensions(synCtx, openAPI);
                 if (vendorExtensions != null
-                        && vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER_CONTENT_AWARE) != null
-                        && (boolean) vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER_CONTENT_AWARE)) {
+                        && vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH) != null
+                        && (boolean) vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH)) {
                     // check for resource level policy
                     status = true;
                 } 

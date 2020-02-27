@@ -537,42 +537,48 @@ public class OASParserUtilTest {
         String definition = OASParserUtil.getOASDefinitionWithTierContentAwareProperty(openAPIdef,
                 contentAwareTiersList, apiLevelTier);
         JSONObject json = new JSONObject(definition);
-        // check whether 'x-throttling-content-aware' exists only in root level and it is true and not set in resource
+        // check whether 'x-throttling-bandwidth' exists only in root level and it is true and not set in resource
         // level
-        Assert.assertNotNull("x-throttling-content-aware does not exist on root level",
-                json.get("x-throttling-tier-content-aware"));
-        Assert.assertTrue("x-throttling-tier-content-aware is not true", (boolean) json.get("x-throttling-tier-content-aware"));
-        //check for resource level
+        Assert.assertNotNull(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " does not exist on root level",
+                json.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        Assert.assertTrue(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " is not true",
+                (boolean) json.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        // check for resource level
         JSONObject pathsObj = (JSONObject) ((JSONObject) ((JSONObject) json.get("paths")).get("/users")).get("post");
-        Assert.assertFalse("x-throttling-tier-content-aware exists on resource level",pathsObj.has("x-throttling-tier-content-aware"));
-        
-        // Test 2: API level tier not set. resource level tier set. resource POST /users is set with Tier2 content-aware tier
+        Assert.assertFalse(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " exists on resource level",
+                pathsObj.has(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+
+        // Test 2: API level tier not set. resource level tier set. resource POST /users is set with Tier2 content-aware
+        // tier
         contentAwareTiersList = new ArrayList<String>();
         contentAwareTiersList.add("TierX");
         contentAwareTiersList.add("Tier2");
         apiLevelTier = null;
-        definition = OASParserUtil.getOASDefinitionWithTierContentAwareProperty(openAPIdef,
-                contentAwareTiersList, apiLevelTier);
+        definition = OASParserUtil.getOASDefinitionWithTierContentAwareProperty(openAPIdef, contentAwareTiersList,
+                apiLevelTier);
         json = new JSONObject(definition);
-        // check whether 'x-throttling-tier-content-aware' exists in root level. it should not be there
-        Assert.assertFalse("x-throttling-tier-content-aware exists on root level", json.has("x-throttling-tier-content-aware"));
+        // check whether 'x-throttling-bandwidth' exists in root level. it should not be there
+        Assert.assertFalse(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " exists on root level",
+                json.has(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
 
         pathsObj = (JSONObject) ((JSONObject) ((JSONObject) json.get("paths")).get("/users")).get("post");
-        Assert.assertTrue("x-throttling-tier-content-aware does not exist on resource level",
-                pathsObj.has("x-throttling-tier-content-aware"));
-        Assert.assertTrue("x-throttling-tier-content-aware is not true", (boolean) pathsObj.get("x-throttling-tier-content-aware"));
-        
-        //check for another resource which has same tier (Tier2) -> GET /resource has this property
+        Assert.assertTrue(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " does not exist on resource level",
+                pathsObj.has(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        Assert.assertTrue(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " is not true",
+                (boolean) pathsObj.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+
+        // check for another resource which has same tier (Tier2) -> GET /resource has this property
         pathsObj = (JSONObject) ((JSONObject) ((JSONObject) json.get("paths")).get("/resource")).get("get");
-        Assert.assertTrue("x-throttling-tier-content-aware does not exist on resource level",
-                pathsObj.has("x-throttling-tier-content-aware"));
-        Assert.assertTrue("x-throttling-tier-content-aware is not true", (boolean) pathsObj.get("x-throttling-tier-content-aware"));
-        
-        //check for another resource which does not have content-aware tier (Tier3) -> GET  /users has this property. it 
+        Assert.assertTrue(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " does not exist on resource level",
+                pathsObj.has(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        Assert.assertTrue(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " is not true",
+                (boolean) pathsObj.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+
+        // check for another resource which does not have content-aware tier (Tier3) -> GET /users has this property. it
         // should not be there
         pathsObj = (JSONObject) ((JSONObject) ((JSONObject) json.get("paths")).get("/users")).get("get");
-        Assert.assertFalse("x-throttling-tier-content-aware exists on resource level",
-                pathsObj.has("x-throttling-tier-content-aware"));
-                
+        Assert.assertFalse(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " exists on resource level",
+                pathsObj.has(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+
     }
 }

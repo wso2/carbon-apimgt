@@ -1223,7 +1223,7 @@ public final class APIConstants {
     public static final String SWAGGER_X_AMZN_RESOURCE_TIMEOUT = "x-amzn-resource-timeout";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
-    public static final String SWAGGER_X_THROTTLING_TIER_CONTENT_AWARE = "x-throttling-tier-content-aware";
+    public static final String SWAGGER_X_THROTTLING_BANDWIDTH = "x-throttling-bandwidth";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
     public static final String SWAGGER_X_WSO2_SECURITY = "x-wso2-security";
     public static final String SWAGGER_X_WSO2_APP_SECURITY = "x-wso2-application-security";
