@@ -69,8 +69,8 @@ export default function ListParameters(props) {
             <Table className={classes.table} aria-label='parameters list'>
                 <TableHead>
                     <TableRow>
-                        <TableCell>Name</TableCell>
                         <TableCell align='left'>Parameter Type</TableCell>
+                        <TableCell>Name</TableCell>
                         <TableCell align='left'>Data Type</TableCell>
                         <TableCell align='left'>Required</TableCell>
                         {!disableUpdate && <TableCell align='left'>Actions</TableCell>}
@@ -80,8 +80,8 @@ export default function ListParameters(props) {
                     {operation.parameters
                         && operation.parameters.map((parameter) => (
                             <TableRow key={parameter.name}>
-                                <TableCell align='left'>{parameter.name}</TableCell>
                                 <TableCell align='left'>{capitalizeFirstLetter(parameter.in)}</TableCell>
+                                <TableCell align='left'>{parameter.name}</TableCell>
                                 <TableCell align='left'>
                                     {capitalizeFirstLetter(parameter.schema ? parameter.schema.type : parameter.type)}
                                 </TableCell>
@@ -117,8 +117,8 @@ export default function ListParameters(props) {
                     {operation.requestBody
                         && Object.entries(operation.requestBody.content).map(([contentType, content]) => (
                             <TableRow key={contentType}>
-                                <TableCell>{contentType}</TableCell>
                                 <TableCell align='left'>Body</TableCell>
+                                <TableCell>{contentType}</TableCell>
                                 <TableCell align='left'>{content.schema.type}</TableCell>
                                 <TableCell align='left'>{content.required ? 'Yes' : 'No'}</TableCell>
                                 {!disableUpdate && (

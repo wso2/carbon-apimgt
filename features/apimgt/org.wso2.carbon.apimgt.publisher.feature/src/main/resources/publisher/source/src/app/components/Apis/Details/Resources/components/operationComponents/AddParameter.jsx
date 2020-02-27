@@ -33,11 +33,17 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { capitalizeFirstLetter } from 'AppData/stringFormatter';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import FormGroup from '@material-ui/core/FormGroup';
 
 const useStyles = makeStyles(() => ({
     formControl: {
         minWidth: 120,
+    },
+    parameterContainer: {
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    checkBox: {
+        color: '#7c7c7c',
     },
 }));
 
@@ -207,7 +213,7 @@ function AddParameter(props) {
         }
     }
     return (
-        <Grid container direction='row' spacing={1} justify='center' alignItems='center' alignContent='space-between'>
+        <Grid container direction='row' spacing={1} className={classes.parameterContainer}>
             <Grid item xs={2} md={2}>
                 <FormControl margin='dense' variant='outlined' className={classes.formControl}>
                     <InputLabel ref={inputLabel} htmlFor='param-in' error={isParameterExist}>
@@ -307,25 +313,24 @@ function AddParameter(props) {
             </Grid>
             <Grid item xs={2} md={2}>
                 <FormControl component='fieldset' className={classes.formControl}>
-                    <FormGroup>
-                        <FormControlLabel
-                            control={(
-                                <Checkbox
-                                    checked={newParameter.required}
-                                    onChange={
-                                        ({
-                                            target: { name, value },
-                                        }) => newParameterDispatcher({ type: name, value: !value })
-                                    }
-                                    value={newParameter.required}
-                                    inputProps={{
-                                        name: 'required',
-                                    }}
-                                />
-                            )}
-                            label='Required'
-                        />
-                    </FormGroup>
+                    <FormControlLabel
+                        className={classes.checkBox}
+                        control={(
+                            <Checkbox
+                                checked={newParameter.required}
+                                onChange={
+                                    ({
+                                        target: { name, value },
+                                    }) => newParameterDispatcher({ type: name, value: !value })
+                                }
+                                value={newParameter.required}
+                                inputProps={{
+                                    name: 'required',
+                                }}
+                            />
+                        )}
+                        label='Required'
+                    />
                     <FormHelperText>Check whether the parameter is required.</FormHelperText>
                 </FormControl>
             </Grid>
