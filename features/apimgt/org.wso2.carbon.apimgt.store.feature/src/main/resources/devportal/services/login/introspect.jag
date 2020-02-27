@@ -20,7 +20,8 @@
     include("/services/constants.jag");
     var appUtils = require("/services/utils.js");
 
-    var log = new Log("Jaggery service for token introspection");
+    var log = new Log();
+    log.debug("Jaggery service for token introspection");
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
     var userInfoEndpoint = appUtils.getLoopbackOrigin() + "/oauth2/userinfo";
