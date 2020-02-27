@@ -4,7 +4,7 @@ Change 1                                                                        
 --------------------                                                                            #
 The default value of DCID column in IDN_OAUTH2_ACCESS_TOKEN table should be changed based on    #
 the DC. The script for the above table can be found in apimgt/tables.sql. An Example is         #
-given below for a deployment with 2 DC's.                                                        #
+given below for a deployment with 2 DC's.                                                       #
                                                                                                 #
 DC1                                                                                             #
 DCID VARCHAR2 (50) DEFAULT 'DC1',                                                               #
