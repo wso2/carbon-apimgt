@@ -19,11 +19,13 @@
 import React from 'react';
 import Notification from 'rc-notification';
 import Configurations from 'Config';
+import merge from 'lodash.merge';
+import DefaultConfigurations from '../../../defaultTheme';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Message from './Message';
 
-const theme = createMuiTheme(Configurations);
+const theme = createMuiTheme(merge(DefaultConfigurations, Configurations));
 
 /**
  * Common alerting/message displaying component for Store application, Pre-set vertical: 'top',
