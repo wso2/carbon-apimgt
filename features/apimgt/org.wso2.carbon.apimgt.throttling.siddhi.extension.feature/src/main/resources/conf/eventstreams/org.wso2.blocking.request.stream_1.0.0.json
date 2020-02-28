@@ -5,6 +5,10 @@
   "description": "Blocking Event Stream",
   "payloadData": [
     {
+      "name": "id",
+      "type": "INT"
+    },
+    {
       "name": "blockingCondition",
       "type": "STRING"
     },

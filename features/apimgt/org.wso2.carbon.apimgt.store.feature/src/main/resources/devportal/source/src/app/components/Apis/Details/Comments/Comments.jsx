@@ -23,8 +23,8 @@ import Paper from '@material-ui/core/Paper';
 import { Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import CONSTS from 'AppData/Constants';
 import classNames from 'classnames';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
@@ -46,7 +46,7 @@ const styles = theme => ({
     },
     contentWrapper: {
         paddingLeft: theme.spacing(3),
-        paddingTop: theme.spacing.unig,
+        marginTop: theme.spacing(1),
     },
     contentWrapperOverview: {
         padding: 0,
@@ -71,6 +71,10 @@ const styles = theme => ({
         marginBottom: theme.spacing(2),
         marginRight: theme.spacing(3),
     },
+    paperProgress: {
+        padding: theme.spacing(3),
+        marginTop: theme.spacing(2),
+    },
 });
 
 /**
@@ -90,7 +94,7 @@ class Comments extends Component {
         super(props);
         this.state = {
             expanded: true,
-            allComments: [],
+            allComments: null,
             comments: [],
             totalComments: 0,
             startCommentsToDisplay: 0,
@@ -281,7 +285,12 @@ class Comments extends Component {
                                 />
                             </Paper>
                         )}
-                        {totalComments === 0 && !isOverview &&
+                        {!allComments && (
+                            <Paper className={classes.paperProgress}>
+                                <CircularProgress size={24} />
+                            </Paper>
+                        )}
+                        {allComments && totalComments === 0 && !isOverview &&
                             <div className={classes.genericMessageWrapper}>
                                 <InlineMessage type='info' className={classes.dialogContainer}>
                                     <Typography variant='h5' component='h3'>

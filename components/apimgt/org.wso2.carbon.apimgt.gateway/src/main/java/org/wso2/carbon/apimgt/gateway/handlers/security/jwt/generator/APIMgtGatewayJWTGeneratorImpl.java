@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
@@ -78,12 +79,12 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         JWTConfigurationDto jwtConfigurationDto =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
         Map<String, Object> claims = new HashMap<>();
-        Set<ClaimMappingDto> claimConfigurations = jwtConfigurationDto.getClaimConfigurations();
-        JSONObject jwtToken = jwtInfoDto.getJwtToken();
+        Set<String> additionalClaims = jwtConfigurationDto.getJwtAdditionalClaims();
+        JWTClaimsSet jwtToken = jwtInfoDto.getJwtToken();
         if (jwtToken != null) {
-            for (ClaimMappingDto claimMapping : claimConfigurations) {
-                if (jwtToken.get(claimMapping.getRemoteClaim()) != null) {
-                    claims.put(claimMapping.getLocalClaim(), jwtToken.get(claimMapping.getRemoteClaim()));
+            for (String additionalClaim : additionalClaims){
+                if (jwtToken.getClaim(additionalClaim) != null) {
+                    claims.put(additionalClaim, jwtToken.getClaim(additionalClaim));
                 }
             }
         }

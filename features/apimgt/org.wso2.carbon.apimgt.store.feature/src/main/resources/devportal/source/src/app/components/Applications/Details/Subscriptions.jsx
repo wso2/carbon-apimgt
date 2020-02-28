@@ -40,9 +40,8 @@ import Paper from '@material-ui/core/Paper';
 import InputBase from '@material-ui/core/InputBase';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import SearchIcon from '@material-ui/icons/Search';
-import DirectionsIcon from '@material-ui/icons/Directions';
-import Chip from '@material-ui/core/Chip';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import Progress from 'AppComponents/Shared/Progress';
 import Alert from 'AppComponents/Shared/Alert';
 import APIList from 'AppComponents/Apis/Listing/APICardView';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
@@ -510,7 +509,9 @@ class Subscriptions extends React.Component {
                 </div>
             );
         } else {
-            return 'Loading . . . ';
+            return (
+              <Progress />  
+            );
         }
     }
 }

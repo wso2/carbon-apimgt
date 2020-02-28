@@ -66,6 +66,7 @@ class ProtectedApp extends Component {
      *  Check if data available ,if not get the user info from existing token information
      */
     componentDidMount() {
+        window.addEventListener('message', this.handleMessage);
         const { location: { search } } = this.props;
         const { setTenantDomain, setSettings } = this.context;
         const { tenant } = queryString.parse(search);

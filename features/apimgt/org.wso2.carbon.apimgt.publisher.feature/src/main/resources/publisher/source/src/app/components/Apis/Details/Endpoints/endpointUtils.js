@@ -186,6 +186,7 @@ function createEndpointConfig(endpointType) {
             tmpEndpointConfig.access_method = 'role-supplied';
             tmpEndpointConfig.amznAccessKey = '';
             tmpEndpointConfig.amznSecretKey = '';
+            tmpEndpointConfig.amznRegion = '';
             break;
         default:
             tmpEndpointConfig.endpoint_type = 'default';

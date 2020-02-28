@@ -410,11 +410,10 @@ public final class APIConstants {
     public static final String JWT_SIGNATURE_ALGORITHM = "SignatureAlgorithm";
     public static final String GATEWAY_JWT_GENERATOR = "GatewayJWTGeneration";
     public static final String GATEWAY_JWT_GENERATOR_IMPL = "ImplClass";
+    public static final String TOKEN_ISSUERS = "TokenIssuers";
     public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
-    public static final String GATEWAY_JWT_GENERATOR_CLAIM_MAPPING = "ClaimMappings";
+    public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "Claims";
     public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
-    public static final String GATEWAY_JWT_GENERATOR_LOCAL_CLAIM = "LocalClaim";
-    public static final String GATEWAY_JWT_GENERATOR_REMOTE_CLAIM = "RemoteClaim";
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
@@ -521,6 +520,8 @@ public final class APIConstants {
 
     public static final String PASSWORD_RESOLVER_IMPL_CLASS = "PasswordResolverImpl";
     public static final String CACHE_INVALIDATION_TYPE = "type";
+    public static final String GATEWAY_JWKS_CACHE = "JWKS_CACHE";
+    public static final String BLOCKING_CONDITION_ID = "id";
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
@@ -1487,7 +1488,12 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_API = "API";
     public static final String BLOCKING_CONDITIONS_USER = "USER";
     public static final String BLOCKING_CONDITIONS_IP = "IP";
-
+    public static final String BLOCK_CONDITION_IP_RANGE = "IPRANGE";
+    public static final String BLOCK_CONDITION_FIXED_IP = "fixedIp";
+    public static final String BLOCK_CONDITION_START_IP = "startingIp";
+    public static final String BLOCK_CONDITION_ENDING_IP = "endingIp";
+    public static final String BLOCK_CONDITION_INVERT = "invert";
+    public static final String BLOCK_CONDITION_IP_TYPE = "type";
     public static final String REVOKED_TOKEN_KEY = "revokedToken";
     public static final String REVOKED_TOKEN_EXPIRY_TIME = "expiryTime";
 
@@ -1905,6 +1911,7 @@ public final class APIConstants {
     public static final int AWS_DEFAULT_CONNECTION_TIMEOUT = 50000;
     public static final String AMZN_ACCESS_KEY = "amznAccessKey";
     public static final String AMZN_SECRET_KEY = "amznSecretKey";
+    public static final String AMZN_REGION = "amznRegion";
     public static final String NO_ENTITY_BODY = "NO_ENTITY_BODY";
 
     public static final String JWT_AUTHENTICATION_CONFIG = "JWTAuthentication";
@@ -1921,12 +1928,13 @@ public final class APIConstants {
     public static final String RECOMMENDATION_API_CONSUMER_KEY = "consumerKey";
     public static final String RECOMMENDATION_API_CONSUMER_SECRET = "consumerSecret";
     public static final String MAX_RECOMMENDATIONS = "maxRecommendations";
+    public static final String WAIT_DURATION = "waitDuration";
     public static final String APPLY_RECOMMENDATIONS_FOR_ALL_APIS = "applyForAllTenants";
     public static final String RECOMMENDATION_USERNAME = "userName";
     public static final String RECOMMENDATION_PASSWORD = "password";
     public static final String ADD_API = "ADD_API";
     public static final String DELETE_API = "DELETE_API";
-    public static final String ADD_NEW_APPLICATION = "ADD_NEW_APPLICATION";
+    public static final String ADD_NEW_APPLICATION = "ADD_APPLICATION";
     public static final String UPDATED_APPLICATION = "UPDATED_APPLICATION";
     public static final String DELETE_APPLICATION = "DELETE_APPLICATION";
     public static final String ADD_USER_CLICKED_API = "ADD_USER_CLICKED_API";
@@ -1949,6 +1957,9 @@ public final class APIConstants {
     public static final String TOKEN_GRANT_TYPE_KEY = "grant_type";
     public static final String TOKEN_KEY = "token";
     public static final String GRANT_TYPE_VALUE = "client_credentials";
+    public static final String RECOMMENDATIONS_CACHE_NAME = "APIRecommendationsCache";
+    public static final String RECOMMENDATIONS_CACHE_KEY = "Recommendations";
+    public static final String LAST_UPDATED_CACHE_KEY = "LastUpdated";
 
 
     public static class CertificateReLoaderConfiguration {
@@ -1967,4 +1978,24 @@ public final class APIConstants {
 
     public static final String DEFAULT_SCOPE_TYPE = "OAUTH2";
     public static final String DEFAULT_BINDING_TYPE = "DEFAULT";
+
+    public static class TokenIssuer {
+
+        public static String TOKEN_ISSUER = "TokenIssuer";
+        public static final String JWKS_CONFIGURATION = "JWKSConfiguration";
+        public static final String CLAIM_MAPPINGS = "ClaimMappings";
+        public static final String CLAIM_MAPPING = "ClaimMapping";
+
+        public static class JWKSConfiguration {
+
+            public static final String URL = "URL";
+        }
+
+        public static class ClaimMapping {
+
+            public static final String LOCAL_CLAIM = "LocalClaim";
+            public static final String REMOTE_CLAIM = "RemoteClaim";
+
+        }
+    }
 }

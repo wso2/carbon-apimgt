@@ -221,12 +221,13 @@ function Endpoints(props) {
         const endpointType = endpointConfig.endpoint_type;
         if (endpointType === 'awslambda') {
             if (endpointConfig.access_method === 'stored') {
-                if (endpointConfig.amznAccessKey === '' || endpointConfig.amznSecretKey === '') {
+                if (endpointConfig.amznAccessKey === '' || endpointConfig.amznSecretKey === ''
+                || endpointConfig.amznRegion === '') {
                     return {
                         isValid: false,
                         message: intl.formatMessage({
                             id: 'Apis.Details.Endpoints.Endpoints.missing.accessKey.secretKey.error',
-                            defaultMessage: 'Access Key and Secret Key should not be empty',
+                            defaultMessage: 'Access Key, Secret Key and Region should not be empty',
                         }),
                     };
                 }

@@ -193,8 +193,8 @@ function Endpoints(props) {
                                             {!showEndpoint(api, 'sand') && (
                                                 <>
                                                     <FormattedMessage
-                                                        id='Apis.Details.Configuration.components.Endpoints.sandbox.
-                                                        not.set'
+                                                        id={'Apis.Details.Configuration.components.Endpoints.sandbox.'
+                                                        + 'not.set'}
                                                         defaultMessage='-'
                                                     />
                                                 </>

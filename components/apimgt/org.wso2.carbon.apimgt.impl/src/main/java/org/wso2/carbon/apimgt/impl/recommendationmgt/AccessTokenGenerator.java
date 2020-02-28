@@ -40,13 +40,13 @@ public class AccessTokenGenerator {
 
     private static final Log log = LogFactory.getLog(AccessTokenGenerator.class);
 
-    private static volatile AccessTokenGenerator accessTokenGenerator = null;
     private long expiryTime = 0;
     private long buffer = 20000; // buffer time is set to 20 seconds
     private String accessToken = null;
     private String oauthUrl;
     private String consumerKey;
     private String consumerSecret;
+    private boolean validToken = true;
 
     public AccessTokenGenerator(String oauthUrl, String consumerKey, String consumerSecret) {
         this.oauthUrl = oauthUrl;
@@ -55,7 +55,7 @@ public class AccessTokenGenerator {
     }
 
     public String getAccessToken() {
-        if (System.currentTimeMillis() > expiryTime) {
+        if (System.currentTimeMillis() > expiryTime || !validToken) {
             if (log.isDebugEnabled()) {
                 log.debug("Access token expired. New token requested");
             }
@@ -102,6 +102,7 @@ public class AccessTokenGenerator {
                 this.accessToken = (String) response.get(APIConstants.OAUTH_RESPONSE_ACCESSTOKEN);
                 int validityPeriod = (Integer) response.get(APIConstants.OAUTH_RESPONSE_EXPIRY_TIME) * 1000;
                 this.expiryTime = System.currentTimeMillis() + validityPeriod;
+                this.validToken = true;
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully received an access token which expires in " + expiryTime);
                 }
@@ -150,5 +151,15 @@ public class AccessTokenGenerator {
             log.error("Error occurred when revoking the Access token", e);
         }
         this.accessToken = null;
+    }
+
+    public void setValidToken(boolean validToken) {
+
+        this.validToken = validToken;
+    }
+
+    public void setOauthUrl(String oauthUrl) {
+
+        this.oauthUrl = oauthUrl;
     }
 }

@@ -16,6 +16,9 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.jwt;
 
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.jwt.SignedJWT;
 import org.apache.axis2.Constants;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -35,6 +38,8 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.base.MultitenantConstants;
+
+import java.text.ParseException;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({JWTValidator.class, GatewayUtils.class})
@@ -118,18 +123,21 @@ public class JWTValidatorTest {
     }
 
     @Test
-    public void testAuthenticationWithInvalidJwtToken2() throws Exception {
+    public void testAuthenticationWithInvalidJwtToken2()   {
         // Invalid token payload
         initMocks();
         String invalidJwtToken = "aasdasd.xxx#.sad";
-        PowerMockito.when(GatewayUtils.verifyTokenSignature(Mockito.eq(invalidJwtToken.split(".")),
-                Mockito.any())).thenReturn(false);
 
         try {
+            SignedJWT signedJWT = (SignedJWT) JWTParser.parse(invalidJwtToken);
+            PowerMockito.when(GatewayUtils.verifyTokenSignature(signedJWT, Mockito.anyString())).thenReturn(false);
             jwtValidator.authenticate(invalidJwtToken, messageContext, null);
             Assert.fail();
-        } catch (APISecurityException e) {
-            Assert.assertEquals(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, e.getErrorCode());
+        } catch (APISecurityException | ParseException e) {
+            if (e instanceof APISecurityException) {
+                Assert.assertEquals(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        ((APISecurityException) e).getErrorCode());
+            }
         }
     }
 
@@ -137,7 +145,7 @@ public class JWTValidatorTest {
     public void testAuthenticationSignatureVerificationFailure() throws Exception {
         // Token signature verification failure
         initMocks();
-        PowerMockito.when(GatewayUtils.verifyTokenSignature(Mockito.eq(validJwtToken.split(".")), Mockito.any()))
+        PowerMockito.when(GatewayUtils.verifyTokenSignature(Mockito.any(SignedJWT.class), Mockito.anyString()))
                 .thenReturn(false);
 
         try {
@@ -152,16 +160,16 @@ public class JWTValidatorTest {
     public void testAuthenticationWithExpiredJwtToken() throws Exception {
         // Expired token
         initMocks();
-        PowerMockito.when(GatewayUtils.verifyTokenSignature(Mockito.any(), Mockito.any())).thenReturn(true);
+        PowerMockito.when(GatewayUtils.verifyTokenSignature(Mockito.any(), Mockito.anyString())).thenReturn(true);
         PowerMockito.when(jwtValidator, "checkTokenExpiration",
                 Mockito.any(), Mockito.any(), Mockito.any()).thenThrow(
-                new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED, "JWT token is expired"));
+                new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "JWT token is expired"));
 
         try {
             jwtValidator.authenticate(validJwtToken, messageContext, null);
             Assert.fail();
         } catch (APISecurityException e) {
-            Assert.assertEquals(APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED, e.getErrorCode());
+            Assert.assertEquals(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, e.getErrorCode());
         }
     }
 
@@ -169,10 +177,10 @@ public class JWTValidatorTest {
     public void testAuthenticationWithScopeFailure() throws Exception {
         // Token does not have the scopes required to access the resource
         initMocks();
-        PowerMockito.when(GatewayUtils.verifyTokenSignature(Mockito.any(), Mockito.any())).thenReturn(true);
         PowerMockito.when(jwtValidator, "validateScopes",
                 Mockito.any(), Mockito.any(), Mockito.any()).thenThrow(new APISecurityException(
                 APISecurityConstants.INVALID_SCOPE, "Scope validation failed"));
+        PowerMockito.when(jwtValidator, "verifyTokenSignature", Mockito.any(), Mockito.any()).thenReturn(true);
 
         try {
             jwtValidator.authenticate(validJwtToken, messageContext, null);
@@ -186,7 +194,9 @@ public class JWTValidatorTest {
     public void testAuthenticationWithAPISubscriptionFailure() throws Exception {
         // Owner of the token is not subscribed to access the resource
         try {
-            GatewayUtils.validateAPISubscription("/unsubscribedPizzashack/1.0.0","1.0.0", payload,
+            JWTClaimsSet jwtClaimsSet = JWTClaimsSet.parse(payload.toString());
+
+            GatewayUtils.validateAPISubscription("/unsubscribedPizzashack/1.0.0", "1.0.0", jwtClaimsSet,
                     validJwtToken.split("\\."), true);
         } catch (APISecurityException e) {
             Assert.assertEquals(APISecurityConstants.API_AUTH_FORBIDDEN, e.getErrorCode());
@@ -197,22 +207,24 @@ public class JWTValidatorTest {
     public void testGenerateAuthContext() throws Exception {
 
         String[] splitToken = validJwtToken.split("\\.");
-        JSONObject api = new JSONObject("{\n" +
-                "              \"subscriberTenantDomain\": \"carbon.super\",\n" +
-                "              \"name\": \"PizzaShackAPI\",\n" +
-                "              \"context\": \"/pizzashack/1.0.0\",\n" +
-                "              \"publisher\": \"admin\",\n" +
-                "              \"version\": \"1.0.0\",\n" +
-                "              \"subscriptionTier\": \"Unlimited\"\n" +
-                "            }\n");
+        net.minidev.json.JSONObject api =
+                (net.minidev.json.JSONObject) new net.minidev.json.parser.JSONParser().parse("{\n" +
+                        "              \"subscriberTenantDomain\": \"carbon.super\",\n" +
+                        "              \"name\": \"PizzaShackAPI\",\n" +
+                        "              \"context\": \"/pizzashack/1.0.0\",\n" +
+                        "              \"publisher\": \"admin\",\n" +
+                        "              \"version\": \"1.0.0\",\n" +
+                        "              \"subscriptionTier\": \"Unlimited\"\n" +
+                        "            }\n");
         JSONObject tierInfo = new JSONObject("{\n" +
                 "              \"stopOnQuotaReach\": true,\n" +
                 "              \"spikeArrestLimit\": 0,\n" +
                 "              \"spikeArrestUnit\": null\n" +
                 "            }\n");
 
+        JWTClaimsSet jwtClaimsSet = JWTClaimsSet.parse(payload.toString());
             AuthenticationContext authenticationContext = GatewayUtils.generateAuthenticationContext(splitToken[2],
-                    payload, api, null, APIConstants.UNLIMITED_TIER, null,true);
+                    jwtClaimsSet, api, null, APIConstants.UNLIMITED_TIER, null,true);
 
         Assert.assertTrue(authenticationContext.isAuthenticated());
         Assert.assertEquals(splitToken[2], authenticationContext.getApiKey());
@@ -235,9 +247,9 @@ public class JWTValidatorTest {
         Assert.assertEquals(payload.getString(APIConstants.JwtTokenConstants.CONSUMER_KEY),
                 authenticationContext.getConsumerKey());
 
-        Assert.assertEquals(api.getString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER),
+        Assert.assertEquals(api.getAsString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER),
                 authenticationContext.getTier());
-        Assert.assertEquals(api.getString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN),
+        Assert.assertEquals(api.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN),
                 authenticationContext.getSubscriberTenantDomain());
 
         Assert.assertEquals(tierInfo.getBoolean(APIConstants.JwtTokenConstants.STOP_ON_QUOTA_REACH),

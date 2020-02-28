@@ -19,19 +19,14 @@ package org.wso2.carbon.apimgt.keymgt.issuers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
+import org.wso2.carbon.identity.oauth.callback.OAuthCallback;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Caching;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,74 +48,76 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
         return ISSUER_PREFIX;
     }
 
+    /**
+     * This method is used to retrieve the authorized scopes with respect to a token.
+     *
+     * @param tokReqMsgCtx      token message context
+     * @param whiteListedScopes scopes to be white listed
+     * @return authorized scopes list
+     */
     @Override
     public List<String> getScopes(OAuthTokenReqMessageContext tokReqMsgCtx, List<String> whiteListedScopes) {
-        String[] requestedScopes = tokReqMsgCtx.getScope();
-        List<String> defaultScope = new ArrayList<String>();
-        defaultScope.add(DEFAULT_SCOPE_NAME);
 
-        String consumerKey = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId();
-        List<String> reqScopeList = Arrays.asList(requestedScopes);
-        Map<String, String> restAPIScopesOfCurrentTenant;
-
-        try {
-
-            Map<String, String> appScopes;
-            ApiMgtDAO apiMgtDAO = getApiMgtDAOInstance();
-
-            //Get all the scopes and permissions against the scopes defined for the APIs subscribed to the application.
-            appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
-
-            //Add API Manager rest API scopes set. This list should be loaded at server start up and keep
-            //in memory and add it to each and every request coming.
-            String tenantDomain = tokReqMsgCtx.getAuthorizedUser().getTenantDomain();
-            appScopes.putAll(APIUtil.getRESTAPIScopesForTenant(tenantDomain));
-
+        List<String> authorizedScopes = null;
+        List<String> requestedScopes = Arrays.asList(tokReqMsgCtx.getScope());
+        String clientId = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId();
+        AuthenticatedUser authenticatedUser = tokReqMsgCtx.getAuthorizedUser();
+        Map<String, String> appScopes = getAppScopes(clientId, authenticatedUser);
+        if (appScopes != null) {
             //If no scopes can be found in the context of the application
-            if (appScopes.isEmpty()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("No scopes defined for the Application " +
-                            tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId());
-                }
-
-                List<String> allowedScopes = getAllowedScopes(whiteListedScopes, reqScopeList);
-                return allowedScopes;
+            if (isAppScopesEmpty(appScopes, clientId)) {
+                return getAllowedScopes(whiteListedScopes, requestedScopes);
             }
-
-            // check for authorized scopes
-            List<String> authorizedScopes =
-                    getAuthorizedScopes(tokReqMsgCtx, reqScopeList, appScopes, whiteListedScopes);
-
-            if (!authorizedScopes.isEmpty()) {
-                return authorizedScopes;
-            } else {
-                return defaultScope;
-            }
-        } catch (APIManagementException e) {
-            log.error("Error while getting scopes of application " + e.getMessage());
-            return null;
+            authorizedScopes = getAuthorizedScopes(authenticatedUser, requestedScopes, appScopes, whiteListedScopes);
         }
+        return authorizedScopes;
+    }
+
+    /**
+     * This method is used to retrieve authorized scopes with respect to an authorization callback.
+     *
+     * @param scopeValidationCallback Authorization callback to validate scopes
+     * @param whiteListedScopes       scopes to be white listed
+     * @return authorized scopes list
+     */
+    @Override
+    public List<String> getScopes(OAuthCallback scopeValidationCallback, List<String> whiteListedScopes) {
+
+        List<String> authroizedScopes = null;
+        List<String> requestedScopes = Arrays.asList(scopeValidationCallback.getRequestedScope());
+        String clientId = scopeValidationCallback.getClient();
+        AuthenticatedUser authenticatedUser = scopeValidationCallback.getResourceOwner();
+        Map<String, String> appScopes = getAppScopes(clientId, authenticatedUser);
+        if (appScopes != null) {
+            //If no scopes can be found in the context of the application
+            if (isAppScopesEmpty(appScopes, clientId)) {
+                return getAllowedScopes(whiteListedScopes, requestedScopes);
+            }
+            authroizedScopes = getAuthorizedScopes(authenticatedUser, requestedScopes, appScopes, whiteListedScopes);
+        }
+        return authroizedScopes;
     }
 
     /**
      * This method is used to get the authorized scopes out of requested scopes. It checks requested scopes with app
      * scopes whether user has permissions to take actions for the requested scopes.
      *
-     * @param tokReqMsgCtx OAuth token request message context.
-     * @param reqScopeList Requested scope list.
-     * @param appScopes    App scopes.
+     * @param authenticatedUser Authenticated user.
+     * @param reqScopeList      Requested scope list.
+     * @param appScopes         App scopes.
      * @return Returns a list of scopes.
      */
-    private List<String> getAuthorizedScopes(OAuthTokenReqMessageContext tokReqMsgCtx, List<String> reqScopeList,
-                                                    Map<String, String> appScopes, List<String> whiteListedScopes) {
+    private List<String> getAuthorizedScopes(AuthenticatedUser authenticatedUser, List<String> reqScopeList,
+                                             Map<String, String> appScopes, List<String> whiteListedScopes) {
 
         boolean status;
-        List<String> authorizedScopes = new ArrayList<String>();
-
+        List<String> authorizedScopes = new ArrayList<>();
         int tenantId;
-        String username = tokReqMsgCtx.getAuthorizedUser().getUserName();
-        String tenantDomain = tokReqMsgCtx.getAuthorizedUser().getTenantDomain();
+        String username = authenticatedUser.getUserName();
+        String tenantDomain = authenticatedUser.getTenantDomain();
         RealmService realmService = getRealmService();
+        List<String> defaultScope = new ArrayList<>();
+        defaultScope.add(DEFAULT_SCOPE_NAME);
 
         try {
             tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
@@ -142,15 +139,14 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
                 //If the scope has been defined in the context of the App and if permissions have been defined for
                 // the scope
                 if (appPermissions != null && appPermissions.length() != 0) {
-                    List<String> permissions = new ArrayList<String>(Arrays.asList(appPermissions.replaceAll(" ", "")
-                            .split(
-                            ",")));
+                    List<String> permissions = new ArrayList<>(Arrays.asList(appPermissions
+                            .replaceAll(" ", "").split(",")));
 
                     //Check if user has at least one of the permission associated with the scope
                     if (!permissions.isEmpty()) {
                         for (String permission : permissions) {
                             if (userRealm != null && userRealm.getAuthorizationManager() != null) {
-                                String userStore = tokReqMsgCtx.getAuthorizedUser().getUserStoreDomain();
+                                String userStore = authenticatedUser.getUserStoreDomain();
                                 username = MultitenantUtils.getTenantAwareUsername(username);
                                 if (userStore != null) {
                                     status = userRealm.getAuthorizationManager()
@@ -178,7 +174,7 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
         } catch (UserStoreException e) {
             log.error("Error occurred while initializing user store.", e);
         }
-        return authorizedScopes;
+        return (!authorizedScopes.isEmpty()) ? authorizedScopes : defaultScope;
     }
 
-}
+ }
