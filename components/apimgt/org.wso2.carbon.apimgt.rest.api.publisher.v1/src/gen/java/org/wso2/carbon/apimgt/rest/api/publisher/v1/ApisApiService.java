@@ -30,6 +30,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MessageTraceDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MessageTraceListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
@@ -76,6 +78,8 @@ public interface ApisApiService {
       public Response apisApiIdMediationPoliciesMediationPolicyIdDelete(String apiId, String mediationPolicyId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMediationPoliciesMediationPolicyIdGet(String apiId, String mediationPolicyId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMediationPoliciesPost(String type, String apiId, InputStream mediationPolicyFileInputStream, Attachment mediationPolicyFileDetail, String inlineContent, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdMessageTracesGet(String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdMessageTracesMessageTraceIdGet(String apiId, String messageTraceId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMonetizationGet(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMonetizePost(String apiId, APIMonetizationInfoDTO body, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;

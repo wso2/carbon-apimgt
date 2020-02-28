@@ -86,6 +86,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
+import org.wso2.carbon.apimgt.impl.mediation.tracing.MediationEventRepo;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -2433,6 +2434,43 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
+
+    /**
+     * Get message IDs for specific API
+     *
+     * @param apiId           API identifier
+     * @param messageContext  Message context
+     * @return list of message IDs as response
+     */
+
+    @Override
+    public Response apisApiIdMessageTracesGet(String apiId, MessageContext messageContext) throws APIManagementException {
+
+        MediationEventRepo mediationeventrepo = MediationEventRepo.getInstance();
+        mediationeventrepo.getMessageIds();
+
+        return Response.ok().entity(mediationeventrepo.getMessageIds()).build();
+
+    }
+
+    /**
+     * Get the events of a message for specific API
+     *
+     * @param apiId           API identifier
+     * @param messageTraceId  Tracing Message ID
+     * @param messageContext  Message context
+     * @return list of events for messageID as response
+     */
+
+    @Override
+    public Response apisApiIdMessageTracesMessageTraceIdGet(String apiId, String messageTraceId, MessageContext messageContext) throws APIManagementException {
+
+        MediationEventRepo mediationeventrepo = MediationEventRepo.getInstance();
+        mediationeventrepo.getMediatorEventsForMessageId(messageTraceId);
+
+        return Response.ok().entity(mediationeventrepo.getMediatorEventsForMessageId(messageTraceId)).build();
+    }
+
 
     /**
      * Get API monetization status and monetized tier to billing plan mapping

@@ -4203,6 +4203,124 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+
+  ################################################################
+  # The "Custom Mediation Policy" message tracing
+  ################################################################
+
+  /apis/{apiId}/message-traces:
+    #-----------------------------------------------------
+    # Retrieve a particular list of custom mediation sequence message traces
+    #-----------------------------------------------------
+    get:
+      operationId: apisApiIdMessageTracesGet
+      summary: Get the custom sequence message trace list
+      description: |
+        This operation can be used to retrieve custom sequence message trace list of an API.
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - Message Tracing List
+      responses:
+        200:
+          description: |
+            OK.
+            List of messages trace of the API is returned
+          schema:
+            $ref: '#/definitions/MessageTraceList'
+          headers:
+            Content-Type:
+              description: |
+                The list of message trace.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+  ################################################################
+  # The "Custom Mediation Policy" message tracing events
+  ################################################################
+
+  /apis/{apiId}/message-traces/{messageTraceId}:
+    #-----------------------------------------------------
+    # Retrieve a particular custom mediation sequence message trace events
+    #-----------------------------------------------------
+    get:
+      operationId: apisApiIdMessageTracesMessageTraceIdGet
+      summary: Get the custom sequence message trace events
+      description: |
+        This operation can be used to retrieve custom sequence message trace events of a message.
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/messageTraceId'
+      tags:
+        - Message Tracing Event List
+      responses:
+        200:
+          description: |
+            OK.
+            Message trace events of the message is returned.
+          schema:
+            $ref: '#/definitions/MessageTrace'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the events.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
   ######################################################
   # The "Certificate Management" resource APIs
   ######################################################
@@ -6750,6 +6868,16 @@ parameters:
     required: true
     type: string
 
+  # Trace message identifier
+  # Specified as part of the path expression
+  messageTraceId:
+    name: messageTraceId
+    in: path
+    description: |
+      Message Trace Id
+    required: true
+    type: string
+
   # Resource policy identifier
   # Specified as part of the path expression
   resourcePolicyId:
@@ -9201,6 +9329,75 @@ definitions:
         description: |
           Number of policy resources returned.
         example: 1
+
+  #-----------------------------------------------------
+  # The Custom Sequence Message Trace List
+  #-----------------------------------------------------
+  MessageTraceList:
+    title: Message Trace List
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/MessageTraceInfo'
+      count:
+        type: integer
+        description: |
+          Number of messages returned.
+        example: 1
+
+  #-----------------------------------------------------
+  # The Message Trace info
+  #-----------------------------------------------------
+  MessageTraceInfo:
+    title: Message Trace Info
+    properties:
+      id:
+        type: string
+      timestamp:
+        type: string
+
+  #-----------------------------------------------------
+  # The Message Trace event list
+  #-----------------------------------------------------
+  MessageTrace:
+    title: Message Trace
+    properties:
+      id:
+        type: string
+      timestamp:
+        type: string
+      events:
+        type: array
+        items:
+          $ref: '#/definitions/MessageTraceEvent'
+
+  #-----------------------------------------------------
+  # The Message Trace events
+  #-----------------------------------------------------
+  MessageTraceEvent:
+    title: Message Trace events
+    properties:
+      componentType:
+        type: string
+      componentName:
+        type: string
+      transportHeaders:
+        type: object
+        additionalProperties:
+          type: string
+      synapseMessagecontext:
+        type: object
+        additionalProperties:
+            type: string
+      axis2MessageContext:
+        type: object
+        additionalProperties:
+            type: string
+      payload:
+        type: object
+        additionalProperties:
+            type: string
 
   #-----------------------------------------------------
   # The Resource Policy Info resource

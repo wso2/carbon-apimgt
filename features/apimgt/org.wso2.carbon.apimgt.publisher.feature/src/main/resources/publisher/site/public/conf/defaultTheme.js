@@ -3,6 +3,77 @@
  * This theme file is an extension of material-ui default theme https://material-ui.com/customization/default-theme/
  * Application related configurations are located in `<PUBLISHER_ROOT>site/public/theme/settings.js`
  */
+// const context = '/publisher';
+
+// const mediatorIcons = [
+//     {
+//         key: 'logmediator',
+//         name: 'Log',
+//         src1: context + '/site/public/images/mediatorIcons/LogMediator.png',
+//         src2: context + '/site/public/images/mediatorIcons/log-mediator.png',
+//     },
+//     {
+//         key: 'propertymediator',
+//         name: 'Property',
+//         src1: context + '/site/public/images/mediatorIcons/PropertyMediator.png',
+//         src2: context + '/site/public/images/mediatorIcons/property-mediator.png',
+//     },
+//     {
+//         key: 'dropmediator',
+//         name: 'Drop',
+//         src1: context + '/site/public/images/mediatorIcons/DropMediator.png',
+//         src2: context + '/site/public/images/mediatorIcons/drop-mediator.png',
+//     },
+//     {
+//         key: 'filtermediator',
+//         name: 'Filter',
+//         src1: context + '/site/public/images/mediatorIcons/FilterMediator.png',
+//         src2: context + '/site/public/images/mediatorIcons/filter-mediator.png',
+//     },
+//     {
+//         key: 'foreachmediator',
+//         name: 'ForEach',
+//         src1: context + '/site/public/images/mediatorIcons/ForEachMediator.png',
+//         src2: context + '/site/public/images/mediatorIcons/foreach-mediator.png',
+//     },
+//     {
+//         key: 'paloadfactorymediator',
+//         name: 'PayloadFactory',
+//         src1: context + '/site/public/images/mediatorIcons/PayloadFactoryMediator.png',
+//         src2: context + '/site/public/images/mediatorIcons/payloadFactory-mediator.png',
+//     },
+//     {
+//         key: 'propertygroupmediator',
+//         name: 'PropertyGroup',
+//         src1: context + '/site/public/images/mediatorIcons/PropertyGroupMediator.png',
+//         src2: context + '/site/public/images/mediatorIcons/propertyGroup-mediator.png',
+//     },
+//     {
+//         key: 'switchmediator',
+//         name: 'Switch',
+//         src1: context + '/site/public/images/mediatorIcons/SwitchMediator.png',
+//         src2: context + '/site/public/images/mediatorIcons/switch-mediator.png',
+//     },
+//     {
+//         key: 'validatemediator',
+//         name: 'Validate',
+//         src1: context + '/site/public/images/mediatorIcons/ValidateMediator.png',
+//         src2: context + '/site/public/images/mediatorIcons/validate-mediator.png',
+//     },
+//     {
+//         key: 'scriptmediator',
+//         name: 'Script',
+//         src1: context + '/site/public/images/mediatorIcons/ScriptMediator.png',
+//         src2: context + '/site/public/images/mediatorIcons/script-mediator.png',
+//     },
+//     {
+//         key: 'classmediator',
+//         name: 'Class',
+//         src1: context + '/site/public/images/mediatorIcons/ClassMediator.png',
+//         src2: context + '/site/public/images/mediatorIcons/class-mediator.png',
+//     },
+// ];
+
 const AppThemes = {
     light: {
         palette: {
@@ -119,6 +190,7 @@ const AppThemes = {
             },
         },
     },
+    // mediatorIcons,
 };
 if (typeof module !== 'undefined') {
     module.exports = AppThemes; // Added for tests

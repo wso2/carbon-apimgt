@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130" width="130" height="130">
+	<defs>
+		<clipPath clipPathUnits="userSpaceOnUse" id="cp1">
+			<path d="M-8 -15L136 -15L136 145L-8 145Z" />
+		</clipPath>
+	</defs>
+	<style>
+		tspan { white-space:pre }
+		.shp0 { fill: #e5521f } 
+		.shp1 { fill: none;stroke: #ffffff;stroke-width: 4 } 
+		.txt2 { font-size: 24px;fill: #ffffff;font-family: "Myriad Pro" } 
+		.txt3 { font-size: 24px;line-height: 21px;fill: #ffffff;font-family: "Myriad Pro" } 
+	</style>
+	<g id="Page 1" clip-path="url(#cp1)">
+		<path id="Path 1" class="shp0" d="M129.68 65.22C129.68 100.95 100.72 129.9 65 129.9C29.28 129.9 0.32 100.95 0.32 65.22C0.32 29.5 29.28 0.54 65 0.54C100.72 0.54 129.68 29.5 129.68 65.22Z" />
+		<path id="Path 3" class="shp1" d="M27.76 66L40.25 78.49L52.55 66.19M40.25 78.49L40.25 29.43" />
+		<text id="0 1 0 " style="transform: matrix(1,0,0,1,55.439,42.446)" >
+			<tspan x="0" y="0" class="txt2">0 1 0</tspan>
+		</text>
+		<text id="1 1 0 0 1 1 " style="transform: matrix(1,0,0,1,56.399,47.582)" >
+			<tspan x="0" y="24" class="txt2">1 1 0</tspan>
+			<tspan x="0" y="50.88" class="txt3">0 1 1</tspan>
+		</text>
+	</g>
+</svg>
