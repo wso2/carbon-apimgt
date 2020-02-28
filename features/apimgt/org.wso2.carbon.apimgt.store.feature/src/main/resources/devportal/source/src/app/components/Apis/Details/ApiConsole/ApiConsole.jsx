@@ -52,6 +52,10 @@ const styles = (theme) => ({
     centerItems: {
         margin: 'auto',
     },
+    tokenType: {
+        margin: 'auto',
+        display: 'flex',
+    },
     inputAdornmentStart: {
         minWidth: theme.spacing(18),
     },
@@ -74,11 +78,11 @@ const styles = (theme) => ({
         paddingBottom: theme.spacing(2),
     },
     usernameField: {
-        width: theme.spacing(49),
+        width: '100%',
     },
     passwordField: {
-        width: theme.spacing(49),
-        marginLeft: theme.spacing(2),
+        width: '100%',
+        marginLeft: theme.spacing(1),
     },
 });
 /**
@@ -508,7 +512,7 @@ class ApiConsole extends React.Component {
                                         </Grid>
                                     </Box>
                                     <Box display='block' justifyContent='center'>
-                                        <Grid x={12} md={6} className={classes.centerItems} item>
+                                        <Grid x={12} md={6} className={classes.tokenType} item>
                                             {securitySchemeType === 'BASIC' ? (
                                                 <>
                                                     <TextField
