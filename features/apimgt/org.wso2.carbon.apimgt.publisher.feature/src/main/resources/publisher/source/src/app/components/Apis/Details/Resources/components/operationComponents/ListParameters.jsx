@@ -70,22 +70,24 @@ export default function ListParameters(props) {
                 <TableHead>
                     <TableRow>
                         <TableCell>Name</TableCell>
-                        <TableCell align='right'>Parameter Type</TableCell>
-                        <TableCell align='right'>Data Type</TableCell>
-                        <TableCell align='right'>Required</TableCell>
-                        {!disableUpdate && <TableCell align='right'>Actions</TableCell>}
+                        <TableCell align='left'>Parameter Type</TableCell>
+                        <TableCell align='left'>Data Type</TableCell>
+                        <TableCell align='left'>Required</TableCell>
+                        {!disableUpdate && <TableCell align='left'>Actions</TableCell>}
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {operation.parameters
                         && operation.parameters.map((parameter) => (
                             <TableRow key={parameter.name}>
-                                <TableCell>{parameter.name}</TableCell>
-                                <TableCell align='right'>{capitalizeFirstLetter(parameter.in)}</TableCell>
-                                <TableCell align='right'>{capitalizeFirstLetter(parameter.schema.type)}</TableCell>
-                                <TableCell align='right'>{parameter.required ? 'Yes' : 'No'}</TableCell>
+                                <TableCell align='left'>{parameter.name}</TableCell>
+                                <TableCell align='left'>{capitalizeFirstLetter(parameter.in)}</TableCell>
+                                <TableCell align='left'>
+                                    {capitalizeFirstLetter(parameter.schema ? parameter.schema.type : parameter.type)}
+                                </TableCell>
+                                <TableCell align='left'>{parameter.required ? 'Yes' : 'No'}</TableCell>
                                 {!disableUpdate && (
-                                    <TableCell align='right'>
+                                    <TableCell align='left'>
                                         {!hideParameterEdit && (
                                             <Tooltip title='Edit'>
                                                 <IconButton
@@ -116,11 +118,11 @@ export default function ListParameters(props) {
                         && Object.entries(operation.requestBody.content).map(([contentType, content]) => (
                             <TableRow key={contentType}>
                                 <TableCell>{contentType}</TableCell>
-                                <TableCell align='right'>Body</TableCell>
-                                <TableCell align='right'>{content.schema.type}</TableCell>
-                                <TableCell align='right'>{content.required ? 'Yes' : 'No'}</TableCell>
+                                <TableCell align='left'>Body</TableCell>
+                                <TableCell align='left'>{content.schema.type}</TableCell>
+                                <TableCell align='left'>{content.required ? 'Yes' : 'No'}</TableCell>
                                 {!disableUpdate && (
-                                    <TableCell align='right'>
+                                    <TableCell align='left'>
                                         {!hideParameterEdit && (
                                             <Tooltip title='Edit'>
                                                 <IconButton onClick={() => {}} fontSize='small'>
