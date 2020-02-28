@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -28,6 +29,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 /*
 * This is the class mediator which will handle publishing events upon throttle out events
@@ -101,6 +103,8 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                 throttlePublisherDTO.setCorrelationID(correlationID);
                 throttlePublisherDTO.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
                 throttlePublisherDTO.setHostName(GatewayUtils.getHostName(messageContext));
+                Map<String, String> properties = Utils.getCustomAnalyticsProperties(messageContext);
+                throttlePublisherDTO.setProperties(properties);
                 
                 if (log.isDebugEnabled()) {
                     log.debug("Publishing throttling event from gateway to analytics for: "

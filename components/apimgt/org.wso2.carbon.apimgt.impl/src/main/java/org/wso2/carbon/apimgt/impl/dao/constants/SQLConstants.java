@@ -3152,10 +3152,10 @@ public class SQLConstants {
     public static final String GET_CATEGORIES_BY_TENANT_ID_SQL = "SELECT * FROM AM_API_CATEGORIES WHERE TENANT_ID = ?";
 
     public static final String IS_API_CATEGORY_NAME_EXISTS = "SELECT COUNT(UUID) AS API_CATEGORY_COUNT FROM "
-            + "AM_API_CATEGORIES WHERE NAME = ? AND TENANT_ID = ?";
+            + "AM_API_CATEGORIES WHERE LOWER(NAME) = LOWER(?) AND TENANT_ID = ?";
 
     public static final String IS_API_CATEGORY_NAME_EXISTS_FOR_ANOTHER_UUID = "SELECT COUNT(UUID) AS API_CATEGORY_COUNT FROM "
-            + "AM_API_CATEGORIES WHERE NAME = ? AND TENANT_ID = ? AND UUID != ?";
+            + "AM_API_CATEGORIES WHERE LOWER(NAME) = LOWER(?) AND TENANT_ID = ? AND UUID != ?";
 
     public static final String GET_API_CATEGORY_BY_ID = "SELECT * FROM AM_API_CATEGORIES WHERE UUID = ?";
 
@@ -3164,6 +3164,10 @@ public class SQLConstants {
     public static final String UPDATE_API_CATEGORY = "UPDATE AM_API_CATEGORIES SET DESCRIPTION = ?, NAME = ? WHERE UUID = ?";
 
     public static final String DELETE_API_CATEGORY = "DELETE FROM AM_API_CATEGORIES WHERE UUID = ?";
+
+    public static final String GET_USER_ID = "SELECT USER_ID FROM AM_USER WHERE USER_NAME=?";
+
+    public static final String ADD_USER_ID = "INSERT INTO AM_USER (USER_ID, USER_NAME) VALUES (?,?)";
 
     /** Throttle related constants**/
 
@@ -3398,6 +3402,9 @@ public class SQLConstants {
         public static final String INSERT_SYSTEM_APPLICATION =
                 "INSERT INTO AM_SYSTEM_APPS " + "(NAME,CONSUMER_KEY,CONSUMER_SECRET,TENANT_DOMAIN,CREATED_TIME) " +
                         "VALUES (?,?,?,?,?)";
+
+        public static final String GET_APPLICATIONS =
+                "SELECT * FROM " + "AM_SYSTEM_APPS WHERE TENANT_DOMAIN = ?";
 
         public static final String GET_CLIENT_CREDENTIALS_FOR_APPLICATION =
                 "SELECT CONSUMER_KEY,CONSUMER_SECRET FROM " + "AM_SYSTEM_APPS WHERE NAME = ? AND TENANT_DOMAIN = ?";

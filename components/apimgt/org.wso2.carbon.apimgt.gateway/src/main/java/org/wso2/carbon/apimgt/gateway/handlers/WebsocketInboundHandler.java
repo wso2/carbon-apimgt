@@ -54,8 +54,12 @@ import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -372,12 +376,25 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         String subscriptionLevelThrottleKey = appId + ":" + apiContext + ":" + apiVersion;
         String messageId = UIDGenerator.generateURNString();
         String remoteIP = getRemoteIP(ctx);
+        if (log.isDebugEnabled()) {
+            log.debug("Remote IP address : " + remoteIP);
+        }
         if (remoteIP.indexOf(":") > 0) {
             remoteIP = remoteIP.substring(1, remoteIP.indexOf(":"));
         }
         JSONObject jsonObMap = new JSONObject();
         if (remoteIP != null && remoteIP.length() > 0) {
-            jsonObMap.put(APIThrottleConstants.IP, APIUtil.ipToLong(remoteIP));
+            try {
+                InetAddress address = APIUtil.getAddress(remoteIP);
+                if (address instanceof Inet4Address) {
+                    jsonObMap.put(APIThrottleConstants.IP, APIUtil.ipToLong(remoteIP));
+                } else if (address instanceof Inet6Address) {
+                    jsonObMap.put(APIThrottleConstants.IPv6, APIUtil.ipToBigInteger(remoteIP));
+                }
+            } catch (UnknownHostException e) {
+                //ignore the error and log it
+                log.error("Error while parsing host IP " + remoteIP, e);
+            }
         }
         jsonObMap.put(APIThrottleConstants.MESSAGE_SIZE, msg.content().capacity());
         try {
@@ -438,7 +455,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             requestPublisherDTO.setUserIp(clientIp);
             requestPublisherDTO.setApplicationConsumerKey(infoDTO.getConsumerKey());
             //context will always be empty as this method will call only for WebSocketFrame and url is null
-            requestPublisherDTO.setApiContext("-");
+            requestPublisherDTO.setApiContext(apiContextUri);
             requestPublisherDTO.setThrottledOut(isThrottledOut);
             requestPublisherDTO.setApiHostname(DataPublisherUtil.getHostAddress());
             requestPublisherDTO.setApiMethod("-");

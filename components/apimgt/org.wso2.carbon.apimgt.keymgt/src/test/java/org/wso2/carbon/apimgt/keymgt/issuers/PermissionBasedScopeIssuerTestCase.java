@@ -144,9 +144,14 @@ public class PermissionBasedScopeIssuerTestCase {
         PermissionBasedScopeIssuer permissionBasedScopeIssuer =
                 new PermissionBasedScopesIssuerWrapper(cacheManager, realmService, apiMgtDAO);
 
+        AuthenticatedUser authenticatedUser = new AuthenticatedUser();
+        authenticatedUser.setTenantDomain("carbon.super");
+        authenticatedUser.setUserName("admin");
+        authenticatedUser.setUserStoreDomain("admin.user.store.domain");
         OAuth2AccessTokenReqDTO tokenDTO = new OAuth2AccessTokenReqDTO();
         tokenDTO.setClientId("clientId");
         OAuthTokenReqMessageContext msgContext = new OAuthTokenReqMessageContext(tokenDTO);
+        msgContext.setAuthorizedUser(authenticatedUser);
         msgContext.setScope(new String[]{"scope 1", "scope 2"});
         ArrayList<String> whiteListedScopes = new ArrayList<String>();
         whiteListedScopes.add("scope 3");

@@ -30,6 +30,7 @@ import withSettings from 'AppComponents/Shared/withSettingsContext';
 import Alert from 'AppComponents/Shared/Alert';
 import classNames from 'classnames';
 import { Helmet } from 'react-helmet';
+import { app } from 'Settings';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { ResourceNotFound } from '../../Base/Errors/index';
@@ -86,6 +87,7 @@ const styles = (theme) => {
     return {
         leftMenu: {
             backgroundColor: theme.custom.leftMenu.background,
+            backgroundImage: `url(${app.context}${theme.custom.leftMenu.backgroundImage})`,
             textAlign: 'left',
             fontFamily: theme.typography.fontFamily,
             position: 'absolute',
@@ -381,7 +383,7 @@ class Details extends React.Component {
                                     to={pathPrefix + 'comments'}
                                 />
                             )}
-                            {api.type !== 'WS' && showSdks && (
+                            {api.type !== 'WS' && showTryout && (
                                 <LeftMenuItem
                                     text={<FormattedMessage id='Apis.Details.index.try.out' defaultMessage='Try out' />}
                                     route='test'

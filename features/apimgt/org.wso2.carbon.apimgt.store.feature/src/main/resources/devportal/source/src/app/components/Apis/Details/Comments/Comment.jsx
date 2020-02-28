@@ -42,14 +42,14 @@ const styles = (theme) => ({
     },
     commentText: {
         color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: theme.spacing(0.8),
+        marginTop: 0,
         width: '99%',
         whiteSpace: 'pre-wrap',
         overflowWrap: 'break-word',
         wordBreak: 'break-all',
     },
     root: {
-        marginTop: theme.spacing(2.5),
+        marginTop: theme.spacing(1),
     },
     contentWrapper: {
         paddingLeft: theme.spacing(2),
@@ -64,6 +64,7 @@ const styles = (theme) => ({
     },
     paper: {
         margin: 0,
+        marginTop: theme.spacing(1 ),
         marginRight: theme.spacing(3),
         paddingBottom: theme.spacing(3),
     },

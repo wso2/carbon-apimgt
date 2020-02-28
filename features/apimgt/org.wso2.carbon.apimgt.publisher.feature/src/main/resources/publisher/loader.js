@@ -21,7 +21,9 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = function (source, map) {
-    const headerPath = path.resolve(this.rootContext + '/override' + this.resourcePath.split('/source')[1]);
+    const isWin = process.platform === 'win32';
+    const pathSeperator = isWin ? '\\' : '/';
+    const headerPath = path.resolve(this.rootContext + pathSeperator + 'override' + this.resourcePath.split(`${pathSeperator}source`)[1]);
     let newSource = source;
     if (fs.existsSync(headerPath)) {
         newSource = fs.readFileSync(headerPath, 'utf8');

@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -132,9 +131,9 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Caching;
-import javax.wsdl.Definition;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -160,6 +159,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.cache.Cache;
+import javax.cache.Caching;
+import javax.wsdl.Definition;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -3394,7 +3397,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, userId, applicationId);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, userId, applicationId,
+                    requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -3548,7 +3552,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, username, requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -3724,7 +3728,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(applicationId);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(applicationId, username, requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -5744,7 +5748,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void publishSearchQuery(String query, String username) {
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(query, username);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(query, username, requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -5752,60 +5756,81 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void publishClickedAPI(ApiTypeWrapper clickedApi, String username) {
         if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(clickedApi, username);
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(clickedApi, username, requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
     }
 
-    public boolean isRecommendationEnabled() {
-        boolean recommendationEnabled = false;
+    /**
+     * To check whether the API recommendation is enabled. It can be either enabled globally or tenant vice.
+     *
+     * @param tenantDomain Tenant domain
+     * @return whether recommendation is enabled or not
+     */
+
+    public boolean isRecommendationEnabled(String tenantDomain) {
 
         if (recommendationEnvironment != null) {
-            recommendationEnabled = true;
+            if (recommendationEnvironment.isApplyForAllTenants()) {
+                return true;
+            } else {
+                try {
+                    org.json.JSONObject tenantConfig = null;
+                    Cache tenantConfigCache = APIUtil.getCache(
+                            APIConstants.API_MANAGER_CACHE_MANAGER,
+                            APIConstants.TENANT_CONFIG_CACHE_NAME,
+                            APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
+                            APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
+                    String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
+                    if (tenantConfigCache.containsKey(cacheName)) {
+                        tenantConfig = (org.json.JSONObject) tenantConfigCache.get(cacheName);
+                    } else {
+                        String content = apimRegistryService
+                                .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+                        tenantConfig = new org.json.JSONObject(content);
+                        tenantConfigCache.put(cacheName, tenantConfig);
+                    }
+                    if (tenantConfig.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
+                        Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
+                        return Boolean.parseBoolean(value.toString());
+                    }
+                } catch (UserStoreException | RegistryException | NullPointerException e) {
+                    log.error("Error occurred when getting API tenant config from registry", e);
+                }
+            }
         }
-        return recommendationEnabled;
+        return false;
     }
 
-    public String getApiRecommendations(String userName) {
-        if (userName != null && requestedTenant != null && recommendationEnvironment != null) {
-            String recommendationEndpointURL = recommendationEnvironment.getRecommendationEndpointURL();
-            String adminUsername = recommendationEnvironment.getUsername();
-            String adminPassword = recommendationEnvironment.getPassword();
-            try {
-                URL serverURL = new URL(recommendationEndpointURL);
-                int serverPort = serverURL.getPort();
-                String serverProtocol = serverURL.getProtocol();
+    public String getRequestedTenant() {
 
-                HttpGet method = new HttpGet(recommendationEndpointURL);
-                HttpClient httpClient = APIUtil.getHttpClient(serverPort, serverProtocol);
+        return requestedTenant;
+    }
 
-                byte[] credentials = org.apache.commons.codec.binary.Base64
-                        .encodeBase64((adminUsername + ":" + adminPassword).getBytes(StandardCharsets.UTF_8));
+    /**
+     * Get recommendations for the user from the recommendation cache.
+     *
+     * @param userName     User's Name
+     * @param tenantDomain tenantDomain
+     * @return List of APIs recommended for the user
+     */
+    public String getApiRecommendations(String userName, String tenantDomain) {
 
-                method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
-                method.setHeader("User", userName);
-                method.setHeader("Account", requestedTenant);
-
-                HttpResponse httpResponse = httpClient.execute(method);
-
-                BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
-                StringBuilder content = new StringBuilder();
-                String line;
-                while (null != (line = br.readLine())) {
-                    content.append(line);
+        if (tenantDomain != null && userName != null) {
+            Cache recommendationsCache = APIUtil.getCache(
+                    APIConstants.API_MANAGER_CACHE_MANAGER,
+                    APIConstants.RECOMMENDATIONS_CACHE_NAME,
+                    APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
+                    APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
+            String cacheName = userName + "_" + tenantDomain;
+            if (recommendationsCache.containsKey(cacheName)) {
+                org.json.JSONObject cachedObject = (org.json.JSONObject) recommendationsCache.get(cacheName);
+                if (cachedObject != null) {
+                    return (String) cachedObject.get(APIConstants.RECOMMENDATIONS_CACHE_KEY);
                 }
-                if (log.isDebugEnabled()) {
-                    log.debug("Recommendations received for user " + adminUsername + " is " + content.toString());
-                }
-                return content.toString();
-
-            } catch (IOException e) {
-                log.error("Connection failure for the recommendation engine", e);
-                return null;
             }
         }
         return null;
     }
-
 }

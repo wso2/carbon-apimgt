@@ -448,6 +448,25 @@ class API extends Resource {
     }
 
     /**
+     * Mock sample responses for Inline Prototyping
+     * of a swagger OAS defintion
+     * 
+     * @param id {String} The api id.
+     */
+    generateMockResponses(id=this.id) {
+        const promise_get = this.client.then(client => { 
+            return client.apis['APIs'].generateMockResponses(
+                { 
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promise_get;
+    }
+
+
+    /**
      * Get the graphQL schema of an API
      * @param id {String} UUID of the API in which the schema is needed
      * @param callback {function} Function which needs to be called upon success of the retrieving schema

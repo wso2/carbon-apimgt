@@ -31,7 +31,9 @@ import Configurations from 'Config';
 import { IntlProvider } from 'react-intl';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 // Localization
+import UnexpectedError from 'AppComponents/Base/Errors/UnexpectedError';
 import LoginDenied from './app/LoginDenied';
+
 
 const ProtectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApps" */));
 
@@ -63,7 +65,6 @@ class Publisher extends React.Component {
         /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
         const queryParams = qs.parse(queryString);
         const { environment = Utils.getCurrentEnvironment().label } = queryParams;
-
         this.state = {
             userResolved: false,
             user: AuthManager.getUser(environment),
@@ -105,6 +106,8 @@ class Publisher extends React.Component {
                 .catch((error) => {
                     if (error && error.message === CONSTS.errorCodes.INSUFFICIENT_PREVILEGES) {
                         this.setState({ userResolved: true, notEnoughPermission: true });
+                    } else if (error && error.message === CONSTS.errorCodes.UNEXPECTED_SERVER_ERROR) {
+                        this.setState({ userResolved: true, unexpectedServerError: true });
                     } else {
                         console.log('Error: ' + error + ',redirecting to login page');
                         this.setState({ userResolved: true });
@@ -142,7 +145,7 @@ class Publisher extends React.Component {
      */
     render() {
         const {
-            user, userResolved, messages, notEnoughPermission,
+            user, userResolved, messages, notEnoughPermission, unexpectedServerError,
         } = this.state;
         const locale = languageWithoutRegionCode || language;
         if (!userResolved) {
@@ -159,6 +162,8 @@ class Publisher extends React.Component {
                                 render={() => {
                                     if (notEnoughPermission) {
                                         return <LoginDenied />;
+                                    } else if (unexpectedServerError) {
+                                        return <UnexpectedError />;
                                     } else if (!user) {
                                         return <RedirectToLogin />;
                                     }

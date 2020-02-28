@@ -167,6 +167,7 @@ public class OASParserUtil {
      * @throws APIManagementException If error occurred while parsing definition.
      */
     public static APIDefinition getOASParser(String apiDefinition) throws APIManagementException {
+
         SwaggerVersion swaggerVersion = getSwaggerVersion(apiDefinition);
 
         if (swaggerVersion == SwaggerVersion.SWAGGER) {
@@ -200,6 +201,18 @@ public class OASParserUtil {
         }
 
         throw new APIManagementException("Invalid OAS definition provided.");
+    }
+
+    public static String generateExamples(String apiDefinition) throws APIManagementException {
+        SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
+
+        if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
+            return oas3Parser.generateExample(apiDefinition);
+        } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) {
+            return oas2Parser.generateExample(apiDefinition);
+        } else {
+            throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
+        }
     }
 
     public static String updateAPIProductSwaggerOperations(Map<API, List<APIProductResource>> apiToProductResourceMapping,
@@ -1140,6 +1153,21 @@ public class OASParserUtil {
         endpointResult.set(APIConstants.WSO2_APP_SECURITY_TYPES, appSecurityTypes);
         endpointResult.put(APIConstants.OPTIONAL, appSecurityOptional);
         return endpointResult;
+    }
+
+    /**
+     * generate response cache configuration for OAS definition.
+     *
+     * @param responseCache     response cache Enabled/Disabled
+     * @param cacheTimeout      cache timeout in seconds
+     * @return JsonNode
+     */
+     static JsonNode getResponseCacheConfig(String responseCache, int cacheTimeout) {
+         ObjectNode responseCacheConfig = objectMapper.createObjectNode();
+         boolean enabled = APIConstants.ENABLED.equalsIgnoreCase(responseCache);
+         responseCacheConfig.put(APIConstants.RESPONSE_CACHING_ENABLED, enabled);
+         responseCacheConfig.put(APIConstants.RESPONSE_CACHING_TIMEOUT, cacheTimeout);
+         return responseCacheConfig;
     }
 
     /**

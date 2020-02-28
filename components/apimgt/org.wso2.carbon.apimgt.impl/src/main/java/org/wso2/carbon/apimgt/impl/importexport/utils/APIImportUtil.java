@@ -545,6 +545,13 @@ public final class APIImportUtil {
         Documentation[] documentations;
         String docDirectoryPath = pathToArchive + File.separator + APIImportExportConstants.DOCUMENT_DIRECTORY;
         try {
+            //remove all documents associated with the API before update
+            List<Documentation> documents = apiProvider.getAllDocumentation(apiIdentifier);
+            if (documents != null) {
+                for (Documentation documentation : documents) {
+                    apiProvider.removeDocumentation(apiIdentifier, documentation.getId());
+                }
+            }
             //load document file if exists
             if (CommonUtil.checkFileExistence(pathToYamlFile)) {
                 if (log.isDebugEnabled()) {
@@ -598,16 +605,16 @@ public final class APIImportUtil {
                         APIUtil.setResourcePermissions(importedApi.getId().getProviderName(),
                                 importedApi.getVisibility(), visibleRoles, filePathDoc);
                         doc.setFilePath(apiProvider.addResourceFile(importedApi.getId(), filePathDoc, apiDocument));
+                    } catch (FileNotFoundException e) {
+                        //this error is logged and ignored because documents are optional in an API
+                        log.error("Failed to locate the document files of the API: " + apiIdentifier.getApiName(), e);
+                        continue;
                     }
                 }
 
-                //Check if documentations exists with same name for given API name, provider and version.
-                //Update or create documentation accordingly.
-                if (apiProvider.isDocumentationExist(apiIdentifier, doc.getName())) {
-                    apiProvider.updateDocumentation(apiIdentifier, doc);
-                } else {
-                    apiProvider.addDocumentation(apiIdentifier, doc);
-                }
+                //Add documentation accordingly.
+                apiProvider.addDocumentation(apiIdentifier, doc);
+
                 if (docContentExists) {
                     //APIProvider.addDocumentationContent method handles both create/update documentation content
                     apiProvider.addDocumentationContent(importedApi, doc.getName(), inlineContent);

@@ -4380,6 +4380,9 @@ definitions:
         example: 02
       token:
         $ref: '#/definitions/ApplicationToken'
+      additionalProperties:
+        type: string
+        description: additionalProperties (if any).
 
 #-----------------------------------------------------
 # The Application Key Re generation Response schema
@@ -4778,6 +4781,7 @@ definitions:
               - INLINE
               - URL
               - FILE
+              - MARKDOWN
             example: INLINE
           sourceUrl:
             type: string

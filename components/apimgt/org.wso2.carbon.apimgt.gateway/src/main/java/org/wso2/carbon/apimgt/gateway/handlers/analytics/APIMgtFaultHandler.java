@@ -21,6 +21,7 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
@@ -32,6 +33,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
 
@@ -114,6 +116,8 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             faultPublisherDTO.setProtocol(protocol);
             faultPublisherDTO.setMetaClientType(metaClientType);
             faultPublisherDTO.setGatewaType(APIMgtGatewayConstants.SYNAPDE_GW_LABEL);
+            Map<String, String> properties = Utils.getCustomAnalyticsProperties(messageContext);
+            faultPublisherDTO.setProperties(properties);
             if (log.isDebugEnabled()) {
                 log.debug("Publishing fault event from gateway to analytics for: " + messageContext.getProperty(
                         APIMgtGatewayConstants.CONTEXT) + " with ID: " + messageContext.getMessageID() + " started"

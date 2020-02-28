@@ -15,17 +15,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.carbon.apimgt.gateway.dto;
 
-package org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator;
+import com.nimbusds.jwt.JWTClaimsSet;
 
-import org.apache.commons.codec.binary.Base64;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import java.io.Serializable;
 
-public class APIMgtGatewayUrlSafeJWTGeneratorImplImpl extends APIMgtGatewayJWTGeneratorImpl {
+/**
+ * Dto class to store JWT payload information
+ */
+public class JWTTokenPayloadInfo implements Serializable {
 
-    @Override
-    public String encode(byte[] stringToBeEncoded) throws APIManagementException {
-        return Base64.encodeBase64URLSafeString(stringToBeEncoded);
 
+    JWTClaimsSet payload;
+    String rawPayload;
+
+    public JWTClaimsSet getPayload() {
+        return payload;
+    }
+
+    public void setPayload(JWTClaimsSet payload) {
+        this.payload = payload;
+    }
+
+    public String getRawPayload() {
+        return rawPayload;
+    }
+
+    public void setRawPayload(String rawPayload) {
+        this.rawPayload = rawPayload;
     }
 }

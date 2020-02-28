@@ -198,7 +198,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query,
-            String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) {
+                            String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) {
 
         List<API> allMatchedApis = new ArrayList<>();
         Object apiListDTO;
@@ -306,7 +306,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             if (!isWSAPI) {
                 APIDefinition oasParser;
-                if(RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion)) {
+                if (RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion)) {
                     oasParser = new OAS2Parser();
                 } else {
                     oasParser = new OAS3Parser();
@@ -340,7 +340,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     *  Prepares the API Model object to be created using the DTO object
+     * Prepares the API Model object to be created using the DTO object
      *
      * @param body APIDTO of the API
      * @return API object to be created
@@ -471,23 +471,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         apiToAdd.setApiOwner(provider);
 
         //attach micro-geteway labels
-        assignLabelsToDTO(body,apiToAdd);
-
-        // set default API Level Policy
-        if (apiToAdd.getApiLevelPolicy() != null) {
-            Policy[] apiPolicies = apiProvider.getPolicies(username, PolicyConstants.POLICY_LEVEL_API);
-            if (apiPolicies.length > 0) {
-                for (Policy policy : apiPolicies) {
-                    if (policy.getPolicyName().equals(APIConstants.UNLIMITED_TIER)) {
-                        apiToAdd.setApiLevelPolicy(APIConstants.UNLIMITED_TIER);
-                        break;
-                    }
-                }
-                if (StringUtils.isBlank(apiToAdd.getApiLevelPolicy())) {
-                    apiToAdd.setApiLevelPolicy(apiPolicies[0].getPolicyName());
-                }
-            }
-        }
+        assignLabelsToDTO(body, apiToAdd);
 
         return apiToAdd;
     }
@@ -503,7 +487,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId          apiId
      * @param accept
-     * @param ifNoneMatch If--Match header value
+     * @param ifNoneMatch    If--Match header value
      * @param messageContext message context
      * @return Response with GraphQL Schema
      */
@@ -539,7 +523,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Update GraphQL Schema
-     * @param apiId api Id
+     *
+     * @param apiId            api Id
      * @param schemaDefinition graphQL schema definition
      * @param ifMatch
      * @param messageContext
@@ -597,7 +582,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = originalAPI.getId();
             boolean isWSAPI = originalAPI.getType() != null
-                            && APIConstants.APITransportType.WS.toString().equals(originalAPI.getType());
+                    && APIConstants.APITransportType.WS.toString().equals(originalAPI.getType());
             boolean isGraphql = originalAPI.getType() != null
                     && APIConstants.APITransportType.GRAPHQL.toString().equals(originalAPI.getType());
 
@@ -656,10 +641,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validation for tiers
             List<String> tiersFromDTO = body.getPolicies();
             String originalStatus = originalAPI.getStatus();
-            if (tiersFromDTO == null || tiersFromDTO.isEmpty() &&
-                    !(APIConstants.CREATED.equals(originalStatus) || APIConstants.PROTOTYPED.equals(originalStatus))) {
-                RestApiUtil.handleBadRequest("A tier should be defined " +
-                        "if the API is not in CREATED or PROTOTYPED state", log);
+            if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                    apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+                if (tiersFromDTO == null || tiersFromDTO.isEmpty() &&
+                        !(APIConstants.CREATED.equals(originalStatus) ||
+                                APIConstants.PROTOTYPED.equals(originalStatus))) {
+                    RestApiUtil.handleBadRequest("A tier should be defined " +
+                            "if the API is not in CREATED or PROTOTYPED state", log);
+                }
             }
 
             if (tiersFromDTO != null && !tiersFromDTO.isEmpty()) {
@@ -767,13 +756,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                 JSONObject endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
                 if (endpointConfig != null) {
                     if (endpointConfig.containsKey(APIConstants.AMZN_ACCESS_KEY) &&
-                            endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                            endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY) &&
+                                endpointConfig.containsKey(APIConstants.AMZN_REGION)) {
                         String accessKey = (String) endpointConfig.get(APIConstants.AMZN_ACCESS_KEY);
                         String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                        String region = (String) endpointConfig.get(APIConstants.AMZN_REGION);
                         AWSCredentialsProvider credentialsProvider;
-                        if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
+                        if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey) &&
+                            StringUtils.isEmpty(region)) {
                             credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
-                        } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)) {
+                        } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey) &&
+                                    !StringUtils.isEmpty(region)) {
                             if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
                                 CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                                 secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
@@ -787,6 +780,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         }
                         AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
                                 .withCredentials(credentialsProvider)
+                                .withRegion(region)
                                 .build();
                         ListFunctionsResult listFunctionsResult = awsLambda.listFunctions();
                         List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
@@ -873,6 +867,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         while ((inputLine = reader.readLine()) != null) {
                             responseString.append(inputLine);
                         }
+                        reader.close();
                         JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
                         String report = responseJson.get(APIConstants.DATA).toString();
                         String grade = (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
@@ -885,6 +880,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         auditReportDTO.setReport(decodedReport);
                         auditReportDTO.setGrade(grade);
                         auditReportDTO.setNumErrors(numErrors);
+                        auditReportDTO.setExternalApiId(auditUuid);
                         return Response.ok().entity(auditReportDTO).build();
                     }
                 }
@@ -903,7 +899,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     private void updateAuditApi(String apiDefinition, String apiToken, String auditUuid, String baseUrl,
-            boolean isDebugEnabled)
+                                boolean isDebugEnabled)
             throws IOException, APIManagementException {
         // Set the property to be attached in the body of the request
         // Attach API Definition to property called specfile to be sent in the request
@@ -937,7 +933,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     private String createAuditApi(String collectionId, String apiToken, APIIdentifier apiIdentifier,
-            String apiDefinition, String baseUrl, boolean isDebugEnabled)
+                                  String apiDefinition, String baseUrl, boolean isDebugEnabled)
             throws IOException, APIManagementException, ParseException {
         HttpURLConnection httpConn;
         OutputStream outputStream;
@@ -999,7 +995,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         } else {
             throw new APIManagementException(
                     "Error while retrieving data for the API Security Audit Report. Found http status: " +
-                    httpConn.getResponseCode() + " - " + httpConn.getResponseMessage());
+                            httpConn.getResponseCode() + " - " + httpConn.getResponseMessage());
         }
         return auditUuid;
     }
@@ -1009,7 +1005,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * that are currently reused by API Products.
      *
      * @param updatedUriTemplates Updated URITemplates
-     * @param existingAPI Existing API
+     * @param existingAPI         Existing API
      * @return List of removed resources that are reused among API Products
      */
     private List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI) {
@@ -1030,7 +1026,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
                     //Check if existing reused resource is among updated resources
                     if (existingVerb.equalsIgnoreCase(updatedVerb) &&
-                        existingPath.equalsIgnoreCase(updatedPath)) {
+                            existingPath.equalsIgnoreCase(updatedPath)) {
                         isReusedResourceRemoved = false;
                         break;
                     }
@@ -1050,7 +1046,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Finds resources that have been removed in the updated API, that are currently reused by API Products.
      *
-     * @param updatedDTO Updated API
+     * @param updatedDTO  Updated API
      * @param existingAPI Existing API
      * @return List of removed resources that are reused among API Products
      */
@@ -1092,6 +1088,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Check whether the token has APIDTO class level Scope annotation
+     *
      * @return true if the token has APIDTO class level Scope annotation
      */
     private boolean checkClassScopeAnnotation(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes, String[] tokenScopes) {
@@ -1108,6 +1105,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Get the API DTO object in which the API field values are overridden with the user passed new values
+     *
      * @throws APIManagementException
      */
     private APIDTO getFieldOverriddenAPIDTO(APIDTO apidto, API originalAPI,
@@ -1172,7 +1170,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdClientCertificatesAliasContentGet(String apiId, String alias,
-            MessageContext messageContext) {
+                                                               MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         String certFileName = alias + ".crt";
         try {
@@ -1199,7 +1197,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdClientCertificatesAliasDelete(String alias, String apiId,
-            MessageContext messageContext) {
+                                                           MessageContext messageContext) {
 
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         try {
@@ -1248,7 +1246,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdClientCertificatesAliasGet(String alias, String apiId,
-            MessageContext messageContext) {
+                                                        MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
         try {
@@ -1275,8 +1273,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdClientCertificatesAliasPut(String alias, String apiId,
-            InputStream certificateInputStream, Attachment certificateDetail, String tier,
-            MessageContext messageContext) {
+                                                        InputStream certificateInputStream, Attachment certificateDetail, String tier,
+                                                        MessageContext messageContext) {
         try {
             ContentDisposition contentDisposition;
             String fileName;
@@ -1342,7 +1340,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (URISyntaxException e) {
             RestApiUtil.handleInternalServerError(
                     "Error while generating the resource location URI for alias '" + alias + "'", e, log);
-        }  catch (FaultGatewaysException e) {
+        } catch (FaultGatewaysException e) {
             RestApiUtil.handleInternalServerError(
                     "Error while publishing the certificate change to gateways for the alias " + alias, e, log);
         }
@@ -1351,7 +1349,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdClientCertificatesGet(String apiId, Integer limit, Integer offset, String alias,
-            MessageContext messageContext) {
+                                                   MessageContext messageContext) {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         List<ClientCertificateDTO> certificates = new ArrayList<>();
@@ -1392,7 +1390,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdClientCertificatesPost(InputStream certificateInputStream,
-            Attachment certificateDetail, String alias, String apiId, String tier, MessageContext messageContext) {
+                                                    Attachment certificateDetail, String alias, String apiId, String tier, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
@@ -1535,14 +1533,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Retrieves the content of a document
      *
-     * @param apiId           API identifier
-     * @param documentId      document identifier
-     * @param ifNoneMatch     If-None-Match header value
+     * @param apiId       API identifier
+     * @param documentId  document identifier
+     * @param ifNoneMatch If-None-Match header value
      * @return Content of the document/ either inline/file or source url as a redirection
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId,
-            String ifNoneMatch, MessageContext messageContext) {
+                                                           String ifNoneMatch, MessageContext messageContext) {
         Documentation documentation;
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -1599,18 +1597,18 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Add content to a document. Content can be inline or File
      *
-     * @param apiId             API identifier
-     * @param documentId        document identifier
-     * @param inputStream       file input stream
-     * @param fileDetail        file details as Attachment
-     * @param inlineContent     inline content for the document
-     * @param ifMatch           If-match header value
+     * @param apiId         API identifier
+     * @param documentId    document identifier
+     * @param inputStream   file input stream
+     * @param fileDetail    file details as Attachment
+     * @param inlineContent inline content for the document
+     * @param ifMatch       If-match header value
      * @return updated document as DTO
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
-            InputStream inputStream, Attachment fileDetail, String inlineContent, String ifMatch,
-            MessageContext messageContext) {
+                                                            InputStream inputStream, Attachment fileDetail, String inlineContent, String ifMatch,
+                                                            MessageContext messageContext) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -1639,7 +1637,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             "or MARKDOWN", log);
                 }
                 apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
-            }  else {
+            } else {
                 RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
             }
 
@@ -1674,14 +1672,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Deletes an existing document of an API
      *
-     * @param apiId             API identifier
-     * @param documentId        document identifier
-     * @param ifMatch           If-match header value
+     * @param apiId      API identifier
+     * @param documentId document identifier
+     * @param ifMatch    If-match header value
      * @return 200 response if deleted successfully
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String ifMatch,
-            MessageContext messageContext) {
+                                                       MessageContext messageContext) {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -1712,7 +1710,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch,
-            MessageContext messageContext) {
+                                                    MessageContext messageContext) {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -1744,15 +1742,15 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Updates an existing document of an API
      *
-     * @param apiId             API identifier
-     * @param documentId        document identifier
-     * @param body              updated document DTO
-     * @param ifMatch           If-match header value
+     * @param apiId      API identifier
+     * @param documentId document identifier
+     * @param body       updated document DTO
+     * @param ifMatch    If-match header value
      * @return updated document DTO as response
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body,
-            String ifMatch, MessageContext messageContext) {
+                                                    String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -1801,6 +1799,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
+
     /**
      * Returns all the documents of the given API identifier that matches to the search condition
      *
@@ -1812,7 +1811,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
-            MessageContext messageContext) {
+                                          MessageContext messageContext) {
         // do some magic!
         //pre-processing
         //setting default limit and offset values if they are not set
@@ -1848,8 +1847,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Add a documentation to an API
      *
-     * @param apiId       api identifier
-     * @param body        Documentation DTO as request body
+     * @param apiId api identifier
+     * @param body  Documentation DTO as request body
      * @return created document DTO as response
      */
     @Override
@@ -1903,6 +1902,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
+
 
     /**
      * Get external store list which the given API is already published to.
@@ -3930,6 +3930,29 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return Response.ok().entity(validationResponse).build();
     }
+
+    /**
+     * Generates Mock response examples for Inline prototyping
+     * of a swagger
+     *
+     * @param apiId API Id
+     * @param ifNoneMatch If-None-Match header value
+     * @param messageContext message context
+     * @return apiDefinition
+     * @throws APIManagementException
+     */
+    @Override
+    public Response generateMockResponses(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        APIIdentifier apiIdentifier = originalAPI.getId();
+        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+        apiDefinition = OASParserUtil.generateExamples(apiDefinition);
+        apiProvider.saveSwaggerDefinition(originalAPI,apiDefinition);
+        return Response.ok().entity(apiDefinition).build();
+    }
+
 
     /**
      * Extract GraphQL Operations from given schema
