@@ -1,7 +1,4 @@
-package org.wso2.carbon.apimgt.gateway.messagetracing;
-
-import org.apache.synapse.aspects.ComponentType;
-import org.apache.synapse.aspects.flow.statistics.data.raw.StatisticDataUnit;
+package org.wso2.carbon.apimgt.impl.mediation.tracing;
 
 import java.util.Map;
 
@@ -11,9 +8,17 @@ public class MediatorEvent {
     private String componentType;
     private String componentId;
     private Map<String, Object> transportHeaders;
-    private Map<String, Object> synapseMessageContext;
-    private Map<String, Object> axis2MessageContext;
+    private Map<String, Object> synapseCtxProperties;
+    private Map<String, Object> axis2CtxProperties;
     private String payload;
+
+    private Map<String, Object> addedTransportHeaders;
+    private Map<String, Object> addedSynapseCtxProperties;
+    private Map<String, Object> addedAxis2CtxProperties;
+
+    private Map<String, Object> removedTransportHeaders;
+    private Map<String, Object> removedSynapseCtxProperties;
+    private Map<String, Object> removedAxis2CtxProperties;
 
     public MediatorEvent() {
     }
@@ -50,20 +55,20 @@ public class MediatorEvent {
         this.transportHeaders = transportHeaders;
     }
 
-    public Map<String, Object> getSynapseMessageContext() {
-        return this.synapseMessageContext;
+    public Map<String, Object> getSynapseCtxProperties() {
+        return this.synapseCtxProperties;
     }
 
-    public void setSynapseMessageContext(Map<String, Object> synapseMessageContext) {
-        this.synapseMessageContext = synapseMessageContext;
+    public void setSynapseCtxProperties(Map<String, Object> synapseCtxProperties) {
+        this.synapseCtxProperties = synapseCtxProperties;
     }
 
     public Map<String, Object> getAXIS2MessageContext() {
-        return this.axis2MessageContext;
+        return this.axis2CtxProperties;
     }
 
-    public void setAxis2MessageContext(Map<String, Object> axis2MessageContext) {
-        this.axis2MessageContext = axis2MessageContext;
+    public void setAxis2CtxProperties(Map<String, Object> axis2CtxProperties) {
+        this.axis2CtxProperties = axis2CtxProperties;
     }
 
     public String getPayload() {
@@ -72,5 +77,53 @@ public class MediatorEvent {
 
     public void setPayload(String payload) {
         this.payload = payload;
+    }
+
+    public Map<String, Object> getAddedTransportHeaders() {
+        return addedTransportHeaders;
+    }
+
+    public void setAddedTransportHeaders(Map<String, Object> addedTransportHeaders) {
+        this.addedTransportHeaders = addedTransportHeaders;
+    }
+
+    public Map<String, Object> getAddedSynapseCtxProperties() {
+        return addedSynapseCtxProperties;
+    }
+
+    public void setAddedSynapseCtxProperties(Map<String, Object> addedSynapseCtxProperties) {
+        this.addedSynapseCtxProperties = addedSynapseCtxProperties;
+    }
+
+    public Map<String, Object> getAddedAxis2CtxProperties() {
+        return addedAxis2CtxProperties;
+    }
+
+    public void setAddedAxis2CtxProperties(Map<String, Object> addedAxis2CtxProperties) {
+        this.addedAxis2CtxProperties = addedAxis2CtxProperties;
+    }
+
+    public Map<String, Object> getRemovedTransportHeaders() {
+        return removedTransportHeaders;
+    }
+
+    public void setRemovedTransportHeaders(Map<String, Object> removedTransportHeaders) {
+        this.removedTransportHeaders = removedTransportHeaders;
+    }
+
+    public Map<String, Object> getRemovedSynapseCtxProperties() {
+        return removedSynapseCtxProperties;
+    }
+
+    public void setRemovedSynapseCtxProperties(Map<String, Object> removedSynapseCtxProperties) {
+        this.removedSynapseCtxProperties = removedSynapseCtxProperties;
+    }
+
+    public Map<String, Object> getRemovedAxis2CtxProperties() {
+        return removedAxis2CtxProperties;
+    }
+
+    public void setRemovedAxis2CtxProperties(Map<String, Object> removedAxis2CtxProperties) {
+        this.removedAxis2CtxProperties = removedAxis2CtxProperties;
     }
 }

@@ -17,10 +17,9 @@
  */
 
 
-package org.wso2.carbon.apimgt.gateway.messageTrace;
+package org.wso2.carbon.apimgt.gateway.messagetracing;
 
 import org.apache.synapse.aspects.flow.statistics.opentracing.management.OpenTracingManager;
-import org.wso2.carbon.apimgt.gateway.messageTrace.APIMSpanHandler;
 
 import org.apache.synapse.aspects.flow.statistics.opentracing.management.scoping.TracingScopeManager;
 

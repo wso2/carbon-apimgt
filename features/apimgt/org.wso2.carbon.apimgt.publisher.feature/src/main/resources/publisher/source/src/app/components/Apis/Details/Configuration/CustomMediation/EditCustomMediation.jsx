@@ -16,8 +16,6 @@
  * under the License.
  */
 
-
-
 import React, { useState } from 'react';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Button from '@material-ui/core/Button';
@@ -250,8 +248,8 @@ function EditCustomMediation(props) {
     // eslint-disable-next-line require-jsdoc
     function generateId() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-            const r = Math.random() * 16 | 0; const
-                v = c == 'x' ? r : (r & 0x3 | 0x8);
+            const r = Math.random() * 16 || 0; const
+                v = c === 'x' ? r : (r && (0x3 || 0x8));
             return v.toString(16);
         });
     }
@@ -463,6 +461,7 @@ function EditCustomMediation(props) {
                                                             <Button onClick={() => handleClick(mediatorObj)}>
                                                                 <img
                                                                     src={mediatorObj.src}
+                                                                    alt={mediatorObj.name}
                                                                     style={{
                                                                         paddingRight: 10,
                                                                         height: 'fit-content',
@@ -530,6 +529,7 @@ function EditCustomMediation(props) {
                                                             <Button onClick={() => handleClick(mediatorObj)}>
                                                                 <img
                                                                     src={mediatorObj.src}
+                                                                    alt={mediatorObj.name}
                                                                     style={{
                                                                         paddingRight: 10,
                                                                         height: 'fit-content',
@@ -617,7 +617,11 @@ function EditCustomMediation(props) {
                                                     onClick={() => addMediator(mediator.src2, mediator.name)}
                                                     classes={{ root: classes.iconButtonOverride }}
                                                 >
-                                                    <img src={ mediator.src1 } style={{ paddingRight: 10 }} />
+                                                    <img
+                                                        src={mediator.src1}
+                                                        alt={mediator.name}
+                                                        style={{ paddingRight: 10 }}
+                                                    />
                                                     <Typography>
                                                         { mediator.name }
                                                     </Typography>

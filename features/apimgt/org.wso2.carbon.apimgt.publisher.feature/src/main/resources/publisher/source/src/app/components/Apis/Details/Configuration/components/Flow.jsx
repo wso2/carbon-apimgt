@@ -24,6 +24,7 @@ import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
 import EditMediationPolicy from 'AppComponents/Apis/Details/MediationPolicies/EditMediationPolicy';
 import EditRounded from '@material-ui/icons/EditRounded';
+import ViewMedaitionPolicies from 'AppComponents/Apis/Details/MediationPolicies/ViewMediationPolicies';
 
 const styles = {
     content: {
@@ -72,6 +73,10 @@ const styles = {
         top: 8,
         right: 0,
     },
+    viewIcon: {
+        position: 'absolute',
+        top: 8,
+    },
 };
 
 /**
@@ -88,6 +93,8 @@ function InFlow(props) {
     function startEditing() {
         setEditing(true);
     }
+
+
     return (
         <>
             <Paper className={classes.paper}>
@@ -101,7 +108,15 @@ function InFlow(props) {
                         </Typography>
                         <Typography className={classes.heading}>
                             {selectedMediationPolicy && selectedMediationPolicy.name ? (
-                                <span>{selectedMediationPolicy.name}</span>
+                                <span>
+                                    {selectedMediationPolicy.name}
+                                    <ViewMedaitionPolicies
+                                        selectedMediationPolicy={selectedMediationPolicy}
+                                        updateMediationPolicy={updateMediationPolicy}
+                                        type={type}
+                                    />
+                                </span>
+
                             ) : (
                                 <span>none</span>
                             )}
@@ -119,6 +134,7 @@ function InFlow(props) {
                 selectedMediationPolicy={selectedMediationPolicy}
                 type={type}
             />
+
         </>
     );
 }

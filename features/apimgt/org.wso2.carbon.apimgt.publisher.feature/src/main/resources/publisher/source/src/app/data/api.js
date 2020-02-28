@@ -2011,6 +2011,46 @@ class API extends Resource {
     }
 
     /**
+     * Get the trace messages IDs.
+     * @param {String} apiId uuid of the api
+     * @returns {Promise}
+     *
+     */
+    static getTracingMessagesIds(apiId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+
+        return restApiClient.then(client => {
+            return client.apis['Message Tracing List'].apisApiIdMessageTracesGet(
+                {
+                    apiId: apiId,
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get the events for message ID.
+     * @param {String} apiId uuid of the api
+     * @param {String} messageTraceId uuid of the api
+     * @returns {Promise}
+     *
+     */
+    static getTracingMessagesEvents(apiId, messageTraceId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+
+        return restApiClient.then(client => {
+            return client.apis['Message Tracing Event List'].apisApiIdMessageTracesMessageTraceIdGet(
+                {
+                    messageTraceId: messageTraceId,
+                    apiId: apiId,
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
      * Get global mediation policies.
      * @returns {Promise}
      *

@@ -64,12 +64,14 @@
         "react-tagsinput": "3.19.0",
         "react-tap-event-plugin": "^2.0.1",
         "react-toastify": "^1.7.0",
+        "react-tooltip": "^4.0.3",
         "react-visibility-sensor": "^5.1.1",
         "swagger-client": "^3.9.4",
         "swagger-editor": "^3.6.30",
         "swagger-parser": "^7.0.1",
         "typeface-roboto": "0.0.35",
-        "url-loader": "^0.5.9"
+        "url-loader": "^0.5.9",
+        "xml-js": "^1.6.11"
     },
     "devDependencies": {
         "@babel/core": "^7.6.4",

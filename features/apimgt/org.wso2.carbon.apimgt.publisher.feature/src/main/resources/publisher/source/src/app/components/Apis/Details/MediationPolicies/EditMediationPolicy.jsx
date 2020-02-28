@@ -136,6 +136,7 @@ function EditMediationPolicy(props) {
             // updateMediationPolicy(policy);
         }
     }
+
     useEffect(() => {
         if (selectedMediationPolicy) {
             const { shared } = selectedMediationPolicy;
@@ -343,57 +344,58 @@ function EditMediationPolicy(props) {
     // };
 
     return (
-        <Dialog
-            disableBackdropClick
-            disableEscapeKeyDown
-            maxWidth='sm'
-            fullWidth
-            aria-labelledby='confirmation-dialog-title'
-            open={editing}
-        >
-            <DialogTitle id='confirmation-dialog-title'>
-                <FormattedMessage
-                    id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.select.policy'
-                    defaultMessage='Select a Mediation Policy'
-                />
-            </DialogTitle>
-            {globalMediationPolicies && seqCustom && (
-                <DialogContent dividers>
-                    <RadioGroup value={provideBy} onChange={handleChangeProvideBy} className={classes.radioWrapper}>
-                        <FormControlLabel
-                            value='none'
-                            control={<Radio color='primary' />}
-                            label={(
-                                <FormattedMessage
-                                    id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.none'
-                                    defaultMessage='None'
-                                />
-                            )}
-                        />
-                        <FormControlLabel
-                            value='global'
-                            control={<Radio color='primary' />}
-                            label={(
-                                <FormattedMessage
-                                    id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.common.policies'
-                                    defaultMessage='Common Policies'
-                                />
-                            )}
-                        />
-                        <FormControlLabel
-                            value='custom'
-                            control={<Radio color='primary' />}
-                            label={(
-                                <FormattedMessage
-                                    id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.custom.policies'
-                                    defaultMessage='Custom Policies'
-                                />
-                            )}
-                        />
-                    </RadioGroup>
-                    {provideBy === 'custom' && (
-                        <>
-                            {/* <Button
+        <>
+            <Dialog
+                disableBackdropClick
+                disableEscapeKeyDown
+                maxWidth='sm'
+                fullWidth
+                aria-labelledby='confirmation-dialog-title'
+                open={editing}
+            >
+                <DialogTitle id='confirmation-dialog-title'>
+                    <FormattedMessage
+                        id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.select.policy'
+                        defaultMessage='Select a Mediation Policy'
+                    />
+                </DialogTitle>
+                {globalMediationPolicies && seqCustom && (
+                    <DialogContent dividers>
+                        <RadioGroup value={provideBy} onChange={handleChangeProvideBy} className={classes.radioWrapper}>
+                            <FormControlLabel
+                                value='none'
+                                control={<Radio color='primary' />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.none'
+                                        defaultMessage='None'
+                                    />
+                                )}
+                            />
+                            <FormControlLabel
+                                value='global'
+                                control={<Radio color='primary' />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.common.policies'
+                                        defaultMessage='Common Policies'
+                                    />
+                                )}
+                            />
+                            <FormControlLabel
+                                value='custom'
+                                control={<Radio color='primary' />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.custom.policies'
+                                        defaultMessage='Custom Policies'
+                                    />
+                                )}
+                            />
+                        </RadioGroup>
+                        {provideBy === 'custom' && (
+                            <>
+                                {/* <Button
                                 component='span'
                                 variant='contained'
                                 onClick={handleUpload}
@@ -415,34 +417,34 @@ function EditMediationPolicy(props) {
                                     defaultMessage='Create New Mediation Flow'
                                 />
                             </Button> */}
-                            <Dropzone
-                                multiple={false}
-                                className={classes.dropzone}
-                                activeClassName={classes.acceptDrop}
-                                rejectClassName={classes.rejectDrop}
-                                onDrop={(dropFile) => {
-                                    onDrop(dropFile);
-                                }}
-                            >
-                                {({ getRootProps, getInputProps }) => (
-                                    <div {...getRootProps({ style: dropzoneStyles })}>
-                                        <input {...getInputProps()} accept='application/xml,text/xml' />
-                                        <div className={classes.dropZoneWrapper}>
-                                            <Icon className={classes.dropIcon}>cloud_upload</Icon>
-                                            <Typography>
-                                                <FormattedMessage
-                                                    id={
-                                                        'Apis.Details.MediationPolicies.Edit.EditMediationPolicy.'
+                                <Dropzone
+                                    multiple={false}
+                                    className={classes.dropzone}
+                                    activeClassName={classes.acceptDrop}
+                                    rejectClassName={classes.rejectDrop}
+                                    onDrop={(dropFile) => {
+                                        onDrop(dropFile);
+                                    }}
+                                >
+                                    {({ getRootProps, getInputProps }) => (
+                                        <div {...getRootProps({ style: dropzoneStyles })}>
+                                            <input {...getInputProps()} accept='application/xml,text/xml' />
+                                            <div className={classes.dropZoneWrapper}>
+                                                <Icon className={classes.dropIcon}>cloud_upload</Icon>
+                                                <Typography>
+                                                    <FormattedMessage
+                                                        id={
+                                                            'Apis.Details.MediationPolicies.Edit.EditMediationPolicy.'
                                                         + 'click.or.drop.to.upload.file'
-                                                    }
-                                                    defaultMessage='Click or drag the mediation file to upload.'
-                                                />
-                                            </Typography>
+                                                        }
+                                                        defaultMessage='Click or drag the mediation file to upload.'
+                                                    />
+                                                </Typography>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
-                            </Dropzone>
-                            { /* {isUploadPreviewShown
+                                    )}
+                                </Dropzone>
+                                { /* {isUploadPreviewShown
                             && (
                                 <UploadCustomMediation
                                     classes={classes}
@@ -460,6 +462,51 @@ function EditMediationPolicy(props) {
                                     selectedMediationPolicy={selectedMediationPolicy}
                                 />
                             )} */ }
+                                <RadioGroup
+                                    aria-label='inflow'
+                                    name='inflow'
+                                    className={classes.radioGroup}
+                                    value={localSelectedPolicyFile.name}
+                                    onChange={handleChange}
+                                >
+                                    <FormLabel component='customPolicies'>
+                                        <FormattedMessage
+                                            id={
+                                                'Apis.Details.Edit.MediationPolicies.'
+                                            + 'EditMediationPolicies.custom.mediation.policies'
+                                            }
+                                            defaultMessage='Custom Mediation Policies'
+                                        />
+                                    </FormLabel>
+                                    {seqCustom.map((seq) => (
+                                        <div>
+                                            <IconButton onClick={() => handleDelete(seq.id)}>
+                                                <Icon>delete</Icon>
+                                            </IconButton>
+                                            <Button onClick={() => handleDownload(seq.id)}>
+                                                <Icon>arrow_downward</Icon>
+                                            </Button>
+                                            <FormControlLabel
+                                                control={(
+                                                    <Radio
+                                                        inputProps={{
+                                                            seq_id: seq.id,
+                                                            seq_name: seq.name,
+                                                            seq_type: seq.type,
+                                                        }}
+                                                        color='primary'
+                                                    />
+                                                )}
+                                                label={seq.name}
+                                                value={seq.name}
+                                                checked={localSelectedPolicyFile.name === seq.name}
+                                            />
+                                        </div>
+                                    ))}
+                                </RadioGroup>
+                            </>
+                        )}
+                        {provideBy === 'global' && (
                             <RadioGroup
                                 aria-label='inflow'
                                 name='inflow'
@@ -467,20 +514,8 @@ function EditMediationPolicy(props) {
                                 value={localSelectedPolicyFile.name}
                                 onChange={handleChange}
                             >
-                                <FormLabel component='customPolicies'>
-                                    <FormattedMessage
-                                        id={
-                                            'Apis.Details.Edit.MediationPolicies.'
-                                            + 'EditMediationPolicies.custom.mediation.policies'
-                                        }
-                                        defaultMessage='Custom Mediation Policies'
-                                    />
-                                </FormLabel>
-                                {seqCustom.map((seq) => (
+                                {globalMediationPolicies.map((seq) => (
                                     <div>
-                                        <IconButton onClick={() => handleDelete(seq.id)}>
-                                            <Icon>delete</Icon>
-                                        </IconButton>
                                         <Button onClick={() => handleDownload(seq.id)}>
                                             <Icon>arrow_downward</Icon>
                                         </Button>
@@ -502,62 +537,30 @@ function EditMediationPolicy(props) {
                                     </div>
                                 ))}
                             </RadioGroup>
-                        </>
-                    )}
-                    {provideBy === 'global' && (
-                        <RadioGroup
-                            aria-label='inflow'
-                            name='inflow'
-                            className={classes.radioGroup}
-                            value={localSelectedPolicyFile.name}
-                            onChange={handleChange}
-                        >
-                            {globalMediationPolicies.map((seq) => (
-                                <div>
-                                    <Button onClick={() => handleDownload(seq.id)}>
-                                        <Icon>arrow_downward</Icon>
-                                    </Button>
-                                    <FormControlLabel
-                                        control={(
-                                            <Radio
-                                                inputProps={{
-                                                    seq_id: seq.id,
-                                                    seq_name: seq.name,
-                                                    seq_type: seq.type,
-                                                }}
-                                                color='primary'
-                                            />
-                                        )}
-                                        label={seq.name}
-                                        value={seq.name}
-                                        checked={localSelectedPolicyFile.name === seq.name}
-                                    />
-                                </div>
-                            ))}
-                        </RadioGroup>
-                    )}
-                </DialogContent>
-            )}
-            <DialogActions>
-                <Button onClick={cancelEditing} color='primary'>
-                    <FormattedMessage
-                        id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.cancel.btn'
-                        defaultMessage='Cancel'
-                    />
-                </Button>
-                <Button
-                    onClick={doneEditing}
-                    color='primary'
-                    variant='contained'
-                    disabled={provideBy === 'custom' && seqCustom && seqCustom.length === 0}
-                >
-                    <FormattedMessage
-                        id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.select.btn'
-                        defaultMessage='Select'
-                    />
-                </Button>
-            </DialogActions>
-        </Dialog>
+                        )}
+                    </DialogContent>
+                )}
+                <DialogActions>
+                    <Button onClick={cancelEditing} color='primary'>
+                        <FormattedMessage
+                            id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.cancel.btn'
+                            defaultMessage='Cancel'
+                        />
+                    </Button>
+                    <Button
+                        onClick={doneEditing}
+                        color='primary'
+                        variant='contained'
+                        disabled={provideBy === 'custom' && seqCustom && seqCustom.length === 0}
+                    >
+                        <FormattedMessage
+                            id='Apis.Details.MediationPolicies.Edit.EditMediationPolicy.select.btn'
+                            defaultMessage='Select'
+                        />
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
     );
 }
 EditMediationPolicy.propTypes = {
