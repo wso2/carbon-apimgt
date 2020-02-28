@@ -205,18 +205,22 @@ public class DataProcessAndPublishingAgent implements Runnable {
         //this parameter will be used to capture message size and pass it to calculation logic
         long messageSizeInBytes = 0;
         ArrayList<VerbInfoDTO> list = (ArrayList<VerbInfoDTO>) messageContext.getProperty(APIConstants.VERB_INFO_DTO);
-        VerbInfoDTO verbInfoDTO = list.get(0);
-        if (authenticationContext.isContentAwareTierPresent() || verbInfoDTO.isContentAware()) {
+        boolean isVerbInfoContentAware = false;
+        if (list != null && !list.isEmpty()) {
+            VerbInfoDTO verbInfoDTO = list.get(0);
+            isVerbInfoContentAware = verbInfoDTO.isContentAware();
+        }
+        
+        if (authenticationContext.isContentAwareTierPresent() || isVerbInfoContentAware) {
             //this request can match with with bandwidth policy. So we need to get message size.
             log.debug("Content aware throttling tier present.");
-            Object contentLength = null;
-            if (transportHeaderMap != null) {
-                contentLength = transportHeaderMap.get(APIThrottleConstants.CONTENT_LENGTH);
-            }
-
+            Object contentLength = messageContext.getProperty("contentLength"); 
+            
             if (contentLength != null) {
+                log.debug("Content lenght found in the request. Using it as the message..");
                 messageSizeInBytes = Integer.parseInt(contentLength.toString());
             } else {
+                log.debug("Building the message to get the message size..");
                 try {
                     buildMessage(axis2MessageContext);
                 } catch (IOException ex) {

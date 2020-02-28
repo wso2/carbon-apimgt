@@ -126,6 +126,7 @@ public class OAuthAuthenticator implements Authenticator {
             }
             //Check if client invoked the default version API (accessing API without version).
             defaultVersionInvoked = headers.containsKey(defaultAPIHeader);
+            synCtx.setProperty("contentLength", headers.get("Content-Length"));
         }
 
 
