@@ -246,7 +246,7 @@ class SampleAPI extends Component {
                             buttonProps={{
                                 size: 'small',
                                 color: 'primary',
-                                variant: 'outlined',
+                                variant: 'contained',
                                 className: classes.buttonLeft,
                             }}
                         >
@@ -259,7 +259,7 @@ class SampleAPI extends Component {
                                     size='small'
                                     color='primary'
                                     disabled={deploying}
-                                    variant='outlined'
+                                    variant='contained'
                                     onClick={this.handleDeploySample}
                                 >
                                     <GetApp />

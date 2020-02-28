@@ -36,6 +36,9 @@ import apiProduct from './apiProduct';
 import mathPayload from './math';
 import calculatorPayload from './calculator';
 import SampleAPIProductWizard from './SampleAPIProductWizard';
+import Create from "@material-ui/icons/Create";
+import APICreateMenu from "AppComponents/Apis/Listing/components/APICreateMenu";
+import {Link} from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
     buttonProgress: {
@@ -52,6 +55,9 @@ const useStyles = makeStyles((theme) => ({
     },
     content: {
         paddingBottom: theme.spacing(2),
+    },
+    buttonLeft: {
+        marginRight: theme.spacing(1),
     },
     deployButton: {
         '& span.material-icons': {
@@ -80,15 +86,18 @@ function SampleAPI(prop) {
      * @param {*} mathApiId
      */
     function createSampleProduct(calId, mathId) {
+
         setStep(3);
         const sampleProductPayload = apiProduct(calId, mathId);
+        console.log(sampleProductPayload);
         const productRestApi = new APIProduct();
-
         const productPromise = productRestApi.create(sampleProductPayload);
+        console.log(productPromise);
+
         productPromise
             .then((prod) => {
                 setStep(4);
-                setProductPath(`/api-products/${prod.body.id}/overview`);
+               setProductPath(`/api-products/${prod.body.id}/overview`);
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Listing.SampleAPI.SampleAPIProduct.successful',
                     defaultMessage: 'Sample CalculatorAPIProduct published successfully',
@@ -96,6 +105,7 @@ function SampleAPI(prop) {
             })
             .catch((error) => {
                 setStep(0);
+                console.log(error);
                 Alert.error(error);
             });
     }
@@ -150,6 +160,7 @@ function SampleAPI(prop) {
      */
 
     return (
+
         <InlineMessage type='info' height={140}>
             <div className={classes.contentWrapper}>
                 <Typography variant='h5' component='h3' className={classes.head}>
@@ -169,22 +180,38 @@ function SampleAPI(prop) {
                     />
                 </Typography>
                 <div className={classes.actions}>
+                    <div className={classes.APICreateMenu}>
+                        <Link to='/api-products/create'>
+                            <Button
+                                variant='contained'
+                                className=  {classes.buttonLeft}
+                                size='small'
+                                color='primary'
+                            >
+                                <Create />
+                                <FormattedMessage
+                                    id='Apis.Listing.components.TopMenu.create.an.api.product'
+                                    defaultMessage='Create an API Product'
+                                />
+                            </Button>
+                        </Link>
+                    </div>
                     <SampleAPIProductWizard step={step} setStep={setStep} productPath={productPath} />
-                    <Button
-                        size='small'
-                        color='primary'
-                        disabled={step !== 0}
-                        variant='outlined'
-                        onClick={handleDeploySample}
-                        className={classes.deployButton}
-                    >
-                        <Icon>play_circle_outline</Icon>
-                        <FormattedMessage
-                            id='Apis.Listing.SampleAPIProduct.deploy.button'
-                            defaultMessage='Deploy Sample API Product'
-                        />
-                        {step !== 0 && <CircularProgress size={24} className={classes.buttonProgress} />}
-                    </Button>
+                    {/*<Button*/}
+                    {/*    size='small'*/}
+                    {/*    color='primary'*/}
+                    {/*    disabled={step !== 0}*/}
+                    {/*    variant='outlined'*/}
+                    {/*    onClick={handleDeploySample}*/}
+                    {/*    className="rightAlign"*/}
+                    {/*>*/}
+                    {/*    <Icon>play_circle_outline</Icon>*/}
+                    {/*    <FormattedMessage*/}
+                    {/*        id='Apis.Listing.SampleAPIProduct.deploy.button'*/}
+                    {/*        defaultMessage='Deploy Sample API Product'*/}
+                    {/*    />*/}
+                    {/*    {step !== 0 && <CircularProgress size={24} className={classes.buttonProgress} />}*/}
+                    {/*</Button>*/}
                 </div>
             </div>
         </InlineMessage>
