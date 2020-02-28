@@ -8917,6 +8917,16 @@ public final class APIUtil {
         return apiMgtDAO.getApplicationByClientId(clientId);
     }
 
+    public static String getQuotaTypeForApplicationPolicy(String policyName, int tenantId)
+            throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        ApplicationPolicy policy = apiMgtDAO.getApplicationPolicy(policyName, tenantId);
+        if (policy != null) {
+            return policy.getDefaultQuotaPolicy().getType();
+        }
+        return null;
+    }
+
     public static List<ConditionDto> extractConditionDto(String base64EncodedString) throws ParseException {
 
         List<ConditionDto> conditionDtoList = new ArrayList<>();
@@ -9745,6 +9755,7 @@ public final class APIUtil {
                 subscriptionPolicyDTO.setSpikeArrestLimit(subscriptionPolicy.getRateLimitCount());
                 subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
                 subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
+                subscriptionPolicyDTO.setTierQuotaType(subscriptionPolicy.getTierQuotaType());
                 subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
             }
             jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);

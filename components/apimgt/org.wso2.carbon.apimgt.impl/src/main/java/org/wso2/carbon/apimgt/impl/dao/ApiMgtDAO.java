@@ -11050,6 +11050,7 @@ public class ApiMgtDAO {
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
+                subPolicy.setTierQuotaType(rs.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
                 Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
                 monetizationPlanProperties.put(APIConstants.Monetization.FIXED_PRICE,
                         rs.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));

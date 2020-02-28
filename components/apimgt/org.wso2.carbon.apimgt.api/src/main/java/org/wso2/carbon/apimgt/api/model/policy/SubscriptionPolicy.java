@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ public class SubscriptionPolicy extends Policy {
     private String billingPlan;
     private String monetizationPlan = null;
     private Map<String, String> monetizationPlanProperties = new HashMap<String, String>();
+    private String tierQuotaType;
 
     public SubscriptionPolicy(String name) {
         super(name);
@@ -90,12 +92,20 @@ public class SubscriptionPolicy extends Policy {
         this.monetizationPlanProperties = monetizationPlanProperties;
     }
 
-	@Override
+    public String getTierQuotaType() {
+        return tierQuotaType;
+    }
+
+    public void setTierQuotaType(String tierQuotaType) {
+        this.tierQuotaType = tierQuotaType;
+    }
+
+    @Override
     public String toString() {
-        return "SubscriptionPolicy [policyName=" + getPolicyName()
-                + ", description=" + getDescription() + ", defaultQuotaPolicy=" + getDefaultQuotaPolicy() +
-                ", rateLimitCount=" + rateLimitCount + ", tenantId=" + getTenantId() +
-                ", ratelimitTimeUnit=" + rateLimitTimeUnit + ", monetizationPlan=" + getMonetizationPlan() +
-                ", monetizationProperties=" + getMonetizationPlanProperties() + "]";
+        return "SubscriptionPolicy [rateLimitCount=" + rateLimitCount + ", rateLimitTimeUnit=" + rateLimitTimeUnit
+                + ", customAttributes=" + Arrays.toString(customAttributes) + ", stopOnQuotaReach=" + stopOnQuotaReach
+                + ", billingPlan=" + billingPlan + ", monetizationPlan=" + monetizationPlan
+                + ", monetizationPlanProperties=" + monetizationPlanProperties + ", tierQuotaType=" + tierQuotaType
+                + "]";
     }
 }

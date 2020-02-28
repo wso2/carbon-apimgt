@@ -1658,6 +1658,8 @@ public final class APIConstants {
         public static final String API_VERSION = "version";
         public static final String API_PUBLISHER = "publisher";
         public static final String API_NAME = "name";
+        public static final String QUOTA_TYPE = "tierQuotaType";
+        public static final String QUOTA_TYPE_BANDWIDTH = "bandwidthVolume";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
