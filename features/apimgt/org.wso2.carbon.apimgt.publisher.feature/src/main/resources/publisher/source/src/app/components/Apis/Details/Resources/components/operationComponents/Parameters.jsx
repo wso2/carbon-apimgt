@@ -67,6 +67,7 @@ export default function Parameters(props) {
                         operationsDispatcher={operationsDispatcher}
                         operation={operation}
                         spec={spec}
+                        specVersion={specVersion}
                     />
                 )}
             </Grid>

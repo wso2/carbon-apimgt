@@ -34,9 +34,13 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Checkbox from '@material-ui/core/Checkbox';
 import Select from '@material-ui/core/Select';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import FormLabel from '@material-ui/core/FormLabel';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { capitalizeFirstLetter } from 'AppData/stringFormatter';
+import {
+    getSupportedDataTypes,
+    getDataFormats,
+    iff,
+} from 'AppComponents/Apis/Details/Resources/components/operationComponents/parameterUtils';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -62,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function EditParameter(props) {
     const {
-        operationsDispatcher, target, verb, editingParameter, setEditingParameter,
+        operationsDispatcher, target, verb, editingParameter, setEditingParameter, version,
     } = props;
     /**
      *
@@ -72,13 +76,21 @@ export default function EditParameter(props) {
      */
     function parameterActionReducer(currentParameter, paramAction) {
         const { action, value } = paramAction;
-        const nextParameter = { ...currentParameter, schema: { ...currentParameter.schema } };
+        const nextParameter = currentParameter.schema
+            ? { ...currentParameter, schema: { ...currentParameter.schema } } : { ...currentParameter };
         switch (action) {
             case 'description':
             case 'required':
                 nextParameter[action] = value;
                 break;
-
+            case 'type':
+            case 'format':
+                if (nextParameter.schema) {
+                    nextParameter.schema[action] = value;
+                } else {
+                    nextParameter[action] = value;
+                }
+                break;
             default:
                 break;
         }
@@ -140,6 +152,7 @@ export default function EditParameter(props) {
                     </Grid>
                     <Grid item md={12}>
                         <TextField
+                            value={parameter.description}
                             fullWidth
                             label='Description'
                             multiline
@@ -160,14 +173,14 @@ export default function EditParameter(props) {
                             variant='outlined'
                             className={classes.formControl}
                         >
-                            <InputLabel required htmlFor='edit-parameter-type'>
+                            <InputLabel required id='edit-parameter-type'>
                                 Type
                             </InputLabel>
 
                             <Select
-                                value=''
+                                value={parameter.schema ? parameter.schema.type : parameter.type}
                                 onChange={
-                                    ({ target: { name, value } }) => parameterActionDispatcher({ type: name, value })
+                                    ({ target: { name, value } }) => parameterActionDispatcher({ action: name, value })
                                 }
                                 inputProps={{
                                     name: 'type',
@@ -181,7 +194,7 @@ export default function EditParameter(props) {
                                     },
                                 }}
                             >
-                                {['number', 'integer'].map((dataType) => (
+                                {getSupportedDataTypes(version, parameter.in).map((dataType) => (
                                     <MenuItem value={dataType} dense>
                                         {capitalizeFirstLetter(dataType)}
                                     </MenuItem>
@@ -191,12 +204,28 @@ export default function EditParameter(props) {
                         </FormControl>
                     </Grid>
                     <Grid item md={6}>
-                        <FormControl fullWidth margin='dense' variant='outlined' className={classes.formControl}>
-                            <InputLabel htmlFor='edit-parameter-format'>Format</InputLabel>
+                        <FormControl
+                            fullWidth
+                            margin='dense'
+                            variant='outlined'
+                            className={classes.formControl}
+                            disabled={parameter.schema
+                                ? iff(
+                                    parameter.schema.type === 'boolean' || parameter.schema.type === 'object',
+                                    true,
+                                    false,
+                                )
+                                : iff(
+                                    parameter.type === 'boolean' || parameter.type === 'object',
+                                    true,
+                                    false,
+                                )}
+                        >
+                            <InputLabel id='edit-parameter-format'>Format</InputLabel>
                             <Select
-                                value=''
+                                value={parameter.schema ? parameter.schema.format : parameter.format}
                                 onChange={
-                                    ({ target: { name, value } }) => parameterActionDispatcher({ type: name, value })
+                                    ({ target: { name, value } }) => parameterActionDispatcher({ action: name, value })
                                 }
                                 inputProps={{
                                     name: 'format',
@@ -210,7 +239,9 @@ export default function EditParameter(props) {
                                     },
                                 }}
                             >
-                                {['float', 'double', 'int32', 'int64'].map((dataType) => (
+                                {getDataFormats(
+                                    parameter.schema ? parameter.schema.type : parameter.type,
+                                ).map((dataType) => (
                                     <MenuItem value={dataType} dense>
                                         {capitalizeFirstLetter(dataType)}
                                     </MenuItem>
@@ -221,14 +252,25 @@ export default function EditParameter(props) {
                     </Grid>
                     <Grid item>
                         <FormControl component='fieldset'>
-                            <FormLabel component='legend'>Require</FormLabel>
                             <FormControlLabel
-                                control={<Checkbox checked={parameter.required} onChange={() => {}} value='required' />}
+                                control={(
+                                    <Checkbox
+                                        checked={parameter.required}
+                                        onChange={(
+                                            { target: { name, value } },
+                                        ) => parameterActionDispatcher({ action: name, value: !value })}
+                                        value={parameter.required}
+                                        inputProps={{
+                                            name: 'required',
+                                        }}
+                                    />
+                                )}
+                                label='Required'
                             />
                         </FormControl>
                     </Grid>
                     <Grid container direction='row' justify='flex-end' alignItems='center'>
-                        <DialogContentText>Use SAVE button in the page to persist changes</DialogContentText>
+                        <DialogContentText>Use DONE button in the page to persist changes</DialogContentText>
                     </Grid>
                 </Grid>
             </DialogContent>
@@ -250,4 +292,5 @@ EditParameter.propTypes = {
     verb: PropTypes.string.isRequired,
     editingParameter: PropTypes.shape({}).isRequired,
     setEditingParameter: PropTypes.func.isRequired,
+    version: PropTypes.string.isRequired,
 };

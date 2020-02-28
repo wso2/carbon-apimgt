@@ -121,10 +121,31 @@ export default function Resources(props) {
                 updatedOperation['x-auth-type'] = value ? 'Any' : 'None';
                 break;
             case 'parameter':
-                if (!updatedOperation.parameters) {
-                    updatedOperation.parameters = [value];
+                if (updatedOperation.parameters) {
+                    // Get the index to check whether the same parameter exists.
+                    const index = updatedOperation.parameters.findIndex(
+                        (e) => e.in === value.in && e.name === value.name,
+                    );
+                    if (index === -1) { // Parameter with name and in does not exists.
+                        if (value.in === 'body') {
+                            // Get the index of existing body param.
+                            // This replaces if a new body parameter is added when another one exists.
+                            const bodyIndex = updatedOperation.parameters.findIndex((parameter) => {
+                                return parameter.in === 'body';
+                            });
+                            if (bodyIndex !== -1) {
+                                updatedOperation.parameters[bodyIndex] = value;
+                            } else {
+                                updatedOperation.parameters.push(value);
+                            }
+                        } else {
+                            updatedOperation.parameters.push(value);
+                        }
+                    } else {
+                        updatedOperation.parameters[index] = value;
+                    }
                 } else {
-                    updatedOperation.parameters.push(value);
+                    updatedOperation.parameters = [value];
                 }
                 break;
             case 'requestBody':

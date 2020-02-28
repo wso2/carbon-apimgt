@@ -33,6 +33,12 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { capitalizeFirstLetter } from 'AppData/stringFormatter';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import {
+    iff,
+    getParameter,
+    getParameterTypes,
+    getSupportedDataTypes,
+} from 'AppComponents/Apis/Details/Resources/components/operationComponents/parameterUtils';
 
 const useStyles = makeStyles(() => ({
     formControl: {
@@ -63,15 +69,7 @@ function AddParameter(props) {
     } = props;
     const inputLabel = useRef(null);
     const [labelWidth, setLabelWidth] = useState(0);
-    const iff = (condition, then, otherwise) => (condition ? then : otherwise);
-    // For more info about Data Models (Schemas) refer https://swagger.io/docs/specification/data-models/
-    const initParameter = specVersion === '2.0'
-        ? {
-            in: '', name: '', type: '', required: '',
-        }
-        : {
-            in: '', name: '', schema: { type: '' }, required: '',
-        };
+    const initParameter = getParameter(specVersion);
 
     /**
      *
@@ -143,7 +141,7 @@ function AddParameter(props) {
                             required: newParameter.required,
                             in: newParameter.in,
                             schema: {
-                                type: newParameter.schema.type,
+                                type: newParameter.type,
                             },
                         },
                     },
@@ -185,33 +183,6 @@ function AddParameter(props) {
         return 'Enter Parameter Name';
     }
 
-    /**
-     * Get the supported parameter types by the spec version.
-     *
-     * @param {string} version : The required OAS/ Swagger version.
-     * @return {array} The list of currently supported parameter types.
-     * */
-    function getSupportedParameterTypes(version) {
-        return version === '2.0' ? ['query', 'header', 'body', 'formData'] : ['query', 'header', 'cookie', 'body'];
-    }
-
-    /**
-     * Get the supported data type by each parameter type.
-     * // TODO Support the array type.
-     *
-     * @param {string} inProperty : The parameter type.
-     * @return {array} A list of supported data types for the parameter type.
-     * */
-    function getSupportedDataTypes(inProperty) {
-        switch (inProperty) {
-            case 'body':
-                return ['string', 'object'];
-            case 'formData':
-                return ['string', 'integer', 'number', 'file'];
-            default:
-                return ['string', 'integer', 'number'];
-        }
-    }
     return (
         <Grid container direction='row' spacing={1} className={classes.parameterContainer}>
             <Grid item xs={2} md={2}>
@@ -237,7 +208,7 @@ function AddParameter(props) {
                         }}
                         error={isParameterExist}
                     >
-                        {getSupportedParameterTypes(specVersion).map((paramType) => {
+                        {getParameterTypes(specVersion).map((paramType) => {
                             if ((paramType === 'body' || paramType === 'formData')
                                 && !['post', 'put', 'patch'].includes(verb)) {
                                 return null;
@@ -300,7 +271,7 @@ function AddParameter(props) {
                         }}
                         error={isParameterExist}
                     >
-                        {getSupportedDataTypes(newParameter.in).map((paramType) => {
+                        {getSupportedDataTypes(specVersion, newParameter.in).map((paramType) => {
                             return (
                                 <MenuItem value={paramType} dense>
                                     {capitalizeFirstLetter(paramType)}

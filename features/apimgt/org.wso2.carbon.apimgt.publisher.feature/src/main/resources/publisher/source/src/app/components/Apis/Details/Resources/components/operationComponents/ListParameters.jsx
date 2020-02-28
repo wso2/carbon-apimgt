@@ -50,7 +50,7 @@ const useStyles = makeStyles({
  */
 export default function ListParameters(props) {
     const {
-        operation, operationsDispatcher, target, verb, disableUpdate, hideParameterEdit,
+        operation, operationsDispatcher, target, verb, disableUpdate, hideParameterEdit, specVersion,
     } = props;
     const classes = useStyles();
     const [editingParameter, setEditingParameter] = useState(null);
@@ -64,6 +64,7 @@ export default function ListParameters(props) {
                     verb={verb}
                     editingParameter={editingParameter}
                     setEditingParameter={setEditingParameter}
+                    version={specVersion}
                 />
             )}
             <Table className={classes.table} aria-label='parameters list'>
@@ -120,10 +121,10 @@ export default function ListParameters(props) {
                                 <TableCell align='left'>Body</TableCell>
                                 <TableCell>{contentType}</TableCell>
                                 <TableCell align='left'>{content.schema.type}</TableCell>
-                                <TableCell align='left'>{content.required ? 'Yes' : 'No'}</TableCell>
+                                <TableCell align='left'>{operation.requestBody.required ? 'Yes' : 'No'}</TableCell>
                                 {!disableUpdate && (
                                     <TableCell align='left'>
-                                        {!hideParameterEdit && (
+                                        {hideParameterEdit && (
                                             <Tooltip title='Edit'>
                                                 <IconButton onClick={() => {}} fontSize='small'>
                                                     <EditIcon fontSize='small' />
@@ -163,7 +164,7 @@ export default function ListParameters(props) {
 }
 
 ListParameters.defaultProps = {
-    hideParameterEdit: true,
+    hideParameterEdit: false,
     disableUpdate: false,
 };
 ListParameters.propTypes = {
@@ -174,4 +175,5 @@ ListParameters.propTypes = {
     target: PropTypes.string.isRequired,
     verb: PropTypes.string.isRequired,
     disableUpdate: PropTypes.bool,
+    specVersion: PropTypes.string.isRequired,
 };
