@@ -651,7 +651,7 @@ class Details extends Component {
                                 <Route path={Details.subPaths.OVERVIEW} component={() => <Overview api={api} />} />
                                 <Route
                                     path={Details.subPaths.API_DEFINITION}
-                                    component={() => <APIDefinition api={api} />}
+                                    component={() => <APIDefinition api={api} updateAPI={this.updateAPI} />}
                                 />
                                 <Route
                                     path={Details.subPaths.WSDL}

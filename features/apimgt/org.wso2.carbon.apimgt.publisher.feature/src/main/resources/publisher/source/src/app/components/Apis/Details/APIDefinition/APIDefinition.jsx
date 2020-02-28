@@ -317,7 +317,7 @@ class APIDefinition extends React.Component {
      * @param {string} toFormat The format it can be converted to.
      * */
     updateSwaggerDefinition(swaggerContent, specFormat, toFormat) {
-        const { api, intl } = this.props;
+        const { api, intl, updateAPI } = this.props;
         let parsedContent = {};
         if (this.hasJsonStructure(swaggerContent)) {
             parsedContent = JSON.parse(swaggerContent);
@@ -351,6 +351,11 @@ class APIDefinition extends React.Component {
                         this.setState({ swagger: swaggerContent });
                     }
                 }
+                /*
+                 *updateAPI() will make a /GET call to get the latest api once the swagger definition is updated.
+                 *Otherwise, we need to refresh the page to get changes.
+                 */
+                updateAPI();
             })
             .catch((err) => {
                 console.log(err);
@@ -614,5 +619,6 @@ APIDefinition.propTypes = {
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,
+    updateAPI: PropTypes.func.isRequired,
 };
 export default withRouter(injectIntl(withStyles(styles, { withTheme: true })(APIDefinition)));
