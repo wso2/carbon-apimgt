@@ -19,7 +19,7 @@ import React, { useState, useRef, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import TextField from '@material-ui/core/TextField';
@@ -65,7 +65,7 @@ const useStyles = makeStyles(() => ({
  */
 function AddParameter(props) {
     const {
-        operation, operationsDispatcher, target, verb, specVersion,
+        operation, operationsDispatcher, target, verb, specVersion, intl,
     } = props;
     const inputLabel = useRef(null);
     const [labelWidth, setLabelWidth] = useState(0);
@@ -173,14 +173,23 @@ function AddParameter(props) {
 
     function getParameterNameHelperText(paramIn) {
         if (isParameterExist) {
-            return 'Parameter name already exists';
+            return intl.formatMessage({
+                id: 'Apis.Details.Resources.components.operationComponents.AddParameter.parameter.name.already.exists',
+                defaultMessage: 'Parameter name already exists',
+            });
         }
         if (paramIn === 'body') {
             if (specVersion !== '2.0') {
-                return 'Enter Content Type';
+                return intl.formatMessage({
+                    id: 'Apis.Details.Resources.components.operationComponents.AddParameter.enter.content.type',
+                    defaultMessage: 'Enter Content Type',
+                });
             }
         }
-        return 'Enter Parameter Name';
+        return intl.formatMessage({
+            id: 'Apis.Details.Resources.components.operationComponents.AddParameter.enter.parameter.name',
+            defaultMessage: 'Enter Parameter Name',
+        });
     }
 
     return (
@@ -221,17 +230,43 @@ function AddParameter(props) {
                         })}
                     </Select>
                     {isParameterExist
-                        ? (<FormHelperText id='my-helper-text' error>Parameter type already exists</FormHelperText>)
-                        : (<FormHelperText id='my-helper-text'>Select the parameter type</FormHelperText>) }
-
+                        ? (
+                            <FormHelperText id='my-helper-text' error>
+                                <FormattedMessage
+                                    id='Apis.Details.Resources.components.operationComponents.parameter.name.exists'
+                                    defaultMessage='Parameter type already exists'
+                                />
+                            </FormHelperText>
+                        )
+                        : (
+                            <FormHelperText id='my-helper-text'>
+                                <FormattedMessage
+                                    id='Apis.Details.Resources.components.operationComponents.select.parameter.type'
+                                    defaultMessage='Select the parameter type'
+                                />
+                            </FormHelperText>
+                        )}
                 </FormControl>
             </Grid>
             <Grid item xs={2} md={2}>
                 <TextField
                     id='parameter-name'
                     label={newParameter.in === 'body'
-                        ? iff(specVersion === '2.0', 'Parameter Name', 'Content Type')
-                        : 'Parameter Name'}
+                        ? iff(specVersion === '2.0',
+                            <FormattedMessage
+                                id='Apis.Details.Resources.components.operationComponents.parameter.name'
+                                defaultMessage='Parameter Name'
+                            />,
+                            <FormattedMessage
+                                id='Apis.Details.Resources.components.operationComponents.content.type'
+                                defaultMessage='Content Type'
+                            />)
+                        : (
+                            <FormattedMessage
+                                id='Apis.Details.Resources.components.operationComponents.parameter.name'
+                                defaultMessage='Parameter Name'
+                            />
+                        )}
                     name='name'
                     value={newParameter.name}
                     onChange={({ target: { name, value } }) => newParameterDispatcher({ type: name, value })}
@@ -251,7 +286,10 @@ function AddParameter(props) {
             <Grid item xs={2} md={2}>
                 <FormControl margin='dense' variant='outlined' className={classes.formControl}>
                     <InputLabel ref={inputLabel} htmlFor='data-type' error={isParameterExist}>
-                        Data Type
+                        <FormattedMessage
+                            id='Apis.Details.Resources.components.operationComponents.data.type'
+                            defaultMessage='Data Type'
+                        />
                     </InputLabel>
 
                     <Select
@@ -300,16 +338,26 @@ function AddParameter(props) {
                                 }}
                             />
                         )}
-                        label='Required'
+                        label={(
+                            <FormattedMessage
+                                id='Apis.Details.Resources.components.operationComponents.required'
+                                defaultMessage='Required'
+                            />
+                        )}
                     />
-                    <FormHelperText>Check whether the parameter is required.</FormHelperText>
+                    <FormHelperText>
+                        <FormattedMessage
+                            id='Apis.Details.Resources.components.operationComponents.required.helper.text'
+                            defaultMessage='Check whether the parameter is required.'
+                        />
+                    </FormHelperText>
                 </FormControl>
             </Grid>
             <Grid item xs={2} md={2}>
                 <Tooltip
                     title={(
                         <FormattedMessage
-                            id='Apis.Details.Resources.components.AddParameter.add.tooltip'
+                            id='Apis.Details.Resources.components.operationComponents.AddParameter.add.tooltip'
                             defaultMessage='Add new parameter'
                         />
                     )}
@@ -327,7 +375,10 @@ function AddParameter(props) {
                             color='primary'
                             onClick={addNewParameter}
                         >
-                            Add
+                            <FormattedMessage
+                                id='Apis.Details.Resources.components.operationComponents.AddParameter.add'
+                                defaultMessage='Add'
+                            />
                         </Button>
                     </span>
                 </Tooltip>
@@ -360,6 +411,8 @@ AddParameter.propTypes = {
     operationsDispatcher: PropTypes.func.isRequired,
     target: PropTypes.string.isRequired,
     verb: PropTypes.string.isRequired,
+    specVersion: PropTypes.string.isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
-export default React.memo(AddParameter);
+export default React.memo(injectIntl(AddParameter));

@@ -29,6 +29,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import { capitalizeFirstLetter } from 'AppData/stringFormatter';
+import { FormattedMessage } from 'react-intl';
 import EditParameter from './EditParameter';
 
 const useStyles = makeStyles({
@@ -70,11 +71,38 @@ export default function ListParameters(props) {
             <Table className={classes.table} aria-label='parameters list'>
                 <TableHead>
                     <TableRow>
-                        <TableCell align='left'>Parameter Type</TableCell>
-                        <TableCell>Name</TableCell>
-                        <TableCell align='left'>Data Type</TableCell>
-                        <TableCell align='left'>Required</TableCell>
-                        {!disableUpdate && <TableCell align='left'>Actions</TableCell>}
+                        <TableCell align='left'>
+                            <FormattedMessage
+                                id='Apis.Details.Resources.components.operationComponents.ListParameter.parameter.type'
+                                defaultMessage='Parameter Type'
+                            />
+                        </TableCell>
+                        <TableCell>
+                            <FormattedMessage
+                                id='Apis.Details.Resources.components.operationComponents.ListParameter.parameter.name'
+                                defaultMessage='Name'
+                            />
+                        </TableCell>
+                        <TableCell align='left'>
+                            <FormattedMessage
+                                id='Apis.Details.Resources.components.operationComponents.ListParameter.data.type'
+                                defaultMessage='Data Type'
+                            />
+                        </TableCell>
+                        <TableCell align='left'>
+                            <FormattedMessage
+                                id='Apis.Details.Resources.components.operationComponents.ListParameter.required'
+                                defaultMessage='Required'
+                            />
+                        </TableCell>
+                        {!disableUpdate && (
+                            <TableCell align='left'>
+                                <FormattedMessage
+                                    id='Apis.Details.Resources.components.operationComponents.ListParameter.actions'
+                                    defaultMessage='Actions'
+                                />
+                            </TableCell>
+                        )}
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -86,11 +114,34 @@ export default function ListParameters(props) {
                                 <TableCell align='left'>
                                     {capitalizeFirstLetter(parameter.schema ? parameter.schema.type : parameter.type)}
                                 </TableCell>
-                                <TableCell align='left'>{parameter.required ? 'Yes' : 'No'}</TableCell>
+                                <TableCell align='left'>
+                                    {parameter.required
+                                        ? (
+                                            <FormattedMessage
+                                                id={'Apis.Details.Resources.components.operationComponents'
+                                                + '.ListParameter.yes'}
+                                                defaultMessage='Yes'
+                                            />
+                                        )
+                                        : (
+                                            <FormattedMessage
+                                                id={'Apis.Details.Resources.components.operationComponents'
+                                                + '.ListParameter.no'}
+                                                defaultMessage='No'
+                                            />
+                                        )}
+                                </TableCell>
                                 {!disableUpdate && (
                                     <TableCell align='left'>
                                         {!hideParameterEdit && (
-                                            <Tooltip title='Edit'>
+                                            <Tooltip title={(
+                                                <FormattedMessage
+                                                    id={'Apis.Details.Resources.components.operationComponents.'
+                                                    + 'ListParameter.edit'}
+                                                    defaultMessage='Edit'
+                                                />
+                                            )}
+                                            >
                                                 <IconButton
                                                     onClick={() => setEditingParameter(parameter)}
                                                     fontSize='small'
@@ -99,7 +150,14 @@ export default function ListParameters(props) {
                                                 </IconButton>
                                             </Tooltip>
                                         )}
-                                        <Tooltip title='Delete'>
+                                        <Tooltip title={(
+                                            <FormattedMessage
+                                                id={'Apis.Details.Resources.components.operationComponents'
+                                                + '.ListParameter.delete'}
+                                                defaultMessage='Delete'
+                                            />
+                                        )}
+                                        >
                                             <IconButton
                                                 disabled={disableUpdate}
                                                 onClick={() => operationsDispatcher({
@@ -118,10 +176,31 @@ export default function ListParameters(props) {
                     {operation.requestBody
                         && Object.entries(operation.requestBody.content).map(([contentType, content]) => (
                             <TableRow key={contentType}>
-                                <TableCell align='left'>Body</TableCell>
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Resources.components.operationComponents.ListParameter.body'
+                                        defaultMessage='Body'
+                                    />
+                                </TableCell>
                                 <TableCell>{contentType}</TableCell>
                                 <TableCell align='left'>{content.schema.type}</TableCell>
-                                <TableCell align='left'>{operation.requestBody.required ? 'Yes' : 'No'}</TableCell>
+                                <TableCell align='left'>
+                                    {operation.requestBody.required
+                                        ? (
+                                            <FormattedMessage
+                                                id={'Apis.Details.Resources.components.operationComponents'
+                                                + '.ListParameter.yes'}
+                                                defaultMessage='Yes'
+                                            />
+                                        )
+                                        : (
+                                            <FormattedMessage
+                                                id={'Apis.Details.Resources.components.operationComponents'
+                                                + '.ListParameter.no'}
+                                                defaultMessage='No'
+                                            />
+                                        )}
+                                </TableCell>
                                 {!disableUpdate && (
                                     <TableCell align='left'>
                                         {hideParameterEdit && (
@@ -131,7 +210,14 @@ export default function ListParameters(props) {
                                                 </IconButton>
                                             </Tooltip>
                                         )}
-                                        <Tooltip title='Delete'>
+                                        <Tooltip title={(
+                                            <FormattedMessage
+                                                id={'Apis.Details.Resources.components.operationComponents'
+                                                + '.ListParameter.delete'}
+                                                defaultMessage='Delete'
+                                            />
+                                        )}
+                                        >
                                             <IconButton
                                                 disabled={disableUpdate}
                                                 onClick={() => {

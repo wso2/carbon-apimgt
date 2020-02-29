@@ -41,6 +41,7 @@ import {
     getDataFormats,
     iff,
 } from 'AppComponents/Apis/Details/Resources/components/operationComponents/parameterUtils';
+import { FormattedMessage } from 'react-intl';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -118,7 +119,10 @@ export default function EditParameter(props) {
         <Dialog fullWidth maxWidth='md' open={isEditing} onClose={handleClose} aria-labelledby='edit-parameter'>
             <DialogTitle disableTypography id='edit-parameter'>
                 <Typography variant='h6'>
-                    Edit
+                    <FormattedMessage
+                        id='Apis.Details.Resources.components.operationComponents.EditParameter.title'
+                        defaultMessage='Edit'
+                    />
                     {' '}
                     <Typography display='inline' variant='subtitle1'>
                         {capitalizeFirstLetter(parameter.in)}
@@ -135,7 +139,12 @@ export default function EditParameter(props) {
                             value={capitalizeFirstLetter(parameter.in)}
                             disabled
                             fullWidth
-                            label='Parameter Type'
+                            label={(
+                                <FormattedMessage
+                                    id='Apis.Details.Resources.components.operationComponents.EditParameter.type'
+                                    defaultMessage='Parameter Type'
+                                />
+                            )}
                             margin='dense'
                             variant='outlined'
                         />
@@ -145,7 +154,12 @@ export default function EditParameter(props) {
                             value={parameter.name}
                             disabled
                             fullWidth
-                            label='Name'
+                            label={(
+                                <FormattedMessage
+                                    id='Apis.Details.Resources.components.operationComponents.EditParameter.name'
+                                    defaultMessage='Name'
+                                />
+                            )}
                             margin='dense'
                             variant='outlined'
                         />
@@ -154,7 +168,12 @@ export default function EditParameter(props) {
                         <TextField
                             value={parameter.description}
                             fullWidth
-                            label='Description'
+                            label={(
+                                <FormattedMessage
+                                    id='Apis.Details.Resources.components.operationComponents.EditParameter.description'
+                                    defaultMessage='Description'
+                                />
+                            )}
                             multiline
                             rows='4'
                             name='description'
@@ -174,7 +193,10 @@ export default function EditParameter(props) {
                             className={classes.formControl}
                         >
                             <InputLabel required id='edit-parameter-type'>
-                                Type
+                                <FormattedMessage
+                                    id='Apis.Details.Resources.components.operationComponents.EditParameter.data.type'
+                                    defaultMessage='Data Type'
+                                />
                             </InputLabel>
 
                             <Select
@@ -200,7 +222,13 @@ export default function EditParameter(props) {
                                     </MenuItem>
                                 ))}
                             </Select>
-                            <FormHelperText>Select schema type</FormHelperText>
+                            <FormHelperText>
+                                <FormattedMessage
+                                    id={'Apis.Details.Resources.components.operationComponents.EditParameter.'
+                                    + 'select.schema.data.type'}
+                                    defaultMessage='Select the Schema Type'
+                                />
+                            </FormHelperText>
                         </FormControl>
                     </Grid>
                     <Grid item md={6}>
@@ -221,7 +249,13 @@ export default function EditParameter(props) {
                                     false,
                                 )}
                         >
-                            <InputLabel id='edit-parameter-format'>Format</InputLabel>
+                            <InputLabel id='edit-parameter-format'>
+                                <FormattedMessage
+                                    id={'Apis.Details.Resources.components.operationComponents.EditParameter.'
+                                    + 'data.format'}
+                                    defaultMessage='Data Format'
+                                />
+                            </InputLabel>
                             <Select
                                 value={parameter.schema ? parameter.schema.format : parameter.format}
                                 onChange={
@@ -247,7 +281,13 @@ export default function EditParameter(props) {
                                     </MenuItem>
                                 ))}
                             </Select>
-                            <FormHelperText>Select format of data type</FormHelperText>
+                            <FormHelperText>
+                                <FormattedMessage
+                                    id={'Apis.Details.Resources.components.operationComponents.EditParameter.'
+                                    + 'select.format.of.data.type'}
+                                    defaultMessage='Select the Format of Data Type'
+                                />
+                            </FormHelperText>
                         </FormControl>
                     </Grid>
                     <Grid item>
@@ -265,21 +305,39 @@ export default function EditParameter(props) {
                                         }}
                                     />
                                 )}
-                                label='Required'
+                                label={(
+                                    <FormattedMessage
+                                        id={'Apis.Details.Resources.components.operationComponents.EditParameter.'
+                                        + 'required'}
+                                        defaultMessage='Required'
+                                    />
+                                )}
                             />
                         </FormControl>
                     </Grid>
                     <Grid container direction='row' justify='flex-end' alignItems='center'>
-                        <DialogContentText>Use DONE button in the page to persist changes</DialogContentText>
+                        <DialogContentText>
+                            <FormattedMessage
+                                id={'Apis.Details.Resources.components.operationComponents.EditParameter.'
+                                + 'use.done.button.to.persist.changes'}
+                                defaultMessage='Use DONE button in the page to persist changes'
+                            />
+                        </DialogContentText>
                     </Grid>
                 </Grid>
             </DialogContent>
             <DialogActions>
                 <Button size='small' onClick={handleClose} color='primary'>
-                    Close
+                    <FormattedMessage
+                        id='Apis.Details.Resources.components.operationComponents.EditParameter.close'
+                        defaultMessage='Close'
+                    />
                 </Button>
                 <Button size='small' onClick={handelDone} variant='contained' color='primary'>
-                    Done
+                    <FormattedMessage
+                        id='Apis.Details.Resources.components.operationComponents.EditParameter.done'
+                        defaultMessage='Done'
+                    />
                 </Button>
             </DialogActions>
         </Dialog>

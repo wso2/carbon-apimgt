@@ -24,7 +24,7 @@ import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Paper from '@material-ui/core/Paper';
 import AddIcon from '@material-ui/icons/Add';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -108,7 +108,7 @@ const SUPPORTED_VERBS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIO
  * @returns
  */
 function AddOperation(props) {
-    const { operationsDispatcher } = props;
+    const { operationsDispatcher, intl } = props;
     const inputLabel = useRef(null);
     const [labelWidth, setLabelWidth] = useState(0);
 
@@ -155,7 +155,10 @@ function AddOperation(props) {
             APIValidation.operationTarget.validate(newOperations.target).error !== null
             || APIValidation.operationVerbs.validate(newOperations.verbs).error !== null
         ) {
-            Alert.warning("Operation target or operation verb(s) can't be empty");
+            Alert.warning(intl.formatMessage({
+                id: 'Apis.Details.Resources.components.AddOperation.operation.target.or.verb.cannot.be.empty.warning',
+                defaultMessage: "Operation target or operation verb(s) can't be empty",
+            }));
             return;
         }
         operationsDispatcher({ action: 'add', data: newOperations });
@@ -167,7 +170,10 @@ function AddOperation(props) {
                 <Grid item md={5} xs={12}>
                     <FormControl margin='dense' variant='outlined' className={classes.formControl}>
                         <InputLabel ref={inputLabel} htmlFor='outlined-age-simple'>
-                            HTTP Verb
+                            <FormattedMessage
+                                id='Apis.Details.Resources.components.AddOperation.http.verb'
+                                defaultMessage='HTTP Verb'
+                            />
                         </InputLabel>
 
                         <Select
@@ -231,7 +237,10 @@ function AddOperation(props) {
                                     placement='bottom'
                                 >
                                     <Badge color='error' variant='dot'>
-                                        OPTION
+                                        <FormattedMessage
+                                            id='Apis.Details.Resources.components.AddOperation.option'
+                                            defaultMessage='OPTION'
+                                        />
                                     </Badge>
                                 </Tooltip>
                             )}
@@ -249,7 +258,12 @@ function AddOperation(props) {
                         onChange={({ target: { name, value } }) => newOperationsDispatcher(
                             { type: name, value: value.startsWith('/') ? value : `/${value}` },
                         )}
-                        placeholder='Enter the URI pattern'
+                        placeholder={(
+                            <FormattedMessage
+                                id='Apis.Details.Resources.components.AddOperation.enter.the.uri.pattern'
+                                defaultMessage='Enter the URI pattern'
+                            />
+                        )}
                         helperText={newOperations.error || 'Enter URI pattern'}
                         fullWidth
                         margin='dense'
@@ -319,4 +333,4 @@ AddOperation.propTypes = {
     operationsDispatcher: PropTypes.func.isRequired,
 };
 
-export default React.memo(AddOperation);
+export default React.memo(injectIntl(AddOperation));
