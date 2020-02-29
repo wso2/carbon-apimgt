@@ -164,12 +164,14 @@
                             org.wso2.carbon.utils.*,
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",					
-                            org.wso2.carbon.apimgt.api.*; version="${carbon.apimgt.imp.pkg.version}"
+                            org.wso2.carbon.apimgt.api.*; version="${carbon.apimgt.imp.pkg.version}",
+                            *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.tracing.internal.*,
                             org.wso2.carbon.apimgt.tracing.*;version="${carbon.apimgt.version}"
                         </Export-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

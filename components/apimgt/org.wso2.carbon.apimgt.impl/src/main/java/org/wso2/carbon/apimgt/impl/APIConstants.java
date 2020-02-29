@@ -1345,6 +1345,11 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE_DIGEST = "digest";
     public static final String ENDPOINT_SECURITY_USERNAME = "username";
     public static final String ENDPOINT_SECURITY_CONFIG = "securityConfig";
+    public static final String ENDPOINT_SECURITY = "endpoint_security";
+    public static final String ENDPOINT_SECURITY_PRODUCTION = "production";
+    public static final String ENDPOINT_SECURITY_SANDBOX = "sandbox";
+    public static final String ENDPOINT_SECURITY_PASSWORD = "password";
+    public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";

@@ -94,6 +94,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -255,6 +256,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -9431,6 +9433,7 @@ public final class APIUtil {
                 API api = getAPI(apiArtifact, registry);
 
                 resource.setEndpointConfig(api.getEndpointConfig());
+                resource.setEndpointSecurityMap(setEndpointSecurityForAPIProduct(api));
             }
 
             apiProduct.setProductResources(resources);
@@ -10235,6 +10238,51 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    public static Map<String, EndpointSecurity> setEndpointSecurityForAPIProduct(API api) throws APIManagementException {
+        Map<String,EndpointSecurity> endpointSecurityMap = new HashMap<>();
+        try {
+            endpointSecurityMap.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new EndpointSecurity());
+            endpointSecurityMap.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, new EndpointSecurity());
+            if (api.isEndpointSecured()) {
+                EndpointSecurity productionEndpointSecurity = new EndpointSecurity();
+                productionEndpointSecurity.setEnabled(true);
+                productionEndpointSecurity.setUsername(api.getEndpointUTUsername());
+                productionEndpointSecurity.setPassword(api.getEndpointUTUsername());
+                if (api.isEndpointAuthDigest()) {
+                    productionEndpointSecurity.setType(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
+                } else {
+                    productionEndpointSecurity.setType(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
+                }
+                endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
+                endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX, productionEndpointSecurity);
+            } else {
+                String endpointConfig = api.getEndpointConfig();
+                if (endpointConfig != null) {
+                    JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
+                    if (endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) {
+                         JSONObject endpointSecurity =
+                                 (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
+                         if (endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION)!= null){
+                             JSONObject productionEndpointSecurity =
+                                     (JSONObject) endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                             endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new ObjectMapper()
+                                     .convertValue(productionEndpointSecurity, EndpointSecurity.class));
+                         }
+                        if (endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_SANDBOX)!= null){
+                            JSONObject sandboxEndpointSecurity =
+                                    (JSONObject) endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                            endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX, new ObjectMapper()
+                                    .convertValue(sandboxEndpointSecurity, EndpointSecurity.class));
+                        }
+                    }
+                }
+            }
+            return endpointSecurityMap;
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while parsing Endpoint Config json", e);
+        }
     }
 
 }
