@@ -65,7 +65,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
     Map<String, String> headersMap;
     private AuthenticationContext authenticationContext;
 
-    private long messageSizeInBytes = 0;
+    private long messageSizeInBytes;
 
     public DataProcessAndPublishingAgent() {
 
@@ -94,6 +94,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.apiTenant = null;
         this.appId = null;
         this.apiName = null;
+        this.messageSizeInBytes = 0;
     }
 
     /**
@@ -127,6 +128,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.appId = appId;
         String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
         this.apiName = APIUtil.getAPINamefromRESTAPI(apiName);
+        this.messageSizeInBytes = 0;
 
         ArrayList<VerbInfoDTO> list = (ArrayList<VerbInfoDTO>) messageContext.getProperty(APIConstants.VERB_INFO_DTO);
         boolean isVerbInfoContentAware = false;
@@ -149,15 +151,10 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 log.debug("Building the message to get the message size..");
                 try {
                     buildMessage(axis2MessageContext);
-                } catch (IOException ex) {
-                    //In case of an exception, it won't be propagated up,and set response size to 0
-                    log.error("Error occurred while building the message to" +
-                              " calculate the response body size", ex);
-                } catch (XMLStreamException ex) {
-                    log.error("Error occurred while building the message to calculate the response" +
-                              " body size", ex);
+                } catch (Exception ex) {
+                    //In case of any exception, it won't be propagated up,and set response size to 0
+                    log.error("Error occurred while building the message to" + " calculate the response body size", ex);
                 }
-
                 SOAPEnvelope env = messageContext.getEnvelope();
                 if (env != null) {
                     SOAPBody soapbody = env.getBody();
@@ -246,7 +243,14 @@ public class DataProcessAndPublishingAgent implements Runnable {
 
         //this parameter will be used to capture message size and pass it to calculation logic
         
-        if (messageSizeInBytes > 0) {
+        ArrayList<VerbInfoDTO> list = (ArrayList<VerbInfoDTO>) messageContext.getProperty(APIConstants.VERB_INFO_DTO);
+        boolean isVerbInfoContentAware = false;
+        if (list != null && !list.isEmpty()) {
+            VerbInfoDTO verbInfoDTO = list.get(0);
+            isVerbInfoContentAware = verbInfoDTO.isContentAware();
+        }
+
+        if (authenticationContext.isContentAwareTierPresent() || isVerbInfoContentAware) {
             if (log.isDebugEnabled()) {
                 log.debug("Message size: " + messageSizeInBytes + "B");
             }
