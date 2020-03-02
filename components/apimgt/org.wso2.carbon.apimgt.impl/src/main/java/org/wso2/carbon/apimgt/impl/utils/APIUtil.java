@@ -9187,7 +9187,7 @@ public final class APIUtil {
                         + APIConstants.Analytics.API_VERSION + ", "
                         + APIConstants.Analytics.API_CREATOR + ", "
                         + APIConstants.Analytics.API_CREATOR_TENANT_DOMAIN + ", "
-                        + APIConstants.APPLICATION_ID + ", "
+                        + APIConstants.Analytics.APPLICATION_ID + ", "
                         + "sum (requestCount) as requestCount "
                         + "group by "
                         + APIConstants.Analytics.API_NAME + ", "
