@@ -1791,8 +1791,18 @@ public final class APIConstants {
         public static final String NONE = "None";
     }
 
-    public static class Monetization {
+    public static class Analytics {
+        public static final String API_NAME = "apiName";
+        public static final String API_VERSION = "apiVersion";
+        public static final String API_CREATOR = "apiCreator";
+        public static final String API_CREATOR_TENANT_DOMAIN = "apiCreatorTenantDomain";
+        public static final String APPLICATION_ID = "applicationId";
+        public static final String RECORDS_DELIMITER = "records";
+    }
 
+    public static class Monetization {
+        public static final String MONETIZATION_USAGE_RECORD_APP = "APIM_MONETIZATION_SUMMARY";
+        public static final String MONETIZATION_USAGE_RECORD_AGG = "MonetizationAgg";
         public static final String USAGE_PUBLISH_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
         public static final String USAGE_PUBLISH_TIME_ZONE = "UTC";
         public static final String COMPLETED = "COMPLETED";
