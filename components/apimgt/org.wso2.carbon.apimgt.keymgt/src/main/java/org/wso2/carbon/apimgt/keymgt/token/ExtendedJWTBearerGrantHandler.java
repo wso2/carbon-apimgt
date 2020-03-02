@@ -32,7 +32,9 @@ import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.application.common.model.IdentityProvider;
 import org.wso2.carbon.identity.application.common.model.PermissionsAndRoleConfig;
 import org.wso2.carbon.identity.application.common.model.RoleMapping;
+import org.wso2.carbon.identity.application.common.model.FederatedAuthenticatorConfig;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
+import org.wso2.carbon.identity.application.common.util.IdentityApplicationManagementUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.grant.jwt.JWTBearerGrantHandler;
@@ -72,7 +74,17 @@ public class ExtendedJWTBearerGrantHandler extends JWTBearerGrantHandler {
 
         try {
             identityProvider = IdentityProviderManager.getInstance().getIdPByName(jwtIssuer, tenantDomain);
-        } catch (IdentityProviderManagementException e) {
+            if (identityProvider != null) {
+                if (StringUtils.equalsIgnoreCase(identityProvider.getIdentityProviderName(), "default")) {
+                    identityProvider = this.getResidentIDPForIssuer(tenantDomain, jwtIssuer);
+                    if (identityProvider == null) {
+                        log.error("No Registered IDP found for the JWT with issuer name : " + jwtIssuer);
+                    }
+                }
+            } else {
+                log.error("No Registered IDP found for the JWT with issuer name : " + jwtIssuer);
+            }
+        } catch (IdentityProviderManagementException | IdentityOAuth2Exception e) {
             log.error("Couldn't initiate identity provider instance", e);
         }
 
@@ -105,6 +117,28 @@ public class ExtendedJWTBearerGrantHandler extends JWTBearerGrantHandler {
         user.setUserAttributes(userAttributes);
         tokReqMsgCtx.setAuthorizedUser(user);
         return ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
+    }
+
+    private IdentityProvider getResidentIDPForIssuer(String tenantDomain, String jwtIssuer) throws IdentityOAuth2Exception {
+        String issuer = "";
+
+        IdentityProvider residentIdentityProvider;
+        try {
+            residentIdentityProvider = IdentityProviderManager.getInstance().getResidentIdP(tenantDomain);
+        } catch (IdentityProviderManagementException var7) {
+            String errorMsg = String.format("Error while getting Resident Identity Provider of '%s' tenant.", tenantDomain);
+            throw new IdentityOAuth2Exception(errorMsg, var7);
+        }
+
+        FederatedAuthenticatorConfig[] fedAuthnConfigs = residentIdentityProvider.getFederatedAuthenticatorConfigs();
+        FederatedAuthenticatorConfig oauthAuthenticatorConfig = IdentityApplicationManagementUtil.
+                getFederatedAuthenticator(fedAuthnConfigs, "openidconnect");
+        if (oauthAuthenticatorConfig != null) {
+            issuer = IdentityApplicationManagementUtil.getProperty(oauthAuthenticatorConfig.
+                    getProperties(), "IdPEntityId").getValue();
+        }
+
+        return jwtIssuer.equals(issuer) ? residentIdentityProvider : null;
     }
 
     /**

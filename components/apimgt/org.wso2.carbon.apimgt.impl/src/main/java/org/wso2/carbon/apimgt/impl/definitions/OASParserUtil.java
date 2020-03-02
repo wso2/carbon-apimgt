@@ -1096,27 +1096,16 @@ public class OASParserUtil {
         if (extensions == null) {
             return;
         }
-        if (extensions.containsKey(APIConstants.X_WSO2_AUTH_HEADER)) {
-            extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
-        }
-        if (extensions.containsKey(APIConstants.X_THROTTLING_TIER)) {
-            extensions.remove(APIConstants.X_THROTTLING_TIER);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_CORS)) {
-            extensions.remove(APIConstants.X_WSO2_CORS);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS)) {
-            extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_SANDBOX_ENDPOINTS)) {
-            extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_BASEPATH)) {
-            extensions.remove(APIConstants.X_WSO2_BASEPATH);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_TRANSPORTS)) {
-            extensions.remove(APIConstants.X_WSO2_TRANSPORTS);
-        }
+        extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
+        extensions.remove(APIConstants.X_THROTTLING_TIER);
+        extensions.remove(APIConstants.X_WSO2_CORS);
+        extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
+        extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
+        extensions.remove(APIConstants.X_WSO2_BASEPATH);
+        extensions.remove(APIConstants.X_WSO2_TRANSPORTS);
+        extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
+        extensions.remove(APIConstants.X_WSO2_RESPONSE_CACHE);
+        extensions.remove(APIConstants.X_WSO2_MUTUAL_SSL);
     }
 
     /**
@@ -1168,30 +1157,5 @@ public class OASParserUtil {
          responseCacheConfig.put(APIConstants.RESPONSE_CACHING_ENABLED, enabled);
          responseCacheConfig.put(APIConstants.RESPONSE_CACHING_TIMEOUT, cacheTimeout);
          return responseCacheConfig;
-    }
-
-    /**
-     * generate app security information for OAS definition
-     *
-     * @param security          application security
-     * @param transport          transport security
-     * @return JsonNode
-     */
-     static JsonNode getTransportSecurity(String security, String transport) {
-         ObjectNode endpointResult = objectMapper.createObjectNode();
-         if (transport != null) {
-             List<String> transportTypes = Arrays.asList(transport.split(","));
-             endpointResult.put(Constants.TRANSPORT_HTTP, transportTypes.contains(Constants.TRANSPORT_HTTP));
-             endpointResult.put(Constants.TRANSPORT_HTTPS, transportTypes.contains(Constants.TRANSPORT_HTTPS));
-         }
-         if (security != null) {
-             List<String> securityList = Arrays.asList(security.split(","));
-             if (securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-                 String mutualSSLOptional = !securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY) ?
-                         APIConstants.OPTIONAL : APIConstants.MANDATORY;
-                 endpointResult.put(APIConstants.API_SECURITY_MUTUAL_SSL, mutualSSLOptional);
-             }
-         }
-        return endpointResult;
     }
 }

@@ -658,11 +658,21 @@ public class OAS2Parser extends APIDefinition {
             swagger.setVendorExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandEndpointObj);
         }
         swagger.setVendorExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());
-        swagger.setVendorExtension(APIConstants.X_WSO2_TRANSPORTS,
-                OASParserUtil.getTransportSecurity(api.getApiSecurity(), api.getTransports()));
-        swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_APP_SECURITY,
-                OASParserUtil.getAppSecurity(api.getApiSecurity()));
-        swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_RESPONSE_CACHE,
+        if (api.getTransports() != null) {
+            swagger.setVendorExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
+        }
+        String apiSecurity = api.getApiSecurity();
+        // set mutual ssl extension if enabled
+        if (apiSecurity != null) {
+            List<String> securityList = Arrays.asList(apiSecurity.split(","));
+            if (securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                String mutualSSLOptional = !securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY) ?
+                        APIConstants.OPTIONAL : APIConstants.MANDATORY;
+                swagger.setVendorExtension(APIConstants.X_WSO2_MUTUAL_SSL, mutualSSLOptional);
+            }
+        }
+        swagger.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, OASParserUtil.getAppSecurity(apiSecurity));
+        swagger.setVendorExtension(APIConstants.X_WSO2_RESPONSE_CACHE,
                 OASParserUtil.getResponseCacheConfig(api.getResponseCache(), api.getCacheTimeout()));
 
         return getSwaggerJsonString(swagger);

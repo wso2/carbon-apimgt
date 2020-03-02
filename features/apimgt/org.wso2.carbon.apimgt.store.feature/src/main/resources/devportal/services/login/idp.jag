@@ -17,7 +17,8 @@
  * under the License.
  */
 
-    var log = new Log("Services login DCR request");
+    var log = new Log();
+    log.debug("Services login DCR request");
     var app = require("/site/public/theme/settings.js").Settings.app;
     var appUtils = require("/services/utils.js");
     include("/services/constants.jag");
