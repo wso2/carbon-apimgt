@@ -1,6 +1,6 @@
 /**
- * Input the menu items for the user dropdown menu.
- * @param {object} props The first number.
- * @returns {ReactDOM} The sum of the two numbers.
+ * Input the menu items for the user profile dropdown menu.
+ * @returns {boolean} This is an extension point where
+ * it can be use to override the top right menu.
  */
 export default false;
