@@ -69,6 +69,7 @@ function Operation(props) {
         target,
         verb,
         arns,
+        resolvedSpec,
     } = props;
     const [isExpanded, setIsExpanded] = useState(false);
     const useStyles = makeStyles((theme) => {
@@ -282,6 +283,7 @@ function Operation(props) {
                                 spec={spec}
                                 target={target}
                                 verb={verb}
+                                resolvedSpec={resolvedSpec}
                             />
                         )}
                         {resourcePolicy && (
@@ -347,6 +349,7 @@ Operation.propTypes = {
     highlight: PropTypes.bool,
     operationRateLimits: PropTypes.arrayOf(PropTypes.shape({})),
     arns: PropTypes.shape([]).isRequired,
+    resolvedSpec: PropTypes.shape({}).isRequired,
 };
 
 export default React.memo(Operation);

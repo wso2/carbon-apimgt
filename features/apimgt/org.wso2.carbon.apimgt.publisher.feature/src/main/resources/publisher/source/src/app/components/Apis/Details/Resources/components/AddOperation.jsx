@@ -258,12 +258,7 @@ function AddOperation(props) {
                         onChange={({ target: { name, value } }) => newOperationsDispatcher(
                             { type: name, value: value.startsWith('/') ? value : `/${value}` },
                         )}
-                        placeholder={(
-                            <FormattedMessage
-                                id='Apis.Details.Resources.components.AddOperation.enter.the.uri.pattern'
-                                defaultMessage='Enter the URI pattern'
-                            />
-                        )}
+                        placeholder='Enter URI pattern'
                         helperText={newOperations.error || 'Enter URI pattern'}
                         fullWidth
                         margin='dense'
