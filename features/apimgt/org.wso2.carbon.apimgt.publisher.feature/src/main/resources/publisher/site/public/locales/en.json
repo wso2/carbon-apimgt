@@ -945,7 +945,7 @@
   "colon": ":",
   "context": "Context",
   "create.new.api": "Create New API",
-  "Create.New.Api.Product": "Create New API Product",
+  "Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product": "Create New API Product",
   "deploy.sample.api": "Deploy Sample API",
   "documents.markdown.editor.default": "#Enter your markdown content",
   "fill.the.mandatory.fields": "Fill the mandatory fields (Name, Version, Context) and create the API. Configure the advanced configurations later.",
