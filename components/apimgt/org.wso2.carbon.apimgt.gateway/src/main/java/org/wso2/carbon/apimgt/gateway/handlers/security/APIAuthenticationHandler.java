@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
+import com.sun.jna.platform.win32.OaIdl;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.lang3.tuple.Pair;
@@ -27,8 +28,12 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
+import org.apache.http.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
@@ -40,9 +45,11 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.gateway.dto.OPADto;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.apikey.ApiKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLAuthenticator;
@@ -59,6 +66,9 @@ import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
@@ -68,6 +78,8 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+
 
 /**
  * Authentication handler for REST APIs exposed in the API gateway. This handler will
@@ -317,7 +329,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @MethodStats
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
-    public boolean handleRequest(MessageContext messageContext) {
+    public boolean handleRequest(MessageContext messageContext){
         TracingSpan keySpan = null;
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
@@ -348,6 +360,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
             if (isAuthenticate(messageContext)) {
                 setAPIParametersToMessageContext(messageContext);
+
                 return true;
             }
         } catch (APISecurityException e) {
@@ -380,6 +393,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
 
             handleAuthFailure(messageContext, e);
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             if (Util.tracingEnabled()) {
                 Util.finishSpan(keySpan);
@@ -403,6 +418,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         return timer.start();
     }
 
+
     /**
      * Authenticates the given request using the authenticators which have been initialized.
      *
@@ -410,7 +426,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      * @return true if the authentication is successful (never returns false)
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
-    protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException {
+    protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException{
         boolean authenticated = false;
         AuthenticationResponse authenticationResponse;
         List<AuthenticationResponse> authResponses = new ArrayList<>();
@@ -458,7 +474,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             return error;
         } else if (error == null) {
-            // ideally this should not exist
+            // ideally this should not existeyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UZG1aak00WkRrM05qWTBZemM1TW1abU9EZ3dNVEUzTVdZd05ERTVNV1JsWkRnNE56YzRaQT09In0.eyJhdWQiOiJodHRwOlwvXC9vcmcud3NvMi5hcGltZ3RcL2dhdGV3YXkiLCJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkbWluIiwidGllciI6IjUwUGVyTWluIiwibmFtZSI6IkdyZWV0aW5ncyIsImlkIjoyLCJ1dWlkIjpudWxsfSwic2NvcGUiOiJhbV9hcHBsaWNhdGlvbl9zY29wZSBkZWZhdWx0IiwiaXNzIjoiaHR0cHM6XC9cL2xvY2FsaG9zdDo5NDQzXC9vYXV0aDJcL3Rva2VuIiwidGllckluZm8iOnsiQnJvbnplIjp7InN0b3BPblF1b3RhUmVhY2giOnRydWUsInNwaWtlQXJyZXN0TGltaXQiOjAsInNwaWtlQXJyZXN0VW5pdCI6bnVsbH19LCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsInN1YnNjcmliZWRBUElzIjpbeyJzdWJzY3JpYmVyVGVuYW50RG9tYWluIjoiY2FyYm9uLnN1cGVyIiwibmFtZSI6IkhlbGxvX1dvcmxkIiwiY29udGV4dCI6IlwvaGVsbG9cLzEuMC4wIiwicHVibGlzaGVyIjoiYWRtaW4iLCJ2ZXJzaW9uIjoiMS4wLjAiLCJzdWJzY3JpcHRpb25UaWVyIjoiQnJvbnplIn1dLCJjb25zdW1lcktleSI6ImYzbnQ1UGU5RHkzcUU0V0JsS0didU1XbXJHRWEiLCJleHAiOjE1ODI4NjQxMDEsImlhdCI6MTU4Mjg2MDUwMSwianRpIjoiOWQxYWFkM2QtYzA5MS00ODg1LTg5NWQtYjc4NTNhYmE4MzI2In0.dsWBI_g820vMnGVvBHUnOETuv1Wo5EFMtz2uM5U8brAmVIKgkfdJmcHg3ip8i6gm94DAMfgxitdTqg-47Kl92OJ1avA5c5x7cc58AzYPELT27CRMY4JEqKkBf5lUTJCnVV8COPnDXTFTmthvEYLZFtidkYZM32PQsR9gFiedcYSy4ZgI5CeMt-rwhpaGz_P36ZmXPM1k0Rr0y6jA97p_VozpforJwRcum9O3h46yZSt92OXsvAs76xIw_AuUodfP1xYAK6Z5wrAIFlxNBOwI7fTMw1idvEHOsWWncOpv6GDBOBH5-gijcTqZr69jFlyp7PszHbP6fL89n8uOXRosPQ
             error = Pair.of(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
