@@ -38,7 +38,7 @@
                 <tr>
                     <td><%=encode.forHtml(String(condition.getConditionId()))%></td>
                     <td><%=encode.forHtml(String(condition.getConditionType()))%></td>
-                    <td><%=encode.forHtml(String(condition.getConditionValue()))%></td>
+                    <td class="js_conditionValue"><%=encode.forHtml(String(condition.getConditionValue()))%></td>
                     <td class="text-left">
                     <div class="form-inline">
                             <label class="switch">
