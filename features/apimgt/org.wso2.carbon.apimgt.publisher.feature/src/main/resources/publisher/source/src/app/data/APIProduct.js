@@ -165,17 +165,10 @@ class APIProduct extends Resource {
             body: apiData,
             'Content-Type': 'application/json',
         };
-        console.log("Request meta data");
-        console.log(Resource._requestMetaData());
-        console.log('Before promise create');
-        console.log(this.client.then(client =>client.apis['API Products']));
-
         promise_create = this.client.then(client => {
             return client.apis['API Products'].post_api_products(payload, this._requestMetaData());
         });
 
-        console.log('After promise create');
-        console.log(promise_create);
         return promise_create;
     }
     /**
