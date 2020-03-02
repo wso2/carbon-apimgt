@@ -1856,13 +1856,11 @@ public final class APIConstants {
     public static final String USER_NAME = "username";
 
     public static class RestApiConstants {
-        public static final String STORE_CONTEXT = "/store";
-        public static final String REST_API_PUBLISHER_VERSION_1 = "v1.0";
         public static final String REST_API_DEFAULT_VERSION = "v1";
         public static final String REST_API_OLD_VERSION = "v0.16";
         public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
-                REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_1;
+                REST_API_PUBLISHER_CONTEXT + REST_API_DEFAULT_VERSION;
         public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
         public static final String REST_API_ADMIN_VERSION = "v0.16";
         public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
