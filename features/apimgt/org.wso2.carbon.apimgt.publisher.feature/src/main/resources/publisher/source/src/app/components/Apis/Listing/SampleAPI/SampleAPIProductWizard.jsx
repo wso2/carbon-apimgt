@@ -102,10 +102,8 @@ function SampleAPIProductWizard(props) {
 
     function handleClose() {
         if (step === 4) {
-            console.log('setting up step 0');
             setStep(1);
             history.push(productPath);
-            console.log('setting up step 0 finished');
         }
     }
 
