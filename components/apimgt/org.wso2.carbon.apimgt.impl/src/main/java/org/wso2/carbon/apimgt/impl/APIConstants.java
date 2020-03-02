@@ -1226,8 +1226,6 @@ public final class APIConstants {
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
     public static final String SWAGGER_X_WSO2_SECURITY = "x-wso2-security";
-    public static final String SWAGGER_X_WSO2_APP_SECURITY = "x-wso2-application-security";
-    public static final String SWAGGER_X_WSO2_RESPONSE_CACHE = "x-wso2-response-cache";
     public static final String WSO2_APP_SECURITY_TYPES = "security-types";
     public static final String OPTIONAL = "optional";
     public static final String MANDATORY = "mandatory";
@@ -1299,6 +1297,9 @@ public final class APIConstants {
     public static final String X_WSO2_SANDBOX_ENDPOINTS = "x-wso2-sandbox-endpoints";
     public static final String X_WSO2_BASEPATH = "x-wso2-basePath";
     public static final String X_WSO2_TRANSPORTS = "x-wso2-transports";
+    public static final String X_WSO2_MUTUAL_SSL = "x-wso2-mutual-ssl";
+    public static final String X_WSO2_APP_SECURITY = "x-wso2-application-security";
+    public static final String X_WSO2_RESPONSE_CACHE = "x-wso2-response-cache";
     public static final String X_WSO2_ENDPOINT_TYPE = "type";
 
     //API Constants
@@ -1856,13 +1857,11 @@ public final class APIConstants {
     public static final String USER_NAME = "username";
 
     public static class RestApiConstants {
-        public static final String STORE_CONTEXT = "/store";
-        public static final String REST_API_PUBLISHER_VERSION_1 = "v1.0";
         public static final String REST_API_DEFAULT_VERSION = "v1";
         public static final String REST_API_OLD_VERSION = "v0.16";
         public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
-                REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_1;
+                REST_API_PUBLISHER_CONTEXT + REST_API_DEFAULT_VERSION;
         public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
         public static final String REST_API_ADMIN_VERSION = "v0.16";
         public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;

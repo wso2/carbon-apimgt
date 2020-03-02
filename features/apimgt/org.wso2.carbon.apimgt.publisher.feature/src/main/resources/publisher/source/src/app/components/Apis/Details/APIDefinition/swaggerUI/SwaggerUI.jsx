@@ -17,16 +17,29 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import 'swagger-ui/dist/swagger-ui.css';
-import PatchedSwaggerUI from './PatchedSwaggerUIReact';
+import 'swagger-ui-react/swagger-ui.css';
+import SwaggerUILib from 'swagger-ui-react';
 
 const disableAuthorizeAndInfoPlugin = function () {
     return {
         wrapComponents: {
             info: () => () => null,
+            authorizeBtn: () => () => null,
         },
     };
 };
+const disableTryItOutPlugin = function () {
+    return {
+        statePlugins: {
+            spec: {
+                wrapSelectors: {
+                    allowTryItOutFor: () => () => false,
+                },
+            },
+        },
+    };
+};
+
 /**
  *
  * @class SwaggerUI
@@ -43,11 +56,10 @@ const SwaggerUI = (props) => {
         url,
         validatorUrl: null,
         docExpansion: 'list',
-        defaultModelsExpandDepth: 0,
-        presets: [disableAuthorizeAndInfoPlugin],
-        plugins: null,
+        defaultModelsExpandDepth: -1,
+        plugins: [disableAuthorizeAndInfoPlugin, disableTryItOutPlugin],
     };
-    return <PatchedSwaggerUI {...componentProps} />;
+    return <SwaggerUILib {...componentProps} />;
 };
 
 SwaggerUI.propTypes = {

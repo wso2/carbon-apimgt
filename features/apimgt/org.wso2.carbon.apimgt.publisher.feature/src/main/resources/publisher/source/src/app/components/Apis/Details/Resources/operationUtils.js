@@ -207,5 +207,6 @@ export {
     extractPathParameters,
     getOperationScopes,
     isSelectAll,
+    getVersion,
     VERSIONS,
 };
