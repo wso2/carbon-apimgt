@@ -20,6 +20,7 @@ import { Icon, IconButton, withStyles } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
+import TopRightMenuOverride from './TopRightMenuOverride';
 
 const styles = (theme) => ({
     settingsIconbtn: {
@@ -33,8 +34,13 @@ const styles = (theme) => ({
     },
 });
 
-const SettingsButton = (props) => {
+const TopRightMenu = (props) => {
     const { classes } = props;
+    if (TopRightMenuOverride) {
+        return (
+            <TopRightMenuOverride />
+        );
+    }
     return (
         <>
             <Link to='/settings'>
@@ -58,8 +64,8 @@ const SettingsButton = (props) => {
     );
 };
 
-SettingsButton.propTypes = {
+TopRightMenu.propTypes = {
     classes: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(SettingsButton);
+export default withStyles(styles)(TopRightMenu);

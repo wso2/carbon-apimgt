@@ -24,7 +24,7 @@ import Hidden from '@material-ui/core/Hidden';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
-import SettingsButton from 'AppComponents/Base/Header/settings/SettingsButton';
+import TopRightMenu from 'AppComponents/Base/Header/topRightMenu/TopRightMenu';
 import Configurations from 'Config';
 import Avatar from './avatar/Avatar';
 import HeaderSearch from './headersearch/HeaderSearch';
@@ -145,7 +145,7 @@ class Header extends React.Component {
 }
 Header.defaultProps = {
     avatar: <Avatar />,
-    settings: <SettingsButton />,
+    settings: <TopRightMenu />,
 };
 
 Header.propTypes = {

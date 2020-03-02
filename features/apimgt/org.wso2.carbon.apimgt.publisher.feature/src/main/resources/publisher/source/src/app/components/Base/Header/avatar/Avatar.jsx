@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import Configurations from 'Config';
+import AvatarMenuItems from './AvatarMenuItems';
 
 const styles = (theme) => ({
     profileMenu: {
@@ -124,14 +125,19 @@ class Avatar extends Component {
                     }}
                     className={classes.profileMenu}
                 >
-                    <Link to={{ pathname: '/services/logout' }}>
-                        <MenuItem onClick={this.doOIDCLogout} id='logout'>
-                            <FormattedMessage
-                                id='Base.Header.avatar.Avatar.logout'
-                                defaultMessage='Logout'
-                            />
-                        </MenuItem>
-                    </Link>
+                    {AvatarMenuItems
+                        ? (
+                            <AvatarMenuItems doOIDCLogout={this.doOIDCLogout} />
+                        ) : (
+                            <Link to={{ pathname: '/services/logout' }}>
+                                <MenuItem onClick={this.doOIDCLogout} id='logout'>
+                                    <FormattedMessage
+                                        id='Base.Header.avatar.Avatar.logout'
+                                        defaultMessage='Logout'
+                                    />
+                                </MenuItem>
+                            </Link>
+                        )}
                 </Menu>
             </>
         );
