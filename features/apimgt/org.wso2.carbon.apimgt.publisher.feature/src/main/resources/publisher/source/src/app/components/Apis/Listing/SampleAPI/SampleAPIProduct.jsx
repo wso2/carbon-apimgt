@@ -183,8 +183,9 @@ function SampleAPI(prop) {
                     }}
                     >
                         <Create />
-                        <FormattedMessage id='Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product'
-                                          defaultMessage='Create New API Product'
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product'
+                            defaultMessage='Create New API Product'
                         />
                     </APIProductCreateMenu>
                     <SampleAPIProductWizard step={step} setStep={setStep} productPath={productPath} />
