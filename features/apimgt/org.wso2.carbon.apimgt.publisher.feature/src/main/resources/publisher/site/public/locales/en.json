@@ -804,7 +804,7 @@
   "Apis.Listing.SampleAPI.SampleAPIProduct.successful": "Sample CalculatorAPIProduct published successfully",
   "Apis.Listing.SampleAPI.SampleAPIProductWizard.calculator.text": "Creating API Calculator",
   "Apis.Listing.SampleAPI.SampleAPIProductWizard.mathapi": "Creating Math API",
-  "Apis.Listing.SampleAPI.SampleAPIProductWizard.product.button": "Go to CalculatorAPIProduct",
+  "Apis.Listing.SampleAPI.SampleAPIProductWizard.product.button": "Go to Calculator API Product",
   "Apis.Listing.SampleAPI.SampleAPIProductWizard.product.close.button": "Close",
   "Apis.Listing.SampleAPI.SampleAPIProductWizard.product.title": "Creating CalculatorAPIProduct from the resourcesof Math API and Calculator API",
   "Apis.Listing.SampleAPI.SampleAPIProductWizard.resource": "Resources",

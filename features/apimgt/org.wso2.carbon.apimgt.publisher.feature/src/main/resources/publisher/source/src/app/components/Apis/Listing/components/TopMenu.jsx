@@ -160,8 +160,16 @@ function TopMenu(props) {
                             </Button>
                         </Link>
                     ) : (
-                        <APICreateMenu buttonProps={{ variant: 'contained', color: 'primary', className: classes.button }}>
-                            <FormattedMessage id='Apis.Listing.components.TopMenu.create.api' defaultMessage='Create API' />
+                        <APICreateMenu buttonProps={{
+                            variant: 'contained',
+                            color: 'primary',
+                            className: classes.button,
+                        }}
+                        >
+                            <FormattedMessage
+                                id='Apis.Listing.components.TopMenu.create.api'
+                                defaultMessage='Create API'
+                            />
                         </APICreateMenu>
                     )}
                 </div>
@@ -186,7 +194,6 @@ function TopMenu(props) {
     } else {
         return null;
     }
-
 }
 
 TopMenu.propTypes = {

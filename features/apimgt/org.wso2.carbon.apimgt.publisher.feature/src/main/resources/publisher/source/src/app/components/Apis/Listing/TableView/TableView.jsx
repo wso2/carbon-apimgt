@@ -31,11 +31,9 @@ import DocThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/DocTh
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
-import Typography from '@material-ui/core/Typography';
 import TopMenu from 'AppComponents/Apis/Listing/components/TopMenu';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
-import SampleAPIProduct from "AppComponents/Apis/Listing/SampleAPI/SampleAPIProduct";
+import SampleAPIProduct from 'AppComponents/Apis/Listing/SampleAPI/SampleAPIProduct';
 
 const styles = (theme) => ({
     contentInside: {

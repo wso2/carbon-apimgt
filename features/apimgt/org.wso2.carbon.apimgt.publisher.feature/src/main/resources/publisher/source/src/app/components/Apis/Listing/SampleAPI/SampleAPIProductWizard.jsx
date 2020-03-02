@@ -102,10 +102,11 @@ function SampleAPIProductWizard(props) {
 
     function handleClose() {
         if (step === 4) {
-            setStep(0);
+            console.log('setting up step 0');
+            setStep(1);
             history.push(productPath);
+            console.log('setting up step 0 finished');
         }
-        setStep(0);
     }
 
     return (
@@ -271,18 +272,12 @@ function SampleAPIProductWizard(props) {
                         <Link to={productPath}>
                             <Button variant='contained' color='primary'>
                                 <FormattedMessage
-                                    id='Apis.Listing.SampleAPI.SampleAPIProductWizard.product.button'
-                                    defaultMessage='Go to CalculatorAPIProduct'
+                                    id='Apis.Listing.SampleAPI.SampleAPIProductWizard.Product.button'
+                                    defaultMessage='Go to Calculator API Product'
                                 />
                             </Button>
                         </Link>
                     )}
-                    <Button onClick={handleClose} color='primary'>
-                        <FormattedMessage
-                            id='Apis.Listing.SampleAPI.SampleAPIProductWizard.product.close.button'
-                            defaultMessage='Close'
-                        />
-                    </Button>
                 </DialogActions>
             </Dialog>
         </>

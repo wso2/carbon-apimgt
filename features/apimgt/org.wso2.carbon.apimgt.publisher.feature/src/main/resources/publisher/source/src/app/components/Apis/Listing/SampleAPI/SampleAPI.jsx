@@ -242,13 +242,12 @@ class SampleAPI extends Component {
                         />
                     </Typography>
                     <div className={classes.actions}>
-                        <APICreateMenu
-                            buttonProps={{
-                                size: 'small',
-                                color: 'primary',
-                                variant: 'contained',
-                                className: classes.buttonLeft,
-                            }}
+                        <APICreateMenu buttonProps={{
+                            size: 'small',
+                            color: 'primary',
+                            variant: 'contained',
+                            className: classes.buttonLeft,
+                        }}
                         >
                             <Create />
                             <FormattedMessage id='create.new.api' defaultMessage='Create New API' />
