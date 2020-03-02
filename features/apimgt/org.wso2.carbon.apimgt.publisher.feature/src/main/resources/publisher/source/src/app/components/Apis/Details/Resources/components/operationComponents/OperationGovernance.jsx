@@ -87,8 +87,15 @@ export default function OperationGovernance(props) {
                 </FormControl>
                 <sup style={{ marginLeft: '10px' }}>
                     <Tooltip
+                        title={(
+                            <FormattedMessage
+                                id={'Apis.Details.Resources.components.operationComponents.OperationGovernance.Security'
+                                + '.tooltip'}
+                                defaultMessage='This will enable/disable Application Level securities defined in the
+                                Runtime Configurations page.'
+                            />
+                        )}
                         fontSize='small'
-                        title='If enabled, Users will need an access token with valid scopes to use the operation'
                         aria-label='Operation security'
                         placement='right-end'
                         interactive

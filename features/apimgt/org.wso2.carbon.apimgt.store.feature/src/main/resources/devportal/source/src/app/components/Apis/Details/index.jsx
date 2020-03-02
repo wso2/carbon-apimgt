@@ -383,7 +383,7 @@ class Details extends React.Component {
                                     to={pathPrefix + 'comments'}
                                 />
                             )}
-                            {api.type !== 'WS' && showSdks && (
+                            {api.type !== 'WS' && showTryout && (
                                 <LeftMenuItem
                                     text={<FormattedMessage id='Apis.Details.index.try.out' defaultMessage='Try out' />}
                                     route='test'

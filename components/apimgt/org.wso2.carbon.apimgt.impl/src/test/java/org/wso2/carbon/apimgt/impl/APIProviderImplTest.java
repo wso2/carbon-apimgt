@@ -802,12 +802,13 @@ public class APIProviderImplTest {
     @Test
     public void testAddBlockCondition() throws APIManagementException {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
-        Mockito.when(apimgtDAO.addBlockConditions(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).
-                thenReturn("testID");
+        BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
+        blockConditionsDTO.setUUID("12345");
+        Mockito.when(apimgtDAO.addBlockConditions(Mockito.any(BlockConditionsDTO.class))).thenReturn(blockConditionsDTO);
         //condition type IP
-        assertEquals("testID", apiProvider.addBlockCondition("IP", "testValue"));
+        assertEquals("12345", apiProvider.addBlockCondition("IP", "testValue"));
         //condition type User
-        assertEquals("testID", apiProvider.addBlockCondition("USER", "testValue"));
+        assertEquals("12345", apiProvider.addBlockCondition("USER", "testValue"));
     }
 
     @Test
@@ -2237,8 +2238,7 @@ public class APIProviderImplTest {
     }
 
     @Test
-    public void testUpdateAPI_InCreatedState() throws RegistryException, UserStoreException, APIManagementException,
-            FaultGatewaysException {
+    public void testUpdateAPI_InCreatedState() throws Exception {
         APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
         Set<String> environments = new HashSet<String>();
         Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
@@ -2282,6 +2282,24 @@ public class APIProviderImplTest {
 
 
         List<Documentation> documentationList = getDocumentationList();
+        Documentation documentation = documentationList.get(1);
+        Mockito.when(APIUtil.getAPIDocPath(api.getId())).thenReturn(documentation.getFilePath());
+        APIProviderImplWrapper apiProviderImplWrapper = new APIProviderImplWrapper(apimgtDAO, null, null);
+        Resource docResource = Mockito.mock(Resource.class);
+        Mockito.when(docResource.getUUID()).thenReturn(documentation.getId());
+        Mockito.when(apiProviderImplWrapper.registry.get(documentation.getFilePath())).thenReturn(docResource);
+
+        GenericArtifact docArtifact = Mockito.mock(GenericArtifact.class);
+        Mockito.when(artifactManager.getGenericArtifact(documentation.getId())).thenReturn(docArtifact);
+        Mockito.when(APIUtil.getDocumentation(docArtifact)).thenReturn(documentation);
+        String artifactPath = "artifact/path";
+        Mockito.when(docArtifact.getPath()).thenReturn(artifactPath);
+        PowerMockito.doNothing().when(APIUtil.class, "clearResourcePermissions", Mockito.any(), Mockito.any(),
+                Mockito.anyInt());
+
+        String[] roles = {"admin", "subscriber"};
+        APIUtil.setResourcePermissions("admin", "Public", roles, artifactPath);
+        Mockito.when(docArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("docFilePath");
 
         final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, documentationList, null);
         RegistryService registryService = Mockito.mock(RegistryService.class);
@@ -2416,6 +2434,24 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
 
         List<Documentation> documentationList = getDocumentationList();
+        Documentation documentation = documentationList.get(1);
+        Mockito.when(APIUtil.getAPIDocPath(api.getId())).thenReturn(documentation.getFilePath());
+        APIProviderImplWrapper apiProviderImplWrapper = new APIProviderImplWrapper(apimgtDAO, null, null);
+        Resource docResource = Mockito.mock(Resource.class);
+        Mockito.when(docResource.getUUID()).thenReturn(documentation.getId());
+        Mockito.when(apiProviderImplWrapper.registry.get(documentation.getFilePath())).thenReturn(docResource);
+
+        GenericArtifact docArtifact = Mockito.mock(GenericArtifact.class);
+        Mockito.when(artifactManager.getGenericArtifact(documentation.getId())).thenReturn(docArtifact);
+        Mockito.when(APIUtil.getDocumentation(docArtifact)).thenReturn(documentation);
+        String artifactPath = "artifact/path";
+        Mockito.when(docArtifact.getPath()).thenReturn(artifactPath);
+        PowerMockito.doNothing().when(APIUtil.class, "clearResourcePermissions", Mockito.any(), Mockito.any(),
+                Mockito.anyInt());
+
+        String[] roles = {"admin", "subscriber"};
+        APIUtil.setResourcePermissions("admin", "Public", roles, artifactPath);
+        Mockito.when(docArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("docFilePath");
 
         final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, documentationList, null);
 
@@ -2623,8 +2659,7 @@ public class APIProviderImplTest {
     }
 
     @Test(expected = FaultGatewaysException.class)
-    public void testUpdateAPI_WithFailedGWs() throws RegistryException, UserStoreException, APIManagementException,
-            FaultGatewaysException {
+    public void testUpdateAPI_WithFailedGWs() throws Exception {
         APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
         Set<String> environments = new HashSet<String>();
         Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
@@ -4394,10 +4429,14 @@ public class APIProviderImplTest {
         Documentation doc1 = new Documentation(DocumentationType.HOWTO, "How To");
         doc1.setVisibility(DocumentVisibility.API_LEVEL);
         doc1.setSourceType(DocumentSourceType.INLINE);
+        doc1.setId("678ghk");
+        doc1.setFilePath("/registry/resource/_system/governance/apimgt/applicationdata/provider/"
+                + "files/provider/fileName");
 
         Documentation doc2 = new Documentation(DocumentationType.SUPPORT_FORUM, "Support Docs");
         doc2.setVisibility(DocumentVisibility.API_LEVEL);
         doc2.setSourceType(DocumentSourceType.FILE);
+        doc2.setId("678ghk");
         doc2.setFilePath("/registry/resource/_system/governance/apimgt/applicationdata/provider/"
                 + "files/provider/fileName");
 

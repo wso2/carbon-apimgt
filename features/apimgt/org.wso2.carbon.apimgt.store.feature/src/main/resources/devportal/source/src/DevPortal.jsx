@@ -149,7 +149,6 @@ class DevPortal extends React.Component {
             
         }
         this.loadLocale(locale);
-        window.addEventListener('message', this.handleMessage);
     }
     /**
      * Set the tenant domain to state

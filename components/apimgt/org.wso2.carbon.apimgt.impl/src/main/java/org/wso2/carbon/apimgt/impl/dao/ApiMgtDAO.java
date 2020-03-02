@@ -81,6 +81,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -5069,6 +5070,39 @@ public class ApiMgtDAO {
                 subscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
             }
 
+            prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
+            prepStmtGetConsumerKey.setInt(1, application.getId());
+            rs = prepStmtGetConsumerKey.executeQuery();
+            List<String> consumerKeys = new ArrayList<>();
+
+            deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery);
+            while (rs.next()) {
+                String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
+
+                // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
+                String mode = rs.getString("CREATE_MODE");
+                if (consumerKey != null) {
+                    deleteDomainApp.setString(1, consumerKey);
+                    deleteDomainApp.addBatch();
+
+                    KeyManagerHolder.getKeyManagerInstance().deleteMappedApplication(consumerKey);
+                    // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
+                    // call delete.
+                    if (!APIConstants.OAuthAppMode.MAPPED.equals(mode)) {
+                        // Adding clients to be deleted.
+                        consumerKeys.add(consumerKey);
+                    }
+                }
+            }
+
+            for (String consumerKey : consumerKeys) {
+                //delete on oAuthorization server.
+                if (log.isDebugEnabled()) {
+                    log.debug("Deleting Oauth application with consumer key " + consumerKey + " from the Oauth server");
+                }
+                KeyManagerHolder.getKeyManagerInstance().deleteApplication(consumerKey);
+            }
+
             deleteMappingQuery = connection.prepareStatement(deleteKeyMappingQuery);
             for (Integer subscriptionId : subscriptions) {
                 deleteMappingQuery.setInt(1, subscriptionId);
@@ -5098,31 +5132,6 @@ public class ApiMgtDAO {
                 log.debug("Subscription details are deleted successfully for Application - " + application.getName());
             }
 
-            prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
-            prepStmtGetConsumerKey.setInt(1, application.getId());
-            rs = prepStmtGetConsumerKey.executeQuery();
-            ArrayList<String> consumerKeys = new ArrayList<String>();
-
-            deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery);
-            while (rs.next()) {
-                String consumerKey = rs.getString("CONSUMER_KEY");
-
-                // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
-                String mode = rs.getString("CREATE_MODE");
-                if (consumerKey != null) {
-                    deleteDomainApp.setString(1, consumerKey);
-                    deleteDomainApp.addBatch();
-
-                    KeyManagerHolder.getKeyManagerInstance().deleteMappedApplication(consumerKey);
-                    // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
-                    // call delete.
-                    if (!"MAPPED".equals(mode)) {
-                        // Adding clients to be deleted.
-                        consumerKeys.add(consumerKey);
-                    }
-
-                }
-            }
             deleteDomainApp.executeBatch();
 
             deleteAppKey = connection.prepareStatement(deleteApplicationKeyQuery);
@@ -5146,10 +5155,6 @@ public class ApiMgtDAO {
                 connection.commit();
             }
 
-            for (String consumerKey : consumerKeys) {
-                //delete on oAuthorization server.
-                KeyManagerHolder.getKeyManagerInstance().deleteApplication(consumerKey);
-            }
         } catch (SQLException e) {
             handleException("Error while removing application details from the database", e);
         } finally {
@@ -6931,6 +6936,8 @@ public class ApiMgtDAO {
             String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
             String applicableLevel = rs.getString("APPLICABLE_LEVEL");
             String policyConditionGroupId = "_condition_" + conditionGroupId;
+            boolean isContentAware = PolicyConstants.BANDWIDTH_TYPE.equals(
+                    rs.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE));
 
             String key = httpVerb + ":" + urlPattern;
             if (mapByHttpVerbURLPatternToId.containsKey(key)) {
@@ -6947,6 +6954,8 @@ public class ApiMgtDAO {
                 String script = null;
                 URITemplate uriTemplate = new URITemplate();
                 uriTemplate.setThrottlingTier(policyName);
+                uriTemplate.setThrottlingTiers(
+                        policyName + PolicyConstants.THROTTLING_TIER_CONTENT_AWARE_SEPERATOR + isContentAware);
                 uriTemplate.setAuthType(authType);
                 uriTemplate.setHTTPVerb(httpVerb);
                 uriTemplate.setUriTemplate(urlPattern);
@@ -11045,6 +11054,7 @@ public class ApiMgtDAO {
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
+                subPolicy.setTierQuotaType(rs.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
                 Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
                 monetizationPlanProperties.put(APIConstants.Monetization.FIXED_PRICE,
                         rs.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));
@@ -12302,20 +12312,20 @@ public class ApiMgtDAO {
     /**
      * Add a block condition
      *
-     * @param conditionType  Type of the block condition
-     * @param conditionValue value related to the type
-     * @param tenantDomain   tenant domain the block condition should be effective
      * @return uuid of the block condition if successfully added
      * @throws APIManagementException
      */
-    public String addBlockConditions(String conditionType, String conditionValue, String tenantDomain) throws
+    public BlockConditionsDTO addBlockConditions(BlockConditionsDTO blockConditionsDTO) throws
             APIManagementException {
         Connection connection = null;
         PreparedStatement insertPreparedStatement = null;
         boolean status = false;
         boolean valid = false;
         ResultSet rs = null;
-        String uuid = null;
+        String uuid = blockConditionsDTO.getUUID();
+        String conditionType  = blockConditionsDTO.getConditionType();
+        String conditionValue = blockConditionsDTO.getConditionValue();
+        String tenantDomain = blockConditionsDTO.getTenantDomain();
         try {
             String query = SQLConstants.ThrottleSQLConstants.ADD_BLOCK_CONDITIONS_SQL;
             if (APIConstants.BLOCKING_CONDITIONS_API.equals(conditionType)) {
@@ -12350,21 +12360,27 @@ public class ApiMgtDAO {
                 } else {
                     throw new APIManagementException("Invalid User in Tenant Domain " + tenantDomain);
                 }
-            } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType)) {
+            } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType) ||
+                    APIConstants.BLOCK_CONDITION_IP_RANGE.equals(conditionType)) {
                 valid = true;
             }
             if (valid) {
                 connection = APIMgtDBUtil.getConnection();
                 connection.setAutoCommit(false);
                 if (!isBlockConditionExist(conditionType, conditionValue, tenantDomain, connection)) {
-                    uuid = UUID.randomUUID().toString();
-                    insertPreparedStatement = connection.prepareStatement(query);
+                    String dbProductName = connection.getMetaData().getDatabaseProductName();
+                    insertPreparedStatement = connection.prepareStatement(query,
+                            new String[]{DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "CONDITION_ID")});
                     insertPreparedStatement.setString(1, conditionType);
                     insertPreparedStatement.setString(2, conditionValue);
                     insertPreparedStatement.setString(3, "TRUE");
                     insertPreparedStatement.setString(4, tenantDomain);
                     insertPreparedStatement.setString(5, uuid);
-                    status = insertPreparedStatement.execute();
+                    insertPreparedStatement.execute();
+                    ResultSet generatedKeys = insertPreparedStatement.getGeneratedKeys();
+                    if (generatedKeys != null && generatedKeys.next()){
+                        blockConditionsDTO.setConditionId(generatedKeys.getInt(1));
+                    }
                     connection.commit();
                     status = true;
                 } else {
@@ -12387,7 +12403,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(insertPreparedStatement, connection, null);
         }
         if (status) {
-            return uuid;
+            return blockConditionsDTO;
         } else {
             return null;
         }
@@ -14565,5 +14581,33 @@ public class ApiMgtDAO {
             handleException("Failed to fetch user ID for " + userName , e);
         }
         return userID;
+    }
+    
+    /**
+     * Get names of the tiers which has bandwidth as the quota type
+     * @param tenantId id of the tenant
+     * @return list of names
+     * @throws APIManagementException
+     */
+    public List<String> getNamesOfTierWithBandwidthQuotaType(int tenantId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        List<String> list = new ArrayList<String>();
+        try {
+            String sqlQuery = ThrottleSQLConstants.GET_TIERS_WITH_BANDWIDTH_QUOTA_TYPE_SQL;
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                list.add(resultSet.getString(1));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve tiers with bandwidth QuotaType ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return list;
     }
 }

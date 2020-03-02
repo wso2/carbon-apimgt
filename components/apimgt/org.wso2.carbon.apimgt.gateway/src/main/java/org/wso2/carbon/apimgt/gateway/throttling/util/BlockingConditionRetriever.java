@@ -18,7 +18,9 @@
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
 
+import com.google.gson.ExclusionStrategy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -115,8 +117,8 @@ public class BlockingConditionRetriever extends TimerTask {
                     GatewayUtils.generateMap(blockConditionsDTO.getApplication()));
             getThrottleDataHolder().addUserBlockingConditionsFromMap(
                     GatewayUtils.generateMap(blockConditionsDTO.getUser()));
-            getThrottleDataHolder().addIplockingConditionsFromMap(
-                    GatewayUtils.generateMap(blockConditionsDTO.getIp()));
+            getThrottleDataHolder()
+                    .addIplockingConditionsFromMap(GatewayUtils.generateIpRangeMap(blockConditionsDTO.getIp()));
         }
     }
 

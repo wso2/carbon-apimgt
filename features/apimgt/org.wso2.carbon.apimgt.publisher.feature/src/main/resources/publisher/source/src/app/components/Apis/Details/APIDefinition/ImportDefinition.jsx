@@ -229,7 +229,7 @@ export default function ImportDefinition(props) {
     function importDefinition() {
         if (isGraphQL) {
             updateGraphQLSchema();
-        } if (isSOAP) {
+        } else if (isSOAP) {
             updateWSDL();
         } else {
             updateOASDefinition();

@@ -470,10 +470,15 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (retrievedProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
+
+            List<String> apiSecurity = body.getSecurityScheme();
             //validation for tiers
             List<String> tiersFromDTO = body.getPolicies();
-            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
-                RestApiUtil.handleBadRequest("No tier defined for the API Product", log);
+            if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                    apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+                if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+                    RestApiUtil.handleBadRequest("No tier defined for the API Product", log);
+                }
             }
 
             //check whether the added API Products's tiers are all valid

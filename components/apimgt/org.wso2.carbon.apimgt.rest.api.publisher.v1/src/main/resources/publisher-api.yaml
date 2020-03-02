@@ -7268,6 +7268,8 @@ definitions:
       lastUpdatedTime:
         type: string
         example: 2017-02-20T13:57:16.229
+        x-otherScopes:
+          - apim:api_publish
       endpointConfig:
         type: object
         description: |

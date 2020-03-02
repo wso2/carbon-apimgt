@@ -455,7 +455,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             requestPublisherDTO.setUserIp(clientIp);
             requestPublisherDTO.setApplicationConsumerKey(infoDTO.getConsumerKey());
             //context will always be empty as this method will call only for WebSocketFrame and url is null
-            requestPublisherDTO.setApiContext("-");
+            requestPublisherDTO.setApiContext(apiContextUri);
             requestPublisherDTO.setThrottledOut(isThrottledOut);
             requestPublisherDTO.setApiHostname(DataPublisherUtil.getHostAddress());
             requestPublisherDTO.setApiMethod("-");
