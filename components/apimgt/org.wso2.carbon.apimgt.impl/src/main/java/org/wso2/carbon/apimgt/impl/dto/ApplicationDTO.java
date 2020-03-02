@@ -29,6 +29,7 @@ public class ApplicationDTO implements Serializable {
     private String tier;
     private String owner;
     private String uuid;
+    private String tierQuotaType;
 
     public String getOwner() {
         return owner;
@@ -69,4 +70,13 @@ public class ApplicationDTO implements Serializable {
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
+
+    public String getTierQuotaType() {
+        return tierQuotaType;
+    }
+
+    public void setTierQuotaType(String tierQuotaType) {
+        this.tierQuotaType = tierQuotaType;
+    }
+    
 }

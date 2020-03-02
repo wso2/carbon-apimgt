@@ -1224,6 +1224,7 @@ public final class APIConstants {
     public static final String SWAGGER_X_AMZN_RESOURCE_TIMEOUT = "x-amzn-resource-timeout";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
+    public static final String SWAGGER_X_THROTTLING_BANDWIDTH = "x-throttling-bandwidth";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
     public static final String SWAGGER_X_WSO2_SECURITY = "x-wso2-security";
     public static final String WSO2_APP_SECURITY_TYPES = "security-types";
@@ -1664,6 +1665,8 @@ public final class APIConstants {
         public static final String API_VERSION = "version";
         public static final String API_PUBLISHER = "publisher";
         public static final String API_NAME = "name";
+        public static final String QUOTA_TYPE = "tierQuotaType";
+        public static final String QUOTA_TYPE_BANDWIDTH = "bandwidthVolume";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";

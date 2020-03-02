@@ -16,19 +16,20 @@
 
 package org.wso2.carbon.apimgt.gateway.utils;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 
 public class OpenAPIUtils {
 
@@ -165,6 +166,37 @@ public class OpenAPIUtils {
         }
         return APIConstants.UNLIMITED_TIER;
     }
+    
+    /**
+     * Check whether the tier for the API is content aware or not.
+     * @param openAPI OpenAPI of the API
+     * @param synCtx The message containing resource request
+     * @return whether tier is content aware or not.
+     */
+    public static boolean isContentAwareTierAvailable(OpenAPI openAPI, MessageContext synCtx) {
+        boolean status = false;
+        Map<String, Object> vendorExtensions;
+        if (openAPI != null) {
+            vendorExtensions = openAPI.getExtensions();
+            if (vendorExtensions != null
+                    && vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH) != null
+                    && (boolean) vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH)) {
+                // check for api level policy
+                status = true;
+            } 
+            // if there is api level policy. no need to check for resource level. if not, check for resource level
+            if(!status) {
+                vendorExtensions = getPathItemExtensions(synCtx, openAPI);
+                if (vendorExtensions != null
+                        && vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH) != null
+                        && (boolean) vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH)) {
+                    // check for resource level policy
+                    status = true;
+                } 
+            }
+        }
+        return status;
+    }
 
     private static Map<String, Object> getPathItemExtensions(MessageContext synCtx, OpenAPI openAPI) {
         if (openAPI != null) {
@@ -195,7 +227,7 @@ public class OpenAPIUtils {
         }
         return null;
     }
-
+    
     private static List<String> getPathItemSecurityScopes(MessageContext synCtx, OpenAPI openAPI) {
         if (openAPI != null) {
             String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);

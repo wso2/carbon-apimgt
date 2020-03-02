@@ -1132,4 +1132,44 @@ public class OAS3Parser extends APIDefinition {
 
         openAPI.setPaths(paths);
     }
+
+    @Override
+    public String getOASDefinitionWithTierContentAwareProperty(String oasDefinition, List<String> contentAwareTiersList,
+            String apiLevelTier) throws APIManagementException {
+        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(oasDefinition, null, null);
+        if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
+            log.debug("Errors found when parsing OAS definition");
+        }
+        OpenAPI swagger = parseAttemptForV3.getOpenAPI();
+        // check if API Level tier is content aware. if so, we set a extension as a global property
+        if (contentAwareTiersList.contains(apiLevelTier)) {
+            swagger.addExtension(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH, true);
+            // no need to check resource levels since both cannot exist at the same time.
+            log.debug("API Level policy is content aware..");
+            return Json.pretty(swagger);
+        }
+        // if api level tier exists, skip checking for resource level tiers since both cannot exist at the same time.
+        if (apiLevelTier != null) {
+            log.debug("API Level policy is not content aware..");
+            return oasDefinition;
+        } else {
+            log.debug("API Level policy does not exist. Checking for resource level");
+            for (Map.Entry<String, PathItem> entry : swagger.getPaths().entrySet()) {
+                String path = entry.getKey();
+                List<Operation> operations = swagger.getPaths().get(path).readOperations();
+                for (Operation op : operations) {
+                    if (contentAwareTiersList
+                            .contains(op.getExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER))) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(
+                                    "API resource Level policy is content aware for operation " + op.getOperationId());
+                        }
+                        op.addExtension(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH, true);
+                    }
+                }
+            }
+            return Json.pretty(swagger);
+        }
+    }
 }
