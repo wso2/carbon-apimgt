@@ -48,7 +48,7 @@
 
         var uri = request.getRequestURI();
         var uriMatcher = new URIMatcher(String(uri));
-        var log = new Log("log-analyzer-proxy.jag");
+        var log = new Log();
         var serviceInvokers = session.get("serviceInvokers");
 
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;

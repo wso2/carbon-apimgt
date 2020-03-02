@@ -655,11 +655,21 @@ public class OAS3Parser extends APIDefinition {
             openAPI.addExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandEndpointObj);
         }
         openAPI.addExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());
-        openAPI.addExtension(APIConstants.X_WSO2_TRANSPORTS,
-                OASParserUtil.getTransportSecurity(api.getApiSecurity(), api.getTransports()));
-        openAPI.addExtension(APIConstants.SWAGGER_X_WSO2_APP_SECURITY,
-                OASParserUtil.getAppSecurity(api.getApiSecurity()));
-        openAPI.addExtension(APIConstants.SWAGGER_X_WSO2_RESPONSE_CACHE,
+        if (api.getTransports() != null) {
+            openAPI.addExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
+        }
+        String apiSecurity = api.getApiSecurity();
+        // set mutual ssl extension if enabled
+        if (apiSecurity != null) {
+            List<String> securityList = Arrays.asList(apiSecurity.split(","));
+            if (securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                String mutualSSLOptional = !securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY) ?
+                        APIConstants.OPTIONAL : APIConstants.MANDATORY;
+                openAPI.addExtension(APIConstants.X_WSO2_MUTUAL_SSL, mutualSSLOptional);
+            }
+        }
+        openAPI.addExtension(APIConstants.X_WSO2_APP_SECURITY, OASParserUtil.getAppSecurity(apiSecurity));
+        openAPI.addExtension(APIConstants.X_WSO2_RESPONSE_CACHE,
                 OASParserUtil.getResponseCacheConfig(api.getResponseCache(), api.getCacheTimeout()));
         return Json.pretty(openAPI);
     }

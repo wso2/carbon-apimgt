@@ -17,7 +17,7 @@ const disableAuthorizeAndInfoPlugin = function () {
  */
 const SwaggerUI = (props) => {
     const {
-        spec, accessTokenProvider, authorizationHeader, api,
+        spec, accessTokenProvider, authorizationHeader, api, securitySchemeType,
     } = props;
 
     const componentProps = {
@@ -31,6 +31,8 @@ const SwaggerUI = (props) => {
             const patternToCheck = `${context}/*`;
             if (authorizationHeader === 'apikey') {
                 req.headers[authorizationHeader] = accessTokenProvider();
+            } else if (securitySchemeType === 'BASIC') {
+                req.headers[authorizationHeader] = 'Basic ' + accessTokenProvider();
             } else {
                 req.headers[authorizationHeader] = 'Bearer ' + accessTokenProvider();
             }

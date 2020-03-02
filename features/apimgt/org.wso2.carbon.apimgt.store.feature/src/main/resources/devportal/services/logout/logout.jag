@@ -17,7 +17,8 @@
  * under the License.
  */
 
-    var log = new Log("Logout Request Function");
+    var log = new Log();
+    log.debug("Logout Request Function");
     include("/services/constants.jag");
     var app = require("/site/public/theme/settings.js").Settings.app;
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;

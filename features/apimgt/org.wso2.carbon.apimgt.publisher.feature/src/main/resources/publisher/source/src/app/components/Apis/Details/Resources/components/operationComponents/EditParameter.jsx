@@ -111,7 +111,7 @@ export default function EditParameter(props) {
                     <Typography display='inline' variant='subtitle1'>
                         {capitalizeFirstLetter(parameter.in)}
                         {' '}
-:
+                        :
                         {parameter.name}
                     </Typography>
                 </Typography>

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-    var log = new Log("Logout Callback Function");
+    var log = new Log();
+    log.debug("Logout Callback Function");
     var app = require("/site/public/conf/settings.js").AppConfig.app;
     include("/services/constants.jag");
 

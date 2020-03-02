@@ -287,6 +287,10 @@ class Credentials extends React.Component {
             hashEnabled,
         } = this.state;
         const user = AuthManager.getUser();
+        const isOnlyMutualSSL = api.securityScheme.includes('mutualssl') && !api.securityScheme.includes('oauth2') &&
+        !api.securityScheme.includes('api_key') && !api.securityScheme.includes('basic_auth');
+        const isOnlyBasicAuth = api.securityScheme.includes('basic_auth') && !api.securityScheme.includes('oauth2') &&
+         !api.securityScheme.includes('api_key');
         const renderCredentialInfo = () => {
             const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
             if (isPrototypedAPI) {
@@ -302,6 +306,18 @@ class Credentials extends React.Component {
                             </Typography>
                         </InlineMessage>
                     </>
+                );
+            } else if (isOnlyMutualSSL || isOnlyBasicAuth) {
+                return (
+                        <InlineMessage type='info' className={classes.dialogContainer}>
+                            <Typography component='p'>
+                            <FormattedMessage
+                                        id='Apis.Details.Creadentials.credetials.mutualssl'
+                                        defaultMessage={'Subscription is not required for Mutual SSL APIs' + 
+                                        ' or APIs with only Basic Authentication.'}
+                                    />
+                            </Typography>
+                        </InlineMessage>
                 );
             } else if (applicationsAvailable.length === 0 && subscribedApplications.length === 0) {
                 return (
@@ -358,7 +374,8 @@ class Credentials extends React.Component {
                                                 />
                                             </Typography>
                                             <Link
-                                                to={`/apis/${api.id}/credentials/wizard`}
+                                                to={(isOnlyMutualSSL || isOnlyBasicAuth) ? null :
+                                                     `/apis/${api.id}/credentials/wizard`}
                                                 style={!api.isSubscriptionAvailable
                                                     ? { pointerEvents: 'none' } : null}
                                             >
@@ -366,7 +383,8 @@ class Credentials extends React.Component {
                                                     variant='contained'
                                                     color='primary'
                                                     className={classes.buttonElm}
-                                                    disabled={!api.isSubscriptionAvailable}
+                                                    disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL || 
+                                                        isOnlyBasicAuth}
                                                 >
                                                     <FormattedMessage
                                                         id={'Apis.Details.Credentials.'
@@ -493,7 +511,8 @@ class Credentials extends React.Component {
                                 />
                                 {applicationsAvailable.length > 0 && (
                                     <Link
-                                        to={`/apis/${api.id}/credentials/wizard`}
+                                        to={(isOnlyMutualSSL || isOnlyBasicAuth) ? null :
+                                             `/apis/${api.id}/credentials/wizard`}
                                         style={!api.isSubscriptionAvailable
                                             ? { pointerEvents: 'none' } : null}
                                         className={classes.addLinkWrapper}
@@ -501,7 +520,8 @@ class Credentials extends React.Component {
                                         <Button
                                             color='secondary'
                                             className={classes.buttonElm}
-                                            disabled={!api.isSubscriptionAvailable}
+                                            disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL
+                                                 || isOnlyBasicAuth}
                                             size='small'
                                         >
                                             <Icon>add_circle_outline</Icon>
