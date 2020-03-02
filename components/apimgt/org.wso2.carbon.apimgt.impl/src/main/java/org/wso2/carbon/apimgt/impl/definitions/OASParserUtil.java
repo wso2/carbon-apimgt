@@ -1109,6 +1109,18 @@ public class OASParserUtil {
     }
 
     /**
+     * remove publisher/MG related extension from OAS
+     *
+     * @param extensions extensions
+     */
+    public static void removePublisherSpecificInfofromOperation(Map<String, Object> extensions) {
+        if (extensions == null) {
+            return;
+        }
+        extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
+    }
+
+    /**
      * Get Application level security types
      * @param security list of security types
      * @return List of api security
