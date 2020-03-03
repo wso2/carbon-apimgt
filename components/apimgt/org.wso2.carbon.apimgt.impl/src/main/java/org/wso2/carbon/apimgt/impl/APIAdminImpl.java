@@ -26,17 +26,14 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.text.SimpleDateFormat;
@@ -348,5 +345,22 @@ public class APIAdminImpl implements APIAdmin {
                 .searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE, true);
         int length = (Integer) result.get("length");
         return length;
+    }
+
+    public Workflow[] getworkflows(String workflowType, String status, String tenantDomain ) throws APIManagementException {
+
+        return apiMgtDAO.getworkflows(workflowType, status , tenantDomain );
+    }
+
+    public Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status, String tenantDomain) throws APIManagementException {
+
+        Workflow workflow=apiMgtDAO.getworkflowReferenceByExternalWorkflowReferenceID(externelWorkflowRef, status ,tenantDomain );
+
+        if (workflow == null) {
+            String msg="External workflow Reference: " + externelWorkflowRef + " was not found.";
+            throw new APIMgtResourceNotFoundException(msg);
+        }
+
+        return workflow;
     }
 }
