@@ -317,7 +317,6 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param swagger swagger object
      * @return Scope set
-     * @throws APIManagementException if an error occurred
      */
     private Set<Scope> getScopesFromExtensions(Swagger swagger) throws APIManagementException {
         Set<Scope> scopeList = new LinkedHashSet<>();
@@ -516,7 +515,7 @@ public class OAS2Parser extends APIDefinition {
             Swagger swagger = parseAttemptForV2.getSwagger();
             Info info = swagger.getInfo();
             OASParserUtil.updateValidationResponseAsSuccess(validationResponse, apiDefinition, swagger.getSwagger(),
-                    info.getTitle(), info.getVersion(), swagger.getBasePath(), info.getDescription());
+                    info.getTitle(), info.getVersion(), swagger.getBasePath(), info.getDescription(), swagger.getHost());
             validationResponse.setParser(this);
             if (returnJsonContent) {
                 if (!apiDefinition.trim().startsWith("{")) { // not a json (it is yaml)
