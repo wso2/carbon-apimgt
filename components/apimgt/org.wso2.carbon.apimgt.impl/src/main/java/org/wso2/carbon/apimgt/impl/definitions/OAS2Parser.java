@@ -568,6 +568,14 @@ public class OAS2Parser extends APIDefinition {
     private void removePublisherSpecificInfo(Swagger swagger) {
         Map<String, Object> extensions = swagger.getVendorExtensions();
         OASParserUtil.removePublisherSpecificInfo(extensions);
+        for (String pathKey : swagger.getPaths().keySet()) {
+            Path path = swagger.getPath(pathKey);
+            Map<HttpMethod, Operation> operationMap = path.getOperationMap();
+            for (Map.Entry<HttpMethod, Operation> entry : operationMap.entrySet()) {
+                Operation operation = entry.getValue();
+                OASParserUtil.removePublisherSpecificInfofromOperation(operation.getVendorExtensions());
+            }
+        }
     }
 
     /**
@@ -671,7 +679,18 @@ public class OAS2Parser extends APIDefinition {
                 swagger.setVendorExtension(APIConstants.X_WSO2_MUTUAL_SSL, mutualSSLOptional);
             }
         }
-        swagger.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, OASParserUtil.getAppSecurity(apiSecurity));
+        // This app security is should given in resource level,
+        // otherwise the default oauth2 scheme defined at each resouce level will override application securities
+        JsonNode appSecurityExtension = OASParserUtil.getAppSecurity(apiSecurity);
+        for (String pathKey : swagger.getPaths().keySet()) {
+            Path path = swagger.getPath(pathKey);
+            Map<HttpMethod, Operation> operationMap = path.getOperationMap();
+            for (Map.Entry<HttpMethod, Operation> entry : operationMap.entrySet()) {
+                Operation operation = entry.getValue();
+                operation.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
+            }
+        }
+        swagger.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
         swagger.setVendorExtension(APIConstants.X_WSO2_RESPONSE_CACHE,
                 OASParserUtil.getResponseCacheConfig(api.getResponseCache(), api.getCacheTimeout()));
 
