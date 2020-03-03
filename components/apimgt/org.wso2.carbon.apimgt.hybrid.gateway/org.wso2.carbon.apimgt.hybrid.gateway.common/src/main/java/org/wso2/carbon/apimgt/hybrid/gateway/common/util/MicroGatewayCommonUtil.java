@@ -18,12 +18,17 @@
 
 package org.wso2.carbon.apimgt.hybrid.gateway.common.util;
 
+import org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.exception.OnPremiseGatewayException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class contains common utility methods used in Micro Gateway components
@@ -75,5 +80,29 @@ public class MicroGatewayCommonUtil {
             throw new OnPremiseGatewayException(errorMessage + urlValue, e);
         }
         throw new OnPremiseGatewayException(errorMessage + urlValue);
+    }
+
+    /**
+     * Get the tenant username password mapping from the enabled tenants
+     *
+     * @return Map<tenantUsername, Password> for all the tenants
+     * @throws OnPremiseGatewayException if failed to retrieve the users
+     */
+    public static Map<String, String> getMultiTenantUserMap() throws OnPremiseGatewayException {
+
+        ArrayList multiTenantUsers = ConfigManager.getConfigurationDTO().getMulti_tenant_users();
+        if (!multiTenantUsers.isEmpty()) {
+            Map<String, String> tenantUserPasswordMap = new HashMap<>();
+            for (Object tenantUserCredential : multiTenantUsers) {
+                byte[] decodedUser = Base64.getDecoder().decode(tenantUserCredential.toString());
+                String decodedUserString = new String(decodedUser);
+                String[] userDetails = decodedUserString.split(":");
+                tenantUserPasswordMap.put(userDetails[0], userDetails[1]);
+            }
+            return tenantUserPasswordMap;
+        } else {
+            throw new OnPremiseGatewayException("Multi Tenant User list is not defined in the on-premise-gateway.toml" +
+                    " file");
+        }
     }
 }

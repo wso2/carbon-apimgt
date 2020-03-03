@@ -27,4 +27,6 @@ public class TenantInitializationConstants {
     public static final String DEFAULT_EMAIL = "Doe@org.com";
     public static final String EMPTY_STRING = "";
     public static final String LOCAL_HOST_NAME = "localhost";
+    public static final String URL_PATH_SEPARATOR = "/";
+    public static final String REMOTE_UPDATED_TENANTS_URI = "/tenants";
 }

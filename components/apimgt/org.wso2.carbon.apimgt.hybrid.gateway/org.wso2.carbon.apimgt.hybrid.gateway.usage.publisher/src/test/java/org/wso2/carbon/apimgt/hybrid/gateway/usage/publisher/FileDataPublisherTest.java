@@ -66,7 +66,6 @@ public class FileDataPublisherTest {
         PowerMockito.mockStatic(CarbonUtils.class);
         PowerMockito.when(CarbonUtils.getCarbonHome()).thenReturn(carbonHome);
         PowerMockito.when(CarbonUtils.getCarbonConfigDirPath()).thenReturn(carbonConfigPath);
-        Mockito.when(ConfigManager.getConfigManager().getProperty("MaxUsageFileSize")).thenReturn("sizeInMb");
         DataBridgeRequestResponseStreamPublisherDTO dataBridgeRequestStreamPublisherDTO = Mockito.mock(DataBridgeRequestResponseStreamPublisherDTO.class);
         FileDataPublisher fileDataPublisher = new FileDataPublisher();
         fileDataPublisher.tryPublish("org.wso2.apimgt.statistics.request:1.0.0", 12324343,

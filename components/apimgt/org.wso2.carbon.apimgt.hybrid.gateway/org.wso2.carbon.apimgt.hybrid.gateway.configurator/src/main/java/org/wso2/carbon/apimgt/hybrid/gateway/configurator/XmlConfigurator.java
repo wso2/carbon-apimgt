@@ -22,13 +22,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.ConfigDTO;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Properties;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
@@ -52,17 +54,17 @@ public class XmlConfigurator {
      * Configure Gateway properties in the api-manager.xml
      *
      * @param carbonHome String
-     * @param gatewayProperties Properties
+     * @param gatewayConfigs Configuration values
      * @param fileMap Map<String, Map<String, String>>
      */
-    public void configure(String carbonHome, Properties gatewayProperties, Map<String, Map<String, String>> fileMap) {
+    public void configure(String carbonHome, ConfigDTO gatewayConfigs, Map<String, Map<String, String>> fileMap) {
 
         for (Map.Entry<String, Map<String, String>> entry : fileMap.entrySet()) {
             String filePath = carbonHome + File.separator + entry.getKey().replace("/", File.separator);
             try {
                 Document doc = DocumentBuilderFactory.newInstance()
                         .newDocumentBuilder().parse(new InputSource(filePath));
-                replaceValues(doc, entry.getValue(), gatewayProperties);
+                replaceValues(doc, entry.getValue(), gatewayConfigs);
                 Transformer transformer = TransformerFactory.newInstance().newTransformer();
                 StreamResult streamResult = new StreamResult(filePath);
                 transformer.transform(new DOMSource(doc), streamResult);
@@ -79,20 +81,41 @@ public class XmlConfigurator {
      *
      * @param doc Document
      * @param xpathMap Map<String, String>
-     * @param configProperties Properties
+     * @param gatewayConfigs Configuration values
      * @throws XPathExpressionException
      */
-    private void replaceValues(Document doc, Map<String, String> xpathMap, Properties configProperties)
+    private void replaceValues(Document doc, Map<String, String> xpathMap, ConfigDTO gatewayConfigs)
             throws XPathExpressionException {
         XPath xpath = XPathFactory.newInstance().newXPath();
         for (Map.Entry entry : xpathMap.entrySet()) {
+            Method methodToFind = null;
             String xpathKey = (String) entry.getKey();
             String replaceKey = (String) entry.getValue();
-            if (configProperties.containsKey(replaceKey) && configProperties.getProperty(replaceKey) != null
-                    && !configProperties.getProperty(replaceKey).isEmpty()) {
-                Node node = (Node) xpath.evaluate("//" + xpathKey.replace(".", "/"),
-                        doc, XPathConstants.NODE);
-                node.setTextContent(configProperties.getProperty(replaceKey));
+            String postFix = replaceKey.substring(0,1).toUpperCase().concat(replaceKey.substring(1).toLowerCase());
+            String replaceKeyGetMethod = "get".concat(postFix);
+            try {
+                methodToFind = ConfigDTO.class.getMethod(replaceKeyGetMethod);
+            } catch (NoSuchMethodException e) {
+                String replaceKeyIsMethod = "is".concat(postFix);
+                try {
+                    methodToFind = ConfigDTO.class.getMethod(replaceKeyIsMethod);
+                } catch (NoSuchMethodException e2) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("No such method exception for the method " + replaceKeyGetMethod + " or " +
+                                replaceKeyIsMethod, e);
+                    }
+                }
+            }
+            try {
+                if (methodToFind != null) {
+                    Node node = (Node) xpath.evaluate("//" + xpathKey.replace(".", "/"),
+                            doc, XPathConstants.NODE);
+                    node.setTextContent(methodToFind.invoke(gatewayConfigs).toString());
+                }
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Exception occurred while invoking the method " + methodToFind, e);
+                }
             }
         }
     }

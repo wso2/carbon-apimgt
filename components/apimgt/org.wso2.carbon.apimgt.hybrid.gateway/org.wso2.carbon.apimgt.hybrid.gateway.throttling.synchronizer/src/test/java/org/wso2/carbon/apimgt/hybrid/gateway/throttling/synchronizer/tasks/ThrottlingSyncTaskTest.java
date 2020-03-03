@@ -31,19 +31,20 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.AccessTokenDTO;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.ConfigDTO;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.OAuthApplicationInfoDTO;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.util.HttpRequestUtil;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.util.TokenUtil;
+import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.TestUtil;
+import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.AdvancedThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.util.mapping.throttling.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager;
-import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.AccessTokenDTO;
-import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.OAuthApplicationInfoDTO;
-import org.wso2.carbon.apimgt.hybrid.gateway.common.util.HttpRequestUtil;
-import org.wso2.carbon.apimgt.hybrid.gateway.common.util.TokenUtil;
-import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.util.mapping.throttling.AdvancedThrottlePolicyMappingUtil;
-import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.TestUtil;
-import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.AdvancedThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -85,6 +86,8 @@ public class ThrottlingSyncTaskTest {
         AccessTokenDTO accessTknDTO = Mockito.mock(AccessTokenDTO.class);
         PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(char[].class), any(String.class)))
                 .thenReturn(accessTknDTO);
+        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(char[].class), any(String.class),
+                any(String.class), any(char[].class))).thenReturn(accessTknDTO);
         Mockito.doReturn("ssfhhh-jenfho-wfembj").when(accessTknDTO)
                 .getAccessToken();
 
@@ -95,8 +98,10 @@ public class ThrottlingSyncTaskTest {
         PowerMockito.when(serviceDataHolder.getAPIManagerConfigurationService()).thenReturn(apimConfigServ);
         APIManagerConfiguration apimConfig = Mockito.mock(APIManagerConfiguration.class);
         Mockito.doReturn(apimConfig).when(apimConfigServ).getAPIManagerConfiguration();
-        Mockito.doReturn("amandaj@wso2.com").when(apimConfig)
+        Mockito.doReturn("multitenant@fleckens.hu").when(apimConfig)
                 .getFirstProperty("APIKeyValidator.Username");
+        Mockito.doReturn("Admin123").when(apimConfig)
+                .getFirstProperty("APIKeyValidator.Password");
 
         ConfigurationContextService configContextServ = Mockito.mock(ConfigurationContextService.class);
         ConfigurationContext configContext = Mockito.mock(ConfigurationContext.class);
@@ -118,17 +123,14 @@ public class ThrottlingSyncTaskTest {
         Mockito.doReturn(policies).when(apiProvider).getPolicies(any(String.class), any(String.class));
 
         PowerMockito.mockStatic(ConfigManager.class);
-        ConfigManager configManager = Mockito.mock(ConfigManager.class);
-        PowerMockito.when(ConfigManager.getConfigManager()).thenReturn(configManager);
+        ConfigDTO configDTO = Mockito.mock(ConfigDTO.class);
+        PowerMockito.when(ConfigManager.getConfigurationDTO()).thenReturn(configDTO);
 
         PowerMockito.mockStatic(APIUtil.class);
         HttpClient httpClient = Mockito.mock(HttpClient.class);
         PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
 
-        Mockito.when(configManager.getProperty(any(String.class)))
-                .thenReturn("https://api.cloud.wso2.com/api/am/admin/v0.16/throttling/policies/subscription",
-                        "https://api.cloud.wso2.com/api/am/admin/v0.16/throttling/policies/application",
-                        "https://api.cloud.wso2.com/api/am/admin/v0.16/throttling/policies/advanced");
+        Mockito.when(configDTO.isMulti_tenant_enabled()).thenReturn(false);
 
         String subPolicies = "{\"count\":2,\"list\":[{\"policyId\":\"8e73b2b4-76c2-4a0f-9520-087337395ce6\"," +
                 "\"policyName\":\"Gold\",\"displayName\":\"Gold\",\"description\":" +

@@ -23,13 +23,9 @@ package org.wso2.carbon.apimgt.hybrid.gateway.common.util;
  */
 public class OnPremiseGatewayConstants {
 
-    public static final String CONFIG_FILE_NAME = "on-premise-gateway.properties";
+    public static final String CONFIG_FILE_TOML_NAME = "on-premise-gateway.toml";
 
-    public static final String API_GATEWAY_URL_PROPERTY_KEY = "api.gateway.url";
-    public static final String API_PUBLISHER_URL_PROPERTY_KEY = "api.publisher.url";
     public static final String DEFAULT_API_PUBLISHER_URL = "https://localhost:9443";
-    public static final String API_ADMIN_URL_PROPERTY_KEY = "api.admin.url";
-    public static final String GATEWAY_LABEL_PROPERTY_KEY = "api.hybrid.gateway.label";
     public static final int DEFAULT_PORT = 9443;
     public static final int DEFAULT_GATEWAY_PORT = 8243;
     public static final String UPDATED_API_INFO_RETRIEVAL_DURATION = "updated.api.info.retrieval.duration";
@@ -38,7 +34,6 @@ public class OnPremiseGatewayConstants {
     public static final String TOKEN_API_SUFFIX = "/token";
     public static final String DYNAMIC_CLIENT_REGISTRATION_URL_SUFFIX = "/client-registration/{version}/register";
 
-    public static final String API_REQUEST_UNIQUE_IDENTIFIER = "unique.identifier";
     public static final String API_REQUEST_UNIQUE_IDENTIFIER_HOLDER = "$token";
     public static final String APT_REQUEST_TOKEN_HEADER = "Request-Token";
     public static final String DEFAULT_CHARSET = "UTF-8";
@@ -65,7 +60,6 @@ public class OnPremiseGatewayConstants {
     public static final String EMPTY_STRING = "";
     public static final String API_VERSION_PARAM = "{version}";
     public static final String CLOUD_API = "cloud";
-    public static final String API_VERSION_PROPERTY = "rest.api.version";
     public static final String API_DEFAULT_VERSION = "v0.16";
     public static final String URL_PATH_SEPARATOR = "/";
     public static final String USERNAME_SEPARATOR = "@";
