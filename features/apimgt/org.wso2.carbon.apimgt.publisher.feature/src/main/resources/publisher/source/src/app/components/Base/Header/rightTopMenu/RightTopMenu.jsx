@@ -20,6 +20,7 @@ import { Icon, IconButton, withStyles } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
+import RightTopMenuLinks from './RightTopMenuLinks';
 
 const styles = (theme) => ({
     settingsIconbtn: {
@@ -35,6 +36,11 @@ const styles = (theme) => ({
 
 const SettingsButton = (props) => {
     const { classes } = props;
+    if (RightTopMenuLinks) {
+        return (
+            <RightTopMenuLinks />
+        );
+    }
     return (
         <>
             <Link to='/settings'>
