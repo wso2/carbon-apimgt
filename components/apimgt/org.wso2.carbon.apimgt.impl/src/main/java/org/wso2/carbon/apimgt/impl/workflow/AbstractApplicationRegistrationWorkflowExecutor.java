@@ -76,6 +76,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
         if (log.isDebugEnabled()) {
             log.debug("Completing AbstractApplicationRegistrationWorkflowExecutor...");
         }
+        super.complete(workFlowDTO);
         ApiMgtDAO dao = ApiMgtDAO.getInstance();
         try {
             String status = null;

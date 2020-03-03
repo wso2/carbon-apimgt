@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
+import org.wso2.carbon.apimgt.api.model.Workflow;
 
 import java.util.List;
 
@@ -200,4 +201,9 @@ public interface APIAdmin  {
      * @return Timestamp in long format
      */
     long getTimestamp(String date);
+
+    Workflow[] getworkflows(String workflowType, String status, String tenantDomain) throws APIManagementException;
+
+
+    Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status, String tenantDomain) throws APIManagementException;
 }
