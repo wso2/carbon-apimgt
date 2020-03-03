@@ -27,6 +27,7 @@ public class SubscriptionPolicyDTO implements Serializable {
     int spikeArrestLimit;
     String spikeArrestUnit;
     boolean stopOnQuotaReach;
+    String tierQuotaType;
 
     public int getSpikeArrestLimit() {
         return spikeArrestLimit;
@@ -50,5 +51,13 @@ public class SubscriptionPolicyDTO implements Serializable {
 
     public void setStopOnQuotaReach(boolean stopOnQuotaReach) {
         this.stopOnQuotaReach = stopOnQuotaReach;
+    }
+
+    public String getTierQuotaType() {
+        return tierQuotaType;
+    }
+
+    public void setTierQuotaType(String tierQuotaType) {
+        this.tierQuotaType = tierQuotaType;
     }
 }

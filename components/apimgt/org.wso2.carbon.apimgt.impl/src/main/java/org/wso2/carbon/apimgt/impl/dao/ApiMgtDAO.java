@@ -81,6 +81,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -6935,6 +6936,8 @@ public class ApiMgtDAO {
             String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
             String applicableLevel = rs.getString("APPLICABLE_LEVEL");
             String policyConditionGroupId = "_condition_" + conditionGroupId;
+            boolean isContentAware = PolicyConstants.BANDWIDTH_TYPE.equals(
+                    rs.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE));
 
             String key = httpVerb + ":" + urlPattern;
             if (mapByHttpVerbURLPatternToId.containsKey(key)) {
@@ -6951,6 +6954,8 @@ public class ApiMgtDAO {
                 String script = null;
                 URITemplate uriTemplate = new URITemplate();
                 uriTemplate.setThrottlingTier(policyName);
+                uriTemplate.setThrottlingTiers(
+                        policyName + PolicyConstants.THROTTLING_TIER_CONTENT_AWARE_SEPERATOR + isContentAware);
                 uriTemplate.setAuthType(authType);
                 uriTemplate.setHTTPVerb(httpVerb);
                 uriTemplate.setUriTemplate(urlPattern);
@@ -11049,6 +11054,7 @@ public class ApiMgtDAO {
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
+                subPolicy.setTierQuotaType(rs.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
                 Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
                 monetizationPlanProperties.put(APIConstants.Monetization.FIXED_PRICE,
                         rs.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));
@@ -14575,5 +14581,33 @@ public class ApiMgtDAO {
             handleException("Failed to fetch user ID for " + userName , e);
         }
         return userID;
+    }
+    
+    /**
+     * Get names of the tiers which has bandwidth as the quota type
+     * @param tenantId id of the tenant
+     * @return list of names
+     * @throws APIManagementException
+     */
+    public List<String> getNamesOfTierWithBandwidthQuotaType(int tenantId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        List<String> list = new ArrayList<String>();
+        try {
+            String sqlQuery = ThrottleSQLConstants.GET_TIERS_WITH_BANDWIDTH_QUOTA_TYPE_SQL;
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, tenantId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                list.add(resultSet.getString(1));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve tiers with bandwidth QuotaType ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return list;
     }
 }

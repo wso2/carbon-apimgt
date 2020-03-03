@@ -115,5 +115,7 @@ public class PolicyConstants {
     public static final String KB = "KB";
 
     public static final String MEDIATION_NAME_ATTRIBUTE = "name";
+    
+    public static final String  THROTTLING_TIER_CONTENT_AWARE_SEPERATOR = ">";
 
 }

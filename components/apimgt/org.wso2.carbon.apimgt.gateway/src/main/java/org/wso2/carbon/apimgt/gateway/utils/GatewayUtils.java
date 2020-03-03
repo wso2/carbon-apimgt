@@ -577,6 +577,11 @@ public class GatewayUtils {
                 authContext.setApplicationName(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
                 authContext.setApplicationTier(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
                 authContext.setSubscriber(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
+                if (applicationObj.containsKey(APIConstants.JwtTokenConstants.QUOTA_TYPE)
+                        && APIConstants.JwtTokenConstants.QUOTA_TYPE_BANDWIDTH
+                                .equals(applicationObj.getAsString(APIConstants.JwtTokenConstants.QUOTA_TYPE))) {
+                    authContext.setIsContentAware(true);;
+                }
             }
         }
         if (isOauth) {
@@ -608,6 +613,12 @@ public class GatewayUtils {
                         subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.SPIKE_ARREST_UNIT))) {
                     authContext.setSpikeArrestUnit(
                             subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.SPIKE_ARREST_UNIT));
+                }
+                //check whether the quota type is there and it is equal to bandwithVolume type.
+                if (subscriptionTierObj.containsKey(APIConstants.JwtTokenConstants.QUOTA_TYPE)
+                        && APIConstants.JwtTokenConstants.QUOTA_TYPE_BANDWIDTH
+                                .equals(subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.QUOTA_TYPE))) {
+                    authContext.setIsContentAware(true);;
                 }
             }
         }
