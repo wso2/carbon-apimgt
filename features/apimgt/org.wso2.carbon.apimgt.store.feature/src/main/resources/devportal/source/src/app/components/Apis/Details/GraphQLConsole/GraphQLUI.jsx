@@ -38,7 +38,7 @@ const { buildSchema } = require('graphql');
  * @param {*} props
  */
 export default function GraphQLUI(props) {
-    const { accessToken, authorizationHeader, URLss } = props;
+    const { accessToken, authorizationHeader, URLs } = props;
     const { api } = useContext(ApiContext);
     const [schema, setSchema] = useState(null);
     const [query, setQuery] = useState('');
@@ -75,7 +75,7 @@ export default function GraphQLUI(props) {
         } else {
             token = 'Bearer ' + accessToken;
         }
-        return fetch((URLss.https), {
+        return fetch((URLs.https), {
             method: 'post',
             headers: {
                 Accept: 'application/json',
@@ -99,12 +99,12 @@ export default function GraphQLUI(props) {
                                 id='Apis.Details.GraphQLConsole.GraphQLUI.URLs'
                             />
                         )}
-                        value={URLss.https}
+                        value={URLs.https}
                         name='selectedURL'
                         fullWidth
                         margin='normal'
                         variant='outlined'
-                        InputProps={URLss.https}
+                        InputProps={URLs.https}
                     />
                 </Box>
                 <div styles={{ width: '100%' }}>

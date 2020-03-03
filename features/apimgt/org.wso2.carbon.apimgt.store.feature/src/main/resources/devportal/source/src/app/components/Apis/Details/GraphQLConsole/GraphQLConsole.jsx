@@ -49,7 +49,7 @@ export default function GraphQLConsole() {
     const classes = useStyles();
     const { api } = useContext(ApiContext);
     const environmentObject = api.endpointURLs;
-    const [URLss, setURLss] = useState(environmentObject[0].URLs);
+    const [URLs, setURLs] = useState(environmentObject[0].URLs);
     const [accessToken, setAccessTocken] = useState('');
     const [securitySchemeType, setSecuritySchemeType] = useState('OAUTH');
     const environments = api.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
@@ -92,7 +92,7 @@ export default function GraphQLConsole() {
                     selectedEnvironment={selectedEnvironment}
                     setSelectedEnvironment={setSelectedEnvironment}
                     environments={environments}
-                    setURLss={setURLss}
+                    setURLs={setURLs}
                     environmentObject={environmentObject}
                     setFound={setFound}
                 />
@@ -101,7 +101,7 @@ export default function GraphQLConsole() {
                 <GraphQLUI
                     accessToken={accessToken}
                     authorizationHeader={authorizationHeader}
-                    URLss={URLss}
+                    URLs={URLs}
                 />
             </Paper>
         </>

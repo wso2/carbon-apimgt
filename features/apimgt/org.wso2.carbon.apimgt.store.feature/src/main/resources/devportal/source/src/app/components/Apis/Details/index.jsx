@@ -58,8 +58,7 @@ const LoadableSwitch = withRouter((props) => {
     let tryoutRoute;
     if (api.type === 'GRAPHQL') {
         tryoutRoute = <Route path='/apis/:apiUuid/test' component={GraphQLConsole} />
-    }
-    else {
+    }else {
         tryoutRoute = <Route path='/apis/:apiUuid/test' component={ApiConsole} />
     }
 

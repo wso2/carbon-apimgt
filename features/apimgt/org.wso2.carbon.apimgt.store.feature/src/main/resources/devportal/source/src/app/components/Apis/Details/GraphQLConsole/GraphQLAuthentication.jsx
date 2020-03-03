@@ -88,7 +88,7 @@ export default function GraphQLAuthentication(props) {
         selectedEnvironment,
         setSelectedEnvironment,
         environments,
-        setURLss,
+        setURLs,
         environmentObject,
         setFound,
     } = props;
@@ -157,11 +157,12 @@ export default function GraphQLAuthentication(props) {
      * @param {React.SyntheticEvent} event
      */
     const handleChanges = (event) => {
-        if (event.target.name === 'selectedApplication') {
-            const promiseApp = Application.get(event.target.value);
+        const { value, name } = event.target;
+        if (name === 'selectedApplication') {
+            const promiseApp = Application.get(value);
             let keyType;
 
-            setSelectedApplication(event.target.value);
+            setSelectedApplication(value);
 
             if (subscriptions != null && subscriptions.find((sub) => sub.applicationId
                 === selectedApplication).status === 'PROD_ONLY_BLOCKED') {
@@ -186,10 +187,10 @@ export default function GraphQLAuthentication(props) {
                     setKeys(appKeys);
                 });
         } else {
-            setSelectedKeyType(event.target.value);
+            setSelectedKeyType(value);
 
-            if (keys.get(event.target.value)) {
-                const { accessToken: accessTokenValue } = keys.get(event.target.value).token;
+            if (keys.get(value)) {
+                const { accessToken: accessTokenValue } = keys.get(value).token;
                 setAccessTocken(accessTokenValue);
             } else {
                 setAccessTocken('');
@@ -203,9 +204,10 @@ export default function GraphQLAuthentication(props) {
      * @param {*} event
      */
     const handleEnvironemtChange = (event) => {
-        setSelectedEnvironment(event.target.value);
-        const urls = environmentObject.find((elm) => event.target.value === elm.environmentName).URLs;
-        setURLss(urls);
+        const { value } = event.target;
+        setSelectedEnvironment(value);
+        const urls = environmentObject.find((elm) => value === elm.environmentName).URLs;
+        setURLs(urls);
     };
 
 
@@ -222,7 +224,8 @@ export default function GraphQLAuthentication(props) {
      * @param {*} event
      */
     const handleaccessTockenChanges = (event) => {
-        setAccessTocken(event.target.value);
+        const { value } = event.target;
+        setAccessTocken(value);
     };
 
     /**
@@ -230,7 +233,8 @@ export default function GraphQLAuthentication(props) {
      * @param {*} event
      */
     const handlesecuritySchemeType = (event) => {
-        setSecuritySchemeType(event.target.value);
+        const { value } = event.target;
+        setSecuritySchemeType(value);
     };
 
 
@@ -247,7 +251,8 @@ export default function GraphQLAuthentication(props) {
                             </Typography>
                             <Typography component='p'>
                                 <FormattedMessage
-                                    id='api.console.require.access.token'
+                                    id={'Apis.Details.GraphQLConsole.'
+                                     + 'GraphQLAuthentication.require.access.token'}
                                     defaultMessage={'You need an access token to try the API. Please log '
                                         + 'in and subscribe to the API to generate an access token. If you already '
                                         + 'have an access token, please provide it below.'}
