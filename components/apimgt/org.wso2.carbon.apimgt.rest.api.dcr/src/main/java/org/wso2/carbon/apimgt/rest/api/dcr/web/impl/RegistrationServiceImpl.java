@@ -153,7 +153,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                         (domain)) {
                     userNameForSP = userNameForSP.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
                 }
-                applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + profile.getClientName();
+                applicationName = profile.getClientName();
 
                 ApplicationManagementService applicationManagementService =
                         ApplicationManagementService.getInstance();
