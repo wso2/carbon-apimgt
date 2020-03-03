@@ -9212,6 +9212,9 @@ public final class APIUtil {
             jsonObject = APIUtil.executeQueryOnStreamProcessor(
                     APIConstants.Monetization.MONETIZATION_USAGE_RECORD_APP,
                     query.toString());
+            if(jsonObject == null){
+                jsonObject = new JSONObject();
+            }
         } catch (APIManagementException ex) {
             String msg = "Unable to Retrieve monetization usage records";
             handleException(msg, ex);
