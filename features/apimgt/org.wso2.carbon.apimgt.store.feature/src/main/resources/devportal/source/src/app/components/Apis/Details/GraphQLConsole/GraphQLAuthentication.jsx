@@ -96,7 +96,7 @@ export default function GraphQLAuthentication(props) {
     const user = AuthManager.getUser();
     const [showToken, setShowToken] = useState(false);
     const [subscriptions, setSubscriptions] = useState(null);
-    const [selectedApplication, setSelectedApplication] = useState();
+    const [selectedApplication, setSelectedApplication] = useState('');
     const [selectedKeyType, setSelectedKeyType] = useState('PRODUCTION');
     const [keys, setKeys] = useState();
     const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
@@ -129,11 +129,9 @@ export default function GraphQLAuthentication(props) {
                             })
                             .then((appKeys) => {
                                 if (appKeys.get('SANDBOX')) {
-                                    const sKType1 = 'SANDBOX';
-                                    setSelectedKeyType(sKType1);
+                                    setSelectedKeyType('SANDBOX');
                                 } else if (appKeys.get('PRODUCTION')) {
-                                    const sKType2 = 'PRODUCTION';
-                                    setSelectedKeyType(sKType2);
+                                    setSelectedKeyType('PRODUCTION');
                                 }
                                 setKeys(appKeys);
                             });
@@ -166,8 +164,7 @@ export default function GraphQLAuthentication(props) {
 
             if (subscriptions != null && subscriptions.find((sub) => sub.applicationId
                 === selectedApplication).status === 'PROD_ONLY_BLOCKED') {
-                const sKType1 = 'SANDBOX';
-                setSelectedKeyType(sKType1);
+                setSelectedKeyType('SANDBOX');
                 keyType = 'SANDBOX';
             } else {
                 keyType = selectedKeyType;
