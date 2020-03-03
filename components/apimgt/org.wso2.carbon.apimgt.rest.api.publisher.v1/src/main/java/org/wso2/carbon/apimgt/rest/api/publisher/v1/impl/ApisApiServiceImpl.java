@@ -843,6 +843,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 // Set the header properties of the request
                 httpGet.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                 httpGet.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
+                httpGet.setHeader(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
                 // Code block for the processing of the response
                 try (CloseableHttpResponse response = getHttpClient.execute(httpGet)) {
                     if (isDebugEnabled) {
@@ -905,6 +906,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             httpPut.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             httpPut.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             httpPut.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
+            httpPut.setHeader(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
             httpPut.setEntity(new StringEntity(jsonBody.toJSONString()));
             // Code block for processing the response
             try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
@@ -938,6 +940,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 APIConstants.MULTIPART_CONTENT_TYPE + APIConstants.MULTIPART_FORM_BOUNDARY);
         httpConn.setRequestProperty(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
         httpConn.setRequestProperty(APIConstants.HEADER_API_TOKEN, apiToken);
+        httpConn.setRequestProperty(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
         outputStream = httpConn.getOutputStream();
         writer = new PrintWriter(new OutputStreamWriter(outputStream, "UTF-8"), true);
         // Name property
