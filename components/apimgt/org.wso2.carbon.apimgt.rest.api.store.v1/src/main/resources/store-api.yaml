@@ -4866,6 +4866,14 @@ definitions:
       IsUnlimitedTierPaid:
         type: boolean
         default: false
+      identityProvider:
+        properties:
+          external:
+            type: boolean
+            default: false
+      IsAnonymousModeEnabled:
+        type: boolean
+        default: true
 #-----------------------------------------------------
 # The Application Attribute resource
 #-----------------------------------------------------

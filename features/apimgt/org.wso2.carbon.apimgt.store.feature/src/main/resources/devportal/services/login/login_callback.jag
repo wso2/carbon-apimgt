@@ -25,15 +25,21 @@
     app.context = appUtils.getTenantBaseStoreContext();
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var serverUrl = "";
+    var isPassive = require("/site/public/theme/settings.js").Settings.app.isPassive;
     var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
     if (app.customUrl.enabled && forwarded_for) {
         serverUrl = MGT_TRANSPORT + forwarded_for;
     } else {
         serverUrl = utils.getServerURL();
     }
-    if(request.getParameter("error") === "login_required"){
-       response.sendRedirect(serverUrl + app.context + "/services/configs");
-    } else if(request.getParameter("code") != null){
+    if(request.getParameter("error")==="login_required" && isPassive){
+        if(utils.getIdentityProviderConfig()!=null){
+        response.sendRedirect(serverUrl + app.context);
+        }
+        else{
+        response.content={error:"Loginerror"};
+        }
+     } else if(request.getParameter("code") != null){
         var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
         if (loginCallbackUrl == null) {
             loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;

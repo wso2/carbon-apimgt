@@ -34,6 +34,8 @@ import { SettingsProvider } from './app/components/Shared/SettingsContext';
 import API from './app/data/api';
 import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
 import DefaultConfigurations from './defaultTheme';
+import AuthManager from './app/data/AuthManager';
+import Loading from './app/components/Base/Loading/Loading';
 const protectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApp" */));
 
 /**
@@ -69,6 +71,9 @@ class DevPortal extends React.Component {
             settings: null,
             tenantDomain: null,
             theme: null,
+            authresponse:false,
+            externalidp:false,
+            isNonAnonymous:false,
         };
         this.systemTheme = merge(cloneDeep(DefaultConfigurations), Configurations);
         this.setTenantTheme = this.setTenantTheme.bind(this);
@@ -84,6 +89,14 @@ class DevPortal extends React.Component {
         promisedSettings
             .then((response) => {
                 this.setSettings(response.body);
+            })
+            .then((response) => {
+                if(!this.state.settings.IsAnonymousModeEnabled){
+                    this.setState({isNonAnonymous:true})
+                }
+                if (Settings.app.isPassive && !AuthManager.getUser() && !sessionStorage.getItem('notEnoughPermission') && !this.state.isNonAnonymous) {
+                    this.checkLoginUser(this.state.settings.identityProvider.external);
+                }
             }).catch((error) => {
                 console.error(
                     'Error while receiving settings : ',
@@ -97,8 +110,6 @@ class DevPortal extends React.Component {
         } else {
             this.setTenantTheme(urlParams.get('tenant'));
         }
-
-        
     }
      /**
      * Load locale file.
@@ -244,14 +255,45 @@ class DevPortal extends React.Component {
         return (prefix + sufix);
     }
 
+    checkLoginUser(isExternalIDP) {
+        if (isExternalIDP) {
+            this.setState({externalidp:true})
+            if (!sessionStorage.getItem('loginStatus')) {
+                sessionStorage.setItem('loginStatus', "check-Login-status");
+                window.location = Settings.app.context + '/services/configs?loginPrompt=false';
+            }
+            else if (sessionStorage.getItem('loginStatus')) {
+                sessionStorage.removeItem('loginStatus');
+            }
+        }
+        else {
+            fetch(Settings.app.context + '/services/configs?loginPrompt=false')
+            .then(response => {
+                if(response){
+                    this.setState({ authresponse: true}); 
+                }
+            })
+            .catch((error) => {
+                console.error(
+                    'Error while fetching : ',
+                    error,
+                );
+            });
+        }
+    }
+
     /**
      * Reners the DevPortal component
      * @returns {JSX} this is the description
      * @memberof DevPortal
      */
     render() {
-        const { settings, tenantDomain, theme, messages } = this.state;
+        const { settings, tenantDomain, theme, messages, authresponse, externalidp, isNonAnonymous } = this.state;
         const { app: { context } } = Settings;
+        if (Settings.app.isPassive && !authresponse && !externalidp && !AuthManager.getUser() && !sessionStorage.getItem('notEnoughPermission') && !isNonAnonymous) {
+            return <Loading />;
+        }
+
         return (
             settings && theme && (
                 <SettingsProvider value={{

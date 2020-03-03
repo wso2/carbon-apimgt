@@ -10237,4 +10237,14 @@ public final class APIUtil {
         return false;
     }
 
+    public static boolean isDevPortalAnonymous() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String anonymousMode = config.getFirstProperty(APIConstants.API_DEVPORTAL_ANONYMOUS_MODE);
+        if (anonymousMode == null) {
+            return true;
+        }
+        return Boolean.parseBoolean(anonymousMode);
+    }
+
 }

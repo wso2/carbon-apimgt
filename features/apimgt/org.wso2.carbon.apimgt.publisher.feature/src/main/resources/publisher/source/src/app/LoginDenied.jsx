@@ -45,16 +45,6 @@ const headerStyle = {
     fontSize: 20,
 };
 
-const buttonStyleRetry = {
-    padding: '5px 15px',
-    margin: 20,
-    borderRadius: 5,
-    textTransform: 'uppercase',
-    color: '#15b8cf',
-    border: 'solid 1px #15b8cf',
-    background: '#efefef',
-};
-
 const buttonStyleLogout = {
     padding: '5px 15px',
     margin: 20,
@@ -63,10 +53,6 @@ const buttonStyleLogout = {
     color: '#000',
     background: '#15b8cf',
 };
-
-function onRetry() {
-    window.location = Configurations.app.context;
-}
 
 function onLogout() {
     window.location = Configurations.app.context + '/services/logout';
@@ -98,12 +84,6 @@ class LoginDenied extends Component {
                             + 'that you are authorized to access the requested resource.'}
                     />
                 </p>
-                <button type='button' onClick={onRetry} style={buttonStyleRetry}>
-                    <FormattedMessage
-                        id='LoginDenied.retry'
-                        defaultMessage='Retry'
-                    />
-                </button>
                 <button type='button' onClick={onLogout} style={buttonStyleLogout}>
                     <FormattedMessage
                         id='LoginDenied.logout'
