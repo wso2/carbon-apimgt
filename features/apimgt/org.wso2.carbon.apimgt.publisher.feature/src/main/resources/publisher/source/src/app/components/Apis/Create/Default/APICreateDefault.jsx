@@ -42,7 +42,9 @@ import AuthManager from 'AppData/AuthManager';
  * @returns
  */
 function APICreateDefault(props) {
-    const { isWebSocket, isAPIProduct, history, intl } = props;
+    const {
+        isWebSocket, isAPIProduct, history, intl,
+    } = props;
     const { settings } = useAppContext();
     const [pageError, setPageError] = useState(null);
     const [isCreating, setIsCreating] = useState();
