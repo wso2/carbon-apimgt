@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.internal.ServiceDataHolder;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.ConfigDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.dao.OnPremiseGatewayDAO;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.AccessTokenDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.OAuthApplicationInfoDTO;
@@ -87,12 +88,12 @@ public class APISynchronizerTest {
         executeHTTPMethodWithRetry();
         APISynchronizer synchronizer = new APISynchronizer();
         PowerMockito.mockStatic(ConfigManager.class);
-        ConfigManager configManager = Mockito.mock(ConfigManager.class);
-        PowerMockito.when(ConfigManager.getConfigManager()).thenReturn(configManager);
+        ConfigDTO configDTO = Mockito.mock(ConfigDTO.class);
+        PowerMockito.when(ConfigManager.getConfigurationDTO()).thenReturn(configDTO);
         PowerMockito.mockStatic(APIUtil.class);
         HttpClient httpClient = Mockito.mock(HttpClient.class);
         PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
-        synchronizer.synchronizeApis(null);
+        synchronizer.synchronizeApis();
     }
 
 
@@ -103,7 +104,7 @@ public class APISynchronizerTest {
         generateAccessToken();
         executeHTTPMethodWithRetry();
         APISynchronizer synchronizer = new APISynchronizer();
-        synchronizer.synchronizeApis(null);
+        synchronizer.synchronizeApis();
     }
 
 
@@ -114,7 +115,7 @@ public class APISynchronizerTest {
         generateAccessToken_ThrowsException();
         executeHTTPMethodWithRetry();
         APISynchronizer synchronizer = new APISynchronizer();
-        synchronizer.synchronizeApis(null);
+        synchronizer.synchronizeApis();
     }
 
     @Test
@@ -126,8 +127,8 @@ public class APISynchronizerTest {
         PowerMockito.mockStatic(HttpClients.class);
         HttpClient httpClient = Mockito.mock(HttpClient.class);
         PowerMockito.mockStatic(ConfigManager.class);
-        ConfigManager configManager = Mockito.mock(ConfigManager.class);
-        PowerMockito.when(ConfigManager.getConfigManager()).thenReturn(configManager);
+        ConfigDTO configDTO = Mockito.mock(ConfigDTO.class);
+        PowerMockito.when(ConfigManager.getConfigurationDTO()).thenReturn(configDTO);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
         PowerMockito.mockStatic(HttpRequestUtil.class);
@@ -189,7 +190,7 @@ public class APISynchronizerTest {
 
     public void registerClient() throws Exception {
         OAuthApplicationInfoDTO oAuthDto = Mockito.mock(OAuthApplicationInfoDTO.class);
-        PowerMockito.when(TokenUtil.registerClient()).thenReturn(oAuthDto);
+        PowerMockito.when(TokenUtil.registerClient(any(String.class), any(char[].class))).thenReturn(oAuthDto);
         Mockito.doReturn(Constants.CLIENT_ID).when(oAuthDto).getClientId();
         Mockito.doReturn(Constants.CLIENT_SECRET).when(oAuthDto).getClientSecret();
     }
@@ -205,6 +206,8 @@ public class APISynchronizerTest {
         AccessTokenDTO accessTknDTO = Mockito.mock(AccessTokenDTO.class);
         PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(char[].class), any(String.class)))
                 .thenReturn(accessTknDTO);
+        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(char[].class), any(String.class),
+                any(String.class), any(char[].class))).thenReturn(accessTknDTO);
         Mockito.doReturn(Constants.ACCESS_TOKEN).when(accessTknDTO).getAccessToken();
     }
 

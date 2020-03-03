@@ -18,27 +18,32 @@
 
 package org.wso2.carbon.apimgt.hybrid.gateway.common.config;
 
-import org.apache.commons.io.IOUtils;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.consensys.cava.toml.TomlArray;
+import net.consensys.cava.toml.TomlTable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.ConfigDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.exception.OnPremiseGatewayException;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.util.OnPremiseGatewayConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Class used to read the on-premise-gateway.properties configuration file
+ * Class used to read the on-premise-gateway.toml configuration file
  */
 public class ConfigManager {
 
     private static final Log log = LogFactory.getLog(ConfigManager.class);
 
-    private Properties configProperties;
+    private static ConfigDTO configObject;
     private static volatile ConfigManager configManager = null;
 
     private ConfigManager() throws OnPremiseGatewayException {
@@ -50,7 +55,7 @@ public class ConfigManager {
      *
      * @return micro API gateway configuration manager
      */
-    public static ConfigManager getConfigManager() throws OnPremiseGatewayException {
+    public static ConfigDTO getConfigurationDTO() throws OnPremiseGatewayException {
         if (configManager == null) {
             synchronized (ConfigManager.class) {
                 if (configManager == null) {
@@ -58,37 +63,72 @@ public class ConfigManager {
                 }
             }
         }
-        return configManager;
+        return configObject;
     }
-
 
     /**
      * Method to get initialize micro API gateway configuration
-     *
      */
     private void init() throws OnPremiseGatewayException {
-        configProperties = new Properties();
-        String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator +
-                OnPremiseGatewayConstants.CONFIG_FILE_NAME;
-        try (InputStream inputStream = new FileInputStream(filePath)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Reading On Premise Gateway configuration file from : "
-                        + CarbonUtils.getCarbonConfigDirPath() + File.separator +
-                        OnPremiseGatewayConstants.CONFIG_FILE_NAME);
-            }
-            configProperties.load(inputStream);
-        } catch (IOException ex) {
+        if (log.isDebugEnabled()) {
+            log.debug("Started reading micro gateway configurations");
+        }
+        String configPath = CarbonUtils.getCarbonConfigDirPath() + File.separator +
+                OnPremiseGatewayConstants.CONFIG_FILE_TOML_NAME;
+        try {
+            Map<String, Object> tomlResult = TomlParser.parse(configPath);
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            configObject = mapper.convertValue(tomlResult, ConfigDTO.class);
+        } catch (ConfigParserException ex) {
             String errorMessage = "Error occurred while reading the config file : "
-                    + OnPremiseGatewayConstants.CONFIG_FILE_NAME;
+                    + OnPremiseGatewayConstants.CONFIG_FILE_TOML_NAME;
             throw new OnPremiseGatewayException(errorMessage, ex);
         }
     }
 
     /**
-     * Method to get a micro API gateway config property given a key
-     *
+     * Processing TomlArray for values
+     * @param value TomlArray
+     * @return processed TomlArray in to List
      */
-    public String getProperty(String key) {
-        return configProperties.getProperty(key);
+    private static List<Object> processTomlArray(TomlArray value) {
+        List<Object> finalList = new ArrayList<>();
+        List<Object> tomlList = value.toList();
+        for (Object obj : tomlList) {
+            if (obj instanceof TomlArray) {
+                finalList.add(processTomlArray((TomlArray) obj));
+            } else if (obj instanceof TomlTable) {
+                finalList.add(processTomlMap((TomlTable) obj));
+            } else {
+                finalList.add(obj);
+            }
+        }
+        return finalList;
+    }
+
+    /**
+     * Processing TomlTable in to a Map for reading
+     * @param tomlTable TomlTable values from parsed toml
+     * @return  Map from Key <String> to Value <Object>
+     */
+    private static Map<String, Object> processTomlMap(TomlTable tomlTable) {
+
+        Map<String, Object> finalMap = new LinkedHashMap<>();
+        Set<String> dottedKeySet = tomlTable.dottedKeySet();
+        for (String key : dottedKeySet) {
+            // To support single quoted keys in the toml inside an array.
+            // Eg: [[a.b]]
+            //     'c.d' = "value"
+            key = key.replaceAll("\"", "'");
+            Object value = tomlTable.get(key);
+            if (value instanceof TomlArray) {
+                finalMap.put(key, processTomlArray((TomlArray) value));
+            } else {
+                finalMap.put(key, tomlTable.get(key));
+            }
+        }
+
+        return finalMap;
     }
 }

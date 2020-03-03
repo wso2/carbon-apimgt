@@ -39,6 +39,6 @@ public class ThrottlingSyncTask implements Task {
     @Override
     public void execute() {
         ThrottlingSynchronizer synchronizer = new ThrottlingSynchronizer();
-        synchronizer.synchronize();
+        synchronizer.initSynchronization();
     }
 }

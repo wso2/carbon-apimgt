@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +31,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.ConfigDTO;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -82,8 +82,8 @@ public class ThrottlingSynchronizerTest {
                 .getClientSecret();
 
         AccessTokenDTO accessTknDTO = Mockito.mock(AccessTokenDTO.class);
-        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(char[].class), any(String.class)))
-                .thenReturn(accessTknDTO);
+        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(char[].class), any(String.class),
+                any(String.class), any(char[].class))).thenReturn(accessTknDTO);
         Mockito.doReturn("ssfhhh-jenfho-wfembj").when(accessTknDTO)
                 .getAccessToken();
 
@@ -94,9 +94,10 @@ public class ThrottlingSynchronizerTest {
         PowerMockito.when(serviceDataHolder.getAPIManagerConfigurationService()).thenReturn(apimConfigServ);
         APIManagerConfiguration apimConfig = Mockito.mock(APIManagerConfiguration.class);
         Mockito.doReturn(apimConfig).when(apimConfigServ).getAPIManagerConfiguration();
-        Mockito.doReturn("amandaj@wso2.com").when(apimConfig)
+        Mockito.doReturn("multitenant@fleckens.hu").when(apimConfig)
                 .getFirstProperty("APIKeyValidator.Username");
-
+        Mockito.doReturn("asdasda").when(apimConfig)
+                .getFirstProperty("APIKeyValidator.Password");
         ConfigurationContextService configContextServ = Mockito.mock(ConfigurationContextService.class);
         ConfigurationContext configContext = Mockito.mock(ConfigurationContext.class);
         PowerMockito.when(serviceDataHolder.getConfigContextService()).thenReturn(configContextServ);
@@ -122,13 +123,9 @@ public class ThrottlingSynchronizerTest {
 
         PowerMockito.mockStatic(ConfigManager.class);
         ConfigManager configManager = Mockito.mock(ConfigManager.class);
-        PowerMockito.when(ConfigManager.getConfigManager()).thenReturn(configManager);
-
-        Mockito.when(configManager.getProperty(any(String.class)))
-                .thenReturn("https://api.cloud.wso2.com/api/am/admin/v0.16/throttling/policies/subscription",
-                        "https://api.cloud.wso2.com/api/am/admin/v0.16/throttling/policies/application",
-                        "https://api.cloud.wso2.com/api/am/admin/v0.16/throttling/policies/advanced");
-
+        ConfigDTO configDTO = Mockito.mock(ConfigDTO.class);
+        PowerMockito.when(ConfigManager.getConfigurationDTO()).thenReturn(configDTO);
+        Mockito.when(configDTO.isMulti_tenant_enabled()).thenReturn(false);
         String subPolicies = "{\"count\":2,\"list\":[{\"policyId\":\"8e73b2b4-76c2-4a0f-9520-087337395ce6\"," +
                 "\"policyName\":\"Gold\",\"displayName\":\"Gold\",\"description\":" +
                 "\"Allows 5000 requests per minute\",\"isDeployed\":true,\"defaultLimit\":" +
@@ -184,6 +181,6 @@ public class ThrottlingSynchronizerTest {
                 fromAdvancedPolicyDTOToPolicy(any(AdvancedThrottlePolicyDTO.class))).thenReturn(apiPolicy);
 
         ThrottlingSynchronizer throttlingSynchronizer = new ThrottlingSynchronizer();
-        throttlingSynchronizer.synchronize();
+        throttlingSynchronizer.initSynchronization();
     }
 }

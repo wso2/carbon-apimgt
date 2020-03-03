@@ -34,6 +34,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.ConfigDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.OAuthApplicationInfoDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -81,12 +82,13 @@ public class TokenUtilTest extends TestBase {
         mockAPIMConfiguration(configMap);
         mockAppCreationCall();
         PowerMockito.mockStatic(ConfigManager.class);
-        ConfigManager configManager = Mockito.mock(ConfigManager.class);
-        PowerMockito.when(ConfigManager.getConfigManager()).thenReturn(configManager);
         PowerMockito.mockStatic(APIUtil.class);
         HttpClient httpClient = Mockito.mock(HttpClient.class);
         PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
-        Mockito.when(configManager.getProperty(any(String.class))).thenReturn("https://localhost:9443");
+        ConfigDTO configDTO = Mockito.mock(ConfigDTO.class);
+        PowerMockito.when(ConfigManager.getConfigurationDTO()).thenReturn(configDTO);
+        Mockito.when(ConfigManager.getConfigurationDTO().getUrl_publisher()).thenReturn("https" +
+                "://localhost:9443");
         OAuthApplicationInfoDTO infoDTO = TokenUtil.registerClient();
         Assert.assertNotNull(infoDTO);
     }
@@ -99,12 +101,13 @@ public class TokenUtilTest extends TestBase {
         mockAPIMConfiguration(configMap);
         mockTokenGenCall();
         PowerMockito.mockStatic(ConfigManager.class);
-        ConfigManager configManager = Mockito.mock(ConfigManager.class);
-        PowerMockito.when(ConfigManager.getConfigManager()).thenReturn(configManager);
         PowerMockito.mockStatic(APIUtil.class);
         HttpClient httpClient = Mockito.mock(HttpClient.class);
         PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
-        Mockito.when(configManager.getProperty(any(String.class))).thenReturn("https://localhost:8243");
+        ConfigDTO configDTO = Mockito.mock(ConfigDTO.class);
+        PowerMockito.when(ConfigManager.getConfigurationDTO()).thenReturn(configDTO);
+        Mockito.when(ConfigManager.getConfigurationDTO().getUrl_gateway()).thenReturn("https" +
+                "://localhost:9443");
         AccessTokenDTO tokenDTO = TokenUtil.generateAccessToken("ClientId", "ClientSecret".toCharArray(), "Scope");
         Assert.assertNotNull(tokenDTO);
     }

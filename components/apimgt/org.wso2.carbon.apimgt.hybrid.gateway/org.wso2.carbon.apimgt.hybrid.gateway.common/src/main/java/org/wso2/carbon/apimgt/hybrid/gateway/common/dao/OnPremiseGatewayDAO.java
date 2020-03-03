@@ -99,14 +99,13 @@ public class OnPremiseGatewayDAO {
         PreparedStatement ps = null;
         JSONArray resultObj = new JSONArray();
         try {
-            String timeDurationResponse =
-                    ConfigManager.getConfigManager()
-                            .getProperty(OnPremiseGatewayConstants.UPDATED_API_INFO_RETRIEVAL_DURATION);
+            int timeDurationResponse =
+                    ConfigManager.getConfigurationDTO().getApi_update_api_info_retrieval_duration();
             int timeDuration;
-            if (timeDurationResponse == null) {
+            if (timeDurationResponse != 0) {
                 timeDuration = OnPremiseGatewayConstants.DEFAULT_UPDATED_API_INFO_RETRIEVAL_DURATION;
             } else {
-                timeDuration = Integer.parseInt(timeDurationResponse) * 60 * 1000;
+                timeDuration = timeDurationResponse * 60 * 1000;
             }
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(selectAllAPIPublishEvents);
