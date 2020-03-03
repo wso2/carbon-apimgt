@@ -49,6 +49,7 @@ public class AWSLambdaMediator extends AbstractMediator {
     private static final Log log = LogFactory.getLog(AWSLambdaMediator.class);
     private String accessKey = "";
     private String secretKey = "";
+    private String region = "";
     private String resourceName = "";
     private int resourceTimeout = APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT;
 
@@ -101,6 +102,8 @@ public class AWSLambdaMediator extends AbstractMediator {
      */
     private InvokeResult invokeLambda(String payload) {
         try {
+            String[] resourceNameSplit = resourceName.split(":");
+            region = resourceNameSplit[3];
             // set credential provider
             AWSCredentialsProvider credentialsProvider;
             if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
@@ -135,6 +138,7 @@ public class AWSLambdaMediator extends AbstractMediator {
             // set aws lambda client
             AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
                     .withCredentials(credentialsProvider)
+                    .withRegion(region)
                     .build();
             return awsLambda.invoke(invokeRequest);
         } catch (SdkClientException e) {

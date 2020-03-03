@@ -17,21 +17,24 @@
  */
 package org.wso2.carbon.apimgt.gateway.dto;
 
-import org.json.JSONObject;
+import com.nimbusds.jwt.JWTClaimsSet;
+
+import java.io.Serializable;
 
 /**
  * Dto class to store JWT payload information
  */
-public class JWTTokenPayloadInfo {
+public class JWTTokenPayloadInfo implements Serializable {
 
-    JSONObject payload;
+
+    JWTClaimsSet payload;
     String rawPayload;
 
-    public JSONObject getPayload() {
+    public JWTClaimsSet getPayload() {
         return payload;
     }
 
-    public void setPayload(JSONObject payload) {
+    public void setPayload(JWTClaimsSet payload) {
         this.payload = payload;
     }
 

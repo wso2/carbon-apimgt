@@ -32,8 +32,10 @@ import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -424,6 +426,8 @@ public class APIManagerConfiguration {
                 }
             }else if (APIConstants.JWT_CONFIGS.equals(localName)){
                 setJWTConfiguration(element);
+            } else if (APIConstants.TOKEN_ISSUERS.equals(localName)) {
+                setJWTTokenIssuers(element);
             } else if (APIConstants.API_RECOMMENDATION.equals(localName)){
                 setRecommendationConfigurations(element);
             }
@@ -1120,28 +1124,20 @@ public class APIManagerConfiguration {
                 OMElement gatewayJWTGeneratorImplElement = gatewayJWTConfigurationElement
                         .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR_IMPL));
                 jwtConfigurationDto.setGatewayJWTGeneratorImpl(gatewayJWTGeneratorImplElement.getText());
-                OMElement gatewayJWTConfigurationsElement = gatewayJWTConfigurationElement
-                        .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_CONFIGURATION));
-                if (gatewayJWTConfigurationsElement != null) {
-                    OMElement claimsElement = gatewayJWTConfigurationsElement
-                            .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR_CLAIM_MAPPING));
+                OMElement configurationElement =
+                        gatewayJWTConfigurationElement
+                                .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_CONFIGURATION));
+                if (configurationElement != null) {
+                    OMElement claimsElement =
+                            configurationElement
+                                    .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR_CLAIMS));
                     if (claimsElement != null) {
-                        Iterator claimElements =
-                                claimsElement.getChildrenWithLocalName(APIConstants.GATEWAY_JWT_GENERATOR_CLAIM);
-                        while (claimElements.hasNext()) {
-                            OMElement claim = (OMElement) claimElements.next();
-                            OMElement remoteClaimElement = claim.getFirstChildWithName(
-                                    new QName(APIConstants.GATEWAY_JWT_GENERATOR_REMOTE_CLAIM));
-                            OMElement localClaimElement = claim.getFirstChildWithName(
-                                    new QName(APIConstants.GATEWAY_JWT_GENERATOR_LOCAL_CLAIM));
-                            if (remoteClaimElement != null && localClaimElement != null) {
-                                String remoteClaim = remoteClaimElement.getText();
-                                String localClaim = localClaimElement.getText();
-                                if (StringUtils.isNotEmpty(remoteClaim) &&
-                                        StringUtils.isNotEmpty(localClaim)) {
-                                    jwtConfigurationDto.getClaimConfigurations().add(new ClaimMappingDto(remoteClaim,
-                                            localClaim));
-                                }
+                        Iterator claims =
+                                claimsElement.getChildrenWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR_CLAIM));
+                        if (claims != null) {
+                            while (claims.hasNext()) {
+                                OMElement claim = (OMElement) claims.next();
+                                jwtConfigurationDto.getJwtAdditionalClaims().add(claim.getText());
                             }
                         }
                     }
@@ -1203,13 +1199,9 @@ public class APIManagerConfiguration {
                 new QName(APIConstants.RECOMMENDATION_ENDPOINT));
         if (recommendationSeverEndpointElement != null) {
             recommendationEnvironment = new RecommendationEnvironment();
-            recommendationEnvironment.setRecommendationServerURL(recommendationSeverEndpointElement.getText());
+            String recommendationSeverEndpoint = recommendationSeverEndpointElement.getText();
+            recommendationEnvironment.setRecommendationServerURL(recommendationSeverEndpoint);
 
-            OMElement oauthEndpointElement = element
-                    .getFirstChildWithName(new QName(APIConstants.AUTHENTICATION_ENDPOINT));
-            if (oauthEndpointElement != null) {
-                recommendationEnvironment.setOauthURL(oauthEndpointElement.getText());
-            }
             OMElement consumerKeyElement = element
                     .getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_API_CONSUMER_KEY));
             if (consumerKeyElement != null) {
@@ -1220,18 +1212,37 @@ public class APIManagerConfiguration {
                 } else {
                     recommendationEnvironment.setConsumerKey(consumerKeyElement.getText());
                 }
-            }
-            OMElement consumerSecretElement = element
-                    .getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_API_CONSUMER_SECRET));
-            if (consumerSecretElement != null) {
-                if (secretResolver.isInitialized()
-                        && secretResolver.isTokenProtected("APIManager.Recommendations.ConsumerSecret")) {
-                    recommendationEnvironment.setConsumerSecret(secretResolver
-                            .resolve("APIManager.Recommendations.ConsumerSecret"));
-                } else {
-                    recommendationEnvironment.setConsumerSecret(consumerSecretElement.getText());
+
+                OMElement consumerSecretElement = element
+                        .getFirstChildWithName(new QName(APIConstants.RECOMMENDATION_API_CONSUMER_SECRET));
+                if (consumerSecretElement != null) {
+                    if (secretResolver.isInitialized()
+                            && secretResolver.isTokenProtected("APIManager.Recommendations.ConsumerSecret")) {
+                        recommendationEnvironment.setConsumerSecret(secretResolver
+                                .resolve("APIManager.Recommendations.ConsumerSecret"));
+                    } else {
+                        recommendationEnvironment.setConsumerSecret(consumerSecretElement.getText());
+                    }
+
+                    OMElement oauthEndpointElement = element
+                            .getFirstChildWithName(new QName(APIConstants.AUTHENTICATION_ENDPOINT));
+                    String oauthEndpoint = null;
+                    if (oauthEndpointElement != null) {
+                        oauthEndpoint = oauthEndpointElement.getText();
+                    } else {
+                        try {
+                            URL endpointURL = new URL(recommendationSeverEndpoint);
+                            oauthEndpoint = endpointURL.getProtocol() + "://" + endpointURL.getHost() + ":"
+                                    + endpointURL.getPort();
+                        } catch (MalformedURLException e) {
+                            log.error("Error when reading the recommendationServer Endpoint", e);
+                        }
+                    }
+                    recommendationEnvironment.setOauthURL(oauthEndpoint); //Oauth URL is set only if both consumer key
+                    // and consumer secrets are correctly defined
                 }
             }
+
             OMElement applyForAllTenantsElement = element
                     .getFirstChildWithName(new QName(APIConstants.APPLY_RECOMMENDATIONS_FOR_ALL_APIS));
             if (applyForAllTenantsElement != null) {
@@ -1264,6 +1275,55 @@ public class APIManagerConfiguration {
                     recommendationEnvironment.setPassword(passwordElement.getText());
                 }
             }
+            OMElement waitDurationElement = element
+                    .getFirstChildWithName(new QName(APIConstants.WAIT_DURATION));
+            if (waitDurationElement != null) {
+                recommendationEnvironment.setWaitDuration(Long.parseLong(waitDurationElement.getText()));
+            } else {
+                log.debug("Max recommendations is not set. Set to default 5");
+            }
+        }
+    }
+
+    private void setJWTTokenIssuers(OMElement omElement) {
+
+        Iterator tokenIssuersElement =
+                omElement.getChildrenWithLocalName(APIConstants.TokenIssuer.TOKEN_ISSUER);
+        while (tokenIssuersElement.hasNext()) {
+            OMElement issuerElement = (OMElement) tokenIssuersElement.next();
+            String issuer = issuerElement.getAttributeValue(new QName("issuer"));
+            TokenIssuerDto tokenIssuerDto = new TokenIssuerDto(issuer);
+            OMElement jwksConfiguration =
+                    issuerElement.getFirstChildWithName(new QName(APIConstants.TokenIssuer.JWKS_CONFIGURATION));
+            if (jwksConfiguration != null) {
+                JWKSConfigurationDTO jwksConfigurationDTO = tokenIssuerDto.getJwksConfigurationDTO();
+                jwksConfigurationDTO.setEnabled(true);
+                jwksConfigurationDTO.setUrl(jwksConfiguration
+                        .getFirstChildWithName(new QName(APIConstants.TokenIssuer.JWKSConfiguration.URL)).getText());
+            }
+            OMElement claimMappingsElement =
+                    issuerElement.getFirstChildWithName(new QName(APIConstants.TokenIssuer.CLAIM_MAPPINGS));
+            if (claimMappingsElement != null) {
+                Iterator claimMapping =
+                        claimMappingsElement.getChildrenWithName(new QName(APIConstants.TokenIssuer.CLAIM_MAPPING));
+                while (claimMapping.hasNext()) {
+                    OMElement claim = (OMElement) claimMapping.next();
+                    OMElement remoteClaimElement = claim.getFirstChildWithName(
+                            new QName(APIConstants.TokenIssuer.ClaimMapping.REMOTE_CLAIM));
+                    OMElement localClaimElement = claim.getFirstChildWithName(
+                            new QName(APIConstants.TokenIssuer.ClaimMapping.LOCAL_CLAIM));
+                    if (remoteClaimElement != null && localClaimElement != null) {
+                        String remoteClaim = remoteClaimElement.getText();
+                        String localClaim = localClaimElement.getText();
+                        if (StringUtils.isNotEmpty(remoteClaim) &&
+                                StringUtils.isNotEmpty(localClaim)) {
+                            tokenIssuerDto.getClaimConfigurations().put(remoteClaim, new ClaimMappingDto(remoteClaim,
+                                    localClaim));
+                        }
+                    }
+                }
+            }
+            jwtConfigurationDto.getTokenIssuerDtoMap().put(tokenIssuerDto.getIssuer(), tokenIssuerDto);
         }
     }
 

@@ -33,8 +33,9 @@ public class BlockConditionsDTO {
   private List<String> application = new ArrayList<String>();
   
   
-  private List<String> ip = new ArrayList<String>();
-  
+  private List<IPRange> ip = new ArrayList<>();
+
+
   
   private List<String> user = new ArrayList<String>();
   
@@ -57,11 +58,11 @@ public class BlockConditionsDTO {
     this.application = application;
   }
 
-  public List<String> getIp() {
+  public List<IPRange> getIp() {
     return ip;
   }
 
-  public void setIp(List<String> ip) {
+  public void setIp(List<IPRange> ip) {
     this.ip = ip;
   }
 

@@ -12,3 +12,5 @@ org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../featur
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/libs/Saxon-HE-9.5.1-8.jar/,target:${installFolder}/../../../lib/endorsed/Saxon-HE-9.5.1-8.jar,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/policy_templates/,target:${installFolder}/../../resources/policy_templates,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/conf_templates/,target:${installFolder}/../../resources/conf/,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../../dbscripts/multi-dc/);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.core_${feature.version}/multi-dc/,target:${installFolder}/../../../dbscripts/multi-dc,overwrite:true);\

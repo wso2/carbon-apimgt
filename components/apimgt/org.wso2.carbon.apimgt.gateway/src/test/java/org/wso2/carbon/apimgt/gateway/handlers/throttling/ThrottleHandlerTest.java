@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.metrics.manager.Timer;
 
@@ -134,14 +135,15 @@ public class ThrottleHandlerTest {
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
                 .MessageContext.TRANSPORT_HEADERS);
-        throttleDataHolder.addIplockingCondition("carbon.super:127.0.0.1", "127.0.0.1");
+        throttleDataHolder.addIplockingCondition("carbon.super", 1, "{\"fixedIp\":\"127.0.0.1\",\"invert\":false}",
+                APIConstants.BLOCKING_CONDITIONS_IP);
         AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
                 (API_AUTH_CONTEXT);
 //        Mockito.when(throttleDataHolder.isRequestBlocked(apiContext, authenticationContext
 //                .getSubscriber() + ":" + authenticationContext.getApplicationName(), authenticationContext
 //                .getUsername(), "carbon.super" + ":" + "127.0.0.1")).thenReturn(true);
         Assert.assertFalse(throttleHandler.handleRequest(messageContext));
-        throttleDataHolder.removeIpBlockingCondition("carbon.super:127.0.0.1");
+        throttleDataHolder.removeIpBlockingCondition("carbon.super", 1);
         Assert.assertTrue(throttleHandler.handleRequest(messageContext));
     }
 

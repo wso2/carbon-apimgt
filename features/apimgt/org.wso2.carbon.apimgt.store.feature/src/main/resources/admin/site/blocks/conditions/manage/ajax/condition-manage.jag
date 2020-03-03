@@ -12,13 +12,15 @@ include("/jagg/jagg.jag");
         print({
             error:true,
             message:'timeout'
-        });        
+        });
     } else if (request.getMethod() == 'POST') {
         if (action == "getAllconditions" ) {
             mod = jagg.module("conditions");
             result = mod.getAllconditions();
 	    var conditionsArray = result.conditions.toArray();
 	    var conditionsListSize  = result.conditions.size();
+      var log = new Log();
+      log.info(conditionsArray);
 	    var count = 0;
             if (result.error) {
                 obj = {
@@ -33,6 +35,6 @@ include("/jagg/jagg.jag");
             }
             print(obj);
         }
-    } 
- }());  
+    }
+ }());
 %>

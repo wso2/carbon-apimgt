@@ -25,7 +25,7 @@ public class BlockingConditionDTO  {
   private String conditionType = null;
   
   @NotNull
-  private String conditionValue = null;
+  private Object conditionValue = null;
 
   
   /**
@@ -59,10 +59,10 @@ public class BlockingConditionDTO  {
    **/
   @ApiModelProperty(required = true, value = "Value of the blocking condition")
   @JsonProperty("conditionValue")
-  public String getConditionValue() {
+  public Object getConditionValue() {
     return conditionValue;
   }
-  public void setConditionValue(String conditionValue) {
+  public void setConditionValue(Object conditionValue) {
     this.conditionValue = conditionValue;
   }
 

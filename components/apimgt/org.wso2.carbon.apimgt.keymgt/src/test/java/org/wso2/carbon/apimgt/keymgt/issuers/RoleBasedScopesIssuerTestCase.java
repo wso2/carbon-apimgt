@@ -128,6 +128,9 @@ public class RoleBasedScopesIssuerTestCase {
         authenticatedUser.setUserStoreDomain("admin.user.store.domain");
         tokReqMsgCtx.setAuthorizedUser(authenticatedUser);
 
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        Map<String, String> appScopes = new HashMap<String, String>();
+        Mockito.when(apiMgtDAO.getScopeRolesOfApplication("clientId")).thenReturn(appScopes);
         RoleBasedScopesIssuer roleBasedScopesIssuer = new RoleBasedScopesIssuerWrapper(cacheManager, realmService
                 , apiMgtDAO);
         ArrayList<String> whiteListedScopes = new ArrayList<String>();
@@ -387,7 +390,9 @@ public class RoleBasedScopesIssuerTestCase {
         whiteListedScopes.add("scope 3");
         whiteListedScopes.add("scope 4");
 
-        Assert.assertNull(roleBasedScopesIssuer.getScopes(tokReqMsgCtx, whiteListedScopes));
+        List<String> defaultScopes = roleBasedScopesIssuer.getScopes(tokReqMsgCtx, whiteListedScopes);
+        Assert.assertEquals(1, defaultScopes.size());
+        Assert.assertEquals("default", defaultScopes.get(0));
     }
 
     @Test

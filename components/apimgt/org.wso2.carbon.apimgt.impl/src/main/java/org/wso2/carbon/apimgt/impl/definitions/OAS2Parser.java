@@ -568,6 +568,14 @@ public class OAS2Parser extends APIDefinition {
     private void removePublisherSpecificInfo(Swagger swagger) {
         Map<String, Object> extensions = swagger.getVendorExtensions();
         OASParserUtil.removePublisherSpecificInfo(extensions);
+        for (String pathKey : swagger.getPaths().keySet()) {
+            Path path = swagger.getPath(pathKey);
+            Map<HttpMethod, Operation> operationMap = path.getOperationMap();
+            for (Map.Entry<HttpMethod, Operation> entry : operationMap.entrySet()) {
+                Operation operation = entry.getValue();
+                OASParserUtil.removePublisherSpecificInfofromOperation(operation.getVendorExtensions());
+            }
+        }
     }
 
     /**
@@ -658,11 +666,32 @@ public class OAS2Parser extends APIDefinition {
             swagger.setVendorExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandEndpointObj);
         }
         swagger.setVendorExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());
-        swagger.setVendorExtension(APIConstants.X_WSO2_TRANSPORTS,
-                OASParserUtil.getTransportSecurity(api.getApiSecurity(), api.getTransports()));
-        swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_APP_SECURITY,
-                OASParserUtil.getAppSecurity(api.getApiSecurity()));
-        swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_RESPONSE_CACHE,
+        if (api.getTransports() != null) {
+            swagger.setVendorExtension(APIConstants.X_WSO2_TRANSPORTS, api.getTransports().split(","));
+        }
+        String apiSecurity = api.getApiSecurity();
+        // set mutual ssl extension if enabled
+        if (apiSecurity != null) {
+            List<String> securityList = Arrays.asList(apiSecurity.split(","));
+            if (securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                String mutualSSLOptional = !securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY) ?
+                        APIConstants.OPTIONAL : APIConstants.MANDATORY;
+                swagger.setVendorExtension(APIConstants.X_WSO2_MUTUAL_SSL, mutualSSLOptional);
+            }
+        }
+        // This app security is should given in resource level,
+        // otherwise the default oauth2 scheme defined at each resouce level will override application securities
+        JsonNode appSecurityExtension = OASParserUtil.getAppSecurity(apiSecurity);
+        for (String pathKey : swagger.getPaths().keySet()) {
+            Path path = swagger.getPath(pathKey);
+            Map<HttpMethod, Operation> operationMap = path.getOperationMap();
+            for (Map.Entry<HttpMethod, Operation> entry : operationMap.entrySet()) {
+                Operation operation = entry.getValue();
+                operation.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
+            }
+        }
+        swagger.setVendorExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
+        swagger.setVendorExtension(APIConstants.X_WSO2_RESPONSE_CACHE,
                 OASParserUtil.getResponseCacheConfig(api.getResponseCache(), api.getCacheTimeout()));
 
         return getSwaggerJsonString(swagger);
@@ -1088,5 +1117,43 @@ public class OAS2Parser extends APIDefinition {
         }
         updateSwaggerSecurityDefinition(swagger, swaggerData, authUrl);
         return getSwaggerJsonString(swagger);
+    }
+
+    @Override
+    public String getOASDefinitionWithTierContentAwareProperty(String oasDefinition,
+            List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException {
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(oasDefinition);
+        Swagger swagger = parseAttemptForV2.getSwagger();
+        // check if API Level tier is content aware. if so, we set a extension as a global property
+        if (contentAwareTiersList.contains(apiLevelTier)) {
+            swagger.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH, true);
+            // no need to check resource levels since both cannot exist at the same time.
+            log.debug("API Level policy is content aware..");
+            return Json.pretty(swagger);
+        }
+        // if api level tier exists, skip checking for resource level tiers since both cannot exist at the same time.
+        if (apiLevelTier != null) {
+            log.debug("API Level policy is not content aware..");
+            return oasDefinition;
+        } else {
+            log.debug("API Level policy does not exist. Checking for resource level");
+            for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
+                String path = entry.getKey();
+                List<Operation> operations = swagger.getPaths().get(path).getOperations();
+                for (Operation op : operations) {
+                    if (contentAwareTiersList
+                            .contains(op.getVendorExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER))) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(
+                                    "API resource Level policy is content aware for operation " + op.getOperationId());
+                        }
+                        op.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH, true);
+                    }
+                }
+            }
+            return Json.pretty(swagger);
+        }
+
     }
 }

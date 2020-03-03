@@ -3,7 +3,6 @@ package org.wso2.carbon.throttle.service;
 import org.wso2.carbon.throttle.service.dto.BlockConditionsDTO;
 import org.wso2.carbon.throttle.service.factories.BlockApiServiceFactory;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;

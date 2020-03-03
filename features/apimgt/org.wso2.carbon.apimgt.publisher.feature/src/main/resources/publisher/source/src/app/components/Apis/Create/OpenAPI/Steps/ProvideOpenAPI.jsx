@@ -62,6 +62,7 @@ const useStyles = makeStyles((theme) => ({
 export default function ProvideOpenAPI(props) {
     const { apiInputs, inputsDispatcher, onValidate } = props;
     const isFileInput = apiInputs.inputType === 'file';
+    const { inputType, inputValue } = apiInputs;
     const classes = useStyles();
     // If valid value is `null`,that means valid, else an error object will be there
     const [isValid, setValidity] = useState({});
@@ -136,8 +137,8 @@ export default function ProvideOpenAPI(props) {
             onValidate(false);
         }
     }
+
     useEffect(() => {
-        const { inputType, inputValue } = apiInputs;
         if (inputValue) {
             if (inputType === ProvideOpenAPI.INPUT_TYPES.FILE) {
                 onDrop([inputValue]);
@@ -145,7 +146,7 @@ export default function ProvideOpenAPI(props) {
                 validateURL(inputValue);
             }
         }
-    }, []);
+    }, [inputType, inputValue]);
 
     // TODO: Use validation + input to separate component that can be share with wsdl,swagger,graphql URL inputs ~tmkb
     const isInvalidURL = Boolean(isValid.url);
