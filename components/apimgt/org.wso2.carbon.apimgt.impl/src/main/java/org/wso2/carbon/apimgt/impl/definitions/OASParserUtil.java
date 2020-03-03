@@ -713,7 +713,7 @@ public class OASParserUtil {
      */
     public static void updateValidationResponseAsSuccess(APIDefinitionValidationResponse validationResponse,
             String originalAPIDefinition, String openAPIVersion, String title, String version, String context,
-            String description) {
+            String description, String endpoint) {
         validationResponse.setValid(true);
         validationResponse.setContent(originalAPIDefinition);
         APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
@@ -722,6 +722,7 @@ public class OASParserUtil {
         info.setVersion(version);
         info.setContext(context);
         info.setDescription(description);
+        info.setEndpoint(endpoint);
         validationResponse.setInfo(info);
     }
 

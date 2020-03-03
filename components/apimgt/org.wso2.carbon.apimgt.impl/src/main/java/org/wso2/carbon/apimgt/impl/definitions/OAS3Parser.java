@@ -78,6 +78,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYPE;
 
@@ -506,7 +507,8 @@ public class OAS3Parser extends APIDefinition {
             OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
             io.swagger.v3.oas.models.info.Info info = openAPI.getInfo();
             OASParserUtil.updateValidationResponseAsSuccess(validationResponse, apiDefinition, openAPI.getOpenapi(),
-                    info.getTitle(), info.getVersion(), null, info.getDescription());
+                    info.getTitle(), info.getVersion(), null, info.getDescription(),
+                    openAPI.getServers().get(0).getUrl());
             validationResponse.setParser(this);
             if (returnJsonContent) {
                 if (!apiDefinition.trim().startsWith("{")) { // not a json (it is yaml)

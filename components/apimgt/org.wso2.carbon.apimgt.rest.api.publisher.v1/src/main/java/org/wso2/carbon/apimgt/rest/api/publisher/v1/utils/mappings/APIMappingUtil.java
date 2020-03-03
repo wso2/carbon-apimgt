@@ -1410,6 +1410,7 @@ public class APIMappingUtil {
                 infoDTO.setVersion(modelInfo.getVersion());
                 infoDTO.setContext(modelInfo.getContext());
                 infoDTO.setDescription(modelInfo.getDescription());
+                infoDTO.setEndpoint(modelInfo.getEndpoint());
                 responseDTO.setInfo(infoDTO);
             }
             if (returnContent) {
