@@ -5974,24 +5974,10 @@ public class ApiMgtDAO {
             prepStmt.setString(7, workflow.getTenantDomain());
             prepStmt.setString(8, workflow.getExternalWorkflowReference());
 
-            if(workflow.getMetadata()!=null){
-                byte[] metadataByte = workflow.getMetadata().toJSONString().getBytes("UTF-8");
-                prepStmt.setBlob(9, new ByteArrayInputStream(metadataByte) );
-            } else {
-                prepStmt.setNull(9, java.sql.Types.BLOB);
-            }
-
-            if(workflow.getProperties() != null) {
-                byte[] propertiesByte = workflow.getProperties().toJSONString().getBytes("UTF-8");
-                prepStmt.setBlob(10, new ByteArrayInputStream(propertiesByte));
-            } else {
-                prepStmt.setNull(10, java.sql.Types.BLOB);
-            }
-
             prepStmt.execute();
-            connection.commit();
 
-        } catch (SQLException | UnsupportedEncodingException e) {
+            connection.commit();
+        } catch (SQLException e) {
             handleException("Error while adding Workflow : " + workflow.getExternalWorkflowReference() + " to the " +
                     "database", e);
         } finally {
@@ -14633,7 +14619,6 @@ public class ApiMgtDAO {
         }
         return userID;
     }
-<<<<<<< HEAD
     
     /**
      * Get names of the tiers which has bandwidth as the quota type
@@ -14661,7 +14646,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return list;
-=======
+    }
 
     /**
      * Remove the Pending workflow Requests using ExternalWorkflowReference
@@ -14940,6 +14925,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return workflow;
->>>>>>> Added workflowExecutors for ApprovalWorkflowExecutor and two rest APIs.
+
     }
 }
