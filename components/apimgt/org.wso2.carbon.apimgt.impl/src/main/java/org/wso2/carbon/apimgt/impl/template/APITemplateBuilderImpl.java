@@ -330,6 +330,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         configcontext = new HandlerConfigContex(configcontext, handlers);
         configcontext = new EnvironmentConfigContext(configcontext, environment);
         configcontext = new TemplateUtilContext(configcontext);
+        configcontext = new SecurityConfigContext(configcontext, apiProduct);
 
         return configcontext;
     }

@@ -17,6 +17,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 
@@ -26,6 +27,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.xml.stream.XMLStreamException;
@@ -63,6 +65,8 @@ public class DataProcessAndPublishingAgent implements Runnable {
     Map<String, String> headersMap;
     private AuthenticationContext authenticationContext;
 
+    private long messageSizeInBytes;
+
     public DataProcessAndPublishingAgent() {
 
         dataPublisher = getDataPublisher();
@@ -90,6 +94,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.apiTenant = null;
         this.appId = null;
         this.apiName = null;
+        this.messageSizeInBytes = 0;
     }
 
     /**
@@ -123,7 +128,43 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.appId = appId;
         String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
         this.apiName = APIUtil.getAPINamefromRESTAPI(apiName);
+        this.messageSizeInBytes = 0;
 
+        ArrayList<VerbInfoDTO> list = (ArrayList<VerbInfoDTO>) messageContext.getProperty(APIConstants.VERB_INFO_DTO);
+        boolean isVerbInfoContentAware = false;
+        if (list != null && !list.isEmpty()) {
+            VerbInfoDTO verbInfoDTO = list.get(0);
+            isVerbInfoContentAware = verbInfoDTO.isContentAware();
+        }
+        //Build the message if needed from here since it cannot be done from the run() method because content 
+        //in axis2MessageContext is modified.
+        if (authenticationContext.isContentAwareTierPresent() || isVerbInfoContentAware) {
+            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
+                    .getAxis2MessageContext();
+            TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) axis2MessageContext
+                    .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            Object contentLength = transportHeaderMap.get(APIThrottleConstants.CONTENT_LENGTH);
+            if (contentLength != null) {
+                log.debug("Content lenght found in the request. Using it as the message size..");
+                messageSizeInBytes  = Long.parseLong(contentLength.toString());
+            } else {
+                log.debug("Building the message to get the message size..");
+                try {
+                    buildMessage(axis2MessageContext);
+                } catch (Exception ex) {
+                    //In case of any exception, it won't be propagated up,and set response size to 0
+                    log.error("Error occurred while building the message to" + " calculate the response body size", ex);
+                }
+                SOAPEnvelope env = messageContext.getEnvelope();
+                if (env != null) {
+                    SOAPBody soapbody = env.getBody();
+                    if (soapbody != null) {
+                        byte[] size = soapbody.toString().getBytes(Charset.defaultCharset());
+                        messageSizeInBytes = size.length;
+                    }
+                } 
+            }
+        }
 
         if (getThrottleProperties().isEnableHeaderConditions()) {
             org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
@@ -201,36 +242,17 @@ public class DataProcessAndPublishingAgent implements Runnable {
         }
 
         //this parameter will be used to capture message size and pass it to calculation logic
-        long messageSizeInBytes = 0;
-        if (authenticationContext.isContentAwareTierPresent()) {
-            //this request can match with with bandwidth policy. So we need to get message size.
-            Object contentLength = null;
-            if (transportHeaderMap != null) {
-                contentLength = transportHeaderMap.get(APIThrottleConstants.CONTENT_LENGTH);
-            }
+        
+        ArrayList<VerbInfoDTO> list = (ArrayList<VerbInfoDTO>) messageContext.getProperty(APIConstants.VERB_INFO_DTO);
+        boolean isVerbInfoContentAware = false;
+        if (list != null && !list.isEmpty()) {
+            VerbInfoDTO verbInfoDTO = list.get(0);
+            isVerbInfoContentAware = verbInfoDTO.isContentAware();
+        }
 
-            if (contentLength != null) {
-                messageSizeInBytes = Integer.parseInt(contentLength.toString());
-            } else {
-                try {
-                    buildMessage(axis2MessageContext);
-                } catch (IOException ex) {
-                    //In case of an exception, it won't be propagated up,and set response size to 0
-                    log.error("Error occurred while building the message to" +
-                              " calculate the response body size", ex);
-                } catch (XMLStreamException ex) {
-                    log.error("Error occurred while building the message to calculate the response" +
-                              " body size", ex);
-                }
-
-                SOAPEnvelope env = messageContext.getEnvelope();
-                if (env != null) {
-                    SOAPBody soapbody = env.getBody();
-                    if (soapbody != null) {
-                        byte[] size = soapbody.toString().getBytes(Charset.defaultCharset());
-                        messageSizeInBytes = size.length;
-                    }
-                }
+        if (authenticationContext.isContentAwareTierPresent() || isVerbInfoContentAware) {
+            if (log.isDebugEnabled()) {
+                log.debug("Message size: " + messageSizeInBytes + "B");
             }
             jsonObMap.put(APIThrottleConstants.MESSAGE_SIZE, messageSizeInBytes);
             if (!StringUtils.isEmpty(authenticationContext.getApplicationName())) {

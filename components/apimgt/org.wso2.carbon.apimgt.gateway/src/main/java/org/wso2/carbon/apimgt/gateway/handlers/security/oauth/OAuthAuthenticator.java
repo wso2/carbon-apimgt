@@ -245,6 +245,7 @@ public class OAuthAuthenticator implements Authenticator {
                     verbInfoDTO.setHttpVerb(httpMethod);
                     verbInfoDTO.setAuthType(authenticationScheme);
                     verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
+                    verbInfoDTO.setContentAware(OpenAPIUtils.isContentAwareTierAvailable(openAPI, synCtx));
                     verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + matchingResource + ":" + httpMethod);
                     verbInfoList.add(verbInfoDTO);
                 }

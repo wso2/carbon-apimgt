@@ -122,6 +122,9 @@ const useStyles = makeStyles((theme) => ({
     marginRight: {
         marginRight: theme.spacing(1),
     },
+    helpText: {
+        paddingTop: theme.spacing(1),
+    },
 }));
 
 /**
@@ -357,6 +360,14 @@ function Properties(props) {
                     </Button>
                 )}
             </div>
+            <Typography variant='caption' component='div' className={classes.helpText}>
+                <FormattedMessage
+                    id='Apis.Details.Properties.Properties.help.main'
+                    defaultMessage={`Usually, APIs have a pre-defined set of properties such as 
+                        the name, version, context, etc. API Properties allows you to 
+                         add specific custom properties to the API.`}
+                />
+            </Typography>
             {isEmpty(additionalProperties) && !isAdditionalPropertiesStale && !showAddProperty && (
                 <div className={classes.messageBox}>
                     <InlineMessage type='info' height={140}>

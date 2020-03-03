@@ -185,6 +185,7 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
             log.error(errorMsg + clientId, e);
             throw new OAuthSystemException(errorMsg + clientId, e);
         }
+        
         if (log.isDebugEnabled()) {
             long end_time = System.nanoTime();
             long output = end_time - start_time;

@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.json.simple.JSONValue;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 
 import java.io.Serializable;
 import java.util.*;
@@ -128,8 +129,8 @@ public class URITemplate implements Serializable{
         this.throttlingTier = throttlingTier;
     }
 
-    public String getThrottlingTiers(){
-        return throttlingTier;
+    public List<String> getThrottlingTiers(){
+        return throttlingTiers;
     }
 
     public void setThrottlingTiers(List<String> throttlingTiers) {
@@ -237,9 +238,28 @@ public class URITemplate implements Serializable{
     public String getThrottlingTiersAsString() {
         StringBuilder stringBuilder = new StringBuilder();
         for (String tier : throttlingTiers) {
-            stringBuilder.append(tier.trim()).append(" ");
+            if (tier.contains(PolicyConstants.THROTTLING_TIER_CONTENT_AWARE_SEPERATOR)) {
+                stringBuilder.append(tier.substring(0,
+                        tier.indexOf(PolicyConstants.THROTTLING_TIER_CONTENT_AWARE_SEPERATOR)).trim()).append(" ");
+            } else {
+                stringBuilder.append(tier.trim()).append(" ");
+            }
         }
         return stringBuilder.toString().trim();
+    }
+    
+    public boolean checkContentAwareFromThrottlingTiers() {
+        // use the content aware property appended  to throttling tiers
+        if (!throttlingTiers.isEmpty()) {
+            String throttlingTierWithContentAware = throttlingTiers.get(0);
+            if (throttlingTierWithContentAware != null &&
+                    throttlingTierWithContentAware.contains(PolicyConstants.THROTTLING_TIER_CONTENT_AWARE_SEPERATOR)) {
+                String[] splitThrottlingTiers =
+                        throttlingTierWithContentAware.split(PolicyConstants.THROTTLING_TIER_CONTENT_AWARE_SEPERATOR);
+                return Boolean.valueOf(splitThrottlingTiers[splitThrottlingTiers.length - 1]);
+            }
+        }
+        return false;
     }
 
     public Scope getScope() {

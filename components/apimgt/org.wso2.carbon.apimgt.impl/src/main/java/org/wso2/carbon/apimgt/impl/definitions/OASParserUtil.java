@@ -93,9 +93,11 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -210,6 +212,25 @@ public class OASParserUtil {
             return oas3Parser.generateExample(apiDefinition);
         } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) {
             return oas2Parser.generateExample(apiDefinition);
+        } else {
+            throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
+        }
+    }
+
+    public static String getOASDefinitionWithTierContentAwareProperty(String apiDefinition,
+            List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException {
+        if (contentAwareTiersList == null || contentAwareTiersList.isEmpty()) {
+            // no modifications if the list is empty
+            return apiDefinition;
+        }
+        SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
+
+        if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
+            return oas3Parser.getOASDefinitionWithTierContentAwareProperty(apiDefinition, contentAwareTiersList,
+                    apiLevelTier);
+        } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) {
+            return oas2Parser.getOASDefinitionWithTierContentAwareProperty(apiDefinition, contentAwareTiersList,
+                    apiLevelTier);
         } else {
             throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
         }
@@ -1109,6 +1130,18 @@ public class OASParserUtil {
     }
 
     /**
+     * remove publisher/MG related extension from OAS
+     *
+     * @param extensions extensions
+     */
+    public static void removePublisherSpecificInfofromOperation(Map<String, Object> extensions) {
+        if (extensions == null) {
+            return;
+        }
+        extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
+    }
+
+    /**
      * Get Application level security types
      * @param security list of security types
      * @return List of api security
@@ -1157,5 +1190,18 @@ public class OASParserUtil {
          responseCacheConfig.put(APIConstants.RESPONSE_CACHING_ENABLED, enabled);
          responseCacheConfig.put(APIConstants.RESPONSE_CACHING_TIMEOUT, cacheTimeout);
          return responseCacheConfig;
+    }
+
+    /**
+     * Sort scopes by name.
+     * This method was added to display scopes in publisher in a sorted manner.
+     *
+     * @param scopeSet
+     * @return Scope set
+     */
+    static Set<Scope> sortScopes(Set<Scope> scopeSet) {
+        List<Scope> scopesSortedlist = new ArrayList<>(scopeSet);
+        scopesSortedlist.sort(Comparator.comparing(Scope::getName));
+        return new LinkedHashSet<>(scopesSortedlist);
     }
 }

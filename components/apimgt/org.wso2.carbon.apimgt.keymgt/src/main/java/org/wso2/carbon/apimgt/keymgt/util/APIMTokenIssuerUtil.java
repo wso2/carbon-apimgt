@@ -184,12 +184,15 @@ public class APIMTokenIssuerUtil {
             for (String scope : scopeList) {
                 scopeString.append(scope).append(" ");
             }
-
+            String quotaType = APIUtil.getQuotaTypeForApplicationPolicy(application.getTier(),
+                    APIUtil.getTenantId(application.getOwner()));
+            
             ApplicationDTO applicationDTO = new ApplicationDTO();
             applicationDTO.setId(application.getId());
             applicationDTO.setName(application.getName());
             applicationDTO.setTier(application.getTier());
             applicationDTO.setOwner(application.getOwner());
+            applicationDTO.setTierQuotaType(quotaType);
 
             AuthenticatedUser endUser = jwtAccessTokenIssuerDTO.getUser();
             JwtTokenInfoDTO jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application,

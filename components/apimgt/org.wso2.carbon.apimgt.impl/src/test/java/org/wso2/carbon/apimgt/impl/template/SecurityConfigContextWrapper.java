@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl.template;
 
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
 /**
@@ -32,6 +33,11 @@ public class SecurityConfigContextWrapper extends SecurityConfigContext {
         this.apiManagerConfiguration = apiManagerConfiguration;
     }
 
+    public SecurityConfigContextWrapper(ConfigContext context, APIProduct apiProduct,
+                                        APIManagerConfiguration apiManagerConfiguration) {
+        super(context, apiProduct);
+        this.apiManagerConfiguration = apiManagerConfiguration;
+    }
     protected APIManagerConfiguration getApiManagerConfiguration() {
         return apiManagerConfiguration;
     }

@@ -29,10 +29,13 @@ import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 import org.wso2.carbon.databridge.commons.Event;
 
+import java.util.ArrayList;
 import java.util.TreeMap;
 
 
@@ -67,6 +70,11 @@ public class DataProcessAndPublishingAgentTest {
                 .class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setContentAware(false);
+        ArrayList<VerbInfoDTO> list = new ArrayList<VerbInfoDTO>();
+        list.add(verbInfoDTO);
+        Mockito.when(messageContext.getProperty(APIConstants.VERB_INFO_DTO)).thenReturn(list);
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(new TreeMap<>());
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
@@ -107,6 +115,11 @@ public class DataProcessAndPublishingAgentTest {
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn
                 (null);
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setContentAware(false);
+        ArrayList<VerbInfoDTO> list = new ArrayList<VerbInfoDTO>();
+        list.add(verbInfoDTO);
+        Mockito.when(messageContext.getProperty(APIConstants.VERB_INFO_DTO)).thenReturn(list);
         dataProcessAndPublishingAgent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
                 apiLevelThrottleKey, null, subscriptionLevelThrottleKey, subscriptionLevelTier,
                 resourceLevelThrottleKey, resourceLevelTier, authorizedUser, apiContext, apiVersion, appTenant,
@@ -129,6 +142,11 @@ public class DataProcessAndPublishingAgentTest {
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(new TreeMap<>());
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setContentAware(false);
+        ArrayList<VerbInfoDTO> list = new ArrayList<VerbInfoDTO>();
+        list.add(verbInfoDTO);
+        Mockito.when(messageContext.getProperty(APIConstants.VERB_INFO_DTO)).thenReturn(list);
         dataProcessAndPublishingAgent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
                 apiLevelThrottleKey, null, subscriptionLevelThrottleKey, subscriptionLevelTier,
                 resourceLevelThrottleKey, resourceLevelTier, authorizedUser, apiContext, apiVersion, appTenant,
@@ -152,6 +170,11 @@ public class DataProcessAndPublishingAgentTest {
         headers.put(APIMgtGatewayConstants.X_FORWARDED_FOR, "192.168.1.1");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setContentAware(false);
+        ArrayList<VerbInfoDTO> list = new ArrayList<VerbInfoDTO>();
+        list.add(verbInfoDTO);
+        Mockito.when(messageContext.getProperty(APIConstants.VERB_INFO_DTO)).thenReturn(list);
         dataProcessAndPublishingAgent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
                 apiLevelThrottleKey, null, subscriptionLevelThrottleKey, subscriptionLevelTier,
                 resourceLevelThrottleKey, resourceLevelTier, authorizedUser, apiContext, apiVersion, appTenant,
@@ -177,6 +200,11 @@ public class DataProcessAndPublishingAgentTest {
         headers.put(APIMgtGatewayConstants.X_FORWARDED_FOR, "192.168.1.1");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setContentAware(false);
+        ArrayList<VerbInfoDTO> list = new ArrayList<VerbInfoDTO>();
+        list.add(verbInfoDTO);
+        Mockito.when(messageContext.getProperty(APIConstants.VERB_INFO_DTO)).thenReturn(list);
         dataProcessAndPublishingAgent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
                 apiLevelThrottleKey, null, subscriptionLevelThrottleKey, subscriptionLevelTier,
                 resourceLevelThrottleKey, resourceLevelTier, authorizedUser, apiContext, apiVersion, appTenant,
@@ -204,6 +232,11 @@ public class DataProcessAndPublishingAgentTest {
         headers.put(APIMgtGatewayConstants.X_FORWARDED_FOR, "192.168.1.1");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setContentAware(false);
+        ArrayList<VerbInfoDTO> list = new ArrayList<VerbInfoDTO>();
+        list.add(verbInfoDTO);
+        Mockito.when(messageContext.getProperty(APIConstants.VERB_INFO_DTO)).thenReturn(list);
         dataProcessAndPublishingAgent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
                 apiLevelThrottleKey, null, subscriptionLevelThrottleKey, subscriptionLevelTier,
                 resourceLevelThrottleKey, resourceLevelTier, authorizedUser, apiContext, apiVersion, appTenant,
@@ -234,6 +267,11 @@ public class DataProcessAndPublishingAgentTest {
         TreeMap headers = new TreeMap();
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setContentAware(false);
+        ArrayList<VerbInfoDTO> list = new ArrayList<VerbInfoDTO>();
+        list.add(verbInfoDTO);
+        Mockito.when(messageContext.getProperty(APIConstants.VERB_INFO_DTO)).thenReturn(list);
         dataProcessAndPublishingAgent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
                 apiLevelThrottleKey, null, subscriptionLevelThrottleKey, subscriptionLevelTier,
                 resourceLevelThrottleKey, resourceLevelTier, authorizedUser, apiContext, apiVersion, appTenant,
@@ -258,6 +296,11 @@ public class DataProcessAndPublishingAgentTest {
         headers.put(APIThrottleConstants.CONTENT_LENGTH,123);
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setContentAware(false);
+        ArrayList<VerbInfoDTO> list = new ArrayList<VerbInfoDTO>();
+        list.add(verbInfoDTO);
+        Mockito.when(messageContext.getProperty(APIConstants.VERB_INFO_DTO)).thenReturn(list);
         dataProcessAndPublishingAgent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
                 apiLevelThrottleKey, null, subscriptionLevelThrottleKey, subscriptionLevelTier,
                 resourceLevelThrottleKey, resourceLevelTier, authorizedUser, apiContext, apiVersion, appTenant,
@@ -285,6 +328,11 @@ public class DataProcessAndPublishingAgentTest {
         TreeMap headers = new TreeMap();
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setContentAware(false);
+        ArrayList<VerbInfoDTO> list = new ArrayList<VerbInfoDTO>();
+        list.add(verbInfoDTO);
+        Mockito.when(messageContext.getProperty(APIConstants.VERB_INFO_DTO)).thenReturn(list);
         dataProcessAndPublishingAgent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
                 apiLevelThrottleKey, null, subscriptionLevelThrottleKey, subscriptionLevelTier,
                 resourceLevelThrottleKey, resourceLevelTier, authorizedUser, apiContext, apiVersion, appTenant,

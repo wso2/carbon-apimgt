@@ -37,23 +37,27 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
+
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({ "javax.net.ssl.*" })
-@PrepareForTest({ TokenRevocationNotifierImpl.class, APIUtil.class, ServiceReferenceHolder.class })
+@PrepareForTest({ TokenRevocationNotifierImpl.class, APIUtil.class, ServiceReferenceHolder.class, PrivilegedCarbonContext.class })
 public class TokenRevocationNotifierImplTest {
 
     private static final Log log = LogFactory.getLog(TokenRevocationNotifierImplTest.class);
     private TokenRevocationNotifierImpl tokenRevocationNotifierImpl;
     private HttpPut httpETCDPut;
     private final String DEFAULT_TTL = "3600";
+    private PrivilegedCarbonContext privilegedCarbonContext;
 
     @Before
     public void Init() throws Exception {
-
+        System.setProperty(CARBON_HOME, "");
         ServiceReferenceHolder serviceReferenceHolder;
         OutputEventAdapterService outputEventAdapterService;
 
@@ -66,6 +70,7 @@ public class TokenRevocationNotifierImplTest {
 
         serviceReferenceHolder = PowerMockito.mock(ServiceReferenceHolder.class);
         outputEventAdapterService = Mockito.mock(OutputEventAdapterService.class);
+        privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
 
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         etcdEPClient = Mockito.mock(HttpClient.class);
@@ -94,6 +99,10 @@ public class TokenRevocationNotifierImplTest {
         PowerMockito.when(etcdEPClient.execute(httpETCDPut)).thenReturn(etcdResponse);
         PowerMockito.when(etcdResponse.getStatusLine()).thenReturn(statusLine);
         PowerMockito.when(statusLine.getStatusCode()).thenReturn(200);
+
+        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
+        privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
     }
 
 

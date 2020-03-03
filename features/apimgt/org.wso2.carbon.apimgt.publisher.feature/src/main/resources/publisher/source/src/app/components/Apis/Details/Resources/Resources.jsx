@@ -30,6 +30,7 @@ import API from 'AppData/api';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
 import { isRestricted } from 'AppData/AuthManager';
+import CONSTS from 'AppData/Constants';
 import Operation from './components/Operation';
 import GroupOfOperations from './components/GroupOfOperations';
 import SpecErrors from './components/SpecErrors';
@@ -318,7 +319,7 @@ export default function Resources(props) {
     useEffect(() => {
         API.getAmznResourceNames(api.id)
             .then((response) => {
-                if (response.body.list) {
+                if (response.body && response.body.list) {
                     setArns(response.body.list);
                 }
             });
@@ -435,7 +436,7 @@ export default function Resources(props) {
                                     alignItems='stretch'
                                 >
                                     {Object.entries(verbObject).map(([verb, operation]) => {
-                                        return (
+                                        return CONSTS.HTTP_METHODS.includes(verb) ? (
                                             <Grid key={`${target}/${verb}`} item>
                                                 <Operation
                                                     target={target}
@@ -463,7 +464,7 @@ export default function Resources(props) {
                                                     {...operationProps}
                                                 />
                                             </Grid>
-                                        );
+                                        ) : null;
                                     })}
                                 </Grid>
                             </GroupOfOperations>
