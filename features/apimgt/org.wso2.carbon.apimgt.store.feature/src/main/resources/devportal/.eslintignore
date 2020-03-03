@@ -9,10 +9,6 @@ source/src/app/data/*
 /source/src/app/components/Apis/Details/Comments/*
 /source/src/app/components/Apis/Details/Credentials/*
 /source/src/app/components/Apis/Details/Documents/*
-<<<<<<< HEAD
-=======
-/source/src/app/components/Apis/Details/GraphQLConsole/*
->>>>>>> add GraphQL Tryout console
 /source/src/app/components/Apis/Listing/*
 /source/src/app/components/Apis/Apis.jsx
 /source/src/app/components/Applications/*

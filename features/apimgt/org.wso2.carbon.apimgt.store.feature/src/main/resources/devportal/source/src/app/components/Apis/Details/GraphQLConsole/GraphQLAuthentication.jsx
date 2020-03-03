@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 import React, { useState, useEffect } from 'react';
 import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
@@ -81,7 +98,7 @@ export default function GraphQLAuthentication(props) {
     const [subscriptions, setSubscriptions] = useState(null);
     const [selectedApplication, setSelectedApplication] = useState();
     const [selectedKeyType, setSelectedKeyType] = useState('PRODUCTION');
-    const [keys, SetKeys] = useState();
+    const [keys, setKeys] = useState();
     const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
 
     useEffect(() => {
@@ -99,7 +116,9 @@ export default function GraphQLAuthentication(props) {
             })
             .then((subscriptionsResponse) => {
                 if (subscriptionsResponse != null) { //
-                    const subs = subscriptionsResponse.obj.list.filter((item) => item.status === 'UNBLOCKED' || item.status === 'PROD_ONLY_BLOCKED');
+                    const subs = subscriptionsResponse.obj.list.filter(
+                        (item) => item.status === 'UNBLOCKED' || item.status === 'PROD_ONLY_BLOCKED',
+                    );
                     if (subs && subs.length > 0) {
                         const sApplication = subs[0].applicationId;
                         setSelectedApplication(sApplication);
@@ -112,13 +131,11 @@ export default function GraphQLAuthentication(props) {
                                 if (appKeys.get('SANDBOX')) {
                                     const sKType1 = 'SANDBOX';
                                     setSelectedKeyType(sKType1);
-                                    ({ accessToken } = appKeys.get('SANDBOX').token);
                                 } else if (appKeys.get('PRODUCTION')) {
                                     const sKType2 = 'PRODUCTION';
                                     setSelectedKeyType(sKType2);
-                                    ({ accessToken } = appKeys.get('PRODUCTION').token);
                                 }
-                                SetKeys(appKeys);
+                                setKeys(appKeys);
                             });
                     }
                     setSubscriptions(subs);
@@ -135,7 +152,6 @@ export default function GraphQLAuthentication(props) {
             });
     }, []);
 
-
     /**
      *
      * @param {React.SyntheticEvent} event
@@ -143,7 +159,6 @@ export default function GraphQLAuthentication(props) {
     const handleChanges = (event) => {
         if (event.target.name === 'selectedApplication') {
             const promiseApp = Application.get(event.target.value);
-            let accessToken;
             let keyType;
 
             setSelectedApplication(event.target.value);
@@ -163,19 +178,22 @@ export default function GraphQLAuthentication(props) {
                 })
                 .then((appKeys) => {
                     if (appKeys.get(keyType)) {
-                        ({ accessToken } = appKeys.get(keyType).token);
+                        const { accessToken: accessTokenValue } = appKeys.get(keyType).token;
+                        setAccessTocken(accessTokenValue);
+                    } else {
+                        setAccessTocken('');
                     }
-                    setAccessTocken(accessToken);
-                    SetKeys(appKeys);
+                    setKeys(appKeys);
                 });
         } else {
-            let accessToken;
             setSelectedKeyType(event.target.value);
 
             if (keys.get(event.target.value)) {
-                ({ accessToken } = keys.get(event.target.value).token);
+                const { accessToken: accessTokenValue } = keys.get(event.target.value).token;
+                setAccessTocken(accessTokenValue);
+            } else {
+                setAccessTocken('');
             }
-            setAccessTocken(accessToken);
         }
     };
 
@@ -254,7 +272,8 @@ export default function GraphQLAuthentication(props) {
                                 <Box display='flex' justifyContent='center'>
                                     <Typography variant='body1' gutterBottom>
                                         <FormattedMessage
-                                            id='Apis.Details.GraphQLConsole.GraphQLAuthentication.please.subscribe.to.application'
+                                            id={'Apis.Details.GraphQLConsole.'
+                                            + 'GraphQLAuthentication.please.subscribe.to.application'}
                                             defaultMessage='Please subscribe to an application'
                                         />
                                     </Typography>
@@ -264,46 +283,46 @@ export default function GraphQLAuthentication(props) {
                             <Box display='flex' justifyContent='center'>
                                 <Grid xs={12} md={6} item>
                                     {(environments && environments.length > 0)
-                                    && (
-                                        <TextField
-                                            fullWidth
-                                            select
-                                            label={(
-                                                <FormattedMessage
-                                                    defaultMessage='Environment'
-                                                    id='Apis.Details.GraphQLConsole.GraphQLAuthentication.environment'
-                                                />
-                                            )}
-                                            value={selectedEnvironment}
-                                            name='selectedEnvironment'
-                                            onChange={handleEnvironemtChange}
-                                            helperText={(
-                                                <FormattedMessage
-                                                    defaultMessage='Please select an environment'
-                                                    id='Apis.Details.GraphQLConsole.SelectAppPanel.select.an.environment'
-                                                />
-                                            )}
-                                            margin='normal'
-                                            variant='outlined'
-                                        >
-                                            {environments && environments.length > 0 && (
-                                                <MenuItem value='' disabled>
-                                                    <em>
-                                                        <FormattedMessage
-                                                            id='api.gateways'
-                                                            defaultMessage='API Gateways'
-                                                        />
-                                                    </em>
-                                                </MenuItem>
-                                            )}
-                                            {environments && (
-                                                environments.map((env) => (
-                                                    <MenuItem value={env} key={env}>
-                                                        {env}
+                                        && (
+                                            <TextField
+                                                fullWidth
+                                                select
+                                                label={(
+                                                    <FormattedMessage
+                                                        defaultMessage='Environment'
+                                                        id='Apis.Details.GraphQLConsole.GraphQLAuthentication.env'
+                                                    />
+                                                )}
+                                                value={selectedEnvironment}
+                                                name='selectedEnvironment'
+                                                onChange={handleEnvironemtChange}
+                                                helperText={(
+                                                    <FormattedMessage
+                                                        defaultMessage='Please select an environment'
+                                                        id='Apis.Details.GraphQLConsole.SelectAppPanel.select.an.env'
+                                                    />
+                                                )}
+                                                margin='normal'
+                                                variant='outlined'
+                                            >
+                                                {environments && environments.length > 0 && (
+                                                    <MenuItem value='' disabled>
+                                                        <em>
+                                                            <FormattedMessage
+                                                                id='api.gateways'
+                                                                defaultMessage='API Gateways'
+                                                            />
+                                                        </em>
                                                     </MenuItem>
-                                                )))}
-                                        </TextField>
-                                    )}
+                                                )}
+                                                {environments && (
+                                                    environments.map((env) => (
+                                                        <MenuItem value={env} key={env}>
+                                                            {env}
+                                                        </MenuItem>
+                                                    )))}
+                                            </TextField>
+                                        )}
                                 </Grid>
                             </Box>
                             <Box display='block' justifyContent='center'>

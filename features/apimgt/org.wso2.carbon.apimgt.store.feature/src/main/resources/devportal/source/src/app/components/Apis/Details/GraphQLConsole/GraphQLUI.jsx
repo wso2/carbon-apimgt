@@ -1,10 +1,27 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React, {
     useState, useEffect, useContext, useRef,
 } from 'react';
 import GraphiQL from 'graphiql';
 import fetch from 'isomorphic-fetch';
 import 'graphiql/graphiql.css';
-import './explorer.css';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import { FormattedMessage } from 'react-intl';
@@ -14,19 +31,19 @@ import Box from '@material-ui/core/Box';
 import { ApiContext } from '../ApiContext';
 import Progress from '../../../Shared/Progress';
 
-
 const { buildSchema } = require('graphql');
 
-
+/**
+ *
+ * @param {*} props
+ */
 export default function GraphQLUI(props) {
     const { accessToken, authorizationHeader, URLss } = props;
-
     const { api } = useContext(ApiContext);
     const [schema, setSchema] = useState(null);
     const [query, setQuery] = useState('');
     const [isExplorerOpen, setIsExplorerOpen] = useState(false);
     const graphiqlEl = useRef(null);
-
 
     useEffect(() => {
         const apiID = api.id;
@@ -38,7 +55,6 @@ export default function GraphQLUI(props) {
                 setSchema(graphqlSchemaObj);
             });
     }, []);
-
 
     const parameters = {};
 
@@ -69,7 +85,6 @@ export default function GraphQLUI(props) {
             body: JSON.stringify(graphQLParams),
         }).then((response) => response.json());
     }
-
     if ({ schema } === null) {
         return <Progress />;
     } else {
@@ -92,7 +107,6 @@ export default function GraphQLUI(props) {
                         InputProps={URLss.https}
                     />
                 </Box>
-
                 <div styles={{ width: '100%' }}>
                     <Box display='flex'>
                         <Box display='flex'>
@@ -102,9 +116,6 @@ export default function GraphQLUI(props) {
                                 onEdit={setQuery}
                                 explorerIsOpen={isExplorerOpen}
                                 onToggleExplorer={handleToggleExplorer}
-                            // onRunOperation={operationName =>
-                            //     this._graphiql.handleRunQuery(operationName)
-                            // }
                             />
                         </Box>
                         <Box display='flex' height='800px' flexGrow={1}>
@@ -113,11 +124,7 @@ export default function GraphQLUI(props) {
                                 fetcher={(graphQLFetcher)}
                                 schema={schema}
                                 query={query}
-                                // variables={variables}
                                 onEditQuery={setQuery}
-                                // onEditVariables={onEditVariables}
-                                // onEditOperationName={onEditOperationName}
-
                             >
                                 <GraphiQL.Toolbar>
                                     <GraphiQL.Button
