@@ -32,6 +32,8 @@ import javax.xml.namespace.QName;
  */
 public final class APIConstants {
 
+    public static final String STRING = "string";
+    public static final String OBJECT = "object";
     //key value of the provider rxt
     public static final String PROVIDER_KEY = "provider";
 

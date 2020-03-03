@@ -70,7 +70,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -319,23 +318,10 @@ public class OAS3Parser extends APIDefinition {
                 }
                 scopeSet.add(scope);
             }
-            return sortScopes(scopeSet);
+            return OASParserUtil.sortScopes(scopeSet);
         } else {
-            return sortScopes(getScopesFromExtensions(openAPI));
+            return OASParserUtil.sortScopes(getScopesFromExtensions(openAPI));
         }
-    }
-
-    /**
-     * Sort scopes by name.
-     * This method was added to display scopes in publisher in a sorted manner.
-     *
-     * @param scopeSet
-     * @return Scope set
-     */
-    private Set<Scope> sortScopes(Set<Scope> scopeSet) {
-        List<Scope> scopesSortedlist = new ArrayList<>(scopeSet);
-        scopesSortedlist.sort(Comparator.comparing(Scope::getName));
-        return new LinkedHashSet(scopesSortedlist);
     }
 
     /**
@@ -1125,11 +1111,11 @@ public class OAS3Parser extends APIDefinition {
 
         JSONObject typeOfPayload = new JSONObject();
         JSONObject payload = new JSONObject();
-        typeOfPayload.put(APIConstants.TYPE, "string");
+        typeOfPayload.put(APIConstants.TYPE, APIConstants.STRING);
         payload.put(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME, typeOfPayload);
 
         Schema postSchema = new Schema();
-        postSchema.setType("object");
+        postSchema.setType(APIConstants.OBJECT);
         postSchema.setProperties(payload);
 
         MediaType mediaType = new MediaType();

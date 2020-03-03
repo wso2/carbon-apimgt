@@ -93,9 +93,11 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -233,7 +235,7 @@ public class OASParserUtil {
             throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
         }
     }
-   
+
     public static String updateAPIProductSwaggerOperations(Map<API, List<APIProductResource>> apiToProductResourceMapping,
                                                            String destinationSwagger)
             throws APIManagementException {
@@ -1188,5 +1190,18 @@ public class OASParserUtil {
          responseCacheConfig.put(APIConstants.RESPONSE_CACHING_ENABLED, enabled);
          responseCacheConfig.put(APIConstants.RESPONSE_CACHING_TIMEOUT, cacheTimeout);
          return responseCacheConfig;
+    }
+
+    /**
+     * Sort scopes by name.
+     * This method was added to display scopes in publisher in a sorted manner.
+     *
+     * @param scopeSet
+     * @return Scope set
+     */
+    static Set<Scope> sortScopes(Set<Scope> scopeSet) {
+        List<Scope> scopesSortedlist = new ArrayList<>(scopeSet);
+        scopesSortedlist.sort(Comparator.comparing(Scope::getName));
+        return new LinkedHashSet<>(scopesSortedlist);
     }
 }
