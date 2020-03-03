@@ -74,9 +74,6 @@ export default function CORSConfiguration(props) {
     const isAllowAllOrigins = corsConfiguration.accessControlAllowOrigins[0] === '*'
         && corsConfiguration.accessControlAllowOrigins.length === 1;
     const classes = useStyles();
-    if (!corsConfiguration.accessControlAllowHeaders.includes('apikey')) {
-        corsConfiguration.accessControlAllowHeaders.push('apikey');
-    }
 
     return (
         <ExpansionPanel className={classes.expansionPanel}>
