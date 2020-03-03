@@ -152,7 +152,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 }
 
                 if (!APIConstants.ADD_API.equals(publishingDetailType) && userName != null
-                        && requestTenantDomain != null) {
+                        && userName != APIConstants.WSO2_ANONYMOUS_USER && requestTenantDomain != null) {
                     updateRecommendationsCache(userName, requestTenantDomain);
                 }
             }
@@ -272,16 +272,18 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     @Override
     public void publishSearchQueries(String query, String username) {
 
-        String userID = getUserId(userName);
-        query = query.split("&", 2)[0];
-        JSONObject obj = new JSONObject();
-        obj.put("user", userID);
-        obj.put("search_query", query);
+        if (userName != APIConstants.WSO2_ANONYMOUS_USER) {
+            String userID = getUserId(userName);
+            query = query.split("&", 2)[0];
+            JSONObject obj = new JSONObject();
+            obj.put("user", userID);
+            obj.put("search_query", query);
 
-        JSONObject payload = new JSONObject();
-        payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_USER_SEARCHED_QUERY);
-        payload.put(APIConstants.PAYLOAD_STRING, obj);
-        publishEvent(payload.toString());
+            JSONObject payload = new JSONObject();
+            payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_USER_SEARCHED_QUERY);
+            payload.put(APIConstants.PAYLOAD_STRING, obj);
+            publishEvent(payload.toString());
+        }
     }
 
     public void publishEvent(String payload) {
