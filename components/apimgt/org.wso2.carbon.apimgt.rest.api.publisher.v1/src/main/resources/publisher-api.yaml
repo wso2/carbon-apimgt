@@ -8879,6 +8879,9 @@ definitions:
           openAPIVersion:
             type: string
             example: "3.0.0"
+          endpoint:
+            type: string
+            example: "https://localhost:9443/am/sample/pizzashack/v1/api/"
       errors:
         type: array
         description: |
