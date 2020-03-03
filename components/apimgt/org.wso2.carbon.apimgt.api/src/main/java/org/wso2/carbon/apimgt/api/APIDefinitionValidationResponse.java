@@ -78,6 +78,7 @@ public class APIDefinitionValidationResponse {
         private String version;
         private String context;
         private String description;
+        private String endpoint;
 
         public String getOpenAPIVersion() {
             return openAPIVersion;
@@ -118,6 +119,10 @@ public class APIDefinitionValidationResponse {
         public void setContext(String context) {
             this.context = context;
         }
+
+        public String getEndpoint() { return endpoint; }
+
+        public void setEndpoint(String endpoint) { this.endpoint = endpoint; }
     }
 
     public APIDefinition getParser() {

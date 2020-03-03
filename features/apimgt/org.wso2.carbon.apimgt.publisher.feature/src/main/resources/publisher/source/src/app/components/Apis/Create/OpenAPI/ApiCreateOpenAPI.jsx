@@ -72,6 +72,7 @@ export default function ApiCreateOpenAPI(props) {
                     name: value.name.replace(/[&/\\#,+()$~%.'":*?<>{}\s]/g, ''),
                     version: value.version,
                     context: value.context,
+                    endpoint: value.endpoint,
                 };
             default:
                 return currentState;
