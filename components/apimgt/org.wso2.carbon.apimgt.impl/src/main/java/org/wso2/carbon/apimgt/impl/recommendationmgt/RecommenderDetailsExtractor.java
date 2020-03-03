@@ -152,7 +152,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 }
 
                 if (!APIConstants.ADD_API.equals(publishingDetailType) && userName != null
-                        && requestTenantDomain != null) {
+                        && userName != APIConstants.WSO2_ANONYMOUS_USER && requestTenantDomain != null) {
                     updateRecommendationsCache(userName, requestTenantDomain);
                 }
             }
