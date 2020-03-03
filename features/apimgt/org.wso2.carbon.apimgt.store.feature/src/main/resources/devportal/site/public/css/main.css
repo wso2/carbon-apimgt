@@ -421,3 +421,9 @@ a {
 .wrapper section.models {
     display: none;
 }
+
+/* Static style for graphql-explorer library */
+.graphiql-explorer-root {
+  max-height: 750px;
+  overflow-y: scroll;
+}

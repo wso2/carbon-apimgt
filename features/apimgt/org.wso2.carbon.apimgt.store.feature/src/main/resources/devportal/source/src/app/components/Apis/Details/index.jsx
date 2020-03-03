@@ -39,7 +39,9 @@ import { ApiContext } from './ApiContext';
 import Progress from '../../Shared/Progress';
 import Wizard from './Credentials/Wizard/Wizard';
 
+
 const ApiConsole = lazy(() => import('./ApiConsole/ApiConsole' /* webpackChunkName: "APIConsole" */));
+const GraphQLConsole = lazy(() => import('./GraphQLConsole/GraphQLConsole' /* webpackChunkName: "GraphQLConsole" */));
 const Overview = lazy(() => import('./Overview' /* webpackChunkName: "APIOverview" */));
 const Documents = lazy(() => import('./Documents/Documents' /* webpackChunkName: "APIDocuments" */));
 const Credentials = lazy(() => import('./Credentials/Credentials' /* webpackChunkName: "APICredentials" */));
@@ -52,6 +54,14 @@ const LoadableSwitch = withRouter((props) => {
     const path = '/apis/';
     const { advertised } = api.advertiseInfo;
     const redirectURL = path + apiUuid + '/overview';
+
+    let tryoutRoute;
+    if (api.type === 'GRAPHQL') {
+        tryoutRoute = <Route path='/apis/:apiUuid/test' component={GraphQLConsole} />
+    }else {
+        tryoutRoute = <Route path='/apis/:apiUuid/test' component={ApiConsole} />
+    }
+
     return (
         <Suspense fallback={<Progress />}>
             <Switch>
@@ -61,7 +71,7 @@ const LoadableSwitch = withRouter((props) => {
                 <Route exact path='/apis/:apiUuid/credentials/wizard' component={Wizard} />
                 {!advertised && <Route path='/apis/:apiUuid/comments' component={Comments} />}
                 {!advertised && <Route path='/apis/:apiUuid/credentials' component={Credentials} />}
-                {!advertised && <Route path='/apis/:apiUuid/test' component={ApiConsole} />}
+                {!advertised && tryoutRoute}
                 {!advertised && <Route path='/apis/:apiUuid/sdk' component={Sdk} />}
                 <Route component={ResourceNotFound} />
             </Switch>
