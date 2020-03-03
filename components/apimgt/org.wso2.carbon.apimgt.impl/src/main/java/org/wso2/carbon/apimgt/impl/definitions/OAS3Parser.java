@@ -558,6 +558,13 @@ public class OAS3Parser extends APIDefinition {
     private void removePublisherSpecificInfo(OpenAPI openAPI) {
         Map<String, Object> extensions = openAPI.getExtensions();
         OASParserUtil.removePublisherSpecificInfo(extensions);
+        for (String pathKey : openAPI.getPaths().keySet()) {
+            PathItem pathItem = openAPI.getPaths().get(pathKey);
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
+                Operation operation = entry.getValue();
+                OASParserUtil.removePublisherSpecificInfofromOperation(operation.getExtensions());
+            }
+        }
     }
 
     /**
@@ -668,7 +675,16 @@ public class OAS3Parser extends APIDefinition {
                 openAPI.addExtension(APIConstants.X_WSO2_MUTUAL_SSL, mutualSSLOptional);
             }
         }
-        openAPI.addExtension(APIConstants.X_WSO2_APP_SECURITY, OASParserUtil.getAppSecurity(apiSecurity));
+        // This app security is should given in resource level,
+        // otherwise the default oauth2 scheme defined at each resouce level will override application securities
+        JsonNode appSecurityExtension = OASParserUtil.getAppSecurity(apiSecurity);
+        for (String pathKey : openAPI.getPaths().keySet()) {
+            PathItem pathItem = openAPI.getPaths().get(pathKey);
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
+                Operation operation = entry.getValue();
+                operation.addExtension(APIConstants.X_WSO2_APP_SECURITY, appSecurityExtension);
+            }
+        }
         openAPI.addExtension(APIConstants.X_WSO2_RESPONSE_CACHE,
                 OASParserUtil.getResponseCacheConfig(api.getResponseCache(), api.getCacheTimeout()));
         return Json.pretty(openAPI);
