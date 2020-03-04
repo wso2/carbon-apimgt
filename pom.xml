@@ -1627,9 +1627,15 @@
             </dependency>
             <dependency>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 <groupId>org.wso2.orbit.com.squareup.okio</groupId>
                 <artifactId>okio</artifactId>
                 <version>${org.wso2.orbit.com.squareup.okio.version}</version>
+=======
+                <groupId>org.wso2.orbit.io.fabric8</groupId>
+                <artifactId>openshift-client</artifactId>
+                <version>${org.wso2.orbit.io.fabric8.version}</version>
+>>>>>>> Stashed changes
 =======
                 <groupId>org.wso2.orbit.io.fabric8</groupId>
                 <artifactId>openshift-client</artifactId>
