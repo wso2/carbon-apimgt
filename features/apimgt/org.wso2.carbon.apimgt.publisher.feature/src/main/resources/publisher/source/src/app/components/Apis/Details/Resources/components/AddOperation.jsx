@@ -24,7 +24,7 @@ import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Paper from '@material-ui/core/Paper';
 import AddIcon from '@material-ui/icons/Add';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 
 import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -108,9 +108,10 @@ const SUPPORTED_VERBS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIO
  * @returns
  */
 function AddOperation(props) {
-    const { operationsDispatcher, intl } = props;
+    const { operationsDispatcher } = props;
     const inputLabel = useRef(null);
     const [labelWidth, setLabelWidth] = useState(0);
+    const intl = useIntl();
 
     /**
      *
@@ -328,4 +329,4 @@ AddOperation.propTypes = {
     operationsDispatcher: PropTypes.func.isRequired,
 };
 
-export default React.memo(injectIntl(AddOperation));
+export default React.memo(AddOperation);
