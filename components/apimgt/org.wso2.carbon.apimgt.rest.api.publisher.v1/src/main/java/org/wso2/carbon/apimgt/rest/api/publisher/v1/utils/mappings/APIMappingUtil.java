@@ -1072,7 +1072,7 @@ public class APIMappingUtil {
      * @param apiLCData API lifecycle state information
      * @return REST API DTO representation of API Lifecycle state information
      */
-    public static LifecycleStateDTO fromLifecycleModelToDTO(Map<String, Object> apiLCData) {
+    public static LifecycleStateDTO fromLifecycleModelToDTO(Map<String, Object> apiLCData, boolean apiOlderVersionExist) {
 
         LifecycleStateDTO lifecycleStateDTO = new LifecycleStateDTO();
 
@@ -1097,6 +1097,10 @@ public class APIMappingUtil {
             List<LifecycleStateCheckItemsDTO> checkItemsDTOList = new ArrayList<>();
             for (Object checkListItemObj : checkListItems) {
                 CheckListItem checkListItem = (CheckListItem) checkListItemObj;
+                if(!apiOlderVersionExist && checkListItem.getName().equals(APIConstants.DEPRECATE_CHECK_LIST_ITEM)){
+                    continue;
+                }
+
                 LifecycleStateCheckItemsDTO checkItemsDTO = new LifecycleStateCheckItemsDTO();
                 checkItemsDTO.setName(checkListItem.getName());
                 checkItemsDTO.setValue(Boolean.getBoolean(checkListItem.getValue()));
