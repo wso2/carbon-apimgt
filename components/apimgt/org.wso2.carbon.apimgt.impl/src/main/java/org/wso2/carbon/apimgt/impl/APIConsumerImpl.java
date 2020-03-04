@@ -4695,8 +4695,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
             //get key manager instance.
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            // set application attributes
+            oauthAppRequest.getOAuthApplicationInfo().putAllAppAttributes(application.getApplicationAttributes());
             //call update method.
-
             OAuthApplicationInfo updatedAppInfo = keyManager.updateApplication(oauthAppRequest);
 
             JSONObject appLogObject = new JSONObject();
