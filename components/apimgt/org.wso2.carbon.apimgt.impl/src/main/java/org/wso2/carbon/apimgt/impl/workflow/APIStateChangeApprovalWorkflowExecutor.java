@@ -20,7 +20,6 @@ import java.util.*;
 
 public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
 
-    private static final String RUNTIME_INSTANCE_RESOURCE_PATH = "/runtime/process-instances";
     private static final Log log = LogFactory.getLog(APIStateChangeWSWorkflowExecutor.class);
     private String stateList;
 
@@ -50,7 +49,6 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
             log.debug("Executing API State change Workflow.");
             log.debug("Execute workflowDTO " + workflowDTO.toString());
         }
-
 
         if (stateList != null) {
             Map<String, List<String>> stateActionMap = getSelectedStatesToApprove();
@@ -84,9 +82,7 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
 
                 apiStateWorkFlowDTO.setProperties("Workflow Process","Application Creation");
 
-
                 super.execute(workflowDTO);
-
 
                 if (log.isDebugEnabled()) {
                     log.debug("APIStateChange payload: ");
@@ -98,8 +94,6 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
                 // calling super.complete() instead of complete() to act as the simpleworkflow executor
                 super.complete(workflowDTO);
             }
-
-
         } else {
             String msg = "State change list is not provided. Please check <stateList> element in ";
             log.error(msg);
@@ -126,7 +120,7 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
 
         try {
             ApiMgtDAO apiMgtDAO1 = ApiMgtDAO.getInstance();
-            Workflow workflow = apiMgtDAO1.getworkflowReferenceByEWR(externalWorkflowRef);
+            Workflow workflow = apiMgtDAO1.getworkflowReferenceByExternalWorkflowReference(externalWorkflowRef);
 
             String apiName = workflow.getMetadata("ApiName");
             String action = workflow.getMetadata("Action");
@@ -134,7 +128,6 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
             String version = workflow.getMetadata("ApiVersion");
             String invoker = workflow.getMetadata("Invoker");
             String currentStatus = workflow.getMetadata("CurrentState");
-
 
             int tenantId = workflowDTO.getTenantId();
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
@@ -170,8 +163,6 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
             log.error(errorMsg, e);
 
         }
-
-
         return new GeneralWorkflowResponse();
     }
 
@@ -199,7 +190,6 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
                     .getMessage();
             throw new WorkflowException(errorMsg, axisFault);
         }
-
     }
 
     /**

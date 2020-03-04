@@ -112,6 +112,4 @@ public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecut
             throw new WorkflowException(errorMsg, axisFault);
         }
     }
-
-
 }
