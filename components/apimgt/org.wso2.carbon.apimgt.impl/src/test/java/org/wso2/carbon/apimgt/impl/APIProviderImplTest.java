@@ -180,13 +180,16 @@ public class APIProviderImplTest {
 
         apimgtDAO = Mockito.mock(ApiMgtDAO.class);
         keyManager = Mockito.mock(KeyManager.class);
+        Mockito.when(keyManager.getResourceByApiId(Mockito.anyString())).thenReturn(null);
+        Mockito.when(keyManager.registerNewResource(Mockito.any(API.class), Mockito.any(Map.class))).thenReturn(true);
+        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
+
         PowerMockito.when(APIUtil.isAPIManagementEnabled()).thenReturn(false);
         PowerMockito.when(APIUtil.replaceEmailDomainBack(Mockito.anyString())).thenReturn("admin");
         Mockito.when(APIUtil.replaceEmailDomain(Mockito.anyString())).thenReturn("admin");
 
         PrivilegedCarbonContext prcontext = Mockito.mock(PrivilegedCarbonContext.class);
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(prcontext);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
 
         PowerMockito.doNothing().when(prcontext).setUsername(Mockito.anyString());
         PowerMockito.doNothing().when(prcontext).setTenantDomain(Mockito.anyString(), Mockito.anyBoolean());
