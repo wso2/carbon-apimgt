@@ -19,7 +19,7 @@ import React, { useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import { withRouter } from 'react-router';
@@ -42,7 +42,9 @@ import AuthManager from 'AppData/AuthManager';
  * @returns
  */
 function APICreateDefault(props) {
-    const { isWebSocket, isAPIProduct, history } = props;
+    const {
+        isWebSocket, isAPIProduct, history, intl,
+    } = props;
     const { settings } = useAppContext();
     const [pageError, setPageError] = useState(null);
     const [isCreating, setIsCreating] = useState();
@@ -183,8 +185,19 @@ function APICreateDefault(props) {
         setIsPublishing(true);
         createAPI().then((api) => api
             .publish()
-            .then(() => {
-                Alert.info('API published successfully');
+            .then((response) => {
+                const { workflowStatus } = response.body;
+                if (workflowStatus === APICreateDefault.WORKFLOW_STATUS.CREATED) {
+                    Alert.info(intl.formatMessage({
+                        id: 'Apis.Create.Default.APICreateDefault.success.publishStatus',
+                        defaultMessage: 'Lifecycle state change request has been sent',
+                    }));
+                } else {
+                    Alert.info(intl.formatMessage({
+                        id: 'Apis.Create.Default.APICreateDefault.success.otherStatus',
+                        defaultMessage: 'API updated succesfully',
+                    }));
+                }
                 history.push(`/apis/${api.id}/overview`);
             })
             .catch((error) => {
@@ -193,7 +206,10 @@ function APICreateDefault(props) {
                     setPageError(error.response.body);
                 } else {
                     const message = 'Something went wrong while publishing the API';
-                    Alert.error(message);
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Create.Default.APICreateDefault.error.errorMessage',
+                        defaultMessage: message,
+                    }));
                     setPageError(message);
                 }
                 console.error(error);
@@ -352,9 +368,15 @@ APICreateDefault.defaultProps = {
     isWebSocket: false,
     isAPIProduct: false,
 };
+APICreateDefault.WORKFLOW_STATUS = {
+    CREATED: 'CREATED',
+};
 APICreateDefault.propTypes = {
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     isAPIProduct: PropTypes.shape({}),
     isWebSocket: PropTypes.shape({}),
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
-export default withRouter(APICreateDefault);
+export default withRouter(injectIntl(APICreateDefault));
