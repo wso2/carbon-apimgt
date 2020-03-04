@@ -597,7 +597,7 @@ class ApiConsole extends React.Component {
                                                             <FormControlLabel
                                                                 value='OAUTH'
                                                                 control={<Radio />}
-                                                                label='Referenced (OAuth)'
+                                                                label='OAuth'
                                                             />
                                                         )}
                                                         {isBasicAuthEnabled && (
