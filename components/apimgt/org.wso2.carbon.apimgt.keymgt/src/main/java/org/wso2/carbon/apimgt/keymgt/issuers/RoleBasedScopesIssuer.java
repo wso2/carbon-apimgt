@@ -35,6 +35,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -144,8 +145,15 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
     private String[] getUserRoles(AuthenticatedUser authenticatedUser) {
 
         String[] userRoles = null;
-        String tenantDomain = authenticatedUser.getTenantDomain();
-        String username = authenticatedUser.getUserName();
+        String tenantDomain;
+        String username;
+        if (authenticatedUser.isFederatedUser()) {
+            tenantDomain = MultitenantUtils.getTenantDomain(authenticatedUser.getAuthenticatedSubjectIdentifier());
+            username = MultitenantUtils.getTenantAwareUsername(authenticatedUser.getAuthenticatedSubjectIdentifier());
+        } else {
+            tenantDomain = authenticatedUser.getTenantDomain();
+            username = authenticatedUser.getUserName();
+        }
         String userStoreDomain = authenticatedUser.getUserStoreDomain();
         RealmService realmService = getRealmService();
         try {
