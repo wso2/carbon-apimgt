@@ -71,7 +71,7 @@ securityDefinitions:
   OAuth2Security:
     type: oauth2
     flow: password
-    tokenUrl: https://localhost:9443/token
+    tokenUrl: https://localhost:9443/oauth2/token
     scopes:
       openid: Authorize access to user details
       apim:api_view: View API

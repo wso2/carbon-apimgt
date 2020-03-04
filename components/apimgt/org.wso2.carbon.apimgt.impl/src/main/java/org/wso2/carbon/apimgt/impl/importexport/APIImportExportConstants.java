@@ -43,6 +43,11 @@ public final class APIImportExportConstants {
     public static final String ID_ELEMENT = "id";
     //name of the api provider element tag of the api.json file
     public static final String PROVIDER_ELEMENT = "providerName";
+    //name of the api name element tag of the api.json file
+    public static final String NAME_ELEMENT = "apiName";
+    //name of the api version element tag of the api.json file
+    public static final String VERSION_ELEMENT = "version";
+
     //location of the api swagger definition file
     public static final String JSON_SWAGGER_DEFINITION_LOCATION = File.separator
             + APIImportExportConstants.META_INFO_DIRECTORY + File.separator + "swagger.json";
