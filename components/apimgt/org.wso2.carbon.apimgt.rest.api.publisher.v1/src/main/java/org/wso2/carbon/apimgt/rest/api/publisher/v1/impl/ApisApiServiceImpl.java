@@ -1491,8 +1491,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //deletes the API
             apiProvider.deleteAPI(apiIdentifier, apiId);
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-            keyManager.deleteRegisteredResourceByAPIId(apiId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource

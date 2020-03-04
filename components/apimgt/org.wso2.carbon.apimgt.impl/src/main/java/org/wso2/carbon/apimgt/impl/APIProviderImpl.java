@@ -67,8 +67,9 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -100,6 +101,7 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
@@ -845,6 +847,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 contextCache.put(api.getContext(), Boolean.TRUE);
             }
         }
+
+        //notify key manager with API addition
+        registerOrUpdateResourceInKeyManager(api);
+    }
+
+    /**
+     * Notify the key manager with API update or addition
+     *
+     * @param api API
+     * @throws APIManagementException when error occurs when register/update API at Key Manager side
+     */
+    private void registerOrUpdateResourceInKeyManager(API api) throws APIManagementException {
+        //get new key manager instance for  resource registration.
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+        Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
+        if (registeredResource == null) {
+            boolean isNewResourceRegistered = keyManager.registerNewResource(api, null);
+            if (!isNewResourceRegistered) {
+                handleException("APIResource registration is failed while adding the API- " + api.getId().getApiName()
+                        + "-" + api.getId().getVersion());
+            }
+        } else {
+            //update APIResource.
+            String resourceId = (String) registeredResource.get("resourceId");
+            if (resourceId == null) {
+                handleException("APIResource update is failed because of empty resourceID.");
+            }
+            keyManager.updateRegisteredResource(api, registeredResource);
+        }
     }
 
     /**
@@ -1305,6 +1336,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
             throw new FaultGatewaysException(failedGateways);
         }
+
+        //notify key manager with API update
+        registerOrUpdateResourceInKeyManager(api);
     }
 
     @Override
@@ -2899,6 +2933,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             registry.commitTransaction();
             transactionCommitted = true;
 
+            //notify key manager with API addition
+            registerOrUpdateResourceInKeyManager(newAPI);
+
             if (log.isDebugEnabled()) {
                 String logMessage = "Successfully created new version : " + newVersion + " of : " + api.getId().getApiName();
                 log.debug(logMessage);
@@ -3687,6 +3724,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
             }
             */
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            if (identifier.toString() != null) {
+                keyManager.deleteRegisteredResourceByAPIId(identifier.toString());
+            }
         } catch (RegistryException e) {
             handleException("Failed to remove the API from : " + path, e);
         } catch (WorkflowException e) {
