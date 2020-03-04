@@ -282,7 +282,7 @@ public final class APIImportUtil {
                 apiId.addProperty(APIImportExportConstants.VERSION_ELEMENT,
                         apiVersion = apiVersion.replace(" ", ""));
             } else {
-                throw new IOException("API Name (id.apiName) or Version (id.version) must be provided in api.yaml");
+                throw new IOException("API Name (id.apiName) and Version (id.version) must be provided in api.yaml");
             }
 
             String prevTenantDomain = MultitenantUtils
