@@ -352,7 +352,8 @@ public class APIAdminImpl implements APIAdmin {
         return apiMgtDAO.getworkflows(workflowType, status , tenantDomain );
     }
 
-    public Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status, String tenantDomain) throws APIManagementException {
+    public Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status,
+                                                                      String tenantDomain) throws APIManagementException {
 
         Workflow workflow=apiMgtDAO.getworkflowReferenceByExternalWorkflowReferenceID(externelWorkflowRef, status ,tenantDomain );
 

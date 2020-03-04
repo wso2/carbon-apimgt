@@ -50,7 +50,6 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
 
         super.execute(workflowDTO);
 
-
         return new GeneralWorkflowResponse();
     }
 
@@ -63,7 +62,6 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
      */
     @Override
     public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
-
 
         workFlowDTO.setUpdatedTime(System.currentTimeMillis());
         ApiMgtDAO dao = ApiMgtDAO.getInstance();
@@ -103,8 +101,6 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
         }
 
         return new GeneralWorkflowResponse();
-
-
     }
 
     @Override
@@ -133,5 +129,4 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
             throw new WorkflowException(errorMsg, axisFault);
         }
     }
-
 }

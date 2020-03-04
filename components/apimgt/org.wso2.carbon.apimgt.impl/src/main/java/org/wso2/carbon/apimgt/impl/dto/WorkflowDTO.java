@@ -63,11 +63,9 @@ public class WorkflowDTO implements Serializable {
     private JSONObject properties;
 
     public WorkflowDTO(){
-        metadata =new JSONObject();
-        properties =new JSONObject();
+        metadata = new JSONObject();
+        properties = new JSONObject();
     }
-
-
 
     public String getProperties(String key) {
         return properties.get(key).toString();

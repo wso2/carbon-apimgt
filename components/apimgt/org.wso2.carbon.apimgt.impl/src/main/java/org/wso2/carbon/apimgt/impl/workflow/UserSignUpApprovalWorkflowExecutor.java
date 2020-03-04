@@ -49,7 +49,6 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
 
         super.execute(workflowDTO);
 
-
         return new GeneralWorkflowResponse();
     }
 

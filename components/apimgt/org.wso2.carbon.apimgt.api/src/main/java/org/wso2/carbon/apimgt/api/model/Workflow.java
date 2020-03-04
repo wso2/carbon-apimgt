@@ -33,10 +33,9 @@ public class Workflow {
 
     private JSONObject properties;
 
-    public Workflow()
-    {
-        metadata=new JSONObject();
-        properties=new JSONObject();
+    public Workflow() {
+        metadata = new JSONObject();
+        properties = new JSONObject();
     }
 
     public String getWorkflowReference() {
@@ -136,7 +135,7 @@ public class Workflow {
     }
 
     public String getMetadata(String key) {
-        return metadata.get(key).toString();
+        return (String)metadata.get(key);
     }
 
     public void setMetadata(String key, String value) {
@@ -144,7 +143,7 @@ public class Workflow {
     }
 
     public String getProperties(String key) {
-        return properties.get(key).toString();
+        return (String)properties.get(key);
     }
 
     public void setProperties(String key, String value) {

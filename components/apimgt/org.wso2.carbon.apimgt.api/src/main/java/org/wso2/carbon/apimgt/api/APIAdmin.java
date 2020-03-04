@@ -204,6 +204,5 @@ public interface APIAdmin  {
 
     Workflow[] getworkflows(String workflowType, String status, String tenantDomain) throws APIManagementException;
 
-
     Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status, String tenantDomain) throws APIManagementException;
 }
