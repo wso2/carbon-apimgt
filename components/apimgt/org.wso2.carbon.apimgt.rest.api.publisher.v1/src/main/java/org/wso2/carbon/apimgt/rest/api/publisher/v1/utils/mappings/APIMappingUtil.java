@@ -1097,7 +1097,7 @@ public class APIMappingUtil {
             List<LifecycleStateCheckItemsDTO> checkItemsDTOList = new ArrayList<>();
             for (Object checkListItemObj : checkListItems) {
                 CheckListItem checkListItem = (CheckListItem) checkListItemObj;
-                if(!apiOlderVersionExist && checkListItem.getName().equals(APIConstants.DEPRECATE_CHECK_LIST_ITEM)){
+                if (!apiOlderVersionExist && checkListItem.getName().equals(APIConstants.DEPRECATE_CHECK_LIST_ITEM)) {
                     continue;
                 }
 
