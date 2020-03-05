@@ -17,18 +17,19 @@
  */
 
 import React, {
-    useState, useEffect, useContext, useRef,
+    useState, useEffect, useRef, useContext,
 } from 'react';
 import GraphiQL from 'graphiql';
 import fetch from 'isomorphic-fetch';
 import 'graphiql/graphiql.css';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
+import Box from '@material-ui/core/Box';
 import { FormattedMessage } from 'react-intl';
 import GraphiQLExplorer from 'graphiql-explorer';
-import Api from 'AppData/api';
-import Box from '@material-ui/core/Box';
 import { ApiContext } from '../ApiContext';
+import Api from '../../../../data/api';
+
 import Progress from '../../../Shared/Progress';
 
 const { buildSchema } = require('graphql');
@@ -38,17 +39,24 @@ const { buildSchema } = require('graphql');
  * @param {*} props
  */
 export default function GraphQLUI(props) {
-    const { accessToken, authorizationHeader, URLs } = props;
+    const {
+        accessToken,
+        authorizationHeader,
+        URLs,
+        securitySchemeType,
+        username,
+        password,
+    } = props;
     const { api } = useContext(ApiContext);
     const [schema, setSchema] = useState(null);
     const [query, setQuery] = useState('');
     const [isExplorerOpen, setIsExplorerOpen] = useState(false);
     const graphiqlEl = useRef(null);
-
     useEffect(() => {
         const apiID = api.id;
         const apiClient = new Api();
         const promiseGraphQL = apiClient.getGraphQLSchemaByAPIId(apiID);
+
         promiseGraphQL
             .then((res) => {
                 const graphqlSchemaObj = buildSchema(res.data);
@@ -72,6 +80,9 @@ export default function GraphQLUI(props) {
         let token;
         if (authorizationHeader === 'apikey') {
             token = accessToken;
+        } else if (securitySchemeType === 'BASIC') {
+            const credentials = username + ':' + password;
+            token = 'Basic ' + btoa(credentials);
         } else {
             token = 'Bearer ' + accessToken;
         }
