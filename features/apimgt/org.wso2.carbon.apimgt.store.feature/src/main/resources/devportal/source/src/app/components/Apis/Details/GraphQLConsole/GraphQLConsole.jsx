@@ -38,10 +38,6 @@ const useStyles = makeStyles((theme) => ({
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
     },
-    root: {
-        margin: theme.spacing(1),
-        padding: theme.spacing(1),
-    },
 }));
 
 
@@ -52,9 +48,9 @@ export default function GraphQLConsole() {
     const [URLs, setURLs] = useState(environmentObject[0].URLs);
     const [accessToken, setAccessTocken] = useState('');
     const [securitySchemeType, setSecuritySchemeType] = useState('OAUTH');
-    const environments = api.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
-    const [selectedEnvironment, setSelectedEnvironment] = useState(environments[0]);
     const [notFound, setFound] = useState(false);
+    const [username, setUserName] = useState('');
+    const [password, setPassword] = useState('');
 
     if (api == null) {
         return <Progress />;
@@ -63,11 +59,15 @@ export default function GraphQLConsole() {
         return 'API Not found !';
     }
     let isApiKeyEnabled = false;
+    let isBasicAuthEnabled = false;
+    let isOAuthEnabled = false;
     let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
     let prefix = 'Bearer';
 
     if (api && api.securityScheme) {
         isApiKeyEnabled = api.securityScheme.includes('api_key');
+        isBasicAuthEnabled = api.securityScheme.includes('basic_auth');
+        isOAuthEnabled = api.securityScheme.includes('oauth2');
         if (isApiKeyEnabled && securitySchemeType === 'API-KEY') {
             authorizationHeader = 'apikey';
             prefix = '';
@@ -79,29 +79,35 @@ export default function GraphQLConsole() {
             <Typography variant='h4' className={classes.titleSub}>
                 <FormattedMessage id='Apis.Details.GraphQLConsole.GraphQLConsole.title' defaultMessage='Try Out' />
             </Typography>
-            <Paper className={classes.root}>
-                <GraphQLAuthentication
-                    api={api}
-                    accessToken={accessToken}
-                    setAccessTocken={setAccessTocken}
-                    authorizationHeader={authorizationHeader}
-                    securitySchemeType={securitySchemeType}
-                    setSecuritySchemeType={setSecuritySchemeType}
-                    prefix={prefix}
-                    isApiKeyEnabled={isApiKeyEnabled}
-                    selectedEnvironment={selectedEnvironment}
-                    setSelectedEnvironment={setSelectedEnvironment}
-                    environments={environments}
-                    setURLs={setURLs}
-                    environmentObject={environmentObject}
-                    setFound={setFound}
-                />
-            </Paper>
+
+            <GraphQLAuthentication
+                api={api}
+                securitySchemeType={securitySchemeType}
+                setSecuritySchemeType={setSecuritySchemeType}
+                username={username}
+                setUserName={setUserName}
+                password={password}
+                setPassword={setPassword}
+                prefix={prefix}
+                isApiKeyEnabled={isApiKeyEnabled}
+                isOAuthEnabled={isOAuthEnabled}
+                isBasicAuthEnabled={isBasicAuthEnabled}
+                accessToken={accessToken}
+                setAccessTocken={setAccessTocken}
+                authorizationHeader={authorizationHeader}
+                setURLs={setURLs}
+                environmentObject={environmentObject}
+                setFound={setFound}
+            />
+
             <Paper className={classes.paper}>
                 <GraphQLUI
                     accessToken={accessToken}
                     authorizationHeader={authorizationHeader}
                     URLs={URLs}
+                    username={username}
+                    password={password}
+                    securitySchemeType={securitySchemeType}
                 />
             </Paper>
         </>
