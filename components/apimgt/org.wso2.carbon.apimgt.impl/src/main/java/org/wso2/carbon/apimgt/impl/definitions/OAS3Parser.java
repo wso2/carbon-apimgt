@@ -508,7 +508,7 @@ public class OAS3Parser extends APIDefinition {
             io.swagger.v3.oas.models.info.Info info = openAPI.getInfo();
             OASParserUtil.updateValidationResponseAsSuccess(validationResponse, apiDefinition, openAPI.getOpenapi(),
                     info.getTitle(), info.getVersion(), null, info.getDescription(),
-                    openAPI.getServers()==null ? null : openAPI.getServers().get(0).getUrl());
+                    (openAPI.getServers()==null || openAPI.getServers().isEmpty() ) ? null : openAPI.getServers().get(0).getUrl());
             validationResponse.setParser(this);
             if (returnJsonContent) {
                 if (!apiDefinition.trim().startsWith("{")) { // not a json (it is yaml)
