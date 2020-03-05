@@ -9822,7 +9822,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, contextTemplate);
+            ps.setString(1, contextTemplate.toLowerCase());
 
             resultSet = ps.executeQuery();
             if (resultSet.next()) {
