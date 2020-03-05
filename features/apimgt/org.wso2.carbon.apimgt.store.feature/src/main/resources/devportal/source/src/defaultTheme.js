@@ -269,12 +269,14 @@ const DefaultConfigurations = {
                     image: '/site/public/images/flags/en.png',
                     imageWidth: 24, // in pixles
                     text: 'English',
+                    direction: 'ltr',
                 },
                 {
                     key: 'si',
                     image: '/site/public/images/flags/si.png',
                     imageWidth: 24, // in pixles
                     text: 'Sinhala',
+                    direction: 'ltr',
                 },
                 {
                     key: 'ar',
