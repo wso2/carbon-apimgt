@@ -318,11 +318,12 @@ class InfoBar extends React.Component {
      */
     handleAppDelete() {
         const { applicationId, intl } = this.props;
+        const { application } = this.state;
         const promisedDelete = Application.deleteApp(applicationId);
         let message = intl.formatMessage({
-            defaultMessage: 'Application deleted successfully!',
-            id: 'Applications.Listing.Listing.application.deleted.successfully',
-        });
+            defaultMessage: 'Application {name} deleted successfully!',
+            id: 'Applications.Details.InfoBar.application.deleted.successfully',
+        }, {name: application.name});
         promisedDelete.then((ok) => {
             if (ok) {
                 Alert.info(message);
@@ -333,8 +334,8 @@ class InfoBar extends React.Component {
             console.log(error);
             message = intl.formatMessage({
                 defaultMessage: 'Error while deleting application {name}',
-                id: 'Applications.Listing.Listing.application.deleting.error',
-            });
+                id: 'Applications.Details.InfoBar.application.deleting.error',
+            }, {name: application.name});
             Alert.error(message);
         });
     }

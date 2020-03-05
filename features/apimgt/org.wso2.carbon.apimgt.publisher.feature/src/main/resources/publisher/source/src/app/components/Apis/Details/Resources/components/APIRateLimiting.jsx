@@ -79,7 +79,7 @@ function APIRateLimiting(props) {
     function updateRateLimitingPolicy(event) {
         // If the selected option is resource, we set the api level rate limiting to null
         const userSelection = event.target.value === RateLimitingLevels.RESOURCE
-            ? null : apiFromContext.apiThrottlingPolicy;
+            ? null : '';
         if (onChange) {
             // Assumed controlled component
             onChange(userSelection);

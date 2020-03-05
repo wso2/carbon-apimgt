@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.6.50-SNAPSHOT</version>
+        <version>6.6.126-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -281,6 +281,7 @@
                                 <bundleDef>
                                     software.amazon.ion:ion-java:${software.amazon.ion.version}
                                 </bundleDef>
+                                <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>

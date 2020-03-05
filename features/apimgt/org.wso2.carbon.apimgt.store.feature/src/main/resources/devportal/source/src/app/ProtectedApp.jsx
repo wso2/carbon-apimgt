@@ -18,7 +18,6 @@
 
 import React, { Component } from 'react';
 import qs from 'qs';
-import { addLocaleData, IntlProvider } from 'react-intl';
 import { withTheme } from '@material-ui/core/styles';
 import Settings from 'Settings';
 import Tenants from 'AppData/Tenants';
@@ -30,22 +29,12 @@ import Base from './components/Base/index';
 import AuthManager from './data/AuthManager';
 import Loading from './components/Base/Loading/Loading';
 import Utils from './data/Utils';
+import User from './data/User';
 import ConfigManager from './data/ConfigManager';
 import AppRouts from './AppRouts';
 import TenantListing from './TenantListing';
 import CONSTS from './data/Constants';
 import LoginDenied from './LoginDenied';
-
-/**
- * Language.
- * @type {string}
- */
-const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
-
-/**
- * Language without region code.
- */
-const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
 
 /**
  * Render protected application paths
@@ -60,14 +49,16 @@ class ProtectedApp extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            messages: {},
             userResolved: false,
             scopesFound: false,
             tenantResolved: false,
             tenantList: [],
+            clientId: Utils.getCookieWithoutEnvironment(User.CONST.DEVPORTAL_CLIENT_ID),
+            sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.DEVPORTAL_SESSION_STATE),
         };
         this.environments = [];
-        this.loadLocale = this.loadLocale.bind(this);
+        this.checkSession = this.checkSession.bind(this);
+        this.handleMessage = this.handleMessage.bind(this);
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb */
     }
 
@@ -75,20 +66,7 @@ class ProtectedApp extends Component {
      *  Check if data available ,if not get the user info from existing token information
      */
     componentDidMount() {
-        let locale = languageWithoutRegionCode || language;
-        //The above can be overriden by the language switcher
-        const { custom: { languageSwitch: { active: languageSwitchActive } } } = this.props.theme;
-        if(languageSwitchActive){
-            let selectedLanguage = localStorage.getItem('language');
-            if(!selectedLanguage && languages && languages.length > 0){
-                selectedLanguage = languages[0].key;
-            }
-            if(selectedLanguage) {
-                locale = selectedLanguage;
-            }
-        }
-        this.loadLocale(locale);
-
+        window.addEventListener('message', this.handleMessage);
         const { location: { search } } = this.props;
         const { setTenantDomain, setSettings } = this.context;
         const { tenant } = queryString.parse(search);
@@ -125,6 +103,7 @@ class ProtectedApp extends Component {
         if (user) { // If token exisit in cookies and user info available in local storage
             const hasViewScope = user.scopes.includes('apim:subscribe');
             if (hasViewScope) {
+                this.checkSession();
                 this.setState({ userResolved: true, scopesFound: true });
             } else {
                 console.log('No relevant scopes found, redirecting to Anonymous View');
@@ -156,6 +135,7 @@ class ProtectedApp extends Component {
                                         error,
                                     );
                                 });
+                                this.checkSession();
                         } else {
                             console.log('No relevant scopes found, redirecting to Anonymous View');
                             this.setState({ userResolved: true });
@@ -176,20 +156,24 @@ class ProtectedApp extends Component {
         }
     }
 
-    /**
-     * Load locale file.
-     *
-     * @param {string} locale Locale name
-     */
-    loadLocale(locale = 'en') {
-        fetch(`${Settings.app.context}/site/public/locales/${locale}.json`)
-            .then((resp) => resp.json())
-            .then((messages) => {
-                // eslint-disable-next-line global-require, import/no-dynamic-require
-                addLocaleData(require(`react-intl/locale-data/${locale}`));
-                this.setState({ messages });
-            });
+    handleMessage(e) {
+        if (e.data === 'changed') {
+            window.location = Settings.app.context + '/services/configs?not-Login';
+        }
     }
+
+    /**
+     * Invoke checksession oidc endpoint.
+     */
+    checkSession() {
+        setInterval(() => {
+            const { clientId, sessionStateCookie } = this.state;
+            const msg = clientId + ' ' + sessionStateCookie; 
+            document.getElementById('iframeOP').contentWindow.postMessage(msg, 'https://' + window.location.host);
+        }, 2000);
+    }
+
+   
 
     /**
      * Change the environment with "environment" query parameter
@@ -227,13 +211,16 @@ class ProtectedApp extends Component {
      */
     render() {
         const {
-            userResolved, tenantList, notEnoughPermission, tenantResolved,
+            userResolved, tenantList, notEnoughPermission, tenantResolved, clientId
         } = this.state;
+        const checkSessionURL = 'https://'+ window.location.host + '/oidc/checksession?client_id='
+        + clientId + '&redirect_uri=https://' + window.location.host
+        + Settings.app.context + '/services/auth/callback/login';
         const { tenantDomain } = this.context;
         if (!userResolved) {
             return <Loading />;
         }
-        const { scopesFound, messages } = this.state;
+        const { scopesFound } = this.state;
         const isUserFound = AuthManager.getUser();
         let isAuthenticated = false;
         if (scopesFound && isUserFound) {
@@ -260,11 +247,16 @@ class ProtectedApp extends Component {
          * @returns {Component}
          */
         return (
-            <IntlProvider locale={language} messages={messages}>
-                <Base>
-                    <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
-                </Base>
-            </IntlProvider>
+            <Base>
+                <iframe
+                    title='iframeOP'
+                    id='iframeOP'
+                    src={checkSessionURL}
+                    width='0px'
+                    height='0px'
+                />     
+                <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
+            </Base>
         );
     }
 }

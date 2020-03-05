@@ -19,15 +19,15 @@
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
+import { injectIntl } from 'react-intl';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
-import AccountCircle from '@material-ui/icons/AccountCircle';
 import Button from '@material-ui/core/Button';
 import Hidden from '@material-ui/core/Hidden';
 import {
-    MenuItem, MenuList, ListItemIcon, ListItemText, Divider,
+    MenuItem, MenuList,
 } from '@material-ui/core';
 import Icon from '@material-ui/core/Icon';
 import PropTypes from 'prop-types';
@@ -40,15 +40,14 @@ import Paper from '@material-ui/core/Paper';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import { FormattedMessage } from 'react-intl';
 import Drawer from '@material-ui/core/Drawer';
+import { ListItemIcon, ListItem, ListItemText, List } from '@material-ui/core';
+import classNames from 'classnames';
 import HeaderSearch from 'AppComponents/Base/Header/Search/HeaderSearch';
 import Settings from 'AppComponents/Shared/SettingsContext';
 import { app } from 'Settings';
 import AuthManager from '../../data/AuthManager';
-import ConfigManager from '../../data/ConfigManager';
-import EnvironmentMenu from './Header/EnvironmentMenu';
 import LanuageSelector from './Header/LanuageSelector';
 import GlobalNavBar from './Header/GlobalNavbar';
-import Utils from '../../data/Utils';
 import VerticalDivider from '../Shared/VerticalDivider';
 
 const styles = (theme) => {
@@ -56,7 +55,9 @@ const styles = (theme) => {
     return {
         appBar: {
             position: 'relative',
-            background: theme.custom.appBar.background,
+            backgroundColor: theme.custom.appBar.background,
+            backgroundImage: `url(${app.context}${theme.custom.appBar.backgroundImage})`,
+            backgroundRepeat: 'no-repeat',
         },
         icon: {
             marginRight: theme.spacing(2),
@@ -70,6 +71,7 @@ const styles = (theme) => {
         },
         publicStore: {
             color: theme.palette.getContrastText(theme.custom.appBar.background),
+            minWidth: 'auto',
         },
         linkWrapper: {
             display: 'flex',
@@ -131,7 +133,9 @@ const styles = (theme) => {
         },
         icons: {
             marginRight: theme.spacing(),
-            fontSize: theme.spacing(3),
+            '&.material-icons': {
+                fontSize: theme.spacing(2),
+            }
         },
         banner: {
             color: theme.custom.banner.color,
@@ -142,6 +146,53 @@ const styles = (theme) => {
             display: 'flex',
             distributeContent: theme.custom.banner.textAlign,
             justifyContent: theme.custom.banner.textAlign,
+        },
+        listRoot: {
+            padding: 0,
+        },
+        listItemTextRoot: {
+            padding: 0,
+        },
+        listText: {
+            color: theme.palette.getContrastText(theme.custom.appBar.background),
+        },
+        listTextSmall: {
+            color: theme.palette.getContrastText(theme.custom.appBar.background),
+        },
+        smallIcon: {
+            marginRight: 5,
+            minWidth: 'auto',
+        },
+        links: {
+            display: 'flex',
+            justifyContent: 'center',
+        },
+        selected: {
+            background: theme.custom.appBar.activeBackground,
+            alignItems: 'center',
+            textDecoration: 'none',
+            color: theme.palette.getContrastText(theme.custom.appBar.activeBackground),
+        },
+        selectedText: {
+            color: theme.palette.getContrastText(theme.custom.appBar.activeBackground),
+        },
+        triangleDown: {
+            width: 0,
+            height: 0,
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderTop: `6px solid ${theme.custom.appBar.activeBackground}`,
+            fontSize: 0,
+            lineHeight: 0,
+            position: 'absolute',
+            bottom: -5,
+        },
+        listIconRoot: {
+            minWidth: 'auto',
+        },
+        listItemRoot: {
+            padding: `0 ${theme.spacing(1)}px 0 ${theme.spacing(1)}px `,
+            height: 30,
         },
     };
 };
@@ -162,56 +213,44 @@ class Layout extends React.Component {
     constructor(props) {
         super(props);
         this.toggleGlobalNavBar = this.toggleGlobalNavBar.bind(this);
+        const { history } = props;
+        history.listen((location) => {
+            this.ditectCurrentMenu(location);
+        });
     }
 
     state = {
-        environments: {},
-        environmentId: 0,
         nightMode: false,
         themeIndex: 0,
         left: false,
         openNavBar: false,
         openUserMenu: false,
+        selected: 'home',
     };
-
+    ditectCurrentMenu = (location) => {
+        const { pathname } = location;
+        if (/\/apis$/g.test(pathname) || /\/apis\//g.test(pathname)) {
+            this.setState({ selected: 'apis' });
+        } else if (/\/home$/g.test(pathname) || /\/home\//g.test(pathname)) {
+            this.setState({ selected: 'home' });
+        } else if (/\/applications$/g.test(pathname) || /\/applications\//g.test(pathname)) {
+            this.setState({ selected: 'applications' });
+        } else if (/\/settings$/g.test(pathname) || /\/settings\//g.test(pathname)) {
+            this.setState({ selected: 'settings' });
+        }
+    };
     componentWillMount() {
         const { theme } = this.props;
         document.body.style.backgroundColor = theme.custom.page.emptyAreadBackground || '#ffffff';
     }
 
     componentDidMount() {
-        // Get Environments
-        const promised_environments = ConfigManager.getConfigs()
-            .environments.then((response) => {
-                this.setState({
-                    environments: response.data.environments,
-                });
-            })
-            .catch((error) => {
-                console.error('Error while receiving environment configurations : ', error);
-            });
-
-        const storedThemeIndex = localStorage.getItem('themeIndex');
-        if (storedThemeIndex) {
-            this.setState({ themeIndex: parseInt(storedThemeIndex) });
-            let nightMode = false;
-            if (parseInt(storedThemeIndex) === 1) {
-                nightMode = true;
-            }
-            this.setState({ nightMode });
-        }
+        const { history: { location } } = this.props;
+        this.ditectCurrentMenu(location);
     }
 
     handleRequestCloseUserMenu = () => {
         this.setState({ openUserMenu: false });
-    };
-
-    handleEnvironmentChange = (event) => {
-        this.setState({ openEnvironmentMenu: false });
-        // TODO: [rnk] Optimize Rendering.
-        const environmentId = parseInt(event.target.id);
-        Utils.setEnvironment(this.state.environments[environmentId]);
-        this.setState({ environmentId });
     };
 
     /**
@@ -274,7 +313,7 @@ class Layout extends React.Component {
      * @memberof Layout
      */
     render() {
-        const { classes, theme, children } = this.props;
+        const { classes, theme, children, intl } = this.props;
         const {
             custom: {
                 banner: {
@@ -289,7 +328,7 @@ class Layout extends React.Component {
                 languageSwitch: { active: languageSwitchActive },
             },
         } = theme;
-        const { openNavBar, openUserMenu, environments } = this.state;
+        const { openNavBar, selected } = this.state;
         const { tenantDomain, setTenantDomain } = this.context;
         const user = AuthManager.getUser();
         // TODO: Refer to fix: https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810 ~tmkb
@@ -298,10 +337,13 @@ class Layout extends React.Component {
         };
         const paperStyles = {
             style: {
-                backgroundColor: theme.palette.background.drawer,
                 top: 64,
+                backgroundColor: theme.custom.appBar.background,
             },
         };
+
+        const strokeColor = theme.palette.getContrastText(theme.custom.appBar.background);
+        const strokeColorSelected = theme.palette.getContrastText(theme.custom.appBar.activeBackground);
         return (
             <>
                 {active && (
@@ -347,7 +389,14 @@ class Layout extends React.Component {
                                 <Hidden smDown>
                                     <VerticalDivider height={32} />
                                     <div className={classes.listInline}>
-                                        <GlobalNavBar smallView />
+                                        <GlobalNavBar
+                                            selected={selected}
+                                            drawerView={false}
+                                            iconWidth={16}
+                                            strokeColor={strokeColor}
+                                            strokeColorSelected={strokeColorSelected}
+                                            classes={classes}
+                                        />
                                     </div>
                                 </Hidden>
                                 <Hidden mdUp>
@@ -367,7 +416,14 @@ class Layout extends React.Component {
                                             onKeyDown={this.toggleGlobalNavBar}
                                         >
                                             <div className={classes.list}>
-                                                <GlobalNavBar smallView={false} />
+                                                <GlobalNavBar
+                                                    selected={selected}
+                                                    drawerView
+                                                    iconWidth={24}
+                                                    strokeColor={strokeColor}
+                                                    strokeColorSelected={strokeColorSelected}
+                                                    classes={classes}
+                                                />
                                             </div>
                                         </div>
                                     </Drawer>
@@ -395,29 +451,42 @@ class Layout extends React.Component {
                                         </Button>
                                     </Link>
                                 )}
-                                <VerticalDivider height={72} />
-                                {/* Environment menu */}
-                                <EnvironmentMenu
-                                    environments={environments}
-                                    environmentLabel={Utils.getEnvironment().label}
-                                    handleEnvironmentChange={this.handleEnvironmentChange}
-                                    id='environmentMenu'
-                                />
+                                <VerticalDivider height={64} />
                                 {languageSwitchActive && <LanuageSelector />}
                                 {user ? (
                                     <>
-                                         <div className={classes.linkWrapper}>
-                                            <Link to='/settings' id='settingsLink'>
-                                                <Button className={classes.userLink}>
-                                                    <Icon className={classes.icons}>settings</Icon>
-                                                    <Hidden mdDown>
-                                                        <FormattedMessage
-                                                            id='Base.index.settings.caption'
-                                                            defaultMessage='Settings'
-                                                        />
-                                                    </Hidden>
-                                                </Button>
-                                            </Link>
+                                        <div className={classes.linkWrapper}>
+                                            <List className={classes.listRoot}>
+                                                <Link to='/settings' id='settingsLink' className={classNames({ [classes.selected]: selected === 'settings', [classes.links]: true })}>
+                                                    <ListItem button>
+                                                        <ListItemIcon classes={{ root: classes.listIconRoot }}>
+                                                            <Icon
+                                                                className={classes.icons}
+                                                                style={{
+                                                                    color: selected === 'settings'
+                                                                        ? strokeColorSelected
+                                                                        : strokeColor
+                                                                }}>settings</Icon>
+                                                        </ListItemIcon>
+                                                        <Hidden mdDown>
+                                                             <ListItemText
+                                                                classes={{
+                                                                    root: classes.listItemTextRoot,
+                                                                    primary: classNames({
+                                                                        [classes.selectedText]: selected === 'settings',
+                                                                        [classes.listText]: selected !== 'settings',
+                                                                    }),
+                                                                }}
+                                                                primary={intl.formatMessage({
+                                                                    id: 'Base.Header.GlobalNavbar.menu.settings',
+                                                                    defaultMessage: 'Settings',
+                                                                })}
+                                                            />
+                                                        </Hidden>
+                                                    </ListItem>
+                                                    {selected === 'settings' && (<div className={classes.triangleDown}></div>)}
+                                                </Link>
+                                            </List>
                                             <Button
                                                 buttonRef={(node) => {
                                                     this.anchorEl = node;
@@ -431,55 +500,48 @@ class Layout extends React.Component {
                                                 <Icon className={classes.icons}>person</Icon>
                                                 {user.name}
                                             </Button>
-                                        <Popper
-                                            id='userPopup'
-                                            open={this.state.openUserMenu}
-                                            anchorEl={this.anchorEl}
-                                            transition
-                                            disablePortal
-                                            anchorOrigin={{
-                                                vertical: 'bottom',
-                                                horizontal: 'center',
-                                            }}
-                                            transformOrigin={{
-                                                vertical: 'top',
-                                                horizontal: 'center',
-                                            }}
-                                        >
-                                            {({ TransitionProps, placement }) => (
-                                                <Grow
-                                                    {...TransitionProps}
-                                                    id='menu-list-grow'
-                                                    style={{
-                                                        transformOrigin:
-                                                            placement === 'bottom' ? 'center top' : 'center bottom',
-                                                    }}
-                                                >
-                                                    <Paper>
-                                                        <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
-                                                            <MenuList>
-                                                                <MenuItem onClick={this.doOIDCLogout}>
-                                                                    <FormattedMessage
-                                                                        id='Base.index.logout'
-                                                                        defaultMessage='Logout'
-                                                                    />
-                                                                </MenuItem>
-                                                            </MenuList>
-                                                        </ClickAwayListener>
-                                                    </Paper>
-                                                </Grow>
-                                            )}
-                                        </Popper>
-                                    </div>
+                                            <Popper
+                                                id='userPopup'
+                                                open={this.state.openUserMenu}
+                                                anchorEl={this.anchorEl}
+                                                transition
+                                                disablePortal
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'center',
+                                                }}
+                                                transformOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'center',
+                                                }}
+                                            >
+                                                {({ TransitionProps, placement }) => (
+                                                    <Grow
+                                                        {...TransitionProps}
+                                                        id='menu-list-grow'
+                                                        style={{
+                                                            transformOrigin:
+                                                                placement === 'bottom' ? 'center top' : 'center bottom',
+                                                        }}
+                                                    >
+                                                        <Paper>
+                                                            <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
+                                                                <MenuList>
+                                                                    <MenuItem onClick={this.doOIDCLogout}>
+                                                                        <FormattedMessage
+                                                                            id='Base.index.logout'
+                                                                            defaultMessage='Logout'
+                                                                        />
+                                                                    </MenuItem>
+                                                                </MenuList>
+                                                            </ClickAwayListener>
+                                                        </Paper>
+                                                    </Grow>
+                                                )}
+                                            </Popper>
+                                        </div>
                                     </>
                                 ) : (
-                                    <>
-                                        {/* TODO: uncomment when the feature is working */}
-                                        {/* <Link to={'/sign-up'}>
-                                     <Button className={classes.userLink}>
-                                     <HowToReg /> sign-up
-                                     </Button>
-                                     </Link> */}
                                         <div className={classes.linkWrapper}>
                                             <a href={app.context + '/services/configs'}>
                                                 <Button className={classes.userLink}>
@@ -488,8 +550,7 @@ class Layout extends React.Component {
                                                 </Button>
                                             </a>
                                         </div>
-                                    </>
-                                )}
+                                    )}
                             </Toolbar>
                         </AppBar>
                         <div className={classes.contentWrapper}>{children}</div>
@@ -518,4 +579,4 @@ Layout.propTypes = {
     theme: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Layout);
+export default injectIntl(withRouter(withStyles(styles, { withTheme: true })(Layout)));

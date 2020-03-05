@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.6.50-SNAPSHOT</version>
+        <version>6.6.126-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -155,6 +155,9 @@
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tier.cache.stub:${carbon.apimgt.version}
                                 </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.output.adapter.http:${carbon.apimgt.version}
+                                </bundleDef>
                                 <bundleDef>org.apache.woden.wso2:woden</bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
@@ -260,6 +263,19 @@
                     <include>publisher/site/**</include>
                     <include>publisher/services/**</include>
                     <include>publisher/jaggery.conf</include>
+                    <include>publisher/source/**</include>
+                    <include>publisher/override/**</include>
+                    <include>publisher/.eslintignore</include>
+                    <include>publisher/.eslintrc.js</include>
+                    <include>publisher/.npmrc</include>
+                    <include>publisher/babel.config.js</include>
+                    <include>publisher/jest.config.js</include>
+                    <include>publisher/jsconfig.json</include>
+                    <include>publisher/loader.js</include>
+                    <include>publisher/package-lock.json</include>
+                    <include>publisher/package.json</include>
+                    <include>publisher/webpack.config.js</include>
+                    <include>publisher/Readme.txt</include>
                     <include>lifecycles/APILifeCycle.xml</include>
                     <include>p2.inf</include>
                     <include>apipublisher/**</include>

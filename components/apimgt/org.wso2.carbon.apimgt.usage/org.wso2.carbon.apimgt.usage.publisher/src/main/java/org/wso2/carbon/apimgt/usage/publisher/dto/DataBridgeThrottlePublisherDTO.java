@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,13 +45,14 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
         setGatewayType(throttlePublisherDTO.getGatewayType());
         setSubscriber(throttlePublisherDTO.getSubscriber());
         setHostName(throttlePublisherDTO.getHostName());
+        setProperties(throttlePublisherDTO.getProperties());
     }
 
     public Object createPayload() {
         return new Object[] { getUsername(), getTenantDomain(), getApiname(),
                 getVersion(), getContext(), getApiCreator(), getApiCreatorTenantDomain(), getApplicationId(),
                 getApplicationName(), getSubscriber(), getThrottledOutReason(), getGatewayType(), getThrottledTime(),
-                getHostName() };
+                getHostName(), DataPublisherUtil.toJsonString(getProperties()) };
     }
 
     public Object createMetaData() {

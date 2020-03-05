@@ -30,17 +30,18 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.TestUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.constants.Constants;
-import org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.util.APIMappingUtil;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.internal.ServiceDataHolder;
+import org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.util.APIMappingUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.AccessTokenDTO;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.ConfigDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.OAuthApplicationInfoDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.util.HttpRequestUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.util.TokenUtil;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -77,23 +78,27 @@ public class APISynchronizationTaskTest {
         PowerMockito.mockStatic(TokenUtil.class);
         OAuthApplicationInfoDTO oAuthDto = Mockito.mock(OAuthApplicationInfoDTO.class);
 
-        PowerMockito.when(TokenUtil.registerClient()).thenReturn(oAuthDto);
+        PowerMockito.when(TokenUtil.registerClient(any(String.class), any(char[].class))).thenReturn(oAuthDto);
         Mockito.doReturn(Constants.CLIENT_ID).when(oAuthDto)
                 .getClientId();
         Mockito.doReturn(Constants.CLIENT_SECRET).when(oAuthDto)
                 .getClientSecret();
 
-        AccessTokenDTO accessTknDTO = Mockito.mock(AccessTokenDTO.class);
+        AccessTokenDTO accessTokenDTO = Mockito.mock(AccessTokenDTO.class);
         PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(char[].class), any(String.class)))
-                .thenReturn(accessTknDTO);
-        Mockito.doReturn(Constants.ACCESS_TOKEN).when(accessTknDTO)
+                .thenReturn(accessTokenDTO);
+        PowerMockito.when(TokenUtil.generateAccessToken(any(String.class), any(char[].class), any(String.class),
+                any(String.class), any(char[].class)))
+                .thenReturn(accessTokenDTO);
+
+        Mockito.doReturn(Constants.ACCESS_TOKEN).when(accessTokenDTO)
                 .getAccessToken();
 
         PowerMockito.mockStatic(HttpClients.class);
         HttpClient httpClient = Mockito.mock(HttpClient.class);
         PowerMockito.mockStatic(ConfigManager.class);
-        ConfigManager configManager = Mockito.mock(ConfigManager.class);
-        PowerMockito.when(ConfigManager.getConfigManager()).thenReturn(configManager);
+        ConfigDTO configDTO = Mockito.mock(ConfigDTO.class);
+        PowerMockito.when(ConfigManager.getConfigurationDTO()).thenReturn(configDTO);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
 

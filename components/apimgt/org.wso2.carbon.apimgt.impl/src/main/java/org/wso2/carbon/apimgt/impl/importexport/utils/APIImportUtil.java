@@ -235,6 +235,8 @@ public final class APIImportUtil {
         API importedApi = null;
         API targetApi; //target API when overwrite is true
         String prevProvider;
+        String apiName;
+        String apiVersion;
         String currentTenantDomain;
         String currentStatus;
         String targetStatus;
@@ -269,7 +271,20 @@ public final class APIImportUtil {
 
             //locate the "providerName" within the "id" and set it as the current user
             JsonObject apiId = configObject.getAsJsonObject(APIImportExportConstants.ID_ELEMENT);
+
             prevProvider = apiId.get(APIImportExportConstants.PROVIDER_ELEMENT).getAsString();
+            apiName = apiId.get(APIImportExportConstants.NAME_ELEMENT).getAsString();
+            apiVersion = apiId.get(APIImportExportConstants.VERSION_ELEMENT).getAsString();
+            // Remove spaces of API Name/version if present
+            if (apiName != null && apiVersion != null) {
+                apiId.addProperty(APIImportExportConstants.NAME_ELEMENT,
+                        apiName = apiName.replace(" ", ""));
+                apiId.addProperty(APIImportExportConstants.VERSION_ELEMENT,
+                        apiVersion = apiVersion.replace(" ", ""));
+            } else {
+                throw new IOException("API Name (id.apiName) and Version (id.version) must be provided in api.yaml");
+            }
+
             String prevTenantDomain = MultitenantUtils
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(prevProvider));
             currentTenantDomain = MultitenantUtils
@@ -302,9 +317,6 @@ public final class APIImportUtil {
 
             // Store imported API status
             targetStatus = importedApi.getStatus();
-
-            String apiName = importedApi.getId().getName();
-            String apiVersion = importedApi.getId().getVersion();
             if (Boolean.TRUE.equals(overwrite)) {
                 String provider = APIUtil
                         .getAPIProviderFromAPINameVersionTenant(apiName, apiVersion, currentTenantDomain);
@@ -545,6 +557,13 @@ public final class APIImportUtil {
         Documentation[] documentations;
         String docDirectoryPath = pathToArchive + File.separator + APIImportExportConstants.DOCUMENT_DIRECTORY;
         try {
+            //remove all documents associated with the API before update
+            List<Documentation> documents = apiProvider.getAllDocumentation(apiIdentifier);
+            if (documents != null) {
+                for (Documentation documentation : documents) {
+                    apiProvider.removeDocumentation(apiIdentifier, documentation.getId());
+                }
+            }
             //load document file if exists
             if (CommonUtil.checkFileExistence(pathToYamlFile)) {
                 if (log.isDebugEnabled()) {
@@ -598,16 +617,16 @@ public final class APIImportUtil {
                         APIUtil.setResourcePermissions(importedApi.getId().getProviderName(),
                                 importedApi.getVisibility(), visibleRoles, filePathDoc);
                         doc.setFilePath(apiProvider.addResourceFile(importedApi.getId(), filePathDoc, apiDocument));
+                    } catch (FileNotFoundException e) {
+                        //this error is logged and ignored because documents are optional in an API
+                        log.error("Failed to locate the document files of the API: " + apiIdentifier.getApiName(), e);
+                        continue;
                     }
                 }
 
-                //Check if documentations exists with same name for given API name, provider and version.
-                //Update or create documentation accordingly.
-                if (apiProvider.isDocumentationExist(apiIdentifier, doc.getName())) {
-                    apiProvider.updateDocumentation(apiIdentifier, doc);
-                } else {
-                    apiProvider.addDocumentation(apiIdentifier, doc);
-                }
+                //Add documentation accordingly.
+                apiProvider.addDocumentation(apiIdentifier, doc);
+
                 if (docContentExists) {
                     //APIProvider.addDocumentationContent method handles both create/update documentation content
                     apiProvider.addDocumentationContent(importedApi, doc.getName(), inlineContent);

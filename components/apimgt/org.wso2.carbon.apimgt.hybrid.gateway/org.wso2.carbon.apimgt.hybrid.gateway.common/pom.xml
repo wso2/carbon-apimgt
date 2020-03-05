@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>org.wso2.carbon.apimgt.hybrid.gateway</artifactId>
-        <version>6.6.50-SNAPSHOT</version>
+        <version>6.6.126-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -29,7 +29,7 @@
     <packaging>bundle</packaging>
 
     <name>WSO2 Carbon - Hybrid API Gateway Common</name>
-    <description>Common functionalities used in hybrid API gateway components</description>
+    <description>Common functionality used in hybrid API gateway components</description>
     <url>http://www.wso2.com</url>
 
     <dependencies>
@@ -103,6 +103,12 @@
             <artifactId>pax-logging-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.consensys.cava</groupId>
+            <artifactId>cava-toml</artifactId>
+            <version>${version.cava-toml}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
@@ -122,6 +128,16 @@
             <artifactId>org.jacoco.agent</artifactId>
             <classifier>runtime</classifier>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.7.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -178,6 +194,7 @@
                             org.wso2.carbon.apimgt.api.*; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.governance.lcm.*,
                             org.wso2.carbon.registry.*; version="${carbon.registry.imp.pkg.version}",
+                            net.consensys.*,
                             org.json.*;
                         </Import-Package>
                     </instructions>
@@ -203,4 +220,7 @@
             </plugin>
         </plugins>
     </build>
+    <properties>
+        <version.cava-toml>0.5.0</version.cava-toml>
+    </properties>
 </project>

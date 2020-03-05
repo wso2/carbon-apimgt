@@ -18,6 +18,11 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
+import java.math.BigInteger;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 public class IPCondition extends Condition {
 	
     private String specificIP;
@@ -69,29 +74,78 @@ public class IPCondition extends Condition {
         return ipAddressinLong;
     }
     
+    private BigInteger ipToBigInteger(String ip) {
+        InetAddress address;
+        try {
+            address = InetAddress.getByName(ip);
+            byte[] bytes = address.getAddress();
+            return new BigInteger(1, bytes);
+        } catch (UnknownHostException e) {
+            //ignore the error 
+        }
+        return BigInteger.ZERO;
+    }
+    
+    /**
+     * Check whether the version of the IP is v6
+     * @param ip
+     * @return boolean
+     */
+    public static boolean isIPv6Address(String ip) {
+        InetAddress address;
+        try {
+            address = InetAddress.getByName(ip);
+            if (address instanceof Inet6Address) {
+                return true;
+            }
+        } catch (UnknownHostException e) {
+            // ignore the error
+        }
+        return false;
+    }
 
     @Override
     public String getCondition() {
     	String condition = null;
     	if(PolicyConstants.IP_SPECIFIC_TYPE.equalsIgnoreCase(getType())){
-    		long ip = ipToLong(getSpecificIP());
-            condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL
-                    +ip +PolicyConstants.END_LONG +PolicyConstants.CLOSE_BRACKET;
+            if (isIPv6Address(specificIP)) {
+                BigInteger ip = ipToBigInteger(getSpecificIP());
+                //(throttler:bigIntcmp(map:get(propertiesMap,'ipv6'), '338288524927261089654173758656056328191')==0)
+                condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeNameForIPv6(ip) + PolicyConstants.EQUAL + 0
+                        + PolicyConstants.CLOSE_BRACKET;
+            } else {
+                long ip = ipToLong(getSpecificIP());
+                condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL
+                        +ip +PolicyConstants.END_LONG +PolicyConstants.CLOSE_BRACKET;    
+            }
             if (isInvertCondition()) {
                 condition = PolicyConstants.INVERT_CONDITION + condition;
             }
     	}
     	
     	if(PolicyConstants.IP_RANGE_TYPE.equalsIgnoreCase(getType())){
-    		 long ipStart = ipToLong(getStartingIP());
-    	        long ipEnd = ipToLong(getEndingIP());
-            condition = PolicyConstants.OPEN_BRACKET + ipStart + PolicyConstants.END_LONG + PolicyConstants.LESS_THAN
-                    + getQueryAttributeName() + PolicyConstants.AND  + ipEnd + PolicyConstants.END_LONG +
-                    PolicyConstants.GREATER_THAN + getQueryAttributeName()
-    	                + PolicyConstants.CLOSE_BRACKET;
-    	        if (isInvertCondition()) {
-    	            condition = PolicyConstants.INVERT_CONDITION + condition;
-    	        }
+            if (isIPv6Address(startingIP) && isIPv6Address(endingIP)) {
+                BigInteger ipStart = ipToBigInteger(getStartingIP());
+                BigInteger ipEnd = ipToBigInteger(getEndingIP());
+                /*
+                (throttler:bigIntcmp(map:get(propertiesMap,'ipv6'), '338288524927261089654173758656056315167')>=0 
+                   AND throttler:bigIntcmp(map:get(propertiesMap,'ipv6'), '338288524927261089654173758656056328191')<=0)
+                */
+                condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeNameForIPv6(ipStart)
+                        + PolicyConstants.GREATER_THAN + 0 + PolicyConstants.AND + getQueryAttributeNameForIPv6(ipEnd)
+                        + PolicyConstants.LESS_THAN + 0 + PolicyConstants.CLOSE_BRACKET;
+            } else {
+                long ipStart = ipToLong(getStartingIP());
+                long ipEnd = ipToLong(getEndingIP());
+                condition = PolicyConstants.OPEN_BRACKET + ipStart + PolicyConstants.END_LONG
+                        + PolicyConstants.LESS_THAN + getQueryAttributeName() + PolicyConstants.AND + ipEnd
+                        + PolicyConstants.END_LONG + PolicyConstants.GREATER_THAN + getQueryAttributeName()
+                        + PolicyConstants.CLOSE_BRACKET;
+            }
+
+            if (isInvertCondition()) {
+                condition = PolicyConstants.INVERT_CONDITION + condition;
+            }
     	}
         
         return condition;
@@ -117,5 +171,9 @@ public class IPCondition extends Condition {
         return msg;
     }
       
+    private String getQueryAttributeNameForIPv6(BigInteger ip) {
+        return "throttler:bigIntcmp(map:get(propertiesMap,'ipv6'), " + PolicyConstants.QUOTE + ip
+                + PolicyConstants.QUOTE + PolicyConstants.CLOSE_BRACKET;
+    }
     
 }

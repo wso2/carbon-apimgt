@@ -36,11 +36,13 @@ import Badge from '@material-ui/core/Badge';
 import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 // spliced operation components
 
+import { FormattedMessage } from 'react-intl';
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
 import OperationGovernance from './operationComponents/OperationGovernance';
 import AWSLambdaSettings from './operationComponents/AWSLambdaSettings';
 import Parameters from './operationComponents/Parameters';
 import SOAPToRESTListing from './operationComponents/SOAPToREST/SOAPToRESTListing';
+import { getOperationScopes } from '../operationUtils';
 
 /**
  *
@@ -67,6 +69,7 @@ function Operation(props) {
         target,
         verb,
         arns,
+        resolvedSpec,
     } = props;
     const [isExpanded, setIsExpanded] = useState(false);
     const useStyles = makeStyles((theme) => {
@@ -133,7 +136,10 @@ function Operation(props) {
                 <Box className={classes.overlayUnmarkDelete}>
                     <Tooltip title='Marked for delete' aria-label='Marked for delete'>
                         <Button onClick={toggleDelete} variant='outlined' style={{ marginTop: '10px' }}>
-                            Undo Delete
+                            <FormattedMessage
+                                id='Apis.Details.Resources.components.Operation.undo.delete'
+                                defaultMessage='Undo Delete'
+                            />
                         </Button>
                     </Tooltip>
                 </Box>
@@ -167,7 +173,6 @@ function Operation(props) {
                             </Badge>
                             <Typography display='inline' style={{ margin: '0px 30px' }} variant='h6' gutterBottom>
                                 {target}
-
                                 <Typography
                                     display='inline'
                                     style={{ margin: '0px 30px' }}
@@ -178,29 +183,61 @@ function Operation(props) {
                                 </Typography>
                             </Typography>
                         </Grid>
-                        {Boolean(isUsedInAPIProduct) && (
-                            <Grid item md={4}>
-                                <Box display='flex'>
+                        {(isUsedInAPIProduct) ? (
+                            <Grid item md={3}>
+                                <Box display='flex' justifyContent='center'>
                                     <ReportProblemOutlinedIcon fontSize='small' />
                                     <Box display='flex' ml={1} mt={1 / 4} fontSize='caption.fontSize'>
-                                        This operation is used in
-                                        {' '}
-                                        {isUsedInAPIProduct}
-                                        {' '}
-API product(s)
+                                        <FormattedMessage
+                                            id={'Apis.Details.Resources.components.Operation.this.operation.'
+                                            + 'used.in.products'}
+                                            defaultMessage={'This operation is used in {isUsedInAPIProduct} API '
+                                            + 'product(s)'}
+                                            values={{ isUsedInAPIProduct }}
+                                        />
                                     </Box>
                                 </Box>
                             </Grid>
+                        ) : (
+                            <Grid item md={3} />
                         )}
+                        <Grid item md={2}>
+                            <Typography
+                                display='inline'
+                                style={{ margin: '0px 30px' }}
+                                variant='caption'
+                                gutterBottom
+                            >
+                                <b>{ getOperationScopes(operation, spec)[0] != null && 'Scope : ' }</b>
+                                { getOperationScopes(operation, spec)[0] != null
+                                    && getOperationScopes(operation, spec)[0] }
+                            </Typography>
+                        </Grid>
                         {!(disableDelete || markAsDelete) && (
-                            <Grid item md={1}>
+                            <Grid item md={1} justify='flex-end' container>
                                 <Tooltip
                                     title={
                                         isUsedInAPIProduct
-                                            ? "Can't delete operation when used in an API product"
-                                            : 'Delete'
+                                            ? (
+                                                <FormattedMessage
+                                                    id={'Apis.Details.Resources.components.Operation.cannot.delete'
+                                                    + '.when.used.in.api.products'}
+                                                    defaultMessage='Cannot delete operation when used in an API product'
+                                                />
+                                            )
+                                            : (
+                                                <FormattedMessage
+                                                    id='Apis.Details.Resources.components.Operation.Delete'
+                                                    defaultMessage='Delete'
+                                                />
+                                            )
                                     }
-                                    aria-label='Delete operation'
+                                    aria-label={(
+                                        <FormattedMessage
+                                            id='Apis.Details.Resources.components.Operation.delete.operation'
+                                            defaultMessage='Delete operation'
+                                        />
+                                    )}
                                 >
                                     <div>
                                         <IconButton
@@ -246,6 +283,7 @@ API product(s)
                                 spec={spec}
                                 target={target}
                                 verb={verb}
+                                resolvedSpec={resolvedSpec}
                             />
                         )}
                         {resourcePolicy && (
@@ -311,6 +349,7 @@ Operation.propTypes = {
     highlight: PropTypes.bool,
     operationRateLimits: PropTypes.arrayOf(PropTypes.shape({})),
     arns: PropTypes.shape([]).isRequired,
+    resolvedSpec: PropTypes.shape({}).isRequired,
 };
 
 export default React.memo(Operation);

@@ -132,7 +132,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         query = query == null ? "" : query;
         expand = (expand != null && expand) ? true : false;
         try {
-            String newSearchQuery = APIUtil.constructNewSearchQuery(query);
+            String newSearchQuery = APIUtil.constructApisGetQuery(query);
 
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
             if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
@@ -1161,8 +1161,6 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //deletes the API
             apiProvider.deleteAPI(apiIdentifier, "");
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-            keyManager.deleteRegisteredResourceByAPIId(apiId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource

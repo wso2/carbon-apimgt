@@ -193,4 +193,8 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     public abstract String getOASVersion(String oasDefinition) throws APIManagementException;
+    
+    public abstract String getOASDefinitionWithTierContentAwareProperty(String oasDefinition,
+            List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException;
+
 }

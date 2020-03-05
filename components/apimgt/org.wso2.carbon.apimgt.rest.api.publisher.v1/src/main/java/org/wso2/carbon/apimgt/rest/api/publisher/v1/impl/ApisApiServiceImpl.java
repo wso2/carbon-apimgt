@@ -86,6 +86,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -472,22 +473,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         //attach micro-geteway labels
         assignLabelsToDTO(body, apiToAdd);
 
-        // set default API Level Policy
-        if (apiToAdd.getApiLevelPolicy() != null) {
-            Policy[] apiPolicies = apiProvider.getPolicies(username, PolicyConstants.POLICY_LEVEL_API);
-            if (apiPolicies.length > 0) {
-                for (Policy policy : apiPolicies) {
-                    if (policy.getPolicyName().equals(APIConstants.UNLIMITED_TIER)) {
-                        apiToAdd.setApiLevelPolicy(APIConstants.UNLIMITED_TIER);
-                        break;
-                    }
-                }
-                if (StringUtils.isBlank(apiToAdd.getApiLevelPolicy())) {
-                    apiToAdd.setApiLevelPolicy(apiPolicies[0].getPolicyName());
-                }
-            }
-        }
-
         return apiToAdd;
     }
 
@@ -656,10 +641,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validation for tiers
             List<String> tiersFromDTO = body.getPolicies();
             String originalStatus = originalAPI.getStatus();
-            if (tiersFromDTO == null || tiersFromDTO.isEmpty() &&
-                    !(APIConstants.CREATED.equals(originalStatus) || APIConstants.PROTOTYPED.equals(originalStatus))) {
-                RestApiUtil.handleBadRequest("A tier should be defined " +
-                        "if the API is not in CREATED or PROTOTYPED state", log);
+            if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                    apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+                if (tiersFromDTO == null || tiersFromDTO.isEmpty() &&
+                        !(APIConstants.CREATED.equals(originalStatus) ||
+                                APIConstants.PROTOTYPED.equals(originalStatus))) {
+                    RestApiUtil.handleBadRequest("A tier should be defined " +
+                            "if the API is not in CREATED or PROTOTYPED state", log);
+                }
             }
 
             if (tiersFromDTO != null && !tiersFromDTO.isEmpty()) {
@@ -767,13 +756,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                 JSONObject endpointConfig = (JSONObject) jsonParser.parse(endpointConfigString);
                 if (endpointConfig != null) {
                     if (endpointConfig.containsKey(APIConstants.AMZN_ACCESS_KEY) &&
-                            endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                            endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY) &&
+                                endpointConfig.containsKey(APIConstants.AMZN_REGION)) {
                         String accessKey = (String) endpointConfig.get(APIConstants.AMZN_ACCESS_KEY);
                         String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                        String region = (String) endpointConfig.get(APIConstants.AMZN_REGION);
                         AWSCredentialsProvider credentialsProvider;
-                        if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
+                        if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey) &&
+                            StringUtils.isEmpty(region)) {
                             credentialsProvider = InstanceProfileCredentialsProvider.getInstance();
-                        } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey)) {
+                        } else if (!StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey) &&
+                                    !StringUtils.isEmpty(region)) {
                             if (secretKey.length() == APIConstants.AWS_ENCRYPTED_SECRET_KEY_LENGTH) {
                                 CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                                 secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
@@ -787,6 +780,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         }
                         AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
                                 .withCredentials(credentialsProvider)
+                                .withRegion(region)
                                 .build();
                         ListFunctionsResult listFunctionsResult = awsLambda.listFunctions();
                         List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
@@ -859,6 +853,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 // Set the header properties of the request
                 httpGet.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                 httpGet.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
+                httpGet.setHeader(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
                 // Code block for the processing of the response
                 try (CloseableHttpResponse response = getHttpClient.execute(httpGet)) {
                     if (isDebugEnabled) {
@@ -873,6 +868,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         while ((inputLine = reader.readLine()) != null) {
                             responseString.append(inputLine);
                         }
+                        reader.close();
                         JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
                         String report = responseJson.get(APIConstants.DATA).toString();
                         String grade = (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
@@ -885,6 +881,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         auditReportDTO.setReport(decodedReport);
                         auditReportDTO.setGrade(grade);
                         auditReportDTO.setNumErrors(numErrors);
+                        auditReportDTO.setExternalApiId(auditUuid);
                         return Response.ok().entity(auditReportDTO).build();
                     }
                 }
@@ -919,6 +916,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             httpPut.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             httpPut.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             httpPut.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
+            httpPut.setHeader(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
             httpPut.setEntity(new StringEntity(jsonBody.toJSONString()));
             // Code block for processing the response
             try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
@@ -952,6 +950,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 APIConstants.MULTIPART_CONTENT_TYPE + APIConstants.MULTIPART_FORM_BOUNDARY);
         httpConn.setRequestProperty(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
         httpConn.setRequestProperty(APIConstants.HEADER_API_TOKEN, apiToken);
+        httpConn.setRequestProperty(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
         outputStream = httpConn.getOutputStream();
         writer = new PrintWriter(new OutputStreamWriter(outputStream, "UTF-8"), true);
         // Name property
@@ -1496,8 +1495,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //deletes the API
             apiProvider.deleteAPI(apiIdentifier, apiId);
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-            keyManager.deleteRegisteredResourceByAPIId(apiId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
@@ -2049,7 +2046,22 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while getting lifecycle state for API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, log);
             }
-            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData);
+
+            boolean apiOlderVersionExist = false;
+            // check whether other versions of the current API exists
+            APIDTO currentAPI = getAPIByID(apiId);
+            APIVersionStringComparator comparator = new APIVersionStringComparator();
+            Set<String> versions = apiProvider.getAPIVersions(
+                    APIUtil.replaceEmailDomain(currentAPI.getProvider()), currentAPI.getName());
+
+            for (String tempVersion : versions) {
+                if (comparator.compare(tempVersion, currentAPI.getVersion()) < 0) {
+                    apiOlderVersionExist = true;
+                    break;
+                }
+            }
+
+            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {

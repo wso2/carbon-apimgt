@@ -81,7 +81,7 @@ const styles = {
  */
 function InFlow(props) {
     const {
-        classes, updateMediationPolicy, selectedMediationPolicy, type,
+        classes, updateMediationPolicy, selectedMediationPolicy, type, isRestricted,
     } = props;
     const [editing, setEditing] = useState(false);
 
@@ -106,7 +106,12 @@ function InFlow(props) {
                                 <span>none</span>
                             )}
                         </Typography>
-                        <Button className={classes.editIcon} size='small' onClick={startEditing}>
+                        <Button
+                            className={classes.editIcon}
+                            size='small'
+                            onClick={startEditing}
+                            disabled={isRestricted}
+                        >
                             <EditRounded />
                         </Button>
                     </Grid>

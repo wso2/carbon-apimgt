@@ -61,13 +61,8 @@ public class APIMappingUtil {
      *
      * @param body DTO model of new API to be created
      */
-    public static void apisUpdate(APIDTO body) throws APISynchronizationException {
+    public static void apisUpdate(APIDTO body, String adminUsername) throws APISynchronizationException {
         try {
-            APIManagerConfiguration config = ServiceDataHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            String adminUsername = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-            String tenantDomain = MultitenantUtils.getTenantDomain(adminUsername);
-
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(adminUsername);
             boolean isWSApi = APIDTO.TypeEnum.WS == body.getType();
 

@@ -148,6 +148,9 @@ const styles = (theme) => ({
     heading: {
         color: theme.palette.getContrastText(theme.palette.background.paper),
     },
+    mutualsslMessage: {
+        marginTop: theme.spacing(2),
+    }
 });
 const ExpansionPanelSummary = withStyles({
     root: {
@@ -183,10 +186,14 @@ function Overview(props) {
             },
         },
     } = theme;
-    const { api, applicationsAvailable } = useContext(ApiContext);
+    const { api, subscribedApplications } = useContext(ApiContext);
     const [totalComments, setCount] = useState(0);
     const [totalDocuments, setDocsCount] = useState(0);
     const [overviewDocOverride, setOverviewDocOverride] = useState(null);
+    const isOnlyMutualSSL = api.securityScheme.includes('mutualssl') && !api.securityScheme.includes('oauth2') &&
+        !api.securityScheme.includes('api_key') && !api.securityScheme.includes('basic_auth');
+    const isOnlyBasicAuth = api.securityScheme.includes('basic_auth') && !api.securityScheme.includes('oauth2') &&
+        !api.securityScheme.includes('api_key');
     useEffect(() => {
         const restApi = new API();
         const promisedApi = restApi.getDocumentsByAPIId(api.id);
@@ -300,7 +307,7 @@ function Overview(props) {
                                             <Box display='block' mt={2}>
                                                 <Grid item xs={12}>
                                                     {user ? (
-                                                        <Box display='inline' mr={2}>
+                                                        <Box display='flex' flexDirection='column' mr={2}>
                                                             <Link
                                                                 to={'/apis/' + api.id + '/credentials'}
                                                                 style={
@@ -312,7 +319,8 @@ function Overview(props) {
                                                                     variant='contained'
                                                                     color='primary'
                                                                     size='large'
-                                                                    disabled={!api.isSubscriptionAvailable}
+                                                                    disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL ||
+                                                                         isOnlyBasicAuth }
                                                                 >
                                                                     <FormattedMessage
                                                                         id={'Apis.Details.Overview.subscribe' +
@@ -321,6 +329,42 @@ function Overview(props) {
                                                                     />
                                                                 </Button>
                                                             </Link>
+                                                            {subscribedApplications && (<Typography variant='caption' component='div'>
+                                                                {subscribedApplications.length === 0 ? (<FormattedMessage
+                                                                    id='Apis.Details.Overview.subscribe.count.zero'
+                                                                    defaultMessage={
+                                                                        'No application subscriptions.'
+                                                                    }
+                                                                />): (
+                                                                    subscribedApplications.length    
+                                                                )}
+                                                                {(isOnlyMutualSSL || isOnlyBasicAuth) && (
+                                                                    <Grid className={classes.mutualsslMessage}>
+                                                                    <Typography variant='body2'>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.Overview.mutualssl.basicauth'
+                                                                        defaultMessage={'Subscription is not required for Mutual SSL APIs' + 
+                                                                        ' or APIs with only Basic Authentication.'}
+                                                                    />
+                                                                    </Typography>
+                                                                    </Grid>
+                                                                )}
+                                                                {' '}
+                                                                {subscribedApplications.length === 1 && (<>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.Overview.subscribe.count.singular'
+                                                                        defaultMessage={
+                                                                            'Application subscribed.'
+                                                                        }
+                                                                    /></>)}
+                                                                {subscribedApplications.length > 1 && (<>
+                                                                     <FormattedMessage
+                                                                        id='Apis.Details.Overview.subscribe.count.plural'
+                                                                        defaultMessage={
+                                                                            'Applications subscribed.'
+                                                                        }
+                                                                    /></>)}
+                                                            </Typography>)}
                                                         </Box>
                                                     ) : (
                                                             <Box display='inline' mr={2}>

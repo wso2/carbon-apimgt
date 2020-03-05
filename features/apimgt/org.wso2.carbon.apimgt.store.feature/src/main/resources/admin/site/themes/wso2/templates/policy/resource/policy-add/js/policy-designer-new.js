@@ -211,12 +211,13 @@ var onExecutionFlowTypeChange = function (id, optionTextOb) {
 
 var onIPChange = function (IPtextEle) {
     //validate the IP
+	
     var IP_value = $(IPtextEle).val();
     var blocks = IP_value.split(".");
     var elementId = $(IPtextEle)[0].id;
     var element = $('#' + elementId);
 
-    if (blocks.length != 4 || !blocks.every(valid_block)) {
+    if (!validateIPAddress(IP_value)) {
         element.css("border", "1px solid red");
         $('#label' + elementId).remove();
         element.parent().append('<label class="error" id="label' + elementId + '" >Invalid IP</label>');
@@ -227,6 +228,7 @@ var onIPChange = function (IPtextEle) {
         element.css("border", "1px solid #cccccc");
         return true;
     }
+
 };
 
 var onEndIPChange = function (IPtextEle) {
@@ -258,26 +260,86 @@ var valid_block = function (block) {
     return false;
 };
 
-var validIPRange = function (startIP, endIP) {
+function validateIPAddress(inputText) {
+    var expression = /((^\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\s*$)|(^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$))/;
 
+    if (expression.test(inputText)) {
+         return true;
+    } else {
+         return false;
+    }
+}
+
+var validIPRange = function (startIP, endIP) {
+	
     if (startIP == null || endIP == null || startIP == "" || endIP == "") {
         return false;
     }
-    var startIPBlocks = startIP.split(".");
-    var endIPBlocks = endIP.split(".");
-    var startIp = 0;
-    var endIp = 0;
-    for (var i = 0; i < 4; i++) {
-        startIp = startIp + startIPBlocks[i] * Math.pow(256, 3-i);
+    if(startIP.includes(".") && endIP.includes(".")) {
+        var startIPBlocks = startIP.split(".");
+        var endIPBlocks = endIP.split(".");
+        var startIp = 0;
+        var endIp = 0;
+        for (var i = 0; i < 4; i++) {
+            startIp = startIp + startIPBlocks[i] * Math.pow(256, 3-i);
+        }
+        for (var i = 0; i < 4; i++) {
+            endIp = endIp + endIPBlocks[i] * Math.pow(256, 3-i);
+        }
+        if(startIp < endIp){
+            return true;
+        }
+        return false;
+    } else if (startIP.includes(":") && endIP.includes(":")) {
+        //convert the short hand ip to full address. IPv6 has 7 semicolons (:)
+        var startFullIp = getFullAddress(startIP);
+        var endFullIp = getFullAddress(endIP);
+
+        var startIPBlocks = startIP.split(":");
+        var endIPBlocks = endIP.split(":");
+
+        //Check from the begining which is greater. Go through 8 blocks
+        var valid = true;
+        for(i = 0; i < 7; i ++) {
+            if(startIPBlocks[i] > endIPBlocks[i]) {
+               valid = false;
+               break;
+            }          
+        }
+        return valid;
+    } else {
+        return false
     }
-    for (var i = 0; i < 4; i++) {
-        endIp = endIp + endIPBlocks[i] * Math.pow(256, 3-i);
-    }
-    if(startIp < endIp){
-        return true;
-    }
-    return false;
+
+
 };
+
+var countSemicolon = function (ip) {
+    var count = 0;
+    for( index = 0, length = ip.length; index < length; ++index ){
+        if(ip.charAt(index) == ":"){
+            count = count + 1;
+        }
+    }
+    return count;
+}
+
+var getFullAddress = function (ip) {
+    var temp = ip;
+    var colonCount = countSemicolon(temp);
+    //full representation has 7 colons (:)
+    var diff = 7 - colonCount;
+
+    var zeros = "0";
+    for(var i = 0; i < diff; i++){
+        zeros = zeros + ":0";
+    } 
+    //fill with 0s
+    if (diff > 0){
+         temp = temp.replace("::", ":" +  zeros + ":");
+    }
+    return temp;
+}
 
 var onDateConditionChange = function (id, optionTextOb) {
     var selectedText = $(optionTextOb).val();

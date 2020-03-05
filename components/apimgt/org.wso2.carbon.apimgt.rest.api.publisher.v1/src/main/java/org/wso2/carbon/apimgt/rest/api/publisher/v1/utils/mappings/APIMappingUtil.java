@@ -61,6 +61,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -731,6 +732,11 @@ public class APIMappingUtil {
                         endpointConfigJson.put(APIConstants.AMZN_SECRET_KEY, APIConstants.AWS_SECRET_KEY);
                     }
                 }
+                if (endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) {
+                    JSONObject jsonObject = handleEndpointSecurity(model,
+                            (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY));
+                    endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, jsonObject);
+                }
                 dto.setEndpointConfig(endpointConfigJson);
             } catch (ParseException e) {
                 //logs the error and continues as this is not a blocker
@@ -1091,7 +1097,7 @@ public class APIMappingUtil {
      * @param apiLCData API lifecycle state information
      * @return REST API DTO representation of API Lifecycle state information
      */
-    public static LifecycleStateDTO fromLifecycleModelToDTO(Map<String, Object> apiLCData) {
+    public static LifecycleStateDTO fromLifecycleModelToDTO(Map<String, Object> apiLCData, boolean apiOlderVersionExist) {
 
         LifecycleStateDTO lifecycleStateDTO = new LifecycleStateDTO();
 
@@ -1116,6 +1122,10 @@ public class APIMappingUtil {
             List<LifecycleStateCheckItemsDTO> checkItemsDTOList = new ArrayList<>();
             for (Object checkListItemObj : checkListItems) {
                 CheckListItem checkListItem = (CheckListItem) checkListItemObj;
+                if (!apiOlderVersionExist && checkListItem.getName().equals(APIConstants.DEPRECATE_CHECK_LIST_ITEM)) {
+                    continue;
+                }
+
                 LifecycleStateCheckItemsDTO checkItemsDTO = new LifecycleStateCheckItemsDTO();
                 checkItemsDTO.setName(checkListItem.getName());
                 checkItemsDTO.setValue(Boolean.getBoolean(checkListItem.getValue()));
@@ -2468,5 +2478,30 @@ public class APIMappingUtil {
         } else {
             ((APIProduct)model).setApiCategories(apiCategories);
         }
+    }
+
+    private static JSONObject handleEndpointSecurity(API api, JSONObject endpointSecurity) throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
+                .getProviderName()));
+        if (checkEndpointSecurityPasswordEnabled(tenantDomain)) {
+            return endpointSecurity;
+        }
+        JSONObject endpointSecurityElement = new JSONObject();
+        endpointSecurityElement.putAll(endpointSecurity);
+        if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX)!= null){
+            JSONObject sandboxEndpointSecurity =
+                    (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+            if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null){
+                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD,"");
+            }
+        }
+        if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+            JSONObject productionEndpointSecurity =
+                    (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+            if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
+                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
+            }
+        }
+        return endpointSecurityElement;
     }
 }

@@ -30,10 +30,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import LaunchIcon from '@material-ui/icons/Launch';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { useIntl, FormattedMessage } from 'react-intl';
 import { getOperationScopes } from '../../operationUtils';
 
 /**
@@ -48,14 +47,21 @@ export default function OperationGovernance(props) {
         operation, operationsDispatcher, operationRateLimits, api, disableUpdate, spec, target, verb,
     } = props;
     const isOperationRateLimiting = api.apiThrottlingPolicy === null;
+    const intl = useIntl();
 
     return (
         <>
             <Grid item xs={12} md={12}>
                 <Typography gutterBottom variant='subtitle1'>
-                    Operation Governance
+                    <FormattedMessage
+                        id='Apis.Details.Resources.components.operationComponents.OperationGovernance.title'
+                        defaultMessage='Operation Governance'
+                    />
                     <Typography style={{ marginLeft: '10px' }} gutterBottom variant='caption'>
-                        (Security, Rate Limiting & Scopes)
+                        <FormattedMessage
+                            id='Apis.Details.Resources.components.operationComponents.OperationGovernance.subTitle'
+                            defaultMessage='(Security, Rate Limiting & Scopes)'
+                        />
                     </Typography>
                     <Divider variant='middle' />
                 </Typography>
@@ -81,8 +87,15 @@ export default function OperationGovernance(props) {
                 </FormControl>
                 <sup style={{ marginLeft: '10px' }}>
                     <Tooltip
+                        title={(
+                            <FormattedMessage
+                                id={'Apis.Details.Resources.components.operationComponents.OperationGovernance.Security'
+                                + '.tooltip'}
+                                defaultMessage='This will enable/disable Application Level securities defined in the
+                                Runtime Configurations page.'
+                            />
+                        )}
                         fontSize='small'
-                        title='If enabled, Users will need an access token with valid scopes to use the operation'
                         aria-label='Operation security'
                         placement='right-end'
                         interactive
@@ -103,17 +116,28 @@ export default function OperationGovernance(props) {
                     }}
                     disabled={disableUpdate || !isOperationRateLimiting}
                     label={
-                        isOperationRateLimiting ? (
-                            'Rate limiting policy'
-                        ) : (
-                            <div>
-                                Rate limiting is governed by
-                                {' '}
-                                <Box fontWeight='fontWeightBold' display='inline' color='primary.main'>
-                                    API Level
-                                </Box>
-                            </div>
-                        )
+                        isOperationRateLimiting
+                            ? intl.formatMessage({
+                                id: 'Apis.Details.Resources.components.operationComponents.'
+                                + 'OperationGovernance.rate.limiting.policy',
+                                defaultMessage: 'Rate limiting policy',
+                            })
+                            : (
+                                <div>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.governed.by'}
+                                        defaultMessage='Rate limiting is governed by '
+                                    />
+                                    <Box fontWeight='fontWeightBold' display='inline' color='primary.main'>
+                                        <FormattedMessage
+                                            id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.API.level'}
+                                            defaultMessage='API Level'
+                                        />
+                                    </Box>
+                                </div>
+                            )
                     }
                     value={
                         isOperationRateLimiting && operation['x-throttling-tier'] ? operation['x-throttling-tier'] : ''
@@ -123,23 +147,45 @@ export default function OperationGovernance(props) {
                         data: { target, verb, value },
                     })}
                     helperText={
-                        isOperationRateLimiting ? (
-                            'Select a rate limit policy for this operation'
-                        ) : (
-                            <span>
-                                Use
-                                {' '}
-                                <Box fontWeight='fontWeightBold' display='inline' color='primary.main'>
-                                    Operation Level
-                                </Box>
-                                {' '}
-                                rate limiting to
-                                {' '}
-                                <b>enable</b>
-                                {' '}
-rate limiting per operation
-                            </span>
-                        )
+                        isOperationRateLimiting
+                            ? intl.formatMessage({
+                                id: 'Apis.Details.Resources.components.operationComponents.'
+                                + 'OperationGovernance.rate.limiting.policy.select',
+                                defaultMessage: 'Select a rate limit policy for this operation',
+                            })
+                            : (
+                                <span>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.helperText.section1'}
+                                        defaultMessage='Use '
+                                    />
+                                    <Box fontWeight='fontWeightBold' display='inline' color='primary.main'>
+                                        <FormattedMessage
+                                            id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.helperText.section2'}
+                                            defaultMessage='Operation Level'
+                                        />
+                                    </Box>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.helperText.section3'}
+                                        defaultMessage=' rate limiting to '
+                                    />
+                                    <b>
+                                        <FormattedMessage
+                                            id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.helperText.section4'}
+                                            defaultMessage='enable'
+                                        />
+                                    </b>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.helperText.section5'}
+                                        defaultMessage=' rate limiting per operation'
+                                    />
+                                </span>
+                            )
                     }
                     margin='dense'
                     variant='outlined'
@@ -154,61 +200,86 @@ rate limiting per operation
             <Grid item md={6} />
             <Grid item md={1} />
             <Grid item md={5}>
-                <TextField
-                    id='operation_scope'
-                    select
-                    disabled={disableUpdate}
-                    fullWidth
-                    label='Operation scope'
-                    value={getOperationScopes(operation, spec)[0]}
-                    onChange={({ target: { value } }) => operationsDispatcher({
-                        action: 'scopes',
-                        data: { target, verb, value: [value] },
-                    })}
-                    helperText='Select a scope to control permissions to this operation'
-                    margin='dense'
-                    variant='outlined'
-                >
-                    {api.scopes.length !== 0
-                        ? api.scopes.map((scope) => (
-                            <MenuItem
-                                key={scope.name}
-                                value={scope.name}
-                                dense
-                            >
-                                {scope.name}
-                            </MenuItem>
-                        )) : (
-                            <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
+                { operation['x-auth-type'] && operation['x-auth-type'].toLowerCase() !== 'none' ? (
+                    <TextField
+                        id='operation_scope'
+                        select
+                        disabled={disableUpdate}
+                        fullWidth
+                        label={api.scopes.length !== 0 ? intl.formatMessage({
+                            id: 'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.operation.scope.label.default',
+                            defaultMessage: 'Operation scope',
+                        }) : intl.formatMessage({
+                            id: 'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.operation.scope.label.notAvailable',
+                            defaultMessage: 'No scope available',
+                        })}
+                        value={getOperationScopes(operation, spec)[0]}
+                        onChange={({ target: { value } }) => operationsDispatcher({
+                            action: 'scopes',
+                            data: { target, verb, value: [value] },
+                        })}
+                        helperText={(
+                            <FormattedMessage
+                                id={'Apis.Details.Resources.components.operationComponents.'
+                                + 'OperationGovernance.operation.scope.helperText'}
+                                defaultMessage='Select a scope to control permissions to this operation'
+                            />
+                        )}
+                        margin='dense'
+                        variant='outlined'
+                    >
+                        <MenuItem
+                            value=''
+                            dense
+                        >
+                            <FormattedMessage
+                                id={'Apis.Details.Resources.components.operationComponents.'
+                                + 'OperationGovernance.operation.scope.select.none'}
+                                defaultMessage='None'
+                            />
+                        </MenuItem>
+                        {api.scopes.length !== 0
+                            ? api.scopes.map((scope) => (
                                 <MenuItem
-                                    key='Create New Scope'
-                                    value='Create New Scope'
+                                    key={scope.name}
+                                    value={scope.name}
                                     dense
                                 >
-                                Create New Scope
+                                    {scope.name}
                                 </MenuItem>
-                            </Link>
-                        )}
-                </TextField>
+                            )) : (
+                                <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
+                                    <MenuItem
+                                        key='Create New Scope'
+                                        value='Create New Scope'
+                                        dense
+                                    >
+                                        <FormattedMessage
+                                            id={'Apis.Details.Resources.components.operationComponents.'
+                                + 'OperationGovernance.operation.scope.create.new.scope'}
+                                            defaultMessage='Create New Scope'
+                                        />
+                                    </MenuItem>
+                                </Link>
+                            )}
+                    </TextField>
+                ) : null }
             </Grid>
-            <Grid item md={5}>
-                <Tooltip title='Remove scope'>
-                    <IconButton
-                        disabled={disableUpdate}
-                        onClick={() => operationsDispatcher({ action: 'scopes', data: { target, verb, value: [] } })}
-                        aria-label='delete'
-                    >
-                        <DeleteIcon fontSize='small' />
-                    </IconButton>
-                </Tooltip>
-                {!disableUpdate && (
+            <Grid item md={5} style={{ marginTop: '14px' }}>
+                { operation['x-auth-type'] && operation['x-auth-type'].toLowerCase() !== 'none' ? !disableUpdate && (
                     <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
                         <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
-                            Create new scope
+                            <FormattedMessage
+                                id={'Apis.Details.Resources.components.operationComponents.'
+                                + 'OperationGovernance.operation.scope.create.new.scope'}
+                                defaultMessage='Create New Scope'
+                            />
                             <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
                         </Typography>
                     </Link>
-                )}
+                ) : null}
             </Grid>
             <Grid item md={1} />
         </>

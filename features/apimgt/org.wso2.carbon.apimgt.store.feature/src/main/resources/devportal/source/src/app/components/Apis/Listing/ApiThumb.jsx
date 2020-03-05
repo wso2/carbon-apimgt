@@ -79,6 +79,13 @@ const styles = theme => ({
         'padding-left': '5px',
         'padding-right': '65px',
     },
+    thumbLeftAction: {
+        alignSelf: 'flex-start',
+        flex: 1,
+        width: '25%',
+        'padding-left': '5px',
+        'padding-right': '10px',
+    },
     thumbRight: {
         alignSelf: 'flex-end',
     },
@@ -367,7 +374,7 @@ class ApiThumb extends React.Component {
                             </div>
                         </div>
                         <div className={classes.thumbInfo}>
-                            {showRating && <div className={classes.thumbLeft}>
+                            {showRating && <div className={classes.thumbLeftAction}>
                                 <Typography
                                     variant='subtitle1'
                                     gutterBottom
@@ -394,6 +401,12 @@ class ApiThumb extends React.Component {
                                             label={api.transportType === undefined ? api.type : api.transportType}
                                             color='primary'
                                         />
+                                    )}
+                                    {(api.lifeCycleStatus === 'PROTOTYPED') && (
+                                        <Chip
+                                        label={api.apiType === 'APIProduct' ? api.state : api.lifeCycleStatus}
+                                        color='default'
+                                    />
                                     )}
                                 </Typography>
                             </div>

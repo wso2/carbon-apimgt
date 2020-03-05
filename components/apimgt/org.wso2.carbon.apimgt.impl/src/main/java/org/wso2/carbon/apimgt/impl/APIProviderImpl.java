@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -66,9 +67,11 @@ import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -100,6 +103,7 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
@@ -845,6 +849,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 contextCache.put(api.getContext(), Boolean.TRUE);
             }
         }
+
+        //notify key manager with API addition
+        registerOrUpdateResourceInKeyManager(api);
+    }
+
+    /**
+     * Notify the key manager with API update or addition
+     *
+     * @param api API
+     * @throws APIManagementException when error occurs when register/update API at Key Manager side
+     */
+    private void registerOrUpdateResourceInKeyManager(API api) throws APIManagementException {
+        //get new key manager instance for  resource registration.
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+        Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
+        if (registeredResource == null) {
+            boolean isNewResourceRegistered = keyManager.registerNewResource(api, null);
+            if (!isNewResourceRegistered) {
+                handleException("APIResource registration is failed while adding the API- " + api.getId().getApiName()
+                        + "-" + api.getId().getVersion());
+            }
+        } else {
+            //update APIResource.
+            String resourceId = (String) registeredResource.get("resourceId");
+            if (resourceId == null) {
+                handleException("APIResource update is failed because of empty resourceID.");
+            }
+            keyManager.updateRegisteredResource(api, registeredResource);
+        }
     }
 
     /**
@@ -1092,7 +1125,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(" User doesn't have permission for update");
         }
 
-        Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
+        Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<>();
         API oldApi = getAPI(api.getId());
         if (oldApi.getStatus().equals(api.getStatus())) {
 
@@ -1142,17 +1175,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 updatePermissions = true;
             }
 
-            if (api.isEndpointSecured() && StringUtils.isBlank(api.getEndpointUTPassword()) &&
-                    !StringUtils.isBlank(oldApi.getEndpointUTPassword())) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Given endpointsecurity password is empty");
-                }
-                api.setEndpointUTUsername(oldApi.getEndpointUTUsername());
-                api.setEndpointUTPassword(oldApi.getEndpointUTPassword());
-                if (log.isDebugEnabled()) {
-                    log.debug("Using the previous username and password for endpoint security");
-                }
-            }
+            updateEndpointSecurity(oldApi, api);
 
             updateApiArtifact(api, true, updatePermissions);
             if (!oldApi.getContext().equals(api.getContext())) {
@@ -1285,7 +1308,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 contextCache.remove(oldApi.getContext());
                 contextCache.put(api.getContext(), Boolean.TRUE);
             }
-
+            //update doc visibility
+            List<Documentation> docsList = getAllDocumentation(api.getId());
+            if (docsList != null) {
+                Iterator it = docsList.iterator();
+                while (it.hasNext()) {
+                    Object docsObject = it.next();
+                    Documentation docs = (Documentation) docsObject;
+                    updateDocVisibility(api,docs);
+                }
+            }
 
         } else {
             // We don't allow API status updates via this method.
@@ -1295,6 +1327,79 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!failedGateways.isEmpty() &&
                 (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
             throw new FaultGatewaysException(failedGateways);
+        }
+
+        //notify key manager with API update
+        registerOrUpdateResourceInKeyManager(api);
+    }
+
+    private void updateEndpointSecurity(API oldApi, API api) throws APIManagementException {
+        try {
+            if (api.isEndpointSecured() && StringUtils.isBlank(api.getEndpointUTPassword()) &&
+                    !StringUtils.isBlank(oldApi.getEndpointUTPassword())) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Given endpoint security password is empty");
+                }
+                api.setEndpointUTUsername(oldApi.getEndpointUTUsername());
+                api.setEndpointUTPassword(oldApi.getEndpointUTPassword());
+                if (log.isDebugEnabled()) {
+                    log.debug("Using the previous username and password for endpoint security");
+                }
+            } else {
+                String endpointConfig = api.getEndpointConfig();
+                String oldEndpointConfig = oldApi.getEndpointConfig();
+                if (StringUtils.isNotEmpty(endpointConfig) && StringUtils.isNotEmpty(oldEndpointConfig)) {
+                    JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
+                    JSONObject oldEndpointConfigJson = (JSONObject) new JSONParser().parse(oldEndpointConfig);
+                    if ((endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) &&
+                            (oldEndpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+                        JSONObject endpointSecurityJson =
+                                (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
+                        JSONObject oldEndpointSecurityJson =
+                                (JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
+                        if (endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                            if (oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                                EndpointSecurity endpointSecurity = new ObjectMapper().convertValue(
+                                        endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
+                                        EndpointSecurity.class);
+                                EndpointSecurity oldEndpointSecurity = new ObjectMapper().convertValue(
+                                        oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
+                                        EndpointSecurity.class);
+                                if (endpointSecurity.isEnabled() && oldEndpointSecurity.isEnabled() &&
+                                        StringUtils.isBlank(endpointSecurity.getPassword())) {
+                                    endpointSecurity.setUsername(oldEndpointSecurity.getUsername());
+                                    endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
+                                }
+                                endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new JSONParser()
+                                        .parse(new ObjectMapper().writeValueAsString(endpointSecurity)));
+                            }
+                        }
+                        if (endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                            if (oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                                EndpointSecurity endpointSecurity = new ObjectMapper()
+                                        .convertValue(endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
+                                                EndpointSecurity.class);
+                                EndpointSecurity oldEndpointSecurity = new ObjectMapper()
+                                        .convertValue(oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
+                                                EndpointSecurity.class);
+                                if (endpointSecurity.isEnabled() && oldEndpointSecurity.isEnabled() &&
+                                        StringUtils.isBlank(endpointSecurity.getPassword())) {
+                                    endpointSecurity.setUsername(oldEndpointSecurity.getUsername());
+                                    endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
+                                }
+                                endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX,
+                                        new JSONParser()
+                                                .parse(new ObjectMapper().writeValueAsString(endpointSecurity)));
+                            }
+                            endpointConfigJson.replace(APIConstants.ENDPOINT_SECURITY,endpointSecurityJson);
+                        }
+                    }
+                    api.setEndpointConfig(endpointConfigJson.toJSONString());
+                }
+            }
+        } catch (ParseException | JsonProcessingException e) {
+            throw new APIManagementException(
+                    "Error while processing endpoint security for API " + api.getId().toString(), e);
         }
     }
 
@@ -1885,14 +1990,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
             api.setGraphQLSchema(getGraphqlSchema(api.getId()));
         }
-        api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
+
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
         } else {
             tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
-
+        //update the swagger definition with content-aware property for policies with bandwidth type.
+        List<String> policyNames = apiMgtDAO
+                .getNamesOfTierWithBandwidthQuotaType(APIUtil.getTenantIdFromTenantDomain(tenantDomain));
+        String definition = OASParserUtil.getOASDefinitionWithTierContentAwareProperty(
+                getOpenAPIDefinition(api.getId()), policyNames, api.getApiLevelPolicy());
+        api.setSwaggerDefinition(definition);
         try {
             builder = getAPITemplateBuilder(api);
         } catch (Exception e) {
@@ -2171,14 +2281,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         api.setApiSecurity(apiSecurity);
-        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
-                !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
-            if (log.isDebugEnabled()) {
-                log.debug("API " + api.getId() + " does not supports oauth2 security, hence removing all the "
-                        + "subscription tiers associated with it");
-            }
-            api.removeAllTiers();
-        }
     }
 
     /**
@@ -2198,17 +2300,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("APIProduct " + apiProduct.getId() + " has following enabled protocols : " + apiSecurity);
         }
         apiProduct.setApiSecurity(apiSecurity);
-
-
-        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
-                !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
-            if (log.isDebugEnabled()) {
-                log.debug( "API Product " + apiProduct.getId() + " does not supports oauth2 security, hence removing all the "
-                        + "subscription tiers associated with it");
-            }
-            apiProduct.removeAllTiers();
-
-        }
     }
 
     private void checkIfValidTransport(String transport) throws APIManagementException {
@@ -2909,6 +3000,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             registry.commitTransaction();
             transactionCommitted = true;
 
+            //notify key manager with API addition
+            registerOrUpdateResourceInKeyManager(newAPI);
+
             if (log.isDebugEnabled()) {
                 String logMessage = "Successfully created new version : " + newVersion + " of : " + api.getId().getApiName();
                 log.debug(logMessage);
@@ -3154,6 +3248,57 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * Updates a visibility of the documentation
+     *
+     * @param api               API
+     * @param documentation    Documentation
+     * @throws APIManagementException if failed to update visibility
+     */
+    private void updateDocVisibility(API api, Documentation documentation) throws APIManagementException {
+        try {
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,APIConstants.DOCUMENTATION_KEY);
+            if (artifactManager == null) {
+                String errorMessage = "Artifact manager is null when updating documentation of API " +
+                        api.getId().getApiName();
+                throw new APIManagementException(errorMessage);
+            }
+
+            GenericArtifact artifact = artifactManager.getGenericArtifact(documentation.getId());
+            String[] authorizedRoles = new String[0];
+            String visibleRolesList = api.getVisibleRoles();
+            if (visibleRolesList != null) {
+                authorizedRoles = visibleRolesList.split(",");
+            }
+
+            int tenantId;
+            String tenantDomain =
+                    MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            try {
+                tenantId = getTenantId(tenantDomain);
+
+                GenericArtifact updateApiArtifact = APIUtil.createDocArtifactContent(artifact, api.getId(), documentation);
+                artifactManager.updateGenericArtifact(updateApiArtifact);
+                APIUtil.clearResourcePermissions(artifact.getPath(), api.getId(), tenantId);
+
+                APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), authorizedRoles,
+                        artifact.getPath(), registry);
+
+                String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
+                if (org.apache.commons.lang.StringUtils.isEmpty(docFilePath)) {
+                    int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                    String filePath = docFilePath.substring(startIndex, docFilePath.length());
+                    APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                            authorizedRoles, filePath, registry);
+                }
+            } catch (UserStoreException e) {
+                throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
+                        + api.getId().getApiName(), e);
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to update visibility of documentation", e);
+        }
+    }
     /**
      * Updates a given documentation
      *
@@ -3646,6 +3791,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
             }
             */
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            if (identifier.toString() != null) {
+                keyManager.deleteRegisteredResourceByAPIId(identifier.toString());
+            }
         } catch (RegistryException e) {
             handleException("Failed to remove the API from : " + path, e);
         } catch (WorkflowException e) {
@@ -5927,20 +6076,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException {
 
-        if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType)) {
-            conditionValue = tenantDomain + ":" + conditionValue.trim();
-        }
         if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
             conditionValue = MultitenantUtils.getTenantAwareUsername(conditionValue);
             conditionValue = conditionValue + "@" + tenantDomain;
         }
-        String uuid = apiMgtDAO.addBlockConditions(conditionType, conditionValue, tenantDomain);
+        BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
+        blockConditionsDTO.setConditionType(conditionType);
+        blockConditionsDTO.setConditionValue(conditionValue);
+        blockConditionsDTO.setTenantDomain(tenantDomain);
+        blockConditionsDTO.setEnabled(true);
+        blockConditionsDTO.setUUID(UUID.randomUUID().toString());
+        BlockConditionsDTO createdBlockConditionsDto = apiMgtDAO.addBlockConditions(blockConditionsDTO);
 
-        if (uuid != null) {
-            publishBlockingEvent(conditionType, conditionValue, "true");
+        if (createdBlockConditionsDto != null) {
+            publishBlockingEvent(createdBlockConditionsDto, "true");
         }
 
-        return uuid;
+        return createdBlockConditionsDto.getUUID();
     }
 
     @Override
@@ -5978,8 +6130,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
             blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
             blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
+            blockCondition.setConditionValue(blockingConditionValue);
         }
-        publishBlockingEvent(blockingConditionType, blockingConditionValue, "delete");
+        publishBlockingEvent(blockCondition, "delete");
     }
 
     @Override
@@ -6051,22 +6204,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (APIConstants.BLOCKING_CONDITIONS_USER.equalsIgnoreCase(blockingConditionType)) {
                 blockingConditionValue = MultitenantUtils.getTenantAwareUsername(blockingConditionValue);
                 blockingConditionValue = blockingConditionValue + "@" + tenantDomain;
+                blockCondition.setConditionValue(blockingConditionValue);
             }
 
-            publishBlockingEvent(blockingConditionType, blockingConditionValue, Boolean.toString(blockCondition
-                    .isEnabled()));
+            publishBlockingEvent(blockCondition, Boolean.toString(blockCondition.isEnabled()));
         }
     }
 
     /**
      * Publishes the changes on blocking conditions.
-     *
-     * @param conditionType  -
-     * @param conditionValue
+     * @param blockConditionsDTO Blockcondition Dto event
      */
-    private void publishBlockingEvent(String conditionType, String conditionValue, String state) {
+    private void publishBlockingEvent(BlockConditionsDTO blockConditionsDTO, String state) {
         OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
-        Object[] objects = new Object[]{conditionType,conditionValue,state,tenantDomain};
+
+        Object[] objects = new Object[]{blockConditionsDTO.getConditionId(), blockConditionsDTO.getConditionType(),
+                blockConditionsDTO.getConditionValue(),state, tenantDomain};
         Event blockingMessage = new Event(APIConstants.BLOCKING_CONDITIONS_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
         ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
@@ -6939,6 +7092,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiProductResource.setApiIdentifier(api.getId());
                 apiProductResource.setProductIdentifier(product.getId());
                 apiProductResource.setEndpointConfig(api.getEndpointConfig());
+                apiProductResource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
                 URITemplate uriTemplate = apiProductResource.getUriTemplate();
 
                 Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
@@ -6975,6 +7129,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         return apiToProductResourceMapping;
     }
+
 
     @Override
     public void saveToGateway(APIProduct product) throws FaultGatewaysException, APIManagementException {
@@ -7153,6 +7308,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiProductResource.setApiIdentifier(api.getId());
             apiProductResource.setProductIdentifier(product.getId());
             apiProductResource.setEndpointConfig(api.getEndpointConfig());
+            apiProductResource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
             URITemplate uriTemplate = apiProductResource.getUriTemplate();
 
             Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
@@ -7716,6 +7872,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         JSONObject securityAuditConfig = APIUtil.getSecurityAuditAttributesFromRegistry(tenantId);
         if (securityAuditConfig != null) {
             if ((securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) != null) &&
+                    securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL) instanceof Boolean &&
                     (Boolean) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_OVERRIDE_GLOBAL)) {
                 String apiToken = (String) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_API_TOKEN);
                 String collectionId = (String) securityAuditConfig.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID);

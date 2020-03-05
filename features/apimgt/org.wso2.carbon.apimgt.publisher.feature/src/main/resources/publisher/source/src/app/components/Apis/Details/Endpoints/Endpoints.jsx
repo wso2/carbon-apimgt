@@ -79,11 +79,12 @@ function Endpoints(props) {
         const tmpEndpointConfig = cloneDeep(initState.endpointConfig);
         const { action, value } = configAction;
         switch (action) {
-            case 'production_endpoints': {
-                return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
-            }
+            case 'production_endpoints':
             case 'sandbox_endpoints': {
-                return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
+                if (value) {
+                    return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
+                }
+                return { ...initState, endpointConfig: { ...tmpEndpointConfig } };
             }
             case 'select_endpoint_category': {
                 return { ...initState, endpointConfig: { ...value } };
@@ -220,12 +221,13 @@ function Endpoints(props) {
         const endpointType = endpointConfig.endpoint_type;
         if (endpointType === 'awslambda') {
             if (endpointConfig.access_method === 'stored') {
-                if (endpointConfig.amznAccessKey === '' || endpointConfig.amznSecretKey === '') {
+                if (endpointConfig.amznAccessKey === '' || endpointConfig.amznSecretKey === ''
+                || endpointConfig.amznRegion === '') {
                     return {
                         isValid: false,
                         message: intl.formatMessage({
                             id: 'Apis.Details.Endpoints.Endpoints.missing.accessKey.secretKey.error',
-                            defaultMessage: 'Access Key and Secret Key should not be empty',
+                            defaultMessage: 'Access Key, Secret Key and Region should not be empty',
                         }),
                     };
                 }

@@ -56,13 +56,13 @@ public class StatusCheckerServerStartListener implements ServerStartupHandler {
         String token = null;
         String pingURL = null;
         try {
-            token = ConfigManager.getConfigManager().getProperty(StatusCheckerConstants.UNIQUE_IDENTIFIER);
-            pingURL = ConfigManager.getConfigManager().getProperty(StatusCheckerConstants.PING_API_URL);
+            token = ConfigManager.getConfigurationDTO().getStatus_unique_identifier();
+            pingURL = ConfigManager.getConfigurationDTO().getStatus_ping_api_url();
 
         } catch (OnPremiseGatewayException e) {
             log.error("Error occurred while reading " + StatusCheckerConstants.PING_API_URL + " and " +
                               StatusCheckerConstants.UNIQUE_IDENTIFIER + " from " +
-                              OnPremiseGatewayConstants.CONFIG_FILE_NAME);
+                              OnPremiseGatewayConstants.CONFIG_FILE_TOML_NAME);
         }
         //If pinging details are set, start pinging
         if (isPingURLSet(pingURL) && isTokenSet(token)) {

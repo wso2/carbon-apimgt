@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.ConfigDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.TestBase;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.exception.OnPremiseGatewayException;
 
@@ -45,13 +46,13 @@ public class ConfigManagerTest extends TestBase {
 
     @Test
     public void testGetConfigManager() throws Exception {
-        ConfigManager configManager = ConfigManager.getConfigManager();
-        Assert.assertNotNull(configManager);
+        ConfigDTO configDTO = ConfigManager.getConfigurationDTO();
+        Assert.assertNotNull(configDTO);
     }
 
     @Test
     public void testGetProperty() throws Exception {
-        String gatewayUrl = ConfigManager.getConfigManager().getProperty("api.gateway.url");
+        String gatewayUrl = ConfigManager.getConfigurationDTO().getUrl_gateway();
         Assert.assertNotNull(gatewayUrl);
     }
 
@@ -62,7 +63,7 @@ public class ConfigManagerTest extends TestBase {
         configManagerField.set(null, null);
         //Set carbon home to a wrong value
         System.setProperty("carbon.home", "");
-        ConfigManager.getConfigManager();
+        ConfigManager.getConfigurationDTO();
     }
 
 }

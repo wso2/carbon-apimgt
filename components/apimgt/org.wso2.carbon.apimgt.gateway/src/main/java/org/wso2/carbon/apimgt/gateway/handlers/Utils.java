@@ -62,6 +62,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -89,7 +91,6 @@ public class Utils {
         axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (headers != null) {
-            headers.remove(HttpHeaders.AUTHORIZATION);
             headers.remove(HttpHeaders.AUTHORIZATION);
 
             headers.remove(HttpHeaders.HOST);
@@ -337,6 +338,16 @@ public class Utils {
     }
 
     /**
+     * Remove a token from gateway API Key token cache
+     *
+     * @param key signature of JWT token which should be removed from the cache
+     */
+    public static void removeCacheEntryFromGatewayAPiKeyCache(String key) {
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_API_KEY_CACHE_NAME)
+                .remove(key);
+    }
+
+    /**
      * Add a token to the invalid token cache of the given tenant domain
      *
      * @param cachedToken   Access token to be added to the invalid token cache
@@ -433,4 +444,36 @@ public class Utils {
         return false;
     }
 
+    /**
+     * Populate custom properties define in a mediation sequence
+     *
+     * @param messageContext MessageContext
+     * @return Map<String, String> with custom properties
+     */
+    public static Map<String, String> getCustomAnalyticsProperties(MessageContext messageContext) {
+        Map<String, String> requestProperties = getCustomAnalyticsProperties(messageContext,
+                APIMgtGatewayConstants.CUSTOM_ANALYTICS_REQUEST_PROPERTIES);
+        Map<String, String> responseProperties = getCustomAnalyticsProperties(messageContext,
+                APIMgtGatewayConstants.CUSTOM_ANALYTICS_RESPONSE_PROPERTIES);
+        Map<String, String> properties = new HashMap<>(requestProperties);
+        properties.putAll(responseProperties);
+        return properties;
+    }
+
+    private static Map<String, String> getCustomAnalyticsProperties(MessageContext messageContext,
+            String propertyPathKey) {
+        Set<String> keys = messageContext.getPropertyKeySet();
+        String properties = (String) messageContext.getProperty(propertyPathKey);
+        if (StringUtils.isBlank(properties)) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> propertyMap = new HashMap<>();
+        String[] propertyKeys = properties.split(APIMgtGatewayConstants.CUSTOM_ANALYTICS_PROPERTY_SEPARATOR);
+        for (String propertyKey : propertyKeys) {
+            if (keys.contains(propertyKey.trim())) {
+                propertyMap.put(propertyKey, (String) messageContext.getProperty(propertyKey.trim()));
+            }
+        }
+        return propertyMap;
+    }
 }

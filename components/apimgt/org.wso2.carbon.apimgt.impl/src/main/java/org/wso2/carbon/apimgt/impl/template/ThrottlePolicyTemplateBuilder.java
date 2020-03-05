@@ -45,10 +45,12 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.io.StringWriter;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -441,11 +443,26 @@ public class ThrottlePolicyTemplateBuilder {
             tempCondition.put(condition.getType().toLowerCase(), conditionJson);
             if (PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType())) {
                 IPCondition ipCondition = (IPCondition) condition;
-                conditionJson.put("specificIp", ipCondition.ipToLong(ipCondition.getSpecificIP()));
+                if (IPCondition.isIPv6Address(ipCondition.getSpecificIP())) {
+                    conditionJson.put("specificIp",
+                            String.valueOf(APIUtil.ipToBigInteger(ipCondition.getSpecificIP())));
+                } else {
+                    conditionJson.put("specificIp", ipCondition.ipToLong(ipCondition.getSpecificIP()));
+                }
+                
             } else if (PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())) {
                 IPCondition ipRangeCondition = (IPCondition) condition;
-                conditionJson.put("startingIp", ipRangeCondition.ipToLong(ipRangeCondition.getStartingIP()));
-                conditionJson.put("endingIp", ipRangeCondition.ipToLong(ipRangeCondition.getEndingIP()));
+                if (IPCondition.isIPv6Address(ipRangeCondition.getStartingIP())
+                        && IPCondition.isIPv6Address(ipRangeCondition.getEndingIP())) {
+                    conditionJson.put("startingIp",
+                            String.valueOf(APIUtil.ipToBigInteger(ipRangeCondition.getStartingIP())));
+                    conditionJson.put("endingIp",
+                            String.valueOf(APIUtil.ipToBigInteger(ipRangeCondition.getEndingIP())));
+                } else {
+                    conditionJson.put("startingIp", ipRangeCondition.ipToLong(ipRangeCondition.getStartingIP()));
+                    conditionJson.put("endingIp", ipRangeCondition.ipToLong(ipRangeCondition.getEndingIP()));
+                }
+                
             } else if (condition instanceof QueryParameterCondition) {
                 QueryParameterCondition queryParameterCondition = (QueryParameterCondition) condition;
                 JSONObject values;

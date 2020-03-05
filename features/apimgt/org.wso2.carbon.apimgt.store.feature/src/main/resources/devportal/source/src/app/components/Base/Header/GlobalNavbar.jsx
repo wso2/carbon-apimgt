@@ -15,50 +15,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 import classNames from 'classnames';
 import Icon from '@material-ui/core/Icon';
-import { ListItemIcon, List, withStyles, ListItem, ListItemText } from '@material-ui/core';
+import { ListItemIcon, List, ListItem, ListItemText } from '@material-ui/core';
+import { withTheme } from '@material-ui/core/styles';
 import CustomIcon from '../../Shared/CustomIcon';
 
-/**
- *
- *
- * @param {*} theme
- */
-const styles = theme => ({
-    listRoot: {
-        padding: 0,
-    },
-    listItemTextRoot: {
-        padding: 0,
-    },
-    listText: {
-        color: theme.palette.getContrastText(theme.palette.background.drawer),
-    },
-    listTextSmall: {
-        color: theme.palette.getContrastText(theme.custom.appBar.background),
-    },
-    smallIcon: {
-        marginRight: 5,
-        minWidth: 'auto',
-    },
-    links: {
-        display: 'flex',
-    },
-    selected: {
-        background: theme.custom.appBar.activeBackground,
-        alignItems: 'center',
-        textDecoration: 'none',
-        color: theme.palette.getContrastText(theme.custom.appBar.activeBackground),
-    },
-    selectedText: {
-        color: theme.palette.getContrastText(theme.custom.appBar.activeBackground),
-    },
-});
 /**
  * GlobalNavBar
  *
@@ -66,45 +32,19 @@ const styles = theme => ({
  * @returns {React.Component}
  */
 function GlobalNavBar(props) {
-    const [selected, setSelected] = useState('home');
     const {
-        classes, theme, intl, smallView, history,
+        classes, theme, intl, drawerView, selected, iconWidth, strokeColorSelected, strokeColor
     } = props;
-    const ditectCurrentMenu = (location) => {
-        const { pathname } = location;
-        if (/\/apis$/g.test(pathname) || /\/apis\//g.test(pathname)) {
-            setSelected('apis');
-        } else if (/\/api-products$/g.test(pathname) || /\/api-products\//g.test(pathname)) {
-            setSelected('api-products');
-        } else if (/\/home$/g.test(pathname) || /\/home\//g.test(pathname)) {
-            setSelected('home');
-        } else if (/\/applications$/g.test(pathname) || /\/applications\//g.test(pathname)) {
-            setSelected('applications');
-        }
-    };
-    useEffect(() => {
-        const { location } = history;
-        ditectCurrentMenu(location);
-    }, []);
-    history.listen((location) => {
-        ditectCurrentMenu(location);
-    });
-
-    let strokeColor = theme.palette.getContrastText(theme.custom.leftMenu.background);
-    let iconWidth = 32;
-    if (smallView) {
-        iconWidth = 16;
-        strokeColor = theme.palette.getContrastText(theme.custom.appBar.background);
-    }
+    
     return (
         <List className={classes.listRoot}>
             {theme.custom.landingPage.active
                 && (
                     <Link to='/home' className={classNames({ [classes.selected]: selected === 'home', [classes.links]: true })}>
-                        <ListItem button>
-                            <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
+                        <ListItem button classes={{root: classes.listItemRoot}}>
+                            <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: !drawerView }) }}>
                                 <Icon
-                                    style={{ fontSize: iconWidth, color: strokeColor }}
+                                    style={{ fontSize: iconWidth, color: selected === 'home' ? strokeColorSelected : strokeColor }}
                                     className={classes.listText}
                                 >
                                 home
@@ -115,8 +55,7 @@ function GlobalNavBar(props) {
                                     root: classes.listItemTextRoot,
                                     primary: classNames({
                                         [classes.selectedText]: selected === 'home',
-                                        [classes.listText]: selected !== 'home' && !smallView,
-                                        [classes.listTextSmall]: selected !== 'home' && smallView,
+                                        [classes.listText]: selected !== 'home',
                                     }),
                                 }}
                                 primary={intl.formatMessage({
@@ -125,20 +64,21 @@ function GlobalNavBar(props) {
                                 })}
                             />
                         </ListItem>
+                        {(selected === 'home' && !drawerView) && (<div className={classes.triangleDown}></div>)}
                     </Link>
                 ) }
             <Link
                 to={(theme.custom.tagWise.active && theme.custom.tagWise.style === 'page') ? '/api-groups' : '/apis'}
                 className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}
             >
-                <ListItem button>
-                    <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
+                <ListItem button classes={{root: classes.listItemRoot}}>
+                    <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: !drawerView }) }}>
                         <CustomIcon
                             width={iconWidth}
                             height={iconWidth}
                             icon='api'
                             className={classes.listText}
-                            strokeColor={strokeColor}
+                            strokeColor={selected === 'apis' ? strokeColorSelected : strokeColor}
                         />
                     </ListItemIcon>
                     <ListItemText
@@ -146,8 +86,7 @@ function GlobalNavBar(props) {
                             root: classes.listItemTextRoot,
                             primary: classNames({
                                 [classes.selectedText]: selected === 'apis',
-                                [classes.listText]: selected !== 'apis' && !smallView,
-                                [classes.listTextSmall]: selected !== 'apis' && smallView,
+                                [classes.listText]: selected !== 'apis',
                             }),
                         }}
                         primary={intl.formatMessage({
@@ -156,16 +95,17 @@ function GlobalNavBar(props) {
                         })}
                     />
                 </ListItem>
+                {(selected === 'apis' && !drawerView) && (<div className={classes.triangleDown}></div>)}
             </Link>
             <Link to='/applications' className={classNames({ [classes.selected]: selected === 'applications', [classes.links]: true })}>
-                <ListItem button>
-                    <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
+                <ListItem button classes={{root: classes.listItemRoot}}>
+                    <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: !drawerView }) }}>
                         <CustomIcon
                             width={iconWidth}
                             height={iconWidth}
                             icon='applications'
                             className={classes.listText}
-                            strokeColor={strokeColor}
+                            strokeColor={selected === 'applications' ? strokeColorSelected : strokeColor}
                         />
                     </ListItemIcon>
                     <ListItemText
@@ -173,8 +113,7 @@ function GlobalNavBar(props) {
                             root: classes.listItemTextRoot,
                             primary: classNames({
                                 [classes.selectedText]: selected === 'applications',
-                                [classes.listText]: selected !== 'applications' && !smallView,
-                                [classes.listTextSmall]: selected !== 'applications' && smallView,
+                                [classes.listText]: selected !== 'applications',
                             }),
                         }}
                         primary={intl.formatMessage({
@@ -183,6 +122,7 @@ function GlobalNavBar(props) {
                         })}
                     />
                 </ListItem>
+                {(selected === 'applications' && !drawerView) && (<div className={classes.triangleDown}></div>)}
             </Link>
         </List>
     );
@@ -193,4 +133,4 @@ GlobalNavBar.propTypes = {
     theme: PropTypes.shape({}).isRequired,
 };
 
-export default withRouter(injectIntl(withStyles(styles, { withTheme: true })(GlobalNavBar)));
+export default withRouter(withTheme(injectIntl(GlobalNavBar)));

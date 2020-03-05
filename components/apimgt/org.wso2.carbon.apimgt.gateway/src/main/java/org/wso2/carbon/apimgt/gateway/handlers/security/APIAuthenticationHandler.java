@@ -85,7 +85,7 @@ import java.util.regex.Pattern;
 public class APIAuthenticationHandler extends AbstractHandler implements ManagedLifecycle {
     private static final Log log = LogFactory.getLog(APIAuthenticationHandler.class);
 
-    private ArrayList<Authenticator> authenticators = new ArrayList<>();
+    protected ArrayList<Authenticator> authenticators = new ArrayList<>();
     private SynapseEnvironment synapseEnvironment;
 
     private String authorizationHeader;

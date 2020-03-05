@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -133,49 +134,49 @@ public class ConditionDto {
     }
 
     public static class IPCondition {
-        private long specificIp;
-        private long startingIp;
-        private long endingIp;
+        private BigInteger specificIp;
+        private BigInteger startingIp;
+        private BigInteger endingIp;
         private boolean invert;
 
         public IPCondition() {
 
         }
 
-        public IPCondition(long specificIp, boolean invert) {
+        public IPCondition(BigInteger specificIp, boolean invert) {
 
             this.specificIp = specificIp;
             this.invert = invert;
         }
 
-        public IPCondition(long startingIp, long endingIp, boolean invert) {
+        public IPCondition(BigInteger startingIp, BigInteger endingIp, boolean invert) {
 
             this.startingIp = startingIp;
             this.endingIp = endingIp;
             this.invert = invert;
         }
 
-        public long getSpecificIp() {
+        public BigInteger getSpecificIp() {
             return specificIp;
         }
 
-        public void setSpecificIp(long specificIp) {
+        public void setSpecificIp(BigInteger specificIp) {
             this.specificIp = specificIp;
         }
 
-        public long getStartingIp() {
+        public BigInteger getStartingIp() {
             return startingIp;
         }
 
-        public void setStartingIp(long startingIp) {
+        public void setStartingIp(BigInteger startingIp) {
             this.startingIp = startingIp;
         }
 
-        public long getEndingIp() {
+        public BigInteger getEndingIp() {
             return endingIp;
         }
 
-        public void setEndingIp(long endingIp) {
+        public void setEndingIp(BigInteger endingIp) {
             this.endingIp = endingIp;
         }
 

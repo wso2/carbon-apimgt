@@ -17,7 +17,8 @@
  * under the License.
  */
 
-    var log = new Log("Services login DCR request");
+    var log = new Log();
+    log.debug("Services login DCR request");
     var app = require("/site/public/conf/settings.js").AppConfig.app;
     var appUtils = require("/services/utils.js");
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -101,13 +102,17 @@
         }
     }
 
-    var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
+    if (request.getQueryString() == "not-Login") {
+        var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl+"&prompt=none";
+    } else {
+        var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
+    }  
+
     log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
     var cookie = {
         'name': 'CLIENT_ID',
         'value': clientId,
         'path': app.context + "/",
-        "httpOnly": false,
         "secure": true,
         "maxAge": -1
     };

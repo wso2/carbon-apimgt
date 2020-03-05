@@ -21,12 +21,11 @@ import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
-
+import { getVersion } from 'AppComponents/Apis/Details/Resources/operationUtils';
 import AddParameter from './AddParameter';
 import ListParameters from './ListParameters';
 
 /**
- *
  * Renders the operation parameters section
  * @export
  * @param {*} props
@@ -34,11 +33,9 @@ import ListParameters from './ListParameters';
  */
 export default function Parameters(props) {
     const {
-        operation, spec, target, verb, operationsDispatcher, disableUpdate,
+        operation, spec, target, verb, operationsDispatcher, disableUpdate, resolvedSpec,
     } = props;
-    if (!spec.openapi) {
-        return null; // TODO: add support to swagger 2 parameter support ~tmkb
-    }
+    const specVersion = getVersion(spec);
     const haveParameters = (operation.parameters && operation.parameters.length !== 0) || operation.requestBody;
     return (
         <>
@@ -56,6 +53,7 @@ export default function Parameters(props) {
                         verb={verb}
                         operationsDispatcher={operationsDispatcher}
                         operation={operation}
+                        specVersion={specVersion}
                     />
                 )}
             </Grid>
@@ -69,6 +67,8 @@ export default function Parameters(props) {
                         operationsDispatcher={operationsDispatcher}
                         operation={operation}
                         spec={spec}
+                        specVersion={specVersion}
+                        resolvedSpec={resolvedSpec}
                     />
                 )}
             </Grid>
@@ -83,6 +83,7 @@ Parameters.propTypes = {
     operationsDispatcher: PropTypes.func.isRequired,
     operation: PropTypes.shape({}).isRequired,
     disableUpdate: PropTypes.bool,
+    resolvedSpec: PropTypes.shape({}).isRequired,
 };
 
 Parameters.defaultProps = {
