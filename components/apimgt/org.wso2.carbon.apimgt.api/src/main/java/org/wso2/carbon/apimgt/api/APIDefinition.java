@@ -48,7 +48,7 @@ public abstract class APIDefinition {
      * @param apiDefinition
      * @return
      */
-    public abstract String generateExample(String apiDefinition);
+    public abstract Map<String, Object> generateExample(String apiDefinition);
 
     /**
      * This method extracts the URI templates from the API definition

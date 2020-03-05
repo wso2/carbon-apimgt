@@ -24,7 +24,6 @@ import io.swagger.oas.inflector.examples.XmlExampleSerializer;
 import io.swagger.oas.inflector.examples.models.Example;
 import io.swagger.oas.inflector.processors.JsonNodeExampleSerializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -60,11 +59,7 @@ import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.util.ArrayList;
@@ -96,21 +91,39 @@ public class OAS3Parser extends APIDefinition {
      * @return swagger Json
      */
     @Override
-    public String generateExample(String apiDefinition) {
+    public Map<String, Object> generateExample(String apiDefinition) {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, null);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
             log.debug("Errors found when parsing OAS definition");
         }
         OpenAPI swagger = parseAttemptForV3.getOpenAPI();
+        //return map
+        Map<String, Object> returnMap = new HashMap<>();
+        //List for APIResMedPolicyList
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
         for (Map.Entry<String, PathItem> entry : swagger.getPaths().entrySet()) {
-            String path = entry.getKey();
             int minResponse = 0;
             int responseCode = 0;
+            String path = entry.getKey();
+            //initializing apiResourceMediationPolicyObject
+            APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
+            //setting path for apiResourceMediationPolicyObject
+            apiResourceMediationPolicyObject.setPath(path);
+            //generating path IDs
+            String pathId = path.replaceAll("[/ {}]","_");
+            apiResourceMediationPolicyObject.setId(pathId);
             Map<String, Schema> definitions = swagger.getComponents().getSchemas();
+            //operation map to get verb
+            Map<PathItem.HttpMethod, Operation> operationMap = entry.getValue().readOperationsMap();
             ArrayList<Integer> responseCodes = new ArrayList<Integer>();
             List<Operation> operations = swagger.getPaths().get(path).readOperations();
             for (Operation op : operations) {
+                //for each HTTP method get the verb
+                for(Map.Entry<PathItem.HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
+                    //add verb to apiResourceMediationPolicyObject
+                    apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
+                }
                 StringBuilder genCode = new StringBuilder();
                 StringBuilder responseSection = new StringBuilder();
                 for (String responseEntry : op.getResponses().keySet()) {
@@ -150,14 +163,20 @@ public class OAS3Parser extends APIDefinition {
                         }
                         if (applicationJson == null && applicationXml == null) {
                             setDefaultGeneratedResponse(genCode);
+
                         }
                     }
                 }
                 genCode.append(responseSection);
+                String finalGenCode = genCode.toString();
+                apiResourceMediationPolicyObject.setContent(finalGenCode);
                 op.addExtension("x-mediation-script", genCode);
+                apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
             }
+            returnMap.put("SWAGGER", Json.pretty(swagger));
+            returnMap.put("policyList",apiResourceMediationPolicyList);
         }
-        return Json.pretty(swagger);
+        return returnMap;
     }
 
     /**
@@ -176,6 +195,7 @@ public class OAS3Parser extends APIDefinition {
 
     /**
      * This method  generates Sample/Mock payloads of XML Examples for operations in the swagger definition
+     *
      * @param model model
      * @param definitions definition
      * @return XmlExample

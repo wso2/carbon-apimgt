@@ -16,7 +16,12 @@
  *  under the License.
  */
 
-import React, { useContext, lazy, Suspense } from 'react';
+import React, {
+    useContext,
+    lazy,
+    Suspense,
+    useState,
+} from 'react';
 import { isRestricted } from 'AppData/AuthManager';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import {
@@ -27,12 +32,15 @@ import {
     Grid,
     Typography,
     makeStyles,
+    Button,
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import Utils from 'AppData/Utils';
 import CircularProgress from '@material-ui/core/CircularProgress';
+// import { list } from 'node_modules/postcss/lib/postcss';
+// import {Button} from '@material-ui/core';
 
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "GenResourceMonaco" */));
 
@@ -44,9 +52,13 @@ const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName
  * */
 function GenericResource(props) {
     const {
-        resourcePath, resourceMethod, scriptContent, onChange,
+        resourcePath, resourceMethod, scriptContent, onChange, originalScript,
     } = props;
     const { api } = useContext(APIContext);
+    const [showReset, setShowReset] = useState(false);
+    // const [newPathId, setNewPathId] = useState(null);
+    // const [defaultScript, setDefaultScript] = useState(scriptContent);
+
     const useStyles = makeStyles((theme) => {
         let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[resourceMethod] : null;
         let chipTextColor = '#000000';
@@ -79,10 +91,26 @@ function GenericResource(props) {
                 backgroundColor: Utils.hexToRGBA(chipColor, 0.1),
                 border: `${chipColor} 1px solid`,
             },
+            scriptResetButton: {
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '10px',
+            },
+
         };
     });
 
+    // const btnStyle = {
+    //     btn: {
+    //         display: flex,
+    //         justify-content: space-between,
+    //         margin-bottom: 10px,
+    //     }
+    //     };
+
     const classes = useStyles();
+    console.log(originalScript);
+
     return (
         <Grid item>
             <ExpansionPanel className={classes.chipExpansionPanel}>
@@ -98,13 +126,25 @@ function GenericResource(props) {
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.genericResourceContent}>
                     <Grid container direction='column'>
-                        <Grid item>
+                        <Grid item className={classes.scriptResetButton}>
                             <Typography variant='subtitle2'>
                                 <FormattedMessage
                                     id='Apis.Details.Endpoints.Prototype.InlineEndpoints.script'
                                     defaultMessage='Script'
                                 />
                             </Typography>
+                            {showReset
+                            && (
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    onClick={() => {
+                                        onChange(originalScript, resourcePath, resourceMethod);
+                                    }}
+                                >
+                                    Reset
+                                </Button>
+                            )}
                         </Grid>
                         <Grid item>
                             <Suspense fallback={<CircularProgress />}>
@@ -118,7 +158,10 @@ function GenericResource(props) {
                                         readOnly: `${isRestricted(['apim:api_create'], api)}`,
                                     }}
                                     language='javascript'
-                                    onChange={(content) => onChange(content, resourcePath, resourceMethod)}
+                                    onChange={(content) => {
+                                        setShowReset(true);
+                                        onChange(content, resourcePath, resourceMethod);
+                                    }}
                                 />
                             </Suspense>
                         </Grid>

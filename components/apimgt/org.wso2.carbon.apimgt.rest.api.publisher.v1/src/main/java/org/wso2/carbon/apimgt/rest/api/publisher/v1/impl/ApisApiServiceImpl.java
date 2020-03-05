@@ -1942,6 +1942,30 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * Gets generated scripts
+     *
+     * @param apiId
+     * @param ifNoneMatch
+     * @param messageContext
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public Response getGeneratedMockScriptsOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        APIIdentifier apiIdentifier = originalAPI.getId();
+//        MockResponsePayloadListDTO mockResponsePayloadListDTO = APIMappingUtil.fromMockPayloadsToListDTO(apiIdentifier);
+        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+        Map<String, Object> examples = OASParserUtil.generateExamples(apiDefinition);
+//        List<APIResourceMediationPolicy> policies = (List)examples.get("resourcePolicyList");
+        List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get("policyList");
+        return Response.ok().entity(APIMappingUtil.fromMockPayloadsToListDTO(policies)).build();
+    }
+
+    /**
      * Retrieves the WSDL meta information of the given API. The API must be a SOAP API.
      *
      * @param apiId Id of the API
@@ -3423,6 +3447,29 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+//    /**
+//     * Resets mock responses in inline prototyping
+//     *
+//     * @param apiId
+//     * @param ifNoneMatch
+//     * @param messageContext
+//     * @return
+//     * @throws APIManagementException
+//     */
+//
+//    @Override
+//    public Response mockResponses(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+//
+//        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+//        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+//        API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+//        APIIdentifier apiIdentifier = originalAPI.getId();
+//        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+//        apiDefinition = OASParserUtil.generateExamples(apiDefinition);
+////        apiProvider.saveSwaggerDefinition(originalAPI,apiDefinition);
+//        return Response.ok().entity(apiDefinition).build();
+//    }
+
     /**
      * Validates the provided WSDL and reset the streams as required
      *
@@ -3909,16 +3956,45 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response generateMockResponses(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIIdentifier apiIdentifier = originalAPI.getId();
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-        apiDefinition = OASParserUtil.generateExamples(apiDefinition);
+        apiDefinition=String.valueOf(OASParserUtil.generateExamples(apiDefinition).get("SWAGGER"));
         apiProvider.saveSwaggerDefinition(originalAPI,apiDefinition);
         return Response.ok().entity(apiDefinition).build();
     }
+
+//    /**
+//     * Generates Mock response examples for Inline prototyping
+//     * of a swagger
+//     *
+//     * @param apiId API Id
+//     * @param ifNoneMatch If-None-Match header value
+//     * @param messageContext message context
+//     * @return apiDefinition String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+//        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+//        API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+//        APIIdentifier apiIdentifier = originalAPI.getId();
+//        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+//        apiDefinition=String.valueOf(OASParserUtil.generateExamples(apiDefinition).get("SWAGGER"));
+//        apiProvider.saveSwaggerDefinition(originalAPI,apiDefinition);
+//        return Response.ok().entity(apiDefinition).build();
+////     * @throws APIManagementException
+//     */
+//    @Override
+//    public Response generateMockResponses(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+//        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+//        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+//        API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+//        APIIdentifier apiIdentifier = originalAPI.getId();
+//        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+//        apiDefinition = OASParserUtil.generateExamples(apiDefinition);
+//        apiProvider.saveSwaggerDefinition(originalAPI,apiDefinition);
+//        return Response.ok().entity(apiDefinition).build();
+//    }
 
 
     /**

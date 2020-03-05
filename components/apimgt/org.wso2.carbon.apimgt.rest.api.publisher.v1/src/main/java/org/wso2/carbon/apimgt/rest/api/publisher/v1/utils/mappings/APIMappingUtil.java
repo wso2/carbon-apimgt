@@ -32,21 +32,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
-import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.ResourcePath;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -266,6 +252,39 @@ public class APIMappingUtil {
 
         return model;
     }
+
+    /**
+     *
+     *
+     * @param mockPayloads
+     * @return
+     * @throws APIManagementException
+     */
+    public static MockResponsePayloadListDTO fromMockPayloadsToListDTO (List<APIResourceMediationPolicy> mockPayloads)
+            throws APIManagementException {
+
+        MockResponsePayloadListDTO mockResponsePayloadListDTO = new MockResponsePayloadListDTO();
+        List<MockResponsePayloadInfoDTO> mockResponsePayloadInfoDTOS = mockResponsePayloadListDTO.getList();
+        for (APIResourceMediationPolicy apiResourceMediationPolicy : mockPayloads){
+            mockResponsePayloadInfoDTOS.add(fromMockPayloadToDTO(apiResourceMediationPolicy));
+        }
+        return mockResponsePayloadListDTO;
+    }
+
+    /**
+     *
+     *
+     * @param model
+     * @return
+     */
+    public static MockResponsePayloadInfoDTO fromMockPayloadToDTO (APIResourceMediationPolicy model) {
+        MockResponsePayloadInfoDTO mockResponsePayloadInfoDTO = new MockResponsePayloadInfoDTO();
+        mockResponsePayloadInfoDTO.setPath(model.getPath());
+        mockResponsePayloadInfoDTO.setVerb(model.getVerb());
+        mockResponsePayloadInfoDTO.setContent(model.getContent());
+        return mockResponsePayloadInfoDTO;
+    }
+
 
     /**
      * This method creates the API monetization information DTO
