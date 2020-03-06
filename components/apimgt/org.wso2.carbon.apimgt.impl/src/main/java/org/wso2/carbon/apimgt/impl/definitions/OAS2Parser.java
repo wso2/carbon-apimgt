@@ -514,8 +514,12 @@ public class OAS2Parser extends APIDefinition {
         } else {
             Swagger swagger = parseAttemptForV2.getSwagger();
             Info info = swagger.getInfo();
-            OASParserUtil.updateValidationResponseAsSuccess(validationResponse, apiDefinition, swagger.getSwagger(),
-                    info.getTitle(), info.getVersion(), swagger.getBasePath(), info.getDescription(), swagger.getHost());
+            OASParserUtil.updateValidationResponseAsSuccess(
+                    validationResponse, apiDefinition, swagger.getSwagger(),
+                    info.getTitle(), info.getVersion(), swagger.getBasePath(), info.getDescription(),
+                    (swagger.getHost() == null || swagger.getHost().isEmpty()) ? null :
+                            new ArrayList<String>(Arrays.asList(swagger.getHost()))
+            );
             validationResponse.setParser(this);
             if (returnJsonContent) {
                 if (!apiDefinition.trim().startsWith("{")) { // not a json (it is yaml)
