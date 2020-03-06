@@ -3979,36 +3979,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(apiDefinition).build();
     }
 
-//    /**
-//     * Generates Mock response examples for Inline prototyping
-//     * of a swagger
-//     *
-//     * @param apiId API Id
-//     * @param ifNoneMatch If-None-Match header value
-//     * @param messageContext message context
-//     * @return apiDefinition String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-//        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-//        API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-//        APIIdentifier apiIdentifier = originalAPI.getId();
-//        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-//        apiDefinition=String.valueOf(OASParserUtil.generateExamples(apiDefinition).get("SWAGGER"));
-//        apiProvider.saveSwaggerDefinition(originalAPI,apiDefinition);
-//        return Response.ok().entity(apiDefinition).build();
-////     * @throws APIManagementException
-//     */
-//    @Override
-//    public Response generateMockResponses(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
-//        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-//        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-//        API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-//        APIIdentifier apiIdentifier = originalAPI.getId();
-//        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-//        apiDefinition = OASParserUtil.generateExamples(apiDefinition);
-//        apiProvider.saveSwaggerDefinition(originalAPI,apiDefinition);
-//        return Response.ok().entity(apiDefinition).build();
-//    }
-
-
     /**
      * Extract GraphQL Operations from given schema
      * @param schema graphQL Schema

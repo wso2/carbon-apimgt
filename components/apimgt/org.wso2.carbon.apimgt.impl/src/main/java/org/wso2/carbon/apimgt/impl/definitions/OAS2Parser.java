@@ -181,7 +181,6 @@ public class OAS2Parser extends APIDefinition {
             }
             returnMap.put("SWAGGER", Json.pretty(swagger));
             returnMap.put("policyList",apiResourceMediationPolicyList);
-
         }
         return returnMap;
     }
