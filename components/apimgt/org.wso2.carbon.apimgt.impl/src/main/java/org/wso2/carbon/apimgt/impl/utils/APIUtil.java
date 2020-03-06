@@ -3956,6 +3956,8 @@ public final class APIUtil {
             String workflowExtensionLocation =
                     CarbonUtils.getCarbonHome() + File.separator + APIConstants.WORKFLOW_EXTENSION_LOCATION;
 
+            File wfExtension = new File(workflowExtensionLocation);
+
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
@@ -3967,7 +3969,14 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding External Stores configuration to the tenant's registry");
             }
-            InputStream inputStream = new FileInputStream(workflowExtensionLocation);
+
+            InputStream inputStream;
+            if (wfExtension.exists()) {
+                inputStream = new FileInputStream(workflowExtensionLocation);
+            } else {
+                inputStream = APIManagerComponent.class
+                        .getResourceAsStream("/workflowextensions/default-workflow-extensions.xml");
+            }
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
             resource.setContent(data);
