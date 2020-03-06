@@ -3457,29 +3457,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-//    /**
-//     * Resets mock responses in inline prototyping
-//     *
-//     * @param apiId
-//     * @param ifNoneMatch
-//     * @param messageContext
-//     * @return
-//     * @throws APIManagementException
-//     */
-//
-//    @Override
-//    public Response mockResponses(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
-//
-//        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-//        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-//        API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-//        APIIdentifier apiIdentifier = originalAPI.getId();
-//        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-//        apiDefinition = OASParserUtil.generateExamples(apiDefinition);
-////        apiProvider.saveSwaggerDefinition(originalAPI,apiDefinition);
-//        return Response.ok().entity(apiDefinition).build();
-//    }
-
     /**
      * Validates the provided WSDL and reset the streams as required
      *

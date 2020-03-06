@@ -613,7 +613,7 @@ paths:
   # Generates Mock/Sample Payloads from Examples in API Definition
   ################################################################
 
-  /apis/{apiId}/generate-mock-scripts:  #generate-mock-scripts
+  /apis/{apiId}/generate-mock-scripts:
     #-----------------------------------------------------
     # Generate Mock responses from Swagger/OAS Definition
     #-----------------------------------------------------
@@ -673,12 +673,12 @@ paths:
   # Generated Mock/Sample Payloads from Examples in API Definition
   ################################################################
 
-  /apis/{apiId}/generated-mock-scripts:   # /apis/{apiId}/generated-mock-scripts
+  /apis/{apiId}/generated-mock-scripts:
     #-----------------------------------------------------
     # resets Mock responses from Swagger/OAS Definition
     #-----------------------------------------------------
     get:
-      operationId: getGeneratedMockScriptsOfAPI  #getGeneratedMockScriptsOfAPI
+      operationId: getGeneratedMockScriptsOfAPI
       summary: Generate mock response payloads
       description: |
         This operation can be used to generate mock responses from examples of swagger definition of an API.
