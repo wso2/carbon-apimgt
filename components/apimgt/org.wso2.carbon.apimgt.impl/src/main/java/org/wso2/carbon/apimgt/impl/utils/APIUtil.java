@@ -3957,28 +3957,32 @@ public final class APIUtil {
                     CarbonUtils.getCarbonHome() + File.separator + APIConstants.WORKFLOW_EXTENSION_LOCATION;
 
             File wfExtension = new File(workflowExtensionLocation);
-            if (wfExtension.exists()) {
-                RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
-                UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
-                if (govRegistry.resourceExists(APIConstants.WORKFLOW_EXECUTOR_LOCATION)) {
-                    log.debug("External Stores configuration already uploaded to the registry");
-                    return;
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug("Adding External Stores configuration to the tenant's registry");
-                }
+            UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
-                InputStream inputStream = new FileInputStream(workflowExtensionLocation);
-                byte[] data = IOUtils.toByteArray(inputStream);
-                Resource resource = govRegistry.newResource();
-                resource.setContent(data);
-                resource.setMediaType(APIConstants.WORKFLOW_MEDIA_TYPE);
-                govRegistry.put(APIConstants.WORKFLOW_EXECUTOR_LOCATION, resource);
-            } else {
-                log.info("Could not find Workflow Configuration file");
+            if (govRegistry.resourceExists(APIConstants.WORKFLOW_EXECUTOR_LOCATION)) {
+                log.debug("External Stores configuration already uploaded to the registry");
+                return;
             }
+            if (log.isDebugEnabled()) {
+                log.debug("Adding External Stores configuration to the tenant's registry");
+            }
+
+            InputStream inputStream;
+            if (wfExtension.exists()) {
+                inputStream = new FileInputStream(workflowExtensionLocation);
+            } else {
+                inputStream = APIManagerComponent.class
+                        .getResourceAsStream("/workflowextensions/default-workflow-extensions.xml");
+            }
+            byte[] data = IOUtils.toByteArray(inputStream);
+            Resource resource = govRegistry.newResource();
+            resource.setContent(data);
+            resource.setMediaType(APIConstants.WORKFLOW_MEDIA_TYPE);
+            govRegistry.put(APIConstants.WORKFLOW_EXECUTOR_LOCATION, resource);
+
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving Workflow configuration information to the registry",
                     e);
