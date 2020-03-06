@@ -116,9 +116,6 @@ public class OAS2Parser extends APIDefinition {
             APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
             //setting path for apiResourceMediationPolicyObject
             apiResourceMediationPolicyObject.setPath(path);
-            //generating path IDs
-            String pathId = path.replaceAll("[/ {}]","_");
-            apiResourceMediationPolicyObject.setId(pathId);
             Map<String, Model> definitions = swagger.getDefinitions();
             //operation map to get verb
             Map<HttpMethod, Operation> operationMap = entry.getValue().getOperationMap();
@@ -126,7 +123,7 @@ public class OAS2Parser extends APIDefinition {
             List<Operation> operations = swagger.getPaths().get(path).getOperations();
             for (Operation op : operations) {
                 //for each HTTP method get the verb
-                for(Map.Entry<HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
+                for (Map.Entry<HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
                     //add verb to apiResourceMediationPolicyObject
                     apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
                 }
@@ -168,7 +165,7 @@ public class OAS2Parser extends APIDefinition {
                                 }
                             }
                         }
-                        if (applicationJson==null && applicationXml==null){
+                        if (applicationJson == null && applicationXml == null) {
                             setDefaultGeneratedResponse(genCode);
                         }
                     }
@@ -177,10 +174,10 @@ public class OAS2Parser extends APIDefinition {
                 String finalGenCode = genCode.toString();
                 apiResourceMediationPolicyObject.setContent(finalGenCode);
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
-                op.setVendorExtension("x-mediation-script", genCode);
+                op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
             }
             returnMap.put("SWAGGER", Json.pretty(swagger));
-            returnMap.put("policyList",apiResourceMediationPolicyList);
+            returnMap.put("policyList", apiResourceMediationPolicyList);
         }
         return returnMap;
     }

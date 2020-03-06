@@ -47,9 +47,8 @@ public class ThreatProtectionPolicyDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "Name of the policy")
+  @ApiModelProperty(value = "Name of the policy")
   @JsonProperty("name")
-  @NotNull
   public String getName() {
     return name;
   }

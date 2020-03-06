@@ -109,9 +109,6 @@ public class OAS3Parser extends APIDefinition {
             APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
             //setting path for apiResourceMediationPolicyObject
             apiResourceMediationPolicyObject.setPath(path);
-            //generating path IDs
-            String pathId = path.replaceAll("[/ {}]","_");
-            apiResourceMediationPolicyObject.setId(pathId);
             Map<String, Schema> definitions = swagger.getComponents().getSchemas();
             //operation map to get verb
             Map<PathItem.HttpMethod, Operation> operationMap = entry.getValue().readOperationsMap();
@@ -119,7 +116,7 @@ public class OAS3Parser extends APIDefinition {
             List<Operation> operations = swagger.getPaths().get(path).readOperations();
             for (Operation op : operations) {
                 //for each HTTP method get the verb
-                for(Map.Entry<PathItem.HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
+                for (Map.Entry<PathItem.HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
                     //add verb to apiResourceMediationPolicyObject
                     apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
                 }
@@ -142,9 +139,9 @@ public class OAS3Parser extends APIDefinition {
                                 genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
                             }
                             if (responseCode == minResponse) {
-                                responseSection.append(getGeneratedSetResponse(responseEntry,"json"));
+                                responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
                                 if (applicationXml != null) {
-                                    responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry,"xml")).append("*/\n\n");
+                                    responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
                                 }
                             }
                         }
@@ -169,13 +166,45 @@ public class OAS3Parser extends APIDefinition {
                 genCode.append(responseSection);
                 String finalGenCode = genCode.toString();
                 apiResourceMediationPolicyObject.setContent(finalGenCode);
-                op.addExtension("x-mediation-script", genCode);
+                op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
             }
+
+            checkAndSetEmptyScope(swagger);
             returnMap.put("SWAGGER", Json.pretty(swagger));
-            returnMap.put("policyList",apiResourceMediationPolicyList);
+            returnMap.put("policyList", apiResourceMediationPolicyList);
         }
         return returnMap;
+    }
+
+    /**
+     * This is to avoid removing the `scopes` field of default security scheme when there are no scopes present. This
+     * will set an empty scope object there.
+     *
+     *   securitySchemes:
+     *     default:
+     *       type: oauth2
+     *       flows:
+     *         implicit:
+     *           authorizationUrl: 'https://test.com'
+     *           scopes: {}
+     *           x-scopes-bindings: {}
+     *
+     *
+     * @param swagger OpenAPI object
+     */
+    private void checkAndSetEmptyScope (OpenAPI swagger) {
+        Components comp = swagger.getComponents();
+        Map<String, SecurityScheme> securitySchemeMap;
+        SecurityScheme securityScheme;
+        OAuthFlows oAuthFlows;
+        OAuthFlow implicitFlow;
+        if (comp != null && (securitySchemeMap = comp.getSecuritySchemes()) != null &&
+                (securityScheme = securitySchemeMap.get(OPENAPI_SECURITY_SCHEMA_KEY)) != null &&
+                (oAuthFlows = securityScheme.getFlows()) != null &&
+                (implicitFlow = oAuthFlows.getImplicit()) != null && implicitFlow.getScopes() == null) {
+            implicitFlow.setScopes(new Scopes());
+        }
     }
 
     /**

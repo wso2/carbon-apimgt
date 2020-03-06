@@ -1941,10 +1941,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Gets generated scripts
      *
-     * @param apiId
-     * @param ifNoneMatch
-     * @param messageContext
-     * @return
+     * @param apiId  API Id
+     * @param ifNoneMatch If-None-Match header value
+     * @param messageContext message context
+     * @return list of policies of generated sample payload
      * @throws APIManagementException
      */
     @Override
@@ -1954,10 +1954,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIIdentifier apiIdentifier = originalAPI.getId();
-//        MockResponsePayloadListDTO mockResponsePayloadListDTO = APIMappingUtil.fromMockPayloadsToListDTO(apiIdentifier);
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
         Map<String, Object> examples = OASParserUtil.generateExamples(apiDefinition);
-//        List<APIResourceMediationPolicy> policies = (List)examples.get("resourcePolicyList");
         List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get("policyList");
         return Response.ok().entity(APIMappingUtil.fromMockPayloadsToListDTO(policies)).build();
     }
