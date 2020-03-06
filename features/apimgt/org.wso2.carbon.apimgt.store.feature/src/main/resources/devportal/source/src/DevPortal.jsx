@@ -98,11 +98,13 @@ class DevPortal extends React.Component {
     loadLocale(locale = 'en') {
         fetch(`${Settings.app.context}/site/public/locales/${locale}.json`)
             .then((resp) => {
-                const messages = resp ? resp.json() : null;
-                if(!messages) {
-                    this.loadLocale('en');
-                    return;
+                if(resp.status === 200){
+                    return(resp.json());
+                } else {
+                    return {};
                 }
+            })
+            .then((messages) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
                 addLocaleData(require(`react-intl/locale-data/${locale}`));
                 this.setState({ messages, language: locale });
