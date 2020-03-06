@@ -227,15 +227,36 @@ class TableView extends React.Component {
         const { page, rowsPerPage } = this;
         const { isAPIProduct, query } = this.props;
         if (query) {
+            let offset = page * rowsPerPage;
+            if (this.count !== 100) {
+                offset = offset > this.count ? 0 : offset;
+                if (offset === 0) {
+                    this.page = 0;
+                }
+            }
             const composeQuery = queryString.parse(query);
             composeQuery.limit = this.rowsPerPage;
-            composeQuery.offset = page * rowsPerPage;
+            composeQuery.offset = offset;
             return API.search(composeQuery);
         }
         if (isAPIProduct) {
-            return APIProduct.all({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            let offset = page * rowsPerPage;
+            if (this.count !== 100) {
+                offset = offset > this.count ? 0 : offset;
+                if (offset === 0) {
+                    this.page = 0;
+                }
+            }
+            return APIProduct.all({ limit: this.rowsPerPage, offset });
         } else {
-            return API.all({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            let offset = page * rowsPerPage;
+            if (this.count !== 100) {
+                offset = offset > this.count ? 0 : offset;
+                if (offset === 0) {
+                    this.page = 0;
+                }
+            }
+            return API.all({ limit: this.rowsPerPage, offset });
         }
     };
 
