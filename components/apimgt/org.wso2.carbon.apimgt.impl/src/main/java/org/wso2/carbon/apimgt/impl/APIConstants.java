@@ -1305,6 +1305,10 @@ public final class APIConstants {
     public static final String X_WSO2_MUTUAL_SSL = "x-wso2-mutual-ssl";
     public static final String X_WSO2_APP_SECURITY = "x-wso2-application-security";
     public static final String X_WSO2_RESPONSE_CACHE = "x-wso2-response-cache";
+    public static final String X_WSO2_DISABLE_SECURITY = "x-wso2-disable-security";
+    public static final String X_WSO2_THROTTLING_TIER = "x-wso2-throttling-tier";
+    public static final String X_WSO2_REQUEST_INTERCEPTOR = "x-wso2-request-interceptor";
+    public static final String X_WSO2_RESPONSE_INTERCEPTOR = "x-wso2-response-interceptor";
     public static final String X_WSO2_ENDPOINT_TYPE = "type";
 
     //API Constants
