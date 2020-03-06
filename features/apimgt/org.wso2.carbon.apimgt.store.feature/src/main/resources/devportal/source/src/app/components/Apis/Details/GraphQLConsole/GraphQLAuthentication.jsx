@@ -33,6 +33,7 @@ import {
     Radio, RadioGroup, FormControlLabel, FormControl,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import SelectAppPanel from '../ApiConsole/SelectAppPanel';
 import Application from '../../../../data/Application';
 import { ApiContext } from '../ApiContext';
@@ -119,40 +120,45 @@ export default function GraphQLAuthentication(props) {
     useEffect(() => {
         const apiID = api.id;
         const apiClient = new Api();
-        const promiseSubscription = apiClient.getSubscriptions(apiID);
-        promiseSubscription
-            .then((subscriptionsResponse) => {
-                const subs = subscriptionsResponse.obj.list.filter(
-                    (item) => item.status === 'UNBLOCKED' || item.status === 'PROD_ONLY_BLOCKED',
-                );
-                if (subs && subs.length > 0) {
-                    const sApplication = subs[0].applicationId;
-                    setSelectedApplication(sApplication);
-                    const promiseApp = Application.get(sApplication);
-                    promiseApp
-                        .then((application) => {
-                            return application.getKeys();
-                        })
-                        .then((appKeys) => {
-                            if (appKeys.get('SANDBOX')) {
-                                setSelectedKeyType('SANDBOX');
-                            } else if (appKeys.get('PRODUCTION')) {
-                                setSelectedKeyType('PRODUCTION');
-                            }
-                            setKeys(appKeys);
-                        });
-                }
-                setSubscriptions(subs);
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.error(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    setFound(true);
-                }
-            });
+
+        if (user != null) {
+            const promiseSubscription = apiClient.getSubscriptions(apiID);
+
+            promiseSubscription
+                .then((subscriptionsResponse) => {
+                    const subs = subscriptionsResponse.obj.list.filter(
+                        (item) => item.status === 'UNBLOCKED' || item.status === 'PROD_ONLY_BLOCKED',
+                    );
+
+                    if (subs && subs.length > 0) {
+                        const sApplication = subs[0].applicationId;
+                        setSelectedApplication(sApplication);
+                        const promiseApp = Application.get(sApplication);
+                        promiseApp
+                            .then((application) => {
+                                return application.getKeys();
+                            })
+                            .then((appKeys) => {
+                                if (appKeys.get('SANDBOX')) {
+                                    setSelectedKeyType('SANDBOX');
+                                } else if (appKeys.get('PRODUCTION')) {
+                                    setSelectedKeyType('PRODUCTION');
+                                }
+                                setKeys(appKeys);
+                            });
+                    }
+                    setSubscriptions(subs);
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.error(error);
+                    }
+                    const { status } = error;
+                    if (status === 404) {
+                        setFound(true);
+                    }
+                });
+        }
     }, []);
 
     /**
@@ -286,6 +292,11 @@ export default function GraphQLAuthentication(props) {
                                             selectedKeyType={selectedKeyType}
                                         />
                                     )}
+                                    {user && subscriptions === null && (
+                                        <Box display='flex' justifyContent='center'>
+                                            <CircularProgress size={35} />
+                                        </Box>
+                                    )}
                                     {subscriptions && subscriptions.length === 0 && (
                                         <Box display='flex' justifyContent='center'>
                                             <Typography variant='body1' gutterBottom>
@@ -296,8 +307,8 @@ export default function GraphQLAuthentication(props) {
                                                 />
                                             </Typography>
                                         </Box>
-
                                     )}
+
                                     <Box display='flex' justifyContent='center'>
                                         <Grid xs={12} md={6} item>
                                             {(environments && environments.length > 0)
@@ -345,6 +356,7 @@ export default function GraphQLAuthentication(props) {
                                                 )}
                                         </Grid>
                                     </Box>
+
                                     <Box display='block' justifyContent='center'>
                                         <Grid x={12} md={6} className={classes.tokenType} item>
                                             {securitySchemeType === 'BASIC' ? (
@@ -456,6 +468,7 @@ export default function GraphQLAuthentication(props) {
                                             )}
                                         </Grid>
                                     </Box>
+
                                 </Box>
                             </Grid>
                         )}
