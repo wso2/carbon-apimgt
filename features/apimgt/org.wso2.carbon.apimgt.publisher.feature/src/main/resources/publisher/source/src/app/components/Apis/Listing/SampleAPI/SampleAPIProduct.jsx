@@ -23,7 +23,6 @@ import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 import green from '@material-ui/core/colors/green';
-import Icon from '@material-ui/core/Icon';
 import { PropTypes } from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import queryString from 'query-string';
@@ -32,10 +31,14 @@ import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import Alert from 'AppComponents/Shared/Alert';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import Create from '@material-ui/icons/Create';
+import GetApp from '@material-ui/icons/GetApp';
 import apiProduct from './apiProduct';
 import mathPayload from './math';
 import calculatorPayload from './calculator';
 import SampleAPIProductWizard from './SampleAPIProductWizard';
+import APIProductCreateMenu from '../components/APIProductCreateMenu';
+
 
 const useStyles = makeStyles((theme) => ({
     buttonProgress: {
@@ -52,6 +55,9 @@ const useStyles = makeStyles((theme) => ({
     },
     content: {
         paddingBottom: theme.spacing(2),
+    },
+    buttonLeft: {
+        marginRight: theme.spacing(1),
     },
     deployButton: {
         '& span.material-icons': {
@@ -71,7 +77,6 @@ const useStyles = makeStyles((theme) => ({
 function SampleAPI(prop) {
     const classes = useStyles();
     const { intl } = prop;
-
     const [step, setStep] = useState(0);
     const [productPath, setProductPath] = useState(null);
     /**
@@ -83,8 +88,8 @@ function SampleAPI(prop) {
         setStep(3);
         const sampleProductPayload = apiProduct(calId, mathId);
         const productRestApi = new APIProduct();
-
         const productPromise = productRestApi.create(sampleProductPayload);
+
         productPromise
             .then((prod) => {
                 setStep(4);
@@ -150,6 +155,7 @@ function SampleAPI(prop) {
      */
 
     return (
+
         <InlineMessage type='info' height={140}>
             <div className={classes.contentWrapper}>
                 <Typography variant='h5' component='h3' className={classes.head}>
@@ -169,21 +175,35 @@ function SampleAPI(prop) {
                     />
                 </Typography>
                 <div className={classes.actions}>
+                    <APIProductCreateMenu buttonProps={{
+                        size: 'small',
+                        color: 'primary',
+                        variant: 'contained',
+                        className: classes.buttonLeft,
+                    }}
+                    >
+                        <Create />
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product'
+                            defaultMessage='Create New API Product'
+                        />
+                    </APIProductCreateMenu>
                     <SampleAPIProductWizard step={step} setStep={setStep} productPath={productPath} />
                     <Button
                         size='small'
                         color='primary'
                         disabled={step !== 0}
-                        variant='outlined'
+                        variant='contained'
                         onClick={handleDeploySample}
-                        className={classes.deployButton}
+                        className='rightAlign'
                     >
-                        <Icon>play_circle_outline</Icon>
+
+                        <GetApp />
                         <FormattedMessage
                             id='Apis.Listing.SampleAPIProduct.deploy.button'
                             defaultMessage='Deploy Sample API Product'
                         />
-                        {step !== 0 && <CircularProgress size={24} className={classes.buttonProgress} />}
+                        {step !== 0 && step !== 4 && <CircularProgress size={24} className={classes.buttonProgress} />}
                     </Button>
                 </div>
             </div>

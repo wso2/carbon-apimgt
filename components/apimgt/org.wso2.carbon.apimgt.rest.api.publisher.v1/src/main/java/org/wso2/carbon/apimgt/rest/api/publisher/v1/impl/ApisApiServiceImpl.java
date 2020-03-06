@@ -86,6 +86,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -1494,8 +1495,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //deletes the API
             apiProvider.deleteAPI(apiIdentifier, apiId);
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-            keyManager.deleteRegisteredResourceByAPIId(apiId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
@@ -2023,7 +2022,22 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while getting lifecycle state for API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, log);
             }
-            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData);
+
+            boolean apiOlderVersionExist = false;
+            // check whether other versions of the current API exists
+            APIDTO currentAPI = getAPIByID(apiId);
+            APIVersionStringComparator comparator = new APIVersionStringComparator();
+            Set<String> versions = apiProvider.getAPIVersions(
+                    APIUtil.replaceEmailDomain(currentAPI.getProvider()), currentAPI.getName());
+
+            for (String tempVersion : versions) {
+                if (comparator.compare(tempVersion, currentAPI.getVersion()) < 0) {
+                    apiOlderVersionExist = true;
+                    break;
+                }
+            }
+
+            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {

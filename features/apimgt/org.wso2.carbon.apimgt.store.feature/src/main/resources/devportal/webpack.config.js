@@ -37,7 +37,7 @@ const config = {
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
             AppTests: path.resolve(__dirname, 'source/Tests/'),
         },
-        extensions: ['.js', '.jsx'],
+        extensions: ['.mjs','.js', '.jsx'],
     },
     module: {
         rules: [
@@ -114,4 +114,4 @@ module.exports = function(env) {
     }
     return config;
 };
-/* eslint-enable */
+

@@ -30,6 +30,7 @@ import org.wso2.carbon.identity.oauth.callback.OAuthCallback;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.CacheManager;
 import javax.cache.Caching;
@@ -122,7 +123,12 @@ public abstract class AbstractScopesIssuer {
 
         //Get all the scopes and roles against the scopes defined for the APIs subscribed to the application.
         Map<String, String> appScopes = null;
-        String tenantDomain = authenticatedUser.getTenantDomain();
+        String tenantDomain;
+        if (authenticatedUser.isFederatedUser()) {
+            tenantDomain = MultitenantUtils.getTenantDomain(authenticatedUser.getAuthenticatedSubjectIdentifier());
+        } else {
+            tenantDomain = authenticatedUser.getTenantDomain();
+        }
         try {
             appScopes = getApiMgtDAOInstance().getScopeRolesOfApplication(consumerKey);
             //Add API Manager rest API scopes set. This list should be loaded at server start up and keep

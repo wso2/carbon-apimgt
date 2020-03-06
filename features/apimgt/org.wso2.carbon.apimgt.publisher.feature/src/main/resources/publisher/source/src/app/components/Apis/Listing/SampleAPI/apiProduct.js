@@ -2,7 +2,6 @@ const getApiProductPayload = (calculatorApiId, mathApiId) => ({
     name: 'CalculatorAPIProduct',
     context: '/calc_prod',
     description: 'A calculator API Product that supports basic operations',
-    thumbnailUri: '/api-products/01234567-0123-0123-0123-012345678901/thumbnail',
     visibility: 'PUBLIC',
     visibleRoles: ['testrole', 'admin'],
     visibleTenants: ['string'],

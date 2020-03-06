@@ -353,9 +353,8 @@
         <task class="org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.tasks.APISynchronizationTask" name="APISynchronizationTask">
             <trigger cron="0 */10 * ? * *"/>
         </task>
-        <task class="org.wso2.carbon.apimgt.onpremise.gateway.usage.publisher.tasks.APIUsageFileUploadTask" name="APIUsageFileUploadTask">
-            <trigger cron="0 0 0/6 1/1 * ? *"/>
-        </task>
+        <task class="org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.APIUsageFileUploadTask"
+          name="APIUsageFileUploadTask">
         <task class="org.wso2.carbon.apimgt.onpremise.gateway.usage.publisher.tasks.APIUsageFileCleanupTask" name="APIUsageFileCleanupTask">
             <trigger cron="0 0 0/1 1/1 * ? *"/>
             <property key="fileRetentionDays" value="35"/>

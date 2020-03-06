@@ -3956,6 +3956,8 @@ public final class APIUtil {
             String workflowExtensionLocation =
                     CarbonUtils.getCarbonHome() + File.separator + APIConstants.WORKFLOW_EXTENSION_LOCATION;
 
+            File wfExtension = new File(workflowExtensionLocation);
+
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
@@ -3967,7 +3969,14 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding External Stores configuration to the tenant's registry");
             }
-            InputStream inputStream = new FileInputStream(workflowExtensionLocation);
+
+            InputStream inputStream;
+            if (wfExtension.exists()) {
+                inputStream = new FileInputStream(workflowExtensionLocation);
+            } else {
+                inputStream = APIManagerComponent.class
+                        .getResourceAsStream("/workflowextensions/default-workflow-extensions.xml");
+            }
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
             resource.setContent(data);
@@ -9168,6 +9177,58 @@ public final class APIUtil {
 
         return null;
 
+    }
+
+    /**
+     * Implemented to get the API usage count for monetization.
+     *
+     * @param from : the start timestamp of the query.
+     * @param to   : the end timestamp of the query.
+     * @return JSON Object.
+     */
+    public static JSONObject getUsageCountForMonetization(long from, long to)
+            throws APIManagementException {
+
+        JSONObject jsonObject = null;
+        String granularity = null;
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        granularity = configuration.getFirstProperty(
+                APIConstants.Monetization.USAGE_PUBLISHER_GRANULARITY);
+        if (StringUtils.isEmpty(granularity)) {
+            //set the default granularity to days, if it is not set in configuration
+            granularity = APIConstants.Monetization.USAGE_PUBLISH_DEFAULT_GRANULARITY;
+        }
+        StringBuilder query = new StringBuilder(
+                "from " + APIConstants.Monetization.MONETIZATION_USAGE_RECORD_AGG
+                        + " within " + from
+                        + "L, " + to + "L per '" + granularity
+                        + "' select "
+                        + APIConstants.Analytics.API_NAME + ", "
+                        + APIConstants.Analytics.API_VERSION + ", "
+                        + APIConstants.Analytics.API_CREATOR + ", "
+                        + APIConstants.Analytics.API_CREATOR_TENANT_DOMAIN + ", "
+                        + APIConstants.Analytics.APPLICATION_ID + ", "
+                        + "sum (requestCount) as requestCount "
+                        + "group by "
+                        + APIConstants.Analytics.API_NAME + ", "
+                        + APIConstants.Analytics.API_VERSION + ", "
+                        + APIConstants.Analytics.API_CREATOR + ", "
+                        + APIConstants.Analytics.API_CREATOR_TENANT_DOMAIN + ", "
+                        + APIConstants.Analytics.APPLICATION_ID
+        );
+        try {
+            jsonObject = APIUtil.executeQueryOnStreamProcessor(
+                    APIConstants.Monetization.MONETIZATION_USAGE_RECORD_APP,
+                    query.toString());
+            if(jsonObject == null){
+                jsonObject = new JSONObject();
+            }
+        } catch (APIManagementException ex) {
+            String msg = "Unable to Retrieve monetization usage records";
+            handleException(msg, ex);
+        }
+        return jsonObject;
     }
 
     public static boolean isDueToAuthorizationFailure(Throwable e) {

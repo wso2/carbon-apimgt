@@ -235,6 +235,8 @@ public final class APIImportUtil {
         API importedApi = null;
         API targetApi; //target API when overwrite is true
         String prevProvider;
+        String apiName;
+        String apiVersion;
         String currentTenantDomain;
         String currentStatus;
         String targetStatus;
@@ -269,7 +271,20 @@ public final class APIImportUtil {
 
             //locate the "providerName" within the "id" and set it as the current user
             JsonObject apiId = configObject.getAsJsonObject(APIImportExportConstants.ID_ELEMENT);
+
             prevProvider = apiId.get(APIImportExportConstants.PROVIDER_ELEMENT).getAsString();
+            apiName = apiId.get(APIImportExportConstants.NAME_ELEMENT).getAsString();
+            apiVersion = apiId.get(APIImportExportConstants.VERSION_ELEMENT).getAsString();
+            // Remove spaces of API Name/version if present
+            if (apiName != null && apiVersion != null) {
+                apiId.addProperty(APIImportExportConstants.NAME_ELEMENT,
+                        apiName = apiName.replace(" ", ""));
+                apiId.addProperty(APIImportExportConstants.VERSION_ELEMENT,
+                        apiVersion = apiVersion.replace(" ", ""));
+            } else {
+                throw new IOException("API Name (id.apiName) and Version (id.version) must be provided in api.yaml");
+            }
+
             String prevTenantDomain = MultitenantUtils
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(prevProvider));
             currentTenantDomain = MultitenantUtils
@@ -302,9 +317,6 @@ public final class APIImportUtil {
 
             // Store imported API status
             targetStatus = importedApi.getStatus();
-
-            String apiName = importedApi.getId().getName();
-            String apiVersion = importedApi.getId().getVersion();
             if (Boolean.TRUE.equals(overwrite)) {
                 String provider = APIUtil
                         .getAPIProviderFromAPINameVersionTenant(apiName, apiVersion, currentTenantDomain);

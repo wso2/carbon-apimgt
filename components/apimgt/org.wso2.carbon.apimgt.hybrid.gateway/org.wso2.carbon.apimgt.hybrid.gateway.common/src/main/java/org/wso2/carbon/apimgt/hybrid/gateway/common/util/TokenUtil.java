@@ -85,6 +85,19 @@ public class TokenUtil {
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
         char[] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
+        return registerClient(username, password);
+    }
+
+    /**
+     * Method to register a client by calling the dynamic client registration endpoint in API Manager with the default
+     * parameters. Uses the username & password provided from the caller
+     *
+     * @param username  tenant username
+     * @param password  password of the user
+     * @return OAuthApplicationInfoDTO
+     * @throws OnPremiseGatewayException when failed to register the client
+     */
+    public static OAuthApplicationInfoDTO registerClient(String username, char[] password) throws OnPremiseGatewayException {
 
         OAuthApplicationRequestDTO dto = new OAuthApplicationRequestDTO();
         dto.setAppCallbackUrl(OnPremiseGatewayConstants.DEFAULT_DCR_CALLBACK_URL);
@@ -110,8 +123,7 @@ public class TokenUtil {
                                                          String username, char[] password)
             throws OnPremiseGatewayException {
 
-        String restApiVersion = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_VERSION_PROPERTY);
+        String restApiVersion = ConfigManager.getConfigurationDTO().getApi_update_rest_api_version();
         if (restApiVersion == null) {
             restApiVersion = OnPremiseGatewayConstants.API_DEFAULT_VERSION;
             if (log.isDebugEnabled()) {
@@ -123,8 +135,7 @@ public class TokenUtil {
                 log.debug("Cloud API doesn't have an version. Therefore, removing the version");
             }
         }
-        String apiPublisherUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_PUBLISHER_URL_PROPERTY_KEY);
+        String apiPublisherUrl = ConfigManager.getConfigurationDTO().getUrl_publisher();
         if (apiPublisherUrl == null) {
             apiPublisherUrl = OnPremiseGatewayConstants.DEFAULT_API_PUBLISHER_URL;
             if (log.isDebugEnabled()) {
@@ -183,6 +194,21 @@ public class TokenUtil {
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
         char[] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
+        return generateAccessToken(clientId, clientSecret, requiredScope, username, password);
+    }
+
+    /**
+     * Method to get an access token corresponding to a given scope with given client ID and Secret for the
+     * tenant username and password sent to the method
+     *
+     * @param clientId     consumer key
+     * @param clientSecret secret key
+     * @param username     Tenant username
+     * @param password     password for the user
+     * @return a json string containing consumer key/secret key pair
+     */
+    public static AccessTokenDTO generateAccessToken(String clientId, char[] clientSecret, String requiredScope, String username, char[] password)
+            throws OnPremiseGatewayException {
         Map<String, String> params = new HashMap<>();
         params.put(OnPremiseGatewayConstants.TOKEN_GRANT_TYPE_KEY,
                 OnPremiseGatewayConstants.TOKEN_GRANT_TYPE);
@@ -204,11 +230,9 @@ public class TokenUtil {
     public static AccessTokenDTO generateAccessToken(Map<String, String> params, String clientId,
                                                      char[] clientSecret)
             throws OnPremiseGatewayException {
-        String tokenApiUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_GATEWAY_URL_PROPERTY_KEY) +
+        String tokenApiUrl = ConfigManager.getConfigurationDTO().getUrl_gateway() +
                 OnPremiseGatewayConstants.TOKEN_API_SUFFIX;
-        String gatewayUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_GATEWAY_URL_PROPERTY_KEY);
+        String gatewayUrl = ConfigManager.getConfigurationDTO().getUrl_gateway();
         URL gatewayUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(gatewayUrl);
         HttpClient httpClient = APIUtil.getHttpClient(gatewayUrlValue.getPort(), gatewayUrlValue.getProtocol());
 

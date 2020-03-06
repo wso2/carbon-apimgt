@@ -21,16 +21,17 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.GatewayListenerNotifier;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.exception.OnPremiseGatewayException;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.util.MicroGatewayCommonUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.tenant.initializer.internal.ServiceDataHolder;
 import org.wso2.carbon.apimgt.hybrid.gateway.tenant.initializer.utils.TenantInitializationConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -44,11 +45,14 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -115,8 +119,19 @@ public class ServerStartupListener implements ServerStartupObserver {
                 boolean isLoginSuccessful = authAdminStub.login(adminName, String.valueOf(adminPwd), host);
                 if (isLoginSuccessful) {
                     try {
-                        initializeTenant();
-                        loadTenant();
+                        boolean multi = ConfigManager.getConfigurationDTO().isMulti_tenant_enabled();
+                        if (multi) {
+                            for (String user : getMultiTenantUsernames()) {
+                                initializeTenant(user);
+                                loadTenant(user);
+                            }
+                        } else {
+                            APIManagerConfiguration config = ServiceDataHolder.getInstance().
+                                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                            String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+                            initializeTenant(username);
+                            loadTenant(username);
+                        }
                         GatewayListenerNotifier.notifyListeners();
                     } catch (Exception e) {
                         log.error("An error occurred while initializing tenant upon initial server " +
@@ -147,12 +162,9 @@ public class ServerStartupListener implements ServerStartupObserver {
     /**
      * Method to create a tenant upon initial server startup
      */
-    private static void initializeTenant() throws Exception {
+    public static void initializeTenant(String username) throws Exception {
         TenantInfoBean tenantInfoBean = new TenantInfoBean();
         TenantMgtAdminService tenantMgtAdminService = new TenantMgtAdminService();
-        APIManagerConfiguration config = ServiceDataHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
         char[] password = MicroGatewayCommonUtil.getRandomString(20).toCharArray();
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -191,11 +203,10 @@ public class ServerStartupListener implements ServerStartupObserver {
     /**
      * Method to load the configurations of a tenant
      */
-    private static void loadTenant() throws IOException {
+    private static void loadTenant(String username) throws IOException {
         String tenantDomain;
         APIManagerConfiguration config = ServiceDataHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
         tenantDomain = MultitenantUtils.getTenantDomain(username);
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             try {
@@ -205,10 +216,6 @@ public class ServerStartupListener implements ServerStartupObserver {
                 carbonContext.setUsername(MultitenantUtils.getTenantAwareUsername(username));
                 ConfigurationContext context =
                         ServiceDataHolder.getInstance().getConfigurationContextService().getServerConfigContext();
-                int tenantId = carbonContext.getTenantId(true);
-                String path = CarbonUtils.getCarbonTenantsDirPath() + File.separator + tenantId;
-                // delete existing configurations of tenant
-                FileUtils.deleteDirectory(new File(path));
                 // load tenant configuration
                 TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, context);
                 log.info("Successfully loaded tenant with tenant domain : " + tenantDomain);
@@ -219,6 +226,29 @@ public class ServerStartupListener implements ServerStartupObserver {
             if (log.isDebugEnabled()) {
                 log.debug("Skipping loading super tenant space since execution is currently in super tenant flow.");
             }
+        }
+    }
+
+    /**
+     * Create the Set of multi tenant username for the gateway
+     *
+     * @return Set of multitenant user and credentials
+     * @throws OnPremiseGatewayException
+     */
+    private static Set<String> getMultiTenantUsernames() throws OnPremiseGatewayException {
+        ArrayList multiTenantUsers = ConfigManager.getConfigurationDTO().getMulti_tenant_users();
+        if (!multiTenantUsers.isEmpty()) {
+            Set<String> userSet = new HashSet<>();
+            for (Object tenantUsername : multiTenantUsers) {
+                byte[] decodedUser = Base64.getDecoder().decode(tenantUsername.toString());
+                String decodedUserString = new String(decodedUser);
+                String[] userDetails = decodedUserString.split(":");
+                userSet.add(userDetails[0]);
+            }
+            return userSet;
+        } else {
+            throw new OnPremiseGatewayException("Multi Tenant User list is not defined in the on-premise-gateway.toml" +
+                    " file");
         }
     }
 

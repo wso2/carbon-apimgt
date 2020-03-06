@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.hybrid.gateway.common.internal.ServiceReferenceHol
 import org.wso2.carbon.apimgt.hybrid.gateway.common.util.HttpRequestUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.TestUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.constants.Constants;
+import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;

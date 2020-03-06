@@ -186,7 +186,7 @@ function TransportLevel(props) {
                         </Typography>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails className={classes.expansionPanelDetails}>
-                        <Transports api={api} configDispatcher={configDispatcher} />
+                        <Transports api={api} configDispatcher={configDispatcher} securityScheme={securityScheme} />
                         <FormControlLabel
                             control={(
                                 <Checkbox
