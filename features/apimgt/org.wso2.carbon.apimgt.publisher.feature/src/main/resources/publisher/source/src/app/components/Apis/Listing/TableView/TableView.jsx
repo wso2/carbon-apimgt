@@ -172,6 +172,9 @@ class TableView extends React.Component {
             const { body } = data;
             const { list, pagination, count } = body;
             const { total } = pagination;
+            // When there is a count stored in the localstorage and it's greater than 0
+            // We check if the response in the rest api callls have 0 items.
+            // We remove the local storage and redo the api call
             if (this.count > 0 && total === 0) {
                 this.removeLocalStorage();
             }
@@ -181,9 +184,6 @@ class TableView extends React.Component {
     };
 
     removeLocalStorage = () => {
-        // When there is a count stored in the localstorage and it's greater than 0
-        // We check if the response in the rest api callls have 0 items.
-        // We remove the local storage and rerun the api call
         const { isAPIProduct } = this.props;
         const paginationSufix = isAPIProduct ? 'products' : 'apis';
         window.localStorage.removeItem('pagination-' + paginationSufix);
