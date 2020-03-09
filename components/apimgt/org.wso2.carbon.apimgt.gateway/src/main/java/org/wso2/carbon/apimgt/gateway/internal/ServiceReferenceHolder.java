@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.tracing.TracingService;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.endpoint.service.EndpointAdmin;
 import org.wso2.carbon.localentry.service.LocalEntryAdmin;
@@ -58,12 +59,12 @@ public class ServiceReferenceHolder {
     private ThrottleDataPublisher throttleDataPublisher;
     private Map<String,AbstractAPIMgtGatewayJWTGenerator> apiMgtGatewayJWTGenerators  = new HashMap<>();
     private Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
-    public ThrottleDataHolder getThrottleDataHolder() {
-        return throttleDataHolder;
-    }
-
+    private TracingTracer tracer;
     public void setThrottleDataHolder(ThrottleDataHolder throttleDataHolder) {
         this.throttleDataHolder = throttleDataHolder;
+    }
+    public ThrottleDataHolder getThrottleDataHolder() {
+        return throttleDataHolder;
     }
 
     private ServiceReferenceHolder() {
@@ -208,5 +209,15 @@ public class ServiceReferenceHolder {
     public Map<String, JWTTransformer> getJwtTransformerMap() {
 
         return jwtTransformerMap;
+    }
+
+    public TracingTracer getTracer() {
+
+        return tracer;
+    }
+
+    public void setTracer(TracingTracer tracer) {
+
+        this.tracer = tracer;
     }
 }
