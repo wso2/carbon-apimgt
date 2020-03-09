@@ -172,10 +172,24 @@ class TableView extends React.Component {
             const { body } = data;
             const { list, pagination, count } = body;
             const { total } = pagination;
+            if (this.count > 0 && total === 0) {
+                this.removeLocalStorage();
+            }
             this.count = total;
             this.setState({ apisAndApiProducts: list, notFound: false, displayCount: count });
         });
     };
+
+    removeLocalStorage = () => {
+        // When there is a count stored in the localstorage and it's greater than 0
+        // We check if the response in the rest api callls have 0 items.
+        // We remove the local storage and rerun the api call
+        const { isAPIProduct } = this.props;
+        const paginationSufix = isAPIProduct ? 'products' : 'apis';
+        window.localStorage.removeItem('pagination-' + paginationSufix);
+        this.page = 0;
+        this.getData();
+    }
 
     getLocalStorage = () => {
         const { isAPIProduct } = this.props;
