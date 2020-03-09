@@ -96,7 +96,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      */
     private int getMaxQueryDepth(String[] userRoles, JSONObject policyDefinition) {
         Object depthObject = policyDefinition.get(APIConstants.QUERY_ANALYSIS_DEPTH);
-        boolean depthCheckEnabled = Boolean.parseBoolean(((JSONObject) depthObject).get("enabled").toString());
+        boolean depthCheckEnabled = Boolean.parseBoolean(((JSONObject) depthObject)
+                .get(APIConstants.CHECK_ENABLED).toString());
         List<Integer> allocatedDepths = new ArrayList<>();
         if (depthCheckEnabled) {
             for (String role : userRoles) {
@@ -110,7 +111,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                 }
             }
             if (allocatedDepths.isEmpty()) {
-                Object defaultDepth = ((JSONObject) depthObject).get("default");
+                Object defaultDepth = ((JSONObject) depthObject).get(APIConstants.DEFAULT_DEPTH_ROLE);
                 if (defaultDepth != null) {
                     return ((Long) defaultDepth).intValue();
                 } else {
@@ -130,7 +131,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      *
      * @param messageContext message context of the request
      * @param payload        payload of the request
-     * @return true or false
+     * @return true, if the query is not blocked or false, if the query is blocked
      */
     private boolean analyseQuery(MessageContext messageContext, String payload) {
         JSONParser jsonParser = new JSONParser();
@@ -139,8 +140,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             String graphQLAccessControlPolicy =
                     (String) messageContext.getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
             JSONObject policyDefinition = (JSONObject) jsonParser.parse(graphQLAccessControlPolicy);
-            if (queryDepthAnalysis(messageContext, payload, policyDefinition) &&
-                    queryComplexityAnalysis(messageContext, payload, policyDefinition)) {
+            if (analyseQueryDepth(messageContext, payload, policyDefinition) &&
+                    analyseQueryComplexity(messageContext, payload, policyDefinition)) {
                 return true;
             } else {
                 return false;
@@ -157,9 +158,9 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      * @param messageContext   message context of the request
      * @param payload          payload of the request
      * @param policyDefinition json object which contains the policy
-     * @return true or false
+     * @return true, if the query depth does not exceed the maximum value or false, if query depth exceeds the maximum
      */
-    private boolean queryDepthAnalysis(MessageContext messageContext, String payload, JSONObject policyDefinition) {
+    private boolean analyseQueryDepth(MessageContext messageContext, String payload, JSONObject policyDefinition) {
         String username = APISecurityUtils.getAuthenticationContext(messageContext).getUsername();
 
         try {
@@ -221,9 +222,9 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      * @param messageContext   message context of the request
      * @param payload          payload of the request
      * @param policyDefinition json object which contains the policy
-     * @return true or false
+     * @return true, if query complexity does not exceed the maximum or false, if query complexity exceeds the maximum
      */
-    private boolean queryComplexityAnalysis(MessageContext messageContext, String payload, JSONObject policyDefinition) {
+    private boolean analyseQueryComplexity(MessageContext messageContext, String payload, JSONObject policyDefinition) {
         FieldComplexityCalculator fieldComplexityCalculator = new FieldComplexityCalculatorImpl(messageContext);
         int maxQueryComplexity = getMaxQueryComplexity(policyDefinition);
 
@@ -285,9 +286,10 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      */
     private int getMaxQueryComplexity(JSONObject policyDefinition) {
         Object complexityObject = policyDefinition.get(APIConstants.QUERY_ANALYSIS_COMPLEXITY);
-        boolean complexityCheckEnabled = Boolean.parseBoolean(((JSONObject) complexityObject).get("enabled").toString());
+        boolean complexityCheckEnabled = Boolean.parseBoolean(((JSONObject) complexityObject)
+                .get(APIConstants.CHECK_ENABLED).toString());
         if (complexityCheckEnabled) {
-            Object maxQueryComplexity = ((JSONObject) complexityObject).get("max_query_complexity");
+            Object maxQueryComplexity = ((JSONObject) complexityObject).get(APIConstants.MAXIMUM_QUERY_COMPLEXITY);
             if (maxQueryComplexity != null) {
                 return ((Long) maxQueryComplexity).intValue();
             } else {

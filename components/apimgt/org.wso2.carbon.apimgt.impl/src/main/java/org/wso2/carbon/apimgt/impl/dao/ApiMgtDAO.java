@@ -14291,46 +14291,51 @@ public class ApiMgtDAO {
         String updateCustomComplexityDetails = SQLConstants.UPDATE_CUSTOM_COMPLEXITY_DETAILS_SQL;
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps1 = conn.prepareStatement(checkEntry)) {
-            conn.setAutoCommit(false);
-            int apiId = getAPIID(apiIdentifier, conn);
-            ps1.setInt(1, apiId);
-            try (ResultSet rs = ps1.executeQuery()) {
-                if (rs.next()) {
-                    if (rs.getInt("MAX_COMPLEXITY") == 0) {
-                        // Update query analysis table entries and add query complexity table entries
-                        updateComplexityValues(apiIdentifier, graphqlComplexityInfo);
-                        try (PreparedStatement ps2 = conn.prepareStatement(addCustomComplexityDetails)) {
-                            for (CustomComplexityDetails customComplexity : graphqlComplexityInfo.getList()) {
-                                UUID uuid = UUID.randomUUID();
-                                String randomUUIDString = uuid.toString();
-                                ps2.setString(1, randomUUIDString);
-                                ps2.setInt(2, apiId);
-                                ps2.setString(3, customComplexity.getType());
-                                ps2.setString(4, customComplexity.getField());
-                                ps2.setInt(5, customComplexity.getComplexityValue());
-                                ps2.executeUpdate();
+            try {
+                conn.setAutoCommit(false);
+                int apiId = getAPIID(apiIdentifier, conn);
+                ps1.setInt(1, apiId);
+                try (ResultSet rs = ps1.executeQuery()) {
+                    if (rs.next()) {
+                        if (rs.getInt("MAX_COMPLEXITY") == 0) {
+                            // Update query analysis table entries and add query complexity table entries
+                            updateComplexityValues(apiIdentifier, graphqlComplexityInfo);
+                            try (PreparedStatement ps2 = conn.prepareStatement(addCustomComplexityDetails)) {
+                                for (CustomComplexityDetails customComplexity : graphqlComplexityInfo.getList()) {
+                                    UUID uuid = UUID.randomUUID();
+                                    String randomUUIDString = uuid.toString();
+                                    ps2.setString(1, randomUUIDString);
+                                    ps2.setInt(2, apiId);
+                                    ps2.setString(3, customComplexity.getType());
+                                    ps2.setString(4, customComplexity.getField());
+                                    ps2.setInt(5, customComplexity.getComplexityValue());
+                                    ps2.executeUpdate();
+                                }
+                            } catch (SQLException e) {
+                                handleException("Error while adding custom complexity details: ", e);
                             }
-                        } catch (SQLException e) {
-                            handleException("Error while adding custom complexity details: ", e);
-                        }
-                    } else {
-                        // Entries already exists for this API_ID. Hence an update is performed.
-                        updateComplexityValues(apiIdentifier, graphqlComplexityInfo);
-                        try (PreparedStatement ps2 = conn.prepareStatement(updateCustomComplexityDetails)) {
-                            for (CustomComplexityDetails customComplexity : graphqlComplexityInfo.getList()) {
-                                ps2.setInt(1, customComplexity.getComplexityValue());
-                                ps2.setInt(2, apiId);
-                                ps2.setString(3, customComplexity.getType());
-                                ps2.setString(4, customComplexity.getField());
-                                ps2.executeUpdate();
+                        } else {
+                            // Entries already exists for this API_ID. Hence an update is performed.
+                            updateComplexityValues(apiIdentifier, graphqlComplexityInfo);
+                            try (PreparedStatement ps2 = conn.prepareStatement(updateCustomComplexityDetails)) {
+                                for (CustomComplexityDetails customComplexity : graphqlComplexityInfo.getList()) {
+                                    ps2.setInt(1, customComplexity.getComplexityValue());
+                                    ps2.setInt(2, apiId);
+                                    ps2.setString(3, customComplexity.getType());
+                                    ps2.setString(4, customComplexity.getField());
+                                    ps2.executeUpdate();
+                                }
+                            } catch (SQLException e) {
+                                handleException("Error while updating custom complexity details: ", e);
                             }
-                        } catch (SQLException e) {
-                            handleException("Error while updating custom complexity details: ", e);
                         }
                     }
                 }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Failed to update complexity details: ", e);
             }
-            conn.commit();
         } catch (SQLException e) {
             handleException("Error while adding complexity details: ", e);
         }
