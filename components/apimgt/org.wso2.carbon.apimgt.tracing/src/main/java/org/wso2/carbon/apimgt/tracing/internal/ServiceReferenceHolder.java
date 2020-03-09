@@ -23,10 +23,13 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.tracing.OpenTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ServiceReferenceHolder {
     private static final Log log = LogFactory.getLog(TracingServiceComponent.class);
@@ -35,7 +38,7 @@ public class ServiceReferenceHolder {
     private APIManagerConfigurationService amConfigService;
     private static final String REMOTE_TRACER_ENABLED = "OpenTracer.RemoteTracer.Enabled";
     private static final String LOG_TRACER_ENABLED = "OpenTracer.LogTracer.Enabled";
-
+    private static Map<String, OpenTracer> openTracerMap = new HashMap();
     private ServiceReferenceHolder() {
         try {
             String filePath = getFilePath();
@@ -64,5 +67,10 @@ public class ServiceReferenceHolder {
 
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigService) {
         this.amConfigService = amConfigService;
+    }
+
+    public static Map<String, OpenTracer> getOpenTracerMap() {
+
+        return openTracerMap;
     }
 }
