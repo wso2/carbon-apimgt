@@ -8429,8 +8429,8 @@ public final class APIUtil {
                                  final long accessExp) {
 
         Iterable<Cache<?, ?>> availableCaches = Caching.getCacheManager(cacheManagerName).getCaches();
-        for (Cache cache:availableCaches) {
-            if(cache.getName().equalsIgnoreCase(getCacheName(cacheName))){
+        for (Cache cache : availableCaches) {
+            if (cache.getName().equalsIgnoreCase(getCacheName(cacheName))) {
                 return Caching.getCacheManager(cacheManagerName).getCache(cacheName);
             }
         }
@@ -8455,8 +8455,8 @@ public final class APIUtil {
     }
 
     private static String getCacheName(String cacheName) {
-        return Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("Cache.ForceLocalCache"))
-                && !cacheName.startsWith("$__local__$.") ? "$__local__$." + cacheName : cacheName;
+        return (Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("Cache.ForceLocalCache"))
+                && !cacheName.startsWith("$__local__$.")) ? "$__local__$." + cacheName : cacheName;
     }
 
     /**

@@ -88,6 +88,9 @@ import javax.xml.stream.XMLStreamException;
 public class APIExportUtil {
 
     private static final Log log = LogFactory.getLog(APIExportUtil.class);
+    private static final String IN = "in";
+    private static final String OUT = "out";
+    private static final String SOAPTOREST = "SoapToRest";
 
     private APIExportUtil() {
     }
@@ -121,7 +124,7 @@ public class APIExportUtil {
 
             //export thumbnail
             exportAPIThumbnail(archivePath, apiIDToReturn, registry);
-            exportSOAPToRESTMediation(archivePath,apiIDToReturn, registry);
+            exportSOAPToRESTMediation(archivePath, apiIDToReturn, registry);
 
             //export documents
             List<Documentation> docList = provider.getAllDocumentation(apiIDToReturn, userName);
@@ -231,7 +234,7 @@ public class APIExportUtil {
      * @throws APIImportExportException If an error occurs while retrieving image from the registry or
      *                            storing in the archive directory
      */
-    private static void exportSOAPToRESTMediation(String archivePath,APIIdentifier apiIdentifier, Registry registry)
+    private static void exportSOAPToRESTMediation(String archivePath, APIIdentifier apiIdentifier, Registry registry)
             throws APIImportExportException {
         String soapToRestBaseUrl = "/apimgt/applicationdata/provider" + RegistryConstants.PATH_SEPARATOR +
                 apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
@@ -243,29 +246,33 @@ public class APIExportUtil {
         OutputStream outputStream = null;
         try {
             if (registry.resourceExists(soapToRestBaseUrl)) {
-                Collection inFlow = (org.wso2.carbon.registry.api.Collection)registry.get(soapToRestBaseUrl
-                        + RegistryConstants.PATH_SEPARATOR + "in");
-                Collection outFlow = (org.wso2.carbon.registry.api.Collection)registry.get(soapToRestBaseUrl
-                        + RegistryConstants.PATH_SEPARATOR + "out");
+                Collection inFlow = (org.wso2.carbon.registry.api.Collection) registry.get(soapToRestBaseUrl
+                        + RegistryConstants.PATH_SEPARATOR + IN);
+                Collection outFlow = (org.wso2.carbon.registry.api.Collection) registry.get(soapToRestBaseUrl
+                        + RegistryConstants.PATH_SEPARATOR + OUT);
 
-                CommonUtil.createDirectory(archivePath + File.separator + "SoapToRest/in");
-                CommonUtil.createDirectory(archivePath + File.separator + "SoapToRest/out");
+                CommonUtil.createDirectory(archivePath + File.separator + SOAPTOREST + File.separator + IN);
+                CommonUtil.createDirectory(archivePath + File.separator + SOAPTOREST + File.separator + OUT);
                 if (inFlow != null) {
                     for (String inFlowPath : inFlow.getChildren()) {
                         inputStream = registry.get(inFlowPath).getContentStream();
-                        outputStream = new FileOutputStream(archivePath + File.separator + "SoapToRest"
-                                + File.separator + "in" +
+                        outputStream = new FileOutputStream(archivePath + File.separator + SOAPTOREST
+                                + File.separator + IN +
                                 inFlowPath.substring(inFlowPath.lastIndexOf(RegistryConstants.PATH_SEPARATOR)));
                         IOUtils.copy(inputStream, outputStream);
+                        IOUtils.closeQuietly(inputStream);
+                        IOUtils.closeQuietly(outputStream);
                     }
                 }
                 if (outFlow != null) {
                     for (String outFlowPath : outFlow.getChildren()) {
                         inputStream = registry.get(outFlowPath).getContentStream();
-                        outputStream = new FileOutputStream(archivePath + File.separator + "SoapToRest"
-                                + File.separator + "out" +
+                        outputStream = new FileOutputStream(archivePath + File.separator + SOAPTOREST
+                                + File.separator + OUT +
                                 outFlowPath.substring(outFlowPath.lastIndexOf(RegistryConstants.PATH_SEPARATOR)));
                         IOUtils.copy(inputStream, outputStream);
+                        IOUtils.closeQuietly(inputStream);
+                        IOUtils.closeQuietly(outputStream);
                     }
                 }
             }
@@ -280,7 +287,6 @@ public class APIExportUtil {
             IOUtils.closeQuietly(outputStream);
         }
     }
-
 
     /**
      * Retrieve documentation for the exporting API and store it in the archive directory.
