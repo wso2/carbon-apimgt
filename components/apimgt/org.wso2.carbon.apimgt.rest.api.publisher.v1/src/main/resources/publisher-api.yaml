@@ -9053,7 +9053,7 @@ definitions:
   ThreatProtectionPolicy:
     title: "Threat Protection Policy Schema"
     required:
-      - nameresource
+      - name
       - type
       - policy
     properties:
