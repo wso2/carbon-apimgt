@@ -172,10 +172,25 @@ class TableView extends React.Component {
             const { body } = data;
             const { list, pagination, count } = body;
             const { total } = pagination;
+            // When there is a count stored in the localstorage and it's greater than 0
+            // We check if the response in the rest api callls have 0 items.
+            // We remove the local storage and redo the api call
+            if (this.count > 0 && total === 0) {
+                this.page = 0;
+                this.removeLocalStorage();
+                this.getData();
+                return;
+            }
             this.count = total;
             this.setState({ apisAndApiProducts: list, notFound: false, displayCount: count });
         });
     };
+
+    removeLocalStorage = () => {
+        const { isAPIProduct } = this.props;
+        const paginationSufix = isAPIProduct ? 'products' : 'apis';
+        window.localStorage.removeItem('pagination-' + paginationSufix);
+    }
 
     getLocalStorage = () => {
         const { isAPIProduct } = this.props;
@@ -377,7 +392,9 @@ class TableView extends React.Component {
             rowsPerPage,
             onChangeRowsPerPage: (numberOfRows) => {
                 this.rowsPerPage = numberOfRows;
-                if (count - 1 === rowsPerPage * page && page !== 0) {
+                if (page * numberOfRows > count) {
+                    this.page = 0;
+                } else if (count - 1 === rowsPerPage * page && page !== 0) {
                     this.page = page - 1;
                 }
                 this.getData();
