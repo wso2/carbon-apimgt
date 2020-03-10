@@ -1336,6 +1336,9 @@ public final class APIConstants {
     public static final String API_DATA_URL = "url";
     public static final String API_UUID = "apiUUID";
 
+    // mock response generation
+    public static final String MOCK_GEN_POLICY_LIST = "policyList";
+
     public static final String IMPLEMENTATION_STATUS = "implementation_status";
     public static final String ENDPOINT_TYPE_DEFAULT = "default";
     public static final String ENDPOINT_TYPE_FAILOVER = "failover";

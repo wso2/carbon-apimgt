@@ -24,7 +24,6 @@ import io.swagger.oas.inflector.examples.XmlExampleSerializer;
 import io.swagger.oas.inflector.examples.models.Example;
 import io.swagger.oas.inflector.processors.JsonNodeExampleSerializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -62,6 +61,7 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -95,21 +95,36 @@ public class OAS3Parser extends APIDefinition {
      * @return swagger Json
      */
     @Override
-    public String generateExample(String apiDefinition) {
+    public Map<String, Object> generateExample(String apiDefinition) {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, null);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
             log.debug("Errors found when parsing OAS definition");
         }
         OpenAPI swagger = parseAttemptForV3.getOpenAPI();
+        //return map
+        Map<String, Object> returnMap = new HashMap<>();
+        //List for APIResMedPolicyList
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
         for (Map.Entry<String, PathItem> entry : swagger.getPaths().entrySet()) {
-            String path = entry.getKey();
             int minResponse = 0;
             int responseCode = 0;
+            String path = entry.getKey();
+            //initializing apiResourceMediationPolicyObject
+            APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
+            //setting path for apiResourceMediationPolicyObject
+            apiResourceMediationPolicyObject.setPath(path);
             Map<String, Schema> definitions = swagger.getComponents().getSchemas();
+            //operation map to get verb
+            Map<PathItem.HttpMethod, Operation> operationMap = entry.getValue().readOperationsMap();
             ArrayList<Integer> responseCodes = new ArrayList<Integer>();
             List<Operation> operations = swagger.getPaths().get(path).readOperations();
             for (Operation op : operations) {
+                //for each HTTP method get the verb
+                for (Map.Entry<PathItem.HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
+                    //add verb to apiResourceMediationPolicyObject
+                    apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
+                }
                 StringBuilder genCode = new StringBuilder();
                 StringBuilder responseSection = new StringBuilder();
                 for (String responseEntry : op.getResponses().keySet()) {
@@ -120,7 +135,7 @@ public class OAS3Parser extends APIDefinition {
                     }
                     Content content = op.getResponses().get(responseEntry).getContent();
                     if (content != null) {
-                        MediaType applicationJson = content.get(APPLICATION_JSON_MEDIA_TYPE);
+                        MediaType applicationJson = content.get(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                         MediaType applicationXml = content.get(APPLICATION_XML_MEDIA_TYPE);
                         if (applicationJson != null) {
                             Schema jsonSchema = applicationJson.getSchema();
@@ -129,9 +144,9 @@ public class OAS3Parser extends APIDefinition {
                                 genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
                             }
                             if (responseCode == minResponse) {
-                                responseSection.append(getGeneratedSetResponse(responseEntry,"json"));
+                                responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
                                 if (applicationXml != null) {
-                                    responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry,"xml")).append("*/\n\n");
+                                    responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
                                 }
                             }
                         }
@@ -149,14 +164,54 @@ public class OAS3Parser extends APIDefinition {
                         }
                         if (applicationJson == null && applicationXml == null) {
                             setDefaultGeneratedResponse(genCode);
+
                         }
                     }
                 }
                 genCode.append(responseSection);
-                op.addExtension("x-mediation-script", genCode);
+                String finalGenCode = genCode.toString();
+                apiResourceMediationPolicyObject.setContent(finalGenCode);
+                op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
+                apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
             }
+
+            checkAndSetEmptyScope(swagger);
+            returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
+            //returnMap.put("SWAGGER", Json.pretty(swagger));
+            returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
+            //returnMap.put("policyList", apiResourceMediationPolicyList);
         }
-        return Json.pretty(swagger);
+        return returnMap;
+    }
+
+    /**
+     * This is to avoid removing the `scopes` field of default security scheme when there are no scopes present. This
+     * will set an empty scope object there.
+     *
+     *   securitySchemes:
+     *     default:
+     *       type: oauth2
+     *       flows:
+     *         implicit:
+     *           authorizationUrl: 'https://test.com'
+     *           scopes: {}
+     *           x-scopes-bindings: {}
+     *
+     *
+     * @param swagger OpenAPI object
+     */
+    private void checkAndSetEmptyScope (OpenAPI swagger) {
+        Components comp = swagger.getComponents();
+        Map<String, SecurityScheme> securitySchemeMap;
+        SecurityScheme securityScheme;
+        OAuthFlows oAuthFlows;
+        OAuthFlow implicitFlow;
+        if (comp != null && (securitySchemeMap = comp.getSecuritySchemes()) != null &&
+                (securityScheme = securitySchemeMap.get(OPENAPI_SECURITY_SCHEMA_KEY)) != null &&
+                (oAuthFlows = securityScheme.getFlows()) != null &&
+                (implicitFlow = oAuthFlows.getImplicit()) != null && implicitFlow.getScopes() == null) {
+            implicitFlow.setScopes(new Scopes());
+        }
     }
 
     /**
@@ -175,6 +230,7 @@ public class OAS3Parser extends APIDefinition {
 
     /**
      * This method  generates Sample/Mock payloads of XML Examples for operations in the swagger definition
+     *
      * @param model model
      * @param definitions definition
      * @return XmlExample

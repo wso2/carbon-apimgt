@@ -1939,6 +1939,28 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * Gets generated scripts
+     *
+     * @param apiId  API Id
+     * @param ifNoneMatch If-None-Match header value
+     * @param messageContext message context
+     * @return list of policies of generated sample payload
+     * @throws APIManagementException
+     */
+    @Override
+    public Response getGeneratedMockScriptsOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        APIIdentifier apiIdentifier = originalAPI.getId();
+        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+        Map<String, Object> examples = OASParserUtil.generateExamples(apiDefinition);
+        List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        return Response.ok().entity(APIMappingUtil.fromMockPayloadsToListDTO(policies)).build();
+    }
+
+    /**
      * Retrieves the WSDL meta information of the given API. The API must be a SOAP API.
      *
      * @param apiId Id of the API
@@ -3921,17 +3943,16 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response generateMockResponses(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIIdentifier apiIdentifier = originalAPI.getId();
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-        apiDefinition = OASParserUtil.generateExamples(apiDefinition);
+        apiDefinition=String.valueOf(OASParserUtil.generateExamples(apiDefinition).get(APIConstants.SWAGGER));
         apiProvider.saveSwaggerDefinition(originalAPI,apiDefinition);
         return Response.ok().entity(apiDefinition).build();
     }
-
 
     /**
      * Extract GraphQL Operations from given schema

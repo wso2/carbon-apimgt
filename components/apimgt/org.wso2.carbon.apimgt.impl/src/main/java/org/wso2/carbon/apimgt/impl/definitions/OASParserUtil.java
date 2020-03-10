@@ -161,7 +161,7 @@ public class OASParserUtil {
         }
     }
 
-    /**
+    /**Map<String, Object>
      * Return correct OAS parser by validating give definition with OAS 2/3 parsers.
      *
      * @param apiDefinition OAS definition
@@ -205,7 +205,7 @@ public class OASParserUtil {
         throw new APIManagementException("Invalid OAS definition provided.");
     }
 
-    public static String generateExamples(String apiDefinition) throws APIManagementException {
+    public static Map<String, Object> generateExamples(String apiDefinition) throws APIManagementException {
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
 
         if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
