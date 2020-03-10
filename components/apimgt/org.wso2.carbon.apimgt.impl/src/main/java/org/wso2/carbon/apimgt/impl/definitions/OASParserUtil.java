@@ -1117,9 +1117,10 @@ public class OASParserUtil {
         if (extensions == null) {
             return;
         }
-        extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
-        extensions.remove(APIConstants.X_THROTTLING_TIER);
         extensions.remove(APIConstants.X_WSO2_CORS);
+        extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
+        extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
+        extensions.remove(APIConstants.X_THROTTLING_TIER);
         extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
         extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
         extensions.remove(APIConstants.X_WSO2_BASEPATH);
@@ -1127,6 +1128,8 @@ public class OASParserUtil {
         extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
         extensions.remove(APIConstants.X_WSO2_RESPONSE_CACHE);
         extensions.remove(APIConstants.X_WSO2_MUTUAL_SSL);
+        extensions.remove(APIConstants.X_WSO2_REQUEST_INTERCEPTOR);
+        extensions.remove(APIConstants.X_WSO2_RESPONSE_INTERCEPTOR);
     }
 
     /**
@@ -1139,6 +1142,10 @@ public class OASParserUtil {
             return;
         }
         extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
+        extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
+        extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
+        extensions.remove(APIConstants.X_WSO2_DISABLE_SECURITY);
+        extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
     }
 
     /**
