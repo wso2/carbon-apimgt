@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Settings from 'AppComponents/Shared/SettingsContext';
 import { FormattedMessage } from 'react-intl';
@@ -25,6 +25,7 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
+import API from './data/api';
 
 const styles = theme => ({
     root: {
@@ -70,6 +71,21 @@ const tenantListing = (props) => {
     const { tenantList, classes, theme } = props;
     const orderedList = tenantList.sort((a, b) => ((a.domain > b.domain) ? 1 : -1));
 
+    function CallSettingAPI(domain){
+        const api = new API();
+        const promisedSettings = api.getSettings();
+        promisedSettings
+            .then((response) => {
+                settingContext.setSettings(response.body); 
+                settingContext.setTenantDomain(domain);
+            }).catch((error) => {
+                console.error(
+                    'Error while receiving settings : ',
+                    error,
+                );
+            });
+        console.log(settingContext);
+    }
     return (
         <div className={classes.root}>
             <Grid container md={4} justify='left' spacing={0} className={classes.wrapper}>
@@ -85,7 +101,7 @@ const tenantListing = (props) => {
                                         textDecoration: 'none',
                                     }}
                                     to={`/apis?tenant=${domain}`}
-                                    onClick={() => settingContext.setTenantDomain(domain)}
+                                    onClick={() => CallSettingAPI(domain)}
                                 >
                                     <Paper elevation={0} square className={classes.paper}>
                                         <Typography

@@ -96,8 +96,7 @@ class LoginDenied extends Component {
                 <p>
                     <FormattedMessage
                         id='LoginDenied.message'
-                        defaultMessage={'The server could not verify '
-                            + 'that you are authorized to access the requested resource.'}
+                        defaultMessage={'You don\'t have access to the Developer Portal.'}
                     />
                 </p>
                 <div>

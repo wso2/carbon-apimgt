@@ -230,12 +230,6 @@ class ProtectedApp extends Component {
         if (notEnoughPermission) {
             return <LoginDenied IsAnonymousModeEnabled={settings.IsAnonymousModeEnabled}/>;
         }
-        if(!isAuthenticated && !settings.IsAnonymousModeEnabled && !sessionStorage.getItem('notEnoughPermission')){
-            return <RedirectToLogin />;
-        }
-        if(settings.IsAnonymousModeEnabled && sessionStorage.getItem('notEnoughPermission')){
-            sessionStorage.removeItem('notEnoughPermission');
-        }
 
         // Waiting till the tenant list is retrieved
         if (!tenantResolved) {
@@ -246,6 +240,12 @@ class ProtectedApp extends Component {
         // tenantDomain contains INVALID when the tenant does not exist
         if (tenantList.length > 0 && (tenantDomain === 'INVALID' || (!isAuthenticated && tenantDomain === null))) {
             return <TenantListing tenantList={tenantList} />;
+        }
+        if(!isAuthenticated && !settings.IsAnonymousModeEnabled && !sessionStorage.getItem('notEnoughPermission')){
+            return <RedirectToLogin />;
+        }
+        if(settings.IsAnonymousModeEnabled && sessionStorage.getItem('notEnoughPermission')){
+            sessionStorage.removeItem('notEnoughPermission');
         }
         /**
          * Note: AuthManager.getUser() method is a passive check, which simply

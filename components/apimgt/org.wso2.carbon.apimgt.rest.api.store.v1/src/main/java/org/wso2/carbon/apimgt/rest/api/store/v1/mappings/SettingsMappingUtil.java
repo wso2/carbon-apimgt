@@ -42,7 +42,7 @@ public class SettingsMappingUtil {
     private static final Log log = LogFactory.getLog(SettingsMappingUtil.class);
 
     public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, Boolean moneatizationEnabled,
-                                         boolean recommendationEnabled) throws APIManagementException {
+                                         boolean recommendationEnabled, boolean anoynumousEnabled) throws APIManagementException {
         SettingsDTO settingsDTO = new SettingsDTO();
         settingsDTO.setScopes(GetScopeList());
         settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
@@ -52,7 +52,7 @@ public class SettingsMappingUtil {
         SettingsIdentityProviderDTO identityProviderDTO = new SettingsIdentityProviderDTO();
         identityProviderDTO.setExternal(APIUtil.getIdentityProviderConfig() != null);
         settingsDTO.setIdentityProvider(identityProviderDTO);
-        settingsDTO.setIsAnonymousModeEnabled(APIUtil.isDevPortalAnonymous());
+        settingsDTO.setIsAnonymousModeEnabled(anoynumousEnabled);
         if (isUserAvailable) {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());
             Map<String, Environment> environments = APIUtil.getEnvironments();

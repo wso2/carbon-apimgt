@@ -5810,6 +5810,46 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
+     * To check whether the DevPortal Anonymous Mode is enabled. It can be either enabled globally or tenant vice.
+     *
+     * @param tenantDomain Tenant domain
+     * @return whether devportal anonymous mode is enabled or not
+     */
+
+    public boolean isDevPortalAnonymousEnabled(String tenantDomain) throws APIManagementException {
+
+        try {
+            org.json.JSONObject tenantConfig = null;
+            Cache tenantConfigCache = APIUtil.getCache(
+                    APIConstants.API_MANAGER_CACHE_MANAGER,
+                    APIConstants.TENANT_CONFIG_CACHE_NAME,
+                    APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
+                    APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
+            String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
+            if (tenantConfigCache.containsKey(cacheName)) {
+                tenantConfig = (org.json.JSONObject) tenantConfigCache.get(cacheName);
+            } else {
+                String content = apimRegistryService
+                        .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+                tenantConfig = new org.json.JSONObject(content);
+                tenantConfigCache.put(cacheName, tenantConfig);
+            }
+            if (tenantConfig.has(APIConstants.API_TENANT_CONF_ENABLE_ANONYMOUS_MODE)) {
+                Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_ANONYMOUS_MODE);
+                if (value != null) {
+                    return Boolean.parseBoolean(value.toString());
+                }
+            } else {
+                boolean anonymous = APIUtil.isDevPortalAnonymous();
+                return anonymous;
+            }
+        } catch (UserStoreException | RegistryException | NullPointerException e) {
+            log.error("Error occurred when getting API tenant config from registry", e);
+        }
+        return true;
+    }
+
+    /**
      * Get recommendations for the user from the recommendation cache.
      *
      * @param userName     User's Name

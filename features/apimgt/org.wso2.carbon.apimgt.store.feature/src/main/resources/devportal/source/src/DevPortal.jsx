@@ -254,7 +254,7 @@ class DevPortal extends React.Component {
         } = theme;
         return (prefix + sufix);
     }
-
+    
     checkLoginUser(isExternalIDP) {
         if (isExternalIDP) {
             this.setState({externalidp:true})

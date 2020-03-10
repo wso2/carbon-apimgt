@@ -2705,6 +2705,8 @@ paths:
         Retreive store settings
       tags:
         - Settings
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
       responses:
         200:
           description: |
