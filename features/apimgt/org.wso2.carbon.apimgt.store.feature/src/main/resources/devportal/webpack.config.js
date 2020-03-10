@@ -42,12 +42,6 @@ const config = {
     module: {
         rules: [
             {
-                test: /\.js$/,
-                use: ['source-map-loader'],
-                enforce: 'pre',
-                exclude: [/node_modules\/swagger-ui/g, ],
-            },
-            {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
                 use: [

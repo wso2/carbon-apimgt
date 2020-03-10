@@ -26,6 +26,7 @@ import Box from '@material-ui/core/Box';
 import { useTheme } from '@material-ui/core/styles';
 import { app } from 'Settings';
 import Hidden from '@material-ui/core/Hidden';
+import Utils from 'AppData/Utils';
 
 const useStyles = makeStyles(theme => ({
     formControl: {
@@ -52,14 +53,14 @@ export default function LanuageSelector() {
     const [language, setLanuage] = React.useState(null);
     const { custom: { languageSwitch: { languages, showFlag, showText } } } = theme;
     useEffect(() => {
+        let locale = Utils.getBrowserLocal();
+
         let selectedLanguage = localStorage.getItem('language');
         if(!selectedLanguage && languages && languages.length > 0){
-            selectedLanguage = languages[0].key;
+            selectedLanguage = locale;
         }
         setLanuage(selectedLanguage);
     }, [])
-
-    const [labelWidth, setLabelWidth] = React.useState(0);
 
     const handleChange = event => {
         const selectedLanguage = event.target.value;

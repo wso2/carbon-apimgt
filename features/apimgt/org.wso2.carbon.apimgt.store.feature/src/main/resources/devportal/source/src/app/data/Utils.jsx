@@ -259,6 +259,11 @@ class Utils {
             }, 100);
         }
     };
+    static getBrowserLocal() {
+        const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
+        const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
+        return(languageWithoutRegionCode || language);
+    }
 }
 
 Utils.CONST = {
