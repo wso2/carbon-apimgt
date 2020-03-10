@@ -282,11 +282,11 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
-            <artifactId>swagger-parser</artifactId>
+            <artifactId>swagger-inflector-oas3</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-inflector</artifactId>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-parser</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.openapitools</groupId>
