@@ -1120,6 +1120,7 @@ public class OASParserUtil {
         extensions.remove(APIConstants.X_WSO2_CORS);
         extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
         extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
+        extensions.remove(APIConstants.X_THROTTLING_TIER);
         extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
         extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
         extensions.remove(APIConstants.X_WSO2_BASEPATH);
