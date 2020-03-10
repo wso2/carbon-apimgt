@@ -179,7 +179,6 @@ class TableView extends React.Component {
                 this.page = 0;
                 this.removeLocalStorage();
                 this.getData();
-                return;
             }
             this.count = total;
             this.setState({ apisAndApiProducts: list, notFound: false, displayCount: count });
