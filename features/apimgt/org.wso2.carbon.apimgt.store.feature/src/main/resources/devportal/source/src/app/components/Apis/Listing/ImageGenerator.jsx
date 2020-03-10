@@ -26,9 +26,11 @@ const styles = {
     icon: {},
     iconWrapper: {
         position: 'relative',
+        display: 'flex',
+        justifyContent: 'center',
         '& span': {
             position: 'absolute',
-            left: '50%',
+            right: 'auto',
         },
     },
 };
@@ -85,7 +87,7 @@ class ImageGenerator extends PureComponent {
         }
         return (
             <div className={classes.iconWrapper} style={{ width }}>
-                <Icon className={classes.icon} style={{ fontSize: height + 'px', marginLeft: -height / 2, color }}>
+                <Icon className={classes.icon} style={{ fontSize: height + 'px', color }}>
                     {IconElement}
                 </Icon>
                 <Background width={width} height={height} colorPair={colorPair} />

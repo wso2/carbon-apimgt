@@ -119,33 +119,32 @@ class DevPortal extends React.Component {
         //The above can be overriden by the language switcher
         let browserLocal = Utils.getBrowserLocal();
         const { direction: defaultDirection, custom: { languageSwitch: { active: languageSwitchActive, languages } } } = localTheme;
-        let selectedLanguage = localStorage.getItem('language');
+        let lanauageToLoad = null;
         if(languageSwitchActive){
+            const savedLanguage = localStorage.getItem('language');
             let direction = defaultDirection;
+            let selectedLanuageObject = null;
             for(var i=0; i < languages.length; i++){
-                if(selectedLanguage && selectedLanguage === languages[i].key && languages[i].direction){
-                    direction = languages[i].direction;
-                } else if( !selectedLanguage && browserLocal === languages[i].key && languages[i].direction) {
-                    direction = languages[i].direction;
+                if(savedLanguage && savedLanguage === languages[i].key){
+                    selectedLanuageObject = languages[i];
+                } else if(!savedLanguage && browserLocal === languages[i].key) {
+                    selectedLanuageObject = languages[i];
                 }
+            }
+            if(selectedLanuageObject) {
+                direction = selectedLanuageObject.direction || defaultDirection;       
             }
             document.body.setAttribute('dir',direction);
             this.systemTheme.direction = direction;
-            
+            lanauageToLoad = savedLanguage || selectedLanuageObject.key || browserLocal;
         } else {
             // If the lanauage switch was disabled after setting a cookie we need to remove the cookie and 
             // force the selected lanuage to the browserLocal.
-            selectedLanguage = browserLocal;
-            localStorage.setItem('language', browserLocal);
-            const oldTheme = merge(DefaultConfigurations, Configurations);
-            const oldLangDirection = oldTheme.direction;
-            if(oldLangDirection !== this.systemTheme.direction){
-                document.body.setAttribute('dir',oldLangDirection);
-                this.systemTheme.direction = oldLangDirection;
-            }
-            
+            lanauageToLoad = browserLocal;
+            document.body.setAttribute('dir', localTheme.direction);
+            this.systemTheme.direction = localTheme.direction;
         }
-        this.loadLocale(selectedLanguage || browserLocal);
+        this.loadLocale(lanauageToLoad);
     }
     /**
      * Set the tenant domain to state
@@ -182,14 +181,20 @@ class DevPortal extends React.Component {
     setTenantTheme(tenant) {
         if(tenant && tenant !== "INVALID"){
             fetch(`${Settings.app.context}/site/public/tenant_themes/${tenant}/apim/defaultTheme.json`)
-            .then((resp) => resp.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("HTTP error " + response.status);
+                }
+                return response.json();
+            })
             .then((data) => {
                 // Merging with the system theme.
-                const tenantMergedTheme = merge(cloneDeep(this.systemTheme), data);
+                const tenantMergedTheme = merge(cloneDeep(DefaultConfigurations), Configurations, data);
                 this.updateLocale(tenantMergedTheme);
                 this.setState({ theme: tenantMergedTheme });
             })
             .catch(() => {
+                console.log('Error loading teant theme. Loading the default theme.');
                 this.updateLocale();
                 this.setState({ theme: this.systemTheme });
             });
