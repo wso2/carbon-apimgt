@@ -59,7 +59,12 @@ import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.util.ArrayList;
@@ -130,7 +135,7 @@ public class OAS3Parser extends APIDefinition {
                     }
                     Content content = op.getResponses().get(responseEntry).getContent();
                     if (content != null) {
-                        MediaType applicationJson = content.get(APPLICATION_JSON_MEDIA_TYPE);
+                        MediaType applicationJson = content.get(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                         MediaType applicationXml = content.get(APPLICATION_XML_MEDIA_TYPE);
                         if (applicationJson != null) {
                             Schema jsonSchema = applicationJson.getSchema();
@@ -171,8 +176,10 @@ public class OAS3Parser extends APIDefinition {
             }
 
             checkAndSetEmptyScope(swagger);
-            returnMap.put("SWAGGER", Json.pretty(swagger));
-            returnMap.put("policyList", apiResourceMediationPolicyList);
+            returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
+            //returnMap.put("SWAGGER", Json.pretty(swagger));
+            returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
+            //returnMap.put("policyList", apiResourceMediationPolicyList);
         }
         return returnMap;
     }

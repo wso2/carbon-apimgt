@@ -51,10 +51,6 @@ import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -176,8 +172,8 @@ public class OAS2Parser extends APIDefinition {
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
                 op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
             }
-            returnMap.put("SWAGGER", Json.pretty(swagger));
-            returnMap.put("policyList", apiResourceMediationPolicyList);
+            returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
+            returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
         }
         return returnMap;
     }

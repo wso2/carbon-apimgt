@@ -1956,7 +1956,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIIdentifier apiIdentifier = originalAPI.getId();
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
         Map<String, Object> examples = OASParserUtil.generateExamples(apiDefinition);
-        List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get("policyList");
+        List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get(APIConstants.MOCK_GEN_POLICY_LIST);
         return Response.ok().entity(APIMappingUtil.fromMockPayloadsToListDTO(policies)).build();
     }
 
@@ -3949,7 +3949,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIIdentifier apiIdentifier = originalAPI.getId();
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-        apiDefinition=String.valueOf(OASParserUtil.generateExamples(apiDefinition).get("SWAGGER"));
+        apiDefinition=String.valueOf(OASParserUtil.generateExamples(apiDefinition).get(APIConstants.SWAGGER));
         apiProvider.saveSwaggerDefinition(originalAPI,apiDefinition);
         return Response.ok().entity(apiDefinition).build();
     }

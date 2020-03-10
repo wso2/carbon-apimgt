@@ -97,7 +97,6 @@ function GenericResource(props) {
     });
 
     const classes = useStyles();
-    console.log(originalScript);
 
     return (
         <Grid item>

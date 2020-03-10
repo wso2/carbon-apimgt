@@ -32,7 +32,22 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
+import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.ResourcePath;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -40,9 +55,46 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListExpandedDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateAvailableTransitionsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateCheckItemsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -255,10 +307,10 @@ public class APIMappingUtil {
     }
 
     /**
+     *This method creates the list of MockPayloadDTO objects for resetting inline prototyping scripts
      *
-     *
-     * @param mockPayloads
-     * @return
+     * @param mockPayloads APIResourceMediationPolicy List
+     * @return mockResponsePayloadListDTO (list of MockPayloadDTO)
      * @throws APIManagementException
      */
     public static MockResponsePayloadListDTO fromMockPayloadsToListDTO (List<APIResourceMediationPolicy> mockPayloads)
@@ -273,10 +325,10 @@ public class APIMappingUtil {
     }
 
     /**
+     * This method creates object of MockPayloadDTO
      *
-     *
-     * @param model
-     * @return
+     * @param model APIResourceMediationPolicy object
+     * @return mockResponsePayloadInfoDTO object
      */
     public static MockResponsePayloadInfoDTO fromMockPayloadToDTO (APIResourceMediationPolicy model) {
         MockResponsePayloadInfoDTO mockResponsePayloadInfoDTO = new MockResponsePayloadInfoDTO();
