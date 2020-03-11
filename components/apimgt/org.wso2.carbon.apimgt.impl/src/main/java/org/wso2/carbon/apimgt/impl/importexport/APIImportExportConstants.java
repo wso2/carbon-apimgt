@@ -57,6 +57,9 @@ public final class APIImportExportConstants {
     //location of the graphql schema definition file
     public static final String GRAPHQL_SCHEMA_DEFINITION_LOCATION = File.separator
             + APIImportExportConstants.META_INFO_DIRECTORY + File.separator + "schema.graphql";
+
+    public static final int REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM = 1;
+
     //Image resource
     public static final String IMAGE_RESOURCE = "Image";
     //Sequences resource
