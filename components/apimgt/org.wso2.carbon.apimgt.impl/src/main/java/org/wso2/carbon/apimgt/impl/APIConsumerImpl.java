@@ -5772,33 +5772,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
 
     public boolean isRecommendationEnabled(String tenantDomain) {
-
-        if (recommendationEnvironment != null) {
-            if (recommendationEnvironment.isApplyForAllTenants()) {
-                return true;
-            } else {
-                try {
-                    org.json.JSONObject tenantConfig;
-                    Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
-                    String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
-                    if (tenantConfigCache.containsKey(cacheName)) {
-                        tenantConfig = (org.json.JSONObject) tenantConfigCache.get(cacheName);
-                    } else {
-                        String content = apimRegistryService
-                                .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
-                        tenantConfig = new org.json.JSONObject(content);
-                        tenantConfigCache.put(cacheName, tenantConfig);
-                    }
-                    if (tenantConfig.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
-                        Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
-                        return Boolean.parseBoolean(value.toString());
-                    }
-                } catch (UserStoreException | RegistryException e) {
-                    log.error("Error occurred when getting API tenant config from registry", e);
-                }
-            }
-        }
-        return false;
+        return APIUtil.isRecommendationEnabled(tenantDomain);
     }
 
     public String getRequestedTenant() {

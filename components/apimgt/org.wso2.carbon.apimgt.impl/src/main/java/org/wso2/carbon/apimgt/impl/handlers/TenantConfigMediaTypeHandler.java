@@ -37,8 +37,8 @@ public class TenantConfigMediaTypeHandler extends Handler {
 
     private void clearConfigCache() {
         Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String cacheName = tenantId + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
         if (tenantConfigCache.containsKey(cacheName)) {
             tenantConfigCache.remove(cacheName);
         }
