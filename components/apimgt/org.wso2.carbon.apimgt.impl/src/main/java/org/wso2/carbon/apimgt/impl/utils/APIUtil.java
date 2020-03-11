@@ -10381,7 +10381,7 @@ public final class APIUtil {
                 return true;
             } else {
                 try {
-                    org.json.simple.JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
+                    org.json.simple.JSONObject tenantConfig = getTenantConfig(tenantDomain);
                     Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
                     return Boolean.parseBoolean(value.toString());
                 } catch (APIManagementException e) {
