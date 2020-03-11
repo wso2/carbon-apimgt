@@ -123,6 +123,20 @@ public class CacheProvider {
     }
 
     /**
+     * @return Tenant Config cache
+     */
+    public static Cache getTenantConfigCache() {
+        return getCache(APIConstants.TENANT_CONFIG_CACHE_NAME);
+    }
+
+    /**
+     * @return Recommendations cache
+     */
+    public static Cache getRecommendationsCache() {
+        return getCache(APIConstants.RECOMMENDATIONS_CACHE_NAME);
+    }
+
+    /**
      * @return APIManagerConfiguration
      */
     private static APIManagerConfiguration getApiManagerConfiguration() {
@@ -372,6 +386,38 @@ public class CacheProvider {
     }
 
     /**
+     * Create and return the Tenant Config Cache
+     */
+    public static Cache createTenantConfigCache() {
+
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (apimGWCacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.TENANT_CONFIG_CACHE_NAME,
+                    Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.TENANT_CONFIG_CACHE_NAME,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
+     * Create and return the Recommendations Cache
+     */
+    public static Cache createRecommendationsCache() {
+
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (apimGWCacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.RECOMMENDATIONS_CACHE_NAME,
+                    Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.RECOMMENDATIONS_CACHE_NAME,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
      * remove caches
      */
     public static void removeAllCaches() {
@@ -401,6 +447,10 @@ public class CacheProvider {
                 getGatewayApiKeyDataCache().getName());
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
                 getInvalidGatewayApiKeyCache().getName());
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
+                getTenantConfigCache().getName());
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
+                getRecommendationsCache().getName());
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                 .removeCache(CacheProvider.getJWKSCache().getName());
     }
