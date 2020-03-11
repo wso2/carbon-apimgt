@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -351,11 +352,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             } else {
                 try {
                     JSONObject tenantConfig = null;
-                    Cache tenantConfigCache = APIUtil.getCache(
-                            APIConstants.API_MANAGER_CACHE_MANAGER,
-                            APIConstants.TENANT_CONFIG_CACHE_NAME,
-                            APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
-                            APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
+                    Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
                     String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
                     if (tenantConfigCache.containsKey(cacheName)) {
                         tenantConfig = (JSONObject) tenantConfigCache.get(cacheName);
@@ -379,7 +376,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                         Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
                         return Boolean.parseBoolean(value.toString());
                     }
-                } catch (RegistryException | UserStoreException | NullPointerException | APIManagementException e) {
+                } catch (RegistryException | UserStoreException | APIManagementException e) {
                     log.error("Error while retrieving Recommendation config from registry", e);
                 }
             }
@@ -399,11 +396,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         long currentTime = System.currentTimeMillis();
         long lastUpdatedTime = 0;
         long waitDuration = recommendationEnvironment.getWaitDuration() * 60 * 1000;
-        Cache recommendationsCache = APIUtil.getCache(
-                APIConstants.API_MANAGER_CACHE_MANAGER,
-                APIConstants.RECOMMENDATIONS_CACHE_NAME,
-                APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
-                APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
+        Cache recommendationsCache = CacheProvider.getRecommendationsCache();
         String cacheName = userName + "_" + tenantDomain;
         JSONObject cachedObject = (JSONObject) recommendationsCache.get(cacheName);
         if (cachedObject != null) {
