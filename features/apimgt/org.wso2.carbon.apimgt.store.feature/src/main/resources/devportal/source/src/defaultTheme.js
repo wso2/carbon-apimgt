@@ -261,7 +261,7 @@ const DefaultConfigurations = {
             prefix: '[Devportal]',
             sufix: '- WSO2 APIM',
         },
-        languageSwitch: { // Country flags are downloaded from https://dribbble.com/shots/1211759-Free-195-Flat-Flags
+        languageSwitch: {
             active: false,
             languages: [
                 {
