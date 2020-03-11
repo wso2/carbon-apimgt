@@ -119,6 +119,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
@@ -137,6 +138,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
@@ -7206,22 +7208,30 @@ public final class APIUtil {
      */
     private static JSONObject getTenantConfig(int tenantId) throws APIManagementException {
         try {
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
-            Resource resource;
-            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
+            Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
+            String cacheName = tenantId + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
+            if (tenantConfigCache.containsKey(cacheName)) {
+                return (JSONObject) tenantConfigCache.get(cacheName);
             } else {
-                loadTenantConf(tenantId);
+                RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+                UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
+                Resource resource;
                 if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
                     resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
                 } else {
-                    throw new APIManagementException("Failed to add tenant-conf.json to tenant: " + tenantId);
+                    loadTenantConf(tenantId);
+                    if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                        resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
+                    } else {
+                        throw new APIManagementException("Failed to add tenant-conf.json to tenant: " + tenantId);
+                    }
                 }
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                JSONParser parser = new JSONParser();
+                JSONObject tenantConfig = (JSONObject) parser.parse(content);
+                tenantConfigCache.put(cacheName, tenantConfig);
+                return tenantConfig;
             }
-            String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-            JSONParser parser = new JSONParser();
-            return (JSONObject) parser.parse(content);
         } catch (RegistryException | ParseException e) {
             throw new APIManagementException("Error while getting tenant config from registry for tenant: "
                     + tenantId, e);
@@ -10355,6 +10365,31 @@ public final class APIUtil {
         } catch (ParseException e) {
             throw new APIManagementException("Error while parsing Endpoint Config json", e);
         }
+    }
+
+    /**
+     * To check whether the API recommendation is enabled. It can be either enabled globally or tenant vice.
+     *
+     * @param tenantDomain Tenant domain
+     * @return whether recommendation is enabled or not
+     */
+    public static boolean isRecommendationEnabled(String tenantDomain) {
+        RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
+        if (recommendationEnvironment != null) {
+            if (recommendationEnvironment.isApplyForAllTenants()) {
+                return true;
+            } else {
+                try {
+                    org.json.simple.JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
+                    Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
+                    return Boolean.parseBoolean(value.toString());
+                } catch (APIManagementException e) {
+                    log.debug("Error while retrieving Recommendation config from registry", e);
+                }
+            }
+        }
+        return false;
     }
 
 }
