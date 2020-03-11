@@ -23,7 +23,7 @@ var isTenantAllowed=function(){
    if(user!=null){
    username=user.username;
    if(request.getParameter("tenant")!=null){
-   if(user.username.split("@")[1]!=request.getParameter("tenant")){
+   if(username.split("@")[username.split("@").length -1]!=request.getParameter("tenant")){
    jagg.setUser(null);
    response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
    return;
