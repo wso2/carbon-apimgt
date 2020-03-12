@@ -16,54 +16,26 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { withRouter } from 'react-router';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
-import green from '@material-ui/core/colors/green';
 import { PropTypes } from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import queryString from 'query-string';
-
-import API from 'AppData/api';
-import APIProduct from 'AppData/APIProduct';
-import Alert from 'AppComponents/Shared/Alert';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Create from '@material-ui/icons/Create';
-import GetApp from '@material-ui/icons/GetApp';
-import apiProduct from './apiProduct';
-import mathPayload from './math';
-import calculatorPayload from './calculator';
-import SampleAPIProductWizard from './SampleAPIProductWizard';
-import APIProductCreateMenu from '../components/APIProductCreateMenu';
+import Button from '@material-ui/core/Button';
+import { Link } from 'react-router-dom';
+import AuthManager from 'AppData/AuthManager';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 
 
 const useStyles = makeStyles((theme) => ({
-    buttonProgress: {
-        color: green[500],
-        position: 'relative',
-    },
-    headline: {
-        paddingTop: theme.spacing(1.25),
-        paddingLeft: theme.spacing(2.5),
-    },
     head: {
         paddingBottom: theme.spacing(2),
         fontWeight: 200,
     },
     content: {
         paddingBottom: theme.spacing(2),
-    },
-    buttonLeft: {
-        marginRight: theme.spacing(1),
-    },
-    deployButton: {
-        '& span.material-icons': {
-            fontSize: 24,
-            marginRight: theme.spacing(1),
-        },
     },
 }));
 
@@ -74,78 +46,8 @@ const useStyles = makeStyles((theme) => ({
  * @class SampleAPI
  * @extends {Component}
  */
-function SampleAPI(prop) {
+function SampleAPI() {
     const classes = useStyles();
-    const { intl } = prop;
-    const [step, setStep] = useState(0);
-    const [productPath, setProductPath] = useState(null);
-    /**
-     * Create API Product
-     * @param {*} calculatorApiId
-     * @param {*} mathApiId
-     */
-    function createSampleProduct(calId, mathId) {
-        setStep(3);
-        const sampleProductPayload = apiProduct(calId, mathId);
-        const productRestApi = new APIProduct();
-        const productPromise = productRestApi.create(sampleProductPayload);
-
-        productPromise
-            .then((prod) => {
-                setStep(4);
-                setProductPath(`/api-products/${prod.body.id}/overview`);
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Listing.SampleAPI.SampleAPIProduct.successful',
-                    defaultMessage: 'Sample CalculatorAPIProduct published successfully',
-                }));
-            })
-            .catch((error) => {
-                setStep(0);
-                Alert.error(error);
-            });
-    }
-
-    /**
-     *  Check apis before create them
-     * @param {*} api
-     */
-    function search(api) {
-        const composeQuery = '?query=name:' + api.name;
-        const composeQueryJSON = queryString.parse(composeQuery);
-        composeQueryJSON.limit = 1;
-        composeQueryJSON.offset = 0;
-        return API.search(composeQueryJSON);
-    }
-
-
-    /**
-     *Handle onClick event for `Deploy Sample API` Button
-     * @memberof SampleAPI
-     */
-    const handleDeploySample = () => {
-        setStep(1);
-        const calculatorSearch = search(calculatorPayload);
-        const mathApiSearch = search(mathPayload);
-        Promise.all([calculatorSearch, mathApiSearch]).then(([calResponse, mathResponse]) => {
-            const calAPI = calResponse.body.list.find((api) => api.name === calculatorPayload.name);
-            const mathAPI = mathResponse.body.list.find((api) => api.name === mathPayload.name);
-            let promisedCalAPI;
-            let promisedMathAPI;
-            if (!calAPI) {
-                promisedCalAPI = new API(calculatorPayload).save();
-            } else {
-                promisedCalAPI = Promise.resolve(calAPI);
-            }
-            if (!mathAPI) {
-                promisedMathAPI = new API(mathPayload).save();
-            } else {
-                promisedMathAPI = Promise.resolve(mathAPI);
-            }
-            Promise.all([promisedCalAPI, promisedMathAPI]).then(
-                ([calculatorAPI, MathAPI]) => createSampleProduct(calculatorAPI.id, MathAPI.id),
-            );
-        });
-    };
 
     /**
      *
@@ -155,7 +57,6 @@ function SampleAPI(prop) {
      */
 
     return (
-
         <InlineMessage type='info' height={140}>
             <div className={classes.contentWrapper}>
                 <Typography variant='h5' component='h3' className={classes.head}>
@@ -174,38 +75,25 @@ function SampleAPI(prop) {
                         }
                     />
                 </Typography>
-                <div className={classes.actions}>
-                    <APIProductCreateMenu buttonProps={{
-                        size: 'small',
-                        color: 'primary',
-                        variant: 'contained',
-                        className: classes.buttonLeft,
-                    }}
-                    >
-                        <Create />
-                        <FormattedMessage
-                            id='Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product'
-                            defaultMessage='Create New API Product'
-                        />
-                    </APIProductCreateMenu>
-                    <SampleAPIProductWizard step={step} setStep={setStep} productPath={productPath} />
-                    <Button
-                        size='small'
-                        color='primary'
-                        disabled={step !== 0}
-                        variant='contained'
-                        onClick={handleDeploySample}
-                        className='rightAlign'
-                    >
+                {!AuthManager.isNotCreator() && (
+                    <div className={classes.actions}>
+                        <Link id='itest-id-createdefault' to='/api-products/create' className={classes.links}>
+                            <Button
+                                size='small'
+                                color='primary'
+                                variant='contained'
+                                className='rightAlign'
+                            >
 
-                        <GetApp />
-                        <FormattedMessage
-                            id='Apis.Listing.SampleAPIProduct.deploy.button'
-                            defaultMessage='Deploy Sample API Product'
-                        />
-                        {step !== 0 && step !== 4 && <CircularProgress size={24} className={classes.buttonProgress} />}
-                    </Button>
-                </div>
+                                <Create />
+                                <FormattedMessage
+                                    id='Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product'
+                                    defaultMessage='Create New API Product'
+                                />
+                            </Button>
+                        </Link>
+                    </div>
+                )}
             </div>
         </InlineMessage>
     );
