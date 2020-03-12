@@ -37,6 +37,8 @@ import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
 import DefaultConfigurations from './defaultTheme';
 import AuthManager from './app/data/AuthManager';
 import Loading from './app/components/Base/Loading/Loading';
+import CONSTS from './app/data/Constants';
+
 const protectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApp" */));
 
 // Configure JSS
@@ -60,9 +62,9 @@ class DevPortal extends React.Component {
             settings: null,
             tenantDomain: null,
             theme: null,
-            authresponse:false,
-            externalidp:false,
-            isNonAnonymous:false,
+            authresponse: false,
+            externalidp: false,
+            isNonAnonymous: false,
             lanuage: null,
         };
         this.systemTheme = merge(cloneDeep(DefaultConfigurations), Configurations);
@@ -79,15 +81,15 @@ class DevPortal extends React.Component {
         promisedSettings
             .then((response) => {
                 this.setSettings(response.body);
-            })
-            .then((response) => {
-                if(!this.state.settings.IsAnonymousModeEnabled){
-                    this.setState({isNonAnonymous:true})
+                if (!this.state.settings.IsAnonymousModeEnabled) {
+                    this.setState({ isNonAnonymous: true });
                 }
-                if (Settings.app.isPassive && !AuthManager.getUser() && !sessionStorage.getItem('notEnoughPermission') && !this.state.isNonAnonymous) {
+                if (Settings.app.isPassive && !AuthManager.getUser()
+                    && !sessionStorage.getItem(CONSTS.ISLOGINPERMITTED) && !this.state.isNonAnonymous) {
                     this.checkLoginUser(this.state.settings.identityProvider.external);
                 }
-            }).catch((error) => {
+            })
+            .catch((error) => {
                 console.error(
                     'Error while receiving settings : ',
                     error,
@@ -101,11 +103,11 @@ class DevPortal extends React.Component {
             this.setTenantTheme(urlParams.get('tenant'));
         }
     }
-     /**
-     * Load locale file.
-     *
-     * @param {string} locale Locale name
-     */
+    /**
+    * Load locale file.
+    *
+    * @param {string} locale Locale name
+    */
     loadLocale(locale = 'en') {
         fetch(`${Settings.app.context}/site/public/locales/${locale}.json`)
             .then((resp) => {
@@ -190,7 +192,7 @@ class DevPortal extends React.Component {
      * @param {string} tenant tenant name
      */
     setTenantTheme(tenant) {
-        if(tenant && tenant !== "INVALID"){
+        if (tenant && tenant !== 'INVALID') {
             fetch(`${Settings.app.context}/site/public/tenant_themes/${tenant}/apim/defaultTheme.json`)
             .then(response => {
                 if (!response.ok) {
@@ -213,7 +215,6 @@ class DevPortal extends React.Component {
             this.updateLocale();
             this.setState({ theme: this.systemTheme });
         }
-        
     }
 
     /**
@@ -256,31 +257,31 @@ class DevPortal extends React.Component {
         } = theme;
         return (prefix + sufix);
     }
-    
+
+    /**
+     * If the passive mode is enabled then this method will check whether
+     * a user is already logged into the publisher.
+     * @param {string} isExternalIDP
+     */
     checkLoginUser(isExternalIDP) {
         if (isExternalIDP) {
-            this.setState({externalidp:true})
-            if (!sessionStorage.getItem('loginStatus')) {
-                sessionStorage.setItem('loginStatus', "check-Login-status");
+            this.setState({ externalidp: true });
+            if (!sessionStorage.getItem(CONSTS.LOGINSTATUS)) {
+                sessionStorage.setItem(CONSTS.LOGINSTATUS, 'check-Login-status');
                 window.location = Settings.app.context + '/services/configs?loginPrompt=false';
+            } else if (sessionStorage.getItem(CONSTS.LOGINSTATUS)) {
+                sessionStorage.removeItem(CONSTS.LOGINSTATUS);
             }
-            else if (sessionStorage.getItem('loginStatus')) {
-                sessionStorage.removeItem('loginStatus');
-            }
-        }
-        else {
+        } else {
             fetch(Settings.app.context + '/services/configs?loginPrompt=false')
-            .then(response => {
-                if(response){
-                    this.setState({ authresponse: true}); 
-                }
-            })
-            .catch((error) => {
-                console.error(
-                    'Error while fetching : ',
-                    error,
-                );
-            });
+                .then((response) => {
+                    if (response) {
+                        this.setState({ authresponse: true });
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error while fetching : ', error);
+                });
         }
     }
 
@@ -290,9 +291,12 @@ class DevPortal extends React.Component {
      * @memberof DevPortal
      */
     render() {
-        const { settings, tenantDomain, theme, messages, language, authresponse, externalidp, isNonAnonymous } = this.state;
-        const { app: { context } } = Settings;
-        if (Settings.app.isPassive && !authresponse && !externalidp && !AuthManager.getUser() && !sessionStorage.getItem('notEnoughPermission') && !isNonAnonymous) {
+        const {
+            settings, tenantDomain, theme, messages, language, authresponse, externalidp, isNonAnonymous,
+        } = this.state;
+        const { app: { context, isPassive } } = Settings;
+        if (isPassive && !authresponse && !externalidp && !AuthManager.getUser()
+            && !sessionStorage.getItem(CONSTS.ISLOGINPERMITTED) && !isNonAnonymous) {
             return <Loading />;
         }
 

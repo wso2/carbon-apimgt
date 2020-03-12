@@ -5787,35 +5787,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return whether devportal anonymous mode is enabled or not
      */
 
-    public boolean isDevPortalAnonymousEnabled(String tenantDomain) throws APIManagementException {
+    public boolean isDevPortalAnonymousEnabled(String tenantDomain) {
 
         try {
-            org.json.JSONObject tenantConfig = null;
-            Cache tenantConfigCache = APIUtil.getCache(
-                    APIConstants.API_MANAGER_CACHE_MANAGER,
-                    APIConstants.TENANT_CONFIG_CACHE_NAME,
-                    APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
-                    APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
-            String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
-            if (tenantConfigCache.containsKey(cacheName)) {
-                tenantConfig = (org.json.JSONObject) tenantConfigCache.get(cacheName);
+            org.json.simple.JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
+            Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_ANONYMOUS_MODE);
+            if (value != null) {
+                return Boolean.parseBoolean(value.toString());
             } else {
-                String content = apimRegistryService
-                        .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
-                tenantConfig = new org.json.JSONObject(content);
-                tenantConfigCache.put(cacheName, tenantConfig);
+                return APIUtil.isDevPortalAnonymous();
             }
-            if (tenantConfig.has(APIConstants.API_TENANT_CONF_ENABLE_ANONYMOUS_MODE)) {
-                Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_ANONYMOUS_MODE);
-                if (value != null) {
-                    return Boolean.parseBoolean(value.toString());
-                }
-            } else {
-                boolean anonymous = APIUtil.isDevPortalAnonymous();
-                return anonymous;
-            }
-        } catch (UserStoreException | RegistryException | NullPointerException e) {
-            log.error("Error occurred when getting API tenant config from registry", e);
+        } catch (APIManagementException e) {
+            log.debug("Error while retrieving Recommendation config from registry", e);
         }
         return true;
     }

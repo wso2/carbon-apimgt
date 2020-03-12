@@ -9,7 +9,7 @@ const Settings = {
             host: 'localhost',
         },
         subscriptionLimit: 1000,
-        isPassive:true,
+        isPassive: true,
     },
     grantTypes: {
         authorization_code: 'Code',

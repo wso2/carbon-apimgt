@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import Settings from 'AppComponents/Shared/SettingsContext';
 import { FormattedMessage } from 'react-intl';
@@ -27,7 +27,7 @@ import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import API from './data/api';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         flexGrow: 1,
         display: 'flex',
@@ -70,13 +70,16 @@ const tenantListing = (props) => {
     const settingContext = useContext(Settings);
     const { tenantList, classes, theme } = props;
     const orderedList = tenantList.sort((a, b) => ((a.domain > b.domain) ? 1 : -1));
-
-    function CallSettingAPI(domain){
+    /**
+     * call the setting API.
+     * @param {string} domain
+     */
+    function getSettings(domain) {
         const api = new API();
         const promisedSettings = api.getSettings();
         promisedSettings
             .then((response) => {
-                settingContext.setSettings(response.body); 
+                settingContext.setSettings(response.body);
                 settingContext.setTenantDomain(domain);
             }).catch((error) => {
                 console.error(
@@ -84,8 +87,8 @@ const tenantListing = (props) => {
                     error,
                 );
             });
-        console.log(settingContext);
     }
+
     return (
         <div className={classes.root}>
             <Grid container md={4} justify='left' spacing={0} className={classes.wrapper}>
@@ -101,7 +104,7 @@ const tenantListing = (props) => {
                                         textDecoration: 'none',
                                     }}
                                     to={`/apis?tenant=${domain}`}
-                                    onClick={() => CallSettingAPI(domain)}
+                                    onClick={() => getSettings(domain)}
                                 >
                                     <Paper elevation={0} square className={classes.paper}>
                                         <Typography

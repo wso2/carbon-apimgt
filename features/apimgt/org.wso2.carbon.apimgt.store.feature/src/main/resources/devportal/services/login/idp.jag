@@ -116,7 +116,7 @@
         }
     }
     var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
-    if(request.getParameter("loginPrompt")==="false"){
+    if (request.getParameter("loginPrompt") === "false") {
         authRequestParams += "&prompt=none";
     } 
     log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);

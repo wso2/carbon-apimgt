@@ -21,9 +21,10 @@ import qs from 'qs';
 import { withTheme } from '@material-ui/core/styles';
 import Settings from 'Settings';
 import Tenants from 'AppData/Tenants';
-import SettingsContext from 'AppComponents/Shared/SettingsContext';
 import queryString from 'query-string';
 import PropTypes from 'prop-types';
+import SettingsContext from 'AppComponents/Shared/SettingsContext';
+import RedirectToLogin from 'AppComponents/Login/RedirectToLogin';
 import API from './data/api';
 import Base from './components/Base/index';
 import AuthManager from './data/AuthManager';
@@ -35,14 +36,11 @@ import AppRouts from './AppRouts';
 import TenantListing from './TenantListing';
 import CONSTS from './data/Constants';
 import LoginDenied from './LoginDenied';
-import RedirectToLogin from 'AppComponents/Login/RedirectToLogin';
 
 /**
  * Render protected application paths
  */
 class ProtectedApp extends Component {
-    static contextType = SettingsContext;
-
     /**
      *  constructor
      * @param {*} props props passed to constructor
@@ -136,7 +134,7 @@ class ProtectedApp extends Component {
                                         error,
                                     );
                                 });
-                                this.checkSession();
+                            this.checkSession();
                         } else {
                             console.log('No relevant scopes found, redirecting to Anonymous View');
                             this.setState({ userResolved: true });
@@ -159,7 +157,7 @@ class ProtectedApp extends Component {
 
     handleMessage(e) {
         if (e.data === 'changed') {
-            window.location = Settings.app.context + '/services/configs?not-Login';
+            window.location = Settings.app.context + '/services/configs?loginPrompt=false';
         }
     }
 
@@ -169,12 +167,10 @@ class ProtectedApp extends Component {
     checkSession() {
         setInterval(() => {
             const { clientId, sessionStateCookie } = this.state;
-            const msg = clientId + ' ' + sessionStateCookie; 
+            const msg = clientId + ' ' + sessionStateCookie;
             document.getElementById('iframeOP').contentWindow.postMessage(msg, 'https://' + window.location.host);
         }, 2000);
     }
-
-   
 
     /**
      * Change the environment with "environment" query parameter
@@ -212,12 +208,12 @@ class ProtectedApp extends Component {
      */
     render() {
         const {
-            userResolved, tenantList, notEnoughPermission, tenantResolved, clientId
+            userResolved, tenantList, notEnoughPermission, tenantResolved, clientId,
         } = this.state;
-        const checkSessionURL = 'https://'+ window.location.host + '/oidc/checksession?client_id='
-        + clientId + '&redirect_uri=https://' + window.location.host
-        + Settings.app.context + '/services/auth/callback/login';
-        const { tenantDomain,settings} = this.context;
+        const checkSessionURL = 'https://' + window.location.host + '/oidc/checksession?client_id='
+            + clientId + '&redirect_uri=https://' + window.location.host
+            + Settings.app.context + '/services/auth/callback/login';
+        const { tenantDomain, settings } = this.context;
         if (!userResolved) {
             return <Loading />;
         }
@@ -228,7 +224,7 @@ class ProtectedApp extends Component {
             isAuthenticated = true;
         }
         if (notEnoughPermission) {
-            return <LoginDenied IsAnonymousModeEnabled={settings.IsAnonymousModeEnabled}/>;
+            return <LoginDenied IsAnonymousModeEnabled={settings.IsAnonymousModeEnabled} />;
         }
 
         // Waiting till the tenant list is retrieved
@@ -241,11 +237,13 @@ class ProtectedApp extends Component {
         if (tenantList.length > 0 && (tenantDomain === 'INVALID' || (!isAuthenticated && tenantDomain === null))) {
             return <TenantListing tenantList={tenantList} />;
         }
-        if(!isAuthenticated && !settings.IsAnonymousModeEnabled && !sessionStorage.getItem('notEnoughPermission')){
+
+        if (!isAuthenticated && !settings.IsAnonymousModeEnabled && !sessionStorage.getItem(CONSTS.ISLOGINPERMITTED)) {
             return <RedirectToLogin />;
         }
-        if(settings.IsAnonymousModeEnabled && sessionStorage.getItem('notEnoughPermission')){
-            sessionStorage.removeItem('notEnoughPermission');
+
+        if (settings.IsAnonymousModeEnabled && sessionStorage.getItem(CONSTS.ISLOGINPERMITTED)) {
+            sessionStorage.removeItem(CONSTS.ISLOGINPERMITTED);
         }
         /**
          * Note: AuthManager.getUser() method is a passive check, which simply
@@ -261,12 +259,13 @@ class ProtectedApp extends Component {
                     src={checkSessionURL}
                     width='0px'
                     height='0px'
-                />     
+                />
                 <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
             </Base>
         );
     }
 }
+ProtectedApp.contextType = SettingsContext;
 ProtectedApp.propTypes = {
     location: PropTypes.shape({
         search: PropTypes.string.isRequired,

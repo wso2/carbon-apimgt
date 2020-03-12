@@ -19,6 +19,7 @@
 import React, { Component } from 'react';
 import Settings from 'Settings';
 import { FormattedMessage } from 'react-intl';
+import CONSTS from './data/Constants';
 
 const messageStyles = {
     width: 400,
@@ -69,8 +70,8 @@ function onLogout() {
 }
 
 function onGoToAnonymousView() {
-    if(Settings.app.isPassive){
-        sessionStorage.setItem("notEnoughPermission", "true");
+    if (Settings.app.isPassive) {
+        sessionStorage.setItem(CONSTS.ISLOGINPERMITTED, 'true');
     }
     window.location = Settings.app.context + '/services/auth/callback/logout';
 }
@@ -96,26 +97,26 @@ class LoginDenied extends Component {
                 <p>
                     <FormattedMessage
                         id='LoginDenied.message'
-                        defaultMessage={'You don\'t have access to the Developer Portal.'}
+                        defaultMessage={'You don\'t have sufficient privileges to access the Developer Portal.'}
                     />
                 </p>
                 <div>
-                    {this.props.IsAnonymousModeEnabled?(
-                    <div>
-                        <button onClick={onGoToAnonymousView} style={buttonStyleRetry}>
-                            <FormattedMessage
-                                id='LoginDenied.anonymousview'
-                                defaultMessage='Go To Public Portal'
-                            />
-                        </button>
-                        <button onClick={onLogout} style={buttonStyleLogout}>
-                            <FormattedMessage
-                                id='LoginDenied.logout'
-                                defaultMessage='Logout'
-                            />
-                        </button>
-                    </div>
-                    ): (
+                    {this.props.IsAnonymousModeEnabled ? (
+                        <div>
+                            <button onClick={onGoToAnonymousView} style={buttonStyleRetry}>
+                                <FormattedMessage
+                                    id='LoginDenied.anonymousview'
+                                    defaultMessage='Go To Public Portal'
+                                />
+                            </button>
+                            <button onClick={onLogout} style={buttonStyleLogout}>
+                                <FormattedMessage
+                                    id='LoginDenied.logout'
+                                    defaultMessage='Logout'
+                                />
+                            </button>
+                        </div>
+                    ) : (
                         <button onClick={onLogout} style={buttonStyleLogout}>
                             <FormattedMessage
                                 id='LoginDenied.logout'
