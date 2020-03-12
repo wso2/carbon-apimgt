@@ -17,6 +17,7 @@
  */
 
 import React, { useState } from 'react';
+import { isRestricted } from 'AppData/AuthManager';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
@@ -35,7 +36,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
  * @returns
  */
 export default function SaveOperations(props) {
-    const { updateOpenAPI, operationsDispatcher } = props;
+    const { updateOpenAPI, operationsDispatcher, api } = props;
     const [isSaving, setIsSaving] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     /**
@@ -49,7 +50,12 @@ export default function SaveOperations(props) {
     return (
         <>
             <Box>
-                <Button disabled={isSaving} onClick={saveChanges} variant='contained' color='primary'>
+                <Button
+                    disabled={isSaving || isRestricted(['apim:api_create'], api)}
+                    onClick={saveChanges}
+                    variant='contained'
+                    color='primary'
+                >
                     Save
                     {isSaving && <CircularProgress size={24} />}
                 </Button>

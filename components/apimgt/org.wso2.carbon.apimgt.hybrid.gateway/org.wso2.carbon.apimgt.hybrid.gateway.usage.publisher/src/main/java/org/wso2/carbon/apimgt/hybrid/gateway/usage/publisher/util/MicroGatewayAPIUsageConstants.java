@@ -39,8 +39,6 @@ public class MicroGatewayAPIUsageConstants {
 
     public static final String ACCEPT_HEADER_APPLICATION_JSON = "application/json";
 
-    public static final String IS_UPLOADED_USAGE_DATA_PUBLISH_ENABLED_PROPERTY = "usage.data.publishing.enabled";
-
     public static final String UPLOADED_USAGE_PUBLISH_FREQUENCY_PROPERTY = "usage.publishing.frequency";
 
     public static final String WORKER_THREAD_COUNT_PROPERTY = "microGatewayUsagePublishers";
@@ -49,7 +47,6 @@ public class MicroGatewayAPIUsageConstants {
 
     public static final String UPLOADED_FILE_SUFFIX = ".uploaded";
 
-    public static final String USAGE_UPLOAD_SERVICE_URL = "usage.upload.service.url";
     public static final String DEFAULT_UPLOAD_SERVICE_URL = "https://localhost:9444/analytics/v1.0/usage/upload-file";
 
     public static final String STREAM_DEFINITIONS_DIRECTORY = "stream-definitions";

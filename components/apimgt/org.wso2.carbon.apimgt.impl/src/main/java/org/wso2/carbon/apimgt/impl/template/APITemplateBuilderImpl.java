@@ -293,7 +293,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         configcontext = new EnvironmentConfigContext(configcontext, environment);
         configcontext = new TemplateUtilContext(configcontext);
 
-        if (!StringUtils.isEmpty(api.getWsdlUrl())) {
+        if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()) || !StringUtils.isEmpty(api.getWsdlUrl())) {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             String tenantDomain = MultitenantUtils
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -330,6 +330,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         configcontext = new HandlerConfigContex(configcontext, handlers);
         configcontext = new EnvironmentConfigContext(configcontext, environment);
         configcontext = new TemplateUtilContext(configcontext);
+        configcontext = new SecurityConfigContext(configcontext, apiProduct);
 
         return configcontext;
     }

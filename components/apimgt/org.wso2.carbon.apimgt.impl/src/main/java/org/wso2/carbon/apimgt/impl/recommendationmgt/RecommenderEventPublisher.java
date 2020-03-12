@@ -27,13 +27,11 @@ public interface RecommenderEventPublisher extends Runnable {
 
     void run();
 
-    void publishAPIdetails(API api, String tenantDomain) throws IOException;
+    void publishAPIDetails(API api, String tenantDomain) throws IOException;
 
-    void publishNewApplication(Application application, String userId, int applicationId);
+    void publishApplicationDetails(Application application, String userId, int applicationId);
 
-    void publishUpdatedApplication(Application application) throws IOException;
-
-    void publishedDeletedApplication(int appId);
+    void publishDeletedApplication(int appId);
 
     void publishClickedApi(ApiTypeWrapper api, String userName);
 

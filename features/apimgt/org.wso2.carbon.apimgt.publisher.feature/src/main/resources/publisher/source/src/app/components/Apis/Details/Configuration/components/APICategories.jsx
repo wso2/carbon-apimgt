@@ -24,13 +24,25 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Checkbox from '@material-ui/core/Checkbox';
 import Box from '@material-ui/core/Box';
+import Tooltip from '@material-ui/core/Tooltip';
+import HelpOutline from '@material-ui/icons/HelpOutline';
+import { makeStyles } from '@material-ui/core/styles';
 
 import API from 'AppData/api';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
+const useStyles = makeStyles((theme) => ({
+    tooltip: {
+        position: 'absolute',
+        right: theme.spacing(-4),
+        top: theme.spacing(1),
+    },
+}));
+
 function APICategories(props) {
     const [categories, setCategories] = useState({});
     const { api, configDispatcher } = props;
+    const classes = useStyles();
 
     console.log(api.selectedCategories);
 
@@ -38,15 +50,11 @@ function APICategories(props) {
         API.apiCategories().then((response) => setCategories(response.body));
     }, []);
 
-    // const handleValidateAndChange = ({ target: { value, name } }) => {
-    //     onChange({ target: { name, value } });
-    // };
-
     if (!categories.list) {
         return null;
     } else {
         return (
-            <Box style={{ marginTop: 10 }}>
+            <Box style={{ position: 'relative', marginTop: 10 }}>
                 <TextField
                     fullWidth
                     select
@@ -72,19 +80,49 @@ function APICategories(props) {
                     }}
                     helperText='Select API Categories for the API'
                 >
-                    {categories.list.map((category) => (
-                        <MenuItem
-                            dense
-                            disableGutters
-                            id={category.id}
-                            key={category.name}
-                            value={category.name}
-                        >
-                            <Checkbox color='primary' checked={api.categories.includes(category.name)} />
-                            <ListItemText primary={category.name} secondary={category.description} />
-                        </MenuItem>
-                    ))}
+                    { (categories.list.length === 0)
+                        ? (
+                            <MenuItem id='no-category-notification'>
+                                <ListItemText
+                                    primary='No API Categories defined yet. Please create an API Category first.'
+                                />
+                            </MenuItem>
+                        )
+                        : (
+                            categories.list.map((category) => (
+                                <MenuItem
+                                    dense
+                                    disableGutters
+                                    id={category.id}
+                                    key={category.name}
+                                    value={category.name}
+                                >
+                                    <Checkbox color='primary' checked={api.categories.includes(category.name)} />
+                                    <ListItemText primary={category.name} secondary={category.description} />
+                                </MenuItem>
+                            ))
+                        )}
                 </TextField>
+                <Tooltip
+                    title={(
+                        <>
+                            <p>
+                                <FormattedMessage
+                                    id='Api.category.dropdown.tooltip'
+                                    defaultMessage={'API categories can be added via admin portal UI or admin REST'
+                                        + ' API. There has to be pre-defined API categories in the environment in order'
+                                        + ' to be attched to an API.'}
+                                />
+                            </p>
+                        </>
+                    )}
+                    aria-label='API Categories'
+                    placement='right-end'
+                    interactive
+                    className={classes.tooltip}
+                >
+                    <HelpOutline />
+                </Tooltip>
             </Box>
         );
     }

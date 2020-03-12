@@ -16,17 +16,17 @@
  *  under the License.
  */
 
-import React from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Grid } from '@material-ui/core';
 import GenericResource from 'AppComponents/Apis/Details/Endpoints/Prototype/GenericResource';
+import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const xMediationScriptProperty = 'x-mediation-script';
 
 const defaultScript = '/* mc.setProperty(\'CONTENT_TYPE\', \'application/json\');\n\t'
     + 'mc.setPayloadJSON(\'{ "data" : "sample JSON"}\');*/\n'
     + '/*Uncomment the above comment block to send a sample response.*/';
-
 
 /**
  * The inline endpoints component.
@@ -36,6 +36,7 @@ const defaultScript = '/* mc.setProperty(\'CONTENT_TYPE\', \'application/json\')
  * @return {any} The HTML representation of the component.
  * */
 function InlineEndpoints(props) {
+    const { api } = useContext(APIContext);
     const { paths, updatePaths } = props;
 
     /**
@@ -46,10 +47,33 @@ function InlineEndpoints(props) {
      * @param {string} method The resource method.
      * */
     const onScriptChange = (value, path, method) => {
+        console.log(value);
         const tmpPaths = JSON.parse(JSON.stringify(paths));
         tmpPaths[path][method][xMediationScriptProperty] = value.trim();
         updatePaths(tmpPaths);
     };
+
+    const [mockScripts, setMockScripts] = useState([]);
+
+    useEffect(() => {
+        const promisedResponse = api.getGeneratedMockScriptsOfAPI(api.id);
+        console.log(promisedResponse);
+        promisedResponse.then((response) => {
+            setMockScripts(response.obj.list);
+        });
+    }, []);
+
+    function getGeneratedMockScriptOfAPI(resourcePath, resourceMethod) {
+        console.log(mockScripts);
+        for (let i = 0; i < mockScripts.length; i++) {
+            if (mockScripts[i].verb.toLowerCase() === resourceMethod.toLowerCase()
+                && mockScripts[i].path === resourcePath) {
+                return mockScripts[i].content;
+            }
+        }
+        return null;
+    }
+
     return (
         <>
             <Grid container spacing={1} direction='column'>
@@ -58,12 +82,14 @@ function InlineEndpoints(props) {
                         Object.keys(paths[path]).map((method) => {
                             const mediationScript = paths[path][method][xMediationScriptProperty];
                             const script = mediationScript === undefined ? defaultScript : mediationScript;
+                            const originalScript = getGeneratedMockScriptOfAPI(path, method);
                             return (
                                 <GenericResource
                                     resourcePath={path}
                                     resourceMethod={method}
                                     onChange={onScriptChange}
                                     scriptContent={script}
+                                    originalScript={originalScript}
                                 />
                             );
                         })

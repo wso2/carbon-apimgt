@@ -115,9 +115,8 @@ public class UsageFileWriter {
     public synchronized void writeToFile(String content) {
         //Check if the file size exceeds the max limit (12mb can contain roughly 10000 requests or 30000 events)
         try {
-            String sizeInMb = ConfigManager.getConfigManager().getProperty("MaxUsageFileSize");
-            int maxFileSize = Integer.parseInt((sizeInMb != null && !sizeInMb.isEmpty()) ? sizeInMb : "12")
-                    * 1024 * 1024;
+            int sizeInMb = ConfigManager.getConfigurationDTO().getUsage_upload_max_usage_file_size();
+            int maxFileSize = (sizeInMb != 0 ? sizeInMb : 12) * 1024 * 1024;
             if (Files.size(filePath) > maxFileSize) {
                 if (log.isDebugEnabled()) {
                     log.debug("Rotating API Usage File. File Size is > MaxFileSize (" + maxFileSize + " Mb)");

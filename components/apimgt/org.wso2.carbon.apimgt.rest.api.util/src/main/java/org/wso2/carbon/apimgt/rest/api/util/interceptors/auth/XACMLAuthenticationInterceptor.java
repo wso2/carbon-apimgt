@@ -36,7 +36,7 @@ import javax.ws.rs.core.Response;
 
 //import org.wso2.carbon.identity.entitlement.proxy.PEPProxy;
 
-
+@Deprecated
 public class XACMLAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
     private static final Log logger = LogFactory.getLog(XACMLAuthenticationInterceptor.class);

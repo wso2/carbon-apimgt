@@ -23,6 +23,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.tracing.JaegerTracer;
+import org.wso2.carbon.apimgt.tracing.LogTracer;
+import org.wso2.carbon.apimgt.tracing.OpenTracer;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingServiceImpl;
 import org.osgi.service.component.annotations.Activate;
@@ -31,6 +34,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.apimgt.tracing.ZipkinTracer;
 
 @Component(
          name = "org.wso2.carbon.apimgt.tracing.internal.TracingServiceComponent", 
@@ -43,10 +47,15 @@ public class TracingServiceComponent {
 
     @Activate
     protected void activate(ComponentContext componentContext) {
+
         try {
             log.debug("Tracing Component activated");
             BundleContext bundleContext = componentContext.getBundleContext();
+            registration = bundleContext.registerService(OpenTracer.class,new JaegerTracer(),null);
+            registration = bundleContext.registerService(OpenTracer.class,new ZipkinTracer(),null);
+            registration = bundleContext.registerService(OpenTracer.class,new LogTracer(),null);
             registration = bundleContext.registerService(TracingService.class, TracingServiceImpl.getInstance(), null);
+
         } catch (Exception e) {
             log.error("Error occured in tracing component activation", e);
         }
@@ -54,22 +63,41 @@ public class TracingServiceComponent {
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
+
         log.debug("Tracing Component deactivated");
         registration.unregister();
     }
 
     @Reference(
-             name = "api.manager.config.service", 
-             service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "unsetAPIManagerConfigurationService")
+            name = "api.manager.config.service",
+            service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
+
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(amcService);
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
+
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
+    }
+
+    @Reference(
+            name = "opentracing.tracer.service",
+            service = OpenTracer.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTracerService")
+    protected void setTracerService(OpenTracer tracer) {
+
+        ServiceReferenceHolder.getInstance().getOpenTracerMap().put(tracer.getName(), tracer);
+    }
+
+    protected void unsetTracerService(OpenTracer tracer) {
+
+        ServiceReferenceHolder.getInstance().getOpenTracerMap().remove(tracer.getName());
     }
 }
 

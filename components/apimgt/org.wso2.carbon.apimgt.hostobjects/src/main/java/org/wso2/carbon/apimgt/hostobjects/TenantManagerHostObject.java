@@ -45,7 +45,7 @@ public class TenantManagerHostObject extends ScriptableObject {
 
     //using a set for file extensions white list since it will be faster to search
     private static final Set<String> EXTENTION_WHITELIST = new HashSet<String>(Arrays.asList(
-            new String[]{"css", "jpg", "png", "gif", "svg", "ttf", "html", "js", "json"}
+            new String[]{"css", "jpg", "png", "gif", "svg", "ttf", "html", "js", "json", "ico"}
     ));
 
     public static String getStoreTenantThemesPath() {

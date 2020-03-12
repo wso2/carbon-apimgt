@@ -308,9 +308,9 @@ class CommonListing extends React.Component {
                 <main
                     className={classNames(
                         classes.content,
-                        { [classes.contentWithoutTags]: !tagPaneVisible || !showLeftMenu },
-                        { [classes.contentWithTagsHidden]: tagPaneVisible && !showLeftMenu },
-                        { [classes.contentWithTags]: tagPaneVisible && showLeftMenu },
+                        { [classes.contentWithoutTags]: !(tagPaneVisible || categoryPaneVisible) || !showLeftMenu },
+                        { [classes.contentWithTagsHidden]: (tagPaneVisible || categoryPaneVisible) && !showLeftMenu },
+                        { [classes.contentWithTags]: (tagPaneVisible || categoryPaneVisible) && showLeftMenu },
                     )}
                     id='commonListing'
                 >

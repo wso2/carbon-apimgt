@@ -148,7 +148,7 @@ class Recommendations extends React.Component {
                 },
             };
         }
-        muiTheme = Object.assign(muiTheme, themeAdditions, Configurations.themes.light);
+        muiTheme = Object.assign(muiTheme, themeAdditions, Configurations);
         return createMuiTheme(muiTheme);
     };
 

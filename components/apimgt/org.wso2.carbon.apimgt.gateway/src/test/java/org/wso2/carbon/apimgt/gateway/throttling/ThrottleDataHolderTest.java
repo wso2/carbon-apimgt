@@ -53,7 +53,6 @@ public class ThrottleDataHolderTest {
         throttleDataHolder.removeApplicationBlockingCondition("admin:DefaultApplication");
         throttleDataHolder.addUserBlockingCondition("user1","enabled");
         throttleDataHolder.removeUserBlockingCondition("user1");
-        throttleDataHolder.setBlockingConditionsPresent(true);
         throttleDataHolder.setKeyTemplatesPresent(true);
     }
 

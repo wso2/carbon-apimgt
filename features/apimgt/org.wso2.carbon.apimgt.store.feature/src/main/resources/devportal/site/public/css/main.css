@@ -385,7 +385,6 @@ div.image-load-animation1 {
   animation-name: image-load-animation1;
   animation-duration: 2s;
   animation-iteration-count: 2;
-  
 }
 div.image-load-animation2 {
   width: 40px;
@@ -397,7 +396,6 @@ div.image-load-animation2 {
   animation-name: image-load-animation2;
   animation-duration: 2s;
   animation-iteration-count: 2;
-  
 }
 
 /* Standard syntax */
@@ -417,4 +415,15 @@ body {
 }
 a {
   text-decoration: none;
+}
+
+/* Hiding models section in swagger console */
+.wrapper section.models {
+    display: none;
+}
+
+/* Static style for graphql-explorer library */
+.graphiql-explorer-root {
+  max-height: 750px;
+  overflow-y: scroll;
 }

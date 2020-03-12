@@ -30,6 +30,7 @@ public class APIKey {
     private String state;
     private String callbackUrl;
     private String grantTypes;
+    private String additionalProperties;
 
     public String getState() {
         return state;
@@ -123,4 +124,12 @@ public class APIKey {
     public void setGrantTypes(String grantTypes) {
         this.grantTypes = grantTypes;
     }
+
+	public String getAdditionalProperties() {
+		return additionalProperties;
+	}
+
+	public void setAdditionalProperties(String additionalProperties) {
+		this.additionalProperties = additionalProperties;
+	}
 }

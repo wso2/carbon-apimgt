@@ -200,6 +200,24 @@ function isSelectAll(selectedOperations, operations) {
     }
     return true;
 }
+
+/**
+ * Check whether the provided object is a Ref object.
+ *
+ * @param {object} content : The object that needs to be checked.
+ * @return {boolean} true if Ref, false otherwise.
+ * */
+function isRef(content) {
+    let isReference = false;
+    if (typeof content === 'object') {
+        Object.keys(content).map((name) => {
+            isReference = name === '$ref';
+            return name;
+        });
+    }
+    return isReference;
+}
+
 export {
     mapAPIOperations,
     getTaggedOperations,
@@ -207,5 +225,7 @@ export {
     extractPathParameters,
     getOperationScopes,
     isSelectAll,
+    getVersion,
     VERSIONS,
+    isRef,
 };

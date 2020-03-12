@@ -93,9 +93,11 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -159,7 +161,7 @@ public class OASParserUtil {
         }
     }
 
-    /**
+    /**Map<String, Object>
      * Return correct OAS parser by validating give definition with OAS 2/3 parsers.
      *
      * @param apiDefinition OAS definition
@@ -203,13 +205,32 @@ public class OASParserUtil {
         throw new APIManagementException("Invalid OAS definition provided.");
     }
 
-    public static String generateExamples(String apiDefinition) throws APIManagementException {
+    public static Map<String, Object> generateExamples(String apiDefinition) throws APIManagementException {
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
 
         if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
             return oas3Parser.generateExample(apiDefinition);
         } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) {
             return oas2Parser.generateExample(apiDefinition);
+        } else {
+            throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
+        }
+    }
+
+    public static String getOASDefinitionWithTierContentAwareProperty(String apiDefinition,
+            List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException {
+        if (contentAwareTiersList == null || contentAwareTiersList.isEmpty()) {
+            // no modifications if the list is empty
+            return apiDefinition;
+        }
+        SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
+
+        if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
+            return oas3Parser.getOASDefinitionWithTierContentAwareProperty(apiDefinition, contentAwareTiersList,
+                    apiLevelTier);
+        } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) {
+            return oas2Parser.getOASDefinitionWithTierContentAwareProperty(apiDefinition, contentAwareTiersList,
+                    apiLevelTier);
         } else {
             throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
         }
@@ -1096,27 +1117,35 @@ public class OASParserUtil {
         if (extensions == null) {
             return;
         }
-        if (extensions.containsKey(APIConstants.X_WSO2_AUTH_HEADER)) {
-            extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
+        extensions.remove(APIConstants.X_WSO2_CORS);
+        extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
+        extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
+        extensions.remove(APIConstants.X_THROTTLING_TIER);
+        extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
+        extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
+        extensions.remove(APIConstants.X_WSO2_BASEPATH);
+        extensions.remove(APIConstants.X_WSO2_TRANSPORTS);
+        extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
+        extensions.remove(APIConstants.X_WSO2_RESPONSE_CACHE);
+        extensions.remove(APIConstants.X_WSO2_MUTUAL_SSL);
+        extensions.remove(APIConstants.X_WSO2_REQUEST_INTERCEPTOR);
+        extensions.remove(APIConstants.X_WSO2_RESPONSE_INTERCEPTOR);
+    }
+
+    /**
+     * remove publisher/MG related extension from OAS
+     *
+     * @param extensions extensions
+     */
+    public static void removePublisherSpecificInfofromOperation(Map<String, Object> extensions) {
+        if (extensions == null) {
+            return;
         }
-        if (extensions.containsKey(APIConstants.X_THROTTLING_TIER)) {
-            extensions.remove(APIConstants.X_THROTTLING_TIER);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_CORS)) {
-            extensions.remove(APIConstants.X_WSO2_CORS);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS)) {
-            extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_SANDBOX_ENDPOINTS)) {
-            extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_BASEPATH)) {
-            extensions.remove(APIConstants.X_WSO2_BASEPATH);
-        }
-        if (extensions.containsKey(APIConstants.X_WSO2_TRANSPORTS)) {
-            extensions.remove(APIConstants.X_WSO2_TRANSPORTS);
-        }
+        extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
+        extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
+        extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
+        extensions.remove(APIConstants.X_WSO2_DISABLE_SECURITY);
+        extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
     }
 
     /**
@@ -1156,27 +1185,30 @@ public class OASParserUtil {
     }
 
     /**
-     * generate app security information for OAS definition
+     * generate response cache configuration for OAS definition.
      *
-     * @param security          application security
-     * @param transport          transport security
+     * @param responseCache     response cache Enabled/Disabled
+     * @param cacheTimeout      cache timeout in seconds
      * @return JsonNode
      */
-     static JsonNode getTransportSecurity(String security, String transport) {
-         ObjectNode endpointResult = objectMapper.createObjectNode();
-         if (transport != null) {
-             List<String> transportTypes = Arrays.asList(transport.split(","));
-             endpointResult.put(Constants.TRANSPORT_HTTP, transportTypes.contains(Constants.TRANSPORT_HTTP));
-             endpointResult.put(Constants.TRANSPORT_HTTPS, transportTypes.contains(Constants.TRANSPORT_HTTPS));
-         }
-         if (security != null) {
-             List<String> securityList = Arrays.asList(security.split(","));
-             if (securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-                 String mutualSSLOptional = !securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY) ?
-                         APIConstants.OPTIONAL : APIConstants.MANDATORY;
-                 endpointResult.put(APIConstants.API_SECURITY_MUTUAL_SSL, mutualSSLOptional);
-             }
-         }
-        return endpointResult;
+     static JsonNode getResponseCacheConfig(String responseCache, int cacheTimeout) {
+         ObjectNode responseCacheConfig = objectMapper.createObjectNode();
+         boolean enabled = APIConstants.ENABLED.equalsIgnoreCase(responseCache);
+         responseCacheConfig.put(APIConstants.RESPONSE_CACHING_ENABLED, enabled);
+         responseCacheConfig.put(APIConstants.RESPONSE_CACHING_TIMEOUT, cacheTimeout);
+         return responseCacheConfig;
+    }
+
+    /**
+     * Sort scopes by name.
+     * This method was added to display scopes in publisher in a sorted manner.
+     *
+     * @param scopeSet
+     * @return Scope set
+     */
+    static Set<Scope> sortScopes(Set<Scope> scopeSet) {
+        List<Scope> scopesSortedlist = new ArrayList<>(scopeSet);
+        scopesSortedlist.sort(Comparator.comparing(Scope::getName));
+        return new LinkedHashSet<>(scopesSortedlist);
     }
 }

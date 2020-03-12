@@ -46,6 +46,8 @@ const showEndpoint = (api, type) => {
  */
 function Endpoints(props) {
     const { parentClasses, api } = props;
+    const isPrototypedAvailable = api.endpointConfig !== null
+        && api.endpointConfig.implementation_status === 'prototyped';
 
     return (
         <>
@@ -61,13 +63,23 @@ function Endpoints(props) {
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={6} lg={4}>
                         {/* Production Endpoint (TODO) fix the endpoint
-                                                info when it's available with the api object */}
-                        <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                            <FormattedMessage
-                                id='Apis.Details.NewOverview.Endpoints.production.endpoint'
-                                defaultMessage='Production Endpoint'
-                            />
-                        </Typography>
+                                            info when it's available with the api object */}
+                        { !isPrototypedAvailable ? (
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Endpoints.production.endpoint'
+                                    defaultMessage='Production Endpoint'
+                                />
+                            </Typography>
+                        )
+                            : (
+                                <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.NewOverview.Endpoints.prototype.endpoint'
+                                        defaultMessage='Prototype Endpoint'
+                                    />
+                                </Typography>
+                            )}
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>
                         <Tooltip
@@ -82,60 +94,65 @@ function Endpoints(props) {
                         >
                             <Typography component='p' variant='body1' className={parentClasses.url}>
                                 {showEndpoint(api, 'prod')
-                                    && <>{showEndpoint(api, 'prod')}</>}
+                                && <>{showEndpoint(api, 'prod')}</>}
                             </Typography>
                         </Tooltip>
                         <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
                             {!showEndpoint(api, 'prod') && (
                                 <>
                                     <FormattedMessage
-                                        id='Apis.Details.NewOverview.Endpoints.production.not.set'
+                                        id='Apis.Details.NewOverview.Endpoints.not.set'
                                         defaultMessage='-'
                                     />
                                 </>
                             )}
                         </Typography>
                     </Grid>
-                    <Grid item xs={12} md={6} lg={4}>
-                        {/* Sandbox Endpoint (TODO) fix the endpoint info when
+                    {!isPrototypedAvailable && (
+                        <Grid item xs={12} md={6} lg={4}>
+                            {/* Sandbox Endpoint (TODO) fix the endpoint info when
                                                 it's available with the api object */}
-                        <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                            <FormattedMessage
-                                id='Apis.Details.NewOverview.Endpoints.sandbox.endpoint'
-                                defaultMessage='Sandbox Endpoint'
-                            />
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={8}>
-                        <Tooltip
-                            placement='top'
-                            classes={{
-                                tooltip: parentClasses.htmlTooltip,
-                            }}
-                            title={
-                                showEndpoint(api, 'sand')
-                                && <>{showEndpoint(api, 'sand')}</>
-                            }
-                        >
-                            <Typography component='p' variant='body1' className={parentClasses.url}>
-                                {showEndpoint(api, 'sand')
-                                    && <>{showEndpoint(api, 'sand')}</>}
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Endpoints.sandbox.endpoint'
+                                    defaultMessage='Sandbox Endpoint'
+                                />
                             </Typography>
-                        </Tooltip>
-                        <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
-                            {!showEndpoint(api, 'sand') && (
-                                <>
-                                    <FormattedMessage
-                                        id='Apis.Details.NewOverview.Endpoints.sandbox.not.set'
-                                        defaultMessage='-'
-                                    />
-                                </>
-                            )}
-                        </Typography>
-                    </Grid>
+                        </Grid>
+                    )}
+
+                    {!isPrototypedAvailable && (
+                        <Grid item xs={12} md={6} lg={8}>
+                            <Tooltip
+                                placement='top'
+                                classes={{
+                                    tooltip: parentClasses.htmlTooltip,
+                                }}
+                                title={
+                                    showEndpoint(api, 'sand')
+                                    && <>{showEndpoint(api, 'sand')}</>
+                                }
+                            >
+                                <Typography component='p' variant='body1' className={parentClasses.url}>
+                                    {showEndpoint(api, 'sand')
+                                    && <>{showEndpoint(api, 'sand')}</>}
+                                </Typography>
+                            </Tooltip>
+                            <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
+                                {!showEndpoint(api, 'sand') && (
+                                    <>
+                                        <FormattedMessage
+                                            id='Apis.Details.NewOverview.Endpoints.sandbox.not.set'
+                                            defaultMessage='-'
+                                        />
+                                    </>
+                                )}
+                            </Typography>
+                        </Grid>
+                    )}
                     <Grid item xs={12} md={6} lg={4}>
                         {/* Sandbox Endpoint (TODO) fix the endpoint info when
-                                                it's available with the api object */}
+                                            it's available with the api object */}
                         <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                             <FormattedMessage
                                 id='Apis.Details.NewOverview.Endpoints.endpoint.security'

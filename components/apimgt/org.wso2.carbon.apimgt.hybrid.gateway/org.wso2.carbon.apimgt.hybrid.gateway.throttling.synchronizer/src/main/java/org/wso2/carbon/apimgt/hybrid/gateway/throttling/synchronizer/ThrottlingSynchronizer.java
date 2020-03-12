@@ -32,10 +32,6 @@ import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.OnPremiseGatewayInitListener;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.AccessTokenDTO;
@@ -45,21 +41,25 @@ import org.wso2.carbon.apimgt.hybrid.gateway.common.util.HttpRequestUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.util.MicroGatewayCommonUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.util.OnPremiseGatewayConstants;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.util.TokenUtil;
-import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.ApplicationThrottlePolicyListDTO;
-import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.BlockingConditionDTO;
-import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.BlockingConditionListDTO;
-import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.SubscriptionThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.util.mapping.throttling.AdvancedThrottlePolicyMappingUtil;
-import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.util.mapping.throttling.SubscriptionThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.AdvancedThrottlePolicyInfoDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.AdvancedThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.ApplicationThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.BlockingConditionDTO;
+import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.BlockingConditionListDTO;
+import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.dto.SubscriptionThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.exception.ThrottlingSynchronizerException;
 import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.util.ThrottlingConstants;
+import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.util.mapping.throttling.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.util.mapping.throttling.ApplicationThrottlePolicyMappingUtil;
+import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.util.mapping.throttling.SubscriptionThrottlePolicyMappingUtil;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -72,6 +72,8 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class synchronizes throttling policies
@@ -86,23 +88,47 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
 
     @Override
     public void completedInitialization() {
-        synchronize();
+        initSynchronization();
     }
 
-    public void synchronize() {
+    /**
+     * Setup user environment to initialize Synchronization
+     */
+    public void initSynchronization() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        char[] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
+        try {
+            boolean isMultiTenantEnabled = ConfigManager.getConfigurationDTO().isMulti_tenant_enabled();
+            if (isMultiTenantEnabled) {
+                Map<String, String> multiTenantUserMap = MicroGatewayCommonUtil.getMultiTenantUserMap();
+                Set<String> tenantUsernameSet = multiTenantUserMap.keySet();
+                for (String tenantusername : tenantUsernameSet) {
+                    synchronize(tenantusername, multiTenantUserMap.get(tenantusername).toCharArray());
+                }
+            } else {
+                synchronize(username, password);
+            }
+        } catch (OnPremiseGatewayException e) {
+            log.error("Error occurred while synchronizing Throttling policies", e);
+        }
+    }
 
+    /**
+     * Start throttle synchronizations for tenant user
+     * @param username Tenant username
+     * @param password Password
+     */
+    public void synchronize(String username, char[] password) {
         log.info("Started synchronizing policies.");
-        String username;
         AccessTokenDTO accessTokenDTO;
         try {
-            loadTenant();
+            loadTenant(username);
             username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-
             //Initialize Rest API urls
-            String apiAdminUrl = ConfigManager.getConfigManager()
-                    .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY);
-            String apiVersion = ConfigManager.getConfigManager()
-                    .getProperty(ThrottlingConstants.API_VERSION_PROPERTY);
+            String apiAdminUrl = ConfigManager.getConfigurationDTO().getUrl_admin();
+            String apiVersion = ConfigManager.getConfigurationDTO().getApi_update_rest_api_version();
             if (apiVersion == null) {
                 apiVersion = ThrottlingConstants.API_DEFAULT_VERSION;
                 if (log.isDebugEnabled()) {
@@ -137,13 +163,13 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
                     .replace(ThrottlingConstants.API_VERSION_PARAM, apiVersion)
                     .replace("//", ThrottlingConstants.URL_PATH_SEPARATOR);
 
-            //fist we need to get an access token to invoke the Admin Rest API
+            //first we need to get an access token to invoke the Admin Rest API
             try {
                 OAuthApplicationInfoDTO responseDto = TokenUtil.registerClient();
                 String combinedScopes = ThrottlingConstants.TOKEN_TIER_VIEW_SCOPE + " "
                         + ThrottlingConstants.BLOCKING_CONDITION_VIEW_SCOPE;
                 accessTokenDTO = TokenUtil.generateAccessToken(responseDto.getClientId(),
-                        responseDto.getClientSecret().toCharArray(), combinedScopes);
+                        responseDto.getClientSecret().toCharArray(), combinedScopes, username, password);
             } catch (OnPremiseGatewayException e) {
                 log.error("Error occurred while creating policies. Unable to generate Access Token.", e);
                 return;
@@ -222,9 +248,7 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
         if (log.isDebugEnabled()) {
             log.debug("Getting Subscription Policies using Admin REST API.");
         }
-
-        String apiAdminUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY);
+        String apiAdminUrl = ConfigManager.getConfigurationDTO().getUrl_admin();
         if (apiAdminUrl == null) {
             apiAdminUrl = ThrottlingConstants.DEFAULT_API_ADMIN_URL;
             if (log.isDebugEnabled()) {
@@ -237,7 +261,6 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
         HttpGet httpGet = new HttpGet(subscriptionPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
-
 
         String response = HttpRequestUtil.executeHTTPMethodWithRetry(httpClient, httpGet,
                 OnPremiseGatewayConstants.DEFAULT_RETRY_COUNT);
@@ -301,8 +324,7 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
         if (log.isDebugEnabled()) {
             log.debug("Getting Subscription Policies using Admin REST API.");
         }
-        String apiAdminUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY);
+        String apiAdminUrl = ConfigManager.getConfigurationDTO().getUrl_admin();
         if (apiAdminUrl == null) {
             apiAdminUrl = ThrottlingConstants.DEFAULT_API_ADMIN_URL;
             if (log.isDebugEnabled()) {
@@ -315,7 +337,6 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
         HttpGet httpGet = new HttpGet(applicationPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
-
 
         String response = HttpRequestUtil.executeHTTPMethodWithRetry(httpClient, httpGet,
                 OnPremiseGatewayConstants.DEFAULT_RETRY_COUNT);
@@ -379,8 +400,7 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
             log.debug("Getting Advanced Policies using Admin REST API.");
         }
 
-        String apiAdminUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY);
+        String apiAdminUrl = ConfigManager.getConfigurationDTO().getUrl_admin();
         if (apiAdminUrl == null) {
             apiAdminUrl = ThrottlingConstants.DEFAULT_API_ADMIN_URL;
             if (log.isDebugEnabled()) {
@@ -392,7 +412,6 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
         HttpGet httpGet = new HttpGet(advancedPolicyUrl);
         String authHeaderValue = OnPremiseGatewayConstants.AUTHORIZATION_BEARER + accessTokenDTO.getAccessToken();
         httpGet.addHeader(OnPremiseGatewayConstants.AUTHORIZATION_HEADER, authHeaderValue);
-
 
         String response = HttpRequestUtil.executeHTTPMethodWithRetry(httpClient, httpGet,
                 OnPremiseGatewayConstants.DEFAULT_RETRY_COUNT);
@@ -411,8 +430,7 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
                                                                   AdvancedThrottlePolicyListDTO policyListDTO)
             throws OnPremiseGatewayException {
         List<AdvancedThrottlePolicyDTO> policyDTOList = new ArrayList<>();
-        String apiAdminUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY);
+        String apiAdminUrl = ConfigManager.getConfigurationDTO().getUrl_admin();
         if (apiAdminUrl == null) {
             apiAdminUrl = ThrottlingConstants.DEFAULT_API_ADMIN_URL;
             if (log.isDebugEnabled()) {
@@ -484,8 +502,7 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
         if (log.isDebugEnabled()) {
             log.debug("Getting Blocking conditions using Admin REST API.");
         }
-        String apiAdminUrl = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_ADMIN_URL_PROPERTY_KEY);
+        String apiAdminUrl = ConfigManager.getConfigurationDTO().getUrl_admin();
         if (apiAdminUrl == null) {
             apiAdminUrl = ThrottlingConstants.DEFAULT_API_ADMIN_URL;
             if (log.isDebugEnabled()) {
@@ -512,10 +529,7 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
 
     }
 
-    private void loadTenant() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+    private void loadTenant(String username) {
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -534,5 +548,4 @@ public class ThrottlingSynchronizer implements OnPremiseGatewayInitListener {
             }
         }
     }
-
 }

@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -76,6 +77,7 @@ import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
@@ -147,13 +149,14 @@ import static org.mockito.Matchers.any;
         GovernanceUtils.class, PrivilegedCarbonContext.class, WorkflowExecutorFactory.class, JavaUtils.class,
         APIProviderImpl.class, APIManagerFactory.class, RegistryUtils.class, ThrottlePolicyDeploymentManager.class,
         LifecycleBeanPopulator.class, Caching.class, PaginationContext.class, MultitenantUtils.class,
-        AbstractAPIManager.class, OASParserUtil.class })
+        AbstractAPIManager.class, OASParserUtil.class, KeyManagerHolder.class })
 public class APIProviderImplTest {
 
     private static String EP_CONFIG_WSDL = "{\"production_endpoints\":{\"url\":\"http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl\""
             + ",\"config\":null,\"template_not_supported\":false},\"endpoint_type\":\"wsdl\"}";
     private static String WSDL_URL = "http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl";
     private ApiMgtDAO apimgtDAO;
+    private KeyManager keyManager;
     private Registry registry;
     private GenericArtifactManager artifactManager;
     private APIGatewayManager gatewayManager;
@@ -169,12 +172,18 @@ public class APIProviderImplTest {
         PowerMockito.mockStatic(WorkflowExecutorFactory.class);
         PowerMockito.mockStatic(ThrottlePolicyDeploymentManager.class);
         PowerMockito.mockStatic(LifecycleBeanPopulator.class);
+        PowerMockito.mockStatic(KeyManagerHolder.class);
         PowerMockito.mockStatic(Caching.class);
         PowerMockito.mockStatic(PaginationContext.class);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(APIGatewayManager.class);
 
         apimgtDAO = Mockito.mock(ApiMgtDAO.class);
+        keyManager = Mockito.mock(KeyManager.class);
+        Mockito.when(keyManager.getResourceByApiId(Mockito.anyString())).thenReturn(null);
+        Mockito.when(keyManager.registerNewResource(Mockito.any(API.class), Mockito.any(Map.class))).thenReturn(true);
+        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
+
         PowerMockito.when(APIUtil.isAPIManagementEnabled()).thenReturn(false);
         PowerMockito.when(APIUtil.replaceEmailDomainBack(Mockito.anyString())).thenReturn("admin");
         Mockito.when(APIUtil.replaceEmailDomain(Mockito.anyString())).thenReturn("admin");
@@ -802,12 +811,13 @@ public class APIProviderImplTest {
     @Test
     public void testAddBlockCondition() throws APIManagementException {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
-        Mockito.when(apimgtDAO.addBlockConditions(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).
-                thenReturn("testID");
+        BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
+        blockConditionsDTO.setUUID("12345");
+        Mockito.when(apimgtDAO.addBlockConditions(Mockito.any(BlockConditionsDTO.class))).thenReturn(blockConditionsDTO);
         //condition type IP
-        assertEquals("testID", apiProvider.addBlockCondition("IP", "testValue"));
+        assertEquals("12345", apiProvider.addBlockCondition("IP", "testValue"));
         //condition type User
-        assertEquals("testID", apiProvider.addBlockCondition("USER", "testValue"));
+        assertEquals("12345", apiProvider.addBlockCondition("USER", "testValue"));
     }
 
     @Test
@@ -2237,8 +2247,7 @@ public class APIProviderImplTest {
     }
 
     @Test
-    public void testUpdateAPI_InCreatedState() throws RegistryException, UserStoreException, APIManagementException,
-            FaultGatewaysException {
+    public void testUpdateAPI_InCreatedState() throws Exception {
         APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
         Set<String> environments = new HashSet<String>();
         Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
@@ -2282,6 +2291,24 @@ public class APIProviderImplTest {
 
 
         List<Documentation> documentationList = getDocumentationList();
+        Documentation documentation = documentationList.get(1);
+        Mockito.when(APIUtil.getAPIDocPath(api.getId())).thenReturn(documentation.getFilePath());
+        APIProviderImplWrapper apiProviderImplWrapper = new APIProviderImplWrapper(apimgtDAO, null, null);
+        Resource docResource = Mockito.mock(Resource.class);
+        Mockito.when(docResource.getUUID()).thenReturn(documentation.getId());
+        Mockito.when(apiProviderImplWrapper.registry.get(documentation.getFilePath())).thenReturn(docResource);
+
+        GenericArtifact docArtifact = Mockito.mock(GenericArtifact.class);
+        Mockito.when(artifactManager.getGenericArtifact(documentation.getId())).thenReturn(docArtifact);
+        Mockito.when(APIUtil.getDocumentation(docArtifact)).thenReturn(documentation);
+        String artifactPath = "artifact/path";
+        Mockito.when(docArtifact.getPath()).thenReturn(artifactPath);
+        PowerMockito.doNothing().when(APIUtil.class, "clearResourcePermissions", Mockito.any(), Mockito.any(),
+                Mockito.anyInt());
+
+        String[] roles = {"admin", "subscriber"};
+        APIUtil.setResourcePermissions("admin", "Public", roles, artifactPath);
+        Mockito.when(docArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("docFilePath");
 
         final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, documentationList, null);
         RegistryService registryService = Mockito.mock(RegistryService.class);
@@ -2416,6 +2443,24 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
 
         List<Documentation> documentationList = getDocumentationList();
+        Documentation documentation = documentationList.get(1);
+        Mockito.when(APIUtil.getAPIDocPath(api.getId())).thenReturn(documentation.getFilePath());
+        APIProviderImplWrapper apiProviderImplWrapper = new APIProviderImplWrapper(apimgtDAO, null, null);
+        Resource docResource = Mockito.mock(Resource.class);
+        Mockito.when(docResource.getUUID()).thenReturn(documentation.getId());
+        Mockito.when(apiProviderImplWrapper.registry.get(documentation.getFilePath())).thenReturn(docResource);
+
+        GenericArtifact docArtifact = Mockito.mock(GenericArtifact.class);
+        Mockito.when(artifactManager.getGenericArtifact(documentation.getId())).thenReturn(docArtifact);
+        Mockito.when(APIUtil.getDocumentation(docArtifact)).thenReturn(documentation);
+        String artifactPath = "artifact/path";
+        Mockito.when(docArtifact.getPath()).thenReturn(artifactPath);
+        PowerMockito.doNothing().when(APIUtil.class, "clearResourcePermissions", Mockito.any(), Mockito.any(),
+                Mockito.anyInt());
+
+        String[] roles = {"admin", "subscriber"};
+        APIUtil.setResourcePermissions("admin", "Public", roles, artifactPath);
+        Mockito.when(docArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("docFilePath");
 
         final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, documentationList, null);
 
@@ -2623,8 +2668,7 @@ public class APIProviderImplTest {
     }
 
     @Test(expected = FaultGatewaysException.class)
-    public void testUpdateAPI_WithFailedGWs() throws RegistryException, UserStoreException, APIManagementException,
-            FaultGatewaysException {
+    public void testUpdateAPI_WithFailedGWs() throws Exception {
         APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
         Set<String> environments = new HashSet<String>();
         Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
@@ -4394,10 +4438,14 @@ public class APIProviderImplTest {
         Documentation doc1 = new Documentation(DocumentationType.HOWTO, "How To");
         doc1.setVisibility(DocumentVisibility.API_LEVEL);
         doc1.setSourceType(DocumentSourceType.INLINE);
+        doc1.setId("678ghk");
+        doc1.setFilePath("/registry/resource/_system/governance/apimgt/applicationdata/provider/"
+                + "files/provider/fileName");
 
         Documentation doc2 = new Documentation(DocumentationType.SUPPORT_FORUM, "Support Docs");
         doc2.setVisibility(DocumentVisibility.API_LEVEL);
         doc2.setSourceType(DocumentSourceType.FILE);
+        doc2.setId("678ghk");
         doc2.setFilePath("/registry/resource/_system/governance/apimgt/applicationdata/provider/"
                 + "files/provider/fileName");
 

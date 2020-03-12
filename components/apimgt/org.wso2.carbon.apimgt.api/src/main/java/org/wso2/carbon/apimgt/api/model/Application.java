@@ -37,6 +37,7 @@ public class Application {
     private List<APIKey> keys = new ArrayList<APIKey>();
     private Map<String, OAuthApplicationInfo> oauthApps = new HashMap<String, OAuthApplicationInfo>();
     private String tier;
+    private String tierQuotaType;
     private String callbackUrl;
     private String description;
     private String status;
@@ -275,5 +276,13 @@ public class Application {
 
     public void updateSubscriber(Subscriber subscriber) {
         this.subscriber = subscriber;
+    }
+
+    public String getTierQuotaType() {
+        return tierQuotaType;
+    }
+
+    public void setTierQuotaType(String tierQuotaType) {
+        this.tierQuotaType = tierQuotaType;
     }
 }
