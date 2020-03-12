@@ -261,7 +261,7 @@ const DefaultConfigurations = {
             prefix: '[Devportal]',
             sufix: '- WSO2 APIM',
         },
-        languageSwitch: { // Country flags are downloaded from https://dribbble.com/shots/1211759-Free-195-Flat-Flags
+        languageSwitch: {
             active: false,
             languages: [
                 {
@@ -272,10 +272,10 @@ const DefaultConfigurations = {
                     direction: 'ltr',
                 },
                 {
-                    key: 'si',
-                    image: '/site/public/images/flags/si.png',
+                    key: 'es',
+                    image: '/site/public/images/flags/sp.png',
                     imageWidth: 24, // in pixles
-                    text: 'Sinhala',
+                    text: 'Spanish',
                     direction: 'ltr',
                 },
                 {
@@ -285,6 +285,13 @@ const DefaultConfigurations = {
                     text: 'Arabic',
                     direction: 'rtl',
                 },
+                {
+                    key: 'si',
+                    image: '/site/public/images/flags/si.png',
+                    imageWidth: 24, // in pixles
+                    text: 'Sinhala',
+                    direction: 'ltr',
+                }
             ],
             showFlag: true,
             showText: true,
