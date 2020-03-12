@@ -161,7 +161,7 @@ public class OASParserUtil {
         }
     }
 
-    /**
+    /**Map<String, Object>
      * Return correct OAS parser by validating give definition with OAS 2/3 parsers.
      *
      * @param apiDefinition OAS definition
@@ -205,7 +205,7 @@ public class OASParserUtil {
         throw new APIManagementException("Invalid OAS definition provided.");
     }
 
-    public static String generateExamples(String apiDefinition) throws APIManagementException {
+    public static Map<String, Object> generateExamples(String apiDefinition) throws APIManagementException {
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
 
         if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
@@ -1117,9 +1117,10 @@ public class OASParserUtil {
         if (extensions == null) {
             return;
         }
-        extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
-        extensions.remove(APIConstants.X_THROTTLING_TIER);
         extensions.remove(APIConstants.X_WSO2_CORS);
+        extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
+        extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
+        extensions.remove(APIConstants.X_THROTTLING_TIER);
         extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
         extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
         extensions.remove(APIConstants.X_WSO2_BASEPATH);
@@ -1127,6 +1128,8 @@ public class OASParserUtil {
         extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
         extensions.remove(APIConstants.X_WSO2_RESPONSE_CACHE);
         extensions.remove(APIConstants.X_WSO2_MUTUAL_SSL);
+        extensions.remove(APIConstants.X_WSO2_REQUEST_INTERCEPTOR);
+        extensions.remove(APIConstants.X_WSO2_RESPONSE_INTERCEPTOR);
     }
 
     /**
@@ -1139,6 +1142,10 @@ public class OASParserUtil {
             return;
         }
         extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
+        extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
+        extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
+        extensions.remove(APIConstants.X_WSO2_DISABLE_SECURITY);
+        extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
     }
 
     /**

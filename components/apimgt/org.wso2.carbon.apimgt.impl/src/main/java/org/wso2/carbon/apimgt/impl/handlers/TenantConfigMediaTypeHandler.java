@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.impl.handlers;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
@@ -36,13 +36,9 @@ public class TenantConfigMediaTypeHandler extends Handler {
     }
 
     private void clearConfigCache() {
-        Cache tenantConfigCache = APIUtil.getCache(
-                APIConstants.API_MANAGER_CACHE_MANAGER,
-                APIConstants.TENANT_CONFIG_CACHE_NAME,
-                APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
-                APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
+        Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String cacheName = tenantId + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
         if (tenantConfigCache.containsKey(cacheName)) {
             tenantConfigCache.remove(cacheName);
         }

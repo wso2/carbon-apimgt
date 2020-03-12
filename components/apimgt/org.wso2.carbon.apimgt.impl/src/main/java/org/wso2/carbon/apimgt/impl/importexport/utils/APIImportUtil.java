@@ -434,6 +434,8 @@ public final class APIImportUtil {
             // Change API lifecycle if state transition is required
             if (StringUtils.isNotEmpty(lifecycleAction)) {
                 log.info("Changing lifecycle from " + currentStatus + " to " + targetStatus);
+                apiProvider.changeAPILCCheckListItems(importedApi.getId(),
+                        APIImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);
                 apiProvider.changeLifeCycleStatus(importedApi.getId(), lifecycleAction);
                 //Change the status of the imported API to targetStatus
                 importedApi.setStatus(targetStatus);

@@ -383,6 +383,14 @@ class Details extends React.Component {
                                     />
                                 </>
                             )}
+                            {api.type !== 'WS' && showTryout && (
+                                <LeftMenuItem
+                                    text={<FormattedMessage id='Apis.Details.index.try.out' defaultMessage='Try out' />}
+                                    route='test'
+                                    iconText='test'
+                                    to={pathPrefix + 'test'}
+                                />
+                            )}
                             {showComments && (
                                 <LeftMenuItem
                                     text={
@@ -391,14 +399,6 @@ class Details extends React.Component {
                                     route='comments'
                                     iconText='comments'
                                     to={pathPrefix + 'comments'}
-                                />
-                            )}
-                            {api.type !== 'WS' && showTryout && (
-                                <LeftMenuItem
-                                    text={<FormattedMessage id='Apis.Details.index.try.out' defaultMessage='Try out' />}
-                                    route='test'
-                                    iconText='test'
-                                    to={pathPrefix + 'test'}
                                 />
                             )}
                         </>

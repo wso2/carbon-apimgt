@@ -74,6 +74,7 @@ import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -5771,37 +5772,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
 
     public boolean isRecommendationEnabled(String tenantDomain) {
-
-        if (recommendationEnvironment != null) {
-            if (recommendationEnvironment.isApplyForAllTenants()) {
-                return true;
-            } else {
-                try {
-                    org.json.JSONObject tenantConfig = null;
-                    Cache tenantConfigCache = APIUtil.getCache(
-                            APIConstants.API_MANAGER_CACHE_MANAGER,
-                            APIConstants.TENANT_CONFIG_CACHE_NAME,
-                            APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
-                            APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
-                    String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
-                    if (tenantConfigCache.containsKey(cacheName)) {
-                        tenantConfig = (org.json.JSONObject) tenantConfigCache.get(cacheName);
-                    } else {
-                        String content = apimRegistryService
-                                .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
-                        tenantConfig = new org.json.JSONObject(content);
-                        tenantConfigCache.put(cacheName, tenantConfig);
-                    }
-                    if (tenantConfig.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
-                        Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
-                        return Boolean.parseBoolean(value.toString());
-                    }
-                } catch (UserStoreException | RegistryException | NullPointerException e) {
-                    log.error("Error occurred when getting API tenant config from registry", e);
-                }
-            }
-        }
-        return false;
+        return APIUtil.isRecommendationEnabled(tenantDomain);
     }
 
     public String getRequestedTenant() {
@@ -5859,11 +5830,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public String getApiRecommendations(String userName, String tenantDomain) {
 
         if (tenantDomain != null && userName != null) {
-            Cache recommendationsCache = APIUtil.getCache(
-                    APIConstants.API_MANAGER_CACHE_MANAGER,
-                    APIConstants.RECOMMENDATIONS_CACHE_NAME,
-                    APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
-                    APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
+            Cache recommendationsCache = CacheProvider.getRecommendationsCache();
             String cacheName = userName + "_" + tenantDomain;
             if (recommendationsCache.containsKey(cacheName)) {
                 org.json.JSONObject cachedObject = (org.json.JSONObject) recommendationsCache.get(cacheName);

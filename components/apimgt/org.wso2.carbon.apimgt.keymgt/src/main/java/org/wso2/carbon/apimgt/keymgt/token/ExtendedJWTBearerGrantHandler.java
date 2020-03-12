@@ -113,7 +113,9 @@ public class ExtendedJWTBearerGrantHandler extends JWTBearerGrantHandler {
         userAttributes
                 .put(ClaimMapping.build(roleClaim, roleClaim, null, false),
                         updatedRoles.toString().replace(" ", ""));
-        tokReqMsgCtx.addProperty(ResourceConstants.ROLE_CLAIM, roleClaim);
+        if (roleClaim != null) {
+            tokReqMsgCtx.addProperty(ResourceConstants.ROLE_CLAIM, roleClaim);
+        }
         user.setUserAttributes(userAttributes);
         tokReqMsgCtx.setAuthorizedUser(user);
         return ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);

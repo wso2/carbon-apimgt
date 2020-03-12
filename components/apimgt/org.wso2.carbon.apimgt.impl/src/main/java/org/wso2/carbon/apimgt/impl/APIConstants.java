@@ -110,8 +110,6 @@ public final class APIConstants {
 
     public static final String API_TENANT_CONF_MEDIA_TYPE = "tenant-config";
     public static final String TENANT_CONFIG_CACHE_NAME = "tenantConfigCache";
-    public static final long TENANT_CONFIG_CACHE_MODIFIED_EXPIRY = 900; // cache set to 15 minutes
-    public static final long TENANT_CONFIG_CACHE_ACCESS_EXPIRY = 900;
 
     public static final String RESOURCE_FOLDER_LOCATION = "repository" + File.separator + "resources";
 
@@ -1307,6 +1305,10 @@ public final class APIConstants {
     public static final String X_WSO2_MUTUAL_SSL = "x-wso2-mutual-ssl";
     public static final String X_WSO2_APP_SECURITY = "x-wso2-application-security";
     public static final String X_WSO2_RESPONSE_CACHE = "x-wso2-response-cache";
+    public static final String X_WSO2_DISABLE_SECURITY = "x-wso2-disable-security";
+    public static final String X_WSO2_THROTTLING_TIER = "x-wso2-throttling-tier";
+    public static final String X_WSO2_REQUEST_INTERCEPTOR = "x-wso2-request-interceptor";
+    public static final String X_WSO2_RESPONSE_INTERCEPTOR = "x-wso2-response-interceptor";
     public static final String X_WSO2_ENDPOINT_TYPE = "type";
 
     //API Constants
@@ -1333,6 +1335,9 @@ public final class APIConstants {
     public static final String API_DATA_SANDBOX_ENDPOINTS = "sandbox_endpoints";
     public static final String API_DATA_URL = "url";
     public static final String API_UUID = "apiUUID";
+
+    // mock response generation
+    public static final String MOCK_GEN_POLICY_LIST = "policyList";
 
     public static final String IMPLEMENTATION_STATUS = "implementation_status";
     public static final String ENDPOINT_TYPE_DEFAULT = "default";

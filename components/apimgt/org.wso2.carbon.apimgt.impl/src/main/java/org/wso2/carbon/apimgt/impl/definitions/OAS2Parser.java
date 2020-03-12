@@ -63,6 +63,7 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -96,21 +97,37 @@ public class OAS2Parser extends APIDefinition {
      * This method  generates Sample/Mock payloads for Swagger (2.0) definitions
      *
      * @param swaggerDef Swagger Definition
-     * @return
+     * @return Swagger Json
      */
     @Override
-    public String generateExample(String swaggerDef) {
+    public Map<String, Object> generateExample(String swaggerDef) {
+        // create APIResourceMediationPolicy List = policyList
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(swaggerDef);
         Swagger swagger = parseAttemptForV2.getSwagger();
+        //return map
+        Map<String, Object> returnMap = new HashMap<>();
+        //List for APIResMedPolicyList
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
         for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
-            String path = entry.getKey();
             int responseCode = 0;
             int minResponseCode = 0;
+            String path = entry.getKey();
+            //initializing apiResourceMediationPolicyObject
+            APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
+            //setting path for apiResourceMediationPolicyObject
+            apiResourceMediationPolicyObject.setPath(path);
             Map<String, Model> definitions = swagger.getDefinitions();
+            //operation map to get verb
+            Map<HttpMethod, Operation> operationMap = entry.getValue().getOperationMap();
             ArrayList<Integer> responseCodes = new ArrayList<Integer>();
             List<Operation> operations = swagger.getPaths().get(path).getOperations();
             for (Operation op : operations) {
+                //for each HTTP method get the verb
+                for (Map.Entry<HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
+                    //add verb to apiResourceMediationPolicyObject
+                    apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
+                }
                 StringBuilder genCode = new StringBuilder();
                 StringBuilder responseSection = new StringBuilder();
                 for (String responseEntry : op.getResponses().keySet()) {
@@ -149,23 +166,28 @@ public class OAS2Parser extends APIDefinition {
                                 }
                             }
                         }
-                        if (applicationJson==null && applicationXml==null){
+                        if (applicationJson == null && applicationXml == null) {
                             setDefaultGeneratedResponse(genCode);
                         }
                     }
                 }
                 genCode.append(responseSection);
-                op.setVendorExtension("x-mediation-script", genCode);
+                String finalGenCode = genCode.toString();
+                apiResourceMediationPolicyObject.setContent(finalGenCode);
+                apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
+                op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
             }
+            returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
+            returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
         }
-        return Json.pretty(swagger);
+        return returnMap;
     }
 
     /**
      * This method  generates Sample/Mock payloads of Schema Examples for operations in the swagger definition
-     * @param model
-     * @param definitions
-     * @return
+     * @param model model
+     * @param definitions definitions
+     * @return Example Json
      */
     private String getSchemaExample(Model model, Map<String, Model> definitions, HashSet<String> strings){
         Example example = ExampleBuilder.fromModel("Model", model, definitions, new HashSet<String>());

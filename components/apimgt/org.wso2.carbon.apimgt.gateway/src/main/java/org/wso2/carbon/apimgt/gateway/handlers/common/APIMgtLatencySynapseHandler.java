@@ -32,20 +32,12 @@ import java.util.Map;
 
 public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
-    private TracingTracer tracer;
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
+        TracingTracer tracer = ServiceReferenceHolder.getInstance().getTracer();
 
         if (Util.tracingEnabled()) {
-            if (tracer == null) {
-                synchronized (this) {
-                    if (tracer == null) {
-                        tracer = ServiceReferenceHolder.getInstance().getTracingService()
-                                .buildTracer(APIMgtGatewayConstants.SERVICE_NAME);
-                    }
-                }
-            }
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             Map headersMap =
@@ -61,6 +53,8 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
+
+        TracingTracer tracer = ServiceReferenceHolder.getInstance().getTracer();
         Map<String, String> tracerSpecificCarrier = new HashMap<>();
         if (Util.tracingEnabled()) {
             TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
