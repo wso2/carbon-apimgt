@@ -5112,7 +5112,7 @@ paths:
     get:
       security:
         - OAuth2Security:
-            - apim:api_publish
+            - apim:api_view
       summary: |
         Retrieve/Search API Products
       description: |
