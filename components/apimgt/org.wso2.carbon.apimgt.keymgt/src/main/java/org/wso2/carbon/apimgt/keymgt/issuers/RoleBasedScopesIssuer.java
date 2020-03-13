@@ -192,13 +192,6 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
         List<String> defaultScope = new ArrayList<>();
         defaultScope.add(DEFAULT_SCOPE_NAME);
 
-//        if (userRoles == null || userRoles.length == 0) {
-//            if (log.isDebugEnabled()) {
-//                log.debug("Could not find roles of the user.");
-//            }
-//            return defaultScope;
-//        }
-
         List<String> authorizedScopes = new ArrayList<>();
         String preservedCaseSensitiveValue = System.getProperty(PRESERVED_CASE_SENSITIVE_VARIABLE);
         boolean preservedCaseSensitive = JavaUtils.isTrueExplicitly(preservedCaseSensitiveValue);
