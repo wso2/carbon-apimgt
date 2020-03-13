@@ -201,7 +201,7 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                                  "applicationName": record[0],   
                                  "applicationOwner" : record[1],
                                  "api" : record[3],
-                                 "api_version" : record[4],
+                                 "version" : record[4],
                                  "msg": record[7],
                                  "severity": record[8],
                                  "alertTimestamp": record[9] 
@@ -234,7 +234,7 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                     var obj =  {  
                               "values":{  
                                  "api" : record[0],
-                                 "api_version" : record[1],
+                                 "version" : record[1],
                                  "apiPublisher" : record[2],
                                  "resourceTemplate" : record[4],
                                  "method" : record[5],                     
@@ -270,7 +270,7 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                     var obj =  {  
                               "values":{  
                                  "api" : record[0],
-                                 "api_version" : record[1],
+                                 "version" : record[1],
                                  "apiPublisher" : record[2],                   
                                  "msg":record[4],
                                  "severity":record[5],
@@ -304,7 +304,7 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                     var obj =  {  
                               "values":{  
                                  "api" : record[0],
-                                 "api_version" : record[1],
+                                 "version" : record[1],
                                  "apiPublisher" : record[2],   
                                  "resourceTemplate" : record[4],
                                  "method" : record[5],                  
@@ -340,7 +340,7 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
                     var obj =  {  
                               "values":{  
                                  "api" : record[0],
-                                 "api_version" : record[1],
+                                 "version" : record[1],
                                  "apiPublisher" : record[2],
                                  "status" : record[4]                             
                                  }
