@@ -126,8 +126,12 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
                     .parseBoolean(isRetrieveRolesFromUserStoreForScopeValidation))) {
                 AuthenticatedUser user = tokReqMsgCtx.getAuthorizedUser();
                 Map<ClaimMapping, String> userAttributes = user.getUserAttributes();
-                userRoles = getRolesFromUserAttribute(userAttributes,
-                        tokReqMsgCtx.getProperty(ResourceConstants.ROLE_CLAIM).toString());
+                if (tokReqMsgCtx.getProperty(ResourceConstants.ROLE_CLAIM) != null) {
+                    userRoles = getRolesFromUserAttribute(userAttributes,
+                            tokReqMsgCtx.getProperty(ResourceConstants.ROLE_CLAIM).toString());
+                } else {
+                    userRoles = new String[0];
+                }
             } else {
                 userRoles = getUserRoles(authenticatedUser);
             }
@@ -188,12 +192,12 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
         List<String> defaultScope = new ArrayList<>();
         defaultScope.add(DEFAULT_SCOPE_NAME);
 
-        if (userRoles == null || userRoles.length == 0) {
-            if (log.isDebugEnabled()) {
-                log.debug("Could not find roles of the user.");
-            }
-            return defaultScope;
-        }
+//        if (userRoles == null || userRoles.length == 0) {
+//            if (log.isDebugEnabled()) {
+//                log.debug("Could not find roles of the user.");
+//            }
+//            return defaultScope;
+//        }
 
         List<String> authorizedScopes = new ArrayList<>();
         String preservedCaseSensitiveValue = System.getProperty(PRESERVED_CASE_SENSITIVE_VARIABLE);
