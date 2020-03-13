@@ -35,6 +35,9 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthComplexityStatus;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.registry.api.Resource;
 
@@ -235,6 +238,89 @@ public interface APIManager {
      * @throws APIManagementException if the asking documentation content is unavailable
      */
     String getDocumentationContent(Identifier identifier, String documentationName) throws APIManagementException;
+
+    /**
+     * Returns the GraphqlComplexityInfo object for a given API ID
+     *
+     * @param apiId API ID
+     * @return GraphqlComplexityInfo object
+     * @throws APIManagementException if failed to retrieve complexity details of the given API
+     */
+    GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiId) throws APIManagementException;
+
+    /**
+     * Updates the complexity details given the GraphqlComplexityInfo object
+     *
+     * @param apiIdentifier         APIIdentifier
+     * @param graphqlComplexityInfo GraphqlComplexityInfo object
+     * @throws APIManagementException if failed to update complexity details
+     */
+    void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
+            throws APIManagementException;
+
+    /**
+     * Returns a list of GraphqlDepthInfo objects for a given API ID
+     *
+     * @param apiIdentifier APIIdentifier
+     * @return List<GraphqlDepthInfo>
+     * @throws APIManagementException if failed to retrieve depth related details of the given API
+     */
+    List<GraphqlDepthInfo> getDepthDetails(APIIdentifier apiIdentifier) throws APIManagementException;
+
+    /**
+     * Returns a GraphqlDepthInfo object for a given uuid
+     *
+     * @param uuid Role Depth Mapping Identifier
+     * @return GraphqlDepthInfo object
+     * @throws APIManagementException if failed to retrieve role-depth mapping
+     */
+    GraphqlDepthInfo getRoleDepthMapping(String uuid) throws APIManagementException;
+
+    /**
+     * Add role-depth mapping given the GraphqlDepthInfo object
+     *
+     * @param apiIdentifier    APIIdentifier
+     * @param graphqlDepthInfo GraphqlDepthInfo object
+     * @throws APIManagementException if failed to add role-depth mapping
+     */
+    void addRoleDepthMapping(APIIdentifier apiIdentifier, GraphqlDepthInfo graphqlDepthInfo)
+            throws APIManagementException;
+
+    /**
+     * Updates the role-depth mapping of a given uuid
+     *
+     * @param uuid Role Depth Mapping Identifier
+     * @throws APIManagementException if failed to update role-depth mapping
+     */
+    void updateRoleDepthMapping(String uuid, GraphqlDepthInfo graphqlDepthInfo) throws APIManagementException;
+
+    /**
+     * Delete role-depth mapping given the uuid
+     *
+     * @param uuid Role Depth Mapping Identifier
+     * @return True, if deletion successful
+     * @throws APIManagementException if failed to delete role-depth mapping
+     */
+    boolean deleteRoleDepthMapping(String uuid) throws APIManagementException;
+
+    /**
+     * Returns a GraphqlDepthComplexityStatus object for a given API ID
+     *
+     * @param apiIdentifier APIIdentifier
+     * @return GraphqlDepthComplexityStatus object
+     * @throws APIManagementException if failed to retrieve limitation status of the given API
+     */
+    GraphqlDepthComplexityStatus getLimitationStatus(APIIdentifier apiIdentifier) throws APIManagementException;
+
+    /**
+     * Updates the limitation status of the given API
+     *
+     * @param apiIdentifier                APIIdentifier
+     * @param graphqlDepthComplexityStatus GraphqlDepthComplexityStatus object
+     * @throws APIManagementException if failed to update limitation status of the given API
+     */
+    void updateLimitationStatus(APIIdentifier apiIdentifier, GraphqlDepthComplexityStatus graphqlDepthComplexityStatus)
+            throws APIManagementException;
 
     /**
      * Retrieves the subscriber from the given access token
