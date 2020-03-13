@@ -62,8 +62,6 @@ class DevPortal extends React.Component {
             settings: null,
             tenantDomain: null,
             theme: null,
-            authresponse: false,
-            externalidp: false,
             isNonAnonymous: false,
             lanuage: null,
         };
@@ -86,7 +84,7 @@ class DevPortal extends React.Component {
                 }
                 if (Settings.app.isPassive && !AuthManager.getUser()
                     && !sessionStorage.getItem(CONSTS.ISLOGINPERMITTED) && !this.state.isNonAnonymous) {
-                    this.checkLoginUser(this.state.settings.identityProvider.external);
+                    this.checkLoginUser();
                 }
             })
             .catch((error) => {
@@ -111,8 +109,8 @@ class DevPortal extends React.Component {
     loadLocale(locale = 'en') {
         fetch(`${Settings.app.context}/site/public/locales/${locale}.json`)
             .then((resp) => {
-                if(resp.status === 200){
-                    return(resp.json());
+                if (resp.status === 200) {
+                    return (resp.json());
                 } else {
                     return {};
                 }
@@ -133,21 +131,21 @@ class DevPortal extends React.Component {
         let browserLocal = Utils.getBrowserLocal();
         const { direction: defaultDirection, custom: { languageSwitch: { active: languageSwitchActive, languages } } } = localTheme;
         let lanauageToLoad = null;
-        if(languageSwitchActive){
+        if (languageSwitchActive) {
             const savedLanguage = localStorage.getItem('language');
             let direction = defaultDirection;
             let selectedLanuageObject = null;
-            for(var i=0; i < languages.length; i++){
-                if(savedLanguage && savedLanguage === languages[i].key){
+            for (var i = 0; i < languages.length; i++) {
+                if (savedLanguage && savedLanguage === languages[i].key) {
                     selectedLanuageObject = languages[i];
-                } else if(!savedLanguage && browserLocal === languages[i].key) {
+                } else if (!savedLanguage && browserLocal === languages[i].key) {
                     selectedLanuageObject = languages[i];
                 }
             }
-            if(selectedLanuageObject) {
-                direction = selectedLanuageObject.direction || defaultDirection;       
+            if (selectedLanuageObject) {
+                direction = selectedLanuageObject.direction || defaultDirection;
             }
-            document.body.setAttribute('dir',direction);
+            document.body.setAttribute('dir', direction);
             this.systemTheme.direction = direction;
             lanauageToLoad = savedLanguage || selectedLanuageObject.key || browserLocal;
         } else {
@@ -194,23 +192,23 @@ class DevPortal extends React.Component {
     setTenantTheme(tenant) {
         if (tenant && tenant !== 'INVALID') {
             fetch(`${Settings.app.context}/site/public/tenant_themes/${tenant}/apim/defaultTheme.json`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("HTTP error " + response.status);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                // Merging with the system theme.
-                const tenantMergedTheme = merge(cloneDeep(DefaultConfigurations), Configurations, data);
-                this.updateLocale(tenantMergedTheme);
-                this.setState({ theme: tenantMergedTheme });
-            })
-            .catch(() => {
-                console.log('Error loading teant theme. Loading the default theme.');
-                this.updateLocale();
-                this.setState({ theme: this.systemTheme });
-            });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("HTTP error " + response.status);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    // Merging with the system theme.
+                    const tenantMergedTheme = merge(cloneDeep(DefaultConfigurations), Configurations, data);
+                    this.updateLocale(tenantMergedTheme);
+                    this.setState({ theme: tenantMergedTheme });
+                })
+                .catch(() => {
+                    console.log('Error loading teant theme. Loading the default theme.');
+                    this.updateLocale();
+                    this.setState({ theme: this.systemTheme });
+                });
         } else {
             this.updateLocale();
             this.setState({ theme: this.systemTheme });
@@ -261,27 +259,13 @@ class DevPortal extends React.Component {
     /**
      * If the passive mode is enabled then this method will check whether
      * a user is already logged into the publisher.
-     * @param {string} isExternalIDP
      */
-    checkLoginUser(isExternalIDP) {
-        if (isExternalIDP) {
-            this.setState({ externalidp: true });
-            if (!sessionStorage.getItem(CONSTS.LOGINSTATUS)) {
-                sessionStorage.setItem(CONSTS.LOGINSTATUS, 'check-Login-status');
-                window.location = Settings.app.context + '/services/configs?loginPrompt=false';
-            } else if (sessionStorage.getItem(CONSTS.LOGINSTATUS)) {
-                sessionStorage.removeItem(CONSTS.LOGINSTATUS);
-            }
-        } else {
-            fetch(Settings.app.context + '/services/configs?loginPrompt=false')
-                .then((response) => {
-                    if (response) {
-                        this.setState({ authresponse: true });
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error while fetching : ', error);
-                });
+    checkLoginUser() {
+        if (!sessionStorage.getItem(CONSTS.LOGINSTATUS)) {
+            sessionStorage.setItem(CONSTS.LOGINSTATUS, 'check-Login-status');
+            window.location = Settings.app.context + '/services/configs?loginPrompt=false';
+        } else if (sessionStorage.getItem(CONSTS.LOGINSTATUS)) {
+            sessionStorage.removeItem(CONSTS.LOGINSTATUS);
         }
     }
 
@@ -292,13 +276,9 @@ class DevPortal extends React.Component {
      */
     render() {
         const {
-            settings, tenantDomain, theme, messages, language, authresponse, externalidp, isNonAnonymous,
+            settings, tenantDomain, theme, messages, language,
         } = this.state;
-        const { app: { context, isPassive } } = Settings;
-        if (isPassive && !authresponse && !externalidp && !AuthManager.getUser()
-            && !sessionStorage.getItem(CONSTS.ISLOGINPERMITTED) && !isNonAnonymous) {
-            return <Loading />;
-        }
+        const { app: { context } } = Settings;
 
         return (
             settings && theme && messages && language && (
