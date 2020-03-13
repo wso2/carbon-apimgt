@@ -117,9 +117,9 @@ public class OAS3Parser extends APIDefinition {
             Map<String, Schema> definitions = swagger.getComponents().getSchemas();
             //operation map to get verb
             Map<PathItem.HttpMethod, Operation> operationMap = entry.getValue().readOperationsMap();
-            ArrayList<Integer> responseCodes = new ArrayList<Integer>();
             List<Operation> operations = swagger.getPaths().get(path).readOperations();
             for (Operation op : operations) {
+                ArrayList<Integer> responseCodes = new ArrayList<Integer>();
                 //for each HTTP method get the verb
                 for (Map.Entry<PathItem.HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
                     //add verb to apiResourceMediationPolicyObject
