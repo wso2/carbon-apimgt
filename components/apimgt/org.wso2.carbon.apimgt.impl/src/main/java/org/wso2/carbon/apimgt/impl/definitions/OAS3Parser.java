@@ -107,7 +107,7 @@ public class OAS3Parser extends APIDefinition {
         //List for APIResMedPolicyList
         List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
         for (Map.Entry<String, PathItem> entry : swagger.getPaths().entrySet()) {
-            int minResponse = 0;
+            int minResponseCode = 0;
             int responseCode = 0;
             String path = entry.getKey();
             //initializing apiResourceMediationPolicyObject
@@ -127,11 +127,13 @@ public class OAS3Parser extends APIDefinition {
                 }
                 StringBuilder genCode = new StringBuilder();
                 StringBuilder responseSection = new StringBuilder();
+                //for setting only one setPayload response
+                boolean setPayloadResponse = false;
                 for (String responseEntry : op.getResponses().keySet()) {
                     if (!responseEntry.equals("default")) {
                         responseCode = Integer.parseInt(responseEntry);
                         responseCodes.add(responseCode);
-                        minResponse = Collections.min(responseCodes);
+                        minResponseCode = Collections.min(responseCodes);
                     }
                     Content content = op.getResponses().get(responseEntry).getContent();
                     if (content != null) {
@@ -143,8 +145,9 @@ public class OAS3Parser extends APIDefinition {
                                 String jsonExample = getJsonExample(jsonSchema, definitions);
                                 genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
                             }
-                            if (responseCode == minResponse) {
+                            if (responseCode == minResponseCode && !setPayloadResponse){
                                 responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
+                                setPayloadResponse=true;
                                 if (applicationXml != null) {
                                     responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
                                 }
@@ -156,15 +159,15 @@ public class OAS3Parser extends APIDefinition {
                                 String xmlExample = getXmlExample(xmlSchema, definitions);
                                 genCode.append(getGeneratedResponseVar(responseEntry, xmlExample, "xml"));
                             }
-                            if (responseCode == minResponse) {
+                            if (responseCode == minResponseCode && !setPayloadResponse){
                                 if (applicationJson == null) {
                                     responseSection.append(getGeneratedSetResponse(responseEntry, "xml"));
+                                    setPayloadResponse=true;
                                 }
                             }
                         }
                         if (applicationJson == null && applicationXml == null) {
                             setDefaultGeneratedResponse(genCode);
-
                         }
                     }
                 }
