@@ -214,16 +214,16 @@ const DefaultConfigurations = {
         tagCloud: {
             active: true,
             colorOptions: { // This is the Options object passed to TagCloud component of https://www.npmjs.com/package/react-tagcloud
-                luminosity: 'light',
+                luminosity: 'dark',
                 hue: 'blue',
             },
             leftMenu: { // These params will be applyed only if the style is 'fixed-left'
                 width: 200,
                 height: 'calc(100vh - 222px)',
-                background: '#00374e',
-                color: '#c7e9ff',
-                titleBackground: '#000',
-                sliderBackground: '#000',
+                background: '#d8e4e9',
+                color: '#000',
+                titleBackground: '#222',
+                sliderBackground: '#222',
                 sliderWidth: 25,
                 hasIcon: false,
             },

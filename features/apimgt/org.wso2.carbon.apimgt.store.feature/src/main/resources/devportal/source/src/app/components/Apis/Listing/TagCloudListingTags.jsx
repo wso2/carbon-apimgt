@@ -79,7 +79,7 @@ function TagCloudListingTags(props) {
 
 
     const tagWiseURL = '/apis?offset=0&query=tag';
-    const { allTags } = props;
+    const { allTags, mainPage } = props;
     let apisTagCloudGroup = null;
 
     if (allTags.count !== 0) {
@@ -134,7 +134,7 @@ function TagCloudListingTags(props) {
             </React.Fragment>
         ) : (
             <div className={classes.tagWiseThumbWrapper}>
-                {Object.keys(apisTagCloudGroup).map((key) => {
+                {mainPage && Object.keys(apisTagCloudGroup).map((key) => {
                     return <ApiTagThumb key={key} tag={apisTagCloudGroup[key]} path={tagWiseURL} style={style} />;
                 })}
             </div>

@@ -89,7 +89,7 @@ function ApiTagCloud(props) {
                     minSize={14}
                     maxSize={25}
                     colorOptions={colorOptions}
-                    tags={allTags}
+                    tags={apisTagWithoutGroups}
                     shuffle={false}
                     className={classes.clickablePointer}
                     onClick={tag => handleOnClick(tag)}
