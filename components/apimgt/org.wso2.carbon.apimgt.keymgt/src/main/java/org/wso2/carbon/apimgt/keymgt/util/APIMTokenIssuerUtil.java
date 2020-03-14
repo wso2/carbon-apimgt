@@ -204,7 +204,8 @@ public class APIMTokenIssuerUtil {
             jwtTokenInfoDTO.setApplication(applicationDTO);
             jwtTokenInfoDTO.setKeyType(application.getKeyType());
             jwtTokenInfoDTO.setConsumerKey(clientId);
-
+            jwtTokenInfoDTO.setTokenReqMessageContext(jwtAccessTokenIssuerDTO.getTokReqMsgCtx());
+            jwtTokenInfoDTO.setOauthAuthzMsgCtx(jwtAccessTokenIssuerDTO.getOauthAuthzMsgCtx());
             APIMJWTGenerator apimjwtGenerator = new APIMJWTGenerator();
             accessToken = apimjwtGenerator.generateJWT(jwtTokenInfoDTO);
 

@@ -76,11 +76,11 @@
         <GatewayJWTGeneration>
             <ImplClass>{{apim.jwt.gateway_generator.impl}}</ImplClass>
             <Configuration>
-            <Claims>
-                {%- for claim in apim.jwt.gateway_generator.claims -%}
+            <ExcludedClaims>
+                {%- for claim in apim.jwt.gateway_generator.excluded_claims -%}
                 <Claim>{{claim}}</Claim>
                 {% endfor %}
-            </Claims>
+            </ExcludedClaims>
             </Configuration>
         </GatewayJWTGeneration>
     </JWTConfiguration>
