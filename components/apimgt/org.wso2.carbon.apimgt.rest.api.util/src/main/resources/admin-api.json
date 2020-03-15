@@ -2197,7 +2197,7 @@
             "name": "providerName",
             "in": "query",
             "description": "Provider name of the API\n",
-            "required": true,
+            "required": false,
             "type": "string"
           },
           {
@@ -3546,9 +3546,9 @@
           "example": "IP"
         },
         "conditionValue": {
-          "type": "string",
+          "type": "object",
           "description": "Value of the blocking condition",
-          "example": "192.168.7.77"
+          "example": "{\"fixedIp\":\"192.168.1.1\":\"invert\":false}"
         }
       }
     },
