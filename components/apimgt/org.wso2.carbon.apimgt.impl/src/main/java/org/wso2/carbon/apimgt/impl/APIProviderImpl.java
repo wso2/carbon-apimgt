@@ -3283,13 +3283,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), authorizedRoles,
                         artifact.getPath(), registry);
-
-                String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
-                if (org.apache.commons.lang.StringUtils.isEmpty(docFilePath)) {
-                    int startIndex = docFilePath.indexOf("governance") + "governance".length();
-                    String filePath = docFilePath.substring(startIndex, docFilePath.length());
+                String docType = artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE);
+                if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equals(docType) ||
+                        APIConstants.IMPLEMENTATION_TYPE_MARKDOWN.equals(docType)) {
+                    String docContentPath = APIUtil.getAPIDocPath(api.getId()) + APIConstants
+                            .INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR
+                            + artifact.getAttribute(APIConstants.DOC_NAME);
+                    APIUtil.clearResourcePermissions(docContentPath, api.getId(), tenantId);
                     APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
-                            authorizedRoles, filePath, registry);
+                            authorizedRoles, docContentPath, registry);
+                } else if (APIConstants.IMPLEMENTATION_TYPE_FILE.equals(docType)) {
+                    String docFilePath = APIUtil.getDocumentationFilePath(api.getId(),
+                            artifact.getAttribute(APIConstants.DOC_FILE_PATH).split(
+                                    APIConstants.DOCUMENT_FILE_DIR + RegistryConstants.PATH_SEPARATOR)[1]);
+                    APIUtil.clearResourcePermissions(docFilePath, api.getId(), tenantId);
+                    APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                            authorizedRoles, docFilePath, registry);
                 }
             } catch (UserStoreException e) {
                 throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
