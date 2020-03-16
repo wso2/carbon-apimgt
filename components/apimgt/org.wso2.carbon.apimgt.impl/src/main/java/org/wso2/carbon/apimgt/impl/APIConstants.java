@@ -337,6 +337,8 @@ public final class APIConstants {
 
     public static final String IMPLEMENTATION_TYPE_ENDPOINT = "ENDPOINT";
     public static final String IMPLEMENTATION_TYPE_INLINE = "INLINE";
+    public static final String IMPLEMENTATION_TYPE_MARKDOWN = "MARKDOWN";
+    public static final String IMPLEMENTATION_TYPE_FILE= "FILE";
 
     public static final String API_OVERVIEW_REDIRECT_URL = "overview_redirectURL";
     public static final String API_OVERVIEW_OWNER = "overview_apiOwner";

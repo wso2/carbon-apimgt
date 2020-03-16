@@ -683,6 +683,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(ExceptionCodes.NO_RESOURCES_FOUND, log);
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
+            if (APIConstants.PUBLIC_STORE_VISIBILITY.equals(apiToUpdate.getVisibility())) {
+                apiToUpdate.setVisibleRoles(StringUtils.EMPTY);
+            }
             apiToUpdate.setUUID(originalAPI.getUUID());
             validateScopes(apiToUpdate);
             apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
