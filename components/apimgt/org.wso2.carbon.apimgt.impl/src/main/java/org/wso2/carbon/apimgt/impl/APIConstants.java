@@ -337,6 +337,8 @@ public final class APIConstants {
 
     public static final String IMPLEMENTATION_TYPE_ENDPOINT = "ENDPOINT";
     public static final String IMPLEMENTATION_TYPE_INLINE = "INLINE";
+    public static final String IMPLEMENTATION_TYPE_MARKDOWN = "MARKDOWN";
+    public static final String IMPLEMENTATION_TYPE_FILE= "FILE";
 
     public static final String API_OVERVIEW_REDIRECT_URL = "overview_redirectURL";
     public static final String API_OVERVIEW_OWNER = "overview_apiOwner";
@@ -414,7 +416,7 @@ public final class APIConstants {
     public static final String GATEWAY_JWT_GENERATOR_IMPL = "ImplClass";
     public static final String TOKEN_ISSUERS = "TokenIssuers";
     public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
-    public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "Claims";
+    public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "ExcludedClaims";
     public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
