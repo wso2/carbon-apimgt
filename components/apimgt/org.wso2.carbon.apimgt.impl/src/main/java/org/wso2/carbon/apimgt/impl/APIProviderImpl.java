@@ -2382,25 +2382,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                     authProperties);
-
-            /* creating opa handler */
-            Map<String, String> opaProperties = new HashMap<>();
-//
-//            String username = api.getApiOwner();
-//            String api_name = api.getId().getApiName();
-//            String version = api.getId().getVersion();
-//            String api_context = api.getContext();
-//            String api_type = api.getType();
-
-//            opaProperties.put(APIConstants.API_SECURITY, apiSecurity);
-//            opaProperties.put("username", username);
-//            opaProperties.put("api_name", api_name);
-//            opaProperties.put("version", version);
-//            opaProperties.put("api_context", api_context);
-//            opaProperties.put("api_type", api_type);
-
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.policies.OPAHandler", opaProperties);
-
             Map<String, String> properties = new HashMap<String, String>();
 
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
@@ -2443,6 +2424,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
                         Collections.<String, String>emptyMap());
             }
+
 
         }
 

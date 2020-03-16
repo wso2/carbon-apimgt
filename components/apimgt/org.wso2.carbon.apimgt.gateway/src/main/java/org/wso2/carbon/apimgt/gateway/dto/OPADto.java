@@ -8,7 +8,7 @@ public class OPADto{
 
     private String API_name;
 
-    private String version;
+    private String api_version;
 
     private String context_path;
 
@@ -31,7 +31,7 @@ public class OPADto{
         this.username = username;
         this.scopes = scopes;
         this.API_name = API_name;
-        this.version = api_version;
+        this.api_version = api_version;
         this.context_path = context_path;
         this.resource_path = resource_path;
         this.http_method = http_method;
@@ -47,12 +47,12 @@ public class OPADto{
         this.username = username;
     }
 
-    public String getVersion() {
-        return version;
+    public String getApi_version() {
+        return api_version;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
+    public void setApi_version(String api_version) {
+        this.api_version = api_version;
     }
 
     public String getApi_type() {

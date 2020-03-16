@@ -59,7 +59,7 @@ include("/jagg/jagg.jag");
             var fullSearchQuery = 'tenantDomain:' + tenantDomain;
 
             if (searchEntry != "") {
-                var lucenePrefix = "version:";
+                var lucenePrefix = "api_version:";
                 searchEntry = lucenePrefix + '"'  + searchEntry +'"';
                 fullSearchQuery += ' AND ' + searchEntry;
             }
@@ -79,7 +79,7 @@ include("/jagg/jagg.jag");
 
             for (i = 0; i < parsedDataResult.length; i++) {
                 apiName = parsedDataResult[i]["values"]["api"];
-                apiVersion = parsedDataResult[i]["values"]["version"];
+                apiVersion = parsedDataResult[i]["values"]["api_version"];
                 apiProvider = parsedDataResult[i]["values"]["apiPublisher"]
 
                 var providerNameSpltArr = apiProvider.split("@");
@@ -116,7 +116,7 @@ include("/jagg/jagg.jag");
                     //creating the api information
                     var name = parsedDataResult[i]["values"]["apiPublisher"] + "--" + 
                                 parsedDataResult[i]["values"]["api"] + ":v" + 
-                                parsedDataResult[i]["values"]["version"]
+                                parsedDataResult[i]["values"]["api_version"]
 
                     arr[i][0] = name;
                     var status = parsedDataResult[i]["values"]["status"];
