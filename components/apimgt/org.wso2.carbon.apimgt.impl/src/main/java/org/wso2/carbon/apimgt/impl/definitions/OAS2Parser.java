@@ -138,7 +138,6 @@ public class OAS2Parser extends APIDefinition {
                         responseCodes.add(responseCode);
                         minResponseCode = Collections.min(responseCodes);
                     }
-
                     if (op.getResponses().get(responseEntry).getExamples() != null) {
                         Object applicationJson = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_JSON_MEDIA_TYPE);
                         Object applicationXml = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_XML_MEDIA_TYPE);
@@ -166,7 +165,7 @@ public class OAS2Parser extends APIDefinition {
                         if (applicationJson == null && applicationXml == null) {
                             setDefaultGeneratedResponse(genCode);
                         }
-                    }else if (op.getResponses().get(responseEntry).getResponseSchema() != null) {
+                    } else if (op.getResponses().get(responseEntry).getResponseSchema() != null) {
                         Model model = op.getResponses().get(responseEntry).getResponseSchema();
                         String schemaExample = getSchemaExample(model, definitions, new HashSet<String>());
                         genCode.append(getGeneratedResponseVar(responseEntry, schemaExample, "json"));
