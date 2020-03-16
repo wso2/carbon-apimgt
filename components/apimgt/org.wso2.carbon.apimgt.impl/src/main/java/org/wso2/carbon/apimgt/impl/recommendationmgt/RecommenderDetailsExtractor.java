@@ -287,20 +287,9 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
 
         Object[] objects = new Object[]{payload};
         Event event = new Event(streamID, System.currentTimeMillis(), null, null, objects);
-        try {
-            startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            superAdminTenantFlowStarted = true;
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
-                    .publish(APIConstants.RECOMMENDATIONS_WSO2_EVENT_PUBLISHER, Collections.EMPTY_MAP, event);
-            if (log.isDebugEnabled()) {
-                log.debug("Event Published for recommendation server with payload " + payload);
-            }
-        } catch (Exception e) {
-            log.error("Exception occurred when publishing events to recommendation engine", e);
-        } finally {
-            if (superAdminTenantFlowStarted) {
-                endTenantFlow();
-            }
+        APIUtil.publishEvent(APIConstants.RECOMMENDATIONS_WSO2_EVENT_PUBLISHER, Collections.EMPTY_MAP, event);
+        if (log.isDebugEnabled()) {
+            log.debug("Event Published for recommendation server with payload " + payload);
         }
     }
 
