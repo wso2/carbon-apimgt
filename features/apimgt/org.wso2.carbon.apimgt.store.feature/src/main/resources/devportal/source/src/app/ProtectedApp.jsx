@@ -219,8 +219,8 @@ class ProtectedApp extends Component {
         const {
             userResolved, tenantList, notEnoughPermission, tenantResolved, clientId
         } = this.state;
-        const checkSessionURL = 'https://' + window.location.host + '/oidc/checksession?client_id='
-            + clientId + '&redirect_uri=https://' + window.location.host
+        const checkSessionURL = window.location.origin + '/oidc/checksession?client_id='
+            + clientId + '&redirect_uri='+ window.location.origin
             + Settings.app.context + '/services/auth/callback/login';
         const { tenantDomain } = this.context;
         if (!userResolved) {
