@@ -20,5 +20,6 @@ const Settings = {
         'urn:ietf:params:oauth:grant-type:saml2-bearer': 'SAML2',
         'urn:ietf:params:oauth:grant-type:jwt-bearer': 'JWT',
         kerberos: 'Kerberos',
+        'urn:ietf:params:oauth:grant-type:device_code': 'Device Code',
     },
 };
