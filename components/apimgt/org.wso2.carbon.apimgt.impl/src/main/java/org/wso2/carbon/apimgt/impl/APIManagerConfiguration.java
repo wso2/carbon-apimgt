@@ -1137,7 +1137,7 @@ public class APIManagerConfiguration {
                         if (claims != null) {
                             while (claims.hasNext()) {
                                 OMElement claim = (OMElement) claims.next();
-                                jwtConfigurationDto.getJwtAdditionalClaims().add(claim.getText());
+                                jwtConfigurationDto.getJWTExcludedClaims().add(claim.getText());
                             }
                         }
                     }

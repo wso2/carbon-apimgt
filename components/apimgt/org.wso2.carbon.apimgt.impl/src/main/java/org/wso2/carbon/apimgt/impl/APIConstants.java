@@ -414,7 +414,7 @@ public final class APIConstants {
     public static final String GATEWAY_JWT_GENERATOR_IMPL = "ImplClass";
     public static final String TOKEN_ISSUERS = "TokenIssuers";
     public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
-    public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "Claims";
+    public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "ExcludedClaims";
     public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
