@@ -57,14 +57,12 @@ function InlineEndpoints(props) {
 
     useEffect(() => {
         const promisedResponse = api.getGeneratedMockScriptsOfAPI(api.id);
-        console.log(promisedResponse);
         promisedResponse.then((response) => {
             setMockScripts(response.obj.list);
         });
     }, []);
 
     function getGeneratedMockScriptOfAPI(resourcePath, resourceMethod) {
-        console.log(mockScripts);
         for (let i = 0; i < mockScripts.length; i++) {
             if (mockScripts[i].verb.toLowerCase() === resourceMethod.toLowerCase()
                 && mockScripts[i].path === resourcePath) {
