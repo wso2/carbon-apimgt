@@ -60,6 +60,9 @@ public class ExportApiUtil {
         //If not specified status is preserved by default
         boolean isStatusPreserved = preserveStatus == null || preserveStatus;
 
+        // Print context information (name and version of the API) in the log
+        log.info("API name: "+ name + ", version: "+ version);
+
         if (name == null || version == null) {
             RestApiUtil.handleBadRequest("'name' or 'version' should not be null", log);
         }
@@ -74,13 +77,13 @@ public class ExportApiUtil {
             apiRequesterDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
             // If provider name is not given
-            if (providerName.isEmpty()){
+            if (StringUtils.isBlank(providerName)) {
                 // Retrieve the provider who is in same tenant domain and who owns the same API (by comparing
                 // API name and the version)
                 providerName = APIUtil.getAPIProviderFromAPINameVersionTenant(name, version, apiRequesterDomain);
 
                 // If there is no provider in current domain, the API cannot be exported
-                if (providerName == null){
+                if (providerName == null) {
                     String errorMessage = "Error occurred while exporting. API: " + name + " version: " + version
                             + " not found";
                     RestApiUtil.handleResourceNotFoundError(errorMessage, log);
