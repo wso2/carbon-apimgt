@@ -47,7 +47,6 @@ function InlineEndpoints(props) {
      * @param {string} method The resource method.
      * */
     const onScriptChange = (value, path, method) => {
-        console.log(value);
         const tmpPaths = JSON.parse(JSON.stringify(paths));
         tmpPaths[path][method][xMediationScriptProperty] = value.trim();
         updatePaths(tmpPaths);
