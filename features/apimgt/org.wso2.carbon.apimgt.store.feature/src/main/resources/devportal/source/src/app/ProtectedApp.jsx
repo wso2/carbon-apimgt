@@ -69,9 +69,9 @@ class ProtectedApp extends Component {
         window.addEventListener('message', this.handleMessage);
         const { location: { search } } = this.props;
         const { setTenantDomain, setSettings } = this.context;
-        const { app: { customUrl: { enabled: customUrlEnabled, tenantDomain: customUrlEnabledDomain } }} = Settings;
+        const { app: { customUrl: { tenantDomain: customUrlEnabledDomain } }} = Settings;
         let tenant = null;
-        if (customUrlEnabled && customUrlEnabledDomain !== 'null') {
+        if (customUrlEnabledDomain !== 'null') {
             tenant = customUrlEnabledDomain;
         } else {
             tenant = queryString.parse(search).tenant;

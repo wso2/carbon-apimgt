@@ -84,10 +84,7 @@ var getTenantDomain = function(){
 };
 
 var getCustomUrlEnabledDomain = function() {
-    var tenantDomain = null;
-    if(app.customUrl.enabled){
-        tenantDomain = request.getHeader("X-WSO2-Tenant");
-    }
+    var tenantDomain = request.getHeader("X-WSO2-Tenant");
     return tenantDomain;
 };
 

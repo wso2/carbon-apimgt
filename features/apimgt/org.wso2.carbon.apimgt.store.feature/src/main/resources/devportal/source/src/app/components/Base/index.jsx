@@ -432,7 +432,7 @@ class Layout extends React.Component {
                                 </Hidden>
                                 <VerticalDivider height={32} />
                                 {showSearch && (<HeaderSearch id='headerSearch' />)}
-                                {tenantDomain && (!customUrlEnabled || customUrlEnabled && customUrlEnabledDomain === 'null') && tenantDomain !== 'INVALID' && (
+                                {tenantDomain && customUrlEnabledDomain === 'null' && tenantDomain !== 'INVALID' && (
                                     <Link
                                         style={{
                                             textDecoration: 'none',

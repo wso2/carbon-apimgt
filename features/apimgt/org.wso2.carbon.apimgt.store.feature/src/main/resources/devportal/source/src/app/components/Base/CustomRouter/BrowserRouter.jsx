@@ -59,8 +59,8 @@ class BrowserRouter extends React.Component {
      * @returns {String}
      */
     pathInterceptor = (originalPath) => {
-        const { app: { customUrl: { enabled: customUrlEnabled, tenantDomain: customUrlEnabledDomain } }} = Settings;
-        if (customUrlEnabled && customUrlEnabledDomain !== 'null') {
+        const { app: { customUrl: { tenantDomain: customUrlEnabledDomain } }} = Settings;
+        if (customUrlEnabledDomain !== 'null') {
             return originalPath;
         }
         const { tenantDomain } = this.context;
