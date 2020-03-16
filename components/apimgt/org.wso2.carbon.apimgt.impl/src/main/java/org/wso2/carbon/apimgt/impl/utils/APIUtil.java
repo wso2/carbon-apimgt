@@ -10391,4 +10391,22 @@ public final class APIUtil {
         return false;
     }
 
+    public static void publishEvent(String eventName, Map dynamicProperties, Event event) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
+                    .publish(eventName, dynamicProperties, event);
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+    }
+
 }

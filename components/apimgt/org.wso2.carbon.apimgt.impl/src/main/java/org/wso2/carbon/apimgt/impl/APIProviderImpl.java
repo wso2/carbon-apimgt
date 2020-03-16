@@ -6225,8 +6225,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param blockConditionsDTO Blockcondition Dto event
      */
     private void publishBlockingEvent(BlockConditionsDTO blockConditionsDTO, String state) {
-        OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
-
         Object[] objects = new Object[]{blockConditionsDTO.getConditionId(), blockConditionsDTO.getConditionType(),
                 blockConditionsDTO.getConditionValue(),state, tenantDomain};
         Event blockingMessage = new Event(APIConstants.BLOCKING_CONDITIONS_STREAM_ID, System.currentTimeMillis(),
@@ -6234,12 +6232,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
 
         if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
-            eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP, blockingMessage);
+            APIUtil.publishEvent(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP, blockingMessage);
         }
     }
 
     private void publishKeyTemplateEvent(String templateValue, String state) {
-        OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
         Object[] objects = new Object[]{templateValue,state};
         Event keyTemplateMessage = new Event(APIConstants.KEY_TEMPLATE_STREM_ID, System.currentTimeMillis(),
                 null, null, objects);
@@ -6248,8 +6245,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
         if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
-            eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP,
-                    keyTemplateMessage);
+            APIUtil.publishEvent(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP, keyTemplateMessage);
         }
     }
 
