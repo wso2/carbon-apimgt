@@ -39,6 +39,8 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiCategoriesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.KeyManagersApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.DeploymentsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ServiceDiscoveryApi"/>
+
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

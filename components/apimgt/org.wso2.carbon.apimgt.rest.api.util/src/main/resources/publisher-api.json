@@ -81,6 +81,12 @@
           "roles": "admin",
           "name": "apim:api_workflow_approve",
           "key": "apim:api_workflow_approve"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:serviceEndpoints_view",
+          "key": "apim:serviceEndpoints_view"
         }
       ]
     }
@@ -3673,6 +3679,59 @@
           }
         }
       }
+    },
+    "/service-discovery/endpoints/{type}": {
+        "get": {
+            "x-scope": "apim:serviceEndpoints_view",
+            "x-wso2-curl": "",
+            "summary": "Get list of services in the cluster.",
+            "description": "Using this operation, you can retrieve complete list of available services in the clusters.\n",
+            "parameters": [
+                {
+                    "$ref": "#/parameters/type"
+                }
+            ],
+            "tags": [
+                "Service Discovery"
+            ],
+            "responses": {
+                "200": {
+                    "description": "Ok.\nList of services for requested type is returned.\n",
+                    "schema": {
+                        "$ref": "#/definitions/serviceDiscoveriesResponse"
+                    },
+                    "headers": {
+                        "Content-type": {
+                            "description": "The content type of the body.\n",
+                            "type": "string"
+                        },
+                        "ETag": {
+                            "description": "Entity Tag of the response resource. Used by caches, or in conditional requests\n(Will be supported in future).\n",
+                            "type": "string"
+                        },
+                        "Last-Modified": {
+                            "description": "Date and time the resource has been modified the last time.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                            "type": "string"
+                        }
+                    }
+                },
+                "304": {
+                    "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested\nresource (Will be supported in future).\n"
+                },
+                "404": {
+                    "description": "Not Found.\nNo services are available in the cluster in requested namespace or type.\n",
+                    "schema": {
+                        "$ref": "#/definitions/Error"
+                    }
+                },
+                "406": {
+                    "description": "Not Acceptable.\nThe requested media type is not supported\n",
+                    "schema": {
+                        "$ref": "#/definitions/Error"
+                    }
+                }
+            }
+        }
     }
   },
   "parameters": {

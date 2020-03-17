@@ -1,4 +1,4 @@
-
+{
   "EnableMonetization" : false,
   "EnableRecommendation" : false,
   "IsUnlimitedTierPaid" : false,
@@ -23,9 +23,28 @@
       ]
     }
   ],
+  "ServiceDiscovery":{
+    "enable":"true",
+    "ServiceDiscoveryTypes":[
+      {
+        "Type":"Kubernetes",
+        "DisplayName":"K8s",
+        "ImplParameters":{
+          "MasterURL":"​",
+          "SAToken":"",
+          "Namespace":"default"
+        }
+      }
+    ]
+  },
   "ExtensionHandlerPosition": "bottom",
   "RESTAPIScopes": {
     "Scope": [
+      {
+        "Name": "apim:serviceEndpoints_view",
+        "Roles": "admin,Internal/publisher"
+      },
+
       {
         "Name": "apim:api_publish",
         "Roles": "admin,Internal/publisher"

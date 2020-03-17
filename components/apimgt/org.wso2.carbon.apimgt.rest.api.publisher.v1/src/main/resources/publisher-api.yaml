@@ -97,6 +97,9 @@ securityDefinitions:
       apim:publisher_settings: Retrieve store settings
       apim:pub_alert_manage: Get/ subscribe/ configure publisher alerts
       apim:shared_scope_manage: Manage shared scopes
+      #------------------------------------------------------------------------------------------------------------myedit
+      apim:serviceEndpoints_view: View available services.
+      #------------------------------------------------------------------------------------------------------------
 
 security:
   - OAuth2Security:
@@ -6799,6 +6802,71 @@ paths:
           schema:
             $ref: '#/definitions/APICategoryList'
 
+
+ #------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+######################################################
+# The "Service Discovery" resource API
+######################################################
+
+  /service-discovery/endpoints/{type}:
+
+    #########################################################
+    # Retriving the list of available services in the cluster
+    #########################################################
+    get:
+      x-scope: apim:serviceEndpoints_view
+      x-wso2-curl: ""
+      summary: Get list of services in the cluster.
+      description: |
+        Using this operation, you can retrieve complete list of available services in the clusters.
+      parameters:
+        - $ref: '#/parameters/type'
+      tags:
+        - Service Discovery
+      responses:
+        200:
+          description: |
+            Ok.
+            List of services for requested type is returned.
+          headers:
+            Content-type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests
+                (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+          schema:
+            $ref: '#/definitions/ServiceDiscoveriesInfo'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested
+            resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            No services are available in the cluster in requested namespace or type.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+  #------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 ######################################################
 # The "Scopes" resource APIs
 ######################################################
@@ -7190,114 +7258,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Deployments" resource APIs
-######################################################
 
-  /deployments:
-    #----------------------------------------------------------
-    # Retrieving the deployments details from tenant-conf.json
-    #----------------------------------------------------------
-    get:
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      produces:
-        - application/json
-      x-wso2-curl: "curl -X GET -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" \"https://localhost:9443/api/am/publisher/v1/deployments\""
-      x-wso2-request: "GET https://localhost:9443/api/am/publisher/v1/deployments"
-      x-wso2-response: "HTTP/1.1 200 OK"
-      summary: Retrieve deployment environments details
-      operationId: deploymentsGet
-      description: |
-        This operation can be used to retrieve cloud clusters information defines in tenant-conf.json file.
-
-        With that you can deploy an API to selected cloud environments.
-      tags:
-        - Deployments
-      responses:
-        '200':
-          description: >
-            OK. Successful response with the list of deployment environments
-            information in the body.
-          schema:
-            $ref: '#/definitions/DeploymentList'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-        '400':
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        '404':
-          description: |
-            Not Found.
-          schema:
-            $ref: '#/definitions/Error'
-        '500':
-          description: |
-            Internal Server Error
-          schema:
-            $ref: '#/definitions/Error'
-
-######################################################
-# The "deployments status per API" resource APIs
-######################################################
-  /apis/{apiId}/deployments:
-#-----------------------------------------------------
-# Retrieve the deployment details of an API
-#-----------------------------------------------------
-    get:
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      produces:
-        - application/json
-      x-wso2-curl: "curl -X GET -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" \"https://localhost:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments"
-      x-wso2-request: "GET https://localhost:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments"
-      x-wso2-response: "HTTP/1.1 200 OK"
-      summary: Retrieve deployment status details
-      operationId: deploymentsGetStatus
-      description: |
-        This operation can be used to retrieve the status of deployments in cloud clusters.
-
-        With that you can get the status of the deployed APIs in cloud environments.
-      parameters:
-        - $ref: '#/parameters/apiId'
-      tags:
-        - DeploymentStatus
-      responses:
-        '200':
-          description: >
-            OK. Successful response with the list of deployment environments
-            information in the body.
-          schema:
-            $ref: '#/definitions/DeploymentStatusList'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-        '400':
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        '404':
-          description: |
-            Not Found.
-          schema:
-            $ref: '#/definitions/Error'
-        '500':
-          description: |
-            Internal Server Error
-          schema:
-            $ref: '#/definitions/Error'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -7623,6 +7584,24 @@ parameters:
     in: path
     required: true
     description: The alert configuration id.
+
+
+
+  #------------------------------------------------------------------------------------------------------------------------------------------------
+   #Specifies the service discovery system to select sevices from it
+  type:
+    name: type
+    type: string
+    in: path
+    required: true
+    description: |
+      Service discovery system type
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -10562,7 +10541,7 @@ definitions:
 
   #-----------------------------------------------------
   # The DeploymentClusterInfo resource
-  #-----------------------------------------------------
+          #-----------------------------------------------------
   DeploymentClusterInfo:
     title: DeploymentClusterInfo
     required:
@@ -10683,6 +10662,30 @@ definitions:
       creationTimestamp:
         type: string
         example: 2020-05-12T06:12:00Z
+
+
+  #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  #------------------------------------------------------
+  # service_discoveriesResponse definition.
+  #------------------------------------------------------
+  ServiceDiscoveriesInfo:
+    title: List of services
+     #Kubernetes
+    # services:
+    properties:
+      serviceName:
+        type: string
+        description: service name available in the cluster
+        example: foo-service
+      serviceURL:
+        type: string
+        description: url of the service
+        example: http://10.0.0.11:6379
+      properties:
+        type: string
+        description: properties of the available services
+        example:
+  #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

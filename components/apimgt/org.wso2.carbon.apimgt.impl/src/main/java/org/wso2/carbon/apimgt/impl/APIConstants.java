@@ -474,6 +474,14 @@ public final class APIConstants {
     public static final String ENDPOINT_PASSWORD_ELEMENT = "endpointPpassword";
     public static final String FEDERATED_USER = "FEDERATED";
 
+    // for service discovery
+//    public static final String SERVICE_DISCOVERY_CONFIGS = "ServiceDiscoveryConfiguration";
+//    public static final String SERVICE_DISCOVERY = SERVICE_DISCOVERY_CONFIGS+"ServiceDiscovery";
+//    public static final String SERVICE_DISCOVERY_CLASS = SERVICE_DISCOVERY_CONFIGS + "ServiceDiscovery.ClassName";
+//    public static final String URL =SERVICE_DISCOVERY_CONFIGS+"ServiceDiscovery.ImplParameters.MasterURL";
+//    public static final String SERVICE_DISCOVERY_TYPE =SERVICE_DISCOVERY_CONFIGS+ "ServiceDiscovery.type";
+//    public static final String SERVICE_DISCOVERY_DISPLAYNAME =SERVICE_DISCOVERY_CONFIGS+"ServiceDiscovery.DisplayName";
+
     //documentation rxt
 
     public static final String DOC_NAME = "overview_name";
@@ -1173,6 +1181,7 @@ public final class APIConstants {
 
     public static final String SHA_256 = "SHA-256";
 
+
     public static class DigestAuthConstants {
         public static final String REALM = "realm";
         public static final String NONCE = "nonce";
@@ -1721,6 +1730,17 @@ public final class APIConstants {
         public static final String NAME = "Name";
     }
 
+// attributes of service discovery config
+    public static class ServiceDiscoveryAttributes{
+
+    public static final String SERVICE_DISCOVERY_CONFIGS = "ServiceDiscoveryConfiguration";
+    public static final String SERVICE_DISCOVERY = "ServiceDiscovery";
+    public static final String SERVICE_DISCOVERY_CLASS =  "ClassName";
+    public static final String URL ="MasterURL";
+    public static final String SERVICE_DISCOVERY_TYPE ="type";
+    public static final String SERVICE_DISCOVERY_DISPLAYNAME ="DisplayName";
+}
+
     public static final String REGISTRY_ARTIFACT_SEARCH_DESC_ORDER = "DES";
     public static final String REGISTRY_ARTIFACT_SORT_BY_CREATED_TIME = "meta_created_date";
 
@@ -1929,6 +1949,8 @@ public final class APIConstants {
     public static final String API_SUBSCRIPTION_TYPE = "API";
     public static final String TYPE = "type";
     public static final String TYPE_SEARCH_TYPE_KEY = "type=";
+
+
 
     public static class OASResourceAuthTypes {
         public static final String APPLICATION_OR_APPLICATION_USER = "Application & Application User";

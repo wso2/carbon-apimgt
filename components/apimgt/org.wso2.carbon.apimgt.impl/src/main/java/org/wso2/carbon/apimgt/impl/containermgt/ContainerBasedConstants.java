@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.containermgt;
 
+import io.fabric8.kubernetes.api.model.IntOrString;
+
 /**
  * This class represents the
  * constants that are used for private-jet mode implementation
@@ -56,6 +58,22 @@ public final class ContainerBasedConstants {
     public static final String CLASS_NAME = "ClassName";
     public static final String CLIENT_KEY_PASSPHRASE = "javax.net.ssl.keyStorePassword";
 
+    //Service discovery constants
+    public static final String SERVICE ="Service"; // my edit
+    public static final String SYSTEM_TYPE ="Kubernetes";// service discovery system type.
+    public static final String SERVICE_NAME ="";
+    public static final String SERVICE_TYPE="";
+    public static final String EXTERNAL_IP="";
+    public static final String CLUSTER_IP="";
+    public static final String NODE_PORT="";
+    public static String TARGET_PORT=""; // We need only this to connect with the service
+    public static final String PORT="";
+    public static String PROTOCOL="";
+
+
+
+
+    // Service discovery
     /**
      * Life Cycle Events
      */

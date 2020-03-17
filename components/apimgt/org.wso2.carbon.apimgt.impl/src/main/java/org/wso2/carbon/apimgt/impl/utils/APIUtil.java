@@ -298,6 +298,8 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import static org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants.*;
+
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
  * and APIConsumer interfaces.
@@ -5777,6 +5779,7 @@ public final class APIUtil {
      * Return the sequence extension name.
      * eg: admin--testAPi--v1.00
      *
+     * //@param api
      * @return
      */
     public static String getSequenceExtensionName(String provider, String name, String version) {
@@ -9090,8 +9093,70 @@ public final class APIUtil {
         return null;
     }
 
+    // for service discovery
+    public static String getServiceDiscoveryFromAPIMConfig(String property)throws APIManagementException {
+
+        //If tenant registry doesn't have the configuration, then read it from api-manager.xml
+        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String serviceDiscoveryConfiguration = apimConfig.getFirstProperty(APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_CONFIGS + property);
+
+        if (!StringUtils.isBlank(serviceDiscoveryConfiguration)) {
+            return serviceDiscoveryConfiguration;
+        }
+
+        return null;
+    }
+
+//    public static Map<String, String>  getServiceDiscoveryDetailsFromAPIMConfig()throws APIManagementException {
+//        Map<String, String> clustersDetails = new HashMap<String,String>();
+//        //If tenant registry doesn't have the configuration, then read it from api-manager.xml
+//
+//        // Read scope whitelist from Configuration.
+////
+//        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+//                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+//       // String serviceDiscoveryConfiguration = apimConfig.getFirstProperty(APIConstants.SERVICRE_DISCOVERY_CONFIGS + property);
+//        List<String> valueset = apimConfig.getProperty(APIConstants.SERVICE_DISCOVERY_CLASS);
+//        Set<String> keyset =  apimConfig.getConfigKeySet();
+//
+//        List<String> serviceClass = apimConfig.getProperty(APIConstants.SERVICE_DISCOVERY_CLASS);
+//        for(int i=0;i<serviceClass.size();i++){
+//            System.out.println(serviceClass.get(i));
+//        }
+//        List<String> type = apimConfig.getProperty(APIConstants.SERVICE_DISCOVERY_TYPE);
+//        List<String> masterURL = apimConfig.getProperty(APIConstants.URL);
+//        List<String>  displayName = apimConfig.getProperty(APIConstants.SERVICE_DISCOVERY_DISPLAYNAME);
+//
+//        List<String> keyList = new ArrayList<String>();
+//        keyList.addAll(keyset);
+//        Iterator<String> iteratorkeys = keyList.iterator();
+//        Iterator<String> iteratorvalue = valueset.iterator();
+//       // while (iteratorkeys.hasNext() || iteratorvalue.hasNext(
+////        while (iteratorkeys.hasNext() )  {
+////
+////            String key = iteratorkeys.next();
+////            String value = iteratorvalue.next();
+////
+////            clustersDetails.put(key, value);
+////        }
+//        String key = iteratorkeys.next();
+//        String value = iteratorvalue.next();
+//
+//        clustersDetails.put(key, value);
+//
+////        if (!StringUtils.isBlank(clustersDetails)) {
+////            return clustersDetails;
+////        }
+//
+//
+//
+//
+//        return clustersDetails;
+//    }
+
     public static boolean isForgetPasswordConfigured() {
-        AxisConfiguration axis2Config = ServiceReferenceHolder.getContextService().getServerConfigContext()
+       AxisConfiguration axis2Config = ServiceReferenceHolder.getContextService().getServerConfigContext()
                 .getAxisConfiguration();
         TransportOutDescription emailTransportSender = axis2Config.getTransportOut(APIConstants.EMAIL_TRANSPORT);
         if (emailTransportSender != null) {

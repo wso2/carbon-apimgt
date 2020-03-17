@@ -59,15 +59,15 @@ public class K8sManager implements ContainerManager {
 
     private static final Logger log = LoggerFactory.getLogger(K8sManager.class);
 
-    private String masterURL;
-    private String saToken;
-    private String namespace;
+    protected String masterURL;
+    protected String saToken;
+    protected String namespace;
     private int replicas;
     private String clusterName;
     private String jwtSecurityCRName;
     private String oauthSecurityCRName;
     private String basicAuthSecurityCRName;
-    private OpenShiftClient openShiftClient;
+    protected OpenShiftClient openShiftClient;
 
     /**
      * This would initialize the class
@@ -465,7 +465,7 @@ public class K8sManager implements ContainerManager {
     /**
      * Sets the openshift client( This supprots both the Openshift and Kubernetes)
      */
-    private void setClient() {
+    protected void setClient() {
 
         Config config = new ConfigBuilder().withMasterUrl(masterURL).withOauthToken(saToken).withNamespace(namespace)
                 //Get keystore password to connect with local clusters
@@ -496,7 +496,7 @@ public class K8sManager implements ContainerManager {
      * @param crd , CustomResourceDefinition
      * @return , Custom resource client
      */
-    private NonNamespaceOperation<APICustomResourceDefinition, APICustomResourceDefinitionList,
+    protected NonNamespaceOperation<APICustomResourceDefinition, APICustomResourceDefinitionList,
             DoneableAPICustomResourceDefinition, Resource<APICustomResourceDefinition,
             DoneableAPICustomResourceDefinition>> getCRDClient(OpenShiftClient client, CustomResourceDefinition crd) {
 
