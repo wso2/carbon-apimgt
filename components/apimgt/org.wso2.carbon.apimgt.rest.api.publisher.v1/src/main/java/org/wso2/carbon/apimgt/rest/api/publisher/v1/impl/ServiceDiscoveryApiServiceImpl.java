@@ -72,7 +72,7 @@ public class ServiceDiscoveryApiServiceImpl implements ServiceDiscoveryApiServic
                   K8sServiceDiscovery obj1 = new K8sServiceDiscovery();
                  // JSONObject f = obj1.getServices(serviceDiscoveryConfig);
 
-                  APIUtil obj2 = new APIUtil();
+                  APIUtil obj2 = new APIUtil();//
                   JSONObject f = obj2.getServices(serviceDiscoveryConfig);
                   listToDTO(f,serviceListDTO);
                 //  APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
