@@ -30,7 +30,8 @@ public class DefaultJWTTransformer implements JWTTransformer {
 
     private JWTConfigurationDto jwtConfigurationDto;
     private Properties defaultClaimMappings;
-    public DefaultJWTTransformer(JWTConfigurationDto jwtConfigurationDto,Properties defaultClaimMappings) {
+
+    public DefaultJWTTransformer(JWTConfigurationDto jwtConfigurationDto, Properties defaultClaimMappings) {
 
         this.defaultClaimMappings = defaultClaimMappings;
         this.jwtConfigurationDto = jwtConfigurationDto;
