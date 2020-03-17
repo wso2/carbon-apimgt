@@ -1307,7 +1307,7 @@ public class APIManagerConfiguration {
             if (claimMappingsElement != null) {
                 OMAttribute disableDefaultClaimMappingAttribute =
                         claimMappingsElement.getAttribute(new QName("disable-default-claim-mapping"));
-                if (disableDefaultClaimMappingAttribute != null){
+                if (disableDefaultClaimMappingAttribute != null) {
                     String disableDefaultClaimMapping = disableDefaultClaimMappingAttribute.getAttributeValue();
                     tokenIssuerDto.setDisableDefaultClaimMapping(Boolean.parseBoolean(disableDefaultClaimMapping));
                 }
