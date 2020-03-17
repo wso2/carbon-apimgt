@@ -13369,7 +13369,8 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, tenantId);
-            ps.setString(2, applicationName);
+            int appId = getApplicationId(applicationName, userId);
+            ps.setInt(2, appId);
             rs = ps.executeQuery();
             while (rs.next()) {
                 APISubscriptionInfoDTO infoDTO = new APISubscriptionInfoDTO();
