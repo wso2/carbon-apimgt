@@ -120,8 +120,8 @@ export default function ProvideOpenAPI(props) {
                 const {
                     body: { isValid: isValidURL, info, content },
                 } = response;
-                info.content = content;
                 if (isValidURL) {
+                    info.content = content;
                     inputsDispatcher({ action: 'preSetAPI', value: info });
                     setValidity({ ...isValid, url: null });
                 } else {
