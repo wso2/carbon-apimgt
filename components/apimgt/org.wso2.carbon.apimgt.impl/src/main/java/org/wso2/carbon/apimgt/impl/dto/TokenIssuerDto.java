@@ -21,6 +21,7 @@ import java.util.Map;
 
 public class TokenIssuerDto {
     private String issuer;
+    private boolean disableDefaultClaimMapping = false;
     private Map<String,ClaimMappingDto> claimConfigurations = new HashMap<>();
     private JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
 
@@ -47,5 +48,15 @@ public class TokenIssuerDto {
     public JWKSConfigurationDTO getJwksConfigurationDTO() {
 
         return jwksConfigurationDTO;
+    }
+
+    public boolean isDisableDefaultClaimMapping() {
+
+        return disableDefaultClaimMapping;
+    }
+
+    public void setDisableDefaultClaimMapping(boolean disableDefaultClaimMapping) {
+
+        this.disableDefaultClaimMapping = disableDefaultClaimMapping;
     }
 }
