@@ -64,11 +64,11 @@ public class APIMTokenIssuerUtil {
 
         String tenantDomain = tokReqMsgCtx.getAuthorizedUser().getTenantDomain();
         String userName = tokReqMsgCtx.getAuthorizedUser().toFullQualifiedUsername();
-        String applicationName = application.getName();
+        int applicationId = application.getId();
 
         String appOwner = application.getOwner();
         APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance()
-                .getSubscribedAPIsForAnApp(appOwner, applicationName);
+                .getSubscribedAPIsForAnApp(appOwner, applicationId);
 
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setSubscriber("sub");
