@@ -57,7 +57,7 @@ public class APICustomResourceDefinition extends CustomResource {
      *          "mode": "${mode}"
      *          "interceptorConfName" : "",
      *          "override" : bool
-     *          "updateTimeStamp" : ""
+     *          "updaimport io.fabric8.kubernetes.api.model.ObjectMeta;teTimeStamp" : ""
      *      }
      *      "status": {}
      * }

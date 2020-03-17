@@ -96,6 +96,9 @@ securityDefinitions:
       apim:ep_certificates_update: Update and delete backend endpoint certificates
       apim:publisher_settings: Retrieve store settings
       apim:pub_alert_manage: Get/ subscribe/ configure publisher alerts.
+      #------------------------------------------------------------------------------------------------------------myedit
+      apim:serviceEndpoints_view: View available services.
+      #------------------------------------------------------------------------------------------------------------
 
 security:
   - OAuth2Security:
@@ -6577,6 +6580,71 @@ paths:
           schema:
             $ref: '#/definitions/APICategoryList'
 
+
+ #------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+######################################################
+# The "Service Discovery" resource API
+######################################################
+
+  /service-discovery/endpoints/{type}:
+
+    #########################################################
+    # Retriving the list of available services in the cluster
+    #########################################################
+    get:
+      x-scope: apim:serviceEndpoints_view
+      x-wso2-curl: ""
+      summary: Get list of services in the cluster.
+      description: |
+        Using this operation, you can retrieve complete list of available services in the clusters.
+      parameters:
+        - $ref: '#/parameters/type'
+      tags:
+        - Service Discovery
+      responses:
+        200:
+          description: |
+            Ok.
+            List of services for requested type is returned.
+          headers:
+            Content-type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests
+                (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+          schema:
+            $ref: '#/definitions/ServiceDiscoveriesInfo'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested
+            resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            No services are available in the cluster in requested namespace or type.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+  #------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -6892,6 +6960,24 @@ parameters:
     in: path
     required: true
     description: The alert configuration id.
+
+
+
+  #------------------------------------------------------------------------------------------------------------------------------------------------
+   #Specifies the service discovery system to select sevices from it
+  type:
+    name: type
+    type: string
+    in: path
+    required: true
+    description: |
+      Service discovery system type
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -9495,7 +9581,7 @@ definitions:
 
   #-----------------------------------------------------
   # The DeploymentClusterInfo resource
-  #-----------------------------------------------------
+          #-----------------------------------------------------
   DeploymentClusterInfo:
     title: DeploymentClusterInfo
     required:
@@ -9513,6 +9599,31 @@ definitions:
       namespace:
         type: string
         example: "def"
+
+
+
+  #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  #------------------------------------------------------
+  # service_discoveriesResponse definition.
+  #------------------------------------------------------
+  ServiceDiscoveriesInfo:
+    title: List of services
+     #Kubernetes
+    # services:
+    properties:
+      serviceName:
+        type: string
+        description: service name available in the cluster
+        example: foo-service
+      serviceURL:
+        type: string
+        description: url of the service
+        example: http://10.0.0.11:6379
+      properties:
+        type: string
+        description: properties of the available services
+        example:
+  #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

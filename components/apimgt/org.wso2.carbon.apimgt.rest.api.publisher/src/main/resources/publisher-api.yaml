@@ -98,6 +98,65 @@ x-wso2-security:
 # The "API Collection" resource APIs
 ######################################################
 paths:
+
+#---------------------------------------------------------------------------------------------------------------------------------------mychanges
+  /service-discovery/endpoints/{type}:
+
+    #########################################################
+    # Retriving the list of available services in the cluster
+    #########################################################
+    get:
+      x-scope: apim:serviceEndpoints_view
+      x-wso2-curl: ""
+      summary: Get list of services in the cluster.
+      description: |
+        Using this operation, you can retrieve complete list of available services in the clusters.
+      parameters:
+        - $ref: '#/parameters/type'
+
+      tags:
+        - serice endpoints in the cluster
+      responses:
+        200:
+          description: |
+            Ok.
+            List of services for requested type is returned.
+          schema:
+            $ref: '#/definitions/serviceDiscoveriesResponse'
+          headers:
+            Content-type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests
+                (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested
+            resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            No services are available in the cluster in requested namespace or type.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   /apis:
 
     #-----------------------------------------------------
@@ -3877,6 +3936,33 @@ parameters:
       Defines whether the returned response should contain full details of API
     type: boolean
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
+  # properties of Kubernetes for service discovery
+  namespace:
+    name: namespace
+    in: query
+    description: |
+      name of the namespace which is active in the Kubernetes cluster
+    type: string
+
+  # Describe the service type of the selectes service.
+  serviceType:
+    name: serviceType
+    in: query
+    description: |
+      serive type of the selectes Kubernetes service.
+    type: string
+
+  #Specifies the service discovery system to select sevices from it
+  systemType:
+    name: type
+    in: path
+    description: |
+      Service discovery system type
+    required: true
+    type: string
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -5081,3 +5167,26 @@ definitions:
         type: string
         description: The resource policy content
         example: "<header description=\"SOAPAction\" name=\"SOAPAction\" scope=\"transport\" value=\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\"/>"
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  #------------------------------------------------------
+  # service_discoveriesResponse definition.
+  #------------------------------------------------------
+  serviceDiscoveriesResponse:
+    title: List of services
+    type: string #Kubernetes
+    # services:
+    properties:
+      serviceName:
+        type: string
+        description: service name available in the cluster
+        example: foo-service
+      serviceURL:
+        type: string
+        description: url of the service
+        example: http://10.0.0.11:6379
+      properties:
+        type: string
+        description: properties of the available services
+        example:
+  #------------------------------------------------------------------------------------------------------------------------------------------------------------------------

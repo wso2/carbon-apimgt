@@ -21,6 +21,12 @@ package org.wso2.carbon.apimgt.impl.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
+import io.fabric8.kubernetes.client.Config;
+import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.openshift.client.DefaultOpenShiftClient;
+import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -265,6 +271,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+
+import static org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants.*;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -5607,7 +5615,7 @@ public final class APIUtil {
      * Return the sequence extension name.
      * eg: admin--testAPi--v1.00
      *
-     * @param api
+     * //@param api
      * @return
      */
     public static String getSequenceExtensionName(String provider, String name, String version) {
@@ -8747,8 +8755,70 @@ public final class APIUtil {
         return null;
     }
 
+    // for service discovery
+    public static String getServiceDiscoveryFromAPIMConfig(String property)throws APIManagementException {
+
+        //If tenant registry doesn't have the configuration, then read it from api-manager.xml
+        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String serviceDiscoveryConfiguration = apimConfig.getFirstProperty(APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_CONFIGS + property);
+
+        if (!StringUtils.isBlank(serviceDiscoveryConfiguration)) {
+            return serviceDiscoveryConfiguration;
+        }
+
+        return null;
+    }
+
+//    public static Map<String, String>  getServiceDiscoveryDetailsFromAPIMConfig()throws APIManagementException {
+//        Map<String, String> clustersDetails = new HashMap<String,String>();
+//        //If tenant registry doesn't have the configuration, then read it from api-manager.xml
+//
+//        // Read scope whitelist from Configuration.
+////
+//        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+//                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+//       // String serviceDiscoveryConfiguration = apimConfig.getFirstProperty(APIConstants.SERVICRE_DISCOVERY_CONFIGS + property);
+//        List<String> valueset = apimConfig.getProperty(APIConstants.SERVICE_DISCOVERY_CLASS);
+//        Set<String> keyset =  apimConfig.getConfigKeySet();
+//
+//        List<String> serviceClass = apimConfig.getProperty(APIConstants.SERVICE_DISCOVERY_CLASS);
+//        for(int i=0;i<serviceClass.size();i++){
+//            System.out.println(serviceClass.get(i));
+//        }
+//        List<String> type = apimConfig.getProperty(APIConstants.SERVICE_DISCOVERY_TYPE);
+//        List<String> masterURL = apimConfig.getProperty(APIConstants.URL);
+//        List<String>  displayName = apimConfig.getProperty(APIConstants.SERVICE_DISCOVERY_DISPLAYNAME);
+//
+//        List<String> keyList = new ArrayList<String>();
+//        keyList.addAll(keyset);
+//        Iterator<String> iteratorkeys = keyList.iterator();
+//        Iterator<String> iteratorvalue = valueset.iterator();
+//       // while (iteratorkeys.hasNext() || iteratorvalue.hasNext(
+////        while (iteratorkeys.hasNext() )  {
+////
+////            String key = iteratorkeys.next();
+////            String value = iteratorvalue.next();
+////
+////            clustersDetails.put(key, value);
+////        }
+//        String key = iteratorkeys.next();
+//        String value = iteratorvalue.next();
+//
+//        clustersDetails.put(key, value);
+//
+////        if (!StringUtils.isBlank(clustersDetails)) {
+////            return clustersDetails;
+////        }
+//
+//
+//
+//
+//        return clustersDetails;
+//    }
+
     public static boolean isForgetPasswordConfigured() {
-        AxisConfiguration axis2Config = ServiceReferenceHolder.getContextService().getServerConfigContext()
+       AxisConfiguration axis2Config = ServiceReferenceHolder.getContextService().getServerConfigContext()
                 .getAxisConfiguration();
         TransportOutDescription emailTransportSender = axis2Config.getTransportOut(APIConstants.EMAIL_TRANSPORT);
         if (emailTransportSender != null) {
@@ -10088,7 +10158,118 @@ public final class APIUtil {
         }
         return state;
     }
+// #####################################################################################################################################################################
+//    protected List<Endpoint> getServices(Map<String, String> clusterProperties){
+//        Config serviceConfig = new ConfigBuilder().withMasterUrl(clusterProperties.get(MASTER_URL))
+//                .withOauthToken(clusterProperties.get(SATOKEN))
+//                        .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
+//
+//        OpenShiftClient client = new DefaultOpenShiftClient(serviceConfig);
+//       // CustomResourceDefinition clusterService = client.customResourceDefinitions().withName(SERVICE).get();
+//        List<Endpoint> endpointList = new ArrayList<>();
+//        List<Service> serviceList = (List<Service>) client.services().inNamespace(null).list();
+//
+//        for (Service service : serviceList) {
+//            String serviceName = service.getMetadata().getName();
+//            String namespace = service.getMetadata().getNamespace();
+//            Map<String, String> labelsMap = service.getMetadata().getLabels();
+//            String labels = (labelsMap != null) ? labelsMap.toString() : "";
+//            ServiceSpec serviceSpec = service.getSpec();
+//            String serviceType = serviceSpec.getType();
+//
+//        }
+//
+//       // ServiceList myServices = client.services().list();
+//       // ServiceList myServices = client.services().inNamespace(null).list();
+//
+//       // log.info(String.valueOf(myServices));
+////       for (Service x : myServices){
+////            x.getMetadata().getName();
+////        }
+////        Service x ;
+//
+//        //System.out.println(String.valueOf(myServices));
+//        return endpointList;
+//
+//    }
+public List<String> serviceNameList;
+    public List<String> namespaceList;
+    public List<String> serviceTypeList;
+    public List <String> clusterIPList;
+    public List<String> targetPortList;
 
+
+    public static JSONObject getServices(Map<String, String> clusterProperties){
+        JSONObject responses = new JSONObject();
+        JSONObject properties = new JSONObject();
+        Config serviceConfig = new ConfigBuilder().withMasterUrl(clusterProperties.get(MASTER_URL))
+                .withOauthToken(clusterProperties.get(SATOKEN)).withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
+
+        OpenShiftClient client = new DefaultOpenShiftClient(serviceConfig);
+        //CustomResourceDefinition clusterService = client.customResourceDefinitions().withName(SERVICE).get();
+
+      //  List<Service> myServices = client.services().list().getItems();
+        List<Service> myServices = client.services().inNamespace(null).list().getItems();
+
+       // log.info(String.valueOf(myServices));
+
+      //  System.out.println(String.valueOf(myServices));
+        //MASTER_URL = clusterProperties.get(MASTER_URL);
+
+        for (Service service : myServices) {
+            String serviceName = service.getMetadata().getName();
+            String namespace = service.getMetadata().getNamespace();
+            ServiceSpec serviceSpec = service.getSpec();
+            String serviceType = serviceSpec.getType();
+            List<String> externalIP = serviceSpec.getExternalIPs();
+            List<ServicePort> portSpec = serviceSpec.getPorts();
+            String clusterIP = serviceSpec.getClusterIP();
+
+            for(ServicePort portList:portSpec){
+                Integer nodePort = portList.getNodePort();
+                ContainerBasedConstants.TARGET_PORT = String.valueOf(portList.getTargetPort().getIntVal());
+                Integer port = portList.getPort();
+                PROTOCOL = portList.getProtocol();
+
+            }
+           // constructServiceResponse(serviceName,namespace,serviceType, clusterProperties.get(MASTER_URL),externalIP, PROTOCOL);
+           // System.out.println(serviceName +"\n" +namespace +"\n" + serviceType +"\n"+externalIP+"\n"+clusterIP + "\n"+ TARGET_PORT+"\n"+"\n");
+           // System.out.println( constructServiceResponse(serviceName,namespace,serviceType, clusterProperties.get(MASTER_URL),externalIP, PROTOCOL));
+            //System.out.println(PROTOCOL);
+            responses.put("serviceName",serviceName);
+      responses.put("serviceURL",clusterProperties.get(MASTER_URL));
+        properties.put("Namespace",namespace);
+        properties.put("ServiceType",serviceType);
+        properties.put("ExternalIPs",externalIP);
+        properties.put("Protocol", PROTOCOL);
+        responses.put("properties",properties);
+
+
+        }
+        return responses ;
+
+
+    }
+
+//    public static JSONObject constructServiceResponse(String serviceName, String namespace, String serviceType, String serviceURL, List<String> externalIP, String protocol){
+//        JSONObject responses = new JSONObject();
+//        JSONObject properties = new JSONObject();
+//        responses.put("serviceName",serviceName);
+//        responses.put("serviceURL",serviceURL);
+//        properties.put("Namespace",namespace);
+//        properties.put("ServiceType",serviceType);
+//        properties.put("ExternalIPs",externalIP);
+//        properties.put("Protocol", protocol);
+//        responses.put("properties",properties);
+//
+//        return responses;
+//    }
+
+    //List<Endpoint> endpointList = new ArrayList<>();
+
+
+
+    //##################################################################################################################################################
     public static Map<String, Map<String, String>> getClusterInfoFromConfig(JSONObject tenantConf) {
 
         JSONArray clusterInfo = (JSONArray) ((JSONObject) tenantConf.get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO))
@@ -10107,9 +10288,22 @@ public final class APIUtil {
                 clusterProperty.put(key, value);
             }
             clusters.put(clusterName, clusterProperty);
+
+            getServices(clusterProperties);//my edit
+
+//            try {
+//                //getServiceDiscoveryDetailsFromAPIMConfig();
+//            } catch (APIManagementException e) {
+//                e.printStackTrace();
+//            }
         }
+
         return clusters;
+
+       // getServices(clusters);//my edit
+
     }
+
 
     public static JSONObject getClusterInfoFromConfig(String tenantConfigContent) throws ParseException {
 

@@ -19,6 +19,7 @@
       }
     ]
   },
+
   "ExtensionHandlerPosition": "bottom",
   "RESTAPIScopes": {
     "Scope": [

@@ -37,6 +37,10 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.LabelsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ScopesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiCategoriesApi"/>
+<!--            my edit
+
+-->
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ServiceDiscoveryApi"/>
 
         </jaxrs:serviceBeans>
         <jaxrs:providers>

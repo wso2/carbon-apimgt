@@ -1044,4 +1044,18 @@
         <EnableSubscriptionValidationViaKeyManager>{{apim.jwt_authenitcation.subscription_validation_via_km}}</EnableSubscriptionValidationViaKeyManager>
     </JWTAuthentication>
 
+{# <?xml version="1.0" encoding="UTF-8"?> #}
+<ServiceDiscoveryConfiguration>
+    {% for services in apim.service_discovery %}
+        <Enabled>{{services.enable}}</Enabled>
+        <ServiceDiscovery type="{{services.type}}">
+            <ClassName>{{services.className}}</ClassName>
+            <DisplayName>{{services.displayName}}</DisplayName>
+            <ImplParameters>
+                <MasterURL>{{services.masterURL}}</MasterURL>
+            </ImplParameters>
+        </ServiceDiscovery>
+    {% endfor %}
+</ServiceDiscoveryConfiguration>
+
 </APIManager>
