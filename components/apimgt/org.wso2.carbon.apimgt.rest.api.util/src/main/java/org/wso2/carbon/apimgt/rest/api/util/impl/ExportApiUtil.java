@@ -60,11 +60,9 @@ public class ExportApiUtil {
         //If not specified status is preserved by default
         boolean isStatusPreserved = preserveStatus == null || preserveStatus;
 
-        // Print context information (name and version of the API) in the log
-        log.info("API name: "+ name + ", version: "+ version);
-
         if (name == null || version == null) {
-            RestApiUtil.handleBadRequest("'name' or 'version' should not be null", log);
+            RestApiUtil.handleBadRequest("'name' (" + name + ") or 'version' (" + version
+                    + ") should not be null.", log);
         }
 
         try {
