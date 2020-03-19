@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -1127,6 +1128,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<>();
         API oldApi = getAPI(api.getId());
+        Gson gson = new Gson();
+        Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
+                HashMap.class);
+        if (!oldMonetizationProperties.isEmpty()) {
+            Map<String, String> newMonetizationProperties = gson.fromJson(api.getMonetizationProperties().toString(),
+                    HashMap.class);
+            for (Map.Entry<String, String> entry : oldMonetizationProperties.entrySet()) {
+                String newValue = newMonetizationProperties.get(entry.getKey());
+                if (StringUtils.isAllBlank(newValue)) {
+                    newMonetizationProperties.put(entry.getKey(), entry.getValue());
+                }
+            }
+            JSONParser parser = new JSONParser();
+            try {
+                JSONObject jsonObj = (JSONObject) parser.parse(gson.toJson(newMonetizationProperties));
+                api.setMonetizationProperties(jsonObj);
+            } catch (ParseException e) {
+                throw new APIManagementException("Error when parsing monetization properties ", e);
+            }
+        }
+
         if (oldApi.getStatus().equals(api.getStatus())) {
 
             String previousDefaultVersion = getDefaultVersion(api.getId());
@@ -7345,6 +7367,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 product.setEnvironments(publishedEnvironments);
                 failedGateways.put("PUBLISHED", failedToPublishEnvironments);
                 failedGateways.put("UNPUBLISHED", Collections.<String, String>emptyMap());
+            }
+        }
+
+        APIProduct oldApi = getAPIProduct(product.getId());
+        Gson gson = new Gson();
+        Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
+                HashMap.class);
+        if (!oldMonetizationProperties.isEmpty()) {
+            Map<String, String> newMonetizationProperties = gson.fromJson(product.getMonetizationProperties().toString(),
+                    HashMap.class);
+            for (Map.Entry<String, String> entry : oldMonetizationProperties.entrySet()) {
+                String newValue = newMonetizationProperties.get(entry.getKey());
+                if (StringUtils.isAllBlank(newValue)) {
+                    newMonetizationProperties.put(entry.getKey(), entry.getValue());
+                }
+            }
+            JSONParser parser = new JSONParser();
+            try {
+                JSONObject jsonObj = (JSONObject) parser.parse(gson.toJson(newMonetizationProperties));
+                product.setMonetizationProperties(jsonObj);
+            } catch (ParseException e) {
+                throw new APIManagementException("Error when parsing monetization properties ", e);
             }
         }
 
