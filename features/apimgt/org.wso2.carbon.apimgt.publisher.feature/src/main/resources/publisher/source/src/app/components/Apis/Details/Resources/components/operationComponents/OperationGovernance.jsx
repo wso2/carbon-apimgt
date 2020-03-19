@@ -218,7 +218,7 @@ export default function OperationGovernance(props) {
                         value={getOperationScopes(operation, spec)[0]}
                         onChange={({ target: { value } }) => operationsDispatcher({
                             action: 'scopes',
-                            data: { target, verb, value: [value] },
+                            data: { target, verb, value: value ? [value] : [] },
                         })}
                         helperText={(
                             <FormattedMessage
