@@ -1131,21 +1131,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Gson gson = new Gson();
         Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
                 HashMap.class);
-        if (!oldMonetizationProperties.isEmpty()) {
+        if (oldMonetizationProperties != null && !oldMonetizationProperties.isEmpty()) {
             Map<String, String> newMonetizationProperties = gson.fromJson(api.getMonetizationProperties().toString(),
                     HashMap.class);
-            for (Map.Entry<String, String> entry : oldMonetizationProperties.entrySet()) {
-                String newValue = newMonetizationProperties.get(entry.getKey());
-                if (StringUtils.isAllBlank(newValue)) {
-                    newMonetizationProperties.put(entry.getKey(), entry.getValue());
+            if (newMonetizationProperties != null) {
+                for (Map.Entry<String, String> entry : oldMonetizationProperties.entrySet()) {
+                    String newValue = newMonetizationProperties.get(entry.getKey());
+                    if (StringUtils.isAllBlank(newValue)) {
+                        newMonetizationProperties.put(entry.getKey(), entry.getValue());
+                    }
                 }
-            }
-            JSONParser parser = new JSONParser();
-            try {
-                JSONObject jsonObj = (JSONObject) parser.parse(gson.toJson(newMonetizationProperties));
-                api.setMonetizationProperties(jsonObj);
-            } catch (ParseException e) {
-                throw new APIManagementException("Error when parsing monetization properties ", e);
+                JSONParser parser = new JSONParser();
+                try {
+                    JSONObject jsonObj = (JSONObject) parser.parse(gson.toJson(newMonetizationProperties));
+                    api.setMonetizationProperties(jsonObj);
+                } catch (ParseException e) {
+                    throw new APIManagementException("Error when parsing monetization properties ", e);
+                }
             }
         }
 
@@ -7374,21 +7376,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Gson gson = new Gson();
         Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
                 HashMap.class);
-        if (!oldMonetizationProperties.isEmpty()) {
+        if (oldMonetizationProperties != null && !oldMonetizationProperties.isEmpty()) {
             Map<String, String> newMonetizationProperties = gson.fromJson(product.getMonetizationProperties().toString(),
                     HashMap.class);
-            for (Map.Entry<String, String> entry : oldMonetizationProperties.entrySet()) {
-                String newValue = newMonetizationProperties.get(entry.getKey());
-                if (StringUtils.isAllBlank(newValue)) {
-                    newMonetizationProperties.put(entry.getKey(), entry.getValue());
+            if (newMonetizationProperties != null) {
+                for (Map.Entry<String, String> entry : oldMonetizationProperties.entrySet()) {
+                    String newValue = newMonetizationProperties.get(entry.getKey());
+                    if (StringUtils.isAllBlank(newValue)) {
+                        newMonetizationProperties.put(entry.getKey(), entry.getValue());
+                    }
                 }
-            }
-            JSONParser parser = new JSONParser();
-            try {
-                JSONObject jsonObj = (JSONObject) parser.parse(gson.toJson(newMonetizationProperties));
-                product.setMonetizationProperties(jsonObj);
-            } catch (ParseException e) {
-                throw new APIManagementException("Error when parsing monetization properties ", e);
+                JSONParser parser = new JSONParser();
+                try {
+                    JSONObject jsonObj = (JSONObject) parser.parse(gson.toJson(newMonetizationProperties));
+                    product.setMonetizationProperties(jsonObj);
+                } catch (ParseException e) {
+                    throw new APIManagementException("Error when parsing monetization properties ", e);
+                }
             }
         }
 
