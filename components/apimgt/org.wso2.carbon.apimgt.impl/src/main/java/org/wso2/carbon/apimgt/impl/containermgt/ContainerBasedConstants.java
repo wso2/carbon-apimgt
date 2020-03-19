@@ -60,7 +60,7 @@ public final class ContainerBasedConstants {
 
     //Service discovery constants
     public static final String SERVICE ="Service"; // my edit
-    public static final String SYSTEM_TYPE ="Kubernetes";// service discovery system type.
+    public static final String SYSTEM_TYPE ="Type";// service discovery system type.
     public static final String SERVICE_NAME ="";
     public static final String SERVICE_TYPE="";
     public static final String EXTERNAL_IP="";
@@ -69,6 +69,13 @@ public final class ContainerBasedConstants {
     public static String TARGET_PORT=""; // We need only this to connect with the service
     public static final String PORT="";
     public static String PROTOCOL="";
+    public static final String SERVICE_DISCOVERY = "ServiceDiscovery";
+    public static final String SERVICE_DISCOVERY_TYPES = "ServiceDiscoveryTypes";
+    public static final String IMPL_PARAMETERS = "ImplParameters";
+
+
+
+
 
 
 

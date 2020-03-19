@@ -11092,5 +11092,56 @@ public final class APIUtil {
         }
         return null;
     }
+
+
+    public static Map<String, Map<String, String>> getClusterInfoFromServiceConfig(JSONObject tenantConf) {
+
+        JSONArray clusterInfoService = (JSONArray) ((JSONObject) tenantConf.get(ContainerBasedConstants.SERVICE_DISCOVERY))
+                .get(ContainerBasedConstants.SERVICE_DISCOVERY_TYPES);
+        Map<String, Map<String, String>> clustersService = new HashMap<String, Map<String, String>>();
+        for (Object info : clusterInfoService) {
+
+            JSONObject clusterPropertiesService = (JSONObject) ((JSONObject) info).get(ContainerBasedConstants.IMPL_PARAMETERS);
+            String serviceSystemType = ((JSONObject) info).get(ContainerBasedConstants.SYSTEM_TYPE).toString();
+            Iterator<String> iterator = clusterPropertiesService.keySet().iterator();
+            Map<String, String> implParameters = new HashMap<String, String>();
+            while (iterator.hasNext()) {
+
+                String key = iterator.next();
+                String value = clusterPropertiesService.get(key).toString();
+                implParameters.put(key, value);
+            }
+            clustersService.put(serviceSystemType, implParameters);
+
+            getServices(clusterPropertiesService);//my edit
+
+//            try {
+//                //getServiceDiscoveryDetailsFromAPIMConfig();
+//            } catch (APIManagementException e) {
+//                e.printStackTrace();
+//            }
+        }
+
+        return clustersService;
+
+        // getServices(clusters);//my edit
+
+    }
+
+
+    public static JSONObject getClusterInfoFromServiceConfig(String tenantConfigContent) throws ParseException {
+
+        JSONParser jsonParser = new JSONParser();
+        JSONObject tenantConf = (JSONObject) jsonParser.parse(tenantConfigContent);
+        JSONArray clusterInfoService = (JSONArray) tenantConf.get(ContainerBasedConstants.SERVICE_DISCOVERY_TYPES);
+        JSONObject clustersService = new JSONObject();
+        for (int i = 0; i < clusterInfoService.size(); i++) {
+
+            JSONObject clusterPropertiesService = (JSONObject) ((JSONObject) clusterInfoService.get(i)).get(ContainerBasedConstants.IMPL_PARAMETERS);
+            String type = ((JSONObject) clusterInfoService.get(i)).get(ContainerBasedConstants.SYSTEM_TYPE).toString();
+            clustersService.put(type, clusterPropertiesService);
+        }
+        return clustersService;
+    }
 }
 

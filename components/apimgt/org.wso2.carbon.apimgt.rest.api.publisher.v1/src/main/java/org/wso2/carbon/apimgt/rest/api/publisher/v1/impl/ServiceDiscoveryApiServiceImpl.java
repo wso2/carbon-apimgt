@@ -66,11 +66,24 @@ public class ServiceDiscoveryApiServiceImpl implements ServiceDiscoveryApiServic
                   }
                   JSONArray serviceDiscovery;
                   APIManagerConfiguration obj = new APIManagerConfiguration();
-                  serviceDiscovery= obj.getServiceDiscoveryConf();
+                  APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                          .getAPIManagerConfiguration();
+                  System.out.println("configuration--------------------------" +configuration.toString()+"\n" );
+
+                  serviceDiscovery= configuration.getServiceDiscoveryConf();
+                  System.out.println("serviceDiscovery---------------------------"+serviceDiscovery.toString()+"\n");
+
+                  System.out.println("serviceDiscovery---------------------------"+serviceDiscovery.get(0).toString()+"\n");
+
+
                   Map<String, String> serviceDiscoveryConfig = new ObjectMapper().convertValue(serviceDiscovery.get(0),
                           Map.class);
+                  System.out.println("config---------------------------------" +serviceDiscoveryConfig.toString()+ "\n");
+
+
                   K8sServiceDiscovery obj1 = new K8sServiceDiscovery();
-                 // JSONObject f = obj1.getServices(serviceDiscoveryConfig);
+                  //JSONObject f = obj1.getServices(serviceDiscoveryConfig);
+                  //System.out.println(f.toString());
 
                   APIUtil obj2 = new APIUtil();//
                   JSONObject f = obj2.getServices(serviceDiscoveryConfig);
