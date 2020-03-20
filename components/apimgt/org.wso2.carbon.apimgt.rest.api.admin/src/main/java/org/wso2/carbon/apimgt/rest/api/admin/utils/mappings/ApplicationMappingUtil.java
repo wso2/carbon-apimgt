@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -31,6 +32,24 @@ import java.util.Map;
 
 public class ApplicationMappingUtil {
 
+    /***
+     * Converts the sort by object according to the input
+     *
+     * @param sortBy
+     * @return Updated sort by field
+     */
+    public static String getApplicationSortByField (String sortBy) {
+        String updatedSortBy = "";
+        if (RestApiConstants.SORT_BY_NAME.equals(sortBy)) {
+            updatedSortBy = APIConstants.APPLICATION_NAME;
+        } else if (RestApiConstants.SORT_BY_THROTTLING_TIER.equals(sortBy)) {
+            updatedSortBy = APIConstants.APPLICATION_TIER;
+        } else if (RestApiConstants.SORT_BY_STATUS.equals(sortBy)) {
+            updatedSortBy = APIConstants.APPLICATION_STATUS;
+        }
+
+        return updatedSortBy;
+    }
 
     public static ApplicationListDTO fromApplicationsToDTO(Application[] applications, int limit, int offset) {
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();

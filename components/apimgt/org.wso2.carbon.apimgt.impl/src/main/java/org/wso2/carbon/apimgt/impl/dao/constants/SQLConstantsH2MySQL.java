@@ -213,7 +213,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   SUB.TENANT_ID AS TENANT_ID, " +
                     "   SUB.SUBSCRIBER_ID AS SUBSCRIBER_ID, " +
                     "   APP.UUID AS UUID," +
-                    "   APP.NAME AS NAME  " +
+                    "   APP.NAME AS NAME," +
+                    "   APP.APPLICATION_STATUS as APPLICATION_STATUS  " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +

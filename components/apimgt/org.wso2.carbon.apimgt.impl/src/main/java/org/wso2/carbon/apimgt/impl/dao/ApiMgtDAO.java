@@ -4873,7 +4873,6 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
-        Application applications = null;
         String sqlQuery = null;
         List<Application> applicationList = new ArrayList<>();
         sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_BY_TENANT_ID");
@@ -4900,6 +4899,7 @@ public class ApiMgtDAO {
                 application.setGroupId(rs.getString("GROUP_ID"));
                 subscriber.setTenantId(rs.getInt("TENANT_ID"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setOwner(subscriberName);
                 applicationList.add(application);
             }
