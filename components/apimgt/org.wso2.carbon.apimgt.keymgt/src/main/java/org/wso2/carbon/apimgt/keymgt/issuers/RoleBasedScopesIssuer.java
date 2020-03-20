@@ -111,7 +111,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
             }
 
             String grantType = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getGrantType();
-            String[] userRoles;
+            String[] userRoles = null;
 
             // If GrantType is SAML20_BEARER and CHECK_ROLES_FROM_SAML_ASSERTION is true, or if GrantType is
             // JWT_BEARER and retrieveRolesFromUserStoreForScopeValidation system property is true,
@@ -126,8 +126,10 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
                     .parseBoolean(isRetrieveRolesFromUserStoreForScopeValidation))) {
                 AuthenticatedUser user = tokReqMsgCtx.getAuthorizedUser();
                 Map<ClaimMapping, String> userAttributes = user.getUserAttributes();
-                userRoles = getRolesFromUserAttribute(userAttributes,
-                        tokReqMsgCtx.getProperty(ResourceConstants.ROLE_CLAIM).toString());
+                if (tokReqMsgCtx.getProperty(ResourceConstants.ROLE_CLAIM) != null) {
+                    userRoles = getRolesFromUserAttribute(userAttributes,
+                            tokReqMsgCtx.getProperty(ResourceConstants.ROLE_CLAIM).toString());
+                }
             } else {
                 userRoles = getUserRoles(authenticatedUser);
             }
@@ -189,10 +191,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
         defaultScope.add(DEFAULT_SCOPE_NAME);
 
         if (userRoles == null || userRoles.length == 0) {
-            if (log.isDebugEnabled()) {
-                log.debug("Could not find roles of the user.");
-            }
-            return defaultScope;
+            userRoles = new String[0];
         }
 
         List<String> authorizedScopes = new ArrayList<>();

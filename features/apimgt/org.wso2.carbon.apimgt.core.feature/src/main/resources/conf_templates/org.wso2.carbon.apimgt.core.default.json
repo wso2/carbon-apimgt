@@ -132,5 +132,5 @@
   "apim.certificate_reloader.period": "600",
   "apimgt.mutual_ssl.certificate_header": "X-WSO2-CLIENT-CERTIFICATE",
   "apimgt.mutual_ssl.enable_client_validation": true,
-  "database.local.url": "jdbc:h2:./repository/database/WSO2CARBON_DB;DB_CLOSE_ON_EXIT=FALSE;MVCC=TRUE"
+  "database.local.url": "jdbc:h2:./repository/database/WSO2CARBON_DB;DB_CLOSE_ON_EXIT=FALSE"
 }

@@ -47,7 +47,6 @@ function InlineEndpoints(props) {
      * @param {string} method The resource method.
      * */
     const onScriptChange = (value, path, method) => {
-        console.log(value);
         const tmpPaths = JSON.parse(JSON.stringify(paths));
         tmpPaths[path][method][xMediationScriptProperty] = value.trim();
         updatePaths(tmpPaths);
@@ -57,14 +56,12 @@ function InlineEndpoints(props) {
 
     useEffect(() => {
         const promisedResponse = api.getGeneratedMockScriptsOfAPI(api.id);
-        console.log(promisedResponse);
         promisedResponse.then((response) => {
             setMockScripts(response.obj.list);
         });
     }, []);
 
     function getGeneratedMockScriptOfAPI(resourcePath, resourceMethod) {
-        console.log(mockScripts);
         for (let i = 0; i < mockScripts.length; i++) {
             if (mockScripts[i].verb.toLowerCase() === resourceMethod.toLowerCase()
                 && mockScripts[i].path === resourcePath) {

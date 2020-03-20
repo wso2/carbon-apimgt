@@ -21,10 +21,7 @@
     var appUtils = require("/services/utils.js");
     var app = require("/site/public/theme/settings.js").Settings.app;
     app.context = appUtils.getTenantBaseStoreContext();
-    var tenantDomain;
-    if (appUtils.isPerTenantServiceProviderEnabled()) {
-        tenantDomain = appUtils.getTenantDomain();
-     }
+    var tenantDomain = appUtils.getServiceProviderTenantDomain();
     var log = new Log();
     var cookieToken = request.getCookie("AM_REF_TOKEN_DEFAULT_P2");
     var tokenParam = request.getParameter("refresh_token", "UTF-8")

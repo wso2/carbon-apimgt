@@ -14,7 +14,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import javax.ws.rs.core.Response;
 
 public abstract class ExportApiService {
-    public abstract Response exportApiGet(String name,String version,String providerName,String format,Boolean preserveStatus);
+    public abstract Response exportApiGet(String name,String version,String format,String providerName,Boolean preserveStatus);
     public abstract Response exportApplicationsGet(String appName,String appOwner,Boolean withKeys);
 }
 

@@ -2516,6 +2516,7 @@ public class APIMappingUtil {
             APIProductDTO apiProductDTO = (APIProductDTO)dto;
             apiCategoryNames = apiProductDTO.getCategories();
         }
+        provider = APIUtil.replaceEmailDomainBack(provider);
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         List<APICategory> apiCategories = new ArrayList<>();

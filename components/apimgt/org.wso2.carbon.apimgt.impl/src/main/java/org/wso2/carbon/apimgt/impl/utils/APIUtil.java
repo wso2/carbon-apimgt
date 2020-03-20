@@ -9787,11 +9787,11 @@ public final class APIUtil {
     public static JwtTokenInfoDTO getJwtTokenInfoDTO(Application application, String userName, String tenantDomain)
             throws APIManagementException {
 
-        String applicationName = application.getName();
+        int applicationId = application.getId();
 
         String appOwner = application.getOwner();
         APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance()
-                .getSubscribedAPIsForAnApp(appOwner, applicationName);
+                .getSubscribedAPIsForAnApp(appOwner, applicationId);
 
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setSubscriber("sub");
@@ -10389,6 +10389,24 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    public static void publishEvent(String eventName, Map dynamicProperties, Event event) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
+                    .publish(eventName, dynamicProperties, event);
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
     }
 
 }

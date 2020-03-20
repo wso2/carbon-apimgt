@@ -26,15 +26,18 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.openidconnect.CustomClaimsCallbackHandler;
 
 import java.nio.charset.Charset;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -89,6 +92,7 @@ public class APIMJWTGenerator extends JWTGenerator {
     public String buildBody(JwtTokenInfoDTO jwtTokenInfoDTO) throws APIManagementException {
 
         Map<String, Object> standardClaims = populateStandardClaims(jwtTokenInfoDTO);
+        Map<String, Object> customClaims = populateCustomClaims(jwtTokenInfoDTO);
 
         //get tenantId
         int tenantId = APIUtil.getTenantId(jwtTokenInfoDTO.getEndUserName());
@@ -99,6 +103,18 @@ public class APIMJWTGenerator extends JWTGenerator {
         }
 
         if (standardClaims != null) {
+            if (customClaims != null) {
+                for (Map.Entry<String, Object> entry : customClaims.entrySet()) {
+                    if (standardClaims.containsKey(entry.getKey())) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Skip already existing claim '" + entry.getKey() + "'");
+                        }
+                    } else {
+                        standardClaims.put(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+
             JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
 
             Iterator<String> it = new TreeSet(standardClaims.keySet()).iterator();
@@ -135,6 +151,22 @@ public class APIMJWTGenerator extends JWTGenerator {
             return jwtClaimsSetBuilder.build().toJSONObject().toJSONString();
         }
         return null;
+    }
+
+    public Map<String, Object> populateCustomClaims(JwtTokenInfoDTO jwtTokenInfoDTO) {
+
+        CustomClaimsCallbackHandler claimsCallBackHandler =
+                OAuthServerConfiguration.getInstance().getOpenIDConnectCustomClaimsCallbackHandler();
+        if (jwtTokenInfoDTO.getOauthAuthzMsgCtx() != null) {
+            JWTClaimsSet jwtClaimsSet = claimsCallBackHandler
+                    .handleCustomClaims(new JWTClaimsSet.Builder(), jwtTokenInfoDTO.getOauthAuthzMsgCtx());
+            return jwtClaimsSet.getClaims();
+        } else if (jwtTokenInfoDTO.getTokReqMsgCtx() != null) {
+            JWTClaimsSet jwtClaimsSet = claimsCallBackHandler
+                    .handleCustomClaims(new JWTClaimsSet.Builder(), jwtTokenInfoDTO.getTokReqMsgCtx());
+            return jwtClaimsSet.getClaims();
+        }
+        return new LinkedHashMap<>();
     }
 
     public Map<String, Object> populateStandardClaims(JwtTokenInfoDTO jwtTokenInfoDTO) throws APIManagementException {

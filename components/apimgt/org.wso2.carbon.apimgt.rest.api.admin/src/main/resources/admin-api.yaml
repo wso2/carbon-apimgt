@@ -2153,7 +2153,7 @@ paths:
           in: query
           description: |
             Provider name of the API
-          required: true
+          required: false
           type: string
         - name: format
           in: query
