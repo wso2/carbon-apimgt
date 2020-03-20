@@ -75,15 +75,11 @@ public class CacheInvalidationServiceImpl implements CacheInvalidationService {
                 cache.removeAll();
             } else {
                 String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
-                if (cache.containsKey(apiCacheKey)) {
-                    cache.remove(apiCacheKey);
-                }
+                cache.remove(apiCacheKey);
                 for (ResourceCacheInvalidationDto uriTemplate : uriTemplates) {
                     String resourceVerbCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
                             uriTemplate.getResourceURLContext(), uriTemplate.getHttpVerb());
-                    if (cache.containsKey(resourceVerbCacheKey)) {
-                        cache.remove(resourceVerbCacheKey);
-                    }
+                    cache.remove(resourceVerbCacheKey);
                 }
             }
 
