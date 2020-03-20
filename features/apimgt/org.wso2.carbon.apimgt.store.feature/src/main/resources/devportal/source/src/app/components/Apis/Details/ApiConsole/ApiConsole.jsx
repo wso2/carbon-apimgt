@@ -77,12 +77,20 @@ const styles = (theme) => ({
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
     },
-    usernameField: {
-        width: '100%',
+    tryoutHeading: {
+        fontWeight: 400,
     },
-    passwordField: {
-        width: '100%',
-        marginLeft: theme.spacing(1),
+    genKeyButton: {
+        width: theme.spacing(20),
+        height: theme.spacing(5),
+        marginTop: theme.spacing(2.5),
+        marginLeft: theme.spacing(2),
+    },
+    gatewayEnvironment: {
+        marginTop: theme.spacing(4),
+    },
+    categoryHeading: {
+        marginBottom: theme.spacing(2),
     },
 });
 /**
@@ -104,6 +112,8 @@ class ApiConsole extends React.Component {
             securitySchemeType: 'OAUTH',
             username: '',
             password: '',
+            isUpdating: false,
+            scopes: [],
         };
         this.handleChanges = this.handleChanges.bind(this);
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
@@ -142,6 +152,10 @@ class ApiConsole extends React.Component {
                 }
                 if (apiData.labels) {
                     labels = apiData.labels.map((label) => { return label.name; });
+                }
+                if (apiData.scopes) {
+                    const scopeList = apiData.scopes.map((scope) => { return scope.name; });
+                    this.setState({ scopes: scopeList });
                 }
                 if (environments && environments.length > 0) {
                     [selectedEnvironment] = environments;
@@ -233,6 +247,39 @@ class ApiConsole extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
+            });
+    }
+
+    /**
+     * Generate access token
+     * */
+    generateAccessToken = () => {
+        const {
+            isUpdating, selectedApplication, selectedKeyType, scopes,
+        } = this.state;
+        this.setState({ isUpdating: true });
+        this.applicationPromise = Application.get(selectedApplication);
+        this.applicationPromise
+            .then((application) => application.generateToken(
+                selectedKeyType,
+                3600,
+                scopes,
+            ))
+            .then((response) => {
+                console.log('token generated successfully ' + response);
+                this.setState({
+                    showToken: false,
+                    accessToken: response.accessToken,
+                });
+                this.setState({ isUpdating: false });
+            })
+            .catch((error) => {
+                console.error(error);
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+                this.setState({ isUpdating: false });
             });
     }
 
@@ -425,11 +472,75 @@ class ApiConsole extends React.Component {
                                 </Paper>
                             </Grid>
                         )}
+                        <Grid x={12} md={6} className={classes.centerItems}>
+                            <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
+                                <FormattedMessage
+                                    id='api.console.security.heading'
+                                    defaultMessage='Security'
+                                />
+                            </Typography>
+                            <Typography variant='h6' color='textSecondary' className={classes.tryoutHeading}>
+                                <FormattedMessage
+                                    id='api.console.security.type.heading'
+                                    defaultMessage='Security Type'
+                                />
+                            </Typography>
+                            {(isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && (
+                                <FormControl component='fieldset'>
+                                    <RadioGroup
+                                        name='securityScheme'
+                                        value={securitySchemeType}
+                                        onChange={this.handleChanges}
+                                        row
+                                    >
+                                        {isOAuthEnabled && (
+                                            <FormControlLabel
+                                                value='OAUTH'
+                                                control={<Radio />}
+                                                label={(
+                                                    <FormattedMessage
+                                                        id='Apis.Details.ApiConsole.security.scheme.oauth'
+                                                        defaultMessage='OAuth'
+                                                    />
+                                                )}
+                                            />
+                                        )}
+                                        {isApiKeyEnabled && (
+                                            <FormControlLabel
+                                                value='API-KEY'
+                                                control={<Radio />}
+                                                label={(
+                                                    <FormattedMessage
+                                                        id='Apis.Details.ApiConsole.security.scheme.apikey'
+                                                        defaultMessage='API Key'
+                                                    />
+                                                )}
+                                                // className={classes.securityTypeRadio}
+                                            />
+                                        )}
+                                        {isBasicAuthEnabled && (
+                                            <FormControlLabel
+                                                value='BASIC'
+                                                control={<Radio />}
+                                                label={(
+                                                    <FormattedMessage
+                                                        id='Apis.Details.ApiConsole.security.scheme.basic'
+                                                        defaultMessage='Basic'
+                                                    />
+                                                )}
+                                                // className={classes.securityTypeRadio}
+                                            />
+                                        )}
+                                    </RadioGroup>
+                                </FormControl>
+                            )}
+                        </Grid>
                         {!isPrototypedAPI
                         && (
                             <Grid xs={12} md={12} item>
                                 <Box display='block'>
-                                    {user && subscriptions && subscriptions.length > 0 && (
+                                    {user && subscriptions
+                                    && subscriptions.length > 0 && securitySchemeType !== 'BASIC' && (
                                         <SelectAppPanel
                                             subscriptions={subscriptions}
                                             handleChanges={this.handleChanges}
@@ -446,97 +557,41 @@ class ApiConsole extends React.Component {
                                                 />
                                             </Typography>
                                         </Box>
-
                                     )}
-                                    <Box display='flex' justifyContent='center'>
-                                        <Grid xs={12} md={6} item>
-                                            {((environments && environments.length > 0)
-                                            || (labels && labels.length > 0))
-                                        && (
-                                            <TextField
-                                                fullWidth
-                                                select
-                                                label={(
-                                                    <FormattedMessage
-                                                        defaultMessage='Environment'
-                                                        id='Apis.Details.ApiConsole.environment'
-                                                    />
-                                                )}
-                                                value={selectedEnvironment}
-                                                name='selectedEnvironment'
-                                                onChange={this.handleChanges}
-                                                helperText={(
-                                                    <FormattedMessage
-                                                        defaultMessage='Please select an environment'
-                                                        id='Apis.Details.ApiConsole.SelectAppPanel.select.environment'
-                                                    />
-                                                )}
-                                                margin='normal'
-                                                variant='outlined'
-                                            >
-                                                {environments && environments.length > 0 && (
-                                                    <MenuItem value='' disabled>
-                                                        <em>
-                                                            <FormattedMessage
-                                                                id='api.gateways'
-                                                                defaultMessage='API Gateways'
-                                                            />
-                                                        </em>
-                                                    </MenuItem>
-                                                )}
-                                                {environments && (
-                                                    environments.map((env) => (
-                                                        <MenuItem value={env} key={env}>
-                                                            {env}
-                                                        </MenuItem>
-                                                    )))}
-                                                {labels && labels.length > 0 && (
-                                                    <MenuItem value='' disabled>
-                                                        <em>
-                                                            <FormattedMessage
-                                                                id='micro.gateways'
-                                                                defaultMessage='Microgateways'
-                                                            />
-                                                        </em>
-                                                    </MenuItem>
-                                                )}
-                                                {labels && (
-                                                    labels.map((label) => (
-                                                        <MenuItem value={label} key={label}>
-                                                            {label}
-                                                        </MenuItem>
-                                                    ))
-                                                )}
-                                            </TextField>
-                                        )}
-                                        </Grid>
-                                    </Box>
                                     <Box display='block' justifyContent='center'>
-                                        <Grid x={12} md={6} className={classes.tokenType} item>
+                                        <Grid x={8} md={6} className={classes.tokenType} item>
                                             {securitySchemeType === 'BASIC' ? (
                                                 <>
-                                                    <TextField
-                                                        margin='normal'
-                                                        variant='outlined'
-                                                        className={classes.usernameField}
-                                                        label={
-                                                            <FormattedMessage id='username' defaultMessage='Username' />
-                                                        }
-                                                        name='username'
-                                                        onChange={this.handleChanges}
-                                                        value={username || ''}
-                                                    />
-                                                    <TextField
-                                                        margin='normal'
-                                                        variant='outlined'
-                                                        className={classes.passwordField}
-                                                        label={
-                                                            <FormattedMessage id='password' defaultMessage='Password' />
-                                                        }
-                                                        name='password'
-                                                        onChange={this.handleChanges}
-                                                        value={password || ''}
-                                                    />
+                                                    <Grid x={12} md={12} item>
+                                                        <TextField
+                                                            margin='normal'
+                                                            variant='outlined'
+                                                            label={(
+                                                                <FormattedMessage
+                                                                    id='username'
+                                                                    defaultMessage='Username'
+                                                                />
+                                                            )}
+                                                            name='username'
+                                                            onChange={this.handleChanges}
+                                                            value={username || ''}
+                                                            fullWidth
+                                                        />
+                                                        <TextField
+                                                            margin='normal'
+                                                            variant='outlined'
+                                                            label={(
+                                                                <FormattedMessage
+                                                                    id='password'
+                                                                    defaultMessage='Password'
+                                                                />
+                                                            )}
+                                                            name='password'
+                                                            onChange={this.handleChanges}
+                                                            value={password || ''}
+                                                            fullWidth
+                                                        />
+                                                    </Grid>
                                                 </>
                                             ) : (
                                                 <TextField
@@ -583,40 +638,95 @@ class ApiConsole extends React.Component {
                                                     }}
                                                 />
                                             )}
-                                        </Grid>
-                                        <Grid x={12} md={6} className={classes.centerItems}>
-                                            {(isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && (
-                                                <FormControl component='fieldset'>
-                                                    <RadioGroup
-                                                        name='securityScheme'
-                                                        value={securitySchemeType}
-                                                        onChange={this.handleChanges}
-                                                        row
-                                                    >
-                                                        {isOAuthEnabled && (
-                                                            <FormControlLabel
-                                                                value='OAUTH'
-                                                                control={<Radio />}
-                                                                label='OAuth'
-                                                            />
-                                                        )}
-                                                        {isBasicAuthEnabled && (
-                                                            <FormControlLabel
-                                                                value='BASIC'
-                                                                control={<Radio />}
-                                                                label='Basic'
-                                                            />
-                                                        )}
-                                                        {isApiKeyEnabled && (
-                                                            <FormControlLabel
-                                                                value='API-KEY'
-                                                                control={<Radio />}
-                                                                label='API Key'
-                                                            />
-                                                        )}
-                                                    </RadioGroup>
-                                                </FormControl>
+                                            {securitySchemeType !== 'BASIC' && (
+                                                <Button
+                                                    onClick={this.generateAccessToken}
+                                                    color='primary'
+                                                    variant='contained'
+                                                    className={classes.genKeyButton}
+                                                >
+                                                    <FormattedMessage
+                                                        id='Apis.Details.ApiCOnsole.generate.test.key'
+                                                        defaultMessage='GEN. TEST KEY '
+                                                    />
+                                                </Button>
                                             )}
+                                        </Grid>
+                                    </Box>
+                                    <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
+                                        <Grid xs={12} md={6} item>
+                                            {((environments && environments.length > 0)
+                                            || (labels && labels.length > 0))
+                                        && (
+                                            <>
+                                                <Typography
+                                                    variant='h5'
+                                                    color='textPrimary'
+                                                    className={classes.categoryHeading}
+                                                >
+                                                    <FormattedMessage
+                                                        id='api.console.gateway.heading'
+                                                        defaultMessage='Gateway'
+                                                    />
+                                                </Typography>
+                                                <TextField
+                                                    fullWidth
+                                                    select
+                                                    label={(
+                                                        <FormattedMessage
+                                                            defaultMessage='Environment'
+                                                            id='Apis.Details.ApiConsole.environment'
+                                                        />
+                                                    )}
+                                                    value={selectedEnvironment}
+                                                    name='selectedEnvironment'
+                                                    onChange={this.handleChanges}
+                                                    helperText={(
+                                                        <FormattedMessage
+                                                            defaultMessage='Please select an environment'
+                                                            id='Apis.Details.ApiConsole.SelectAppPanel.environment'
+                                                        />
+                                                    )}
+                                                    margin='normal'
+                                                    variant='outlined'
+                                                >
+                                                    {environments && environments.length > 0 && (
+                                                        <MenuItem value='' disabled>
+                                                            <em>
+                                                                <FormattedMessage
+                                                                    id='api.gateways'
+                                                                    defaultMessage='API Gateways'
+                                                                />
+                                                            </em>
+                                                        </MenuItem>
+                                                    )}
+                                                    {environments && (
+                                                        environments.map((env) => (
+                                                            <MenuItem value={env} key={env}>
+                                                                {env}
+                                                            </MenuItem>
+                                                        )))}
+                                                    {labels && labels.length > 0 && (
+                                                        <MenuItem value='' disabled>
+                                                            <em>
+                                                                <FormattedMessage
+                                                                    id='micro.gateways'
+                                                                    defaultMessage='Microgateways'
+                                                                />
+                                                            </em>
+                                                        </MenuItem>
+                                                    )}
+                                                    {labels && (
+                                                        labels.map((label) => (
+                                                            <MenuItem value={label} key={label}>
+                                                                {label}
+                                                            </MenuItem>
+                                                        ))
+                                                    )}
+                                                </TextField>
+                                            </>
+                                        )}
+
                                         </Grid>
                                     </Box>
                                 </Box>
