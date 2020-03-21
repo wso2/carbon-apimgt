@@ -147,7 +147,7 @@ public class OAS3Parser extends APIDefinition {
                             }
                             if (responseCode == minResponseCode && !setPayloadResponse){
                                 responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
-                                setPayloadResponse=true;
+                                setPayloadResponse = true;
                                 if (applicationXml != null) {
                                     responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
                                 }
@@ -162,7 +162,7 @@ public class OAS3Parser extends APIDefinition {
                             if (responseCode == minResponseCode && !setPayloadResponse){
                                 if (applicationJson == null) {
                                     responseSection.append(getGeneratedSetResponse(responseEntry, "xml"));
-                                    setPayloadResponse=true;
+                                    setPayloadResponse = true;
                                 }
                             }
                         }

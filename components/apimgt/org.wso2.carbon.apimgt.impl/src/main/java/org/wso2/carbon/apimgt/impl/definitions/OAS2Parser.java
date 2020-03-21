@@ -146,7 +146,7 @@ public class OAS2Parser extends APIDefinition {
                             genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
                             if (responseCode == minResponseCode && !setPayloadResponse){
                                 responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
-                                setPayloadResponse=true;
+                                setPayloadResponse = true;
                                 if (applicationXml != null) {
                                     responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
                                 }
@@ -158,7 +158,7 @@ public class OAS2Parser extends APIDefinition {
                             if (responseCode == minResponseCode && !setPayloadResponse){
                                 if (applicationJson == null) {
                                     responseSection.append(getGeneratedSetResponse(responseEntry, "xml"));
-                                    setPayloadResponse=true;
+                                    setPayloadResponse = true;
                                 }
                             }
                         }
@@ -171,11 +171,11 @@ public class OAS2Parser extends APIDefinition {
                         genCode.append(getGeneratedResponseVar(responseEntry, schemaExample, "json"));
                         if (responseCode == minResponseCode && !setPayloadResponse){
                             responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
-                            setPayloadResponse=true;
+                            setPayloadResponse = true;
                         }
                     } else if (responseCode == minResponseCode && !setPayloadResponse){
                         setDefaultGeneratedResponse(genCode);
-                        setPayloadResponse=true;
+                        setPayloadResponse = true;
                     }
                 }
                 genCode.append(responseSection);
