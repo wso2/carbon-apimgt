@@ -198,5 +198,11 @@ public class APIMgtGatewayConstants {
     public static final String DEFAULT_JWT_TRANSFORMER_ISSUER = "default";
     public static final String SPAN_ACTIVITY_ID = "span.activity.id";
     public static final String SPAN_RESOURCE = "span.resource";
+    public static final String SPAN_API_NAME = "span.api.name";
+    public static final String SPAN_API_VERSION = "span.api.version";
+    public static final String SPAN_APPLICATION_NAME = "span.application.name";
+    public static final String SPAN_APPLICATION_ID = "span.application.id";
+    public static final String SPAN_APPLICATION_CONSUMER_KEY = "span.consumerkey";
+    public static final String SPAN_ENDPOINT = "span.endpoint";
 }
 

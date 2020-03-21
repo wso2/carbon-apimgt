@@ -876,22 +876,22 @@ public class GatewayUtils {
 
     public static void setAPIRelatedTags(TracingSpan tracingSpan, org.apache.synapse.MessageContext messageContext) {
 
-        org.apache.axis2.context.MessageContext axis2MessageContext =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        Object restUrlPostfix = axis2MessageContext.getProperty(APIMgtGatewayConstants.REST_URL_POSTFIX);
-        Object httpMethod = axis2MessageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
-        if (restUrlPostfix != null) {
-            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_REQUEST_PATH, (String) restUrlPostfix);
-        }
-        if (httpMethod != null) {
-            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_REQUEST_METHOD, (String) httpMethod);
-        }
         Object electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
         if (electedResource != null) {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_RESOURCE, (String) electedResource);
         }
-
-        setTracingId(tracingSpan, axis2MessageContext);
+        Object api = messageContext.getProperty(APIMgtGatewayConstants.API);
+        if (api != null) {
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_NAME, (String) api);
+        }
+        Object version = messageContext.getProperty(APIMgtGatewayConstants.VERSION);
+        if (version != null) {
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_VERSION, (String) version);
+        }
+        Object consumerKey = messageContext.getProperty(APIMgtGatewayConstants.CONSUMER_KEY);
+        if (consumerKey != null) {
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_APPLICATION_CONSUMER_KEY, (String) consumerKey);
+        }
     }
 
     private static void setTracingId(TracingSpan tracingSpan, MessageContext axis2MessageContext) {
@@ -903,6 +903,27 @@ public class GatewayUtils {
                     (String) headersMap.get(APIConstants.ACTIVITY_ID));
         } else {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ACTIVITY_ID, axis2MessageContext.getMessageID());
+        }
+    }
+    public static void setRequestRelatedTags(TracingSpan tracingSpan, org.apache.synapse.MessageContext messageContext){
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Object restUrlPostfix = axis2MessageContext.getProperty(APIMgtGatewayConstants.REST_URL_POSTFIX);
+        String httpMethod = (String) (axis2MessageContext.getProperty(Constants.Configuration.HTTP_METHOD));
+        if (restUrlPostfix != null) {
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_REQUEST_PATH, (String) restUrlPostfix);
+        }
+        if (httpMethod != null) {
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_REQUEST_METHOD, httpMethod);
+        }
+        setTracingId(tracingSpan, axis2MessageContext);
+    }
+
+    public static void setEndpointRelatedInformation(TracingSpan tracingSpan,
+                                                     org.apache.synapse.MessageContext messageContext) {
+        Object endpoint = messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
+        if (endpoint != null){
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ENDPOINT, (String) endpoint);
         }
     }
 }
