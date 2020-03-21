@@ -169,6 +169,9 @@ public class OAS3Parser extends APIDefinition {
                         if (applicationJson == null && applicationXml == null) {
                             setDefaultGeneratedResponse(genCode);
                         }
+                    }else if (responseCode == minResponseCode && !setPayloadResponse) {
+                        setDefaultGeneratedResponse(genCode);
+                        setPayloadResponse = true;
                     }
                 }
                 genCode.append(responseSection);

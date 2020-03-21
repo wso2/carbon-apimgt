@@ -173,6 +173,9 @@ public class OAS2Parser extends APIDefinition {
                             responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
                             setPayloadResponse=true;
                         }
+                    }else if (responseCode == minResponseCode && !setPayloadResponse){
+                        setDefaultGeneratedResponse(genCode);
+                        setPayloadResponse=true;
                     }
                 }
                 genCode.append(responseSection);
