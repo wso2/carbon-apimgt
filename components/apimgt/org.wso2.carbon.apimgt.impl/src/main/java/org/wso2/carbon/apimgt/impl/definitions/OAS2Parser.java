@@ -173,7 +173,7 @@ public class OAS2Parser extends APIDefinition {
                             responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
                             setPayloadResponse = true;
                         }
-                    } else if (responseCode == minResponseCode && !setPayloadResponse){
+                    } else if (responseCode == minResponseCode && !setPayloadResponse) {
                         setDefaultGeneratedResponse(genCode);
                         setPayloadResponse = true;
                     }
@@ -196,7 +196,7 @@ public class OAS2Parser extends APIDefinition {
      * @param definitions definitions
      * @return Example Json
      */
-    private String getSchemaExample(Model model, Map<String, Model> definitions, HashSet<String> strings){
+    private String getSchemaExample(Model model, Map<String, Model> definitions, HashSet<String> strings) {
         Example example = ExampleBuilder.fromModel("Model", model, definitions, new HashSet<String>());
         SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
         Json.mapper().registerModule(simpleModule);
@@ -222,7 +222,7 @@ public class OAS2Parser extends APIDefinition {
      * @param type  mediaType (Json/Xml)
      * @return generatedString
      */
-    private String getGeneratedResponseVar(String responseCode, String example, String type){
+    private String getGeneratedResponseVar(String responseCode, String example, String type) {
         return "\nvar response" + responseCode + type + " = "+ example+"\n\n";
     }
 

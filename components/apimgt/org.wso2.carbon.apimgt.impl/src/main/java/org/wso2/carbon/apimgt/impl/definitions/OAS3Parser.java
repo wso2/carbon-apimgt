@@ -159,7 +159,7 @@ public class OAS3Parser extends APIDefinition {
                                 String xmlExample = getXmlExample(xmlSchema, definitions);
                                 genCode.append(getGeneratedResponseVar(responseEntry, xmlExample, "xml"));
                             }
-                            if (responseCode == minResponseCode && !setPayloadResponse){
+                            if (responseCode == minResponseCode && !setPayloadResponse) {
                                 if (applicationJson == null) {
                                     responseSection.append(getGeneratedSetResponse(responseEntry, "xml"));
                                     setPayloadResponse = true;
@@ -183,9 +183,7 @@ public class OAS3Parser extends APIDefinition {
 
             checkAndSetEmptyScope(swagger);
             returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
-            //returnMap.put("SWAGGER", Json.pretty(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
-            //returnMap.put("policyList", apiResourceMediationPolicyList);
         }
         return returnMap;
     }
