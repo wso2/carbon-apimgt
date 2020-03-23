@@ -32,25 +32,6 @@ import java.util.Map;
 
 public class ApplicationMappingUtil {
 
-    /***
-     * Converts the sort by object according to the input
-     *
-     * @param sortBy
-     * @return Updated sort by field
-     */
-    public static String getApplicationSortByField (String sortBy) {
-        String updatedSortBy = "";
-        if (RestApiConstants.SORT_BY_NAME.equals(sortBy)) {
-            updatedSortBy = APIConstants.APPLICATION_NAME;
-        } else if (RestApiConstants.SORT_BY_THROTTLING_TIER.equals(sortBy)) {
-            updatedSortBy = APIConstants.APPLICATION_TIER;
-        } else if (RestApiConstants.SORT_BY_STATUS.equals(sortBy)) {
-            updatedSortBy = APIConstants.APPLICATION_STATUS;
-        }
-
-        return updatedSortBy;
-    }
-
     public static ApplicationListDTO fromApplicationsToDTO(Application[] applications, int limit, int offset) {
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
         List<ApplicationInfoDTO> applicationInfoDTOs = applicationListDTO.getList();

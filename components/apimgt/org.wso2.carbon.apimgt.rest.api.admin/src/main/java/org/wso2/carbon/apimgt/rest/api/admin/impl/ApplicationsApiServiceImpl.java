@@ -8,6 +8,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.ApplicationsApiService;
@@ -75,10 +76,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     APIAdmin apiAdmin = new APIAdminImpl();
                     int tenantId = APIUtil.getTenantId(user);
                     allMatchedApps = apiAdmin.getApplicationsByTenantIdWithPagination(tenantId, 0, limit,
-                            "", "", ApplicationMappingUtil.getApplicationSortByField("name"),
+                            "", "", APIConstants.APPLICATION_NAME,
                             RestApiConstants.DEFAULT_SORT_ORDER).toArray(new Application[0]);
-                }
-                else {
+                } else {
                     allMatchedApps = apiConsumer.getApplicationsByOwner(user);
                 }
             } else { // flow at migration process
