@@ -8,7 +8,7 @@ public class OPADto{
 
     private String API_name;
 
-    private String api_version;
+    private String version;
 
     private String context_path;
 
@@ -20,6 +20,8 @@ public class OPADto{
 
     private String application_name;
 
+    private String client_ip;
+
     public OPADto(String api_type) {
         this.api_type = api_type;
     }
@@ -27,16 +29,17 @@ public class OPADto{
     public OPADto(String username, String[] scopes,
                   String API_name, String api_version,
                   String context_path, String resource_path,
-                  String http_method, String api_type, String application_name) {
+                  String http_method, String api_type, String application_name, String client_ip) {
         this.username = username;
         this.scopes = scopes;
         this.API_name = API_name;
-        this.api_version = api_version;
+        this.version = api_version;
         this.context_path = context_path;
         this.resource_path = resource_path;
         this.http_method = http_method;
         this.api_type = api_type;
         this.application_name = application_name;
+        this.client_ip = client_ip;
     }
 
     public String getUsername() {
@@ -47,12 +50,12 @@ public class OPADto{
         this.username = username;
     }
 
-    public String getApi_version() {
-        return api_version;
+    public String getVersion() {
+        return version;
     }
 
-    public void setApi_version(String api_version) {
-        this.api_version = api_version;
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public String getApi_type() {
@@ -111,4 +114,11 @@ public class OPADto{
         this.application_name = application_name;
     }
 
+    public String getClient_ip() {
+        return client_ip;
+    }
+
+    public void setClient_ip(String client_ip) {
+        this.client_ip = client_ip;
+    }
 }
