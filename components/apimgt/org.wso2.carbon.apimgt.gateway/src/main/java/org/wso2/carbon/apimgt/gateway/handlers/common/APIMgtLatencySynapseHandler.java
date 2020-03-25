@@ -23,6 +23,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -46,6 +47,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
             TracingSpan responseLatencySpan =
                     Util.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY, spanContext, tracer);
             Util.setTag(responseLatencySpan, APIMgtGatewayConstants.SPAN_KIND, APIMgtGatewayConstants.SERVER);
+            GatewayUtils.setRequestRelatedTags(responseLatencySpan, messageContext);
             messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY, responseLatencySpan);
         }
         return true;
@@ -78,6 +80,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         if (Util.tracingEnabled()) {
             TracingSpan backendLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
+            GatewayUtils.setEndpointRelatedInformation(backendLatencySpan, messageContext);
             Util.finishSpan(backendLatencySpan);
         }
         return true;
@@ -88,6 +91,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
             Util.finishSpan(responseLatencySpan);
         }
         return true;

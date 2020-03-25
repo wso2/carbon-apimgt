@@ -24,6 +24,7 @@ import io.swagger.models.Xml;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.BooleanProperty;
 import io.swagger.models.properties.DateProperty;
+import io.swagger.models.properties.DateTimeProperty;
 import io.swagger.models.properties.DoubleProperty;
 import io.swagger.models.properties.FloatProperty;
 import io.swagger.models.properties.IntegerProperty;
@@ -815,6 +816,8 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
             return new LongProperty();
         case "date":
             return new DateProperty();
+        case "dateTime":
+            return new DateTimeProperty();
         default:
             return new RefProperty();
         }

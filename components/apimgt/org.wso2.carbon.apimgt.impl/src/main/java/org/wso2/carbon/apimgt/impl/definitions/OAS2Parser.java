@@ -120,9 +120,9 @@ public class OAS2Parser extends APIDefinition {
             Map<String, Model> definitions = swagger.getDefinitions();
             //operation map to get verb
             Map<HttpMethod, Operation> operationMap = entry.getValue().getOperationMap();
-            ArrayList<Integer> responseCodes = new ArrayList<Integer>();
             List<Operation> operations = swagger.getPaths().get(path).getOperations();
             for (Operation op : operations) {
+                ArrayList<Integer> responseCodes = new ArrayList<Integer>();
                 //for each HTTP method get the verb
                 for (Map.Entry<HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
                     //add verb to apiResourceMediationPolicyObject
@@ -130,19 +130,13 @@ public class OAS2Parser extends APIDefinition {
                 }
                 StringBuilder genCode = new StringBuilder();
                 StringBuilder responseSection = new StringBuilder();
+                //for setting only one setPayload response
+                boolean setPayloadResponse = false;
                 for (String responseEntry : op.getResponses().keySet()) {
                     if (!responseEntry.equals("default")) {
                         responseCode = Integer.parseInt(responseEntry);
                         responseCodes.add(responseCode);
                         minResponseCode = Collections.min(responseCodes);
-                    }
-                    if (op.getResponses().get(responseEntry).getResponseSchema() != null) {
-                        Model model = op.getResponses().get(responseEntry).getResponseSchema();
-                        String schemaExample = getSchemaExample(model, definitions, new HashSet<String>());
-                        genCode.append(getGeneratedResponseVar(responseEntry, schemaExample, "json"));
-                        if (responseCode == minResponseCode) {
-                            responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
-                        }
                     }
                     if (op.getResponses().get(responseEntry).getExamples() != null) {
                         Object applicationJson = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_JSON_MEDIA_TYPE);
@@ -150,8 +144,9 @@ public class OAS2Parser extends APIDefinition {
                         if (applicationJson != null) {
                             String jsonExample = Json.pretty(applicationJson);
                             genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
-                            if (responseCode == minResponseCode) {
+                            if (responseCode == minResponseCode && !setPayloadResponse){
                                 responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
+                                setPayloadResponse = true;
                                 if (applicationXml != null) {
                                     responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
                                 }
@@ -160,15 +155,27 @@ public class OAS2Parser extends APIDefinition {
                         if (applicationXml != null) {
                             String xmlExample = applicationXml.toString();
                             genCode.append(getGeneratedResponseVar(responseEntry, xmlExample, "xml"));
-                            if (responseCode == minResponseCode) {
+                            if (responseCode == minResponseCode && !setPayloadResponse){
                                 if (applicationJson == null) {
                                     responseSection.append(getGeneratedSetResponse(responseEntry, "xml"));
+                                    setPayloadResponse = true;
                                 }
                             }
                         }
                         if (applicationJson == null && applicationXml == null) {
                             setDefaultGeneratedResponse(genCode);
                         }
+                    } else if (op.getResponses().get(responseEntry).getResponseSchema() != null) {
+                        Model model = op.getResponses().get(responseEntry).getResponseSchema();
+                        String schemaExample = getSchemaExample(model, definitions, new HashSet<String>());
+                        genCode.append(getGeneratedResponseVar(responseEntry, schemaExample, "json"));
+                        if (responseCode == minResponseCode && !setPayloadResponse){
+                            responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
+                            setPayloadResponse = true;
+                        }
+                    } else if (responseCode == minResponseCode && !setPayloadResponse) {
+                        setDefaultGeneratedResponse(genCode);
+                        setPayloadResponse = true;
                     }
                 }
                 genCode.append(responseSection);
@@ -189,7 +196,7 @@ public class OAS2Parser extends APIDefinition {
      * @param definitions definitions
      * @return Example Json
      */
-    private String getSchemaExample(Model model, Map<String, Model> definitions, HashSet<String> strings){
+    private String getSchemaExample(Model model, Map<String, Model> definitions, HashSet<String> strings) {
         Example example = ExampleBuilder.fromModel("Model", model, definitions, new HashSet<String>());
         SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
         Json.mapper().registerModule(simpleModule);
@@ -215,7 +222,7 @@ public class OAS2Parser extends APIDefinition {
      * @param type  mediaType (Json/Xml)
      * @return generatedString
      */
-    private String getGeneratedResponseVar(String responseCode, String example, String type){
+    private String getGeneratedResponseVar(String responseCode, String example, String type) {
         return "\nvar response" + responseCode + type + " = "+ example+"\n\n";
     }
 

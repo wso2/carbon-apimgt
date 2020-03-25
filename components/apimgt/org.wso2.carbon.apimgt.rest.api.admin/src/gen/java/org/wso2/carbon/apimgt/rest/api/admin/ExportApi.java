@@ -40,11 +40,11 @@ public class ExportApi  {
 
     public Response exportApiGet(@ApiParam(value = "API Name\n",required=true) @QueryParam("name")  String name,
     @ApiParam(value = "Version of the API\n",required=true) @QueryParam("version")  String version,
-    @ApiParam(value = "Provider name of the API\n",required=true) @QueryParam("providerName")  String providerName,
     @ApiParam(value = "Format of output documents. Can be YAML or JSON.\n",required=true, allowableValues="{values=[JSON, YAML]}") @QueryParam("format")  String format,
+    @ApiParam(value = "Provider name of the API\n") @QueryParam("providerName")  String providerName,
     @ApiParam(value = "Preserve API Status on export\n") @QueryParam("preserveStatus")  Boolean preserveStatus)
     {
-    return delegate.exportApiGet(name,version,providerName,format,preserveStatus);
+    return delegate.exportApiGet(name,version,format,providerName,preserveStatus);
     }
     @GET
     @Path("/applications")

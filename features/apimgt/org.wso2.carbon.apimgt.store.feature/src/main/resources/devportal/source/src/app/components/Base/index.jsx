@@ -330,6 +330,8 @@ class Layout extends React.Component {
         } = theme;
         const { openNavBar, selected } = this.state;
         const { tenantDomain, setTenantDomain } = this.context;
+        const { customUrl: { enabled: customUrlEnabled, tenantDomain: customUrlEnabledDomain } } = app;
+
         const user = AuthManager.getUser();
         // TODO: Refer to fix: https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810 ~tmkb
         const commonStyle = {
@@ -430,7 +432,7 @@ class Layout extends React.Component {
                                 </Hidden>
                                 <VerticalDivider height={32} />
                                 {showSearch && (<HeaderSearch id='headerSearch' />)}
-                                {tenantDomain && tenantDomain !== 'INVALID' && (
+                                {tenantDomain && customUrlEnabledDomain === 'null' && tenantDomain !== 'INVALID' && (
                                     <Link
                                         style={{
                                             textDecoration: 'none',

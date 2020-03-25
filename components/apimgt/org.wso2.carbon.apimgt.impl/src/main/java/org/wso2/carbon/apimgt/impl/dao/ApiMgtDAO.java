@@ -4873,7 +4873,6 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
-        Application applications = null;
         String sqlQuery = null;
         List<Application> applicationList = new ArrayList<>();
         sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_BY_TENANT_ID");
@@ -4900,6 +4899,7 @@ public class ApiMgtDAO {
                 application.setGroupId(rs.getString("GROUP_ID"));
                 subscriber.setTenantId(rs.getInt("TENANT_ID"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setOwner(subscriberName);
                 applicationList.add(application);
             }
@@ -13349,7 +13349,7 @@ public class ApiMgtDAO {
      * @return APISubscriptionInfoDTO[]
      * @throws APIManagementException if failed to get Subscribed APIs
      */
-    public APISubscriptionInfoDTO[] getSubscribedAPIsForAnApp(String userId, String applicationName) throws
+    public APISubscriptionInfoDTO[] getSubscribedAPIsForAnApp(String userId, int applicationID) throws
             APIManagementException {
         List<APISubscriptionInfoDTO> apiSubscriptionInfoDTOS = new ArrayList<APISubscriptionInfoDTO>();
         Connection conn = null;
@@ -13369,7 +13369,7 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, tenantId);
-            ps.setString(2, applicationName);
+            ps.setInt(2, applicationID);
             rs = ps.executeQuery();
             while (rs.next()) {
                 APISubscriptionInfoDTO infoDTO = new APISubscriptionInfoDTO();

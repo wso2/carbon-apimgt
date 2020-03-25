@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -1127,6 +1128,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<>();
         API oldApi = getAPI(api.getId());
+        Gson gson = new Gson();
+        Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
+                HashMap.class);
+        if (oldMonetizationProperties != null && !oldMonetizationProperties.isEmpty()) {
+            Map<String, String> newMonetizationProperties = gson.fromJson(api.getMonetizationProperties().toString(),
+                    HashMap.class);
+            if (newMonetizationProperties != null) {
+                for (Map.Entry<String, String> entry : oldMonetizationProperties.entrySet()) {
+                    String newValue = newMonetizationProperties.get(entry.getKey());
+                    if (StringUtils.isAllBlank(newValue)) {
+                        newMonetizationProperties.put(entry.getKey(), entry.getValue());
+                    }
+                }
+                JSONParser parser = new JSONParser();
+                try {
+                    JSONObject jsonObj = (JSONObject) parser.parse(gson.toJson(newMonetizationProperties));
+                    api.setMonetizationProperties(jsonObj);
+                } catch (ParseException e) {
+                    throw new APIManagementException("Error when parsing monetization properties ", e);
+                }
+            }
+        }
+
         if (oldApi.getStatus().equals(api.getStatus())) {
 
             String previousDefaultVersion = getDefaultVersion(api.getId());
@@ -3283,13 +3307,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), authorizedRoles,
                         artifact.getPath(), registry);
-
-                String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
-                if (org.apache.commons.lang.StringUtils.isEmpty(docFilePath)) {
-                    int startIndex = docFilePath.indexOf("governance") + "governance".length();
-                    String filePath = docFilePath.substring(startIndex, docFilePath.length());
+                String docType = artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE);
+                if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equals(docType) ||
+                        APIConstants.IMPLEMENTATION_TYPE_MARKDOWN.equals(docType)) {
+                    String docContentPath = APIUtil.getAPIDocPath(api.getId()) + APIConstants
+                            .INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR
+                            + artifact.getAttribute(APIConstants.DOC_NAME);
+                    APIUtil.clearResourcePermissions(docContentPath, api.getId(), tenantId);
                     APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
-                            authorizedRoles, filePath, registry);
+                            authorizedRoles, docContentPath, registry);
+                } else if (APIConstants.IMPLEMENTATION_TYPE_FILE.equals(docType)) {
+                    String docFilePath = APIUtil.getDocumentationFilePath(api.getId(),
+                            artifact.getAttribute(APIConstants.DOC_FILE_PATH).split(
+                                    APIConstants.DOCUMENT_FILE_DIR + RegistryConstants.PATH_SEPARATOR)[1]);
+                    APIUtil.clearResourcePermissions(docFilePath, api.getId(), tenantId);
+                    APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                            authorizedRoles, docFilePath, registry);
                 }
             } catch (UserStoreException e) {
                 throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
@@ -6216,8 +6249,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param blockConditionsDTO Blockcondition Dto event
      */
     private void publishBlockingEvent(BlockConditionsDTO blockConditionsDTO, String state) {
-        OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
-
         Object[] objects = new Object[]{blockConditionsDTO.getConditionId(), blockConditionsDTO.getConditionType(),
                 blockConditionsDTO.getConditionValue(),state, tenantDomain};
         Event blockingMessage = new Event(APIConstants.BLOCKING_CONDITIONS_STREAM_ID, System.currentTimeMillis(),
@@ -6225,12 +6256,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
 
         if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
-            eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP, blockingMessage);
+            APIUtil.publishEvent(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP, blockingMessage);
         }
     }
 
     private void publishKeyTemplateEvent(String templateValue, String state) {
-        OutputEventAdapterService eventAdapterService = ServiceReferenceHolder.getInstance().getOutputEventAdapterService();
         Object[] objects = new Object[]{templateValue,state};
         Event keyTemplateMessage = new Event(APIConstants.KEY_TEMPLATE_STREM_ID, System.currentTimeMillis(),
                 null, null, objects);
@@ -6239,8 +6269,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
         if (throttleProperties.getDataPublisher() != null && throttleProperties.getDataPublisher().isEnabled()) {
-            eventAdapterService.publish(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP,
-                    keyTemplateMessage);
+            APIUtil.publishEvent(APIConstants.BLOCKING_EVENT_PUBLISHER, Collections.EMPTY_MAP, keyTemplateMessage);
         }
     }
 
@@ -7340,6 +7369,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 product.setEnvironments(publishedEnvironments);
                 failedGateways.put("PUBLISHED", failedToPublishEnvironments);
                 failedGateways.put("UNPUBLISHED", Collections.<String, String>emptyMap());
+            }
+        }
+
+        APIProduct oldApi = getAPIProduct(product.getId());
+        Gson gson = new Gson();
+        Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
+                HashMap.class);
+        if (oldMonetizationProperties != null && !oldMonetizationProperties.isEmpty()) {
+            Map<String, String> newMonetizationProperties = gson.fromJson(product.getMonetizationProperties().toString(),
+                    HashMap.class);
+            if (newMonetizationProperties != null) {
+                for (Map.Entry<String, String> entry : oldMonetizationProperties.entrySet()) {
+                    String newValue = newMonetizationProperties.get(entry.getKey());
+                    if (StringUtils.isAllBlank(newValue)) {
+                        newMonetizationProperties.put(entry.getKey(), entry.getValue());
+                    }
+                }
+                JSONParser parser = new JSONParser();
+                try {
+                    JSONObject jsonObj = (JSONObject) parser.parse(gson.toJson(newMonetizationProperties));
+                    product.setMonetizationProperties(jsonObj);
+                } catch (ParseException e) {
+                    throw new APIManagementException("Error when parsing monetization properties ", e);
+                }
             }
         }
 

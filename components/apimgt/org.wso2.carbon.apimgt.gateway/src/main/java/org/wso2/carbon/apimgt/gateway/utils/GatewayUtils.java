@@ -27,6 +27,7 @@ import com.nimbusds.jwt.SignedJWT;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.codec.binary.Base64;
@@ -59,6 +60,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -88,6 +91,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 public class GatewayUtils {
 
@@ -867,6 +871,59 @@ public class GatewayUtils {
                     return null;
                 }
             }
+        }
+    }
+
+    public static void setAPIRelatedTags(TracingSpan tracingSpan, org.apache.synapse.MessageContext messageContext) {
+
+        Object electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
+        if (electedResource != null) {
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_RESOURCE, (String) electedResource);
+        }
+        Object api = messageContext.getProperty(APIMgtGatewayConstants.API);
+        if (api != null) {
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_NAME, (String) api);
+        }
+        Object version = messageContext.getProperty(APIMgtGatewayConstants.VERSION);
+        if (version != null) {
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_API_VERSION, (String) version);
+        }
+        Object consumerKey = messageContext.getProperty(APIMgtGatewayConstants.CONSUMER_KEY);
+        if (consumerKey != null) {
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_APPLICATION_CONSUMER_KEY, (String) consumerKey);
+        }
+    }
+
+    private static void setTracingId(TracingSpan tracingSpan, MessageContext axis2MessageContext) {
+
+        Map headersMap =
+                (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        if (headersMap.containsKey(APIConstants.ACTIVITY_ID)) {
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ACTIVITY_ID,
+                    (String) headersMap.get(APIConstants.ACTIVITY_ID));
+        } else {
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ACTIVITY_ID, axis2MessageContext.getMessageID());
+        }
+    }
+    public static void setRequestRelatedTags(TracingSpan tracingSpan, org.apache.synapse.MessageContext messageContext){
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Object restUrlPostfix = axis2MessageContext.getProperty(APIMgtGatewayConstants.REST_URL_POSTFIX);
+        String httpMethod = (String) (axis2MessageContext.getProperty(Constants.Configuration.HTTP_METHOD));
+        if (restUrlPostfix != null) {
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_REQUEST_PATH, (String) restUrlPostfix);
+        }
+        if (httpMethod != null) {
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_REQUEST_METHOD, httpMethod);
+        }
+        setTracingId(tracingSpan, axis2MessageContext);
+    }
+
+    public static void setEndpointRelatedInformation(TracingSpan tracingSpan,
+                                                     org.apache.synapse.MessageContext messageContext) {
+        Object endpoint = messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
+        if (endpoint != null){
+            Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ENDPOINT, (String) endpoint);
         }
     }
 }

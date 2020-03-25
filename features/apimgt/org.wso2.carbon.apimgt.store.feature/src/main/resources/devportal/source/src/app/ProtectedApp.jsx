@@ -68,7 +68,13 @@ class ProtectedApp extends Component {
         window.addEventListener('message', this.handleMessage);
         const { location: { search } } = this.props;
         const { setTenantDomain, setSettings } = this.context;
-        const { tenant } = queryString.parse(search);
+        const { app: { customUrl: { tenantDomain: customUrlEnabledDomain } }} = Settings;
+        let tenant = null;
+        if (customUrlEnabledDomain !== 'null') {
+            tenant = customUrlEnabledDomain;
+        } else {
+            tenant = queryString.parse(search).tenant;
+        }
         const tenantApi = new Tenants();
         tenantApi.getTenantsByState().then((response) => {
             const { list } = response.body;
@@ -78,7 +84,7 @@ class ProtectedApp extends Component {
                 if (tenant) {
                     this.setState({ tenantResolved: true, tenantList: list }, setTenantDomain(tenant));
                 } else {
-                    this.setState({ tenantResolved: true, tenantList: response.body.list });
+                    this.setState({ tenantResolved: true, tenantList: list });
                 }
             } else {
                 this.setState({ tenantResolved: true });
@@ -172,6 +178,8 @@ class ProtectedApp extends Component {
         }, 2000);
     }
 
+
+
     /**
      * Change the environment with "environment" query parameter
      * @return {String} environment name in the query param
@@ -210,8 +218,8 @@ class ProtectedApp extends Component {
         const {
             userResolved, tenantList, notEnoughPermission, tenantResolved, clientId,
         } = this.state;
-        const checkSessionURL = 'https://' + window.location.host + '/oidc/checksession?client_id='
-            + clientId + '&redirect_uri=https://' + window.location.host
+        const checkSessionURL = window.location.origin + '/oidc/checksession?client_id='
+            + clientId + '&redirect_uri='+ window.location.origin
             + Settings.app.context + '/services/auth/callback/login';
         const { tenantDomain, settings } = this.context;
         if (!userResolved) {

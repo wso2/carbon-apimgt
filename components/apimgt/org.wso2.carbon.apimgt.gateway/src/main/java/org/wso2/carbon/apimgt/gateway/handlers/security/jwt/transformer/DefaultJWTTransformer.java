@@ -24,14 +24,16 @@ import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
 
 import java.util.Map;
-
+import java.util.Properties;
 
 public class DefaultJWTTransformer implements JWTTransformer {
 
     private JWTConfigurationDto jwtConfigurationDto;
+    private Properties defaultClaimMappings;
 
-    public DefaultJWTTransformer(JWTConfigurationDto jwtConfigurationDto) {
+    public DefaultJWTTransformer(JWTConfigurationDto jwtConfigurationDto, Properties defaultClaimMappings) {
 
+        this.defaultClaimMappings = defaultClaimMappings;
         this.jwtConfigurationDto = jwtConfigurationDto;
     }
 
@@ -40,10 +42,23 @@ public class DefaultJWTTransformer implements JWTTransformer {
 
         String issuer = jwtClaimsSet.getIssuer();
         TokenIssuerDto tokenIssuerDto = jwtConfigurationDto.getTokenIssuerDtoMap().get(issuer);
+        JWTClaimsSet.Builder transformedJWT = new JWTClaimsSet.Builder();
         if (tokenIssuerDto != null) {
+            if (!tokenIssuerDto.isDisableDefaultClaimMapping()) {
+                for (Map.Entry<String, Object> claimEntry : jwtClaimsSet.getClaims().entrySet()) {
+                    String claimKey = claimEntry.getKey();
+                    if (defaultClaimMappings.containsKey(claimEntry.getKey())) {
+                        claimKey = (String) defaultClaimMappings.get(claimKey);
+                    }
+                    transformedJWT.claim(claimKey, claimEntry.getValue());
+                }
+            } else {
+                transformedJWT = new JWTClaimsSet.Builder(jwtClaimsSet);
+            }
+
             Map<String, ClaimMappingDto> claimConfigurations = tokenIssuerDto.getClaimConfigurations();
             JWTClaimsSet.Builder jwtBuilder = new JWTClaimsSet.Builder();
-            for (Map.Entry<String, Object> claimEntry : jwtClaimsSet.getClaims().entrySet()) {
+            for (Map.Entry<String, Object> claimEntry : transformedJWT.build().getClaims().entrySet()) {
                 ClaimMappingDto claimMappingDto = claimConfigurations.get(claimEntry.getKey());
                 String claimKey = claimEntry.getKey();
                 if (claimMappingDto != null) {
@@ -52,8 +67,17 @@ public class DefaultJWTTransformer implements JWTTransformer {
                 jwtBuilder.claim(claimKey, claimEntry.getValue());
             }
             return jwtBuilder.build();
+        } else {
+            for (Map.Entry<String, Object> claimEntry : jwtClaimsSet.getClaims().entrySet()) {
+                String claimKey = claimEntry.getKey();
+                if (defaultClaimMappings.containsKey(claimEntry.getKey())) {
+                    claimKey = (String) defaultClaimMappings.get(claimKey);
+                }
+                transformedJWT.claim(claimKey, claimEntry.getValue());
+            }
+            return transformedJWT.build();
         }
-        return jwtClaimsSet;
+
     }
 
     @Override

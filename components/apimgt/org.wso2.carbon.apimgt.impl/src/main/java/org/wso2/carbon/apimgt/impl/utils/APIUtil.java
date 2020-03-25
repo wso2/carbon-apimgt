@@ -7162,8 +7162,7 @@ public final class APIUtil {
      */
     public static JSONObject getTenantRESTAPIScopesConfig(String tenantDomain) throws APIManagementException {
         JSONObject restAPIConfigJSON = null;
-        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
-        JSONObject tenantConfJson = getTenantConfig(tenantId);
+        JSONObject tenantConfJson = getTenantConfig(tenantDomain);
         if (tenantConfJson != null) {
             restAPIConfigJSON = getRESTAPIScopesFromTenantConfig(tenantConfJson);
             if (restAPIConfigJSON == null) {
@@ -7181,8 +7180,7 @@ public final class APIUtil {
      */
     public static JSONObject getTenantRESTAPIScopeRoleMappingsConfig(String tenantDomain) throws APIManagementException {
         JSONObject restAPIConfigJSON = null;
-        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
-        JSONObject tenantConfJson = getTenantConfig(tenantId);
+        JSONObject tenantConfJson = getTenantConfig(tenantDomain);
         if (tenantConfJson != null) {
             restAPIConfigJSON = getRESTAPIScopeRoleMappingsFromTenantConfig(tenantConfJson);
             if (restAPIConfigJSON == null) {
@@ -7213,6 +7211,9 @@ public final class APIUtil {
             if (tenantConfigCache.containsKey(cacheName)) {
                 return (JSONObject) tenantConfigCache.get(cacheName);
             } else {
+                if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
+                    loadTenantRegistry(tenantId);
+                }
                 RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
                 UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
                 Resource resource;
@@ -9786,11 +9787,11 @@ public final class APIUtil {
     public static JwtTokenInfoDTO getJwtTokenInfoDTO(Application application, String userName, String tenantDomain)
             throws APIManagementException {
 
-        String applicationName = application.getName();
+        int applicationId = application.getId();
 
         String appOwner = application.getOwner();
         APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance()
-                .getSubscribedAPIsForAnApp(appOwner, applicationName);
+                .getSubscribedAPIsForAnApp(appOwner, applicationId);
 
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setSubscriber("sub");
@@ -10247,9 +10248,7 @@ public final class APIUtil {
         public static boolean isPerTenantServiceProviderEnabled(String tenantDomain) throws APIManagementException,
                 RegistryException {
 
-        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
-        loadTenantRegistry(tenantId);
-        JSONObject tenantConfig = getTenantConfig(tenantId);
+            JSONObject tenantConfig = getTenantConfig(tenantDomain);
         if (tenantConfig.containsKey(APIConstants.ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION)) {
             return (boolean) tenantConfig.get(APIConstants.ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION);
         }
@@ -10401,6 +10400,24 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    public static void publishEvent(String eventName, Map dynamicProperties, Event event) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
+                    .publish(eventName, dynamicProperties, event);
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
     }
 
 }
