@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -30,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ApplicationMappingUtil {
-
 
     public static ApplicationListDTO fromApplicationsToDTO(Application[] applications, int limit, int offset) {
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
