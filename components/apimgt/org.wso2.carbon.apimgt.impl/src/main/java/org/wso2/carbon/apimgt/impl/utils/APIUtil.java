@@ -10331,7 +10331,6 @@ public final class APIUtil {
         return Boolean.parseBoolean(anonymousMode);
     }
 
-
     public static Map<String, EndpointSecurity> setEndpointSecurityForAPIProduct(API api) throws APIManagementException {
         Map<String,EndpointSecurity> endpointSecurityMap = new HashMap<>();
         try {

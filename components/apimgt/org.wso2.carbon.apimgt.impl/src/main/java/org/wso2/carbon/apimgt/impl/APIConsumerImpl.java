@@ -5798,7 +5798,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 return APIUtil.isDevPortalAnonymous();
             }
         } catch (APIManagementException e) {
-            log.debug("Error while retrieving Recommendation config from registry", e);
+            log.error("Error while retrieving Anonymous config from registry", e);
         }
         return true;
     }

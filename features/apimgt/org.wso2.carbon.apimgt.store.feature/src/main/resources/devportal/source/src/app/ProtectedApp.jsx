@@ -68,7 +68,7 @@ class ProtectedApp extends Component {
         window.addEventListener('message', this.handleMessage);
         const { location: { search } } = this.props;
         const { setTenantDomain, setSettings } = this.context;
-        const { app: { customUrl: { tenantDomain: customUrlEnabledDomain } }} = Settings;
+        const { app: { customUrl: { tenantDomain: customUrlEnabledDomain } } } = Settings;
         let tenant = null;
         if (customUrlEnabledDomain !== 'null') {
             tenant = customUrlEnabledDomain;
@@ -179,7 +179,6 @@ class ProtectedApp extends Component {
     }
 
 
-
     /**
      * Change the environment with "environment" query parameter
      * @return {String} environment name in the query param
@@ -219,7 +218,7 @@ class ProtectedApp extends Component {
             userResolved, tenantList, notEnoughPermission, tenantResolved, clientId,
         } = this.state;
         const checkSessionURL = window.location.origin + '/oidc/checksession?client_id='
-            + clientId + '&redirect_uri='+ window.location.origin
+            + clientId + '&redirect_uri=' + window.location.origin
             + Settings.app.context + '/services/auth/callback/login';
         const { tenantDomain, settings } = this.context;
         if (!userResolved) {
