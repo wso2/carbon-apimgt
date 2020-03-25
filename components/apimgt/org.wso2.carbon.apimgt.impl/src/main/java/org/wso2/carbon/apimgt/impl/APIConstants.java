@@ -689,9 +689,7 @@ public final class APIConstants {
     public static final String API_STORE_MAP_EXISTING_AUTH_APPS = API_STORE + "MapExistingAuthApps";
     public static final String API_STORE_API_KEY_ALIAS = API_STORE + "ApiKeyAlias";
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
-
-    public static final String API_DEVPORTAL_ANONYMOUS_MODE = API_STORE+"EnableAnonymousMode";
-
+    public static final String API_DEVPORTAL_ANONYMOUS_MODE = API_STORE + "EnableAnonymousMode";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";
