@@ -49,6 +49,9 @@
              JWT. -->
         <!--ConsumerDialectURI>http://wso2.org/claims</ConsumerDialectURI-->
 
+        <!-- Whether to convert claims retrieved from AuthorizationGrantCache to ConsumerDialectURI -->
+        <!--ConvertClaimsToConsumerDialect>false</ConvertClaimsToConsumerDialect-->
+
         <!-- Signature algorithm. Accepts "SHA256withRSA" or "NONE". To disable signing explicitly specify "NONE". -->
         <!--SignatureAlgorithm>SHA256withRSA</SignatureAlgorithm-->
 
