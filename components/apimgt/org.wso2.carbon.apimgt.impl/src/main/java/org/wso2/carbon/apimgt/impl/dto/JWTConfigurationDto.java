@@ -32,7 +32,7 @@ public class JWTConfigurationDto {
     private String claimRetrieverImplClass;
     private String gatewayJWTGeneratorImpl;
     private Map<String,TokenIssuerDto> tokenIssuerDtoMap = new HashMap();
-    private Set<String> jwtAdditionalClaims = new HashSet<>();
+    private Set<String> jwtExcludedClaims = new HashSet<>();
 
     public boolean isEnabled() {
 
@@ -114,13 +114,13 @@ public class JWTConfigurationDto {
         this.tokenIssuerDtoMap = tokenIssuerDtoMap;
     }
 
-    public Set<String> getJwtAdditionalClaims() {
+    public Set<String> getJWTExcludedClaims() {
 
-        return jwtAdditionalClaims;
+        return jwtExcludedClaims;
     }
 
-    public void setJwtAdditionalClaims(Set<String> jwtClaims) {
+    public void setJwtExcludedClaims(Set<String> jwtClaims) {
 
-        this.jwtAdditionalClaims = jwtClaims;
+        this.jwtExcludedClaims = jwtClaims;
     }
 }

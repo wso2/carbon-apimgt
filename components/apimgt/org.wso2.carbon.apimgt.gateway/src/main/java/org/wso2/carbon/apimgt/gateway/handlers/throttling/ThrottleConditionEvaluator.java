@@ -207,16 +207,18 @@ public class ThrottleConditionEvaluator {
     private boolean isJWTClaimPresent(AuthenticationContext authenticationContext, ConditionDTO condition) {
 
         Map assertions = GatewayUtils.getJWTClaims(authenticationContext);
-
-        Object value = assertions.get(condition.getConditionName());
-        if (value == null) {
-            return false;
-        } else if (value instanceof String) {
-            String valueString = (String) value;
-            return valueString.matches(condition.getConditionValue());
-        } else {
-            return false;
+        if (assertions != null) {
+            Object value = assertions.get(condition.getConditionName());
+            if (value == null) {
+                return false;
+            } else if (value instanceof String) {
+                String valueString = (String) value;
+                Pattern pattern = Pattern.compile(condition.getConditionValue());
+                Matcher matcher = pattern.matcher(valueString);
+                return matcher.find();
+            }
         }
+        return false;
     }
 
     private boolean isJWTClaimPresent(AuthenticationContext authenticationContext, ConditionDto.JWTClaimConditions
@@ -232,7 +234,9 @@ public class ThrottleConditionEvaluator {
                 break;
             } else if (value instanceof String) {
                 String valueString = (String) value;
-                status = status && valueString.matches(jwtClaim.getValue());
+                Pattern pattern = Pattern.compile(jwtClaim.getValue());
+                Matcher matcher = pattern.matcher(valueString);
+                status = status && matcher.find();
             } else {
                 status = false;
             }
@@ -255,7 +259,9 @@ public class ThrottleConditionEvaluator {
                 status = false;
                 break;
             } else {
-                status = status && value.matches(queryParam.getValue());
+                Pattern pattern = Pattern.compile(queryParam.getValue());
+                Matcher matcher = pattern.matcher(value);
+                status = status && matcher.find();
             }
         }
         if (condition.isInvert()) {
@@ -269,12 +275,16 @@ public class ThrottleConditionEvaluator {
 
         Map<String, String> queryParamMap = GatewayUtils.getQueryParams(messageContext);
 
-        String value = queryParamMap.get(condition.getConditionName());
-
-        if (value == null) {
-            return false;
+        if (queryParamMap != null) {
+            String value = queryParamMap.get(condition.getConditionName());
+            if (value == null) {
+                return false;
+            }
+            Pattern pattern = Pattern.compile(condition.getConditionValue());
+            Matcher matcher = pattern.matcher(value);
+            return matcher.find();
         }
-        return value.matches(condition.getConditionValue());
+        return false;
     }
 
     private boolean isMatchingIP(MessageContext messageContext, ConditionDTO condition) {

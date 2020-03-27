@@ -88,7 +88,7 @@ export default function TagCloudListing() {
                 </div>
             </div>
             <div className={classes.listContentWrapper}>
-                {allTags && <TagCloudListingTags allTags={allTags} />}
+                {allTags && <TagCloudListingTags allTags={allTags} mainPage={true} />}
             </div>
         </main>
     );

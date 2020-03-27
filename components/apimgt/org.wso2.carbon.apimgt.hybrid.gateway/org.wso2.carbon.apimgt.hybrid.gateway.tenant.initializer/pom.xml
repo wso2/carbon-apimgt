@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>org.wso2.carbon.apimgt.hybrid.gateway</artifactId>
-        <version>6.6.108-SNAPSHOT</version>
+        <version>6.6.166-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -157,7 +157,8 @@
                             org.wso2.carbon.user.api.*; version="${imp.pkg.version.org.wso2.carbon.user.api}",
                             org.wso2.carbon.user.core.*; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.base.*; version="${imp.pkg.version.org.wso2.carbon.base}",
-                            org.apache.commons.io.*
+                            org.apache.commons.io.*,
+                            org.wso2.carbon.ntask.core.*
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.hybrid.gateway.tenant.initializer.internal,

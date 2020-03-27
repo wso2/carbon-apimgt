@@ -37,16 +37,10 @@ const config = {
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
             AppTests: path.resolve(__dirname, 'source/Tests/'),
         },
-        extensions: ['.js', '.jsx'],
+        extensions: ['.mjs','.js', '.jsx'],
     },
     module: {
         rules: [
-            {
-                test: /\.js$/,
-                use: ['source-map-loader'],
-                enforce: 'pre',
-                exclude: [/node_modules\/swagger-ui/g, ],
-            },
             {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
@@ -114,4 +108,4 @@ module.exports = function(env) {
     }
     return config;
 };
-/* eslint-enable */
+

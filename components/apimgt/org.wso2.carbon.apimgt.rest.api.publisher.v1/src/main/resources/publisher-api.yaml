@@ -71,7 +71,7 @@ securityDefinitions:
   OAuth2Security:
     type: oauth2
     flow: password
-    tokenUrl: https://localhost:9443/token
+    tokenUrl: https://localhost:9443/oauth2/token
     scopes:
       openid: Authorize access to user details
       apim:api_view: View API
@@ -610,15 +610,15 @@ paths:
             $ref: '#/definitions/Error'
 
   ################################################################
-  # The swagger resource of "Individual API" resource APIs
+  # Generates Mock/Sample Payloads from Examples in API Definition
   ################################################################
 
-  /apis/{apiId}/generate-mock-responses:
+  /apis/{apiId}/generate-mock-scripts:
     #-----------------------------------------------------
     # Generate Mock responses from Swagger/OAS Definition
     #-----------------------------------------------------
     post:
-      operationId: generateMockResponses
+      operationId: generateMockScripts
       summary: Generate mock response payloads
       description: |
         This operation can be used to generate mock responses from examples of swagger definition of an API.
@@ -669,6 +669,64 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ################################################################
+  # Generated Mock/Sample Payloads from Examples in API Definition
+  ################################################################
+
+  /apis/{apiId}/generated-mock-scripts:
+    #-----------------------------------------------------
+    # resets Mock responses from Swagger/OAS Definition
+    #-----------------------------------------------------
+    get:
+      operationId: getGeneratedMockScriptsOfAPI
+      summary: Generate mock response payloads
+      description: |
+        This operation can be used to generate mock responses from examples of swagger definition of an API.
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/If-None-Match'
+      tags:
+        - APIs
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/MockResponsePayloadList'
+          description: |
+            OK.
+            Requested swagger document of the API is returned with example responses
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
 
   ################################################################
   # The resource policy definitions of "Individual API" resource APIs
@@ -5054,7 +5112,7 @@ paths:
     get:
       security:
         - OAuth2Security:
-            - apim:api_publish
+            - apim:api_view
       summary: |
         Retrieve/Search API Products
       description: |
@@ -9186,6 +9244,33 @@ definitions:
             type: string
           associatedType:
             type: string
+
+  #-----------------------------------------------------
+  # The Mock Response Payload List resource
+  #-----------------------------------------------------
+  MockResponsePayloadList:
+    title: Mock Response Payload list
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/MockResponsePayloadInfo'
+
+  #-----------------------------------------------------
+  # The Mock Response Payload info resource
+  #-----------------------------------------------------
+  MockResponsePayloadInfo:
+    title : Mock Response Payload info object
+    properties:
+      path:
+        type: string
+        description: path of the resource
+      content:
+        type: string
+        description: new modified code
+      verb:
+        type: string
+
   #-----------------------------------------------------
   # The Resource policy List resource
   #-----------------------------------------------------

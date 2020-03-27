@@ -27,10 +27,10 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 
+import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.ConfigDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.hybrid.gateway.common.util.OnPremiseGatewayConstants;
 import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.MicroGatewayAPIUsageConstants;
 import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter;
 import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsagePublisherException;
@@ -62,7 +62,7 @@ public class APIUsageFileUploadTask implements Task {
 
     private static final Log log = LogFactory.getLog(APIUsageFileUploadTask.class);
 
-    private ConfigManager configManager;
+    private ConfigDTO configDTO;
 
     @Override
     public void setProperties(Map<String, String> map) {
@@ -76,7 +76,7 @@ public class APIUsageFileUploadTask implements Task {
     public void execute() {
         log.info("Running API Usage File Upload Task.");
         try {
-            configManager = ConfigManager.getConfigManager();
+            configDTO = ConfigManager.getConfigurationDTO();
         } catch (OnPremiseGatewayException e) {
             log.error("Error occurred while reading the configuration. Usage upload was cancelled.", e);
             return;
@@ -137,7 +137,7 @@ public class APIUsageFileUploadTask implements Task {
         String response;
 
         try {
-            String uploadServiceUrl = configManager.getProperty(MicroGatewayAPIUsageConstants.USAGE_UPLOAD_SERVICE_URL);
+            String uploadServiceUrl = configDTO.getUrl_usage_upload_service();
             uploadServiceUrl = (uploadServiceUrl != null && !uploadServiceUrl.isEmpty()) ? uploadServiceUrl :
                     MicroGatewayAPIUsageConstants.DEFAULT_UPLOAD_SERVICE_URL;
             URL uploadServiceUrlValue = MicroGatewayCommonUtil.getURLFromStringUrlValue(uploadServiceUrl);

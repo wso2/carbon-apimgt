@@ -31,10 +31,9 @@ import DocThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/DocTh
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
-import Typography from '@material-ui/core/Typography';
 import TopMenu from 'AppComponents/Apis/Listing/components/TopMenu';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import SampleAPIProduct from 'AppComponents/Apis/Listing/SampleAPI/SampleAPIProduct';
 
 const styles = (theme) => ({
     contentInside: {
@@ -173,10 +172,24 @@ class TableView extends React.Component {
             const { body } = data;
             const { list, pagination, count } = body;
             const { total } = pagination;
+            // When there is a count stored in the localstorage and it's greater than 0
+            // We check if the response in the rest api callls have 0 items.
+            // We remove the local storage and redo the api call
+            if (this.count > 0 && total === 0) {
+                this.page = 0;
+                this.removeLocalStorage();
+                this.getData();
+            }
             this.count = total;
             this.setState({ apisAndApiProducts: list, notFound: false, displayCount: count });
         });
     };
+
+    removeLocalStorage = () => {
+        const { isAPIProduct } = this.props;
+        const paginationSufix = isAPIProduct ? 'products' : 'apis';
+        window.localStorage.removeItem('pagination-' + paginationSufix);
+    }
 
     getLocalStorage = () => {
         const { isAPIProduct } = this.props;
@@ -378,7 +391,9 @@ class TableView extends React.Component {
             rowsPerPage,
             onChangeRowsPerPage: (numberOfRows) => {
                 this.rowsPerPage = numberOfRows;
-                if (count - 1 === rowsPerPage * page && page !== 0) {
+                if (page * numberOfRows > count) {
+                    this.page = 0;
+                } else if (count - 1 === rowsPerPage * page && page !== 0) {
                     this.page = page - 1;
                 }
                 this.getData();
@@ -436,26 +451,7 @@ class TableView extends React.Component {
                     />
                     <div className={classes.contentInside}>
                         {isAPIProduct ? (
-                            <InlineMessage type='info' height={140}>
-                                <div className={classes.contentWrapper}>
-                                    <Typography variant='h5' component='h3' className={classes.head}>
-                                        <FormattedMessage
-                                            id='Apis.Listing.SampleAPIProduct.manager'
-                                            defaultMessage='Welcome to WSO2 API Manager'
-                                        />
-                                    </Typography>
-                                    <Typography component='p' className={classes.content}>
-                                        <FormattedMessage
-                                            id='Apis.Listing.SampleAPIProduct.description'
-                                            defaultMessage={
-                                                'The API resources in an API product can come from'
-                                                + ' one or more APIs, so you can mix and match resources from multiple '
-                                                + ' API resources to create specialized feature sets.'
-                                            }
-                                        />
-                                    </Typography>
-                                </div>
-                            </InlineMessage>
+                            <SampleAPIProduct />
                         ) : (
                             <SampleAPI />
                         )}

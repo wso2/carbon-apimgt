@@ -101,9 +101,11 @@ public final class RestApiConstants {
             + "/custom";
     public static final String RESOURCE_PATH_CATEGORY = "/categories";
 
-    public static final String SERVER_URL = "/applications";
-    public static final String SERVER_USER_NAME = "/applications";
-    public static final String SERVER_PASSWORD = "/applications";
+    // Used in XACML authentication interceptor: Deprecated
+    public static final String SERVER_URL = "server_url";
+    public static final String SERVER_USER_NAME = "username";
+    public static final String SERVER_PASSWORD = "password";
+
     public static final String RESOURCE_PATH_SUBSCRIPTIONS = "/subscriptions";
     public static final String RESOURCE_PATH_TIERS = "/tiers";
     public static final String RESOURCE_PATH_TIERS_API = RESOURCE_PATH_TIERS + "/api";

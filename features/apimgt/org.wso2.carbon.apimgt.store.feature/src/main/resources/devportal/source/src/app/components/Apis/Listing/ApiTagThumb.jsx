@@ -107,7 +107,7 @@ const styles = theme => ({
  */
 function ApiTagThumb(props) {
     const {
-        tag, path, classes, theme, style,
+        tag, path, classes, theme, style, mainPage,
     } = props;
     const tagLink = path + ':' + tag.value;
     const {
@@ -116,7 +116,7 @@ function ApiTagThumb(props) {
         },
     } = theme.custom;
     const name = tag.value.split(theme.custom.tagWise.key)[0];
-    if (style === 'fixed-left') {
+    if (style === 'fixed-left' || !mainPage) {
         return (
             <Link to={tagLink} className={classes.textWrapper}>
                 <ListItem button>

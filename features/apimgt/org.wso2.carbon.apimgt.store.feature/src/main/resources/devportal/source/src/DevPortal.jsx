@@ -27,6 +27,7 @@ import cloneDeep from 'lodash.clonedeep';
 import { create } from 'jss';
 import rtl from 'jss-rtl';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import Utils from 'AppData/Utils';
 import Settings from 'Settings';
 import Logout from './app/components/Logout';
 import Progress from './app/components/Shared/Progress';
@@ -35,18 +36,6 @@ import API from './app/data/api';
 import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
 import DefaultConfigurations from './defaultTheme';
 const protectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApp" */));
-
-/**
- * Language.
- * @type {string}
- */
-const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
-
-/**
- * Language without region code.
- */
-const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
-
 
 // Configure JSS
 const jss = create({ plugins: [...jssPreset().plugins, rtl()] });
@@ -69,6 +58,7 @@ class DevPortal extends React.Component {
             settings: null,
             tenantDomain: null,
             theme: null,
+            lanuage: null,
         };
         this.systemTheme = merge(cloneDeep(DefaultConfigurations), Configurations);
         this.setTenantTheme = this.setTenantTheme.bind(this);
@@ -107,11 +97,17 @@ class DevPortal extends React.Component {
      */
     loadLocale(locale = 'en') {
         fetch(`${Settings.app.context}/site/public/locales/${locale}.json`)
-            .then((resp) => resp.json())
+            .then((resp) => {
+                if(resp.status === 200){
+                    return(resp.json());
+                } else {
+                    return {};
+                }
+            })
             .then((messages) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
                 addLocaleData(require(`react-intl/locale-data/${locale}`));
-                this.setState({ messages });
+                this.setState({ messages, language: locale });
             });
     }
     /**
@@ -120,35 +116,35 @@ class DevPortal extends React.Component {
      * @memberof DevPortal
      */
     updateLocale(localTheme = this.systemTheme) {
-        let locale = languageWithoutRegionCode || language;
         //The above can be overriden by the language switcher
+        let browserLocal = Utils.getBrowserLocal();
         const { direction: defaultDirection, custom: { languageSwitch: { active: languageSwitchActive, languages } } } = localTheme;
+        let lanauageToLoad = null;
         if(languageSwitchActive){
-            let selectedLanguage = localStorage.getItem('language');
+            const savedLanguage = localStorage.getItem('language');
             let direction = defaultDirection;
-            if(!selectedLanguage && languages && languages.length > 0){
-                selectedLanguage = languages[0].key;
-            }
+            let selectedLanuageObject = null;
             for(var i=0; i < languages.length; i++){
-                if(selectedLanguage === languages[i].key && languages[i].direction){
-                    direction = languages[i].direction;
-                    document.body.setAttribute('dir',direction);
-                    this.systemTheme.direction = direction;
+                if(savedLanguage && savedLanguage === languages[i].key){
+                    selectedLanuageObject = languages[i];
+                } else if(!savedLanguage && browserLocal === languages[i].key) {
+                    selectedLanuageObject = languages[i];
                 }
             }
-            if(selectedLanguage) {
-                locale = selectedLanguage;
+            if(selectedLanuageObject) {
+                direction = selectedLanuageObject.direction || defaultDirection;       
             }
+            document.body.setAttribute('dir',direction);
+            this.systemTheme.direction = direction;
+            lanauageToLoad = savedLanguage || selectedLanuageObject.key || browserLocal;
         } else {
-            const oldTheme = merge(DefaultConfigurations, Configurations);
-            const oldLangDirection = oldTheme.direction;
-            if(oldLangDirection !== this.systemTheme.direction){
-                document.body.setAttribute('dir',oldLangDirection);
-                this.systemTheme.direction = oldLangDirection;
-            }
-            
+            // If the lanauage switch was disabled after setting a cookie we need to remove the cookie and 
+            // force the selected lanuage to the browserLocal.
+            lanauageToLoad = browserLocal;
+            document.body.setAttribute('dir', localTheme.direction);
+            this.systemTheme.direction = localTheme.direction;
         }
-        this.loadLocale(locale);
+        this.loadLocale(lanauageToLoad);
     }
     /**
      * Set the tenant domain to state
@@ -185,14 +181,20 @@ class DevPortal extends React.Component {
     setTenantTheme(tenant) {
         if(tenant && tenant !== "INVALID"){
             fetch(`${Settings.app.context}/site/public/tenant_themes/${tenant}/apim/defaultTheme.json`)
-            .then((resp) => resp.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("HTTP error " + response.status);
+                }
+                return response.json();
+            })
             .then((data) => {
                 // Merging with the system theme.
-                const tenantMergedTheme = merge(cloneDeep(this.systemTheme), data);
+                const tenantMergedTheme = merge(cloneDeep(DefaultConfigurations), Configurations, data);
                 this.updateLocale(tenantMergedTheme);
                 this.setState({ theme: tenantMergedTheme });
             })
             .catch(() => {
+                console.log('Error loading teant theme. Loading the default theme.');
                 this.updateLocale();
                 this.setState({ theme: this.systemTheme });
             });
@@ -250,10 +252,10 @@ class DevPortal extends React.Component {
      * @memberof DevPortal
      */
     render() {
-        const { settings, tenantDomain, theme, messages } = this.state;
+        const { settings, tenantDomain, theme, messages, language } = this.state;
         const { app: { context } } = Settings;
         return (
-            settings && theme && (
+            settings && theme && messages && language && (
                 <SettingsProvider value={{
                     settings,
                     setSettings: this.setSettings,

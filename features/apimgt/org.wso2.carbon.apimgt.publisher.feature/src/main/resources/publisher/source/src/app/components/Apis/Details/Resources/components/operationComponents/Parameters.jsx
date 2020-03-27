@@ -33,7 +33,7 @@ import ListParameters from './ListParameters';
  */
 export default function Parameters(props) {
     const {
-        operation, spec, target, verb, operationsDispatcher, disableUpdate,
+        operation, spec, target, verb, operationsDispatcher, disableUpdate, resolvedSpec,
     } = props;
     const specVersion = getVersion(spec);
     const haveParameters = (operation.parameters && operation.parameters.length !== 0) || operation.requestBody;
@@ -67,6 +67,8 @@ export default function Parameters(props) {
                         operationsDispatcher={operationsDispatcher}
                         operation={operation}
                         spec={spec}
+                        specVersion={specVersion}
+                        resolvedSpec={resolvedSpec}
                     />
                 )}
             </Grid>
@@ -81,6 +83,7 @@ Parameters.propTypes = {
     operationsDispatcher: PropTypes.func.isRequired,
     operation: PropTypes.shape({}).isRequired,
     disableUpdate: PropTypes.bool,
+    resolvedSpec: PropTypes.shape({}).isRequired,
 };
 
 Parameters.defaultProps = {

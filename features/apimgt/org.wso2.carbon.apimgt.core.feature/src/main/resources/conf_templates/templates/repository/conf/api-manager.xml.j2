@@ -76,11 +76,11 @@
         <GatewayJWTGeneration>
             <ImplClass>{{apim.jwt.gateway_generator.impl}}</ImplClass>
             <Configuration>
-            <Claims>
-                {%- for claim in apim.jwt.gateway_generator.claims -%}
+            <ExcludedClaims>
+                {%- for claim in apim.jwt.gateway_generator.excluded_claims -%}
                 <Claim>{{claim}}</Claim>
                 {% endfor %}
-            </Claims>
+            </ExcludedClaims>
             </Configuration>
         </GatewayJWTGeneration>
     </JWTConfiguration>
@@ -151,7 +151,11 @@
         <URL>{{issuer_1.jwks.url}}</URL>
       </JWKSConfiguration>
     {% endif %}
-      <ClaimMappings>
+    {% if issuer_1.disable_default_claim_mapping is defined %}
+      <ClaimMappings disable-default-claim-mapping ="{{issuer_1.disable_default_claim_mapping}}">
+    {% else%}
+      <ClaimMappings disable-default-claim-mapping = "false">
+    {% endif %}
       {%- for claim in issuer_1.claim_mapping -%}
          <ClaimMapping>
            <RemoteClaim>{{claim.remote_claim}}</RemoteClaim>

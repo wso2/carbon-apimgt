@@ -126,8 +126,8 @@ public class ApiKeyAuthenticator implements Authenticator {
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE , e);
             }
             // Check if the decoded header contains type as 'JWT'.
-            if (decodedHeader.getType() != JOSEObjectType.JWT) {
-                if (log.isDebugEnabled()){
+            if (!decodedHeader.getType().equals(JOSEObjectType.JWT)) {
+                if (log.isDebugEnabled()) {
                     log.debug("Invalid Api Key token type. Api Key: " + GatewayUtils.getMaskedToken(splitToken[0]));
                 }
                 log.error("Invalid Api Key token type.");

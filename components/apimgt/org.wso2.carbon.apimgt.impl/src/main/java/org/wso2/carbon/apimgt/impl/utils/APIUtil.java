@@ -94,6 +94,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -118,6 +119,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
@@ -136,6 +138,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
@@ -255,6 +258,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -3954,6 +3958,8 @@ public final class APIUtil {
             String workflowExtensionLocation =
                     CarbonUtils.getCarbonHome() + File.separator + APIConstants.WORKFLOW_EXTENSION_LOCATION;
 
+            File wfExtension = new File(workflowExtensionLocation);
+
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
@@ -3965,7 +3971,14 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding External Stores configuration to the tenant's registry");
             }
-            InputStream inputStream = new FileInputStream(workflowExtensionLocation);
+
+            InputStream inputStream;
+            if (wfExtension.exists()) {
+                inputStream = new FileInputStream(workflowExtensionLocation);
+            } else {
+                inputStream = APIManagerComponent.class
+                        .getResourceAsStream("/workflowextensions/default-workflow-extensions.xml");
+            }
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
             resource.setContent(data);
@@ -7149,8 +7162,7 @@ public final class APIUtil {
      */
     public static JSONObject getTenantRESTAPIScopesConfig(String tenantDomain) throws APIManagementException {
         JSONObject restAPIConfigJSON = null;
-        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
-        JSONObject tenantConfJson = getTenantConfig(tenantId);
+        JSONObject tenantConfJson = getTenantConfig(tenantDomain);
         if (tenantConfJson != null) {
             restAPIConfigJSON = getRESTAPIScopesFromTenantConfig(tenantConfJson);
             if (restAPIConfigJSON == null) {
@@ -7168,8 +7180,7 @@ public final class APIUtil {
      */
     public static JSONObject getTenantRESTAPIScopeRoleMappingsConfig(String tenantDomain) throws APIManagementException {
         JSONObject restAPIConfigJSON = null;
-        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
-        JSONObject tenantConfJson = getTenantConfig(tenantId);
+        JSONObject tenantConfJson = getTenantConfig(tenantDomain);
         if (tenantConfJson != null) {
             restAPIConfigJSON = getRESTAPIScopeRoleMappingsFromTenantConfig(tenantConfJson);
             if (restAPIConfigJSON == null) {
@@ -7195,22 +7206,33 @@ public final class APIUtil {
      */
     private static JSONObject getTenantConfig(int tenantId) throws APIManagementException {
         try {
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
-            Resource resource;
-            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
+            Cache tenantConfigCache = CacheProvider.getTenantConfigCache();
+            String cacheName = tenantId + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
+            if (tenantConfigCache.containsKey(cacheName)) {
+                return (JSONObject) tenantConfigCache.get(cacheName);
             } else {
-                loadTenantConf(tenantId);
+                if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
+                    loadTenantRegistry(tenantId);
+                }
+                RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+                UserRegistry registry = registryService.getConfigSystemRegistry(tenantId);
+                Resource resource;
                 if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
                     resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
                 } else {
-                    throw new APIManagementException("Failed to add tenant-conf.json to tenant: " + tenantId);
+                    loadTenantConf(tenantId);
+                    if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                        resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
+                    } else {
+                        throw new APIManagementException("Failed to add tenant-conf.json to tenant: " + tenantId);
+                    }
                 }
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                JSONParser parser = new JSONParser();
+                JSONObject tenantConfig = (JSONObject) parser.parse(content);
+                tenantConfigCache.put(cacheName, tenantConfig);
+                return tenantConfig;
             }
-            String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-            JSONParser parser = new JSONParser();
-            return (JSONObject) parser.parse(content);
         } catch (RegistryException | ParseException e) {
             throw new APIManagementException("Error while getting tenant config from registry for tenant: "
                     + tenantId, e);
@@ -8910,6 +8932,16 @@ public final class APIUtil {
         return apiMgtDAO.getApplicationByClientId(clientId);
     }
 
+    public static String getQuotaTypeForApplicationPolicy(String policyName, int tenantId)
+            throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        ApplicationPolicy policy = apiMgtDAO.getApplicationPolicy(policyName, tenantId);
+        if (policy != null) {
+            return policy.getDefaultQuotaPolicy().getType();
+        }
+        return null;
+    }
+
     public static List<ConditionDto> extractConditionDto(String base64EncodedString) throws ParseException {
 
         List<ConditionDto> conditionDtoList = new ArrayList<>();
@@ -9156,6 +9188,58 @@ public final class APIUtil {
 
         return null;
 
+    }
+
+    /**
+     * Implemented to get the API usage count for monetization.
+     *
+     * @param from : the start timestamp of the query.
+     * @param to   : the end timestamp of the query.
+     * @return JSON Object.
+     */
+    public static JSONObject getUsageCountForMonetization(long from, long to)
+            throws APIManagementException {
+
+        JSONObject jsonObject = null;
+        String granularity = null;
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        granularity = configuration.getFirstProperty(
+                APIConstants.Monetization.USAGE_PUBLISHER_GRANULARITY);
+        if (StringUtils.isEmpty(granularity)) {
+            //set the default granularity to days, if it is not set in configuration
+            granularity = APIConstants.Monetization.USAGE_PUBLISH_DEFAULT_GRANULARITY;
+        }
+        StringBuilder query = new StringBuilder(
+                "from " + APIConstants.Monetization.MONETIZATION_USAGE_RECORD_AGG
+                        + " within " + from
+                        + "L, " + to + "L per '" + granularity
+                        + "' select "
+                        + APIConstants.Analytics.API_NAME + ", "
+                        + APIConstants.Analytics.API_VERSION + ", "
+                        + APIConstants.Analytics.API_CREATOR + ", "
+                        + APIConstants.Analytics.API_CREATOR_TENANT_DOMAIN + ", "
+                        + APIConstants.Analytics.APPLICATION_ID + ", "
+                        + "sum (requestCount) as requestCount "
+                        + "group by "
+                        + APIConstants.Analytics.API_NAME + ", "
+                        + APIConstants.Analytics.API_VERSION + ", "
+                        + APIConstants.Analytics.API_CREATOR + ", "
+                        + APIConstants.Analytics.API_CREATOR_TENANT_DOMAIN + ", "
+                        + APIConstants.Analytics.APPLICATION_ID
+        );
+        try {
+            jsonObject = APIUtil.executeQueryOnStreamProcessor(
+                    APIConstants.Monetization.MONETIZATION_USAGE_RECORD_APP,
+                    query.toString());
+            if(jsonObject == null){
+                jsonObject = new JSONObject();
+            }
+        } catch (APIManagementException ex) {
+            String msg = "Unable to Retrieve monetization usage records";
+            handleException(msg, ex);
+        }
+        return jsonObject;
     }
 
     public static boolean isDueToAuthorizationFailure(Throwable e) {
@@ -9431,6 +9515,7 @@ public final class APIUtil {
                 API api = getAPI(apiArtifact, registry);
 
                 resource.setEndpointConfig(api.getEndpointConfig());
+                resource.setEndpointSecurityMap(setEndpointSecurityForAPIProduct(api));
             }
 
             apiProduct.setProductResources(resources);
@@ -9702,11 +9787,11 @@ public final class APIUtil {
     public static JwtTokenInfoDTO getJwtTokenInfoDTO(Application application, String userName, String tenantDomain)
             throws APIManagementException {
 
-        String applicationName = application.getName();
+        int applicationId = application.getId();
 
         String appOwner = application.getOwner();
         APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance()
-                .getSubscribedAPIsForAnApp(appOwner, applicationName);
+                .getSubscribedAPIsForAnApp(appOwner, applicationId);
 
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setSubscriber("sub");
@@ -9739,6 +9824,7 @@ public final class APIUtil {
                 subscriptionPolicyDTO.setSpikeArrestLimit(subscriptionPolicy.getRateLimitCount());
                 subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
                 subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
+                subscriptionPolicyDTO.setTierQuotaType(subscriptionPolicy.getTierQuotaType());
                 subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
             }
             jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
@@ -10162,9 +10248,7 @@ public final class APIUtil {
         public static boolean isPerTenantServiceProviderEnabled(String tenantDomain) throws APIManagementException,
                 RegistryException {
 
-        int tenantId = getTenantIdFromTenantDomain(tenantDomain);
-        loadTenantRegistry(tenantId);
-        JSONObject tenantConfig = getTenantConfig(tenantId);
+            JSONObject tenantConfig = getTenantConfig(tenantDomain);
         if (tenantConfig.containsKey(APIConstants.ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION)) {
             return (boolean) tenantConfig.get(APIConstants.ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION);
         }
@@ -10235,6 +10319,94 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    public static Map<String, EndpointSecurity> setEndpointSecurityForAPIProduct(API api) throws APIManagementException {
+        Map<String,EndpointSecurity> endpointSecurityMap = new HashMap<>();
+        try {
+            endpointSecurityMap.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new EndpointSecurity());
+            endpointSecurityMap.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, new EndpointSecurity());
+            if (api.isEndpointSecured()) {
+                EndpointSecurity productionEndpointSecurity = new EndpointSecurity();
+                productionEndpointSecurity.setEnabled(true);
+                productionEndpointSecurity.setUsername(api.getEndpointUTUsername());
+                productionEndpointSecurity.setPassword(api.getEndpointUTUsername());
+                if (api.isEndpointAuthDigest()) {
+                    productionEndpointSecurity.setType(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
+                } else {
+                    productionEndpointSecurity.setType(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
+                }
+                endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
+                endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX, productionEndpointSecurity);
+            } else {
+                String endpointConfig = api.getEndpointConfig();
+                if (endpointConfig != null) {
+                    JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
+                    if (endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) {
+                         JSONObject endpointSecurity =
+                                 (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
+                         if (endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION)!= null){
+                             JSONObject productionEndpointSecurity =
+                                     (JSONObject) endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                             endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new ObjectMapper()
+                                     .convertValue(productionEndpointSecurity, EndpointSecurity.class));
+                         }
+                        if (endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_SANDBOX)!= null){
+                            JSONObject sandboxEndpointSecurity =
+                                    (JSONObject) endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                            endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX, new ObjectMapper()
+                                    .convertValue(sandboxEndpointSecurity, EndpointSecurity.class));
+                        }
+                    }
+                }
+            }
+            return endpointSecurityMap;
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while parsing Endpoint Config json", e);
+        }
+    }
+
+    /**
+     * To check whether the API recommendation is enabled. It can be either enabled globally or tenant vice.
+     *
+     * @param tenantDomain Tenant domain
+     * @return whether recommendation is enabled or not
+     */
+    public static boolean isRecommendationEnabled(String tenantDomain) {
+        RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
+        if (recommendationEnvironment != null) {
+            if (recommendationEnvironment.isApplyForAllTenants()) {
+                return true;
+            } else {
+                try {
+                    org.json.simple.JSONObject tenantConfig = getTenantConfig(tenantDomain);
+                    Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
+                    return Boolean.parseBoolean(value.toString());
+                } catch (APIManagementException e) {
+                    log.debug("Error while retrieving Recommendation config from registry", e);
+                }
+            }
+        }
+        return false;
+    }
+
+    public static void publishEvent(String eventName, Map dynamicProperties, Event event) {
+
+        boolean tenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            tenantFlowStarted = true;
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
+                    .publish(eventName, dynamicProperties, event);
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
     }
 
 }

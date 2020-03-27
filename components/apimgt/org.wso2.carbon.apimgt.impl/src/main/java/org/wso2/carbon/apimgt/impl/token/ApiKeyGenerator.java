@@ -74,7 +74,7 @@ public class ApiKeyGenerator {
         }
         String issuerIdentifier = OAuthServerConfiguration.getInstance().getOpenIDConnectIDTokenIssuerIdentifier();
         JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
-        jwtClaimsSetBuilder.claim("sub", jwtTokenInfoDTO.getEndUserName());
+        jwtClaimsSetBuilder.claim("sub", APIUtil.getUserNameWithTenantSuffix(jwtTokenInfoDTO.getEndUserName()));
         jwtClaimsSetBuilder.claim("jti", UUID.randomUUID().toString());
         jwtClaimsSetBuilder.claim("iss", issuerIdentifier);
         jwtClaimsSetBuilder.claim("iat", currentTime);

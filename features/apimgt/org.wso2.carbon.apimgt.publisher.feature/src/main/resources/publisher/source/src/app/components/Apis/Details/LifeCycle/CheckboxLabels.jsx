@@ -70,9 +70,10 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function CheckboxLabels(props) {
     const classes = useStyles();
-    const { api } = props;
+    const {
+        api, isMutualSSLEnabled, isCertAvailable, isAppLayerSecurityMandatory, isBusinessPlanAvailable,
+    } = props;
     const isEndpointAvailable = api.endpointConfig !== null && !api.endpointConfig.implementation_status;
-    const isTierAvailable = api.policies.length !== 0;
     const isPrototypedAvailable = (api.endpointConfig !== null
         && api.endpointConfig.implementation_status === 'prototyped')
         || api.endpointImplementationType === 'INLINE';
@@ -120,22 +121,44 @@ export default function CheckboxLabels(props) {
                                 <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
                             </Link>
                         </Grid>
-                        <Grid xs={12} className={classes.grid}>
-                            {isTierAvailable ? (
-                                <CheckIcon className={classes.iconTrue} />
-                            ) : (
-                                <CloseIcon className={classes.iconFalse} />
+                        <>
+                            {isAppLayerSecurityMandatory && (
+                                <Grid xs={12} className={classes.grid}>
+                                    {isBusinessPlanAvailable ? (
+                                        <CheckIcon className={classes.iconTrue} />
+                                    ) : (
+                                        <CloseIcon className={classes.iconFalse} />
+                                    )}
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='Apis.Details.LifeCycle.CheckboxLabels.business.plans.selected'
+                                            defaultMessage='Business Plan(s) selected'
+                                        />
+                                    </Typography>
+                                    <Link to={'/apis/' + api.id + '/subscriptions'}>
+                                        <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
+                                    </Link>
+                                </Grid>
                             )}
-                            <Typography>
-                                <FormattedMessage
-                                    id='Apis.Details.LifeCycle.CheckboxLabels.business.plans.selected'
-                                    defaultMessage='Business Plan(s) selected'
-                                />
-                            </Typography>
-                            <Link to={'/apis/' + api.id + '/subscriptions'}>
-                                <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
-                            </Link>
-                        </Grid>
+                            {isMutualSSLEnabled && (
+                                <Grid xs={12} className={classes.grid}>
+                                    {isCertAvailable ? (
+                                        <CheckIcon className={classes.iconTrue} />
+                                    ) : (
+                                        <CloseIcon className={classes.iconFalse} />
+                                    )}
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='Apis.Details.LifeCycle.CheckboxLabels.cert.provided'
+                                            defaultMessage='Certificate provided'
+                                        />
+                                    </Typography>
+                                    <Link to={'/apis/' + api.id + '/runtime-configuration'}>
+                                        <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
+                                    </Link>
+                                </Grid>
+                            ) }
+                        </>
                     </Grid>
                     { api.type !== 'GRAPHQL' && (
                         <>

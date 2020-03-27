@@ -71,8 +71,7 @@ public class HttpRequestUtil {
         String uri = getURI(httpMethod);
 
         //Add an unique identifier as a custom header for distinguishing requests from different micro gateways.
-        String token = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_REQUEST_UNIQUE_IDENTIFIER);
+        String token = ConfigManager.getConfigurationDTO().getStatus_unique_identifier();
         if (StringUtils.isNotBlank(token) && !(OnPremiseGatewayConstants.API_REQUEST_UNIQUE_IDENTIFIER_HOLDER
                 .equals(token))) {
             if (log.isDebugEnabled()) {
@@ -118,8 +117,7 @@ public class HttpRequestUtil {
         String methodName = httpMethod.getMethod();
 
         //Add an unique identifier as an custom header for distinguishing requests from different micro gateways.
-        String token = ConfigManager.getConfigManager()
-                .getProperty(OnPremiseGatewayConstants.API_REQUEST_UNIQUE_IDENTIFIER);
+        String token = ConfigManager.getConfigurationDTO().getStatus_unique_identifier();
         if (StringUtils.isNotBlank(token) && !(OnPremiseGatewayConstants.API_REQUEST_UNIQUE_IDENTIFIER_HOLDER
                 .equals(token))) {
             if (log.isDebugEnabled()) {

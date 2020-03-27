@@ -49,10 +49,14 @@ public class Util {
         } else {
             Object sp = parentSpan.getSpan();
             Span childSpan;
-            if (sp instanceof Span) {
-                childSpan = tracer.getTracingTracer().buildSpan(spanName).asChildOf((Span) sp).start();
-            } else {
-                childSpan = tracer.getTracingTracer().buildSpan(spanName).asChildOf((SpanContext) sp).start();
+            if (sp != null){
+                if (sp instanceof Span) {
+                    childSpan = tracer.getTracingTracer().buildSpan(spanName).asChildOf((Span) sp).start();
+                } else {
+                    childSpan = tracer.getTracingTracer().buildSpan(spanName).asChildOf((SpanContext) sp).start();
+                }
+            }else{
+                 childSpan = tracer.getTracingTracer().buildSpan(spanName).start();
             }
             return new TracingSpan(childSpan);
         }

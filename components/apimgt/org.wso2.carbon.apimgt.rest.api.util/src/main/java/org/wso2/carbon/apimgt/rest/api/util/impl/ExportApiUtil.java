@@ -60,8 +60,9 @@ public class ExportApiUtil {
         //If not specified status is preserved by default
         boolean isStatusPreserved = preserveStatus == null || preserveStatus;
 
-        if (name == null || version == null || providerName == null) {
-            RestApiUtil.handleBadRequest("'name', 'version' or 'provider' should not be null", log);
+        if (name == null || version == null) {
+            RestApiUtil.handleBadRequest("'name' (" + name + ") or 'version' (" + version
+                    + ") should not be null.", log);
         }
 
         try {
@@ -69,10 +70,26 @@ public class ExportApiUtil {
             exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
                     ExportFormat.YAML;
 
+            // Get currently logged in user's username and the domain
             userName = RestApiUtil.getLoggedInUsername();
+            apiRequesterDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            // If provider name is not given
+            if (StringUtils.isBlank(providerName)) {
+                // Retrieve the provider who is in same tenant domain and who owns the same API (by comparing
+                // API name and the version)
+                providerName = APIUtil.getAPIProviderFromAPINameVersionTenant(name, version, apiRequesterDomain);
+
+                // If there is no provider in current domain, the API cannot be exported
+                if (providerName == null) {
+                    String errorMessage = "Error occurred while exporting. API: " + name + " version: " + version
+                            + " not found";
+                    RestApiUtil.handleResourceNotFoundError(errorMessage, log);
+                }
+            }
+
             //provider names with @ signs are only accepted
             apiDomain = MultitenantUtils.getTenantDomain(providerName);
-            apiRequesterDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
             if (!StringUtils.equals(apiDomain, apiRequesterDomain)) {
                 //not authorized to export requested API

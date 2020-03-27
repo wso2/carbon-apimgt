@@ -32,7 +32,6 @@ public class ThrottlingConstants {
     public static final String BLOCKING_POLICIES_SUFFIX = "/api/am/admin/{version}/throttling/blacklist";
     public static final String DEFAULT_API_ADMIN_URL = "https://localhost:9443";
 
-    public static final String API_VERSION_PROPERTY = "rest.api.version";
     public static final String API_VERSION_PARAM = "{version}";
     public static final String CLOUD_API = "cloud";
     public static final String API_DEFAULT_VERSION = "v0.16";

@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -1137,7 +1138,7 @@ public class APIManagerConfiguration {
                         if (claims != null) {
                             while (claims.hasNext()) {
                                 OMElement claim = (OMElement) claims.next();
-                                jwtConfigurationDto.getJwtAdditionalClaims().add(claim.getText());
+                                jwtConfigurationDto.getJWTExcludedClaims().add(claim.getText());
                             }
                         }
                     }
@@ -1304,6 +1305,12 @@ public class APIManagerConfiguration {
             OMElement claimMappingsElement =
                     issuerElement.getFirstChildWithName(new QName(APIConstants.TokenIssuer.CLAIM_MAPPINGS));
             if (claimMappingsElement != null) {
+                OMAttribute disableDefaultClaimMappingAttribute =
+                        claimMappingsElement.getAttribute(new QName("disable-default-claim-mapping"));
+                if (disableDefaultClaimMappingAttribute != null) {
+                    String disableDefaultClaimMapping = disableDefaultClaimMappingAttribute.getAttributeValue();
+                    tokenIssuerDto.setDisableDefaultClaimMapping(Boolean.parseBoolean(disableDefaultClaimMapping));
+                }
                 Iterator claimMapping =
                         claimMappingsElement.getChildrenWithName(new QName(APIConstants.TokenIssuer.CLAIM_MAPPING));
                 while (claimMapping.hasNext()) {

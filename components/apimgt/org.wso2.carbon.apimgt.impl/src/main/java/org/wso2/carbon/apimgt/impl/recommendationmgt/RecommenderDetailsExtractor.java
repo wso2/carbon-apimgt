@@ -33,15 +33,12 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -136,7 +133,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         startTenantFlow(tenantDomain);
         tenantFlowStarted = true;
         try {
-            if (isRecommendationEnabled(tenantDomain)) {
+            if (APIUtil.isRecommendationEnabled(tenantDomain)) {
                 if (APIConstants.ADD_API.equals(publishingDetailType)) {
                     publishAPIDetails(api, tenantDomain);
                 } else if (APIConstants.ADD_NEW_APPLICATION.equals(publishingDetailType)) {
@@ -152,7 +149,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
                 }
 
                 if (!APIConstants.ADD_API.equals(publishingDetailType) && userName != null
-                        && requestTenantDomain != null) {
+                        && userName != APIConstants.WSO2_ANONYMOUS_USER && requestTenantDomain != null) {
                     updateRecommendationsCache(userName, requestTenantDomain);
                 }
             }
@@ -272,36 +269,27 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
     @Override
     public void publishSearchQueries(String query, String username) {
 
-        String userID = getUserId(userName);
-        query = query.split("&", 2)[0];
-        JSONObject obj = new JSONObject();
-        obj.put("user", userID);
-        obj.put("search_query", query);
+        if (userName != APIConstants.WSO2_ANONYMOUS_USER) {
+            String userID = getUserId(userName);
+            query = query.split("&", 2)[0];
+            JSONObject obj = new JSONObject();
+            obj.put("user", userID);
+            obj.put("search_query", query);
 
-        JSONObject payload = new JSONObject();
-        payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_USER_SEARCHED_QUERY);
-        payload.put(APIConstants.PAYLOAD_STRING, obj);
-        publishEvent(payload.toString());
+            JSONObject payload = new JSONObject();
+            payload.put(APIConstants.ACTION_STRING, APIConstants.ADD_USER_SEARCHED_QUERY);
+            payload.put(APIConstants.PAYLOAD_STRING, obj);
+            publishEvent(payload.toString());
+        }
     }
 
     public void publishEvent(String payload) {
 
         Object[] objects = new Object[]{payload};
         Event event = new Event(streamID, System.currentTimeMillis(), null, null, objects);
-        try {
-            startTenantFlow(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            superAdminTenantFlowStarted = true;
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
-                    .publish(APIConstants.RECOMMENDATIONS_WSO2_EVENT_PUBLISHER, Collections.EMPTY_MAP, event);
-            if (log.isDebugEnabled()) {
-                log.debug("Event Published for recommendation server with payload " + payload);
-            }
-        } catch (Exception e) {
-            log.error("Exception occurred when publishing events to recommendation engine", e);
-        } finally {
-            if (superAdminTenantFlowStarted) {
-                endTenantFlow();
-            }
+        APIUtil.publishEvent(APIConstants.RECOMMENDATIONS_WSO2_EVENT_PUBLISHER, Collections.EMPTY_MAP, event);
+        if (log.isDebugEnabled()) {
+            log.debug("Event Published for recommendation server with payload " + payload);
         }
     }
 
@@ -341,50 +329,6 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         return description;
     }
 
-    private boolean isRecommendationEnabled(String tenantDomain) {
-
-        if (recommendationEnvironment != null) {
-            if (recommendationEnvironment.isApplyForAllTenants()) {
-                return true;
-            } else {
-                try {
-                    JSONObject tenantConfig = null;
-                    Cache tenantConfigCache = APIUtil.getCache(
-                            APIConstants.API_MANAGER_CACHE_MANAGER,
-                            APIConstants.TENANT_CONFIG_CACHE_NAME,
-                            APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
-                            APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
-                    String cacheName = tenantDomain + "_" + APIConstants.TENANT_CONFIG_CACHE_NAME;
-                    if (tenantConfigCache.containsKey(cacheName)) {
-                        tenantConfig = (JSONObject) tenantConfigCache.get(cacheName);
-                    } else {
-                        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                                .getTenantId(tenantDomain);
-                        APIUtil.loadTenantRegistry(tenantId);
-                        Registry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                                .getConfigSystemRegistry(tenantId);
-                        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                            APIUtil.loadTenantConf(tenantId);
-                        }
-                        if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                            Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
-                            String content = new String((byte[]) resource.getContent());
-                            tenantConfig = new JSONObject(content);
-                            tenantConfigCache.put(cacheName, tenantConfig);
-                        }
-                    }
-                    if (tenantConfig.has(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY)) {
-                        Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
-                        return Boolean.parseBoolean(value.toString());
-                    }
-                } catch (RegistryException | UserStoreException | NullPointerException | APIManagementException e) {
-                    log.error("Error while retrieving Recommendation config from registry", e);
-                }
-            }
-        }
-        return false;
-    }
-
     /**
      * Update the recommendationsCache by  connecting with the recommendation engine and getting recommendations for
      * the given user for given tenant domain. A user can have several entries cache for different tenants
@@ -397,11 +341,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
         long currentTime = System.currentTimeMillis();
         long lastUpdatedTime = 0;
         long waitDuration = recommendationEnvironment.getWaitDuration() * 60 * 1000;
-        Cache recommendationsCache = APIUtil.getCache(
-                APIConstants.API_MANAGER_CACHE_MANAGER,
-                APIConstants.RECOMMENDATIONS_CACHE_NAME,
-                APIConstants.TENANT_CONFIG_CACHE_MODIFIED_EXPIRY,
-                APIConstants.TENANT_CONFIG_CACHE_ACCESS_EXPIRY);
+        Cache recommendationsCache = CacheProvider.getRecommendationsCache();
         String cacheName = userName + "_" + tenantDomain;
         JSONObject cachedObject = (JSONObject) recommendationsCache.get(cacheName);
         if (cachedObject != null) {

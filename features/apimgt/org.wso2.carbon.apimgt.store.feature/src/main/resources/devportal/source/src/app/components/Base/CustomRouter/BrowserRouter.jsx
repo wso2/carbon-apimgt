@@ -20,7 +20,8 @@ import React from 'react';
 import { createBrowserHistory } from 'history';
 import { Router } from 'react-router';
 import isPlainObject from 'lodash.isplainobject';
-import Settings from 'AppComponents/Shared/SettingsContext';
+import SettingsContext from 'AppComponents/Shared/SettingsContext';
+import Settings from 'Settings';
 import queryString from 'query-string';
 import PropTypes from 'prop-types';
 
@@ -31,7 +32,7 @@ import PropTypes from 'prop-types';
  * @extends {React.Component}
  */
 class BrowserRouter extends React.Component {
-    static contextType = Settings
+    static contextType = SettingsContext
 
     /**
      * Creates an instance of BrowserRouter.
@@ -58,6 +59,10 @@ class BrowserRouter extends React.Component {
      * @returns {String}
      */
     pathInterceptor = (originalPath) => {
+        const { app: { customUrl: { tenantDomain: customUrlEnabledDomain } }} = Settings;
+        if (customUrlEnabledDomain !== 'null') {
+            return originalPath;
+        }
         const { tenantDomain } = this.context;
         let path = '';
         let queryStringsRaw = '';
