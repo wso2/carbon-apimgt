@@ -76,6 +76,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -523,7 +524,17 @@ public final class APIImportUtil {
     private static void updateAPIWithThumbnail(File imageFile, API importedApi, APIProvider apiProvider) {
 
         APIIdentifier apiIdentifier = importedApi.getId();
-        String mimeType = URLConnection.guessContentTypeFromName(imageFile.getName());
+        String fileName = imageFile.getName();
+        String mimeType = URLConnection.guessContentTypeFromName(fileName);
+        if (StringUtils.isBlank(mimeType)) {
+            try {
+                // Check whether the icon is in .json format (UI icons are stored as .json)
+                new JsonParser().parse(new FileReader(imageFile));
+                mimeType = APIConstants.APPLICATION_JSON_MEDIA_TYPE;
+            } catch (Exception e) {
+                log.error("Failed to read the file. ", e);
+            }
+        }
         try (FileInputStream inputStream = new FileInputStream(imageFile.getAbsolutePath())) {
             ResourceFile apiImage = new ResourceFile(inputStream, mimeType);
             String thumbPath = APIUtil.getIconPath(apiIdentifier);

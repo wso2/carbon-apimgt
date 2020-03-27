@@ -128,5 +128,7 @@ public final class APIImportExportConstants {
         fileExtensionMapping.put("image/jpg", "jpg");
         fileExtensionMapping.put("image/bmp", "bmp");
         fileExtensionMapping.put("image/gif", "gif");
+        // To identify thumbnail icons
+        fileExtensionMapping.put("application/json", "json");
     }
 }
