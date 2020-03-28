@@ -60,6 +60,9 @@
              JWT. -->
         <ConsumerDialectURI>{{apim.jwt.claim_dialect}}</ConsumerDialectURI>
 
+        <!-- Whether to convert claims retrieved from AuthorizationGrantCache to the dialect defined in ConsumerDialectURI -->
+        <ConvertClaimsToConsumerDialect>{{apim.jwt.convert_dialect}}</ConvertClaimsToConsumerDialect>
+
         <!-- Signature algorithm. Accepts "SHA256withRSA" or "NONE". To disable signing explicitly specify "NONE". -->
         <SignatureAlgorithm>{{apim.jwt.signing_algorithm}}</SignatureAlgorithm>
 

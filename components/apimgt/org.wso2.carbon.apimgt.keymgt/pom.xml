@@ -154,6 +154,10 @@
             <artifactId>log4j</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.claim.mgt</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
