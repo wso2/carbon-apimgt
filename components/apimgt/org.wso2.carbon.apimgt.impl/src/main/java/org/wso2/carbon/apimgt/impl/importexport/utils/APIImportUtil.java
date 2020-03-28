@@ -19,11 +19,7 @@
 package org.wso2.carbon.apimgt.impl.importexport.utils;
 
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.io.FileUtils;
@@ -531,8 +527,13 @@ public final class APIImportUtil {
                 // Check whether the icon is in .json format (UI icons are stored as .json)
                 new JsonParser().parse(new FileReader(imageFile));
                 mimeType = APIConstants.APPLICATION_JSON_MEDIA_TYPE;
-            } catch (Exception e) {
-                log.error("Failed to read the file. ", e);
+            } catch (JsonParseException e) {
+                // Here the exceptions were handled and logged that may arise when parsing the .json file,
+                // and this will not break the flow of importing the API.
+                // If the .json is wrong or cannot be found the API import process will still be carried out.
+                log.error("Failed to read the thumbnail file. ", e);
+            } catch (FileNotFoundException e) {
+                log.error("Failed to find the thumbnail file. ", e);
             }
         }
         try (FileInputStream inputStream = new FileInputStream(imageFile.getAbsolutePath())) {
