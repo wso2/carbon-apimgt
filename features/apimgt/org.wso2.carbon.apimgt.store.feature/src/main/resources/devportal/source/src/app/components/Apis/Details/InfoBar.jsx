@@ -332,7 +332,10 @@ class InfoBar extends React.Component {
         } = theme;
 
         // Remve the tags with a sufix '-group' from tags
-        const apisTagsWithoutGroups = [];
+        let apisTagsWithoutGroups = [];
+        if ( !active ){
+            apisTagsWithoutGroups = api.tags;
+        }
         if (active && api.tags && api.tags.length > 0) {
             for (let i = 0; i < api.tags.length; i++) {
                 if (api.tags[i].search(key) != -1 && api.tags[i].split(key).length > 0) {

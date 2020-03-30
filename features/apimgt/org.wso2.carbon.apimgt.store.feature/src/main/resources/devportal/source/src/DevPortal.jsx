@@ -61,6 +61,8 @@ class DevPortal extends React.Component {
             lanuage: null,
         };
         this.systemTheme = merge(cloneDeep(DefaultConfigurations), Configurations);
+        console.info(JSON.stringify(DefaultConfigurations));
+
         this.setTenantTheme = this.setTenantTheme.bind(this);
         this.setSettings = this.setSettings.bind(this);
     }
