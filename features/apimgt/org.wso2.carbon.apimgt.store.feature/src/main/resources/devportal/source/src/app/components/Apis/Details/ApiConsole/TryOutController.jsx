@@ -27,8 +27,9 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import {
-    Radio, RadioGroup, FormControlLabel, FormControl, CircularProgress,
+    Radio, RadioGroup, FormControlLabel, FormControl, CircularProgress, Tooltip,
 } from '@material-ui/core';
+import HelpOutline from '@material-ui/icons/HelpOutline';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Icon from '@material-ui/core/Icon';
@@ -82,6 +83,9 @@ const styles = makeStyles((theme) => ({
     categoryHeading: {
         marginBottom: theme.spacing(2),
         marginLeft: theme.spacing(-5),
+    },
+    tooltip: {
+        marginLeft: theme.spacing(1),
     },
 }));
 
@@ -521,22 +525,40 @@ function TryOutController(props) {
                                             />
                                         )}
                                         {securitySchemeType !== 'BASIC' && (
-                                            <Button
-                                                onClick={securitySchemeType === 'API-KEY' ? generateApiKey
-                                                    : generateAccessToken}
-                                                color='primary'
-                                                variant='contained'
-                                                className={classes.genKeyButton}
-                                                disabled={!user || (subscriptions && subscriptions.length === 0)}
-                                            >
-                                                {isUpdating && (
-                                                    <CircularProgress size={20} />
-                                                )}
-                                                <FormattedMessage
-                                                    id='Apis.Details.ApiCOnsole.generate.test.key'
-                                                    defaultMessage='GEN. TEST KEY '
-                                                />
-                                            </Button>
+                                            <>
+                                                <Button
+                                                    onClick={securitySchemeType === 'API-KEY' ? generateApiKey
+                                                        : generateAccessToken}
+                                                    color='secondary'
+                                                    variant='outlined'
+                                                    className={classes.genKeyButton}
+                                                    disabled={!user || (subscriptions && subscriptions.length === 0)}
+                                                >
+                                                    {isUpdating && (
+                                                        <CircularProgress size={15} />
+                                                    )}
+                                                    <FormattedMessage
+                                                        id='Apis.Details.ApiCOnsole.generate.test.key'
+                                                        defaultMessage='GEN. TEST KEY '
+                                                    />
+                                                </Button>
+                                                <Tooltip
+                                                    placement='right'
+                                                    title={(
+                                                        <>
+                                                            <FormattedMessage
+                                                                id='Apis.Details.TryOutConsole.access.token.tooltip'
+                                                                defaultMessage={
+                                                                    'You can use your existing Access Token or '
+                                                + 'you can generate a new Test Key.'
+                                                                }
+                                                            />
+                                                        </>
+                                                    )}
+                                                >
+                                                    <HelpOutline className={classes.tooltip} />
+                                                </Tooltip>
+                                            </>
                                         )}
                                     </Grid>
                                 </Box>
