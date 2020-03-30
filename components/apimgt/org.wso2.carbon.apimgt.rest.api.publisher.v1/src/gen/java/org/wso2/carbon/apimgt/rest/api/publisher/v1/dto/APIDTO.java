@@ -210,6 +210,7 @@ public enum AccessControlEnum {
     private APICorsConfigurationDTO corsConfiguration = null;
     private String workflowStatus = null;
     private String createdTime = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
     private String lastUpdatedTime = null;
     private Object endpointConfig = null;
 

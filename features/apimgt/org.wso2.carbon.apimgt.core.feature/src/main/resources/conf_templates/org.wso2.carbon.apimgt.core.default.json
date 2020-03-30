@@ -13,6 +13,7 @@
   "apim.jwt.enable": false,
   "apim.jwt.header": "X-JWT-Assertion",
   "apim.jwt.claim_dialect": "http://wso2.org/claims",
+  "apim.jwt.convert_dialect": false,
   "apim.jwt.signing_algorithm": "SHA256withRSA",
   "apim.jwt.claims_extractor_impl": "org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever",
   "apim.jwt.gateway_generator.impl":"org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl",
@@ -131,5 +132,6 @@
   "oauth.grant_type.iwa_ntlm.grant_validator": "org.wso2.carbon.identity.oauth.common.NTLMAuthenticationValidator",
   "apim.certificate_reloader.period": "600",
   "apimgt.mutual_ssl.certificate_header": "X-WSO2-CLIENT-CERTIFICATE",
-  "apimgt.mutual_ssl.enable_client_validation": true
+  "apimgt.mutual_ssl.enable_client_validation": true,
+  "database.local.url": "jdbc:h2:./repository/database/WSO2CARBON_DB;DB_CLOSE_ON_EXIT=FALSE"
 }

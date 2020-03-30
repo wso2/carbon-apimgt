@@ -177,25 +177,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 operation.getOperation().toString());
         ArrayList<String> supportedFields = getSupportedFields(list);
 
-        if (Operation.QUERY.equals(operation.getOperation())) {
-            if (log.isDebugEnabled()) {
-                log.debug("Operation - Query " + operation.getName());
-            }
-            getNestedLevelOperations(operation.getSelectionSet().getSelections(),supportedFields, operationArray);
-            operationList = String.join(",", operationArray);
-        } else if (operation.getOperation().equals(Operation.MUTATION)) {
-            // Will support nexted level mutation according to requirements.
-            operationList = operation.getName();
-            if (log.isDebugEnabled()) {
-                log.debug("Operation - Mutation " + operation.getName());
-            }
-        } else if (operation.getOperation().equals(Operation.SUBSCRIPTION)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Operation - Subscription " + operation.getName());
-            }
-            getNestedLevelOperations(operation.getSelectionSet().getSelections(), supportedFields, operationArray);
-            operationList = String.join(",", operationArray);
-        }
+        getNestedLevelOperations(operation.getSelectionSet().getSelections(), supportedFields, operationArray);
+        operationList = String.join(",", operationArray);
         return operationList;
     }
 

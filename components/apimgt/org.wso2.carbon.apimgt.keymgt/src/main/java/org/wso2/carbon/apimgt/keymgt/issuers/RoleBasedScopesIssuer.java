@@ -35,6 +35,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -110,7 +111,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
             }
 
             String grantType = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getGrantType();
-            String[] userRoles;
+            String[] userRoles = null;
 
             // If GrantType is SAML20_BEARER and CHECK_ROLES_FROM_SAML_ASSERTION is true, or if GrantType is
             // JWT_BEARER and retrieveRolesFromUserStoreForScopeValidation system property is true,
@@ -125,8 +126,10 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
                     .parseBoolean(isRetrieveRolesFromUserStoreForScopeValidation))) {
                 AuthenticatedUser user = tokReqMsgCtx.getAuthorizedUser();
                 Map<ClaimMapping, String> userAttributes = user.getUserAttributes();
-                userRoles = getRolesFromUserAttribute(userAttributes,
-                        tokReqMsgCtx.getProperty(ResourceConstants.ROLE_CLAIM).toString());
+                if (tokReqMsgCtx.getProperty(ResourceConstants.ROLE_CLAIM) != null) {
+                    userRoles = getRolesFromUserAttribute(userAttributes,
+                            tokReqMsgCtx.getProperty(ResourceConstants.ROLE_CLAIM).toString());
+                }
             } else {
                 userRoles = getUserRoles(authenticatedUser);
             }
@@ -144,8 +147,15 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
     private String[] getUserRoles(AuthenticatedUser authenticatedUser) {
 
         String[] userRoles = null;
-        String tenantDomain = authenticatedUser.getTenantDomain();
-        String username = authenticatedUser.getUserName();
+        String tenantDomain;
+        String username;
+        if (authenticatedUser.isFederatedUser()) {
+            tenantDomain = MultitenantUtils.getTenantDomain(authenticatedUser.getAuthenticatedSubjectIdentifier());
+            username = MultitenantUtils.getTenantAwareUsername(authenticatedUser.getAuthenticatedSubjectIdentifier());
+        } else {
+            tenantDomain = authenticatedUser.getTenantDomain();
+            username = authenticatedUser.getUserName();
+        }
         String userStoreDomain = authenticatedUser.getUserStoreDomain();
         RealmService realmService = getRealmService();
         try {
@@ -181,10 +191,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
         defaultScope.add(DEFAULT_SCOPE_NAME);
 
         if (userRoles == null || userRoles.length == 0) {
-            if (log.isDebugEnabled()) {
-                log.debug("Could not find roles of the user.");
-            }
-            return defaultScope;
+            userRoles = new String[0];
         }
 
         List<String> authorizedScopes = new ArrayList<>();

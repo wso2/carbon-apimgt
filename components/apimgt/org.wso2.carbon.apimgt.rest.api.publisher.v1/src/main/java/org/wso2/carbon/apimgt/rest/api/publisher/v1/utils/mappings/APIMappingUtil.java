@@ -38,8 +38,9 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -54,9 +55,46 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListExpandedDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateAvailableTransitionsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateCheckItemsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -75,6 +113,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -266,6 +305,39 @@ public class APIMappingUtil {
 
         return model;
     }
+
+    /**
+     *This method creates the list of MockPayloadDTO objects for resetting inline prototyping scripts
+     *
+     * @param mockPayloads APIResourceMediationPolicy List
+     * @return mockResponsePayloadListDTO (list of MockPayloadDTO)
+     * @throws APIManagementException
+     */
+    public static MockResponsePayloadListDTO fromMockPayloadsToListDTO (List<APIResourceMediationPolicy> mockPayloads)
+            throws APIManagementException {
+
+        MockResponsePayloadListDTO mockResponsePayloadListDTO = new MockResponsePayloadListDTO();
+        List<MockResponsePayloadInfoDTO> mockResponsePayloadInfoDTOS = mockResponsePayloadListDTO.getList();
+        for (APIResourceMediationPolicy apiResourceMediationPolicy : mockPayloads){
+            mockResponsePayloadInfoDTOS.add(fromMockPayloadToDTO(apiResourceMediationPolicy));
+        }
+        return mockResponsePayloadListDTO;
+    }
+
+    /**
+     * This method creates object of MockPayloadDTO
+     *
+     * @param model APIResourceMediationPolicy object
+     * @return mockResponsePayloadInfoDTO object
+     */
+    public static MockResponsePayloadInfoDTO fromMockPayloadToDTO (APIResourceMediationPolicy model) {
+        MockResponsePayloadInfoDTO mockResponsePayloadInfoDTO = new MockResponsePayloadInfoDTO();
+        mockResponsePayloadInfoDTO.setPath(model.getPath());
+        mockResponsePayloadInfoDTO.setVerb(model.getVerb());
+        mockResponsePayloadInfoDTO.setContent(model.getContent());
+        return mockResponsePayloadInfoDTO;
+    }
+
 
     /**
      * This method creates the API monetization information DTO
@@ -712,6 +784,11 @@ public class APIMappingUtil {
                         endpointConfigJson.put(APIConstants.AMZN_SECRET_KEY, APIConstants.AWS_SECRET_KEY);
                     }
                 }
+                if (endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) {
+                    JSONObject jsonObject = handleEndpointSecurity(model,
+                            (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY));
+                    endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, jsonObject);
+                }
                 dto.setEndpointConfig(endpointConfigJson);
             } catch (ParseException e) {
                 //logs the error and continues as this is not a blocker
@@ -1072,7 +1149,7 @@ public class APIMappingUtil {
      * @param apiLCData API lifecycle state information
      * @return REST API DTO representation of API Lifecycle state information
      */
-    public static LifecycleStateDTO fromLifecycleModelToDTO(Map<String, Object> apiLCData) {
+    public static LifecycleStateDTO fromLifecycleModelToDTO(Map<String, Object> apiLCData, boolean apiOlderVersionExist) {
 
         LifecycleStateDTO lifecycleStateDTO = new LifecycleStateDTO();
 
@@ -1097,6 +1174,10 @@ public class APIMappingUtil {
             List<LifecycleStateCheckItemsDTO> checkItemsDTOList = new ArrayList<>();
             for (Object checkListItemObj : checkListItems) {
                 CheckListItem checkListItem = (CheckListItem) checkListItemObj;
+                if (!apiOlderVersionExist && checkListItem.getName().equals(APIConstants.DEPRECATE_CHECK_LIST_ITEM)) {
+                    continue;
+                }
+
                 LifecycleStateCheckItemsDTO checkItemsDTO = new LifecycleStateCheckItemsDTO();
                 checkItemsDTO.setName(checkListItem.getName());
                 checkItemsDTO.setValue(Boolean.getBoolean(checkListItem.getValue()));
@@ -2435,6 +2516,7 @@ public class APIMappingUtil {
             APIProductDTO apiProductDTO = (APIProductDTO)dto;
             apiCategoryNames = apiProductDTO.getCategories();
         }
+        provider = APIUtil.replaceEmailDomainBack(provider);
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         List<APICategory> apiCategories = new ArrayList<>();
@@ -2449,5 +2531,30 @@ public class APIMappingUtil {
         } else {
             ((APIProduct)model).setApiCategories(apiCategories);
         }
+    }
+
+    private static JSONObject handleEndpointSecurity(API api, JSONObject endpointSecurity) throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
+                .getProviderName()));
+        if (checkEndpointSecurityPasswordEnabled(tenantDomain)) {
+            return endpointSecurity;
+        }
+        JSONObject endpointSecurityElement = new JSONObject();
+        endpointSecurityElement.putAll(endpointSecurity);
+        if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX)!= null){
+            JSONObject sandboxEndpointSecurity =
+                    (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+            if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null){
+                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD,"");
+            }
+        }
+        if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+            JSONObject productionEndpointSecurity =
+                    (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+            if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
+                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
+            }
+        }
+        return endpointSecurityElement;
     }
 }

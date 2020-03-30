@@ -80,7 +80,7 @@ var login = function (username, password, tenantMode) {
                     username: username,
                     isSuperTenant: isSuperTenant,
                     cookie: sessionCookie,
-                    userDomain: username.split("@")[1],
+                    userDomain: username.split("@")[username.split("@").length -1],
                     auth: auth
                 });
                 getWorkflowCookie(username, password);

@@ -176,9 +176,14 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     @Override
     public boolean doPreUpdateRoleListOfUser(String username, String[] deletedRoles, String[] newRoles,
                                              UserStoreManager userStoreManager) {
-
+        if (!isEnable()) {
+            return true;
+        }
+        if (ArrayUtils.isNotEmpty(deletedRoles)) {
+            removeGatewayKeyCache(username, userStoreManager);
+        }
         APIUtil.clearRoleCache(getUserName(username, userStoreManager));
-        return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
+        return true;
     }
 
     @Override

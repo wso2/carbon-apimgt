@@ -113,74 +113,87 @@ function TopMenu(props) {
         classes, data, setListType, theme, count, isAPIProduct, listType,
     } = props;
     const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
-    return (
-        <div className={classes.root}>
-            <div className={classes.mainIconWrapper}>
-                <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
-            </div>
-            <div className={classes.mainTitleWrapper}>
-                {data && (
-                    <>
-                        <Typography variant='h5' className={classes.mainTitle} component='div'>
-                            {isAPIProduct ? (
+
+    if (count > 0) {
+        return (
+            <div className={classes.root}>
+                <div className={classes.mainIconWrapper}>
+                    <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
+                </div>
+                <div className={classes.mainTitleWrapper}>
+                    {data && (
+                        <>
+                            <Typography variant='h5' className={classes.mainTitle} component='div'>
+                                {isAPIProduct ? (
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.TopMenu.apiproducts'
+                                        defaultMessage='API Products'
+                                    />
+                                ) : (
+                                    <FormattedMessage id='Apis.Listing.components.TopMenu.apis' defaultMessage='APIs' />
+                                )}
+                            </Typography>
+                            <Typography variant='caption' gutterBottom align='left' component='div'>
                                 <FormattedMessage
-                                    id='Apis.Listing.components.TopMenu.apiproducts'
-                                    defaultMessage='API Products'
+                                    id='Apis.Listing.components.TopMenu.displaying'
+                                    defaultMessage='Displaying'
                                 />
-                            ) : (
-                                <FormattedMessage id='Apis.Listing.components.TopMenu.apis' defaultMessage='APIs' />
-                            )}
-                        </Typography>
-                        <Typography variant='caption' gutterBottom align='left' component='div'>
+                                {' '}
+                                {' '}
+                                {count}
+                                {' '}
+                                {' '}
+                                {getTitleForArtifactType(props)}
+                            </Typography>
+                        </>
+                    )}
+                </div>
+                <VerticalDivider height={70} />
+                <div className={classes.APICreateMenu}>
+                    {isAPIProduct ? (
+                        <Link to='/api-products/create'>
+                            <Button variant='contained' className={classes.createButton}>
+                                <FormattedMessage
+                                    id='Apis.Listing.components.TopMenu.create.an.api.product'
+                                    defaultMessage='Create an API Product'
+                                />
+                            </Button>
+                        </Link>
+                    ) : (
+                        <APICreateMenu buttonProps={{
+                            variant: 'contained',
+                            color: 'primary',
+                            className: classes.button,
+                        }}
+                        >
                             <FormattedMessage
-                                id='Apis.Listing.components.TopMenu.displaying'
-                                defaultMessage='Displaying'
+                                id='Apis.Listing.components.TopMenu.create.api'
+                                defaultMessage='Create API'
                             />
-                            {' '}
-                            {' '}
-                            {count}
-                            {' '}
-                            {' '}
-                            {getTitleForArtifactType(props)}
-                        </Typography>
-                    </>
-                )}
+                        </APICreateMenu>
+                    )}
+                </div>
+                <div className={classes.buttonRight}>
+                    <IconButton
+                        className={classes.button}
+                        disabled={data.length === 0}
+                        onClick={() => setListType('list')}
+                    >
+                        <List color={listType === 'list' ? 'primary' : 'default'} />
+                    </IconButton>
+                    <IconButton
+                        className={classes.button}
+                        disabled={data.length === 0}
+                        onClick={() => setListType('grid')}
+                    >
+                        <GridOn color={listType === 'grid' ? 'primary' : 'default'} />
+                    </IconButton>
+                </div>
             </div>
-            <VerticalDivider height={70} />
-            <div className={classes.APICreateMenu}>
-                {isAPIProduct ? (
-                    <Link to='/api-products/create'>
-                        <Button variant='contained' className={classes.createButton}>
-                            <FormattedMessage
-                                id='Apis.Listing.components.TopMenu.create.an.api.product'
-                                defaultMessage='Create an API Product'
-                            />
-                        </Button>
-                    </Link>
-                ) : (
-                    <APICreateMenu buttonProps={{ variant: 'contained', color: 'primary', className: classes.button }}>
-                        <FormattedMessage id='Apis.Listing.components.TopMenu.create.api' defaultMessage='Create API' />
-                    </APICreateMenu>
-                )}
-            </div>
-            <div className={classes.buttonRight}>
-                <IconButton
-                    className={classes.button}
-                    disabled={data.length === 0}
-                    onClick={() => setListType('list')}
-                >
-                    <List color={listType === 'list' ? 'primary' : 'default'} />
-                </IconButton>
-                <IconButton
-                    className={classes.button}
-                    disabled={data.length === 0}
-                    onClick={() => setListType('grid')}
-                >
-                    <GridOn color={listType === 'grid' ? 'primary' : 'default'} />
-                </IconButton>
-            </div>
-        </div>
-    );
+        );
+    } else {
+        return null;
+    }
 }
 
 TopMenu.propTypes = {

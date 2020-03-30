@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.wso2.carbon.apimgt.hybrid.gateway.common.dto.ConfigDTO;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -64,17 +65,17 @@ public class RegistryXmlConfigurator {
     private static final String VALUE = "value";
 
     private Document doc;
-    private Properties configProperties;
+    ConfigDTO gatewayConfigs;
 
     /**
      * Configure registry.xml with provided properties
      *
      * @param configDirPath String
-     * @param configProperties Properties
+     * @param gatewayConfigs Properties
      */
-    public void configure(String configDirPath, Properties configProperties) {
+    public void configure(String configDirPath, ConfigDTO gatewayConfigs) {
         String regXmlFilePath = configDirPath + File.separator + REGISTRY_XML;
-        this.configProperties = configProperties;
+        this.gatewayConfigs = gatewayConfigs;
         try {
             doc = DocumentBuilderFactory.newInstance()
                                         .newDocumentBuilder().parse(new InputSource(regXmlFilePath));
@@ -106,28 +107,23 @@ public class RegistryXmlConfigurator {
         }
         tasks = doc.createElement(TASKS);
         //File Upload Task
-        if (configProperties.containsKey(ConfigConstants.FILE_DATA_UPLOAD_TASK_ENABLED)
-                    && Boolean.parseBoolean(
-                configProperties.getProperty(ConfigConstants.FILE_DATA_UPLOAD_TASK_ENABLED))) {
+        if (gatewayConfigs.isUsage_upload_task_enabled()) {
             Element fileUploadTask = doc.createElement(TASK);
-            String className = configProperties.getProperty(ConfigConstants.FILE_DATA_UPLOAD_TASK_CLASS);
+            String className = gatewayConfigs.getUsage_upload_file_data_upload_task_class();
             className = (className != null && !className.isEmpty()) ? className
                                 : ConfigConstants.DEFAULT_FILE_DATA_UPLOAD_TASK_CLASS;
             fileUploadTask.setAttribute(NAME,
                                         className.substring(className.lastIndexOf(".") + 1, className.length()));
             fileUploadTask.setAttribute(CLASS, className);
             Element fileUploadTrigger = doc.createElement(TRIGGER);
-            fileUploadTrigger.setAttribute(CRON,
-                                           configProperties.getProperty(ConfigConstants.FILE_DATA_UPLOAD_TASK_CRON));
+            fileUploadTrigger.setAttribute(CRON, gatewayConfigs.getUsage_upload_task_cron());
             fileUploadTask.appendChild(fileUploadTrigger);
             tasks.appendChild(fileUploadTask);
         }
         //File Cleanup Task
-        if (configProperties.containsKey(ConfigConstants.FILE_DATA_CLEANUP_TASK_ENABLED)
-                    && Boolean.parseBoolean(
-                configProperties.getProperty(ConfigConstants.FILE_DATA_CLEANUP_TASK_ENABLED))) {
+        if (gatewayConfigs.isUsage_upload_cleanup_task_enabled()) {
             Element fileCleanupTask = doc.createElement(TASK);
-            String className = configProperties.getProperty(ConfigConstants.FILE_DATA_CLEANUP_TASK_CLASS);
+            String className = gatewayConfigs.getUsage_upload_cleanup_task_class();
             className = (className != null && !className.isEmpty()) ? className
                                 : ConfigConstants.DEFAULT_FILE_DATA_CLEANUP_TASK_CLASS;
             fileCleanupTask.setAttribute(NAME,
@@ -135,11 +131,11 @@ public class RegistryXmlConfigurator {
             fileCleanupTask.setAttribute(CLASS, className);
             Element fileCleanupTrigger = doc.createElement(TRIGGER);
             fileCleanupTrigger.setAttribute(CRON,
-                                            configProperties.getProperty(ConfigConstants.FILE_DATA_CLEANUP_TASK_CRON));
+                    String.valueOf(gatewayConfigs.getUsage_upload_cleanup_task_cron()));
             Element fileCleanupProperty = doc.createElement(PROPERTY);
             fileCleanupProperty.setAttribute(KEY, FILE_RETENTION_DAYS);
             fileCleanupProperty.setAttribute(VALUE,
-                                             configProperties.getProperty(ConfigConstants.FILE_DATA_RETENTION_DAYS));
+                    String.valueOf(gatewayConfigs.getUsage_upload_retention_days()));
             fileCleanupTask.appendChild(fileCleanupTrigger);
             fileCleanupTask.appendChild(fileCleanupProperty);
             tasks.appendChild(fileCleanupTask);
@@ -149,35 +145,30 @@ public class RegistryXmlConfigurator {
             registryRootNode.appendChild(tasks);
         }
         //Throttling Synchronization Task
-        if (configProperties.containsKey(ConfigConstants.THROTTLING_SYNC_TASK_ENABLED)
-                    && Boolean.parseBoolean(
-                configProperties.getProperty(ConfigConstants.THROTTLING_SYNC_TASK_ENABLED))) {
+        if (gatewayConfigs.isThrottling_synchronization_task_enabled()) {
             Element fileUploadTask = doc.createElement(TASK);
-            String className = configProperties.getProperty(ConfigConstants.THROTTLING_SYNC_TASK_CLASS);
+            String className = gatewayConfigs.getThrottling_synchronization_task_class();
             className = (className != null && !className.isEmpty()) ? className
                                 : ConfigConstants.DEFAULT_THROTTLING_SYNC_TASK_CLASS;
             fileUploadTask.setAttribute(NAME,
                                         className.substring(className.lastIndexOf(".") + 1, className.length()));
             fileUploadTask.setAttribute(CLASS, className);
             Element fileUploadTrigger = doc.createElement(TRIGGER);
-            fileUploadTrigger.setAttribute(CRON,
-                                           configProperties.getProperty(ConfigConstants.THROTTLING_SYNC_TASK_CRON));
+            fileUploadTrigger.setAttribute(CRON, gatewayConfigs.getThrottling_synchronization_task_cron());
             fileUploadTask.appendChild(fileUploadTrigger);
             tasks.appendChild(fileUploadTask);
         }
         //API Update Task
-        if (configProperties.containsKey(ConfigConstants.API_UPDATE_TASK_ENABLED)
-                    && Boolean.parseBoolean(configProperties.getProperty(ConfigConstants.API_UPDATE_TASK_ENABLED))) {
+        if (gatewayConfigs.isApi_update_task_enabled()) {
             Element apiUpdateTask = doc.createElement(TASK);
-            String className = configProperties.getProperty(ConfigConstants.API_UPDATE_TASK_CLASS);
+            String className = gatewayConfigs.getApi_update_task_class();
             className = (className != null && !className.isEmpty()) ? className
                                 : ConfigConstants.DEFAULT_API_UPDATE_TASK_CLASS;
             apiUpdateTask.setAttribute(NAME,
                                        className.substring(className.lastIndexOf(".") + 1, className.length()));
             apiUpdateTask.setAttribute(CLASS, className);
             Element fileUploadTrigger = doc.createElement(TRIGGER);
-            fileUploadTrigger.setAttribute(CRON,
-                                           configProperties.getProperty(ConfigConstants.API_UPDATE_TASK_CRON));
+            fileUploadTrigger.setAttribute(CRON, gatewayConfigs.getApi_update_task_cron());
             apiUpdateTask.appendChild(fileUploadTrigger);
             tasks.appendChild(apiUpdateTask);
         }

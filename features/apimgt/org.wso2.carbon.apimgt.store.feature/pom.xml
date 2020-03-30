@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.6.93-SNAPSHOT</version>
+        <version>6.6.169-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -145,6 +145,14 @@
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-codegen</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-inflector</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-inflector-oas3</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -218,6 +226,7 @@
                                 </bundleDef>
                                 <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}
@@ -304,6 +313,19 @@
                     <include>devportal/site/**</include>
                     <include>devportal/services/**</include>
                     <include>devportal/jaggery.conf</include>
+                    <include>devportal/source/**</include>
+                    <include>devportal/override/**</include>
+                    <include>devportal/.eslintignore</include>
+                    <include>devportal/.eslintrc.js</include>
+                    <include>devportal/.npmrc</include>
+                    <include>devportal/babel.config.js</include>
+                    <include>devportal/jest.config.js</include>
+                    <include>devportal/jsconfig.json</include>
+                    <include>devportal/loader.js</include>
+                    <include>devportal/package-lock.json</include>
+                    <include>devportal/package.json</include>
+                    <include>devportal/webpack.config.js</include>
+                    <include>devportal/Readme.txt</include>
                     <include>p2.inf</include>
                     <include>admin/**</include>
                     <include>apistore/**</include>

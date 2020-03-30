@@ -17,15 +17,20 @@
  */
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class EndpointSecurity {
 
     private String password = null;
 
     private String type = null;
 
-    private Boolean enabled = null;
+    private boolean enabled = false;
 
     private String username = null;
+
+    private Map additionalProperties = new HashMap();
 
     public String getPassword() {
 
@@ -47,12 +52,12 @@ public class EndpointSecurity {
         this.type = type;
     }
 
-    public Boolean getEnabled() {
+    public boolean isEnabled() {
 
         return enabled;
     }
 
-    public void setEnabled(Boolean enabled) {
+    public void setEnabled(boolean enabled) {
 
         this.enabled = enabled;
     }
@@ -65,6 +70,16 @@ public class EndpointSecurity {
     public void setUsername(String username) {
 
         this.username = username;
+    }
+
+    public Map getAdditionalProperties() {
+
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map additionalProperties) {
+
+        this.additionalProperties = additionalProperties;
     }
 
     @Override

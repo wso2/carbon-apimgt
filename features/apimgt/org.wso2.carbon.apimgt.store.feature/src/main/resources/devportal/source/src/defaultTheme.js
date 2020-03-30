@@ -214,16 +214,16 @@ const DefaultConfigurations = {
         tagCloud: {
             active: true,
             colorOptions: { // This is the Options object passed to TagCloud component of https://www.npmjs.com/package/react-tagcloud
-                luminosity: 'light',
+                luminosity: 'dark',
                 hue: 'blue',
             },
             leftMenu: { // These params will be applyed only if the style is 'fixed-left'
                 width: 200,
                 height: 'calc(100vh - 222px)',
-                background: '#00374e',
-                color: '#c7e9ff',
-                titleBackground: '#000',
-                sliderBackground: '#000',
+                background: '#d8e4e9',
+                color: '#000',
+                titleBackground: '#222',
+                sliderBackground: '#222',
                 sliderWidth: 25,
                 hasIcon: false,
             },
@@ -261,7 +261,7 @@ const DefaultConfigurations = {
             prefix: '[Devportal]',
             sufix: '- WSO2 APIM',
         },
-        languageSwitch: { // Country flags are downloaded from https://dribbble.com/shots/1211759-Free-195-Flat-Flags
+        languageSwitch: {
             active: false,
             languages: [
                 {
@@ -269,12 +269,14 @@ const DefaultConfigurations = {
                     image: '/site/public/images/flags/en.png',
                     imageWidth: 24, // in pixles
                     text: 'English',
+                    direction: 'ltr',
                 },
                 {
-                    key: 'si',
-                    image: '/site/public/images/flags/si.png',
+                    key: 'es',
+                    image: '/site/public/images/flags/sp.png',
                     imageWidth: 24, // in pixles
-                    text: 'Sinhala',
+                    text: 'Spanish',
+                    direction: 'ltr',
                 },
                 {
                     key: 'ar',
@@ -283,6 +285,13 @@ const DefaultConfigurations = {
                     text: 'Arabic',
                     direction: 'rtl',
                 },
+                {
+                    key: 'si',
+                    image: '/site/public/images/flags/si.png',
+                    imageWidth: 24, // in pixles
+                    text: 'Sinhala',
+                    direction: 'ltr',
+                }
             ],
             showFlag: true,
             showText: true,

@@ -64,11 +64,11 @@ public class APIMTokenIssuerUtil {
 
         String tenantDomain = tokReqMsgCtx.getAuthorizedUser().getTenantDomain();
         String userName = tokReqMsgCtx.getAuthorizedUser().toFullQualifiedUsername();
-        String applicationName = application.getName();
+        int applicationId = application.getId();
 
         String appOwner = application.getOwner();
         APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance()
-                .getSubscribedAPIsForAnApp(appOwner, applicationName);
+                .getSubscribedAPIsForAnApp(appOwner, applicationId);
 
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setSubscriber("sub");
@@ -184,12 +184,15 @@ public class APIMTokenIssuerUtil {
             for (String scope : scopeList) {
                 scopeString.append(scope).append(" ");
             }
-
+            String quotaType = APIUtil.getQuotaTypeForApplicationPolicy(application.getTier(),
+                    APIUtil.getTenantId(application.getOwner()));
+            
             ApplicationDTO applicationDTO = new ApplicationDTO();
             applicationDTO.setId(application.getId());
             applicationDTO.setName(application.getName());
             applicationDTO.setTier(application.getTier());
             applicationDTO.setOwner(application.getOwner());
+            applicationDTO.setTierQuotaType(quotaType);
 
             AuthenticatedUser endUser = jwtAccessTokenIssuerDTO.getUser();
             JwtTokenInfoDTO jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application,
@@ -201,7 +204,8 @@ public class APIMTokenIssuerUtil {
             jwtTokenInfoDTO.setApplication(applicationDTO);
             jwtTokenInfoDTO.setKeyType(application.getKeyType());
             jwtTokenInfoDTO.setConsumerKey(clientId);
-
+            jwtTokenInfoDTO.setTokenReqMessageContext(jwtAccessTokenIssuerDTO.getTokReqMsgCtx());
+            jwtTokenInfoDTO.setOauthAuthzMsgCtx(jwtAccessTokenIssuerDTO.getOauthAuthzMsgCtx());
             APIMJWTGenerator apimjwtGenerator = new APIMJWTGenerator();
             accessToken = apimjwtGenerator.generateJWT(jwtTokenInfoDTO);
 

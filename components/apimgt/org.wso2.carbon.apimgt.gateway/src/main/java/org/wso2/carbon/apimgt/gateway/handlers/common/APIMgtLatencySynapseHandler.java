@@ -23,6 +23,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -32,20 +33,12 @@ import java.util.Map;
 
 public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
-    private TracingTracer tracer;
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
+        TracingTracer tracer = ServiceReferenceHolder.getInstance().getTracer();
 
         if (Util.tracingEnabled()) {
-            if (tracer == null) {
-                synchronized (this) {
-                    if (tracer == null) {
-                        tracer = ServiceReferenceHolder.getInstance().getTracingService()
-                                .buildTracer(APIMgtGatewayConstants.SERVICE_NAME);
-                    }
-                }
-            }
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             Map headersMap =
@@ -54,6 +47,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
             TracingSpan responseLatencySpan =
                     Util.startSpan(APIMgtGatewayConstants.RESPONSE_LATENCY, spanContext, tracer);
             Util.setTag(responseLatencySpan, APIMgtGatewayConstants.SPAN_KIND, APIMgtGatewayConstants.SERVER);
+            GatewayUtils.setRequestRelatedTags(responseLatencySpan, messageContext);
             messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_LATENCY, responseLatencySpan);
         }
         return true;
@@ -61,6 +55,8 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
 
     @Override
     public boolean handleRequestOutFlow(MessageContext messageContext) {
+
+        TracingTracer tracer = ServiceReferenceHolder.getInstance().getTracer();
         Map<String, String> tracerSpecificCarrier = new HashMap<>();
         if (Util.tracingEnabled()) {
             TracingSpan parentSpan = (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
@@ -84,6 +80,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         if (Util.tracingEnabled()) {
             TracingSpan backendLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY_SPAN);
+            GatewayUtils.setEndpointRelatedInformation(backendLatencySpan, messageContext);
             Util.finishSpan(backendLatencySpan);
         }
         return true;
@@ -94,6 +91,7 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            GatewayUtils.setAPIRelatedTags(responseLatencySpan, messageContext);
             Util.finishSpan(responseLatencySpan);
         }
         return true;

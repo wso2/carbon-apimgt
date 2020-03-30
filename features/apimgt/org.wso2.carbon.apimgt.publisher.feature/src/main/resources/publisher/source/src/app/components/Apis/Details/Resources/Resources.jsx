@@ -29,7 +29,9 @@ import Banner from 'AppComponents/Shared/Banner';
 import API from 'AppData/api';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
+import SwaggerParser from 'swagger-parser';
 import { isRestricted } from 'AppData/AuthManager';
+import CONSTS from 'AppData/Constants';
 import Operation from './components/Operation';
 import GroupOfOperations from './components/GroupOfOperations';
 import SpecErrors from './components/SpecErrors';
@@ -60,11 +62,11 @@ export default function Resources(props) {
     const [api, updateAPI] = useAPI();
     const [pageError, setPageError] = useState(false);
     const [operationRateLimits, setOperationRateLimits] = useState([]);
-    const [specErrors] = useState([]);
     const [markedOperations, setSelectedOperation] = useState({});
     const [openAPISpec, setOpenAPISpec] = useState({});
     const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
     const [arns, setArns] = useState([]);
+    const [resolvedSpec, setResolvedSpec] = useState({ spec: {}, errors: [] });
 
     /**
      *
@@ -120,10 +122,31 @@ export default function Resources(props) {
                 updatedOperation['x-auth-type'] = value ? 'Any' : 'None';
                 break;
             case 'parameter':
-                if (!updatedOperation.parameters) {
-                    updatedOperation.parameters = [value];
+                if (updatedOperation.parameters) {
+                    // Get the index to check whether the same parameter exists.
+                    const index = updatedOperation.parameters.findIndex(
+                        (e) => e.in === value.in && e.name === value.name,
+                    );
+                    if (index === -1) { // Parameter with name and in does not exists.
+                        if (value.in === 'body') {
+                            // Get the index of existing body param.
+                            // This replaces if a new body parameter is added when another one exists.
+                            const bodyIndex = updatedOperation.parameters.findIndex((parameter) => {
+                                return parameter.in === 'body';
+                            });
+                            if (bodyIndex !== -1) {
+                                updatedOperation.parameters[bodyIndex] = value;
+                            } else {
+                                updatedOperation.parameters.push(value);
+                            }
+                        } else {
+                            updatedOperation.parameters.push(value);
+                        }
+                    } else {
+                        updatedOperation.parameters[index] = value;
+                    }
                 } else {
-                    updatedOperation.parameters.push(value);
+                    updatedOperation.parameters = [value];
                 }
                 break;
             case 'requestBody':
@@ -227,18 +250,28 @@ export default function Resources(props) {
     );
     /**
      *
-     *
-     * @param {*} response
-     * @returns
+     * @param {*} rawSpec The original swagger content.
+     * @returns {null}
      */
     function resolveAndUpdateSpec(rawSpec) {
-        // return Swagger.resolve({ spec: rawSpec, allowMetaPatches: false }).then(({ spec, errors }) => {
-        //     const value = spec;
-        //     delete value.$$normalized;
-        //     operationsDispatcher({ action: 'init', data: value.paths });
-        //     setOpenAPISpec(value);
-        //     setSpecErrors(errors);
-        // });
+        /*
+         * Deep copying the spec.
+         * Otherwise it will resolved to the original parameter passed (rawSpec) to the validate method.
+         * We will not alter the provided spec.
+         */
+        const specCopy = cloneDeep(rawSpec);
+        /*
+        * Used SwaggerParser.validate() because we can get the errors as well.
+        */
+        SwaggerParser.validate(specCopy, (err, result) => {
+            setResolvedSpec(() => {
+                const errors = err ? [err] : [];
+                return {
+                    spec: result,
+                    errors,
+                };
+            });
+        });
         operationsDispatcher({ action: 'init', data: rawSpec.paths });
         setOpenAPISpec(rawSpec);
     }
@@ -318,7 +351,7 @@ export default function Resources(props) {
     useEffect(() => {
         API.getAmznResourceNames(api.id)
             .then((response) => {
-                if (response.body.list) {
+                if (response.body && response.body.list) {
                     setArns(response.body.list);
                 }
             });
@@ -383,7 +416,7 @@ export default function Resources(props) {
 
     // Note: Make sure not to use any hooks after/within this condition , because it returns conditionally
     // If you do so, You will probably get `Rendered more hooks than during the previous render.` exception
-    if (!pageError && isEmpty(openAPISpec)) {
+    if ((!pageError && isEmpty(openAPISpec)) || (resolvedSpec.errors.length === 0 && isEmpty(resolvedSpec.spec))) {
         return (
             <Grid container direction='row' justify='center' alignItems='center'>
                 <Grid item>
@@ -414,7 +447,7 @@ export default function Resources(props) {
                     <AddOperation operationsDispatcher={operationsDispatcher} />
                 </Grid>
             )}
-            {specErrors.length > 0 && <SpecErrors specErrors={specErrors} />}
+            {resolvedSpec.errors.length > 0 && <SpecErrors specErrors={resolvedSpec.errors} />}
             <Grid item md={12}>
                 <Paper>
                     {!disableMultiSelect && (
@@ -435,7 +468,7 @@ export default function Resources(props) {
                                     alignItems='stretch'
                                 >
                                     {Object.entries(verbObject).map(([verb, operation]) => {
-                                        return (
+                                        return CONSTS.HTTP_METHODS.includes(verb) ? (
                                             <Grid key={`${target}/${verb}`} item>
                                                 <Operation
                                                     target={target}
@@ -461,9 +494,10 @@ export default function Resources(props) {
                                                     disableMultiSelect={disableMultiSelect}
                                                     arns={arns}
                                                     {...operationProps}
+                                                    resolvedSpec={resolvedSpec.spec}
                                                 />
                                             </Grid>
-                                        );
+                                        ) : null;
                                     })}
                                 </Grid>
                             </GroupOfOperations>

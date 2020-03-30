@@ -68,6 +68,7 @@
         "swagger-client": "^3.9.4",
         "swagger-parser": "^7.0.1",
         "swagger-ui": "^3.25.0",
+        "swagger-ui-react": "^3.25.0",
         "typeface-roboto": "0.0.35",
         "url-loader": "^0.5.9"
     },

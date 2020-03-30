@@ -22,6 +22,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class APIProductResource {
 
     private String apiName;
@@ -30,7 +33,7 @@ public class APIProductResource {
     private APIProductIdentifier productIdentifier;
     private URITemplate uriTemplate;
     private String endpointConfig;
-
+    private Map<String,EndpointSecurity> endpointSecurityMap = new HashMap<>();
     private String inSequenceName = "";
     private String outSequenceName = "";
     private String faultSequenceName = "";
@@ -129,5 +132,15 @@ public class APIProductResource {
     // Used by velocity template to generate synapse definition
     public String getEndpointKey() {
         return apiIdentifier.getApiName() + "--v" + apiIdentifier.getVersion();
+    }
+
+    public Map<String, EndpointSecurity> getEndpointSecurityMap() {
+
+        return endpointSecurityMap;
+    }
+
+    public void setEndpointSecurityMap(Map<String, EndpointSecurity> endpointSecurityMap) {
+
+        this.endpointSecurityMap = endpointSecurityMap;
     }
 }

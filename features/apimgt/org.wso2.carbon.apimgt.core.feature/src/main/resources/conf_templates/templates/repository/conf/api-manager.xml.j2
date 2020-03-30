@@ -60,6 +60,9 @@
              JWT. -->
         <ConsumerDialectURI>{{apim.jwt.claim_dialect}}</ConsumerDialectURI>
 
+        <!-- Whether to convert claims retrieved from AuthorizationGrantCache to the dialect defined in ConsumerDialectURI -->
+        <ConvertClaimsToConsumerDialect>{{apim.jwt.convert_dialect}}</ConvertClaimsToConsumerDialect>
+
         <!-- Signature algorithm. Accepts "SHA256withRSA" or "NONE". To disable signing explicitly specify "NONE". -->
         <SignatureAlgorithm>{{apim.jwt.signing_algorithm}}</SignatureAlgorithm>
 
@@ -76,14 +79,11 @@
         <GatewayJWTGeneration>
             <ImplClass>{{apim.jwt.gateway_generator.impl}}</ImplClass>
             <Configuration>
-                <ClaimMappings>
-                {%- for claim in apim.jwt.gateway_generator.claims -%}
-                    <Claim>
-                    <RemoteClaim>{{claim.remote_claim}}</RemoteClaim>
-                    <LocalClaim>{{claim.local_claim}}</LocalClaim>
-                    </Claim>
-                    {% endfor %}
-                </ClaimMappings>
+            <ExcludedClaims>
+                {%- for claim in apim.jwt.gateway_generator.excluded_claims -%}
+                <Claim>{{claim}}</Claim>
+                {% endfor %}
+            </ExcludedClaims>
             </Configuration>
         </GatewayJWTGeneration>
     </JWTConfiguration>
@@ -145,6 +145,30 @@
             {% endfor %}
         </Environments>
     </APIGateway>
+
+    <TokenIssuers>
+    {%- for issuer_1 in apim.jwt.issuer -%}
+    <TokenIssuer issuer ="{{issuer_1.name}}">
+    {% if issuer_1.jwks is defined %}
+      <JWKSConfiguration>
+        <URL>{{issuer_1.jwks.url}}</URL>
+      </JWKSConfiguration>
+    {% endif %}
+    {% if issuer_1.disable_default_claim_mapping is defined %}
+      <ClaimMappings disable-default-claim-mapping ="{{issuer_1.disable_default_claim_mapping}}">
+    {% else%}
+      <ClaimMappings disable-default-claim-mapping = "false">
+    {% endif %}
+      {%- for claim in issuer_1.claim_mapping -%}
+         <ClaimMapping>
+           <RemoteClaim>{{claim.remote_claim}}</RemoteClaim>
+           <LocalClaim>{{claim.local_claim}}</LocalClaim>
+         </ClaimMapping>
+      {% endfor %}
+      </ClaimMappings>
+      </TokenIssuer>
+    {% endfor %}
+    </TokenIssuers>
 
     <CacheConfigurations>
 	    <!-- Enable/Disable token caching at the Gateway-->
@@ -366,7 +390,9 @@
     <OAuthConfigurations>
         <!-- Remove OAuth headers from outgoing message. -->
         <RemoveOAuthHeadersFromOutMessage>{{not apim.oauth_config.enable_outbound_auth_header}}</RemoveOAuthHeadersFromOutMessage>
-
+        {% if apim.oauth_config.scope_issuer is defined %}
+        <ScopeIssuer>{{apim.oauth_config.scope_issuer}}</ScopeIssuer>
+        {% endif %}
         {% if apim.oauth_config.set_jwt_as_opaque_token is defined %}
         <!-- Consider incoming jwt token as an opaque token. -->
         <JWTAsOpaqueToken>{{apim.oauth_config.set_jwt_as_opaque_token}}</JWTAsOpaqueToken>
@@ -940,6 +966,8 @@
         <recommendationAPI>{{apim.devportal.recommendations.recommendations_api}}</recommendationAPI>
         {% if apim.devportal.recommendations.oauth_endpoint is defined %}
         <authenticationEndpoint>{{apim.devportal.recommendations.oauth_endpoint}}</authenticationEndpoint>
+        {% endif %}
+        {% if apim.devportal.recommendations.consumer_key is defined %}
         <consumerKey>{{apim.devportal.recommendations.consumer_key}}</consumerKey>
         <consumerSecret>{{apim.devportal.recommendations.consumer_secret}}</consumerSecret>
         {% endif %}
@@ -948,6 +976,9 @@
         {% endif %}
         {% if apim.devportal.recommendations.apply_for_all_tenants is defined %}
         <applyForAllTenants>{{apim.devportal.recommendations.apply_for_all_tenants}}</applyForAllTenants>
+        {% endif %}
+        {% if apim.devportal.recommendations.wait_duration is defined %}
+        <waitDuration>{{apim.devportal.recommendations.wait_duration}}</waitDuration>
         {% endif %}
         {% if apim.devportal.recommendations.username is defined %}
         <userName>{{apim.devportal.recommendations.username}}</userName>

@@ -259,6 +259,8 @@ public class APIManagerComponent {
             CacheProvider.createRESTAPITokenCache();
             CacheProvider.createRESTAPIInvalidTokenCache();
             CacheProvider.createGatewayJWTTokenCache();
+            CacheProvider.createTenantConfigCache();
+            CacheProvider.createRecommendationsCache();
             //Initialize Recommendation wso2event output publisher
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();

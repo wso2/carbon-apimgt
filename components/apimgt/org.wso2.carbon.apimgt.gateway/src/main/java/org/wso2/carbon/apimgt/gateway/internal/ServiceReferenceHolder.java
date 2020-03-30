@@ -19,12 +19,14 @@ package org.wso2.carbon.apimgt.gateway.internal;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.tracing.TracingService;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.endpoint.service.EndpointAdmin;
 import org.wso2.carbon.localentry.service.LocalEntryAdmin;
@@ -33,8 +35,9 @@ import org.wso2.carbon.rest.api.service.RestApiAdmin;
 import org.wso2.carbon.sequences.services.SequenceAdmin;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ServiceReferenceHolder {
@@ -54,14 +57,14 @@ public class ServiceReferenceHolder {
     private EndpointAdmin endpointAdmin;
     private MediationSecurityAdminService mediationSecurityAdminService;
     private ThrottleDataPublisher throttleDataPublisher;
-    private AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator;
-    private Set<String> claims = new HashSet<>();
-    public ThrottleDataHolder getThrottleDataHolder() {
-        return throttleDataHolder;
-    }
-
+    private Map<String,AbstractAPIMgtGatewayJWTGenerator> apiMgtGatewayJWTGenerators  = new HashMap<>();
+    private Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
+    private TracingTracer tracer;
     public void setThrottleDataHolder(ThrottleDataHolder throttleDataHolder) {
         this.throttleDataHolder = throttleDataHolder;
+    }
+    public ThrottleDataHolder getThrottleDataHolder() {
+        return throttleDataHolder;
     }
 
     private ServiceReferenceHolder() {
@@ -196,20 +199,25 @@ public class ServiceReferenceHolder {
         this.throttleDataPublisher = throttleDataPublisher;
     }
 
-    public AbstractAPIMgtGatewayJWTGenerator getAPIMgtGatewayJWTGenerator() {
 
-        return apiMgtGatewayJWTGenerator;
+
+    public Map<String,AbstractAPIMgtGatewayJWTGenerator> getApiMgtGatewayJWTGenerator() {
+
+        return apiMgtGatewayJWTGenerators;
     }
 
-    public AbstractAPIMgtGatewayJWTGenerator getApiMgtGatewayJWTGenerator() {
+    public Map<String, JWTTransformer> getJwtTransformerMap() {
 
-        return apiMgtGatewayJWTGenerator;
+        return jwtTransformerMap;
     }
 
-    public void setApiMgtGatewayJWTGenerator(
-            AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator) {
+    public TracingTracer getTracer() {
 
-        this.apiMgtGatewayJWTGenerator = apiMgtGatewayJWTGenerator;
+        return tracer;
     }
 
+    public void setTracer(TracingTracer tracer) {
+
+        this.tracer = tracer;
+    }
 }

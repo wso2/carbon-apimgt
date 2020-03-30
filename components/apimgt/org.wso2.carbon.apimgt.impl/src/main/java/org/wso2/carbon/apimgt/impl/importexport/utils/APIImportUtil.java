@@ -24,6 +24,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.io.FileUtils;
@@ -76,6 +77,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -235,6 +237,8 @@ public final class APIImportUtil {
         API importedApi = null;
         API targetApi; //target API when overwrite is true
         String prevProvider;
+        String apiName;
+        String apiVersion;
         String currentTenantDomain;
         String currentStatus;
         String targetStatus;
@@ -269,7 +273,20 @@ public final class APIImportUtil {
 
             //locate the "providerName" within the "id" and set it as the current user
             JsonObject apiId = configObject.getAsJsonObject(APIImportExportConstants.ID_ELEMENT);
+
             prevProvider = apiId.get(APIImportExportConstants.PROVIDER_ELEMENT).getAsString();
+            apiName = apiId.get(APIImportExportConstants.NAME_ELEMENT).getAsString();
+            apiVersion = apiId.get(APIImportExportConstants.VERSION_ELEMENT).getAsString();
+            // Remove spaces of API Name/version if present
+            if (apiName != null && apiVersion != null) {
+                apiId.addProperty(APIImportExportConstants.NAME_ELEMENT,
+                        apiName = apiName.replace(" ", ""));
+                apiId.addProperty(APIImportExportConstants.VERSION_ELEMENT,
+                        apiVersion = apiVersion.replace(" ", ""));
+            } else {
+                throw new IOException("API Name (id.apiName) and Version (id.version) must be provided in api.yaml");
+            }
+
             String prevTenantDomain = MultitenantUtils
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(prevProvider));
             currentTenantDomain = MultitenantUtils
@@ -302,9 +319,6 @@ public final class APIImportUtil {
 
             // Store imported API status
             targetStatus = importedApi.getStatus();
-
-            String apiName = importedApi.getId().getName();
-            String apiVersion = importedApi.getId().getVersion();
             if (Boolean.TRUE.equals(overwrite)) {
                 String provider = APIUtil
                         .getAPIProviderFromAPINameVersionTenant(apiName, apiVersion, currentTenantDomain);
@@ -422,6 +436,8 @@ public final class APIImportUtil {
             // Change API lifecycle if state transition is required
             if (StringUtils.isNotEmpty(lifecycleAction)) {
                 log.info("Changing lifecycle from " + currentStatus + " to " + targetStatus);
+                apiProvider.changeAPILCCheckListItems(importedApi.getId(),
+                        APIImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);
                 apiProvider.changeLifeCycleStatus(importedApi.getId(), lifecycleAction);
                 //Change the status of the imported API to targetStatus
                 importedApi.setStatus(targetStatus);
@@ -509,7 +525,22 @@ public final class APIImportUtil {
     private static void updateAPIWithThumbnail(File imageFile, API importedApi, APIProvider apiProvider) {
 
         APIIdentifier apiIdentifier = importedApi.getId();
-        String mimeType = URLConnection.guessContentTypeFromName(imageFile.getName());
+        String fileName = imageFile.getName();
+        String mimeType = URLConnection.guessContentTypeFromName(fileName);
+        if (StringUtils.isBlank(mimeType)) {
+            try {
+                // Check whether the icon is in .json format (UI icons are stored as .json)
+                new JsonParser().parse(new FileReader(imageFile));
+                mimeType = APIConstants.APPLICATION_JSON_MEDIA_TYPE;
+            } catch (JsonParseException e) {
+                // Here the exceptions were handled and logged that may arise when parsing the .json file,
+                // and this will not break the flow of importing the API.
+                // If the .json is wrong or cannot be found the API import process will still be carried out.
+                log.error("Failed to read the thumbnail file. ", e);
+            } catch (FileNotFoundException e) {
+                log.error("Failed to find the thumbnail file. ", e);
+            }
+        }
         try (FileInputStream inputStream = new FileInputStream(imageFile.getAbsolutePath())) {
             ResourceFile apiImage = new ResourceFile(inputStream, mimeType);
             String thumbPath = APIUtil.getIconPath(apiIdentifier);

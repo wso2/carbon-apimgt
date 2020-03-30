@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.gateway.internal;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -31,8 +30,13 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl;
+import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.transformer.DefaultJWTTransformer;
+import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
@@ -63,6 +67,9 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 @Component(
          name = "org.wso2.carbon.apimgt.handlers", 
@@ -93,7 +100,8 @@ public class APIHandlerServiceComponent {
             }
             String filePath = getFilePath();
             configuration.load(filePath);
-            ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl(configuration));
+            ServiceReferenceHolder.getInstance()
+                    .setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl(configuration));
             ServiceReferenceHolder.getInstance().setThrottleProperties(configuration.getThrottleProperties());
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
             if ("Synapse".equalsIgnoreCase(gatewayType)) {
@@ -122,7 +130,8 @@ public class APIHandlerServiceComponent {
                         webServiceBlockConditionsRetriever.startKeyTemplateDataRetriever();
 
                         // Start web service based revoked JWT tokens retriever.
-                        // Advanced throttle properties & blocking conditions have to be enabled for JWT token retrieval due to the throttle config dependency for this feature.
+                        // Advanced throttle properties & blocking conditions have to be enabled for JWT token
+                        // retrieval due to the throttle config dependency for this feature.
                         RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
                         webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
                     }
@@ -131,19 +140,28 @@ public class APIHandlerServiceComponent {
                 // Set APIM Gateway JWT Generator
 
                 JWTConfigurationDto jwtConfigurationDto = configuration.getJwtConfigurationDto();
-                if (jwtConfigurationDto.isEnabled()){
-                    if (StringUtils.isNotEmpty(jwtConfigurationDto.getGatewayJWTGeneratorImpl())) {
-                        AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator =
-                                (AbstractAPIMgtGatewayJWTGenerator) Class
-                                        .forName(jwtConfigurationDto.getGatewayJWTGeneratorImpl()).newInstance();
-                        ServiceReferenceHolder.getInstance().setApiMgtGatewayJWTGenerator(apiMgtGatewayJWTGenerator);
-                    }
-                }
+                Properties defaultClaimMappings = new Properties();
+                InputStream resourceAsStream =
+                        this.getClass().getClassLoader().getResourceAsStream("default-claim-mapping.properties");
+                defaultClaimMappings.load(resourceAsStream);
+
+                JWTTransformer jwtTransformer = new DefaultJWTTransformer(jwtConfigurationDto, defaultClaimMappings);
+                registration = context.getBundleContext()
+                        .registerService(JWTTransformer.class.getName(), jwtTransformer, null);
+                registration =
+                        context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
+                                new APIMgtGatewayJWTGeneratorImpl(), null);
+                registration =
+                        context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
+                                new APIMgtGatewayUrlSafeJWTGeneratorImpl(), null);
+
                 // Start JWT revoked map cleaner.
                 RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
                 revokedJWTMapCleaner.startJWTRevokedMapCleaner();
+                ServiceReferenceHolder.getInstance().setTracer(ServiceReferenceHolder.getInstance().getTracingService()
+                        .buildTracer(APIMgtGatewayConstants.SERVICE_NAME));
             }
-        } catch (AxisFault | APIManagementException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+        } catch (APIManagementException | IOException e) {
             log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
         }
         // Create caches for the super tenant
@@ -158,6 +176,7 @@ public class APIHandlerServiceComponent {
         CacheProvider.createGatewayApiKeyCache();
         CacheProvider.createGatewayApiKeyDataCache();
         CacheProvider.getInvalidGatewayApiKeyCache();
+        CacheProvider.getJWKSCache();
     }
 
     @Deactivate
@@ -352,6 +371,41 @@ public class APIHandlerServiceComponent {
     protected void unsetMediationSecurityAdminService(MediationSecurityAdminService mediationSecurityAdminService) {
 
         ServiceReferenceHolder.getInstance().setMediationSecurityAdminService(null);
+    }
+
+    @Reference(
+            name = "jwt.transformer.service.component",
+            service = JWTTransformer.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetJWTTransformer")
+    protected void setJWTTransformer(JWTTransformer jwtTransformer) {
+
+        ServiceReferenceHolder.getInstance().getJwtTransformerMap().put(jwtTransformer.getIssuer(), jwtTransformer);
+    }
+
+    protected void unsetJWTTransformer(JWTTransformer jwtTransformer) {
+
+        ServiceReferenceHolder.getInstance().getJwtTransformerMap().remove(jwtTransformer.getIssuer());
+    }
+
+
+    @Reference(
+            name = "jwt.generator.service.component",
+            service = AbstractAPIMgtGatewayJWTGenerator.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetGatewayJWTGenerator")
+    protected void setGatewayJWTGenerator(AbstractAPIMgtGatewayJWTGenerator gatewayJWTGenerator) {
+
+        ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
+                .put(gatewayJWTGenerator.getClass().getName(), gatewayJWTGenerator);
+    }
+
+    protected void unsetGatewayJWTGenerator(AbstractAPIMgtGatewayJWTGenerator gatewayJWTGenerator) {
+
+        ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
+                .remove(gatewayJWTGenerator.getClass().getName());
     }
 }
 

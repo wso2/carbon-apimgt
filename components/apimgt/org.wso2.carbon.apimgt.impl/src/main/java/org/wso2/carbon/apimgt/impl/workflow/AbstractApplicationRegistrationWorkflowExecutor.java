@@ -136,6 +136,11 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
             workflowDTO.getAppInfoDTO().getOAuthApplicationInfo()
                        .setClientName(application.getName());
+
+            // set applications attributes to the oAuthApplicationInfo
+            workflowDTO.getAppInfoDTO().getOAuthApplicationInfo()
+                    .putAllAppAttributes(application.getApplicationAttributes());
+
             //createApplication on oAuthorization server.
             OAuthApplicationInfo oAuthApplication = keyManager.createApplication(workflowDTO.getAppInfoDTO());
 
