@@ -545,15 +545,13 @@ function TryOutController(props) {
                                                 <Tooltip
                                                     placement='right'
                                                     title={(
-                                                        <>
-                                                            <FormattedMessage
-                                                                id='Apis.Details.TryOutConsole.access.token.tooltip'
-                                                                defaultMessage={
-                                                                    'You can use your existing Access Token or '
+                                                        <FormattedMessage
+                                                            id='Apis.Details.TryOutConsole.access.token.tooltip'
+                                                            defaultMessage={
+                                                                'You can use your existing Access Token or '
                                                 + 'you can generate a new Test Key.'
-                                                                }
-                                                            />
-                                                        </>
+                                                            }
+                                                        />
                                                     )}
                                                 >
                                                     <HelpOutline className={classes.tooltip} />
