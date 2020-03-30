@@ -93,7 +93,7 @@ const styles = makeStyles((theme) => ({
  */
 function TryOutController(props) {
     const {
-        securitySchemeType, selectedEnvironment, swagger, environments, labels,
+        securitySchemeType, selectedEnvironment, environments, labels,
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
         setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes, updateSwagger,
         setSecurityScheme, setUsername, setPassword, username, password,
@@ -622,7 +622,6 @@ function TryOutController(props) {
         </>
     );
 }
-
 
 TryOutController.propTypes = {
     classes: PropTypes.shape({

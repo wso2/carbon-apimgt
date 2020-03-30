@@ -102,7 +102,6 @@ class ApiConsole extends React.Component {
     componentDidMount() {
         const { api } = this.context;
         const apiID = api.id;
-        const user = AuthManager.getUser();
         let apiData;
         let environments;
         let labels;
