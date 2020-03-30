@@ -329,7 +329,7 @@ function TryOutController(props) {
     }
 
     const user = AuthManager.getUser();
-    if (api == null || swagger == null) {
+    if (api == null) {
         return <Progress />;
     }
     if (notFound) {
@@ -527,6 +527,7 @@ function TryOutController(props) {
                                                 color='primary'
                                                 variant='contained'
                                                 className={classes.genKeyButton}
+                                                disabled={!user || (subscriptions && subscriptions.length === 0)}
                                             >
                                                 {isUpdating && (
                                                     <CircularProgress size={20} />
