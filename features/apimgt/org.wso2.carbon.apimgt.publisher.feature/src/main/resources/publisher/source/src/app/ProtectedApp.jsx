@@ -46,7 +46,6 @@ const DeferredAPIs = () => (
     </Suspense>
 );
 const theme = createMuiTheme(Themes.light);
-console.info(JSON.stringify(Themes.light));
 
 /**
  * Language.
