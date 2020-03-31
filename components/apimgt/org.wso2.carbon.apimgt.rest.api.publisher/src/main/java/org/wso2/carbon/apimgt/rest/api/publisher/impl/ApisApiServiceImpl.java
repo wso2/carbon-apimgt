@@ -157,7 +157,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             Map<String, Object> result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain,
                                         offset, limit, false);
-            Set<API> apis = (Set<API>) result.get("apis");
+            Set<API> apis = (Set)((Set)result.get("apis")).stream().filter(p->p instanceof API).collect(Collectors.toSet());
             allMatchedApis.addAll(apis);
 
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, expand);
