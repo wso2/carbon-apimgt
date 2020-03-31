@@ -27,14 +27,19 @@
 <header>
     <div class="wrapper">
         <h1>APIM &bullet; Human Interface Guidelines</h1>
-        <small>Updated: 16 Mar 2020</small>
+        <small>Updated: 31 Mar 2020</small>
     </div>
 </header>
 <div class="wrapper">
     <nav role="navigator">
         <h4>Table of Contents</h4>
         <ol>
-            <li><a href="#intro" id="toc-intro">Introduction</a></li>
+            <li><a href="#intro" id="toc-intro">Introduction</a>
+                <ol>
+                    <li><a href="#roles" id="toc-roles">User Roles</a></li>
+                    <li><a href="#customers" id="toc-customers">Customer Distribution</a></li>
+                </ol>
+            </li>
             <li><a href="#ux" id="toc-ux">UX Best Practices</a>
                 <ol>
                     <li><a href="#rules" id="toc-rules">Immutable Rules</a></li>
@@ -87,6 +92,51 @@
             interface developments.</p>
         <p>We will define set of guidelines so that user interfaces will be consistent throughout the
             application.</p>
+
+        <section id="roles" class="waypoint">
+            <h3>User Roles</h3>
+            <h4>API Publisher</h4>
+            <p>
+                An API publisher (API provider) is an API product manager. He/she manages a set of APIs and API
+                products across the enterprise or business unit and controls the API lifecycle, subscriptions,
+                and monetization aspects of an API or API product. The API Publisher can also analyze usage patterns
+                for APIs and access all APIs statistics.
+            </p>
+            <h4>API Creator</h4>
+            <p>
+                An API Creator is a person in a technical role who understands the technical aspects of the API
+                (interfaces, documentation, versions, etc.) and uses the API Publisher portal for the design and
+                development of APIs. APIs created by an API creator are managed (lifecycle managed and productized)
+                by an API product manager.
+            </p>
+            <h4>API Subscriber</h4>
+            <p>
+                A subscriber is a consumer of an API. He/she intends to develop one or more applications that consume
+                APIs on the developer portal. A subscriber uses the API developer portal to discover APIs, read the
+                documentation and forums, rate/comment on the APIs, subscribe, obtain keys, and finally use APIs
+                from their applications.
+            </p>
+
+            <h4>Admin</h4>
+            <p>
+                The admin user is responsible for managing the admin portal, which includes tasks such as approving
+                workflows, managing rate limiting policies, configuring emails for bot detection/alerts, viewing the
+                state and health of APIs, etc. In addition, the admin user is also capable of carrying out general
+                administrative tasks such as managing users, roles, databases, security, etc.
+            </p>
+        </section>
+
+        <section id="customers" class="waypoint">
+            <h3>Customer Distribution by Region</h3>
+            <p>
+                Customer Distribution by Region as of January 2020
+            </p>
+            <img width="600" src="assets/images/customers.png" alt="Customer Distribution by Region"/>
+            <p> Find more on
+                <a href="https://docs.google.com/spreadsheets/d/1gXqP4NHhqfnzZnjTI_8rh-Y8XGyj0qpCz3FegMMzL0A/"
+                   target="blank">APIM Customers - Region & Country</a>
+            </p>
+        </section>
 
         <hr>
 

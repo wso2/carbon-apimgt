@@ -102,6 +102,7 @@ h3 a:active {
 
 h4 {
     font-size: 1.25em;
+    font-weight: 500;
 }
 
 h5 {
@@ -457,3 +458,5 @@ form.vertical label {
 .s-tag-table tr td:last-child {
     border-right: 1px solid #e5e5e5
 }
+
+#roles h4 {margin: 40px 0 0}
