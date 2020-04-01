@@ -69,7 +69,7 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
             }
 
             String tenantDomain = workflowDTO.getTenantDomain();
-            if (!tenantDomain.equals(tenantDomainOfUser)) {
+            if (tenantDomain != null && !tenantDomain.equals(tenantDomainOfUser)) {
                 return Response.status(Response.Status.UNAUTHORIZED).build();
             }
             if (tenantDomain != null && !SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
