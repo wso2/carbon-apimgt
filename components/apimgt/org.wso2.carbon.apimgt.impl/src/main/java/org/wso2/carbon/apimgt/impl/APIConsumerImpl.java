@@ -2817,7 +2817,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         API api = null;
         APIProduct product = null;
         Identifier identifier = null;
-        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
         String state;
         String apiContext;
