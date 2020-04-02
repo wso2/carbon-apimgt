@@ -35,13 +35,13 @@ import API from 'AppData/api';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import StarRatingSummary from 'AppComponents/Apis/Details/StarRatingSummary';
 import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
+import Social from 'AppComponents/Apis/Details/Social/Social';
 import VerticalDivider from '../../Shared/VerticalDivider';
 import ApiThumb from '../Listing/ApiThumb';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import AuthManager from '../../../data/AuthManager';
 import Environments from './Environments';
 import Labels from './Labels';
-
 /**
  *
  *
@@ -332,7 +332,10 @@ class InfoBar extends React.Component {
         } = theme;
 
         // Remve the tags with a sufix '-group' from tags
-        const apisTagsWithoutGroups = [];
+        let apisTagsWithoutGroups = [];
+        if ( !active ){
+            apisTagsWithoutGroups = api.tags;
+        }
         if (active && api.tags && api.tags.length > 0) {
             for (let i = 0; i < api.tags.length; i++) {
                 if (api.tags[i].search(key) != -1 && api.tags[i].split(key).length > 0) {
@@ -384,6 +387,7 @@ class InfoBar extends React.Component {
                             <VerticalDivider height={70} />
                         </>
                     )}
+                    <Social />
                 </div>
                 {position === 'horizontal' && <div style={{ height: 60 }} />}
                 {showOverview && (

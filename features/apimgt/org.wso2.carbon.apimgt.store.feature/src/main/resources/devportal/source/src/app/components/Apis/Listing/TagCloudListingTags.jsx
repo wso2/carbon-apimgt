@@ -28,6 +28,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Icon from '@material-ui/core/Icon';
 import { FormattedMessage } from 'react-intl';
 import ApiTagThumb from './ApiTagThumb';
+import classNames from 'classnames';
 
 const useStyles = makeStyles(theme => ({
     mainTitle: {
@@ -60,6 +61,12 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'center',
         display: 'flex',
     },
+    mainPageList: {
+        display: 'flex',
+    },
+    mainPageAllApis: {
+        width: '100%',
+    }
 }));
 
 /**
@@ -106,32 +113,32 @@ function TagCloudListingTags(props) {
             {!mainPage && (<Typography variant='h6' gutterBottom className={classes.filterTitle}>
                 <FormattedMessage defaultMessage='Api Groups' id='Apis.Listing.TagCloudListingTags.title' />
             </Typography>)}
-            <List component='nav' aria-label='main mailbox folders'>
+            <List component='nav' aria-label='main mailbox folders' className={classNames({ [classes.mainPageList]: mainPage })}>
                 {Object.keys(apisTagCloudGroup).map((key) => {
                     return <ApiTagThumb key={key} tag={apisTagCloudGroup[key]} path={tagWiseURL} style={style} mainPage={mainPage} />;
                 })}
-                {showAllApis && (
-                    <React.Fragment>
-                        <Divider />
-
-                        <Link to='apis/' className={classes.textWrapper}>
-                            <ListItem button>
-                                <ListItemIcon>
-                                    <Icon>label</Icon>
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={
-                                        <FormattedMessage
-                                            defaultMessage='All Apis'
-                                            id='Apis.Listing.TagCloudListingTags.allApis'
-                                        />
-                                    }
-                                />
-                            </ListItem>
-                        </Link>
-                    </React.Fragment>
-                )}
             </List>
+            {showAllApis && (
+                <div className={classNames({ [classes.mainPageAllApis]: mainPage })}>
+                    <Divider />
+
+                    <Link to='apis/' className={classes.textWrapper}>
+                        <ListItem button>
+                            <ListItemIcon>
+                                <Icon>label</Icon>
+                            </ListItemIcon>
+                            <ListItemText
+                                primary={
+                                    <FormattedMessage
+                                        defaultMessage='All Apis'
+                                        id='Apis.Listing.TagCloudListingTags.allApis'
+                                    />
+                                }
+                            />
+                        </ListItem>
+                    </Link>
+                </div>
+            )}
         </>
 
     ) : (
