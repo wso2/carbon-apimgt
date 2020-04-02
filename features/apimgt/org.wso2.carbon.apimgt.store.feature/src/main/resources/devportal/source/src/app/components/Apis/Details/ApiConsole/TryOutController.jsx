@@ -499,8 +499,6 @@ function TryOutController(props) {
                                                 name='accessToken'
                                                 onChange={handleChanges}
                                                 type={showToken ? 'text' : 'password'}
-                                                // value={selectedKeyType === 'PRODUCTION'
-                                                //     ? productionAccessToken : sandboxAccessToken}
                                                 value={tokenValue}
                                                 helperText={(
                                                     <FormattedMessage
