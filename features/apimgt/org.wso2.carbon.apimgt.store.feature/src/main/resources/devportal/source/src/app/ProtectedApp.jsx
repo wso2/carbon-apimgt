@@ -235,7 +235,7 @@ class ProtectedApp extends Component {
         if (notEnoughPermission) {
             return <LoginDenied />;
         }
-
+        
         // Waiting till the tenant list is retrieved
         if (!tenantResolved) {
             return <Loading />;
@@ -245,6 +245,23 @@ class ProtectedApp extends Component {
         // tenantDomain contains INVALID when the tenant does not exist
         if (tenantList.length > 0 && (tenantDomain === 'INVALID' || (!isAuthenticated && tenantDomain === null))) {
             return <TenantListing tenantList={tenantList} />;
+        }
+        // check for widget=true in the query params. If it's present we render without <Base> component.
+        const pageUrl = new URL(window.location);
+        const isWidget = pageUrl.searchParams.get('widget');
+        if(isWidget) {
+            return (
+                <>
+                    <iframe
+                        title='iframeOP'
+                        id='iframeOP'
+                        src={checkSessionURL}
+                        width='0px'
+                        height='0px'
+                    />
+                    <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />  
+                </>
+            );  
         }
         /**
          * Note: AuthManager.getUser() method is a passive check, which simply
