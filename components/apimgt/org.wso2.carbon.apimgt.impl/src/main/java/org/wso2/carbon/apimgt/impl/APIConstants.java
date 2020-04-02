@@ -1737,7 +1737,8 @@ public final class APIConstants {
     public static final String SERVICE_DISCOVERY = "ServiceDiscovery";
     public static final String SERVICE_DISCOVERY_CLASS =  "ClassName";
     public static final String URL ="MasterURL";
-    public static final String SERVICE_DISCOVERY_TYPE ="type";
+    public static String SERVICE_DISCOVERY_TYPE ="type";
+    public static final String ENABLED ="Enabled";
     public static final String SERVICE_DISCOVERY_DISPLAYNAME ="DisplayName";
 }
 

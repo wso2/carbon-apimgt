@@ -1051,6 +1051,24 @@ public class RestApiUtil {
         return paginatedURL;
     }
 
+
+
+    /** Returns the paginated url for APIs API
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+
+    public static String getServiceDiscoveryPaginatedServices(Integer offset, Integer limit){
+        String paginatedServies =RestApiConstants.SERVICE_DISCOVERT_GET_PAGINATION_SERVICES;
+        paginatedServies = paginatedServies.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedServies = paginatedServies.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        return paginatedServies;
+
+    }
+
+
     /** Returns the paginated url for Applications API
      *
      * @param offset starting index

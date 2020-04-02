@@ -505,6 +505,16 @@ public interface APIManager {
     Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end,
                                            boolean limitAttributes) throws APIManagementException;
 
+    /**
+     * Return Service Discovery search result based on the provied query
+     * @param type  type of the service discovery system
+     * @param tenantDomain tenant domain
+     * @param start starting number
+     * @param end ending number
+     * @param limitAttributes whether or not to limit attributes in the search result*/
+
+//    Map<String,Object> searchPaginatesServices(String type, String tenantDomain , int start, int end, boolean limitAttributes) throws APIManagementException;
+
 
     /**
      * fetches the lastUpdated timestamp for the API swagger resource

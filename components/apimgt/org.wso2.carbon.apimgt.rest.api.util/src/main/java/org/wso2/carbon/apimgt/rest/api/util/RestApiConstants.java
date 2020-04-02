@@ -87,6 +87,7 @@ public final class RestApiConstants {
     public static final String CHARSET = "UTF-8";
 
     //todo better to take from cxf level
+    public static final String RESOURCI_PATH_SERVICE_DISCOVERY ="/service-discovery";
     public static final String RESOURCE_PATH_APIS = "/apis";
     public static final String RESOURCE_PATH_API_PRODUCTS = "/api-products";
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
@@ -208,6 +209,10 @@ public final class RestApiConstants {
 
     public static final String PRODUCT_DOCUMENTS_GET_PAGINATION_URL =
             RESOURCE_PATH_PRODUCT_DOCUMENTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
+    //service-discovery
+    public static final String SERVICE_DISCOVERT_GET_PAGINATION_SERVICES =
+            RESOURCI_PATH_SERVICE_DISCOVERY + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM;
 
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_NAME = "name";
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_VALUE = "value";

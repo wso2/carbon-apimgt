@@ -500,23 +500,59 @@ public class APIManagerConfiguration {
                 setContainerMgtConfigurations(element);
             }else if (APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_CONFIGS.equals(localName)) {
                 Iterator iterator = element.getChildrenWithLocalName("ServiceDiscovery");
+//                Iterator elements = element.getChildElements();
+//                while (elements.hasNext()){
+//                    OMElement serviceDiscoveryAttribute = (OMElement)elements.next();
+//                    if(serviceDiscoveryAttribute.getLocalName().equals("ServiceDiscovery")){
+//                        APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_TYPE = serviceDiscoveryAttribute.getAttributeValue(new QName("type"));
+//
+//                    }
+//                }
+//                if ("ServiceDiscovery".equals(element.getLocalName())) {
+//                        APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_TYPE = element.getAttributeValue(new QName("type"));
+//                    //jsonObject.put(APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_TYPE,element.getAttributeValue(new QName("type")));
+//                }
                 while (iterator.hasNext()) {
                     OMElement omElement = (OMElement) iterator.next();
                     Iterator attributes = omElement.getChildElements();
+                    //OMAttribute attributes1 = omElement.getAttribute(QName.valueOf("type"));
+
                     JSONObject jsonObject = new JSONObject();
+                    if(omElement.getLocalName().equals("ServiceDiscovery")){
+                        APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_TYPE = omElement.getAttributeValue(new QName("type"));
+                        jsonObject.put("type",APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_TYPE);
+
+                    }
+
                     while (attributes.hasNext()) {
                         OMElement attribute = (OMElement) attributes.next();
-                        if (attribute.getLocalName().equals(APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_DISPLAYNAME)) {
+                       // jsonObject.put("type",APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_TYPE);
+
+
+
+//                         if (attribute.getLocalName().equals(APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_TYPE)) {
+//                            jsonObject.put(APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_TYPE, attribute.getText());
+//                        }
+                         if (attribute.getLocalName().equals(APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_DISPLAYNAME)) {
                             jsonObject.put(APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_DISPLAYNAME, attribute.getText());
                         } else if (attribute.getLocalName().equals(APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_CLASS)) {
                             jsonObject.put(APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_CLASS, attribute.getText());
                         }
-                        else if (attribute.getLocalName().equals(APIConstants.ServiceDiscoveryAttributes.URL)) {
-                            jsonObject.put(APIConstants.ServiceDiscoveryAttributes.URL, attribute.getText());
+                        else if(attribute.getLocalName().equals("ImplParameters")){
+                            JSONObject implParameters = new JSONObject();
+                            Iterator implParametersIterator = attribute.getChildElements();
+                            while(implParametersIterator.hasNext()) {
+                                OMElement implParameter = (OMElement) implParametersIterator.next();
+                                if ("MasterURL".equals(implParameter.getLocalName())) {
+                                    implParameters.put("MasterURL", implParameter.getText());
+                                }
+                                else if ("SAToken".equals(implParameter.getLocalName())) {
+                                    implParameters.put("SAToken", implParameter.getText());
+                                }
+                            }
+                            jsonObject.put("ImplParameters",implParameters);
                         }
-                        else if (attribute.getLocalName().equals(APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_TYPE)) {
-                            jsonObject.put(APIConstants.ServiceDiscoveryAttributes.SERVICE_DISCOVERY_TYPE, attribute.getText());
-                        }
+
 
                     }
                     serviceDiscovery.add(jsonObject);

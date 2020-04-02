@@ -11094,54 +11094,58 @@ public final class APIUtil {
     }
 
 
-    public static Map<String, Map<String, String>> getClusterInfoFromServiceConfig(JSONObject tenantConf) {
+    public static Map<String, Map<String, Object>> getServiceDiscoveryTypesFromConfig(JSONObject tenantConf) {
 
-        JSONArray clusterInfoService = (JSONArray) ((JSONObject) tenantConf.get(ContainerBasedConstants.SERVICE_DISCOVERY))
+        JSONArray serviceDiscoveryTypes = (JSONArray) ((JSONObject) tenantConf.get(ContainerBasedConstants.SERVICE_DISCOVERY))
                 .get(ContainerBasedConstants.SERVICE_DISCOVERY_TYPES);
-        Map<String, Map<String, String>> clustersService = new HashMap<String, Map<String, String>>();
-        for (Object info : clusterInfoService) {
+        Map<String, Map<String, Object>> serviceDiscoverySystems = new HashMap<String, Map<String, Object>>();
+        for (Object types : serviceDiscoveryTypes) {
 
-            JSONObject clusterPropertiesService = (JSONObject) ((JSONObject) info).get(ContainerBasedConstants.IMPL_PARAMETERS);
-            String serviceSystemType = ((JSONObject) info).get(ContainerBasedConstants.SYSTEM_TYPE).toString();
-            Iterator<String> iterator = clusterPropertiesService.keySet().iterator();
-            Map<String, String> implParameters = new HashMap<String, String>();
+            JSONObject implParameters = (JSONObject) ((JSONObject) types).get(ContainerBasedConstants.IMPL_PARAMETERS);
+            String serviceSystemType = ((JSONObject) types).get(ContainerBasedConstants.SYSTEM_TYPE).toString();
+            String displayName = ((JSONObject) types).get(ContainerBasedConstants.DISPLAY_NAME).toString();
+            Iterator<String> iterator = implParameters.keySet().iterator();
+            Map<String, Object> implParametersMap = new HashMap<String, Object>();
             while (iterator.hasNext()) {
 
                 String key = iterator.next();
-                String value = clusterPropertiesService.get(key).toString();
+                String value = implParameters.get(key).toString();
                 implParameters.put(key, value);
             }
-            clustersService.put(serviceSystemType, implParameters);
-
-            getServices(clusterPropertiesService);//my edit
-
-//            try {
-//                //getServiceDiscoveryDetailsFromAPIMConfig();
-//            } catch (APIManagementException e) {
-//                e.printStackTrace();
-//            }
+            serviceDiscoverySystems.put(serviceSystemType, implParameters);
         }
-
-        return clustersService;
-
-        // getServices(clusters);//my edit
-
+        return serviceDiscoverySystems;
     }
 
 
-    public static JSONObject getClusterInfoFromServiceConfig(String tenantConfigContent) throws ParseException {
+    public static JSONObject getServiceDiscoveryTypesFromConfig(String tenantConfigContent) throws ParseException {
 
         JSONParser jsonParser = new JSONParser();
         JSONObject tenantConf = (JSONObject) jsonParser.parse(tenantConfigContent);
-        JSONArray clusterInfoService = (JSONArray) tenantConf.get(ContainerBasedConstants.SERVICE_DISCOVERY_TYPES);
-        JSONObject clustersService = new JSONObject();
-        for (int i = 0; i < clusterInfoService.size(); i++) {
+        JSONArray serviceDiscoveryTypes = (JSONArray) tenantConf.get(ContainerBasedConstants.SERVICE_DISCOVERY_TYPES);
+        JSONObject serviceDiscoverySystems = new JSONObject();
+        for (int i = 0; i < serviceDiscoveryTypes.size(); i++) {
 
-            JSONObject clusterPropertiesService = (JSONObject) ((JSONObject) clusterInfoService.get(i)).get(ContainerBasedConstants.IMPL_PARAMETERS);
-            String type = ((JSONObject) clusterInfoService.get(i)).get(ContainerBasedConstants.SYSTEM_TYPE).toString();
-            clustersService.put(type, clusterPropertiesService);
+            JSONObject clusterPropertiesService = (JSONObject) ((JSONObject) serviceDiscoveryTypes.get(i)).get(ContainerBasedConstants.IMPL_PARAMETERS);
+            String type = ((JSONObject) serviceDiscoveryTypes.get(i)).get(ContainerBasedConstants.SYSTEM_TYPE).toString();
+            serviceDiscoverySystems.put(type, clusterPropertiesService);
         }
-        return clustersService;
+        return serviceDiscoverySystems;
     }
+
+    public static  Map<String, Object> getServiceDiscoveryConfigurationFromXML(){
+        JSONArray serviceDiscovery;
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        serviceDiscovery= configuration.getServiceDiscoveryConf();
+        Map<String, Object> serviceDiscoveryConfig = new ObjectMapper().convertValue(serviceDiscovery.get(0),
+                Map.class);
+        return serviceDiscoveryConfig;
+    }
+
+
+
+
+
 }
 
