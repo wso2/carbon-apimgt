@@ -1,14 +1,11 @@
-package org.wso2.carbon.apimgt.impl.containermgt;
+package org.wso2.carbon.apimgt.impl.containermgt.k8service;
 
-import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.model.Endpoint;
+import org.wso2.carbon.apimgt.impl.containermgt.ContainerManager;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public interface ServiceDiscovery extends ContainerManager {
     void initManager(Map implParametersDetails);
 
-    public JSONObject getServices(Map<String, String> clusterProperties);
+    public Service getServices(Map<String, Object> clusterProperties);
 }
