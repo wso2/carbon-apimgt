@@ -45,12 +45,12 @@
             systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD,SUPER_TENANT_DOMAIN);
         }
         if (systemApplicationDTO == null) {
-            log.error("Oauth application details not found for 'publisher'");
+            log.error("Oauth application details not found for 'admin portal'");
             response.status = 401;
             response.contentType = "application/json";
             var res= {};
             res.error = true;
-            res.message = "Oauth application details not found for 'publisher'";
+            res.message = "Oauth application details not found for 'admin portal'";
             print(res);
         } else {
             var clientId = systemApplicationDTO.getConsumerKey();

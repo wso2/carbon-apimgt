@@ -18,4 +18,4 @@
 
 ## `site.json` has been removed!
 
-Please refer `<APIM_PUBLISHER>/site/public/conf/settings.js` file to , get all the configurations related to Publisher SPA
+Please refer `<APIM_ADMIN_PORTAL>/site/public/conf/settings.js` file to , get all the configurations related to Admin Portal SPA
