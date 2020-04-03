@@ -27,10 +27,11 @@ import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import Configurations from 'Config';
 import Avatar from './avatar/Avatar';
 import HeaderSearch from './headersearch/HeaderSearch';
-import GlobalNavBar from './navbar/GlobalNavBar';
+import AppContent from '../../../AppContents';
 
 const styles = (theme) => ({
     appBar: {
+        zIndex: theme.zIndex.drawer + 1,
         position: 'relative',
         background: theme.palette.background.appBar,
     },
@@ -71,21 +72,9 @@ class Header extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            openNavBar: false,
             smScreen: false,
         };
-        this.toggleGlobalNavBar = this.toggleGlobalNavBar.bind(this);
         this.toggleSmSearch = this.toggleSmSearch.bind(this);
-    }
-
-    /**
-     * Toggle the Global LHS Navbar visibility
-     *
-     * @memberof Header
-     */
-    toggleGlobalNavBar() {
-        const { openNavBar } = this.state;
-        this.setState({ openNavBar: !openNavBar });
     }
 
     /**
@@ -103,7 +92,7 @@ class Header extends React.Component {
      * @memberof Header
      */
     render() {
-        const { openNavBar, smScreen } = this.state;
+        const { smScreen } = this.state;
         const {
             classes, avatar, theme, menuItems,
         } = this.props;
@@ -125,7 +114,6 @@ class Header extends React.Component {
                             />
                         </Link>
                         <h2 style={{ color: 'white' }}>Admin portal</h2>
-                        <GlobalNavBar toggleGlobalNavBar={this.toggleGlobalNavBar} open={openNavBar} />
                         <VerticalDivider height={32} />
                         <Hidden smDown>
                             <HeaderSearch />
@@ -141,6 +129,7 @@ class Header extends React.Component {
                         {avatar}
                     </Toolbar>
                 </AppBar>
+                <AppContent />
             </>
         );
     }
