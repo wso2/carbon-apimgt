@@ -43,7 +43,7 @@ jest.mock('history', () => {
 });
 
 
-describe('Publisher <HeaderSearch> component tests', () => {
+describe('Admin Portal <HeaderSearch> component tests', () => {
     beforeAll(async () => {
         AuthManager.hasScopes = mockedHasScopes.bind(AuthManager);
         API.search = mockedSearch.bind(API);

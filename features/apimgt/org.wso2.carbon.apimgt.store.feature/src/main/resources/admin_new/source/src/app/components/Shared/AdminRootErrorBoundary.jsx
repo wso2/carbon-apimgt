@@ -25,14 +25,14 @@ import { FormattedMessage } from 'react-intl';
  * log those errors, and display a fallback UI instead of the component tree that crashed.
  * Error boundaries catch errors during rendering, in lifecycle methods,
  * and in constructors of the whole tree below them.
- * @class PublisherRootErrorBoundary
+ * @class AdminRootErrorBoundary
  * @extends {Component}
  */
-class PublisherRootErrorBoundary extends Component {
+class AdminRootErrorBoundary extends Component {
     /**
-     * Creates an instance of PublisherRootErrorBoundary.
+     * Creates an instance of AdminRootErrorBoundary.
      * @param {any} props @inheritDoc
-     * @memberof PublisherRootErrorBoundary
+     * @memberof AdminRootErrorBoundary
      */
     constructor(props) {
         super(props);
@@ -46,7 +46,7 @@ class PublisherRootErrorBoundary extends Component {
      * @param {Error} error is an error that has been thrown
      * @param {Object} info info is an object with componentStack key. The property has information about component
      * stack during thrown error.
-     * @memberof PublisherRootErrorBoundary
+     * @memberof AdminRootErrorBoundary
      */
     componentDidCatch(error, info) {
         this.setState({ hasError: true, error, info });
@@ -55,7 +55,7 @@ class PublisherRootErrorBoundary extends Component {
     /**
      * Return error handled UI
      * @returns {React.Component} return react component
-     * @memberof PublisherRootErrorBoundary
+     * @memberof AdminRootErrorBoundary
      */
     render() {
         const { hasError, error, info } = this.state;
@@ -70,7 +70,7 @@ class PublisherRootErrorBoundary extends Component {
                 <div>
                     <h2>
                         <FormattedMessage
-                            id='Apis.Shared.PublisherRootErrorBoundary.something.went.wrong.while.rendering.heading'
+                            id='Apis.Shared.AdminRootErrorBoundary.something.went.wrong.while.rendering.heading'
                             defaultMessage='Something went wrong while rendering the'
                         />
                     </h2>
@@ -86,7 +86,7 @@ class PublisherRootErrorBoundary extends Component {
                     </pre>
                     <span>
                         <FormattedMessage
-                            id='Apis.Shared.PublisherRootErrorBoundary.refresh.or.try.again.message'
+                            id='Apis.Shared.AdminRootErrorBoundary.refresh.or.try.again.message'
                             defaultMessage='You may refresh the page now or try again later'
                         />
                     </span>
@@ -97,13 +97,13 @@ class PublisherRootErrorBoundary extends Component {
                         }}
                         aria-label={(
                             <FormattedMessage
-                                id='Apis.Shared.PublisherRootErrorBoundary.something.went.wrong.while.rendering.button'
+                                id='Apis.Shared.AdminRootErrorBoundary.something.went.wrong.while.rendering.button'
                                 defaultMessage='Something went wrong while rendering the'
                             />
                         )}
                     >
                         <FormattedMessage
-                            id='Apis.Shared.PublisherRootErrorBoundary.refresh'
+                            id='Apis.Shared.AdminRootErrorBoundary.refresh'
                             defaultMessage='Refresh'
                         />
                     </button>
@@ -115,13 +115,13 @@ class PublisherRootErrorBoundary extends Component {
     }
 }
 
-PublisherRootErrorBoundary.defaultProps = {
+AdminRootErrorBoundary.defaultProps = {
     appName: 'Application',
 };
 
-PublisherRootErrorBoundary.propTypes = {
+AdminRootErrorBoundary.propTypes = {
     children: PropTypes.node.isRequired,
     appName: PropTypes.string,
 };
 
-export default PublisherRootErrorBoundary;
+export default AdminRootErrorBoundary;

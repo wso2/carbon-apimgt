@@ -26,7 +26,7 @@ import qs from 'qs';
 import Utils from 'AppData/Utils';
 import Logout from 'AppComponents/Logout';
 import Progress from 'AppComponents/Shared/Progress';
-import PublisherRootErrorBoundary from 'AppComponents/Shared/PublisherRootErrorBoundary';
+import AdminRootErrorBoundary from 'AppComponents/Shared/AdminRootErrorBoundary';
 import Configurations from 'Config';
 import { IntlProvider } from 'react-intl';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
@@ -54,9 +54,9 @@ const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
  */
 class Admin extends React.Component {
     /**
-     *Creates an instance of Publisher.
+     *Creates an instance of Admin.
      * @param {*} props
-     * @memberof Publisher
+     * @memberof Admin
      */
     constructor(props) {
         super(props);
@@ -108,14 +108,13 @@ class Admin extends React.Component {
                     }
                 });
         }
-
     }
 
     /**
      *
      *
      * @param {User} user
-     * @memberof Publisher
+     * @memberof Admin
      */
     updateUser(user) {
         this.setState({ user });
@@ -136,7 +135,7 @@ class Admin extends React.Component {
      *
      *
      * @returns {React.Component} Render complete app component
-     * @memberof Publisher
+     * @memberof Admin
      */
     render() {
         const {
@@ -148,7 +147,7 @@ class Admin extends React.Component {
         }
         return (
             <IntlProvider locale={locale} messages={messages}>
-                <PublisherRootErrorBoundary appName='Publisher Application'>
+                <AdminRootErrorBoundary appName='Admin Application'>
                     <Router basename={Configurations.app.context}>
                         <Switch>
                             <Redirect exact from='/login' to='/apis' />
@@ -171,7 +170,7 @@ class Admin extends React.Component {
                             />
                         </Switch>
                     </Router>
-                </PublisherRootErrorBoundary>
+                </AdminRootErrorBoundary>
             </IntlProvider>
         );
     }
