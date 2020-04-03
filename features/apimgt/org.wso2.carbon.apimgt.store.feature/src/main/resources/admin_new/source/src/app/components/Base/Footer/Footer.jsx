@@ -33,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
         height: 50,
         alignItems: 'center',
         display: 'flex',
+        zIndex: theme.zIndex.drawer + 1,
     },
 }));
 
