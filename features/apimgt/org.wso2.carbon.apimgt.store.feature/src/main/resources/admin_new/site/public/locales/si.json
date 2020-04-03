@@ -1,0 +1,15 @@
+{
+    "name": "නම",
+    "next": "ඊළඟ",
+    "password": "රහස් පදය",
+    "save": "සුරකින්න",
+    "security": "ආරක්ෂාව",
+    "status": "තත්ත්වය",
+    "summary": "සාරාංශය",
+    "timeout": "කාලය හමාරයි",
+    "type": "වර්ගය",
+    "url": "URL",
+    "username": "පරිශීලක නාමය",
+    "version": "පිටපත",
+    "welcome.to.wso2.api.manager": "WSO2 API කළමනාකරු වෙත සාදරයෙන් පිළිගනිමු"
+}
