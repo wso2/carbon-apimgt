@@ -36,7 +36,8 @@ import { IntlProvider } from 'react-intl';
 import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import Progress from 'AppComponents/Shared/Progress';
 import Configurations from 'Config';
-import SideNavBar from 'AppComponents/Base/Header/navbar/SideNavBar';
+import LeftMenu from 'AppComponents/Base/Header/navbar/LeftMenu';
+import AppContent from './AppContents';
 
 const HelloWorld = () => (
     <Suspense fallback={<Progress message='Loading components ...' />}>
@@ -46,7 +47,7 @@ const HelloWorld = () => (
 
 const SideNavBarRendering = (props) => (
     <Suspense fallback={<Progress message='Loading sidebar ...' />}>
-        <SideNavBar {...props} />
+        <LeftMenu {...props} />
     </Suspense>
 );
 
@@ -152,22 +153,28 @@ export default class Protected extends Component {
                             width='0px'
                             height='0px'
                         />
-                        <SideNavBar />
+
                         {settings ? (
                             <AppContextProvider value={{ settings, user }}>
                                 <Switch>
-                                    <HelloWorld />
-                                    <Route
+                                    {/* <HelloWorld /> */}
+                                    <div>
+                                        <AppContent />
+                                    </div>
+
+                                    {/* <Route
                                         path='/'
                                         component={SideNavBarRendering}
-                                    />
-                                    <Route component={ResourceNotFound} />
+                                    /> */}
+                                    {/* <Route component={ResourceNotFound} /> */}
                                 </Switch>
+
                             </AppContextProvider>
                         ) : (
                                 <Progress message='Loading Settings ...' />
                             )}
                     </Base>
+
                 </AppErrorBoundary>
             </MuiThemeProvider>
         );
