@@ -1,4 +1,6 @@
-# Publisher Portal Application Structure
+# Admin Portal Application Structure
+
+// todo: modify this accordingly
 
 1. Override folder  - If you want to override a certain React Component / file from source/src/ folder, this is the correct place to do it.
 You do not have to copy the entire directory, only copy the desired file/files.
@@ -11,4 +13,4 @@ You do not have to copy the entire directory, only copy the desired file/files.
 
 Note : Only the Services and Site folders along with the jaggery.conf file is required at the runtime.
 
-5. Source and other files - Includes the react files (source code) of the Publisher Portal React Application.
+5. Source and other files - Includes the react files (source code) of the Admin Portal React Application.

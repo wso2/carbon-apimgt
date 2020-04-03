@@ -72,7 +72,7 @@ class AuthManager {
      * Do token introspection and Get the currently logged in user's details
      * When user authentication happens via redirection flow, This method might get used to
      * retrieve the user information
-     * after setting the access token parts in cookies, Because access token parts are stored in /publisher path ,
+     * after setting the access token parts in cookies, Because access token parts are stored in /admin_portal path ,
      * just making an external request in same path will submit both cookies, allowing the service to build the
      * complete access token and do the introspection.
      * Return a promise resolving to user object iff introspect calls return active user else null
@@ -146,46 +146,12 @@ class AuthManager {
         return !AuthManager.getUser().scopes.includes('apim:api_create');
     }
 
-    static isNotPublisher() {
+    static isNotAdminPortal() {
         if (AuthManager.getUser() === null) {
             return doRedirectToLogin();
         } else {
             return !AuthManager.getUser().scopes.includes('apim:api_publish');
         }
-    }
-
-    /**
-     *
-     * @param {*} scopesAllowedToEdit
-     * @param {*} api
-     */
-    static isRestricted(scopesAllowedToEdit, api) {
-        // determines whether the apiType is API PRODUCT and user has publisher role, then allow access.
-        if (api.apiType === 'APIProduct') {
-            if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-
-        // determines whether the user is a publisher or creator (based on what is passed from the element)
-        // if (scopesAllowedToEdit.filter(element => AuthManager.getUser().scopes.includes(element)).length > 0) {
-        if (scopesAllowedToEdit.find((element) => AuthManager.getUser().scopes.includes(element))) {
-            // if the user has publisher role, no need to consider the api LifeCycleStatus
-            if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
-                return false;
-            } else if (
-                // if the user has creator role, but not the publisher role
-                api.lifeCycleStatus === 'CREATED'
-                || api.lifeCycleStatus === 'PROTOTYPED'
-            ) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-        return true;
     }
 
     static hasBasicLoginPermission(scopes) {
@@ -240,8 +206,5 @@ AuthManager.CONST = {
         'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
         + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
 };
-const { isRestricted } = AuthManager;
-
-export { isRestricted };
 
 export default AuthManager;

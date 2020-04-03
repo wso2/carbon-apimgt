@@ -73,7 +73,7 @@ const styles = (theme) => ({
 });
 
 /**
- * Base Component for the publisher app
+ * Base Component for the admin portal app
  * Adding a padding to Base container to avoid overlapping content with the Header AppBar
  * Following padding top values are based on material UI AppBar height parameters as described in here:
  * https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810
