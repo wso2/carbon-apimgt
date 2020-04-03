@@ -67,7 +67,7 @@ function GlobalNavLinks(props) {
         classes, theme, smallView, history,
     } = props;
 
-    const publisherUser = !AuthManager.isNotPublisher();
+    const publisherUser = !AuthManager.isNotAdminPortal();
     const ditectCurrentMenu = (location) => {
         const { pathname } = location;
         if (/\/apis$/g.test(pathname) || /\/apis\//g.test(pathname)) {

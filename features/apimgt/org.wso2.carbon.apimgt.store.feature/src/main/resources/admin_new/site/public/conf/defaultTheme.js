@@ -1,7 +1,7 @@
 /**
- * IMPORTANT: This file only contains theme JSS of the Publisher app, Don't add other configuration parameters here.
+ * IMPORTANT: This file only contains theme JSS of the Admin portal app, Don't add other configuration parameters here.
  * This theme file is an extension of material-ui default theme https://material-ui.com/customization/default-theme/
- * Application related configurations are located in `<PUBLISHER_ROOT>site/public/theme/settings.js`
+ * Application related configurations are located in `<ADMIN_PORTAL_ROOT>site/public/theme/settings.js`
  */
 const AppThemes = {
     light: {

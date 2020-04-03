@@ -17,7 +17,7 @@
  */
 
 /**
- * Utility class for Publisher application
+ * Utility class for Admin Portal application
  */
 class Utils {
     /**
@@ -332,7 +332,6 @@ class Utils {
 }
 
 Utils.CONST = {
-    LOCAL_STORAGE_ENVIRONMENT: 'environment_publisher',
     // TODO: fix/remove below wrong paths
     MULTI_ENVIRONMENT_OVERVIEW_ENABLED: 'multi_env_overview',
 
