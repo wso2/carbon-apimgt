@@ -5974,10 +5974,24 @@ public class ApiMgtDAO {
             prepStmt.setString(7, workflow.getTenantDomain());
             prepStmt.setString(8, workflow.getExternalWorkflowReference());
 
+            if(workflow.getMetadata()!=null){
+                byte[] metadataByte = workflow.getMetadata().toJSONString().getBytes("UTF-8");
+                prepStmt.setBlob(9, new ByteArrayInputStream(metadataByte) );
+            } else {
+                prepStmt.setNull(9, java.sql.Types.BLOB);
+            }
+
+            if(workflow.getProperties() != null) {
+                byte[] propertiesByte = workflow.getProperties().toJSONString().getBytes("UTF-8");
+                prepStmt.setBlob(10, new ByteArrayInputStream(propertiesByte));
+            } else {
+                prepStmt.setNull(10, java.sql.Types.BLOB);
+            }
+
             prepStmt.execute();
 
             connection.commit();
-        } catch (SQLException e) {
+        } catch (SQLException | UnsupportedEncodingException e) {
             handleException("Error while adding Workflow : " + workflow.getExternalWorkflowReference() + " to the " +
                     "database", e);
         } finally {
