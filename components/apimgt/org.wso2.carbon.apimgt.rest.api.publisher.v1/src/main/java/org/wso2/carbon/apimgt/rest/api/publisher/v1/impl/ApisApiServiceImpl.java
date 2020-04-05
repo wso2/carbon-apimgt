@@ -4139,10 +4139,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
                 APIProvider apiProvider = RestApiUtil.getProvider(username);
 
-                if (apiProvider.isScopeKeyAssigned(apiId, scope.getName(), tenantId)) {
+                if (apiProvider.isScopeKeyAssignedLocally(apiId, scope.getName(), tenantId)) {
                     RestApiUtil
-                            .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API",
-                                    log);
+                            .handleBadRequest("Scope " + scope.getName() + " is already assigned locally by another "
+                                    + "API", log);
                 }
             }
             //set description as empty if it is not provided

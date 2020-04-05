@@ -439,11 +439,11 @@ public interface APIManager {
      * Check whether the given scope key is already available under given tenant
      *
      * @param scopeKey candidate scope key
-     * @param tenantid tenant id
+     * @param tenantDomain tenant domain
      * @return true if the scope key is already available
      * @throws APIManagementException if failed to check the context availability
      */
-    boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException;
+    boolean isScopeKeyExist(String scopeKey, String tenantDomain) throws APIManagementException;
 
     /**
      * Check whether the given scope key is already assigned to an API under given tenant
@@ -455,6 +455,18 @@ public interface APIManager {
      * @throws APIManagementException if failed to check the context availability
      */
     boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid) throws APIManagementException;
+
+    /**
+     * Check whether the given scope key is already assigned to an API as local scope under given tenant.
+     *
+     * @param apiIdentifier API Identifier
+     * @param scopeKey   candidate scope key
+     * @param tenantId   tenant Id
+     * @return true if the scope key is already attached as a local scope in any API
+     * @throws APIManagementException if failed to check the local scope availability
+     */
+    boolean isScopeKeyAssignedLocally(APIIdentifier apiIdentifier, String scopeKey, int tenantId)
+            throws APIManagementException;
 
     /**
      * Check if a given context template already exists

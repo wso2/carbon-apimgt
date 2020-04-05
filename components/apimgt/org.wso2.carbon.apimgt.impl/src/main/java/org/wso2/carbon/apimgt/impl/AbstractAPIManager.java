@@ -1599,12 +1599,22 @@ public abstract class AbstractAPIManager implements APIManager {
         return MultitenantUtils.getTenantDomainFromUrl(url);
     }
 
-    public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException {
-        if (System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES) != null && Boolean
-                .parseBoolean(System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES))) {
-            return false;
-        }
-        return apiMgtDAO.isScopeKeyExist(scopeKey, tenantid);
+    /**
+     * Check whether the given scope key is already available under given tenant
+     *
+     * @param scopeKey candidate scope key
+     * @param tenantDomain tenant domain
+     * @return true if the scope key is already available
+     * @throws APIManagementException if failed to check the context availability
+     */
+    public boolean isScopeKeyExist(String scopeKey, String tenantDomain) throws APIManagementException {
+        //TODO: find whether to skip the duplicate scope config
+//        if (System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES) != null && Boolean
+//                .parseBoolean(System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES))) {
+//            return false;
+//        }
+//        return apiMgtDAO.isScopeKeyExist(scopeKey, tenantid);
+        return KeyManagerHolder.getKeyManagerInstance().isScopeExists(scopeKey, tenantDomain);
     }
 
     public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid)
@@ -1616,6 +1626,20 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isScopeKeyAssigned(identifier, scopeKey, tenantid);
     }
 
+    /**
+     * Check whether the given scope key is already assigned to an API as local scope under given tenant.
+     *
+     * @param apiIdentifier API Identifier
+     * @param scopeKey   candidate scope key
+     * @param tenantId   tenant id
+     * @return true if the scope key is already attached as a local scope in any API
+     * @throws APIManagementException if failed to check the local scope availability
+     */
+    public boolean isScopeKeyAssignedLocally(APIIdentifier apiIdentifier, String scopeKey, int tenantId)
+            throws APIManagementException {
+
+        return apiMgtDAO.isScopeKeyAssignedLocally(apiIdentifier, scopeKey, tenantId);
+    }
 
     public boolean isApiNameExist(String apiName) throws APIManagementException {
         String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
