@@ -10,17 +10,24 @@ import org.apache.http.entity.StringEntity;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
+import org.apache.synapse.rest.RESTConstants;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.OPADto;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+//import org.json.JSONObject;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+//import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
+import java.util.Properties;
+
 
 import java.io.*;
 import java.util.TreeMap;
@@ -46,15 +53,15 @@ public class OPAHandler extends AbstractHandler {
     @Override
     public boolean handleRequest(MessageContext messageContext) {
 
-        setUsername(messageContext.getProperty("tenant.info.id").toString());
+        setUsername(messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER).toString());
         setScopes(messageContext.getProperty("Access-Control-Allow-Headers").toString());
         setApi_name(messageContext.getProperty(APIMgtGatewayConstants.API).toString());
         setVersion(messageContext.getProperty(APIMgtGatewayConstants.VERSION).toString());
-        setApi_context(messageContext.getProperty("REST_API_CONTEXT").toString());
-        setResource_path(messageContext.getProperty("API_RESOURCE_CACHE_KEY").toString());
+        setApi_context(messageContext.getProperty(RESTConstants.REST_API_CONTEXT).toString());
+        setResource_path(messageContext.getProperty(APIMgtGatewayConstants.RESOURCE).toString());
         setHttp_method(messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD).toString());
         setApi_type(messageContext.getProperty(APIMgtGatewayConstants.API_TYPE).toString());
-        setApplication_name(messageContext.getProperty("ARTIFACT_NAME").toString());
+        setApplication_name(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME).toString());
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
@@ -91,22 +98,22 @@ public class OPAHandler extends AbstractHandler {
 
         try {
             ObjectMapper mapper = new ObjectMapper();
-            String jsonStr = mapper.writeValueAsString(opaDto);
-//            String jsonStr = "{\"input\":{\"method\":\"GET\"}}";
+            String opaPayload = mapper.writeValueAsString(opaDto);
+            opaPayload = "{\"input\" :" + opaPayload + "}";
+            HttpResponse response = sendRequestToOPaServer(opaPayload);
 
-            HttpResponse response = sendRequestToOPaServer(jsonStr);
             int statusCode = response.getStatusLine().getStatusCode();
             String finalAnswer = getResultFromOPAResponse(response);
 
-            if(statusCode != HttpStatus.SC_OK){
+            if(HttpStatus.SC_OK != statusCode){
                 throw new RuntimeException("Failed with HTTP error code : "+ statusCode);
             }
-            else if(statusCode == HttpStatus.SC_OK){
-                if(finalAnswer.equals("true")){
+            else if(HttpStatus.SC_OK == statusCode){
+                if("true".equals(finalAnswer)){
                     return true;
                 }
-                else if(finalAnswer.equals("false")){
-                    handleAuthFailure();
+                else if("false".equals(finalAnswer)){
+                    handleOPAPolicyFailure(messageContext, HttpStatus.SC_UNAUTHORIZED );
                 }
             }
 
@@ -119,10 +126,10 @@ public class OPAHandler extends AbstractHandler {
                     "Proxy configured incorrectly\n" +
                     "Ensure that proxy is configured correctly in Settings > Proxy\n" +
                     "Request timeout:\n" +
-                    "Change request timeout in Settings > General");
+                    "Change request timeout in Settings > General",e);
         }
         catch (ParseException e) {
-            log.error("Error occurred while reading the response");
+            log.error("Error occurred while reading the response",e);
         }
         finally {
             httpClient.getConnectionManager().shutdown();
@@ -133,7 +140,7 @@ public class OPAHandler extends AbstractHandler {
 
     private HttpResponse sendRequestToOPaServer(String jsonStr) throws IOException {
         HttpPost postRequest = new HttpPost("http://0.0.0.0:8181/v1/data/opa/examples/allow");
-        postRequest.addHeader("content-type", "application/xml");
+        postRequest.addHeader("Content-Type","application/json");
         StringEntity userEntity = new StringEntity(jsonStr, ContentType.APPLICATION_JSON);
         postRequest.setEntity(userEntity);
 
@@ -150,20 +157,20 @@ public class OPAHandler extends AbstractHandler {
             responseString.append(inputline);
         }
         reader.close();
-        JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
-        String report = responseJson.toString();
 
-        return report.substring(10,report.length()-1);
+        JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
+        Object object = responseJson.get("result");
+        return object.toString();
     }
 
-    private boolean handleAuthFailure(){
+    private void handleOPAPolicyFailure(MessageContext messageContext, int status){
         log.error("wrong credentials: Request breaks provided policies");
-        return false;
+        Utils.sendFault(messageContext, status);
     }
 
     @Override
     public boolean handleResponse(MessageContext messageContext) {
-        return false;
+        return true;
     }
 
     public static Log getLog() {
