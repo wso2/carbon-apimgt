@@ -50,8 +50,7 @@ public class ScopesApiServiceImpl implements ScopesApiService {
             try {
                 APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-                int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-                isScopeExist = apiProvider.isScopeKeyExist(scopeName, tenantId);
+                isScopeExist = apiProvider.isScopeKeyExist(scopeName, tenantDomain);
             } catch (APIManagementException e) {
                 RestApiUtil.handleInternalServerError("Error occurred while checking scope name", e, log);
             }

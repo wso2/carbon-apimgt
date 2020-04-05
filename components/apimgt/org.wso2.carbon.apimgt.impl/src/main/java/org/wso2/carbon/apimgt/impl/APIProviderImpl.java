@@ -7967,7 +7967,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public Boolean isGlobalScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException {
 
-        if (!ApiMgtDAO.getInstance().isGlobalScopeExists(scopeName, tenantDomain)) {
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        if (!ApiMgtDAO.getInstance().isGlobalScopeExists(scopeName, tenantId)) {
             return KeyManagerHolder.getKeyManagerInstance().isScopeExists(scopeName, tenantDomain);
         }
         return true;
