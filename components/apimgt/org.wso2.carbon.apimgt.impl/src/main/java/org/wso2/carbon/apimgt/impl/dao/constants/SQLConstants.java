@@ -3506,7 +3506,15 @@ public class SQLConstants {
 
     //Resource Scope related constants
     public static final String ADD_API_RESOURCE_SCOPE_MAPPING =
-            "INSERT INTO AM_API_RESOURCE_SCOPE_MAPPING (SCOPE_ID, URL_MAPPING_ID) VALUES (?, ?)";
+            "INSERT INTO AM_API_RESOURCE_SCOPE_MAPPING (SCOPE_NAME, URL_MAPPING_ID, TENANT_ID) VALUES (?, ?, ?)";
     public static final String ADD_OAUTH2_RESOURCE_SCOPE_SQL =
             "INSERT INTO IDN_OAUTH2_RESOURCE_SCOPE (RESOURCE_PATH, SCOPE_ID, TENANT_ID) VALUES (?,?,?)";
+    public static final String IS_SCOPE_ATTACHED_LOCALLY =
+            "SELECT AM_API.API_NAME, AM_API.API_PROVIDER " +
+                    "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM, AM_API " +
+                    "WHERE ARSM.SCOPE_NAME = ? AND " +
+                    "ARSM.TENANT_ID = ? AND " +
+                    "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_GLOBAL_SCOPE GS WHERE GS.TENANT_ID = ?) AND " +
+                    "ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND " +
+                    "AUM.API_ID = AM_API.API_ID";
 }
