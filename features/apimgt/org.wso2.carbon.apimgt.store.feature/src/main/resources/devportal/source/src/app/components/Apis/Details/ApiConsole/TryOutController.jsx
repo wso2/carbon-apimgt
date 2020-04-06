@@ -99,8 +99,9 @@ function TryOutController(props) {
     const {
         securitySchemeType, selectedEnvironment, environments, labels,
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
-        setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes, updateSwagger,
+        setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes,
         setSecurityScheme, setUsername, setPassword, username, password,
+        setProductionApiKey, setSandboxApiKey, productionApiKey, sandboxApiKey,
     } = props;
     const classes = styles();
 
@@ -143,7 +144,7 @@ function TryOutController(props) {
                             setSelectedApplication(selectedApplicationList);
                             setSubscriptions(subscriptionsList);
                             setKeys(appKeys);
-                            setSelectedEnvironment(selectedEnvironments);
+                            setSelectedEnvironment(selectedEnvironments, false);
                             setSelectedKeyType(selectedKeyTypes, false);
                             if (selectedKeyType === 'PRODUCTION') {
                                 setProductionAccessToken(accessToken);
@@ -155,7 +156,7 @@ function TryOutController(props) {
                     setSelectedApplication(selectedApplicationList);
                     setSubscriptions(subscriptionsList);
                     setKeys(keys);
-                    setSelectedEnvironment(selectedEnvironment);
+                    setSelectedEnvironment(selectedEnvironment, false);
                     if (selectedKeyType === 'PRODUCTION') {
                         setProductionAccessToken(accessToken);
                     } else {
@@ -167,7 +168,7 @@ function TryOutController(props) {
                 setSelectedApplication(selectedApplicationList);
                 setSubscriptions(subscriptionsList);
                 setKeys(keys);
-                setSelectedEnvironment(selectedEnvironment);
+                setSelectedEnvironment(selectedEnvironment, false);
                 if (selectedKeyType === 'PRODUCTION') {
                     setProductionAccessToken(accessToken);
                 } else {
@@ -230,9 +231,9 @@ function TryOutController(props) {
                 console.log('Non empty response received', response);
                 setShowToken(false);
                 if (selectedKeyType === 'PRODUCTION') {
-                    setProductionAccessToken(response.body.apikey);
+                    setProductionApiKey(response.body.apikey);
                 } else {
-                    setSandboxAccessToken(response.body.apikey);
+                    setSandboxApiKey(response.body.apikey);
                 }
                 setIsUpdating(false);
             })
@@ -302,12 +303,13 @@ function TryOutController(props) {
         const { name, value } = target;
         switch (name) {
             case 'selectedEnvironment':
-                setSelectedEnvironment(value);
-                updateSwagger();
+                setSelectedEnvironment(value, true);
                 break;
             case 'selectedApplication':
                 setProductionAccessToken('');
                 setSandboxAccessToken('');
+                setProductionApiKey('');
+                setSandboxApiKey('');
                 setSelectedApplication(value);
                 break;
             case 'selectedKeyType':
@@ -318,8 +320,6 @@ function TryOutController(props) {
                 }
                 break;
             case 'securityScheme':
-                setProductionAccessToken('');
-                setSandboxAccessToken('');
                 setSecurityScheme(value);
                 break;
             case 'username':
@@ -354,6 +354,13 @@ function TryOutController(props) {
         }
     }
     const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
+
+    let tokenValue = '';
+    if (securitySchemeType === 'API-KEY') {
+        tokenValue = selectedKeyType === 'PRODUCTION' ? productionApiKey : sandboxApiKey;
+    } else {
+        tokenValue = selectedKeyType === 'PRODUCTION' ? productionAccessToken : sandboxAccessToken;
+    }
 
     return (
         <>
@@ -492,8 +499,7 @@ function TryOutController(props) {
                                                 name='accessToken'
                                                 onChange={handleChanges}
                                                 type={showToken ? 'text' : 'password'}
-                                                value={selectedKeyType === 'PRODUCTION'
-                                                    ? productionAccessToken : sandboxAccessToken}
+                                                value={tokenValue}
                                                 helperText={(
                                                     <FormattedMessage
                                                         id='enter.access.token'
@@ -539,7 +545,7 @@ function TryOutController(props) {
                                                     )}
                                                     <FormattedMessage
                                                         id='Apis.Details.ApiCOnsole.generate.test.key'
-                                                        defaultMessage='GEN. TEST KEY '
+                                                        defaultMessage='GET TEST KEY '
                                                     />
                                                 </Button>
                                                 <Tooltip
@@ -585,7 +591,7 @@ function TryOutController(props) {
                                                         id='Apis.Details.ApiConsole.environment'
                                                     />
                                                 )}
-                                                value={selectedEnvironment}
+                                                value={selectedEnvironment || (environments && environments[0])}
                                                 name='selectedEnvironment'
                                                 onChange={handleChanges}
                                                 helperText={(
