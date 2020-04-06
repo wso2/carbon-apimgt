@@ -3912,6 +3912,10 @@ public final class APIUtil {
 
             if (govRegistry.resourceExists(APIConstants.GA_CONFIGURATION_LOCATION)) {
                 log.debug("Google Analytics configuration already uploaded to the registry");
+                // set media type
+                Resource resource = govRegistry.get(APIConstants.GA_CONFIGURATION_LOCATION);
+                resource.setMediaType(APIConstants.GA_CONF_MEDIA_TYPE);
+                govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
                 return;
             }
             if (log.isDebugEnabled()) {
@@ -3920,6 +3924,7 @@ public final class APIUtil {
             inputStream = APIManagerComponent.class.getResourceAsStream("/statistics/default-ga-config.xml");
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
+            resource.setMediaType(APIConstants.GA_CONF_MEDIA_TYPE);
             resource.setContent(data);
             govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
 

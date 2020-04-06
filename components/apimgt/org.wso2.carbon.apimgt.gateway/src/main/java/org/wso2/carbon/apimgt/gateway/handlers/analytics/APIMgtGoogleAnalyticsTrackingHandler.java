@@ -24,7 +24,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.xml.namespace.QName;
 
@@ -41,11 +40,11 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -66,8 +65,6 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 	
 	/** The key for getting the google analytics configuration - key refers to a/an [registry] entry    */
     private String configKey = null;
-    /** Version number of the throttle policy */
-    private long version;
 
     protected GoogleAnalyticsConfig config = null;
 
@@ -83,40 +80,25 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
             span = Util.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan, tracer);
         }
         try {
-            if (configKey == null) {
-                throw new SynapseException("Google Analytics configuration unspecified for the API");
-            }
-
-            Entry entry = msgCtx.getConfiguration().getEntryDefinition(configKey);
+            Entry entry = (Entry) msgCtx.getConfiguration().getLocalRegistry().get(APIConstants.GA_CONF_KEY);
             if (entry == null) {
-                log.warn("Cannot find Google Analytics configuration using key: " + configKey);
+                log.warn("Cannot find Google Analytics configuration using key: " + APIConstants.GA_CONF_KEY);
                 return true;
             }
             Object entryValue = null;
-            boolean reCreate = false;
 
-            if (entry.isDynamic()) {
-                if ((!entry.isCached()) || (entry.isExpired()) || config == null) {
-                    entryValue = msgCtx.getEntry(this.configKey);
-                    if (this.version != entry.getVersion()) {
-                        reCreate = true;
-                    }
-                }
-            } else if (config == null) {
-                entryValue = msgCtx.getEntry(this.configKey);
-            }
-
-            if (reCreate || config == null) {
+            if (config == null) {
+                entryValue = entry.getValue();
                 if (entryValue == null || !(entryValue instanceof OMElement)) {
-                    log.warn("Unable to load Google Analytics configuration using key: " + configKey);
+                    log.warn("Unable to load Google Analytics configuration using key: "
+                            + APIConstants.GA_CONF_KEY);
                     return true;
                 }
-                version = entry.getVersion();
                 config = getGoogleAnalyticsConfig((OMElement) entryValue);
             }
 
             if (config == null) {
-                log.warn("Unable to create Google Analytics configuration using key: " + configKey);
+                log.warn("Unable to create Google Analytics configuration using key: " + APIConstants.GA_CONF_KEY);
                 return true;
             }
             if (!config.isEnabled()) {
