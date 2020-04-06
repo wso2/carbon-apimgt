@@ -32,7 +32,10 @@
     if (app.customUrl.enabled && forwarded_for) {
         serverUrl = MGT_TRANSPORT + forwarded_for;
     } else {
-        serverUrl = utils.getServerURL();
+        serverUrl = appUtils.getTenantBasedCustomUrl();
+        if (serverUrl == null) {
+            serverUrl = utils.getServerURL();
+        }
     }
     var logoutEndpoint = serverUrl + OIDC_LOGOUT_ENDPOINT_SUFFIX;
 

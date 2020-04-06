@@ -29,7 +29,10 @@
     if (app.customUrl.enabled && forwarded_for) {
         serverUrl = MGT_TRANSPORT + forwarded_for;
     } else {
-        serverUrl = utils.getServerURL();
+        serverUrl = appUtils.getTenantBasedCustomUrl();
+        if (serverUrl == null) {
+            serverUrl = utils.getServerURL();
+        }
     }
     if(request.getParameter("error") === "login_required"){
        response.sendRedirect(serverUrl + app.context + "/services/configs");
