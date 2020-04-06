@@ -52,6 +52,8 @@ import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.namespace.QName;
@@ -168,6 +170,31 @@ public class APIGatewayManager {
                     gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(apiLocalEntry,
                             gatewayAPIDTO.getLocalEntriesToBeAdd()));
                 }
+
+                // Retrieve ga-config from the registry and publish to gateway as a local entry
+                try {
+                    APIMRegistryServiceImpl apimRegistryService = new APIMRegistryServiceImpl();
+                    String content = apimRegistryService.getGovernanceRegistryResourceContent(tenantDomain,
+                            APIConstants.GA_CONFIGURATION_LOCATION);
+
+                    GatewayContentDTO apiLocalEntry = new GatewayContentDTO();
+                    apiLocalEntry.setName(APIConstants.GA_CONF_KEY);
+                    apiLocalEntry.setContent("<localEntry key=\"" + APIConstants.GA_CONF_KEY + "\">"
+                            + content + "</localEntry>");
+                    gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(apiLocalEntry,
+                            gatewayAPIDTO.getLocalEntriesToBeAdd()));
+
+                } catch (UserStoreException e) {
+                    String msg = "UserStoreException thrown when getting GA config from registry while " +
+                            "publishing API to gateway ";
+                    throw new APIManagementException(msg, e);
+                } catch (RegistryException e) {
+                    String msg = "RegistryException thrown when getting GA config from registry while "
+                            + "publishing API to gateway ";
+                    throw new APIManagementException(msg, e);
+                }
+
+
                 // If the API exists in the Gateway
                 // If the Gateway type is 'production' and a production url has
                 // not been specified
