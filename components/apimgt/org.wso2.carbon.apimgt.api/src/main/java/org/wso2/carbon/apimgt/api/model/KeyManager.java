@@ -274,7 +274,7 @@ public interface KeyManager {
     Map<String, Scope> getAllScopes(String tenantDomain) throws APIManagementException;
 
     /**
-     * This method will be used to attach a Scope in the authorization server to a API resource
+     * This method will be used to attach a Scope in the authorization server to an API resource
      *
      * @param api          API
      * @param uriTemplate  URITemplate
@@ -283,6 +283,18 @@ public interface KeyManager {
      * @throws APIManagementException
      */
     void attachScopeToResource(API api, URITemplate uriTemplate, Scope scope, String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * This method will be used to detach a Scope in the authorization server from an API resource
+     *
+     * @param apiIdentifier
+     * @param uriTemplate
+     * @param scope
+     * @param tenantDomain
+     * @throws APIManagementException
+     */
+    void detachScopeToResource(APIIdentifier apiIdentifier, URITemplate uriTemplate, Scope scope, String tenantDomain)
             throws APIManagementException;
 
     /**
