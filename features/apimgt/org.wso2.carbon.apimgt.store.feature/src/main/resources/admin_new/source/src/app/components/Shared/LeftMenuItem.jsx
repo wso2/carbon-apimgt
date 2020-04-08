@@ -118,11 +118,12 @@ function LeftMenuItem(props) {
             to={to}
             style={{ backgroundColor: selected ? theme.palette.background.appBarSelected : '' }}
         >
-            {// If the icon pro ( which is comming from the React Material library )
-            // is coming we add css class and render.
-            // If leftMenu='no icon' at the theme object we hide the icon. Also we add static classes to
-            // allow customers theme
-            // the product without compiling.
+            {
+            // If the icon pro ( which is comming from the React Material library )
+                // is coming we add css class and render.
+                // If leftMenu='no icon' at the theme object we hide the icon. Also we add static classes to
+                // allow customers theme
+                // the product without compiling.
                 Icon ? (
                     React.cloneElement(Icon, {
                         className: classNames(

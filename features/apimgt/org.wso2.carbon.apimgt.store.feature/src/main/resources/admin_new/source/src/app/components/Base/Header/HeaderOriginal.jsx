@@ -129,7 +129,6 @@ class Header extends React.Component {
                         {avatar}
                     </Toolbar>
                 </AppBar>
-                <AppContent />
             </>
         );
     }
