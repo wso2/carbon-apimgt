@@ -50,7 +50,7 @@ const AppThemes = {
             wrapperBackground: '#f9f9f9',
             starColor: '#f2c73a',
             disableColor: '#D3D3D3',
-            leftMenuWidth: 210,
+            leftMenuWidth: 280,
             contentAreaWidth: 1240,
             drawerWidth: 200,
             logo: '/site/public/images/logo-inverse.svg', // todo: change logo here

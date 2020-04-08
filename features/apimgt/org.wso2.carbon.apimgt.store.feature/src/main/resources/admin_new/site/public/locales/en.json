@@ -16,5 +16,20 @@
   "leftmenu.primary.categories": "CATEGORIES",
   "leftmenu.primary.throttlingpolicies": "THROTTLING POLICIES",
   "leftmenu.primary.botdetection": "BOT DETECTION",
-  "leftmenu.primary.analytics": "ANALYTICS"
+  "leftmenu.primary.analytics": "ANALYTICS",
+  "leftmenu.secondary.tasks.usercreation": "USER CREATION",
+  "leftmenu.secondary.tasks.applicationcreation": "APPLICATION CREATION",
+  "leftmenu.secondary.tasks.subscriptioncreation": "SUBSCRIPTION CREATION",
+  "leftmenu.secondary.tasks.applicationregistration": "APPLICATION REGISTRATION",
+  "leftmenu.secondary.tasks.apistatechange": "API STATE CHANGE",
+  "leftmenu.secondary.settings.applications": "APPLICATIONS",
+  "leftmenu.secondary.settings.scopemapping": "SCOPE MAPPING",
+  "leftmenu.secondary.microgateway.labels": "LABELS",
+  "leftmenu.secondary.categories.apicategories": "API CATEGORIES",
+  "leftmenu.secondary.throttlingpolicies.advancedpolicies": "ADVANCED POLICIES",
+  "leftmenu.secondary.throttlingpolicies.applicationpolicies": "APPLICATION POLICIES",
+  "leftmenu.secondary.throttlingpolicies.subscriptionpolicies": "SUBSCRIPTION POLICIES",
+  "leftmenu.secondary.throttlingpolicies.custompolicies": "CUSTOM POLICIES",
+  "leftmenu.secondary.throttlingpolicies.blacklistpolicies": "BLACKLIST POLICIES",
+  "leftmenu.secondary.analytics.apiavailability": "API AVAILABILITY"
 }

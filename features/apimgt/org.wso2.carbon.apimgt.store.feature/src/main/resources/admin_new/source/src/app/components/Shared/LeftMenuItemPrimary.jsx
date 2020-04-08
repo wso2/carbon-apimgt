@@ -100,7 +100,7 @@ function LeftMenuItemPrimary(props) {
   };
 
   const {
-    classes, theme, Icon, to, history, text, route, intl
+    classes, theme, Icon, history, text, route, secondaryMenuDetails
   } = props;
 
   const routeToCheck = route || text;
@@ -125,11 +125,15 @@ function LeftMenuItemPrimary(props) {
     ditectCurrentMenu(location);
   });
 
+  const secondaryMenuItems = secondaryMenuDetails.map((item) =>
+    <LeftMenuItemSecondary
+      text={item.name}
+      to={item.to}
+    />
+  );
 
   return (
-    <List
-    // className={classes.root}
-    >
+    <List>
       <ListItem className={classes.expansionArrow} button onClick={handleClick}>
         <CustomIcon
           strokeColor={strokeColor}
@@ -159,22 +163,7 @@ function LeftMenuItemPrimary(props) {
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
       <Collapse in={open} timeout="auto" unmountOnExit>
-        {/* <List component="div" disablePadding>
-          <ListItem button className={classes.nested}>
-            <ListItemIcon>
-              <StarBorder />
-            </ListItemIcon>
-            <ListItemText primary="Starred" />
-          </ListItem>
-        </List> */}
-        <LeftMenuItemSecondary
-          // text={intl.formatMessage({
-          //   id: 'leftmenu.primary.tasks1',
-          //   defaultMessage: 'overview',
-          // })}
-          text='Nested 1'
-          to='/overview'
-        />
+        {secondaryMenuItems}
       </Collapse>
     </List>
   );
