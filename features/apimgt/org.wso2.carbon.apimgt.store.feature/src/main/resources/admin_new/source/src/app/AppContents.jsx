@@ -12,6 +12,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
+import LeftMenu from './components/Base/Header/navbar/LeftMenu';
 
 const drawerWidth = 240;
 
@@ -53,6 +54,7 @@ export default function Appcontent() {
                 }}
             >
                 <div className={classes.toolbar} />
+                {/* <LeftMenu /> */}
                 {/* // todo: render LeftMenuItems  */}
                 <List>
                     {['Tasks', 'Settings', 'Microgateway', 'Categories', 'Throttling policies',
@@ -70,3 +72,8 @@ export default function Appcontent() {
 
     );
 }
+
+
+// Appcontents.contextType = AppContext;
+
+// export default Appcontents;
