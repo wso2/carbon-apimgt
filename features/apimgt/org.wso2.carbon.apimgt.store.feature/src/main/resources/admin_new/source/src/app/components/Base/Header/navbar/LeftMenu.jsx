@@ -1,5 +1,5 @@
 import React from 'react';
-import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
+import LeftMenuItemPrimary from 'AppComponents/Shared/LeftMenuItemPrimary';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl } from 'react-intl';
 
@@ -44,53 +44,51 @@ const styles = (theme) => ({
 
 const LeftMenu = (props) => {
     const { classes, intl } = props;
-    console.log('props obj from side nav bar: ', props);
-    // console.log('styles are: ', styles());
     return (
         <div className={classes.LeftMenu}>
-            <LeftMenuItem
+            <LeftMenuItemPrimary
                 text={intl.formatMessage({
-                    id: 'leftmenu.primary.tasks1',
-                    defaultMessage: 'overview',
+                    id: 'leftmenu.primary.tasks',
+                    defaultMessage: 'TASKS',
                 })}
                 to='/overview'
             />
-            <LeftMenuItem
+            <LeftMenuItemPrimary
                 text={intl.formatMessage({
                     id: 'leftmenu.primary.settings',
                     defaultMessage: 'SETTINGS',
                 })}
                 to='/overview'
             />
-            <LeftMenuItem
+            <LeftMenuItemPrimary
                 text={intl.formatMessage({
                     id: 'leftmenu.primary.microgateway',
                     defaultMessage: 'MICROGATEWAY',
                 })}
                 to='/overview'
             />
-            <LeftMenuItem
+            <LeftMenuItemPrimary
                 text={intl.formatMessage({
                     id: 'leftmenu.primary.categories',
                     defaultMessage: 'CATEGORIES',
                 })}
                 to='/overview'
             />
-            <LeftMenuItem
+            <LeftMenuItemPrimary
                 text={intl.formatMessage({
                     id: 'leftmenu.primary.throttlingpolicies',
                     defaultMessage: 'THROTTLING POLICIES',
                 })}
                 to='/overview'
             />
-            <LeftMenuItem
+            <LeftMenuItemPrimary
                 text={intl.formatMessage({
                     id: 'leftmenu.primary.botdetection',
                     defaultMessage: 'BOT DETECTION',
                 })}
                 to='/overview'
             />
-            <LeftMenuItem
+            <LeftMenuItemPrimary
                 text={intl.formatMessage({
                     id: 'leftmenu.primary.analytics',
                     defaultMessage: 'ANALYTICS',
