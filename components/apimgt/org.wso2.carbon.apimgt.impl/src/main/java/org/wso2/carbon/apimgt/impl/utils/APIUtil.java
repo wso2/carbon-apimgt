@@ -261,6 +261,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -469,21 +470,18 @@ public final class APIUtil {
             api.setEnableSchemaValidation(Boolean.parseBoolean(
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
-            Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(api.getId());
-            api.setScopes(scopes);
+            Map<String, Scope> scopeToKeyMapping = ApiMgtDAO.getInstance().getAPIScopes(api.getId(), tenantDomainName);
+            api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
 
-            HashMap<String, String> resourceScopesMap;
-            resourceScopesMap = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
-
             for (URITemplate uriTemplate : uriTemplates) {
-                String uTemplate = uriTemplate.getUriTemplate();
-                String method = uriTemplate.getHTTPVerb();
-                String resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                Scope scope = findScopeByKey(scopes, resourceScopesMap.get(resourceScopeKey));
-                uriTemplate.setScope(scope);
-                uriTemplate.setScopes(scope);
+                Scope templateScope = uriTemplate.getScope();
+                if (templateScope != null) {
+                    Scope scope = scopeToKeyMapping.get(templateScope.getKey());
+                    uriTemplate.setScope(scope);
+                    uriTemplate.setScopes(scope);
+                }
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
             }
@@ -654,11 +652,8 @@ public final class APIUtil {
             api.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
-            Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(api.getId());
-            api.setScopes(scopes);
-
-            HashMap<String, String> resourceScopes;
-            resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
+            Map<String, Scope> scopeToKeyMapping = ApiMgtDAO.getInstance().getAPIScopes(api.getId(), tenantDomainName);
+            api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
 
@@ -675,10 +670,12 @@ public final class APIUtil {
             for (URITemplate uriTemplate : uriTemplates) {
                 String uTemplate = uriTemplate.getUriTemplate();
                 String method = uriTemplate.getHTTPVerb();
-                String resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                Scope scope = findScopeByKey(scopes, resourceScopes.get(resourceScopeKey));
-                uriTemplate.setScope(scope);
-                uriTemplate.setScopes(scope);
+                Scope templateScope = uriTemplate.getScope();
+                if (templateScope != null) {
+                    Scope scope = scopeToKeyMapping.get(templateScope.getKey());
+                    uriTemplate.setScope(scope);
+                    uriTemplate.setScopes(scope);
+                }
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
                 // AWS Lambda: set arn & timeout to URI template
@@ -3390,11 +3387,8 @@ public final class APIUtil {
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
             ArrayList<URITemplate> urlPatternsList;
 
-            Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(oldId);
-            api.setScopes(scopes);
-
-            HashMap<String, String> resourceScopes;
-            resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(oldId);
+            Map<String, Scope> scopeToKeyMapping = ApiMgtDAO.getInstance().getAPIScopes(api.getId(), tenantDomainName);
+            api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             urlPatternsList = ApiMgtDAO.getInstance().getAllURITemplates(oldContext, oldId.getVersion());
             Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
@@ -3402,9 +3396,10 @@ public final class APIUtil {
             for (URITemplate uriTemplate : uriTemplates) {
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-                String resourceScopeKey = APIUtil.getResourceKey(oldContext, oldId.getVersion(), uriTemplate.getUriTemplate(), uriTemplate.getHTTPVerb());
-                uriTemplate.setScope(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
-
+                Scope templateScope = uriTemplate.getScope();
+                if (templateScope != null) {
+                    scopeToKeyMapping.get(templateScope.getKey());
+                }
             }
             api.setUriTemplates(uriTemplates);
 
