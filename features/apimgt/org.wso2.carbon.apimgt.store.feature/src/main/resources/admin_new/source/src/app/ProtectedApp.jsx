@@ -38,6 +38,7 @@ import Progress from 'AppComponents/Shared/Progress';
 import Configurations from 'Config';
 import LeftMenu from 'AppComponents/Base/Header/navbar/LeftMenu';
 import AppContent from './AppContents';
+import LeftMenuItem from './components/Shared/LeftMenuItem';
 
 const HelloWorld = () => (
     <Suspense fallback={<Progress message='Loading components ...' />}>
@@ -45,9 +46,16 @@ const HelloWorld = () => (
     </Suspense>
 );
 
-const SideNavBarRendering = (props) => (
+const SideNavBarRendering = () => (
     <Suspense fallback={<Progress message='Loading sidebar ...' />}>
-        <LeftMenu {...props} />
+        <LeftMenuItem
+            // text={intl.formatMessage({
+            //     id: 'Apis.Details.index.overview',
+            //     defaultMessage: 'overview',
+            // })}
+            text='Overview'
+            to='overview'
+        />
     </Suspense>
 );
 
@@ -158,17 +166,17 @@ export default class Protected extends Component {
                             <AppContextProvider value={{ settings, user }}>
                                 <Switch>
                                     {/* <HelloWorld /> */}
-                                    <div>
+                                    {/* <div>
                                         <AppContent />
-                                    </div>
+                                    </div> */}
 
                                     {/* <Route
                                         path='/'
                                         component={SideNavBarRendering}
                                     /> */}
-                                    {/* <Route component={ResourceNotFound} /> */}
+                                    <LeftMenu />
+                                    <Route component={ResourceNotFound} />
                                 </Switch>
-
                             </AppContextProvider>
                         ) : (
                                 <Progress message='Loading Settings ...' />

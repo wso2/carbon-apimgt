@@ -9,5 +9,12 @@
   "unblock": "Unblock",
   "upload.image": "Click or drag the image to upload.",
   "version": "Version",
-  "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager"
+  "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager",
+  "leftmenu.primary.tasks": "TASKS",
+  "leftmenu.primary.settings": "SETTINGS",
+  "leftmenu.primary.microgateway": "MICROGATEWAY",
+  "leftmenu.primary.categories": "CATEGORIES",
+  "leftmenu.primary.throttlingpolicies": "THROTTLING POLICIES",
+  "leftmenu.primary.botdetection": "BOT DETECTION",
+  "leftmenu.primary.analytics": "ANALYTICS"
 }
