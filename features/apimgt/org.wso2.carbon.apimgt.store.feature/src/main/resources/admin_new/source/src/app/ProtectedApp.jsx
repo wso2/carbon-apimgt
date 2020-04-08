@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Component, Suspense } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Route, Switch } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
@@ -37,27 +37,6 @@ import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import Progress from 'AppComponents/Shared/Progress';
 import Configurations from 'Config';
 import LeftMenu from 'AppComponents/Base/Header/navbar/LeftMenu';
-import AppContent from './AppContents';
-import LeftMenuItem from './components/Shared/LeftMenuItem';
-
-const HelloWorld = () => (
-    <Suspense fallback={<Progress message='Loading components ...' />}>
-        <h1>Hello world!</h1>
-    </Suspense>
-);
-
-const SideNavBarRendering = () => (
-    <Suspense fallback={<Progress message='Loading sidebar ...' />}>
-        <LeftMenuItem
-            // text={intl.formatMessage({
-            //     id: 'Apis.Details.index.overview',
-            //     defaultMessage: 'overview',
-            // })}
-            text='Overview'
-            to='overview'
-        />
-    </Suspense>
-);
 
 const theme = createMuiTheme(Themes.light);
 
@@ -165,15 +144,6 @@ export default class Protected extends Component {
                         {settings ? (
                             <AppContextProvider value={{ settings, user }}>
                                 <Switch>
-                                    {/* <HelloWorld /> */}
-                                    {/* <div>
-                                        <AppContent />
-                                    </div> */}
-
-                                    {/* <Route
-                                        path='/'
-                                        component={SideNavBarRendering}
-                                    /> */}
                                     <LeftMenu />
                                     <Route component={ResourceNotFound} />
                                 </Switch>
