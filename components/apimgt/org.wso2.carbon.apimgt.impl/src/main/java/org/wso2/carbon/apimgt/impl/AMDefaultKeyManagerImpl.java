@@ -49,6 +49,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
@@ -978,14 +979,31 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @param uriTemplate  URITemplate
      * @param scope        Scope to attach
      * @param tenantDomain tenant domain
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs while attaching scope to resource
      */
     @Override
     public void attachScopeToResource(API api, URITemplate uriTemplate, Scope scope, String tenantDomain)
             throws APIManagementException {
 
-        //TODO: before that call addScopeToResourceMapping and addScopeToAPIMapping
+        //TODO: remove after validation completes
         ApiMgtDAO.getInstance().addResourceScope(api, uriTemplate, scope, tenantDomain);
+    }
+
+    /**
+     * This method will be used to detach a Scope in the authorization server from an API resource
+     *
+     * @param apiIdentifier APIIdentifier
+     * @param uriTemplate   URITemplate
+     * @param scope         Scope To detach from
+     * @param tenantDomain  tenant domain
+     * @throws APIManagementException if an error occurs while detaching scope from resource
+     */
+    @Override
+    public void detachScopeToResource(APIIdentifier apiIdentifier, URITemplate uriTemplate, Scope scope, String tenantDomain)
+            throws APIManagementException {
+
+        //TODO: remove after validation completes
+        ApiMgtDAO.getInstance().removeResourceScope(scope, tenantDomain);
     }
 
     @Override
