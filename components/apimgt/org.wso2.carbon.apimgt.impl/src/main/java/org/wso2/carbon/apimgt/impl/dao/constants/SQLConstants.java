@@ -2009,15 +2009,16 @@ public class SQLConstants {
             "   AUM.AUTH_SCHEME," +
             "   AUM.URL_PATTERN," +
             "   AUM.THROTTLING_TIER," +
-            "   AUM.MEDIATION_SCRIPT " +
+            "   AUM.MEDIATION_SCRIPT," +
+            "   ARSM.SCOPE_NAME " +
             " FROM " +
-            "   AM_API_URL_MAPPING AUM, " +
-            "   AM_API API " +
+            "   AM_API_URL_MAPPING AUM " +
+            " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID  " +
+            " LEFT OUTER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID" +
             " WHERE" +
             "   API.CONTEXT= ? " +
             "   AND API.API_VERSION = ? " +
-            "   AND AUM.API_ID = API.API_ID " +
-            " ORDER BY URL_MAPPING_ID";
+            " ORDER BY AUM.URL_MAPPING_ID";
 
     public static final String UPDATE_API_SQL =
             "UPDATE AM_API " +
@@ -2106,11 +2107,13 @@ public class SQLConstants {
             "   AUM.URL_PATTERN," +
             "   AUM.HTTP_METHOD," +
             "   AUM.AUTH_SCHEME," +
-            "   AUM.THROTTLING_TIER, " +
-            "   AUM.MEDIATION_SCRIPT " +
+            "   AUM.THROTTLING_TIER," +
+            "   AUM.MEDIATION_SCRIPT," +
+            "   ARSM.SCOPE_NAME " +
             " FROM " +
             "   AM_API_URL_MAPPING AUM " +
             " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+            " LEFT OUTER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID" +
             " WHERE " +
             "  API.API_PROVIDER = ? AND " +
             "  API.API_NAME = ? AND " +
@@ -2379,13 +2382,6 @@ public class SQLConstants {
     public static final String DELETE_FROM_AM_API_PRODUCT_MAPPING_SQL = "DELETE FROM AM_API_PRODUCT_MAPPING WHERE "
             + "API_ID = ? ";
 
-    public static final String GET_API_SCOPES_SQL =
-            " SELECT A.SCOPE_ID, A.NAME, A.DISPLAY_NAME, A.DESCRIPTION, C.SCOPE_BINDING " +
-            " FROM  " +
-            " ((IDN_OAUTH2_SCOPE AS A  INNER JOIN  AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) " +
-            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) " +
-            " WHERE B.API_ID = ?";
-
     public static final String GET_SCOPES_SQL =
             " SELECT SCOPE_ID  " +
                     " FROM  IDN_OAUTH2_SCOPE  " +
@@ -2394,18 +2390,6 @@ public class SQLConstants {
 
     public static final String ADD_SCOPE_ROLE_SQL =
             "INSERT INTO IDN_OAUTH2_SCOPE_BINDING (SCOPE_ID, SCOPE_BINDING, BINDING_TYPE) values (?,?,?)";
-
-    public static final String GET_API_SCOPES_ORACLE_SQL =
-            "SELECT " +
-            "   A.SCOPE_ID, " +
-            "   A.NAME, " +
-            "   A.DISPLAY_NAME, " +
-            "   A.DESCRIPTION, " +
-            "   C.SCOPE_BINDING " +
-            " FROM  " +
-            " ((IDN_OAUTH2_SCOPE A  INNER JOIN  AM_API_SCOPES B ON A.SCOPE_ID = B.SCOPE_ID) " +
-            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING C ON B.SCOPE_ID = C.SCOPE_ID ) " +
-            " WHERE B.API_ID = ?";
 
     public static final String GET_SCOPE_BY_SUBSCRIBED_API_PREFIX =
             "SELECT " +
@@ -2495,20 +2479,20 @@ public class SQLConstants {
 
     public static final String GET_RESOURCE_TO_SCOPE_MAPPING_SQL =
             "SELECT " +
-            "   RS.RESOURCE_PATH, " +
-            "   S.NAME " +
-            " FROM " +
-            "   IDN_OAUTH2_RESOURCE_SCOPE RS " +
-            " INNER JOIN " +
-            "   IDN_OAUTH2_SCOPE S " +
-            " ON " +
-            "   S.SCOPE_ID = RS.SCOPE_ID " +
-            " INNER JOIN " +
-            "   AM_API_SCOPES A " +
-            " ON " +
-            "   A.SCOPE_ID = RS.SCOPE_ID " +
-            " WHERE" +
-            "   A.API_ID = ? ";
+                    "   RS.RESOURCE_PATH, " +
+                    "   S.NAME " +
+                    " FROM " +
+                    "   IDN_OAUTH2_RESOURCE_SCOPE RS " +
+                    " INNER JOIN " +
+                    "   IDN_OAUTH2_SCOPE S " +
+                    " ON " +
+                    "   S.SCOPE_ID = RS.SCOPE_ID " +
+                    " INNER JOIN " +
+                    "   AM_API_SCOPES A " +
+                    " ON " +
+                    "   A.SCOPE_ID = RS.SCOPE_ID " +
+                    " WHERE" +
+                    "   A.API_ID = ? ";
 
     public static final String GET_SUBSCRIBED_APIS_FROM_CONSUMER_KEY =
         "SELECT SUB.API_ID "
@@ -3281,11 +3265,13 @@ public class SQLConstants {
 				+ " ) x";
 
 		public static final String GET_CONDITION_GROUPS_FOR_POLICIES_SQL = "SELECT grp.CONDITION_GROUP_ID ,AUM.HTTP_METHOD,AUM.AUTH_SCHEME, pol.APPLICABLE_LEVEL, "
-				+ " AUM.URL_PATTERN,AUM.THROTTLING_TIER,AUM.MEDIATION_SCRIPT,AUM.URL_MAPPING_ID, pol.DEFAULT_QUOTA_TYPE  "
+				+ " AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, AUM.URL_MAPPING_ID, "
+                + " pol.DEFAULT_QUOTA_TYPE, ARSM.SCOPE_NAME "
 				+ " FROM AM_API_URL_MAPPING AUM"
 				+ " INNER JOIN  AM_API API ON AUM.API_ID = API.API_ID"
 				+ " LEFT OUTER JOIN AM_API_THROTTLE_POLICY pol ON AUM.THROTTLING_TIER = pol.NAME "
 				+ " LEFT OUTER JOIN AM_CONDITION_GROUP grp ON pol.POLICY_ID  = grp.POLICY_ID"
+                + " LEFT OUTER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID"
 				+ " where API.CONTEXT= ? AND API.API_VERSION = ? AND pol.TENANT_ID = ?"
 				/*+ " GROUP BY AUM.HTTP_METHOD,AUM.URL_PATTERN, AUM.URL_MAPPING_ID"*/
 				+ " ORDER BY AUM.URL_MAPPING_ID";
@@ -3461,7 +3447,7 @@ public class SQLConstants {
     public static final String ADD_API_RESOURCE_SCOPE_MAPPING =
             "INSERT INTO AM_API_RESOURCE_SCOPE_MAPPING (SCOPE_NAME, URL_MAPPING_ID, TENANT_ID) VALUES (?, ?, ?)";
     public static final String ADD_OAUTH2_RESOURCE_SCOPE_SQL =
-            "INSERT INTO IDN_OAUTH2_RESOURCE_SCOPE (RESOURCE_PATH, SCOPE_ID, TENANT_ID) VALUES (?,?,?)";
+            "INSERT INTO IDN_OAUTH2_RESOURCE_SCOPE (RESOURCE_PATH, SCOPE_NAME, TENANT_ID) VALUES (?,?,?)";
     public static final String IS_SCOPE_ATTACHED_LOCALLY =
             "SELECT AM_API.API_NAME, AM_API.API_PROVIDER " +
                     "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM, AM_API " +
@@ -3470,4 +3456,35 @@ public class SQLConstants {
                     "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_GLOBAL_SCOPE GS WHERE GS.TENANT_ID = ?) AND " +
                     "ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND " +
                     "AUM.API_ID = AM_API.API_ID";
+
+    public static final String REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL =
+            " DELETE FROM AM_API_RESOURCE_SCOPE_MAPPING " +
+                    " WHERE URL_MAPPING_ID IN ( SELECT URL_MAPPING_ID FROM AM_API_URL_MAPPING " + "WHERE API_ID = ? )";
+
+    public static final String GET_LOCAL_SCOPES_FOR_API_SQL =
+            " SELECT DISTINCT ARSM.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM " +
+                    " WHERE ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND AUM.API_ID = ? AND ARSM.SCOPE_NAME NOT IN " +
+                        " (SELECT GS.NAME FROM AM_GLOBAL_SCOPE GS) ";
+
+    public static final String GET_URL_TEMPLATES_WITH_SCOPES_FOR_API_SQL =
+            " SELECT " +
+                    "   AUM.URL_MAPPING_ID," +
+                    "   AUM.URL_PATTERN," +
+                    "   AUM.HTTP_METHOD," +
+                    "   AUM.AUTH_SCHEME," +
+                    "   AUM.THROTTLING_TIER, " +
+                    "   AUM.MEDIATION_SCRIPT, " +
+                    "   ARSM.SCOPE_NAME " +
+                    " FROM " +
+                    "   AM_API_URL_MAPPING AUM " +
+                    " INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID" +
+                    " AND AUM.API_ID = ?";
+
+    public static final String REMOVE_KM_RESOURCE_SCOPE_SQL =
+            " DELETE FROM IDN_OAUTH2_RESOURCE_SCOPE WHERE SCOPE_NAME = ? AND TENANT_ID = ?";
+
+
+    public static final String GET_API_SCOPES_SQL =
+            " SELECT ARSM.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM " +
+                    " WHERE ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND AUM.API_ID = ?";
 }
