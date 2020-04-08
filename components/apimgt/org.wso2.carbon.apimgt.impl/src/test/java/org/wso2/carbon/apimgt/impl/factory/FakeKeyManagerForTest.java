@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.impl.factory;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -158,6 +159,12 @@ public class FakeKeyManagerForTest implements KeyManager {
     @Override
     public void attachScopeToResource(API api, URITemplate uriTemplate, Scope scope, String tenantDomain)
             throws APIManagementException {
+
+    }
+
+    @Override
+    public void detachScopeToResource(APIIdentifier apiIdentifier, URITemplate uriTemplate, Scope scope,
+                                      String tenantDomain) throws APIManagementException {
 
     }
 
