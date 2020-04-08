@@ -50,7 +50,7 @@ const styles = (theme) => ({
     leftLInk: {
         paddingTop: theme.spacing(1),
         paddingBottom: theme.spacing(1),
-        paddingLeft: theme.spacing(1),
+        paddingLeft: theme.spacing(3),
         paddingRight: theme.spacing(1),
         fontSize: theme.typography.caption.fontSize,
         cursor: 'pointer',
