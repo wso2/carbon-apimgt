@@ -42,6 +42,130 @@ const styles = (theme) => ({
     },
 });
 
+const tasksSubMenuDetails = (props) => [
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.tasks.usercreation',
+            defaultMessage: 'USER CREATION',
+        }),
+        to: 'user_creation',
+    },
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.tasks.applicationcreation',
+            defaultMessage: 'APPLICATION CREATION',
+        }),
+        to: 'application_creation',
+    },
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.tasks.subscriptioncreation',
+            defaultMessage: 'SUBSCRIPTION CREATION',
+        }),
+        to: 'subscription_creation',
+    },
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.tasks.applicationregistration',
+            defaultMessage: 'APPLICATION REGISTRATION',
+        }),
+        to: 'application_registration',
+    },
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.tasks.apistatechange',
+            defaultMessage: 'API STATE CHANGE',
+        }),
+        to: 'api_state_change',
+    },
+];
+
+const settingsSubMenuDetails = (props) => [
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.settings.applications',
+            defaultMessage: 'APPLICATIONS',
+        }),
+        to: 'applications',
+    },
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.settings.scopemapping',
+            defaultMessage: 'SCOPE MAPPING',
+        }),
+        to: 'scope_mapping',
+    },
+];
+
+const microgatewaySubMenuDetails = (props) => [
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.microgateway.labels',
+            defaultMessage: 'LABELS',
+        }),
+        to: 'labels',
+    },
+];
+
+const categoriesSubMenuDetails = (props) => [
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.categories.apicategories',
+            defaultMessage: 'API CATEGORIES',
+        }),
+        to: 'api_categories',
+    },
+];
+
+const throttlingPoliciesSubMenuDetails = (props) => [
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.throttlingpolicies.advancedpolicies',
+            defaultMessage: 'ADVANCED POLICIES',
+        }),
+        to: 'advanced_policies',
+    },
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.throttlingpolicies.applicationpolicies',
+            defaultMessage: 'APPLICATION POLICIES',
+        }),
+        to: 'application_policies',
+    },
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.throttlingpolicies.subscriptionpolicies',
+            defaultMessage: 'SUBSCRIPTION POLICIES',
+        }),
+        to: 'subcription_policies',
+    },
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.throttlingpolicies.custompolicies',
+            defaultMessage: 'CUSTOM POLICIES',
+        }),
+        to: 'custom_policies',
+    },
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.throttlingpolicies.blacklistpolicies',
+            defaultMessage: 'BLACKLIST POLICIES',
+        }),
+        to: 'blacklist_policies',
+    },
+];
+
+const analyticsSubMenuDetails = (props) => [
+    {
+        name: props.intl.formatMessage({
+            id: 'leftmenu.secondary.analytics.apiavailability',
+            defaultMessage: 'API AVAILABILITY',
+        }),
+        to: 'api_availability',
+    },
+];
+const botDetectionSubMenuDetails = () => [];
+
 const LeftMenu = (props) => {
     const { classes, intl } = props;
     console.log('props obj from side nav bar: ', props);
@@ -53,49 +177,49 @@ const LeftMenu = (props) => {
                     id: 'leftmenu.primary.tasks1',
                     defaultMessage: 'overview',
                 })}
-                to='/overview'
+                secondaryMenuDetails={tasksSubMenuDetails(props)}
             />
             <LeftMenuItem
                 text={intl.formatMessage({
                     id: 'leftmenu.primary.settings',
                     defaultMessage: 'SETTINGS',
                 })}
-                to='/overview'
+                secondaryMenuDetails={settingsSubMenuDetails(props)}
             />
             <LeftMenuItem
                 text={intl.formatMessage({
                     id: 'leftmenu.primary.microgateway',
                     defaultMessage: 'MICROGATEWAY',
                 })}
-                to='/overview'
+                secondaryMenuDetails={microgatewaySubMenuDetails(props)}
             />
             <LeftMenuItem
                 text={intl.formatMessage({
                     id: 'leftmenu.primary.categories',
                     defaultMessage: 'CATEGORIES',
                 })}
-                to='/overview'
+                secondaryMenuDetails={categoriesSubMenuDetails(props)}
             />
             <LeftMenuItem
                 text={intl.formatMessage({
                     id: 'leftmenu.primary.throttlingpolicies',
                     defaultMessage: 'THROTTLING POLICIES',
                 })}
-                to='/overview'
+                secondaryMenuDetails={throttlingPoliciesSubMenuDetails(props)}
             />
             <LeftMenuItem
                 text={intl.formatMessage({
                     id: 'leftmenu.primary.botdetection',
                     defaultMessage: 'BOT DETECTION',
                 })}
-                to='/overview'
+                secondaryMenuDetails={botDetectionSubMenuDetails()}
             />
             <LeftMenuItem
                 text={intl.formatMessage({
                     id: 'leftmenu.primary.analytics',
                     defaultMessage: 'ANALYTICS',
                 })}
-                to='/overview'
+                secondaryMenuDetails={analyticsSubMenuDetails(props)}
             />
         </div>
 
