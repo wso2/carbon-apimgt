@@ -172,28 +172,16 @@ public class APIGatewayManager {
                 }
 
                 // Retrieve ga-config from the registry and publish to gateway as a local entry
-                try {
-                    APIMRegistryServiceImpl apimRegistryService = new APIMRegistryServiceImpl();
-                    String content = apimRegistryService.getGovernanceRegistryResourceContent(tenantDomain,
-                            APIConstants.GA_CONFIGURATION_LOCATION);
+                String content = APIUtil.getGAConfig(tenantDomain);
 
+                if (content != null) {
                     GatewayContentDTO apiLocalEntry = new GatewayContentDTO();
                     apiLocalEntry.setName(APIConstants.GA_CONF_KEY);
                     apiLocalEntry.setContent("<localEntry key=\"" + APIConstants.GA_CONF_KEY + "\">"
                             + content + "</localEntry>");
                     gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(apiLocalEntry,
                             gatewayAPIDTO.getLocalEntriesToBeAdd()));
-
-                } catch (UserStoreException e) {
-                    String msg = "UserStoreException thrown when getting GA config from registry while " +
-                            "publishing API to gateway ";
-                    throw new APIManagementException(msg, e);
-                } catch (RegistryException e) {
-                    String msg = "RegistryException thrown when getting GA config from registry while "
-                            + "publishing API to gateway ";
-                    throw new APIManagementException(msg, e);
                 }
-
 
                 // If the API exists in the Gateway
                 // If the Gateway type is 'production' and a production url has
@@ -442,6 +430,19 @@ public class APIGatewayManager {
                         + "</localEntry>");
                 productAPIDto.setLocalEntriesToBeAdd(addGatewayContentToList(productLocalEntry,
                         productAPIDto.getLocalEntriesToBeAdd()));
+
+                // Retrieve ga-config from the registry and publish to gateway as a local entry
+                String content = APIUtil.getGAConfig(tenantDomain);
+
+                if (content != null) {
+                    GatewayContentDTO gaConfigLocalEntry = new GatewayContentDTO();
+                    gaConfigLocalEntry.setName(APIConstants.GA_CONF_KEY);
+                    gaConfigLocalEntry.setContent("<localEntry key=\"" + APIConstants.GA_CONF_KEY + "\">"
+                            + content + "</localEntry>");
+                    productAPIDto.setLocalEntriesToBeAdd(addGatewayContentToList(gaConfigLocalEntry,
+                            productAPIDto.getLocalEntriesToBeAdd()));
+                }
+
                 // If the Gateway type is 'production' and a production url has
                 // not been specified
                 // Or if the Gateway type is 'sandbox' and a sandbox url has not
