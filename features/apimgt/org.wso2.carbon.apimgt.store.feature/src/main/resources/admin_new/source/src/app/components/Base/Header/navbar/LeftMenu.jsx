@@ -1,4 +1,5 @@
 import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import LeftMenuItemPrimary from 'AppComponents/Shared/LeftMenuItemPrimary';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl } from 'react-intl';
@@ -42,185 +43,262 @@ const styles = (theme) => ({
     },
 });
 
-const tasksSubMenuDetails = (props) => [
+const subPaths = {
+    TASKS_USER_CREATION: '/admin/tasks/user_creation',
+    TASKS_APPLICATION_CREATION: '/admin/tasks/application_creation',
+    TASKS_SUBSCRIPTION_CREATION: '/admin/tasks/subscription_creation',
+    TASKS_APPLICATION_REGISTRATION: '/admin/tasks/applicationregistration',
+    TASKS_API_STATE_CHANGE: '/admin/tasks/apistatechange',
+    SETTINGS_APPLICATIONS: '/admin/settings/applications',
+    SETTINGS_SCOPE_MAPPING: '/admin/settings/scopemapping',
+    MICROGATEWAY_LABELS: '/admin/microgateway/labels',
+    CATEGORIES_API_CATEGORIES: '/admin/categories/apicategories',
+    THROTTLINGPOLICIES_ADVANCED_POLICIES: '/admin/throttlingpolicies/advancedpolicies',
+    THROTTLINGPOLICIES_APPLICATION_POLICIES: '/admin/throttlingpolicies/applicationpolicies',
+    THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES: '/admin/throttlingpolicies/subscriptionpolicies',
+    THROTTLINGPOLICIES_CUSTOM_POLICIES: '/admin/throttlingpolicies/custompolicies',
+    THROTTLINGPOLICIES_BLACKLIST_POLICIES: '/admin/throttlingpolicies/blacklistpolicies',
+    ANALYTICS_API_AVAILABILITY: '/admin/analytics/apiavailability',
+};
+
+const tasksSubMenuDetails = (intl) => [
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.tasks.usercreation',
             defaultMessage: 'USER CREATION',
         }),
-        to: 'user_creation',
+        to: subPaths.TASKS_USER_CREATION,
     },
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.tasks.applicationcreation',
             defaultMessage: 'APPLICATION CREATION',
         }),
-        to: 'application_creation',
+        to: subPaths.TASKS_APPLICATION_CREATION,
     },
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.tasks.subscriptioncreation',
             defaultMessage: 'SUBSCRIPTION CREATION',
         }),
-        to: 'subscription_creation',
+        to: subPaths.TASKS_SUBSCRIPTION_CREATION,
     },
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.tasks.applicationregistration',
             defaultMessage: 'APPLICATION REGISTRATION',
         }),
-        to: 'application_registration',
+        to: subPaths.TASKS_APPLICATION_REGISTRATION,
     },
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.tasks.apistatechange',
             defaultMessage: 'API STATE CHANGE',
         }),
-        to: 'api_state_change',
+        to: subPaths.TASKS_API_STATE_CHANGE,
     },
 ];
 
-const settingsSubMenuDetails = (props) => [
+const settingsSubMenuDetails = (intl) => [
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.settings.applications',
             defaultMessage: 'APPLICATIONS',
         }),
-        to: 'applications',
+        to: subPaths.SETTINGS_APPLICATIONS,
     },
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.settings.scopemapping',
             defaultMessage: 'SCOPE MAPPING',
         }),
-        to: 'scope_mapping',
+        to: subPaths.SETTINGS_SCOPE_MAPPING,
     },
 ];
 
-const microgatewaySubMenuDetails = (props) => [
+const microgatewaySubMenuDetails = (intl) => [
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.microgateway.labels',
             defaultMessage: 'LABELS',
         }),
-        to: 'labels',
+        to: subPaths.MICROGATEWAY_LABELS,
     },
 ];
 
-const categoriesSubMenuDetails = (props) => [
+const categoriesSubMenuDetails = (intl) => [
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.categories.apicategories',
             defaultMessage: 'API CATEGORIES',
         }),
-        to: 'api_categories',
+        to: subPaths.CATEGORIES_API_CATEGORIES,
     },
 ];
 
-const throttlingPoliciesSubMenuDetails = (props) => [
+const throttlingPoliciesSubMenuDetails = (intl) => [
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.throttlingpolicies.advancedpolicies',
             defaultMessage: 'ADVANCED POLICIES',
         }),
-        to: 'advanced_policies',
+        to: subPaths.THROTTLINGPOLICIES_ADVANCED_POLICIES,
     },
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.throttlingpolicies.applicationpolicies',
             defaultMessage: 'APPLICATION POLICIES',
         }),
-        to: 'application_policies',
+        to: subPaths.THROTTLINGPOLICIES_APPLICATION_POLICIES,
     },
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.throttlingpolicies.subscriptionpolicies',
             defaultMessage: 'SUBSCRIPTION POLICIES',
         }),
-        to: 'subcription_policies',
+        to: subPaths.THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES,
     },
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.throttlingpolicies.custompolicies',
             defaultMessage: 'CUSTOM POLICIES',
         }),
-        to: 'custom_policies',
+        to: subPaths.THROTTLINGPOLICIES_CUSTOM_POLICIES,
     },
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.throttlingpolicies.blacklistpolicies',
             defaultMessage: 'BLACKLIST POLICIES',
         }),
-        to: 'blacklist_policies',
+        to: subPaths.THROTTLINGPOLICIES_BLACKLIST_POLICIES,
     },
 ];
 
-const analyticsSubMenuDetails = (props) => [
+const analyticsSubMenuDetails = (intl) => [
     {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
             id: 'leftmenu.secondary.analytics.apiavailability',
             defaultMessage: 'API AVAILABILITY',
         }),
-        to: 'api_availability',
+        to: subPaths.ANALYTICS_API_AVAILABILITY,
     },
 ];
 const botDetectionSubMenuDetails = () => [];
 
+// todo: decide the Naming and directory for this.
+//       Since Page contents are also rendered from this component.
 const LeftMenu = (props) => {
     const { classes, intl } = props;
     return (
-        <div className={classes.LeftMenu}>
-            <LeftMenuItemPrimary
-                text={intl.formatMessage({
-                    id: 'leftmenu.primary.tasks',
-                    defaultMessage: 'TASKS',
-                })}
-                secondaryMenuDetails={tasksSubMenuDetails(props)}
-            />
-            <LeftMenuItemPrimary
-                text={intl.formatMessage({
-                    id: 'leftmenu.primary.settings',
-                    defaultMessage: 'SETTINGS',
-                })}
-                secondaryMenuDetails={settingsSubMenuDetails(props)}
-            />
-            <LeftMenuItemPrimary
-                text={intl.formatMessage({
-                    id: 'leftmenu.primary.microgateway',
-                    defaultMessage: 'MICROGATEWAY',
-                })}
-                secondaryMenuDetails={microgatewaySubMenuDetails(props)}
-            />
-            <LeftMenuItemPrimary
-                text={intl.formatMessage({
-                    id: 'leftmenu.primary.categories',
-                    defaultMessage: 'CATEGORIES',
-                })}
-                secondaryMenuDetails={categoriesSubMenuDetails(props)}
-            />
-            <LeftMenuItemPrimary
-                text={intl.formatMessage({
-                    id: 'leftmenu.primary.throttlingpolicies',
-                    defaultMessage: 'THROTTLING POLICIES',
-                })}
-                secondaryMenuDetails={throttlingPoliciesSubMenuDetails(props)}
-            />
-            <LeftMenuItemPrimary
-                text={intl.formatMessage({
-                    id: 'leftmenu.primary.botdetection',
-                    defaultMessage: 'BOT DETECTION',
-                })}
-                secondaryMenuDetails={botDetectionSubMenuDetails()}
-            />
-            <LeftMenuItemPrimary
-                text={intl.formatMessage({
-                    id: 'leftmenu.primary.analytics',
-                    defaultMessage: 'ANALYTICS',
-                })}
-                secondaryMenuDetails={analyticsSubMenuDetails(props)}
-            />
-        </div>
-
+        <Router>
+            <div className={classes.LeftMenu}>
+                <LeftMenuItemPrimary
+                    text={intl.formatMessage({
+                        id: 'leftmenu.primary.tasks',
+                        defaultMessage: 'TASKS',
+                    })}
+                    secondaryMenuDetails={tasksSubMenuDetails(intl)}
+                />
+                <LeftMenuItemPrimary
+                    text={intl.formatMessage({
+                        id: 'leftmenu.primary.settings',
+                        defaultMessage: 'SETTINGS',
+                    })}
+                    secondaryMenuDetails={settingsSubMenuDetails(intl)}
+                />
+                <LeftMenuItemPrimary
+                    text={intl.formatMessage({
+                        id: 'leftmenu.primary.microgateway',
+                        defaultMessage: 'MICROGATEWAY',
+                    })}
+                    secondaryMenuDetails={microgatewaySubMenuDetails(intl)}
+                />
+                <LeftMenuItemPrimary
+                    text={intl.formatMessage({
+                        id: 'leftmenu.primary.categories',
+                        defaultMessage: 'CATEGORIES',
+                    })}
+                    secondaryMenuDetails={categoriesSubMenuDetails(intl)}
+                />
+                <LeftMenuItemPrimary
+                    text={intl.formatMessage({
+                        id: 'leftmenu.primary.throttlingpolicies',
+                        defaultMessage: 'THROTTLING POLICIES',
+                    })}
+                    secondaryMenuDetails={throttlingPoliciesSubMenuDetails(intl)}
+                />
+                <LeftMenuItemPrimary
+                    text={intl.formatMessage({
+                        id: 'leftmenu.primary.botdetection',
+                        defaultMessage: 'BOT DETECTION',
+                    })}
+                    secondaryMenuDetails={botDetectionSubMenuDetails()}
+                />
+                <LeftMenuItemPrimary
+                    text={intl.formatMessage({
+                        id: 'leftmenu.primary.analytics',
+                        defaultMessage: 'ANALYTICS',
+                    })}
+                    secondaryMenuDetails={analyticsSubMenuDetails(intl)}
+                />
+            </div>
+            <div className={classes.content}>
+                <div className={classes.contentInside}>
+                    {/* todo: Create components for each submenu item and replace h1's */}
+                    <Switch>
+                        <Route path={subPaths.TASKS_USER_CREATION}>
+                            <h1>Hello user creation</h1>
+                        </Route>
+                        <Route path={subPaths.TASKS_APPLICATION_CREATION}>
+                            <h1>Hello application creation</h1>
+                        </Route>
+                        <Route path={subPaths.TASKS_SUBSCRIPTION_CREATION}>
+                            <h1>Hello subscription creation</h1>
+                        </Route>
+                        <Route path={subPaths.TASKS_APPLICATION_REGISTRATION}>
+                            <h1>Hello TASKS_APPLICATION_REGISTRATION</h1>
+                        </Route>
+                        <Route path={subPaths.TASKS_API_STATE_CHANGE}>
+                            <h1>Hello TASKS_API_STATE_CHANGE</h1>
+                        </Route>
+                        <Route path={subPaths.SETTINGS_APPLICATIONS}>
+                            <h1>Hello SETTINGS_APPLICATIONS</h1>
+                        </Route>
+                        <Route path={subPaths.SETTINGS_SCOPE_MAPPING}>
+                            <h1>Hello SETTINGS_SCOPE_MAPPING</h1>
+                        </Route>
+                        <Route path={subPaths.MICROGATEWAY_LABELS}>
+                            <h1>Hello MICROGATEWAY_LABELS</h1>
+                        </Route>
+                        <Route path={subPaths.CATEGORIES_API_CATEGORIES}>
+                            <h1>Hello CATEGORIES_API_CATEGORIES</h1>
+                        </Route>
+                        <Route path={subPaths.THROTTLINGPOLICIES_ADVANCED_POLICIES}>
+                            <h1>Hello THROTTLINGPOLICIES_ADVANCED_POLICIES</h1>
+                        </Route>
+                        <Route path={subPaths.THROTTLINGPOLICIES_APPLICATION_POLICIES}>
+                            <h1>Hello THROTTLINGPOLICIES_APPLICATION_POLICIES</h1>
+                        </Route>
+                        <Route path={subPaths.THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES}>
+                            <h1>Hello THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES</h1>
+                        </Route>
+                        <Route path={subPaths.THROTTLINGPOLICIES_CUSTOM_POLICIES}>
+                            <h1>Hello THROTTLINGPOLICIES_CUSTOM_POLICIES</h1>
+                        </Route>
+                        <Route path={subPaths.THROTTLINGPOLICIES_BLACKLIST_POLICIES}>
+                            <h1>Hello THROTTLINGPOLICIES_BLACKLIST_POLICIES</h1>
+                        </Route>
+                        <Route path={subPaths.ANALYTICS_API_AVAILABILITY}>
+                            <h1>Hello ANALYTICS_API_AVAILABILITY</h1>
+                        </Route>
+                        {/* todo: determine the component for /admin/ */}
+                        <Route path='/admin/'>
+                            <h1>Select submenu</h1>
+                        </Route>
+                    </Switch>
+                </div>
+            </div>
+        </Router>
     );
 };
 
