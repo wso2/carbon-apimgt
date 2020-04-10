@@ -881,8 +881,10 @@ public class ApiMgtDAO {
 
             if (!isProduct) {
                 preparedStForInsert.setString(1, apiTypeWrapper.getApi().getId().getTier());
+                preparedStForInsert.setString(10, apiTypeWrapper.getApi().getId().getTier());
             } else {
                 preparedStForInsert.setString(1, apiTypeWrapper.getApiProduct().getId().getTier());
+                preparedStForInsert.setString(10, apiTypeWrapper.getApiProduct().getId().getTier());
             }
             preparedStForInsert.setInt(2, id);
             preparedStForInsert.setInt(3, applicationId);
@@ -919,7 +921,55 @@ public class ApiMgtDAO {
         }
         return subscriptionId;
     }
-    
+
+    public int updateSubscription(ApiTypeWrapper apiTypeWrapper, String inputSubscriptionUUId, String status,
+                                  String requestedThrottlingTier) throws APIManagementException {
+        Connection conn = null;
+        final boolean isProduct = apiTypeWrapper.isAPIProduct();
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        PreparedStatement preparedStForUpdate = null;
+        int subscriptionId = -1;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            //Query to retrieve subscription id
+            String retrieveSubscriptionIDQuery = SQLConstants.RETRIEVE_SUBSCRIPTION_ID_SQL;
+            ps = conn.prepareStatement(retrieveSubscriptionIDQuery);
+            ps.setString(1, inputSubscriptionUUId);
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                subscriptionId = resultSet.getInt(1);
+            }
+
+            //This query to update the AM_SUBSCRIPTION table
+            String sqlQuery = SQLConstants.UPDATE_SINGLE_SUBSCRIPTION_SQL;
+            preparedStForUpdate = conn.prepareStatement(sqlQuery);
+            preparedStForUpdate.setString(1, requestedThrottlingTier);
+            preparedStForUpdate.setString(2, status);
+            preparedStForUpdate.setString(3, inputSubscriptionUUId);
+            preparedStForUpdate.executeUpdate();
+
+            // finally commit transaction
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the update subscription ", e1);
+                }
+            }
+            handleException("Failed to update subscription data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(preparedStForUpdate, null, null);
+        }
+        return subscriptionId;
+    }
+
     /**
      * Removes the subscription entry from AM_SUBSCRIPTIONS for identifier.
      *
@@ -1149,6 +1199,7 @@ public class ApiMgtDAO {
                 subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
                 subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
                 subscribedAPI.setTier(new Tier(resultSet.getString("TIER_ID")));
+                subscribedAPI.setRequestedTier(new Tier(resultSet.getString("TIER_ID_PENDING")));
                 subscribedAPI.setUUID(resultSet.getString("UUID"));
                 subscribedAPI.setApplication(application);
             }
@@ -1203,6 +1254,7 @@ public class ApiMgtDAO {
                 subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
                 subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
                 subscribedAPI.setTier(new Tier(resultSet.getString("TIER_ID")));
+                subscribedAPI.setRequestedTier(new Tier(resultSet.getString("TIER_ID_PENDING")));
 
                 Timestamp createdTime = resultSet.getTimestamp("CREATED_TIME");
                 subscribedAPI.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
@@ -1848,6 +1900,7 @@ public class ApiMgtDAO {
         subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
         subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
         subscribedAPI.setTier(new Tier(resultSet.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
+        subscribedAPI.setRequestedTier(new Tier(resultSet.getString("TIER_ID_PENDING")));
 
         Application application = new Application(resultSet.getString("APP_NAME"), subscriber);
         application.setUUID(resultSet.getString("APP_UUID"));
@@ -2040,7 +2093,9 @@ public class ApiMgtDAO {
         subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
         subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
         String tierName = result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID);
+        String requestedTierName = result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID_PENDING);
         subscribedAPI.setTier(new Tier(tierName));
+        subscribedAPI.setRequestedTier(new Tier(requestedTierName));
         subscribedAPI.setUUID(result.getString("SUB_UUID"));
         //setting NULL for subscriber. If needed, Subscriber object should be constructed &
         // passed in
@@ -2998,6 +3053,40 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, status);
             ps.setInt(2, subscriptionId);
+            ps.execute();
+
+            //Commit transaction
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback subscription status update ", e1);
+                }
+            }
+            handleException("Failed to update subscription status ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    public void updateSubscriptionStatusAndTier(int subscriptionId, String status, String requestedThrottlingTier) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            //This query is to update the AM_SUBSCRIPTION table
+            String sqlQuery = SQLConstants.UPDATE_SUBSCRIPTION_STATUS_AND_TIER_SQL;
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, null);
+            ps.setString(2, requestedThrottlingTier);
+            ps.setString(3, status);
+            ps.setInt(4, subscriptionId);
             ps.execute();
 
             //Commit transaction
