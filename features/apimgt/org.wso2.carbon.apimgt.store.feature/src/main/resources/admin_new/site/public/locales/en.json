@@ -31,5 +31,9 @@
   "leftmenu.secondary.throttlingpolicies.subscriptionpolicies": "SUBSCRIPTION POLICIES",
   "leftmenu.secondary.throttlingpolicies.custompolicies": "CUSTOM POLICIES",
   "leftmenu.secondary.throttlingpolicies.blacklistpolicies": "BLACKLIST POLICIES",
-  "leftmenu.secondary.analytics.apiavailability": "API AVAILABILITY"
+  "leftmenu.secondary.analytics.apiavailability": "API AVAILABILITY",
+  "topmenu.microgateways.maintitle": "Microgateways",
+  "topmenu.microgateways.add.microgateway": "Add Microgateway",
+  "create.banner.create.microgateway": "Create Microgateway",
+  "create.banner.button.text.microgateway": "Create Microgateway"
 }
