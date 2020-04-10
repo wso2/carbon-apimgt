@@ -102,6 +102,30 @@ class API extends Resource {
         });
         return promisedSettings.then(response => response.body);
     }
+
+    /**
+     * Importing a WSDL and creating an API by a .wsdl file or a WSDL archive zip file
+     *
+     * @static
+     * @param {*} url WSDL url
+     * @param {*} additionalProperties additional properties of the API eg: name, version, context
+     * @param {*} implementationType SOAPTOREST or SOAP
+     * @returns {API} API object which was created
+     * @memberof Wsdl
+     */
+    static importByUrl(url, additionalProperties, implementationType = 'SOAP') {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then((client) => {
+            client.apis.APIs
+            const promisedResponse = client.apis.APIs.importWSDLDefinition({
+                url,
+                additionalProperties: JSON.stringify(additionalProperties),
+                implementationType,
+            });
+
+            return promisedResponse.then((response) => new API(response.body));
+        });
+    }
 }
 
 
