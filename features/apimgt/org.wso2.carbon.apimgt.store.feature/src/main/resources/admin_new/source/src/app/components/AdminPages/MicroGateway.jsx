@@ -105,7 +105,7 @@ export default function MicroGateway(props) {
         <>
             <Typography variant='h4' align='left' className={classes.mainTitle}>
                 <FormattedMessage
-                    id='Apis.Details.Environments.Environments.Microgateways'
+                    id='contents.main.title.microgateways'
                     defaultMessage='Microgateways'
                 />
             </Typography>
