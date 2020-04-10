@@ -40,9 +40,6 @@ class APIClient {
         SwaggerClient.http.withCredentials = true;
         const promisedResolve = SwaggerClient.resolve({
             url: Utils.getSwaggerURL(),
-            requestInterceptor: (request) => {
-                request.headers.Accept = 'text/yaml';
-            },
         });
         APIClient.spec = promisedResolve;
         this._client = promisedResolve.then((resolved) => {
@@ -177,7 +174,7 @@ class APIClient {
                         AuthManager.refresh(env).then((res) => res.json())
                             .then(() => {
                                 request.headers.authorization = 'Bearer '
-                                + AuthManager.getUser(env.label).getPartialToken();
+                                    + AuthManager.getUser(env.label).getPartialToken();
                                 release();
                                 resolve(request);
                             }).catch((error) => {

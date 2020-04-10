@@ -245,6 +245,7 @@ const LeftMenu = (props) => {
             <div className={classes.content}>
                 <div className={classes.contentInside}>
                     {/* todo: Create components for each submenu item and replace h1's */}
+                    {/* todo: Setup server sider routing to support refreshes and link based navigation */}
                     <Switch>
                         <Route path={subPaths.TASKS_USER_CREATION}>
                             <h1>Hello user creation</h1>
