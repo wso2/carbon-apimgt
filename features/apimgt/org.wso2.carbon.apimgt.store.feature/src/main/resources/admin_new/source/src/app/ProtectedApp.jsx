@@ -73,12 +73,9 @@ export default class Protected extends Component {
      */
     componentDidMount() {
         const user = AuthManager.getUser();
-        const api = new Api();
-        const settingPromise = api.getSettings();
         window.addEventListener('message', this.handleMessage);
         if (user) {
             this.setState({ user });
-            settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
             this.checkSession();
         } else {
             // If no user data available , Get the user info from existing token information
@@ -86,7 +83,6 @@ export default class Protected extends Component {
             // user information via redirection
             const userPromise = AuthManager.getUserFromToken();
             userPromise.then((loggedUser) => this.setState({ user: loggedUser }));
-            settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
         }
     }
 
@@ -118,7 +114,7 @@ export default class Protected extends Component {
     render() {
         const { user = AuthManager.getUser(), messages } = this.state;
         const header = <Header avatar={<Avatar user={user} />} user={user} />;
-        const { settings, clientId } = this.state;
+        const { clientId } = this.state;
         const checkSessionURL = 'https://' + window.location.host + '/oidc/checksession?client_id='
             + clientId + '&redirect_uri=https://' + window.location.host
             + Configurations.app.context + '/services/auth/callback/login';
@@ -141,16 +137,12 @@ export default class Protected extends Component {
                             height='0px'
                         />
 
-                        {settings ? (
-                            <AppContextProvider value={{ settings, user }}>
-                                <Switch>
-                                    <LeftMenu />
-                                    <Route component={ResourceNotFound} />
-                                </Switch>
-                            </AppContextProvider>
-                        ) : (
-                                <Progress message='Loading Settings ...' />
-                            )}
+                        <AppContextProvider value={{ user }}>
+                            <Switch>
+                                <LeftMenu />
+                                <Route component={ResourceNotFound} />
+                            </Switch>
+                        </AppContextProvider>
                     </Base>
 
                 </AppErrorBoundary>

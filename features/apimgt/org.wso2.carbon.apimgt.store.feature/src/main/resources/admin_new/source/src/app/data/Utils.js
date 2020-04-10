@@ -181,7 +181,7 @@ class Utils {
      * @memberof Utils
      */
     static getSwaggerURL() {
-        return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SWAGGER_YAML;
+        return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SWAGGER_JSON;
     }
 
     /**
@@ -337,7 +337,7 @@ Utils.CONST = {
 
     LOGOUT_CALLBACK: '/services/auth/callback/logout',
     INTROSPECT: '/services/auth/introspect',
-    SWAGGER_YAML: '/api/am/publisher/v1/swagger.yaml',
+    SWAGGER_JSON: '/api/am/admin/v0.16/swagger.json',
     PROTOCOL: 'https://',
 };
 
