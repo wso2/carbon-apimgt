@@ -35,5 +35,6 @@
   "topmenu.microgateways.maintitle": "Microgateways",
   "topmenu.microgateways.add.microgateway": "Add Microgateway",
   "create.banner.create.microgateway": "Create Microgateway",
-  "create.banner.button.text.microgateway": "Create Microgateway"
+  "create.banner.button.text.microgateway": "Create Microgateway",
+  "contents.main.title.microgateways": "Microgateways"
 }
