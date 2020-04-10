@@ -466,11 +466,25 @@ public class SQLConstants {
             "   API_ID = ? " +
             "   AND APPLICATION_ID = ?";
 
+    public static final String RETRIEVE_SUBSCRIPTION_ID_SQL =
+            " SELECT " +
+                    "   SUBSCRIPTION_ID " +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION " +
+                    " WHERE " +
+                    "   UUID = ? ";
+
     public static final String ADD_SUBSCRIPTION_SQL =
             " INSERT INTO " +
             "   AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME, " +
-                    "UPDATED_TIME, UUID) " +
-            " VALUES (?,?,?,?,?,?,?,?,?)";
+                    "UPDATED_TIME, UUID, TIER_ID_PENDING) " +
+            " VALUES (?,?,?,?,?,?,?,?,?,?)";
+
+    public static final String UPDATE_SINGLE_SUBSCRIPTION_SQL =
+            " UPDATE AM_SUBSCRIPTION " +
+                    " SET TIER_ID_PENDING = ? " +
+                    " , SUB_STATUS = ? " +
+                    " WHERE UUID = ?";
     
     public static final String GET_SUBSCRIPTION_UUID_SQL =
             " SELECT UUID " +
@@ -519,6 +533,7 @@ public class SQLConstants {
             "   API.API_TYPE AS API_TYPE, " +
             "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
+            "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   SUBS.UUID AS UUID, " +
@@ -539,6 +554,7 @@ public class SQLConstants {
             "   API.API_TYPE AS API_TYPE, " +
             "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
+            "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   SUBS.UUID AS UUID, " +
@@ -698,6 +714,7 @@ public class SQLConstants {
             "   API.API_NAME AS API_NAME, " +
             "   API.API_VERSION AS API_VERSION, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
+            "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
             "   APP.APPLICATION_ID AS APP_ID, " +
             "   APP.UUID AS APP_UUID, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
@@ -1130,6 +1147,13 @@ public class SQLConstants {
             " UPDATE AM_SUBSCRIPTION " +
             " SET SUB_STATUS = ? " +
             " WHERE SUBSCRIPTION_ID = ?";
+
+    public static final String UPDATE_SUBSCRIPTION_STATUS_AND_TIER_SQL =
+            " UPDATE AM_SUBSCRIPTION " +
+                    " SET TIER_ID_PENDING = ? " +
+                    " , TIER_ID = ? " +
+                    " , SUB_STATUS = ? " +
+                    " WHERE SUBSCRIPTION_ID = ?";
 
     public static final String UPDATE_REFRESHED_APPLICATION_ACCESS_TOKEN_PREFIX = "UPDATE ";
 

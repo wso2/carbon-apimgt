@@ -144,6 +144,7 @@ class Subscriptions extends React.Component {
             searchText: '',
         };
         this.handleSubscriptionDelete = this.handleSubscriptionDelete.bind(this);
+        this.handleSubscriptionUpdate = this.handleSubscriptionUpdate.bind(this);
         this.updateSubscriptions = this.updateSubscriptions.bind(this);
         this.handleSubscribe = this.handleSubscribe.bind(this);
         this.handleOpenDialog = this.handleOpenDialog.bind(this);
@@ -232,6 +233,44 @@ class Subscriptions extends React.Component {
                     this.setState({ isAuthorize: false });
                 }
                 Alert.error('Error occurred when deleting subscription');
+            });
+    }
+
+    /**
+     *
+     * Handle subscription update of application
+     *
+     * @param {*} apiId API id
+     * @param {*} subscriptionId subscription id
+     * @param {*} throttlingPolicy throttling tier
+     * @param {*} status subscription status
+     * @memberof Subscriptions
+     */
+    handleSubscriptionUpdate(apiId, subscriptionId, currentThrottlingPolicy, status, requestedThrottlingPolicy) {
+        const {
+            match: {
+                params: { applicationId },
+            },
+        } = this.props;
+        const client = new Subscription();
+        const promisedUpdate = client.updateSubscription(applicationId, apiId, subscriptionId, currentThrottlingPolicy, status, requestedThrottlingPolicy);
+
+        promisedUpdate
+            .then((response) => {
+                if (response.status !== 200 && response.status !== 201) {
+                    console.log(response);
+                    Alert.info('Something went wrong while updating the Subscription!');
+                    return;
+                }
+                Alert.info('Subscription Tier updated successfully!');
+                this.updateSubscriptions(applicationId);
+            })
+            .catch((error) => {
+                const { status } = error;
+                if (status === 401) {
+                    this.setState({ isAuthorize: false });
+                }
+                Alert.error('Error occurred when updating subscription');
             });
     }
 
@@ -434,6 +473,7 @@ class Subscriptions extends React.Component {
                                                                             key={subscription.subscriptionId}
                                                                             subscription={subscription}
                                                                             handleSubscriptionDelete={this.handleSubscriptionDelete}
+                                                                            handleSubscriptionUpdate={this.handleSubscriptionUpdate}
                                                                         />
                                                                     );
                                                                 })}

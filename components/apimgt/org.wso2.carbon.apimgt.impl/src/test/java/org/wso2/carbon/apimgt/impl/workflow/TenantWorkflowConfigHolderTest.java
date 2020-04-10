@@ -322,6 +322,8 @@ public class TenantWorkflowConfigHolderTest {
                         ".ApplicationRegistrationSimpleWorkflowExecutor\"/>\n" +
                         "    <SubscriptionCreation executor=\"org.wso2.carbon.apimgt.impl.workflow" +
                         ".SubscriptionCreationSimpleWorkflowExecutor\"/>\n"+
+                        "   <SubscriptionUpdate executor=\"org.wso2.carbon.apimgt.impl.workflow" +
+                        ".SubscriptionUpdateSimpleWorkflowExecutor\"/>\n"+
                         "    <UserSignUp executor=\"org.wso2.carbon.apimgt.impl.workflow" +
                         ".UserSignUpSimpleWorkflowExecutor\"/>\n"+
                         "    <SubscriptionDeletion executor=\"org.wso2.carbon.apimgt.impl.workflow" +

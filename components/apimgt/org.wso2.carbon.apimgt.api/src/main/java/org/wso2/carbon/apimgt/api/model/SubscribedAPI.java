@@ -29,6 +29,7 @@ public class SubscribedAPI {
 
     private int subscriptionId;
     private Tier tier;
+    private Tier requestedTier;
     private Subscriber subscriber;
     private APIIdentifier apiId;
     private APIProductIdentifier productId;
@@ -179,5 +180,13 @@ public class SubscribedAPI {
 
     public void setUpdatedTime(String updatedTime) {
         this.updatedTime = updatedTime;
+    }
+
+    public Tier getRequestedTier() {
+        return requestedTier;
+    }
+
+    public void setRequestedTier(Tier requestedTier) {
+        this.requestedTier = requestedTier;
     }
 }

@@ -2863,6 +2863,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApiVersion(identifier.getVersion());
                 workflowDTO.setApiProvider(identifier.getProviderName());
                 workflowDTO.setTierName(identifier.getTier());
+                workflowDTO.setRequestedTierName(identifier.getTier());
                 workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
                 workflowDTO.setApplicationId(applicationId);
                 workflowDTO.setSubscriber(userId);
@@ -2937,6 +2938,163 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 SubscribedAPI addedSubscription = getSubscriptionById(subscriptionId);
                 subscriptionStatus = addedSubscription.getSubStatus();
                 subscriptionUUID = addedSubscription.getUUID();
+
+                JSONObject subsLogObject = new JSONObject();
+                subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
+                subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
+                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
+                subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
+
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                        APIConstants.AuditLogConstants.CREATED, this.username);
+
+                if (workflowResponse == null) {
+                    workflowResponse = new GeneralWorkflowResponse();
+                }
+            }
+
+            if (log.isDebugEnabled()) {
+                String logMessage = "API Name: " + identifier.getName() + ", API Version " + identifier.getVersion()
+                        + ", Subscription Status: " + subscriptionStatus + " subscribe by " + userId + " for app "
+                        + applicationName;
+                log.debug(logMessage);
+            }
+
+            return new SubscriptionResponse(subscriptionStatus, subscriptionUUID, workflowResponse);
+        } else {
+            throw new APIMgtResourceNotFoundException("Subscriptions not allowed on APIs/API Products in the state: " +
+                    state);
+        }
+    }
+
+    @Override
+    public SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId, int applicationId,
+                                                   String inputSubscriptionId, String currentThrottlingPolicy,
+                                                   String requestedThrottlingPolicy)
+            throws APIManagementException {
+
+        API api = null;
+        APIProduct product = null;
+        Identifier identifier = null;
+        final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
+        String state;
+        String apiContext;
+
+        if (isApiProduct) {
+            product = apiTypeWrapper.getApiProduct();
+            state = product.getState();
+            identifier = product.getId();
+            apiContext = product.getContext();
+        } else {
+            api = apiTypeWrapper.getApi();
+            state = api.getStatus();
+            identifier = api.getId();
+            apiContext = api.getContext();
+        }
+
+        WorkflowResponse workflowResponse = null;
+        int subscriptionId;
+        if (APIConstants.PUBLISHED.equals(state)) {
+            subscriptionId = apiMgtDAO.updateSubscription(apiTypeWrapper, inputSubscriptionId,
+                    APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, requestedThrottlingPolicy);
+
+            boolean isTenantFlowStarted = false;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
+            }
+
+            String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
+
+            try {
+                WorkflowExecutor updateSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+
+                SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+                workflowDTO.setStatus(WorkflowStatus.CREATED);
+                workflowDTO.setCreatedTime(System.currentTimeMillis());
+                workflowDTO.setTenantDomain(tenantDomain);
+                workflowDTO.setTenantId(tenantId);
+                workflowDTO.setExternalWorkflowReference(updateSubscriptionWFExecutor.generateUUID());
+                workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
+                workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+                workflowDTO.setCallbackUrl(updateSubscriptionWFExecutor.getCallbackURL());
+                workflowDTO.setApiName(identifier.getName());
+                workflowDTO.setApiContext(apiContext);
+                workflowDTO.setApiVersion(identifier.getVersion());
+                workflowDTO.setApiProvider(identifier.getProviderName());
+                workflowDTO.setTierName(identifier.getTier());
+                workflowDTO.setRequestedTierName(requestedThrottlingPolicy);
+                workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
+                workflowDTO.setApplicationId(applicationId);
+                workflowDTO.setSubscriber(userId);
+
+                Tier tier = null;
+                Set<Tier> policies = Collections.emptySet();
+                if (!isApiProduct) {
+                    policies = api.getAvailableTiers();
+                } else {
+                    policies = product.getAvailableTiers();
+                }
+
+                for (Tier policy : policies) {
+                    if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
+                        tier = policy;
+                    }
+                }
+                boolean isMonetizationEnabled = false;
+
+                if (api != null) {
+                    isMonetizationEnabled = api.getMonetizationStatus();
+                    //check whether monetization is enabled for API and tier plan is commercial
+                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                        workflowResponse = updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO, api);
+                    } else {
+                        workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
+                    }
+                } else {
+                    isMonetizationEnabled = product.getMonetizationStatus();
+                    //check whether monetization is enabled for API and tier plan is commercial
+                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                        workflowResponse = updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO, product);
+                    } else {
+                        workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
+                    }
+                }
+            } catch (WorkflowException e) {
+                throw new APIManagementException("Could not execute Workflow", e);
+            } finally {
+                if (isTenantFlowStarted) {
+                    endTenantFlow();
+                }
+            }
+
+            if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
+                invalidateCachedKeys(applicationId);
+            }
+
+            //to handle on-the-fly subscription rejection (and removal of subscription entry from the database)
+            //the response should have {"Status":"REJECTED"} in the json payload for this to work.
+            boolean subscriptionRejected = false;
+            String subscriptionStatus = null;
+            String subscriptionUUID = "";
+
+            if (workflowResponse != null && workflowResponse.getJSONPayload() != null
+                    && !workflowResponse.getJSONPayload().isEmpty()) {
+                try {
+                    JSONObject wfResponseJson = (JSONObject) new JSONParser().parse(workflowResponse.getJSONPayload());
+                    if (APIConstants.SubscriptionStatus.REJECTED.equals(wfResponseJson.get("Status"))) {
+                        subscriptionRejected = true;
+                        subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
+                    }
+                } catch (ParseException e) {
+                    log.error('\'' + workflowResponse.getJSONPayload() + "' is not a valid JSON.", e);
+                }
+            }
+
+            if (!subscriptionRejected) {
+                SubscribedAPI updatedSubscription = getSubscriptionById(subscriptionId);
+                subscriptionStatus = updatedSubscription.getSubStatus();
+                subscriptionUUID = updatedSubscription.getUUID();
 
                 JSONObject subsLogObject = new JSONObject();
                 subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());

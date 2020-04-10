@@ -132,6 +132,27 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         return delegate.subscriptionsSubscriptionIdGet(subscriptionId, ifNoneMatch, securityContext);
     }
 
+    @PUT
+    @Path("/{subscriptionId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update existing subscription ", notes = "This operation can be used to update a subscription providing the subscription id, api id, application Id, status and updated throttling policy tier. ", response = SubscriptionDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:sub_manage", description = "Retrieve, Manage subscriptions"),
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+        })
+    }, tags={ "Subscriptions",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Subscription Updated. Successful response with the updated object as entity in the body. Location header contains URL of newly updates entity. ", response = SubscriptionDTO.class),
+        @ApiResponse(code = 202, message = "Accepted. The request has been accepted. ", response = WorkflowResponseDTO.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested Subscription does not exist. ", response = Void.class),
+        @ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = Void.class) })
+    public Response subscriptionsSubscriptionIdPut(@ApiParam(value = "Subscription object that should to be added " ,required=true) SubscriptionDTO body, @ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId, @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.subscriptionsSubscriptionIdPut(body, subscriptionId, xWSO2Tenant, securityContext);
+    }
+
     @GET
     @Path("/{subscriptionId}/usage")
     @Consumes({ "application/json" })
