@@ -338,8 +338,10 @@ public class JWTValidator {
 
         String endUserToken = null;
         boolean valid = false;
+        String jwtTokenCacheKey = jwtInfoDto.getApicontext().concat(":").concat(jwtInfoDto.getVersion()).concat(":")
+                .concat(tokenSignature);
         if (isGatewayTokenCacheEnabled) {
-            Object token = getGatewayJWTTokenCache().get(tokenSignature);
+            Object token = getGatewayJWTTokenCache().get(jwtTokenCacheKey);
             if (token != null) {
                 endUserToken = (String) token;
                 String[] splitToken = ((String) token).split("\\.");
@@ -351,7 +353,7 @@ public class JWTValidator {
             if (StringUtils.isEmpty(endUserToken) || !valid) {
                 try {
                     endUserToken = apiMgtGatewayJWTGenerator.generateToken(jwtInfoDto);
-                    getGatewayJWTTokenCache().put(tokenSignature, endUserToken);
+                    getGatewayJWTTokenCache().put(jwtTokenCacheKey, endUserToken);
                 } catch (APIManagementException e) {
                     log.error("Error while Generating Backend JWT", e);
                     throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
