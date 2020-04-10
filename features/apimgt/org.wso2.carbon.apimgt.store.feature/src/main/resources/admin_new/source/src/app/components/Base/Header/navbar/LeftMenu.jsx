@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import LeftMenuItemPrimary from 'AppComponents/Shared/LeftMenuItemPrimary';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl } from 'react-intl';
+import MicrogatewayLabels from 'AppComponents/AdminPages/MicrogatewayLabels';
 
 const styles = (theme) => ({
     LeftMenu: {
@@ -269,7 +270,7 @@ const LeftMenu = (props) => {
                             <h1>Hello SETTINGS_SCOPE_MAPPING</h1>
                         </Route>
                         <Route path={subPaths.MICROGATEWAY_LABELS}>
-                            <h1>Hello MICROGATEWAY_LABELS</h1>
+                            <MicrogatewayLabels />
                         </Route>
                         <Route path={subPaths.CATEGORIES_API_CATEGORIES}>
                             <h1>Hello CATEGORIES_API_CATEGORIES</h1>
