@@ -381,6 +381,7 @@ public final class APIConstants {
     //tables columns for subscription
     public static final String SUBSCRIPTION_FIELD_SUBSCRIPTION_ID = "SUBSCRIPTION_ID";
     public static final String SUBSCRIPTION_FIELD_TIER_ID = "TIER_ID";
+    public static final String SUBSCRIPTION_FIELD_TIER_ID_PENDING = "TIER_ID_PENDING";
     public static final String SUBSCRIPTION_FIELD_API_ID = "API_ID";
     public static final String SUBSCRIPTION_FIELD_ACCESS_TOKEN = "ACCESS_TOKEN";
     public static final String SUBSCRIPTION_FIELD_SUB_STATUS = "SUB_STATUS";
@@ -552,6 +553,7 @@ public final class APIConstants {
         public static final String PROD_ONLY_BLOCKED = "PROD_ONLY_BLOCKED";
         public static final String UNBLOCKED = "UNBLOCKED";
         public static final String ON_HOLD = "ON_HOLD";
+        public static final String TIER_UPDATE_PENDING = "TIER_UPDATE_PENDING";
         public static final String REJECTED = "REJECTED";
 
         private SubscriptionStatus() {
