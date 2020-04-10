@@ -817,10 +817,13 @@ public class GatewayUtils {
             jwtInfoDto.setKeytype(apiKeyValidationInfoDTO.getType());
             jwtInfoDto.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
             jwtInfoDto.setSubscriptionTier(apiKeyValidationInfoDTO.getTier());
+            jwtInfoDto.setApiName(apiKeyValidationInfoDTO.getApiName());
             jwtInfoDto.setEndusertenantid(
                     APIUtil.getTenantIdFromTenantDomain(apiKeyValidationInfoDTO.getSubscriberTenantDomain()));
         } else if (subscribedAPI != null) {
             // If the user is subscribed to the API
+            String apiName = subscribedAPI.getAsString(APIConstants.JwtTokenConstants.API_NAME);
+            jwtInfoDto.setApiName(apiName);
             String subscriptionTier = subscribedAPI.getAsString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER);
             String subscriptionTenantDomain =
                     subscribedAPI.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN);

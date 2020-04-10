@@ -52,6 +52,9 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationtier())) {
             claims.put(dialect + "/applicationtier", jwtInfoDto.getApplicationtier());
         }
+        if (StringUtils.isNotEmpty(jwtInfoDto.getApiName())) {
+            claims.put(dialect + "/apiname", jwtInfoDto.getApiName());
+        }
         if (StringUtils.isNotEmpty(jwtInfoDto.getApicontext())) {
             claims.put(dialect + "/apicontext", jwtInfoDto.getApicontext());
         }
