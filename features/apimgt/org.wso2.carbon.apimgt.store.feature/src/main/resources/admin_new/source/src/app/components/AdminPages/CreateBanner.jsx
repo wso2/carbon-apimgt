@@ -42,6 +42,11 @@ const styles = (theme) => ({
     head: {
         fontWeight: 200,
     },
+    contentWrapper: {
+        maxWidth: theme.custom.contentAreaWidth,
+        paddingLeft: theme.spacing(3),
+        paddingTop: theme.spacing(3),
+    },
 });
 
 const CreateBanner = (props) => {
@@ -49,26 +54,28 @@ const CreateBanner = (props) => {
         classes, title, description, buttonText, onClick,
     } = props;
     return (
-        <InlineMessage type='info' height={140}>
-            <div className={classes.contentWrapper}>
-                <Typography variant='h5' component='h3' className={classes.head}>
-                    {title}
-                </Typography>
-                <Typography component='p' className={classes.content}>
-                    {description}
-                </Typography>
-                <div className={classes.actions}>
-                    <Button
-                        variant='contained'
-                        color='primary'
-                        className={classes.button}
-                        onClick={onClick}
-                    >
-                        {buttonText}
-                    </Button>
+        <div className={classes.contentWrapper}>
+            <InlineMessage type='info' height={140}>
+                <div className={classes.contentWrapper}>
+                    <Typography variant='h5' component='h3' className={classes.head}>
+                        {title}
+                    </Typography>
+                    <Typography component='p' className={classes.content}>
+                        {description}
+                    </Typography>
+                    <div className={classes.actions}>
+                        <Button
+                            variant='contained'
+                            color='primary'
+                            className={classes.button}
+                            onClick={onClick}
+                        >
+                            {buttonText}
+                        </Button>
+                    </div>
                 </div>
-            </div>
-        </InlineMessage>
+            </InlineMessage>
+        </div>
     );
 };
 
