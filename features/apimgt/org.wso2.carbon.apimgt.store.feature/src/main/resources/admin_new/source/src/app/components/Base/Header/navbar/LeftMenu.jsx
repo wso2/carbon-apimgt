@@ -4,6 +4,7 @@ import LeftMenuItemPrimary from 'AppComponents/Shared/LeftMenuItemPrimary';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl } from 'react-intl';
 import MicroGateway from 'AppComponents/AdminPages/MicroGateway';
+import APICategories from 'AppComponents/AdminPages/APICategories';
 
 const styles = (theme) => ({
     LeftMenu: {
@@ -273,7 +274,7 @@ const LeftMenu = (props) => {
                             <MicroGateway />
                         </Route>
                         <Route path={subPaths.CATEGORIES_API_CATEGORIES}>
-                            <h1>Hello CATEGORIES_API_CATEGORIES</h1>
+                            <APICategories />
                         </Route>
                         <Route path={subPaths.THROTTLINGPOLICIES_ADVANCED_POLICIES}>
                             <h1>Hello THROTTLINGPOLICIES_ADVANCED_POLICIES</h1>
