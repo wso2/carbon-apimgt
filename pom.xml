@@ -1729,6 +1729,11 @@
                 <artifactId>org.apache.servicemix.bundles.jedis</artifactId>
                 <version>${servicemix.bundles.jedis.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>javax.cache.wso2</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
