@@ -90,7 +90,7 @@ public class JMSTransportHandler {
                         new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
                                 keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
                                 "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
-        jmsTaskManagerForThrottleDataTopic.setJmsMessageListener(new JMSMessageListener());
+        jmsTaskManagerForThrottleDataTopic.setMessageListener(new JMSMessageListener());
 
         jmsListenerForThrottleDataTopic = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME
                 + "#" + JMSConstants.TOPIC_THROTTLE_DATA, jmsTaskManagerForThrottleDataTopic);
@@ -105,7 +105,7 @@ public class JMSTransportHandler {
                 new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
                         keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
                         "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
-        jmsTaskManagerForTokenRevocationTopic.setJmsMessageListener(new JMSMessageListener());
+        jmsTaskManagerForTokenRevocationTopic.setMessageListener(new JMSMessageListener());
 
         jmsListenerForTokenRevocationTopic = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME
                 + "#" + JMSConstants.TOPIC_TOKEN_REVOCATION, jmsTaskManagerForTokenRevocationTopic);
@@ -120,7 +120,7 @@ public class JMSTransportHandler {
                 new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
                         keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
                         "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
-        jmsTaskManagerForCacheInvalidationTopic.setJmsMessageListener(new JMSMessageListener());
+        jmsTaskManagerForCacheInvalidationTopic.setMessageListener(new JMSMessageListener());
 
         jmsListenerForCacheInvalidationTopic = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME
                 + "#" + JMSConstants.TOPIC_CACHE_INVALIDATION, jmsTaskManagerForCacheInvalidationTopic);

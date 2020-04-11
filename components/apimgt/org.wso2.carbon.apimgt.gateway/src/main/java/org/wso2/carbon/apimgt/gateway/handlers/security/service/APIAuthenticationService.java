@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.service;
 
-import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationService;
+import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationServiceImpl;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 
