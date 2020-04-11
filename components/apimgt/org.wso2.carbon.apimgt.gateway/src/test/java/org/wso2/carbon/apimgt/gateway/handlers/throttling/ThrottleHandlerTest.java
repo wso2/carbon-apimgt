@@ -135,7 +135,7 @@ public class ThrottleHandlerTest {
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
                 .MessageContext.TRANSPORT_HEADERS);
-        throttleDataHolder.addIplockingCondition("carbon.super", 1, "{\"fixedIp\":\"127.0.0.1\",\"invert\":false}",
+        throttleDataHolder.addIpBlockingCondition("carbon.super", 1, "{\"fixedIp\":\"127.0.0.1\",\"invert\":false}",
                 APIConstants.BLOCKING_CONDITIONS_IP);
         AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
                 (API_AUTH_CONTEXT);
