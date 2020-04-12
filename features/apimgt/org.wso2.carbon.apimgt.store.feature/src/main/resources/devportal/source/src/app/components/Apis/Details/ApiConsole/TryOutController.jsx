@@ -87,6 +87,9 @@ const styles = makeStyles((theme) => ({
     tooltip: {
         marginLeft: theme.spacing(1),
     },
+    menuItem: {
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+    },
 }));
 
 /**
@@ -619,7 +622,7 @@ function TryOutController(props) {
                                                 variant='outlined'
                                             >
                                                 {environments && environments.length > 0 && (
-                                                    <MenuItem value='' disabled>
+                                                    <MenuItem value='' disabled className={classes.menuItem}>
                                                         <em>
                                                             <FormattedMessage
                                                                 id='api.gateways'
@@ -630,7 +633,11 @@ function TryOutController(props) {
                                                 )}
                                                 {environments && (
                                                     environments.map((env) => (
-                                                        <MenuItem value={env} key={env}>
+                                                        <MenuItem
+                                                            value={env}
+                                                            key={env}
+                                                            className={classes.menuItem}
+                                                        >
                                                             {env}
                                                         </MenuItem>
                                                     )))}
@@ -640,13 +647,18 @@ function TryOutController(props) {
                                                             <FormattedMessage
                                                                 id='micro.gateways'
                                                                 defaultMessage='Microgateways'
+                                                                className={classes.menuItem}
                                                             />
                                                         </em>
                                                     </MenuItem>
                                                 )}
                                                 {labels && (
                                                     labels.map((label) => (
-                                                        <MenuItem value={label} key={label}>
+                                                        <MenuItem
+                                                            value={label}
+                                                            key={label}
+                                                            className={classes.menuItem}
+                                                        >
                                                             {label}
                                                         </MenuItem>
                                                     ))
