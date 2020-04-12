@@ -17,7 +17,6 @@
  */
 
 import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
@@ -29,6 +28,14 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
+import { withStyles } from '@material-ui/core/styles';
+
+const styles = (theme) => ({
+    dialogWrapper: {
+        '& span,& p , & h5, & label, & td, & li, & div, & input, & p.MuiFormHelperText-root': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        }    },
+});
 
 const columns = ['Name', 'Value'];
 
@@ -45,7 +52,7 @@ const options = {
 };
 
 function Invoice(props) {
-    const { subscriptionId, isMonetizedAPI, isDynamicUsagePolicy } = props;
+    const { subscriptionId, isMonetizedAPI, isDynamicUsagePolicy, classes } = props;
     const [showPopup, setShowPopup] = useState(false);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [invoice, setInvoice] = useState(null);
@@ -102,7 +109,7 @@ function Invoice(props) {
                 />
             </Button>
             {invoice ? (
-                <Dialog open={showPopup} onClose={handleClose} fullWidth='true'>
+                <Dialog open={showPopup} onClose={handleClose} fullWidth='true' className={classes.dialogWrapper}>
                     {invoice && (<MUIDataTable
                         title='Upcoming Invoice'
                         data={invoice}
@@ -111,7 +118,7 @@ function Invoice(props) {
                     />) }
                 </Dialog>
             ) : (
-                <Dialog open={showErrorPopup} onClose={handleAlertClose} fullWidth='true'>
+                <Dialog open={showErrorPopup} onClose={handleAlertClose} fullWidth='true' className={classes.dialogWrapper}>
                     <DialogTitle>No Data Available</DialogTitle>
                     <DialogContent>
                         <DialogContentText id='invoice-dialog-description'>
@@ -132,4 +139,4 @@ Invoice.propTypes = {
     subscriptionId: PropTypes.string.isRequired,
 };
 
-export default Invoice;
+export default withStyles(styles)(Invoice);

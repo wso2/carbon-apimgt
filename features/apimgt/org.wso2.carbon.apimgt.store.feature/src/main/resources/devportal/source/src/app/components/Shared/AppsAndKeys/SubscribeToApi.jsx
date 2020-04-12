@@ -103,6 +103,9 @@ const styles = theme => ({
         margin: 0,
         padding: 0,
     },
+    appDropDown: {
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+    },
 });
 
 const subscribeToApi = (props) => {
@@ -177,7 +180,7 @@ const subscribeToApi = (props) => {
                             className={classes.selectEmpty}
                         >
                             {applicationsList.map(app => (
-                                <MenuItem value={app.value} key={app.value}>
+                                <MenuItem value={app.value} key={app.value} className={classes.appDropDown}>
                                     {app.label}
                                 </MenuItem>
                             ))}
@@ -212,7 +215,7 @@ const subscribeToApi = (props) => {
                             className={classes.selectEmpty}
                         >
                             {throttlingPolicyList.map(policy => (
-                                <MenuItem value={policy.tierName} key={policy.tierName}>
+                                <MenuItem value={policy.tierName} key={policy.tierName}  className={classes.appDropDown}>
                                     {policy.tierPlan === 'COMMERCIAL' ? (
                                         <React.Fragment>
                                             <ListItemText

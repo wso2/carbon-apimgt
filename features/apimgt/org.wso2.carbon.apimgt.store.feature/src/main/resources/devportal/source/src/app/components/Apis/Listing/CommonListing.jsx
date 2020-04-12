@@ -93,7 +93,7 @@ const styles = (theme) => ({
         marginLeft: theme.custom.tagCloud.leftMenu.width,
     },
     contentWithoutTags: {
-        marginLeft: 0,
+        marginLeft: -4,
     },
     contentWithTagsHidden: {
         marginLeft: theme.custom.tagCloud.leftMenu.sliderWidth,

@@ -62,6 +62,9 @@ const styles = (theme) => ({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
+        '& span, & h5, & label, & td, & li, & div, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
     },
     copyWrapper: {
         display: 'flex',
@@ -81,6 +84,11 @@ const styles = (theme) => ({
     margin: {
         marginRight: theme.spacing(2),
     },
+    dialogWrapper: {
+        '& label,& h5, & label, & td, & li, & input, & h2, & p.MuiTypography-root,& p.MuiFormHelperText-root': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
+    }
 });
 
 /**
@@ -538,6 +546,7 @@ class ViewKeys extends React.Component {
                             open={(open || isKeyJWT) && selectedGrantTypes.includes('client_credentials')}
                             onClose={this.handleClose}
                             aria-labelledby='responsive-dialog-title'
+                            className={classes.dialogWrapper}
                         >
                             <DialogTitle id='responsive-dialog-title'>
                                 {dialogHead}

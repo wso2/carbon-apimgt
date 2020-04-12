@@ -45,6 +45,7 @@ import classNames from 'classnames';
 import HeaderSearch from 'AppComponents/Base/Header/Search/HeaderSearch';
 import Settings from 'AppComponents/Shared/SettingsContext';
 import { app } from 'Settings';
+import ReactSafeHtml from 'react-safe-html';
 import AuthManager from '../../data/AuthManager';
 import LanuageSelector from './Header/LanuageSelector';
 import GlobalNavBar from './Header/GlobalNavbar';
@@ -84,7 +85,7 @@ const styles = (theme) => {
         wrapper: {
             minHeight: '100%',
             marginBottom: -50,
-            background: theme.palette.background.default + ' url(' + theme.custom.backgroundImage + ') repeat left top',
+            background: theme.palette.background.default + ' url('+ app.context + theme.custom.backgroundImage + ') repeat left top',
         },
         contentWrapper: {
             display: 'flex',
@@ -92,6 +93,7 @@ const styles = (theme) => {
             overflowY: 'hidden',
             position: 'relative',
             minHeight: 'calc(100vh - 114px)',
+            marginLeft: -4,
         },
         push: {
             height: 50,
@@ -100,7 +102,7 @@ const styles = (theme) => {
             background: theme.custom.footer.background,
             color: theme.custom.footer.color,
             paddingLeft: theme.spacing(3),
-            height: 50,
+            height: theme.custom.footer.height || 50,
             alignItems: 'center',
             display: 'flex',
         },
@@ -194,6 +196,9 @@ const styles = (theme) => {
             padding: `0 ${theme.spacing(1)}px 0 ${theme.spacing(1)}px `,
             height: 30,
         },
+        logoutLink: {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        }
     };
 };
 
@@ -323,7 +328,7 @@ class Layout extends React.Component {
                     showSearch,
                 },
                 footer: {
-                    active: footerActive, text: footerText,
+                    active: footerActive, text: footerText, footerHTML,
                 },
                 languageSwitch: { active: languageSwitchActive },
             },
@@ -529,7 +534,7 @@ class Layout extends React.Component {
                                                         <Paper>
                                                             <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
                                                                 <MenuList>
-                                                                    <MenuItem onClick={this.doOIDCLogout}>
+                                                                    <MenuItem onClick={this.doOIDCLogout} className={classes.logoutLink}>
                                                                         <FormattedMessage
                                                                             id='Base.index.logout'
                                                                             defaultMessage='Logout'
@@ -560,14 +565,18 @@ class Layout extends React.Component {
                     </div>
                     {footerActive && (
                         <footer className={classes.footer} id='footer'>
-                            <Typography noWrap>
+                            {footerHTML && footerHTML !== '' ? (
+                                <>
+                                    {<ReactSafeHtml html={footerHTML} />}
+                                </>
+                            ) : (<Typography noWrap>
                                 {footerText && footerText !== '' ? <span>{footerText}</span> : (
                                     <FormattedMessage
                                         id='Base.index.copyright.text'
                                         defaultMessage='WSO2 API-M v3.1.0 | © 2020 WSO2 Inc'
                                     />
                                 )}
-                            </Typography>
+                            </Typography>)}
                         </footer>
                     )}
                 </div>

@@ -82,8 +82,6 @@ class ApiConsole extends React.Component {
             scopes: [],
             selectedKeyType: 'PRODUCTION',
             keys: [],
-            productionApiKey: '',
-            sandboxApiKey: '',
         };
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.updateSwagger = this.updateSwagger.bind(this);
@@ -96,8 +94,6 @@ class ApiConsole extends React.Component {
         this.setSelectedKeyType = this.setSelectedKeyType.bind(this);
         this.setKeys = this.setKeys.bind(this);
         this.updateAccessToken = this.updateAccessToken.bind(this);
-        this.setProductionApiKey = this.setProductionApiKey.bind(this);
-        this.setSandboxApiKey = this.setSandboxApiKey.bind(this);
     }
 
     /**
@@ -106,6 +102,7 @@ class ApiConsole extends React.Component {
     componentDidMount() {
         const { api } = this.context;
         const apiID = api.id;
+        const user = AuthManager.getUser();
         let apiData;
         let environments;
         let labels;
@@ -142,14 +139,20 @@ class ApiConsole extends React.Component {
             })
             .then((swaggerResponse) => {
                 swagger = swaggerResponse.obj;
-                this.setState({
-                    api: apiData,
-                    swagger,
-                    environments,
-                    labels,
-                    productionAccessToken,
-                    sandboxAccessToken,
-                });
+                if (user != null) {
+                    this.setState({
+                        api: apiData,
+                        swagger,
+                        environments,
+                        labels,
+                        productionAccessToken,
+                        sandboxAccessToken,
+
+                    });
+                    return this.apiClient.getSubscriptions(apiID);
+                } else {
+                    return null;
+                }
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -174,12 +177,8 @@ class ApiConsole extends React.Component {
      * Set Selected Environment
      * @memberof ApiConsole
      */
-    setSelectedEnvironment(selectedEnvironment, isUpdateSwagger) {
-        if (isUpdateSwagger) {
-            this.setState({ selectedEnvironment }, this.updateSwagger);
-        } else {
-            this.setState({ selectedEnvironment });
-        }
+    setSelectedEnvironment(selectedEnvironment) {
+        this.setState({ selectedEnvironment });
     }
 
     /**
@@ -196,22 +195,6 @@ class ApiConsole extends React.Component {
      */
     setSandboxAccessToken(sandboxAccessToken) {
         this.setState({ sandboxAccessToken });
-    }
-
-    /**
-     * Set Production API Key
-     * @memberof ApiConsole
-     */
-    setProductionApiKey(productionApiKey) {
-        this.setState({ productionApiKey });
-    }
-
-    /**
-     * Set Sandbox API Key
-     * @memberof ApiConsole
-     */
-    setSandboxApiKey(sandboxApiKey) {
-        this.setState({ sandboxApiKey });
     }
 
     /**
@@ -274,19 +257,13 @@ class ApiConsole extends React.Component {
     accessTokenProvider() {
         const {
             securitySchemeType, username, password, productionAccessToken,
-            sandboxAccessToken, selectedKeyType, productionApiKey, sandboxApiKey,
+            sandboxAccessToken, selectedKeyType,
         } = this.state;
         if (securitySchemeType === 'BASIC') {
             const credentials = username + ':' + password;
             return btoa(credentials);
         }
-        if (securitySchemeType === 'API-KEY') {
-            if (selectedKeyType === 'PRODUCTION') {
-                return productionApiKey;
-            } else {
-                return sandboxApiKey;
-            }
-        } else if (selectedKeyType === 'PRODUCTION') {
+        if (selectedKeyType === 'PRODUCTION') {
             return productionAccessToken;
         } else {
             return sandboxAccessToken;
@@ -325,8 +302,7 @@ class ApiConsole extends React.Component {
         const { classes } = this.props;
         const {
             api, notFound, swagger, securitySchemeType, selectedEnvironment, labels, environments, scopes,
-            username, password, productionAccessToken, sandboxAccessToken, selectedKeyType, sandboxApiKey,
-            productionApiKey,
+            username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
         } = this.state;
         const user = AuthManager.getUser();
         const downloadSwagger = JSON.stringify({ ...swagger });
@@ -398,10 +374,6 @@ class ApiConsole extends React.Component {
                         selectedKeyType={selectedKeyType}
                         updateSwagger={this.updateSwagger}
                         setKeys={this.setKeys}
-                        setProductionApiKey={this.setProductionApiKey}
-                        setSandboxApiKey={this.setSandboxApiKey}
-                        productionApiKey={productionApiKey}
-                        sandboxApiKey={sandboxApiKey}
                     />
 
                     <Grid container>

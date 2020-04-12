@@ -154,6 +154,8 @@ class CommentOptions extends React.Component {
                                 variant="outlined" size="small"
                                 className={editIndex === -1 ? classes.link : classes.disable}
                                 onClick={() => this.handleClickOpen(comment)}
+                                variant='contained'
+                                color='primary'
                             >
                                 <FormattedMessage
                                     id='Apis.Details.Comments.CommentOptions.delete'

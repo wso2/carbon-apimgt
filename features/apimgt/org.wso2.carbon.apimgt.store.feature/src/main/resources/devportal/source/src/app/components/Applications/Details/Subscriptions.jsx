@@ -79,6 +79,14 @@ const styles = (theme) => ({
     },
     root: {
         padding: theme.spacing(3),
+        '& h5': {
+            color: theme.palette.getContrastText(theme.palette.background.default),
+        },
+    },
+    subscribePop: {
+        '& span, & h5, & label, & input, & td, & li': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
     },
     firstCell: {
         paddingLeft: 0,
@@ -87,7 +95,27 @@ const styles = (theme) => ({
         paddingLeft: theme.spacing(2),
     },
     cardContent: {
-        minHeight: 200,
+        '& table tr td':{
+            paddingLeft: theme.spacing(1),
+        },
+        '& table tr:nth-child(even)': {
+            backgroundColor: theme.custom.listView.tableBodyEvenBackgrund,
+            '& td, & a': {
+                color: theme.palette.getContrastText(theme.custom.listView.tableBodyEvenBackgrund),
+            },
+        },
+        '& table tr:nth-child(odd)': {
+            backgroundColor: theme.custom.listView.tableBodyOddBackgrund,
+            '& td, & a': {
+                color: theme.palette.getContrastText(theme.custom.listView.tableBodyOddBackgrund),
+            },
+        },
+        '& table th': {
+            backgroundColor: theme.custom.listView.tableHeadBackground,
+            color: theme.palette.getContrastText(theme.custom.listView.tableHeadBackground),
+            paddingLeft: theme.spacing(1),
+        },
+
     },
     titleWrapper: {
         display: 'flex',
@@ -369,17 +397,7 @@ class Subscriptions extends React.Component {
                                     </div>
                                 )
                                 : (
-                                    <Card className={classes.card}>
-                                        <CardActions>
-                                            <Typography variant='h6' gutterBottom className={classes.cardTitle}>
-                                                <FormattedMessage
-                                                    id='Applications.Details.Subscriptions.subscriptions'
-                                                    defaultMessage='Subscriptions'
-                                                />
-                                            </Typography>
-                                        </CardActions>
-                                        <Divider />
-                                        <CardContent className={classes.cardContent}>
+                                    <div className={classes.cardContent}>
                                             {subscriptionsNotFound ? (
                                                 <ResourceNotFound />
                                             ) : (
@@ -440,8 +458,7 @@ class Subscriptions extends React.Component {
                                                         </TableBody>
                                                     </Table>
                                                 )}
-                                        </CardContent>
-                                    </Card>
+                                        </div>
                                 )}
                         </Grid>
                     </Grid>
@@ -452,6 +469,7 @@ class Subscriptions extends React.Component {
                         maxWidth='lg'
                         fullWidth
                         fullScreen
+                        className={classes.subscribePop}
                     >
                         <MuiDialogTitle disableTypography className={classes.dialogTitle}>
                             <Typography variant='h6'>

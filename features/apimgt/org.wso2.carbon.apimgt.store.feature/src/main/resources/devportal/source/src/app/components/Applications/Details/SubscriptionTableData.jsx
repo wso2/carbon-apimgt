@@ -152,7 +152,7 @@ class SubscriptionTableData extends React.Component {
 
         return (
             <TableRow hover>
-                <TableCell style={{ paddingLeft: 0 }}>
+                <TableCell>
                     { link }
                 </TableCell>
                 <TableCell>{apiInfo.lifeCycleStatus}</TableCell>
