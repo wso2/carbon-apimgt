@@ -699,6 +699,7 @@ public final class APIConstants {
     public static final String API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS = API_PUBLISHER
             + "EnableAccessControl";
     public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
+    public static final String API_PUBLISHER_SUBSCRIBER_CLAIMS = API_PUBLISHER + "SubscriberClaims";
     public static final String WSO2_API_STORE_TYPE = "wso2";
 
     public static final String EXTERNAL_API_STORES = "ExternalAPIStores";
@@ -947,6 +948,7 @@ public final class APIConstants {
     public static final String API_USER_ROLE_CACHE = "appPublisherUserRoleCache";
     public static final String API_PUBLISHER_ADMIN_PERMISSION_CACHE = "apimAdminPermissionCache";
     public static final String API_SUBSCRIBER_CACHE = "subscriberCache";
+    public static final String EMAIL_CLAIM = "http://wso2.org/claims/emailaddress";
 
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =

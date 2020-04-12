@@ -191,6 +191,8 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.indexer.IndexerException;
 import org.wso2.carbon.registry.indexing.solr.SolrClient;
+import org.wso2.carbon.user.api.ClaimManager;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.Tenant;
@@ -265,6 +267,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -10409,4 +10412,66 @@ public final class APIUtil {
 
     }
 
+    /**
+     * Returns the user claims for the given user.
+     *
+     * @param endUserName name of the user whose claims needs to be returned
+     * @param tenantId    tenant id of the user
+     * @param dialectURI  claim dialect URI
+     * @return claims map
+     * @throws APIManagementException
+     */
+    public static SortedMap<String, String> getClaims(String endUserName, int tenantId, String dialectURI)
+            throws APIManagementException {
+        SortedMap<String, String> claimValues;
+        try {
+            ClaimManager claimManager = ServiceReferenceHolder.getInstance().getRealmService().
+                    getTenantUserRealm(tenantId).getClaimManager();
+            ClaimMapping[] claims = claimManager.getAllClaimMappings(dialectURI);
+            String[] claimURIs = claimMappingtoClaimURIString(claims);
+            UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance().getRealmService().
+                    getTenantUserRealm(tenantId).getUserStoreManager();
+            String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
+            claimValues = new TreeMap(userStoreManager.getUserClaimValues(tenantAwareUserName, claimURIs, null));
+            return claimValues;
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while retrieving user claim values from user store", e);
+        }
+    }
+
+    /**
+     * Returns the display name of the given claim URI.
+     *
+     * @param claimURI
+     * @param subscriber
+     * @return display name of the claim
+     * @throws APIManagementException
+     */
+    public static String getClaimDisplayName(String claimURI, String subscriber) throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(subscriber);
+        int tenantId;
+        String displayName;
+        try {
+            tenantId = getTenantId(tenantDomain);
+            ClaimManager claimManager = ServiceReferenceHolder.getInstance().getRealmService().
+                    getTenantUserRealm(tenantId).getClaimManager();
+            displayName = claimManager.getClaim(claimURI).getDisplayTag();
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while retrieving claim values from user store", e);
+        }
+        return displayName;
+    }
+
+    /**
+     * Helper method to convert array of <code>Claim</code> object to
+     * array of <code>String</code> objects corresponding to the ClaimURI values.
+     */
+    private static String[] claimMappingtoClaimURIString(ClaimMapping[] claims) {
+        String[] temp = new String[claims.length];
+        for (int i = 0; i < claims.length; i++) {
+            temp[i] = claims[i].getClaim().getClaimUri();
+
+        }
+        return temp;
+    }
 }

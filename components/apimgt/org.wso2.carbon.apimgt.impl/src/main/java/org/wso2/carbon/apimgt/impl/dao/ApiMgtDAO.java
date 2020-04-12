@@ -591,6 +591,53 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get subscriber name using subscription ID
+     *
+     * @param subscriptionId
+     * @return subscriber name
+     * @throws APIManagementException
+     */
+    public String getSubscriberName(String subscriptionId) throws APIManagementException {
+
+        int subscriberId = getSubscriberIdBySubscriptionUUID(subscriptionId);
+        Subscriber subscriber = getSubscriber(subscriberId);
+        if (subscriber != null) {
+            return subscriber.getName();
+        }
+        return StringUtils.EMPTY;
+    }
+
+    /**
+     * Get subscriber ID using subscription ID
+     *
+     * @param subscriptionId
+     * @return subscriber ID
+     * @throws APIManagementException
+     */
+    private int getSubscriberIdBySubscriptionUUID(String subscriptionId) throws APIManagementException {
+
+        Connection connection = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        int subscirberId = 0;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String query = SQLConstants.GET_SUBSCRIBER_ID_BY_SUBSCRIPTION_UUID_SQL;
+            ps = connection.prepareStatement(query);
+            ps.setString(1, subscriptionId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                subscirberId = rs.getInt("SUBSCRIBER_ID");
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving Subscriber ID: ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
+        }
+        return subscirberId;
+    }
+
+    /**
      * Derives info about monetization usage publish job
      *
      * @return ifno about the monetization usage publish job
