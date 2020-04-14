@@ -123,6 +123,7 @@ const styles = theme => ({
  */
 class Listing extends Component {
     static contextType = Settings;
+    static rowsPerPage = 10;
 
     /**
      *
@@ -135,7 +136,7 @@ class Listing extends Component {
             orderBy: 'name',
             data: null,
             page: 0,
-            rowsPerPage: 10,
+            rowsPerPage: Listing.rowsPerPage,
             open: false,
             isApplicationSharingEnabled: true,
             isDeleteOpen: false,
@@ -294,7 +295,7 @@ class Listing extends Component {
         }
         const { classes, theme, intl } = this.props;
         const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
-        const paginationEnabled = totalApps > rowsPerPage;
+        const paginationEnabled = totalApps > Listing.rowsPerPage;
         return (
             <main className={classes.content}>
                 <div className={classes.root}>
