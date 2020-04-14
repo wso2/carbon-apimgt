@@ -225,7 +225,7 @@ class Listing extends Component {
         const nextRowsPerPage = event.target.value;
         const { rowsPerPage, page } = this.state;
         const rowsPerPageRatio = rowsPerPage / nextRowsPerPage;
-        const nextPage =  Math.floor( page * rowsPerPageRatio );
+        const nextPage =  Math.floor(page * rowsPerPageRatio);
         this.setState({ rowsPerPage: nextRowsPerPage, page: nextPage }, this.updateApps);
     };
 
@@ -249,12 +249,11 @@ class Listing extends Component {
      * @memberof Listing
      */
     handleAppDelete() {
-        const { data, deletingId } = this.state;
+        const { data, deletingId, page } = this.state;
         const { intl } = this.props;
         const newData = new Map([...data]);
         const app = newData.get(deletingId);
         app.deleting = true;
-        this.setState({ data: newData });
 
         let message = intl.formatMessage({
             defaultMessage: 'Application {name} deleted successfully!',
@@ -266,7 +265,11 @@ class Listing extends Component {
                 newData.delete(deletingId);
                 Alert.info(message);
                 this.toggleDeleteConfirmation();
-                this.setState({ data: newData });
+                // Page is reduced by 1, when there is only one application in a particular page and it is deleted (except when in first page)
+                if (newData.size === 0 && page !== 0) {
+                    this.setState((state) => ({ page: state.page - 1 }));
+                }
+                this.updateApps();
             }
         }).catch((error) => {
             console.log(error);
