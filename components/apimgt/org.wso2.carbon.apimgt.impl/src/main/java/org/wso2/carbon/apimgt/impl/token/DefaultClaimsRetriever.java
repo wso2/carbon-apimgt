@@ -89,6 +89,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
         SortedMap<String, String> claimValues;
         if (endUserName != null) {
             int tenantId = APIUtil.getTenantId(endUserName);
+            String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
             //check in local cache
             String key = endUserName + ':' + tenantId;
             ClaimCacheKey cacheKey = new ClaimCacheKey(key);

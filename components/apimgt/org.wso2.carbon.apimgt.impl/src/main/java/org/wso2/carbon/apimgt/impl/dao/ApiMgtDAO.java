@@ -598,7 +598,6 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getSubscriberName(String subscriptionId) throws APIManagementException {
-
         int subscriberId = getSubscriberIdBySubscriptionUUID(subscriptionId);
         Subscriber subscriber = getSubscriber(subscriberId);
         if (subscriber != null) {
@@ -615,7 +614,6 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     private int getSubscriberIdBySubscriptionUUID(String subscriptionId) throws APIManagementException {
-
         Connection connection = null;
         ResultSet rs = null;
         PreparedStatement ps = null;
@@ -627,7 +625,7 @@ public class ApiMgtDAO {
             ps.setString(1, subscriptionId);
             rs = ps.executeQuery();
             if (rs.next()) {
-                subscirberId = rs.getInt("SUBSCRIBER_ID");
+                subscirberId = rs.getInt(APIConstants.APPLICATION_SUBSCRIBER_ID);
             }
         } catch (SQLException e) {
             handleException("Error while retrieving Subscriber ID: ", e);

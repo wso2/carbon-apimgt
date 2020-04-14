@@ -10465,6 +10465,9 @@ public final class APIUtil {
     /**
      * Helper method to convert array of <code>Claim</code> object to
      * array of <code>String</code> objects corresponding to the ClaimURI values.
+     *
+     * @param claims claims object
+     * @return String array of claims
      */
     private static String[] claimMappingtoClaimURIString(ClaimMapping[] claims) {
         String[] temp = new String[claims.length];

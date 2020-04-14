@@ -3911,7 +3911,7 @@ paths:
         200:
           description: |
             OK.
-            Details of a pending invoice returned.
+             Details of the subscriber are returned.
           schema:
             $ref: '#/definitions/SubscriberInfo'
         404:

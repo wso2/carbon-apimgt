@@ -1637,7 +1637,7 @@ public abstract class AbstractAPIManager implements APIManager {
             SortedMap<String, String> claims = APIUtil.getClaims(username, tenantId, ClaimsRetriever
                     .DEFAULT_DIALECT_URI);
             String email = claims.get(APIConstants.EMAIL_CLAIM);
-            if (email != null && !email.isEmpty()) {
+            if (StringUtils.isNotEmpty(email)) {
                 subscriber.setEmail(email);
             } else {
                 subscriber.setEmail(StringUtils.EMPTY);

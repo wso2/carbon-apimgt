@@ -117,7 +117,6 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
-import org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
@@ -8019,37 +8018,5 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return null;
-    }
-
-    /**
-     * This methods loads the claim retriever implementation class
-     *
-     * @return claim retriever implementation
-     * @throws APIManagementException if failed to load claim retriever implementation class
-     */
-    private ClaimsRetriever getClaimRetrieverImplClass(String claimsRetrieverImpl) throws APIManagementException {
-
-        APIManagerConfiguration configuration = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.
-                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        ClaimsRetriever claimsRetriever = null;
-        if (configuration == null) {
-            log.error("API Manager configuration is not initialized.");
-        } else {
-            String claimRetrieverClass = configuration.getFirstProperty("ppublis");
-            if (StringUtils.isEmpty(claimRetrieverClass)) {
-                claimsRetriever = new DefaultClaimsRetriever();
-            } else {
-                try {
-                    claimsRetriever = (ClaimsRetriever) APIUtil.getClassForName(claimRetrieverClass).newInstance();
-                } catch (ClassNotFoundException e) {
-                    APIUtil.handleException("Class not found " + claimRetrieverClass, e);
-                } catch (InstantiationException e) {
-                    APIUtil.handleException("Error when instantiating " + claimRetrieverClass, e);
-                } catch (IllegalAccessException e) {
-                    APIUtil.handleException("Illegal access to " + claimRetrieverClass, e);
-                }
-            }
-        }
-        return claimsRetriever;
     }
 }
