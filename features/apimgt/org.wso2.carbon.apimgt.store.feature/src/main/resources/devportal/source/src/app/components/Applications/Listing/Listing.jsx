@@ -222,7 +222,11 @@ class Listing extends Component {
      * @memberof Listing
      */
     handleChangeRowsPerPage = (event) => {
-        this.setState({ rowsPerPage: event.target.value }, this.updateApps);
+        const nextRowsPerPage = event.target.value;
+        const { rowsPerPage, page } = this.state;
+        const rowsPerPageRatio = rowsPerPage / nextRowsPerPage;
+        const nextPage =  Math.floor( page * rowsPerPageRatio );
+        this.setState({ rowsPerPage: nextRowsPerPage, page: nextPage }, this.updateApps);
     };
 
     /**
