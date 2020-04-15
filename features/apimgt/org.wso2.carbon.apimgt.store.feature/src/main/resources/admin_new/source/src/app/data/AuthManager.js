@@ -142,6 +142,10 @@ class AuthManager {
         Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1, currentEnv);
     }
 
+    static hasBasicLoginPermission(scopes) {
+        return scopes.includes('apim:tier_view');
+    }
+
     static isNotAdminPortal() {
         // if (AuthManager.getUser() === null) {
         //     return doRedirectToLogin();
