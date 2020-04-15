@@ -46,6 +46,12 @@ public class FakeKeyManagerForTest implements KeyManager {
         return null;
     }
 
+    @Override
+    public OAuthApplicationInfo registerKeyManagerMgtApplication(String tenantDomain) throws APIManagementException {
+
+        return null;
+    }
+
     @Override public void deleteApplication(String s) throws APIManagementException {
 
     }
