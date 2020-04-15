@@ -8017,6 +8017,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * Get all available global scope keys.
+     *
+     * @param tenantDomain tenant domain
+     * @return Global Scope Keyset
+     * @throws APIManagementException if failed to get the scope key set
+     */
+    @Override
+    public Set<String> getAllGlobalScopeKeys(String tenantDomain) throws APIManagementException {
+
+        //Get all global scope keys
+        return ApiMgtDAO.getInstance().getAllGlobalScopeKeys(tenantDomain);
+    }
+
+    /**
      * Get global scope by UUID
      * @param globalScopeId  Global scope Id
      * @param tenantDomain  tenant domain
@@ -8035,6 +8049,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ExceptionCodes.from(ExceptionCodes.GLOBAL_SCOPE_NOT_FOUND, globalScopeId));
         }
         return scope;
+    }
+
+    /**
+     * Get global scope by name.
+     *
+     * @param globalScopeName Global scope name
+     * @param tenantDomain    tenant domain
+     * @return Global scope
+     * @throws APIManagementException If failed to get the scope
+     */
+    @Override
+    public Scope getGlobalScopeByName(String globalScopeName, String tenantDomain) throws APIManagementException {
+
+        return KeyManagerHolder.getKeyManagerInstance().getScopeByName(globalScopeName, tenantDomain);
     }
 
     /**
