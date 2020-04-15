@@ -138,6 +138,7 @@
                 {% else %}
                 <GatewayWSEndpoint></GatewayWSEndpoint>
                 {% endif %}
+                <OpaServer>{{environment_name.opa_server}}</OpaServer>
             </Environment>
             {% endfor %}
         </Environments>

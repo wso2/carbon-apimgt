@@ -23,6 +23,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 //import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -139,7 +141,11 @@ public class OPAHandler extends AbstractHandler {
     }
 
     private HttpResponse sendRequestToOPaServer(String jsonStr) throws IOException {
-        HttpPost postRequest = new HttpPost("http://0.0.0.0:8181/v1/data/opa/examples/allow");
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        Object o  =  configuration.getFirstProperty("APIGateway.Environments.Environment.OpaServer");
+
+        HttpPost postRequest = new HttpPost(o.toString());
         postRequest.addHeader("Content-Type","application/json");
         StringEntity userEntity = new StringEntity(jsonStr, ContentType.APPLICATION_JSON);
         postRequest.setEntity(userEntity);
