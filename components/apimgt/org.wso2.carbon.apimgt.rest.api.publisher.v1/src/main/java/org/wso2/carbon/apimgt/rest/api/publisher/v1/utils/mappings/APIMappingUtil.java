@@ -2367,9 +2367,14 @@ public class APIMappingUtil {
         APIDefinition apiDefinition = OASParserUtil.getOASParser(swagger);
         Set<Scope> scopes = apiDefinition.getScopes(swagger);
         List<ScopeDTO> scopeDTOS = new ArrayList<>();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        Set<String> allGlobalScopeKeys = apiProvider.getAllGlobalScopeKeys(tenantDomain);
         for (Scope aScope : scopes) {
             ScopeDTO scopeDTO = new ScopeDTO();
-            scopeDTO.setName(aScope.getName());
+            String scopeName = aScope.getName();
+            scopeDTO.setName(scopeName);
+            scopeDTO.setIsGlobal(allGlobalScopeKeys.contains(scopeName) ? Boolean.TRUE : Boolean.FALSE);
             scopeDTO.setDescription(aScope.getDescription());
             ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
             String roles = aScope.getRoles();
