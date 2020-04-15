@@ -223,7 +223,9 @@ class Scopes extends React.Component {
             viewColumns: false,
             customToolbar: false,
         };
-        const scopesList = api.scopes.map((scope) => {
+        const scopesList = api.scopes.filter((scope) => {
+            return !scope.isGlobal;
+        }).map((scope) => {
             const aScope = [];
             aScope.push(scope.name);
             aScope.push(scope.description);
