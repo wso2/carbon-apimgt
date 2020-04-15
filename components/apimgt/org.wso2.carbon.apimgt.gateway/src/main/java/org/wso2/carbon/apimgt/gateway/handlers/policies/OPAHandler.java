@@ -143,9 +143,9 @@ public class OPAHandler extends AbstractHandler {
     private HttpResponse sendRequestToOPaServer(String jsonStr) throws IOException {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        Object server_url  =  configuration.getFirstProperty("APIGateway.Environments.Environment.OpaServer");
+        Object serverEndpoint  =  configuration.getFirstProperty("APIGateway.Environments.Environment.OpaServer");
 
-        HttpPost postRequest = new HttpPost(server_url.toString());
+        HttpPost postRequest = new HttpPost(serverEndpoint.toString());
         postRequest.addHeader("Content-Type","application/json");
         StringEntity userEntity = new StringEntity(jsonStr, ContentType.APPLICATION_JSON);
         postRequest.setEntity(userEntity);
