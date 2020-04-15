@@ -457,6 +457,16 @@ public interface APIManager {
     boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid) throws APIManagementException;
 
     /**
+     * Check whether the given scope key is already assigned to any API under given tenant.
+     *
+     * @param scopeKey     Scope
+     * @param tenantDomain Tenant Domain
+     * @return true if scope is attached to an API
+     * @throws APIManagementException if failed to check the assignment
+     */
+    boolean isScopeKeyAssignedToAPI(String scopeKey, String tenantDomain) throws APIManagementException;
+
+    /**
      * Check whether the given scope key is already assigned to an API as local scope under given tenant.
      *
      * @param apiIdentifier API Identifier
