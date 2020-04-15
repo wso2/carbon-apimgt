@@ -257,9 +257,9 @@ public enum ExceptionCodes implements ErrorHandler {
 
     GLOBAL_SCOPE_NOT_FOUND(900981, "Global Scope not found", 404,
             "Requested Global Scope ID  %s could not be found"),
-    GLOBAL_SCOPE_ID_NOT_SPECIFIED(900982,"Global Scope ID not specified", 400,
+    GLOBAL_SCOPE_ID_NOT_SPECIFIED(900982, "Global Scope ID not specified", 400,
             "Global Scope ID not specified"),
-    GLOBAL_SCOPE_NAME_NOT_SPECIFIED(900983,"Global Scope name not specified", 400,
+    GLOBAL_SCOPE_NAME_NOT_SPECIFIED(900983, "Global Scope name not specified", 400,
             "Global Scope name not specified"),
     GLOBAL_SCOPE_ALREADY_REGISTERED(900984, "Global Scope already exists", 409, "Global Scope %s already exists"),
     SCOPE_VALIDATION_FAILED(900986, "Scope validation failed", 412, "Scope validation failed"),
