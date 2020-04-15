@@ -12,9 +12,13 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This class is responsible for mapping Scope Objects into REST API Scope related DTOs
+ * This class is responsible for mapping Scope Objects into REST API Scope related DTOs.
  */
 public class GlobalScopeMappingUtil {
+
+    private GlobalScopeMappingUtil() {
+        throw new IllegalStateException("GlobalScope Mapping Utility class");
+    }
 
     /**
      * Converts Scope object into ScopeDTO object.
@@ -81,5 +85,4 @@ public class GlobalScopeMappingUtil {
         globalScopeListDTO.setCount(scopeDTOList.size());
         return globalScopeListDTO;
     }
-
 }
