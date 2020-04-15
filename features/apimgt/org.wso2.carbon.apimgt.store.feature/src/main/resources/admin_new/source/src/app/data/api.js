@@ -19,6 +19,7 @@
 import Utils from './Utils';
 import Resource from './Resource';
 import cloneDeep from 'lodash.clonedeep';
+import APIClientFactory from 'AppData/APIClientFactory';
 
 /**
  * An abstract representation of an API
@@ -116,8 +117,37 @@ class API extends Resource {
             return promisedResponse.then((response) => new API(response.body));
         });
     }
-}
 
+    /**
+     * Get list of api categories
+     */
+    apiCategoriesListGet() {
+        return this.client.then(client => {
+            return client.apis['API Category (Collection)'].get_api_categories(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    createAPICategory(name, description, callback = null) {
+        const promise_create_api_category = this.client.then(client => {
+            return client.apis['API Category (Individual)'].post_api_categories(
+                {
+                    name: name,
+                    description: description
+                },
+                this._requestMetaData(),
+            );
+        });
+
+
+        if (callback) {
+            return promise_create_api_category.then(callback);
+        } else {
+            return promise_create_api_category;
+        }
+    }
+}
 
 API.CONSTS = {
     API: 'API',

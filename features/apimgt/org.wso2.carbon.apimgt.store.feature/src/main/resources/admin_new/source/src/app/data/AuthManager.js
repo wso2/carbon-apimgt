@@ -142,20 +142,13 @@ class AuthManager {
         Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1, currentEnv);
     }
 
-    static isNotCreator() {
-        return !AuthManager.getUser().scopes.includes('apim:api_create');
-    }
-
     static isNotAdminPortal() {
-        if (AuthManager.getUser() === null) {
-            return doRedirectToLogin();
-        } else {
-            return !AuthManager.getUser().scopes.includes('apim:api_publish');
-        }
-    }
-
-    static hasBasicLoginPermission(scopes) {
-        return scopes.includes('apim:api_view');
+        // if (AuthManager.getUser() === null) {
+        //     return doRedirectToLogin();
+        // } else {
+        //     return !AuthManager.getUser().scopes.includes('apim:api_publish');
+        // }
+        return false;
     }
 
     /**
@@ -203,8 +196,10 @@ class AuthManager {
 // TODO: derive this from swagger definitions ~tmkb
 AuthManager.CONST = {
     USER_SCOPES:
-        'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
-        + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
+        'apim:tier_view apim:tier_manage apim:bl_view apim:bl_manage apim:mediation_policy_view'
+        + ' apim:mediation_policy_create apim:app_owner_change apim:app_import_export '
+        + 'apim:api_import_export apim:label_manage apim:label_read apim:monetization_usage_publish'
+        + ' apim:api_workflow apim:bot_data apim:tenantInfo apim:admin_operations',
 };
 
 export default AuthManager;
