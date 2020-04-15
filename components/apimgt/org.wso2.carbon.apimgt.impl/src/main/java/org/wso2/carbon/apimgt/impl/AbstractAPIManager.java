@@ -1600,6 +1600,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return true if the scope key is already available
      * @throws APIManagementException if failed to check the context availability
      */
+    @Override
     public boolean isScopeKeyExist(String scopeKey, String tenantDomain) throws APIManagementException {
 
         return KeyManagerHolder.getKeyManagerInstance().isScopeExists(scopeKey, tenantDomain);
