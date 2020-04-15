@@ -34,6 +34,7 @@ public class JWTInfoDto {
     private String subscriptionTier;
     private String applicationid;
     private String apicontext;
+    private String apiName;
     private JWTClaimsSet jwtToken;
     private MessageContext messageContext;
 
@@ -165,5 +166,15 @@ public class JWTInfoDto {
     public void setMessageContext(MessageContext messageContext) {
 
         this.messageContext = messageContext;
+    }
+
+    public String getApiName() {
+
+        return apiName;
+    }
+
+    public void setApiName(String apiName) {
+
+        this.apiName = apiName;
     }
 }

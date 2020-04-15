@@ -24,6 +24,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.io.FileUtils;
@@ -76,6 +77,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -523,7 +525,22 @@ public final class APIImportUtil {
     private static void updateAPIWithThumbnail(File imageFile, API importedApi, APIProvider apiProvider) {
 
         APIIdentifier apiIdentifier = importedApi.getId();
-        String mimeType = URLConnection.guessContentTypeFromName(imageFile.getName());
+        String fileName = imageFile.getName();
+        String mimeType = URLConnection.guessContentTypeFromName(fileName);
+        if (StringUtils.isBlank(mimeType)) {
+            try {
+                // Check whether the icon is in .json format (UI icons are stored as .json)
+                new JsonParser().parse(new FileReader(imageFile));
+                mimeType = APIConstants.APPLICATION_JSON_MEDIA_TYPE;
+            } catch (JsonParseException e) {
+                // Here the exceptions were handled and logged that may arise when parsing the .json file,
+                // and this will not break the flow of importing the API.
+                // If the .json is wrong or cannot be found the API import process will still be carried out.
+                log.error("Failed to read the thumbnail file. ", e);
+            } catch (FileNotFoundException e) {
+                log.error("Failed to find the thumbnail file. ", e);
+            }
+        }
         try (FileInputStream inputStream = new FileInputStream(imageFile.getAbsolutePath())) {
             ResourceFile apiImage = new ResourceFile(inputStream, mimeType);
             String thumbPath = APIUtil.getIconPath(apiIdentifier);

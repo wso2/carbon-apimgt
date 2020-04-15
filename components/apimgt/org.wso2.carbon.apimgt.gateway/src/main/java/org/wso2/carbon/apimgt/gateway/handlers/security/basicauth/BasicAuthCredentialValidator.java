@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -45,6 +46,7 @@ import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceStub;
 import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceUserStoreExceptionException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -186,6 +188,15 @@ public class BasicAuthCredentialValidator {
             if (StringUtils.isNotBlank(resourceRoles)) {
                 userRoles = getUserRoles(username);
 
+                //check if the roles related to the API resource contains internal role which matches
+                // any of the role of the user
+                if (validateInternalUserRoles(resourceRoles, userRoles)) {
+                    if (gatewayKeyCacheEnabled) {
+                        getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                    }
+                    return true;
+                }
+
                 // check if the roles related to the API resource contains any of the role of the user
                 for (String role : userRoles) {
                     if (resourceRoles.contains(role)) {
@@ -248,6 +259,35 @@ public class BasicAuthCredentialValidator {
             log.debug("Basic Authentication: Scope validation failed for the API resource: ".concat(apiElectedResource));
         }
         throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
+    }
+
+    /**
+     * This method used to validate scopes which bind with internal roles.
+     *
+     * @param resourceRoles allowed roles for resource
+     * @param userRoles     roles of user
+     * @return true if one of userRoles match with any internal role of resource scope
+     */
+    private boolean validateInternalUserRoles(String resourceRoles, String[] userRoles) {
+        String[] separatedRoles = resourceRoles.split(",");
+        if (resourceRoles.contains(CarbonConstants.DOMAIN_SEPARATOR)) {
+            for (String role : separatedRoles) {
+                if (role.contains(CarbonConstants.DOMAIN_SEPARATOR)) {
+                    int index = role.indexOf(CarbonConstants.DOMAIN_SEPARATOR);
+                    if (index > 0) {
+                        String domain = role.substring(0, index);
+                        if (UserCoreConstants.INTERNAL_DOMAIN.equalsIgnoreCase(domain)) {
+                            for (String userRole : userRoles) {
+                                if (role.equalsIgnoreCase(userRole)) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private String[] getUserRoles(String username) throws APISecurityException {

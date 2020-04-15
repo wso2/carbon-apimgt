@@ -69,7 +69,7 @@ public class TokenGenTest {
     public void testAbstractJWTGenerator() throws Exception {
         JWTGenerator jwtGen = new JWTGenerator() {
             @Override
-            protected Map<String, String> convertClaimMap(Map<ClaimMapping, String> userAttributes) {
+            protected Map<String, String> convertClaimMap(Map<ClaimMapping, String> userAttributes, String username) {
                 return new HashMap<>();
             }
         };
@@ -130,7 +130,7 @@ public class TokenGenTest {
     public void testJWTGeneration() throws Exception {
         JWTGenerator jwtGen = new JWTGenerator() {
             @Override
-            public Map<String, String> convertClaimMap(Map<ClaimMapping, String> userAttributes) {
+            public Map<String, String> convertClaimMap(Map<ClaimMapping, String> userAttributes, String username) {
                 return new HashMap<>();
             }
         };

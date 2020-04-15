@@ -88,6 +88,16 @@ var getCustomUrlEnabledDomain = function() {
     return tenantDomain;
 };
 
+var getTenantBasedCustomUrl = function() {
+    var tenantDomain = getTenantDomain();
+    var storeDomainMapping = utils.getTenantBasedStoreDomainMapping(tenantDomain);
+    if (storeDomainMapping != null) {
+        return "https://" + storeDomainMapping.get('customUrl');
+    } else {
+        return null;
+    }
+};
+
 var getServiceProviderTenantDomain = function(){
     var tenantDomain = getTenantDomain();
     if (isPerTenantServiceProviderEnabled()) {

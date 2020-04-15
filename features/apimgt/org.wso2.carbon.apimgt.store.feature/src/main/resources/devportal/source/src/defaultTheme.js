@@ -230,6 +230,14 @@ const DefaultConfigurations = {
         },
         social: {
             showRating: true,
+            showSharing: {
+                active: false,
+                showFacebook: true,
+                showReddit: true,
+                showTwitter: true,
+                showEmbad: true,
+                showEmail: true,
+            }
         },
         apiDetailPages: {
             showCredentials: true,
