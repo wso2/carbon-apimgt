@@ -96,7 +96,11 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
             throw new APIManagementException("Scope Id cannot be null or empty",
                     ExceptionCodes.GLOBAL_SCOPE_ID_NOT_SPECIFIED);
         }
-        //TODO:check if scope has attachments and throw error
+        Scope existingScope = apiProvider.getGlobalScopeByUUID(scopeId, tenantDomain);
+        if (apiProvider.isScopeKeyAssignedToAPI(existingScope.getName(), tenantDomain)) {
+            RestApiUtil.handleConflict("Cannot remove the Global Scope " + scopeId + " as it is used by one "
+                    + "or more APIs", log);
+        }
         apiProvider.deleteGlobalScope(scopeId, tenantDomain);
         return Response.ok().build();
     }
