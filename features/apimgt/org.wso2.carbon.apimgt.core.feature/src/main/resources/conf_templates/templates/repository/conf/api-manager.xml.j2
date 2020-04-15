@@ -1106,4 +1106,69 @@
             <ClientCertificateHeader>{{apimgt.mutual_ssl.certificate_header}}</ClientCertificateHeader>
             <EnableClientCertificateValidation>{{apimgt.mutual_ssl.enable_client_validation}}</EnableClientCertificateValidation>
         </MutualSSL>
+    <GlobalCacheInvalidation>
+        <Enabled>{{apim.cache_invalidation.enabled}}</Enabled>
+        <Domain>{{apim.cache_invalidation.domain}}</Domain>
+        <Stream>{{apim.cache.invalidation.stream}}</Stream>
+        <Username>{{apim.cache_invalidation.username}}</Username>
+        <Password>{{apim.cache_invalidation.password}}</Password>
+        <Topic>{{apim.cache_invalidation.topic_name}}</Topic>
+        <ExcludedCaches>
+          {%- for cache in apim.cache_invalidation.excluded_caches -%}
+          <Cache>{{cache}}</Cache>
+          {% endfor %}
+         </ExcludedCaches>
+        {% if apim.cache_invalidation.url_group is defined %}
+        <ReceiverUrlGroup>
+        {%- for group in apim.cache_invalidation.url_group -%}
+        { {{- group.receiver_urls.toList()|join(',') -}} }
+        {{- "," if not loop.last -}}
+        {%- endfor -%}
+        </ReceiverUrlGroup>
+        {% elif apim.throttling.url_group is defined%}
+        <ReceiverUrlGroup>
+        {%- for group in apim.throttling.url_group -%}
+        {%- if group.type == "loadbalance" -%}
+        { {{- group.traffic_manager_urls.toList()|join(',') -}} }
+        {%- else -%}{ {{- group.traffic_manager_urls.toList()|join('|') -}} }
+        {%- endif -%}
+        {{- "," if not loop.last -}}
+        {%- endfor -%}
+        </ReceiverUrlGroup>
+        {%- else -%}
+        <ReceiverUrlGroup>tcp://${carbon.local.ip}:${receiver.url.port}</ReceiverUrlGroup>
+        {% endif %}
+        {% if apim.cache_invalidation.url_group is defined %}
+        <AuthUrlGroup>
+        {%- for group in apim.cache_invalidation.url_group -%}
+        { {{- group.auth_urls.toList()|join(',') -}} }
+        {{- "," if not loop.last -}}
+        {%- endfor -%}
+        </AuthUrlGroup>
+        {% elif apim.throttling.url_group is defined%}
+        <AuthUrlGroup>
+        {%- for group in apim.throttling.url_group -%}
+        {%- if group.type == "loadbalance" -%}
+        { {{- group.traffic_manager_auth_urls.toList()|join(',') -}} }
+        {%- else -%}{ {{- group.traffic_manager_auth_urls.toList()|join('|') -}} }
+        {%- endif -%}
+        {{- "," if not loop.last -}}
+        {%- endfor -%}
+        </AuthUrlGroup>
+        {% else %}
+        <AuthUrlGroup>ssl://${carbon.local.ip}:${auth.url.port}</AuthUrlGroup>
+        {% endif %}
+        <ReceiverConnectionDetails>
+            <transport.jms.ConnectionFactoryJNDIName>{{apim.throttling.jms.conn_jndi_name}}</transport.jms.ConnectionFactoryJNDIName>
+            <transport.jms.DestinationType>{{apim.throttling.jms.destination_type}}</transport.jms.DestinationType>
+            <java.naming.factory.initial>{{apim.throttling.jms.java_naming_factory_initial}}</java.naming.factory.initial>
+            {% if apim.cache_invalidation.topic_connection_urls is defined %}
+            <connectionfactory.TopicConnectionFactory>amqp://{{apim.cache_invalidation.username}}:{{apim.cache_invalidation.password}}@clientid/carbon?brokerlist='{% for url in apim.cache_invalidation.topic_connection_urls %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+            {% elif apim.throttling.throttle_decision_endpoints is defined %}
+            <connectionfactory.TopicConnectionFactory>amqp://{{apim.throttling.jms.username}}:{{apim.throttling.jms.password}}@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+            {% else %}
+            <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
+            {% endif %}
+        </ReceiverConnectionDetails>
+    </GlobalCacheInvalidation>
 </APIManager>

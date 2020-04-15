@@ -1,0 +1,36 @@
+{
+  "name": "cache.invalidation.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "cacheManagerName",
+      "type": "STRING"
+    },
+    {
+      "name": "cacheName",
+      "type": "STRING"
+    },
+    {
+      "name": "cacheKey",
+      "type": "STRING"
+    },
+    {
+      "name": "tenantDomain",
+      "type": "STRING"
+    },
+    {
+      "name": "tenantId",
+      "type": "INT"
+    },
+    {
+      "name": "clusterDomain",
+      "type": "STRING"
+    },
+    {
+      "name": "nodeId",
+      "type": "STRING"
+    }
+  ]
+}

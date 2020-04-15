@@ -133,5 +133,11 @@
   "apim.certificate_reloader.period": "600",
   "apimgt.mutual_ssl.certificate_header": "X-WSO2-CLIENT-CERTIFICATE",
   "apimgt.mutual_ssl.enable_client_validation": true,
-  "database.local.url": "jdbc:h2:./repository/database/WSO2CARBON_DB;DB_CLOSE_ON_EXIT=FALSE"
+  "database.local.url": "jdbc:h2:./repository/database/WSO2CARBON_DB;DB_CLOSE_ON_EXIT=FALSE",
+  "apim.cache_invalidation.enabled":false,
+  "apim.cache_invalidation.domain": "default",
+  "apim.cache.invalidation.stream":"cache.invalidation.stream:1.0.0",
+  "apim.cache_invalidation.username":"${admin.username}",
+  "apim.cache_invalidation.password":"${admin.password}",
+  "apim.cache_invalidation.topic_name":"globalCacheInvalidation"
 }
