@@ -1627,6 +1627,21 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
+     * Check whether the given scope key is already assigned to any API under given tenant.
+     *
+     * @param scopeKey     Scope Key
+     * @param tenantDomain Tenant Domain
+     * @return whether scope is assigned or not
+     * @throws APIManagementException if failed to check the scope assignment
+     */
+    @Override
+    public boolean isScopeKeyAssignedToAPI(String scopeKey, String tenantDomain) throws APIManagementException {
+
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        return apiMgtDAO.isScopeKeyAssigned(scopeKey, tenantId);
+    }
+
+    /**
      * Check whether the given scope key is already assigned to an API as local scope under given tenant.
      *
      * @param apiIdentifier API Identifier
