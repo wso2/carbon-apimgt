@@ -28,7 +28,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
@@ -6333,10 +6332,8 @@ public class ApiMgtDAO {
                     if (Integer.parseInt(uriTemplate.getScope().getId()) == 0) {
                         String scopeKey = uriTemplate.getScope().getKey();
                         Scope scopeByKey = APIUtil.findScopeByKey(api.getScopes(), scopeKey);
-                        if (scopeByKey != null) {
-                            if (Integer.parseInt(scopeByKey.getId()) > 0) {
-                                uriTemplate.getScopes().setId(scopeByKey.getId());
-                            }
+                        if (scopeByKey != null && Integer.parseInt(scopeByKey.getId()) > 0) {
+                            uriTemplate.getScopes().setId(scopeByKey.getId());
                         }
                     }
 
@@ -9382,8 +9379,6 @@ public class ApiMgtDAO {
      */
     public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
 
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
         Map<String, Set<Scope>> apiScopeSet = new HashMap<String, Set<Scope>>();
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -9396,25 +9391,24 @@ public class ApiMgtDAO {
 
             // apids are retrieved from the db so no need to protect for sql injection
             sqlQuery = sqlQuery.replace("$paramList", apiIdsString);
-            ps = conn.prepareStatement(sqlQuery);
-            resultSet = ps.executeQuery();
-            while (resultSet.next()) {
 
-                String apiId = resultSet.getString(1);
-                Scope scope = new Scope();
-                scope.setId(String.valueOf(resultSet.getInt(2)));
-                scope.setName(resultSet.getString(3));
-                scope.setDescription(resultSet.getString(4));
-
-                Set<Scope> scopeList = apiScopeSet.get(apiId);
-
-                if (scopeList == null) {
-                    scopeList = new LinkedHashSet<Scope>();
-                    scopeList.add(scope);
-                    apiScopeSet.put(apiId, scopeList);
-                } else {
-                    scopeList.add(scope);
-                    apiScopeSet.put(apiId, scopeList);
+            try (PreparedStatement ps = conn.prepareStatement(sqlQuery);
+                 ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()) {
+                    String apiId = resultSet.getString(1);
+                    Scope scope = new Scope();
+                    scope.setId(String.valueOf(resultSet.getInt(2)));
+                    scope.setName(resultSet.getString(3));
+                    scope.setDescription(resultSet.getString(4));
+                    Set<Scope> scopeList = apiScopeSet.get(apiId);
+                    if (scopeList == null) {
+                        scopeList = new LinkedHashSet<Scope>();
+                        scopeList.add(scope);
+                        apiScopeSet.put(apiId, scopeList);
+                    } else {
+                        scopeList.add(scope);
+                        apiScopeSet.put(apiId, scopeList);
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -10079,13 +10073,10 @@ public class ApiMgtDAO {
                 if (rs != null && rs.next()) {
                     String provider = rs.getString("API_PROVIDER");
                     String apiName = rs.getString("API_NAME");
-                    //Check if the provider name and api name is same.
-                    if (provider.equals(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()))
-                            && apiName.equals(apiIdentifier.getApiName())) {
-                        //Return false since this means we're attaching the scope to another version of the API.
-                        return false;
-                    }
-                    return true;
+                    // Check if the provider name and api name is same.
+                    // Return false if we're attaching the scope to another version of the API.
+                    return !(provider.equals(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()))
+                            && apiName.equals(apiIdentifier.getApiName()));
                 }
             }
         } catch (SQLException e) {
@@ -15249,7 +15240,7 @@ public class ApiMgtDAO {
 
     /**
      * Add resource scope to IDN OAuth2 table
-     * TODO:// Remove after validation completes
+     * TODO:// Remove after scope validation from swagger completes
      * @param api
      * @param uriTemplate
      * @param scope
