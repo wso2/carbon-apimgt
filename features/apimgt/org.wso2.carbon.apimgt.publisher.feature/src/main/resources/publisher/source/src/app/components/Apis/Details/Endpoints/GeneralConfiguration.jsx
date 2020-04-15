@@ -25,6 +25,7 @@ import {
     Switch,
     Typography,
     withStyles,
+    FormGroup,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -68,6 +69,9 @@ const styles = (theme) => ({
     securityHeading: {
         fontWeight: 600,
     },
+    sandboxEndpointSwitch: {
+        marginLeft: theme.spacing(2),
+    },
 });
 
 /**
@@ -81,15 +85,38 @@ function GeneralConfiguration(props) {
         intl,
         epConfig,
         endpointSecurityInfo,
-        handleToggleEndpointSecurity,
         handleEndpointSecurityChange,
         endpointType,
         classes,
+        setEndpointSecurityInfo,
+        endpointsDispatcher,
     } = props;
     const [isConfigExpanded, setConfigExpand] = useState(false);
     const [endpointCertificates, setEndpointCertificates] = useState([]);
     const { api } = useContext(APIContext);
     const [aliasList, setAliasList] = useState([]);
+
+    const [state, setState] = React.useState({
+        production: false,
+        sandbox: false,
+    });
+
+    const handleToggleEndpointSecurity = (name) => (event) => {
+        setState({ ...state, [name]: event.target.checked });
+        const tmpSecurityInfo = endpointSecurityInfo === null ? {
+            production: {
+                enabled: state[name], type: 'BASIC', username: null, password: null,
+            },
+            sandbox: {
+                enabled: state[name], type: 'BASIC', username: null, password: null,
+            },
+        } : endpointSecurityInfo;
+        setEndpointSecurityInfo(tmpSecurityInfo);
+        endpointsDispatcher({
+            action: 'endpointSecurity',
+            value: { ...tmpSecurityInfo, [name]: { ...tmpSecurityInfo[name], enabled: event.target.checked } },
+        });
+    };
 
     /**
      * Method to upload the certificate content by calling the rest api.
@@ -183,6 +210,21 @@ function GeneralConfiguration(props) {
             });
     }, []);
 
+    let isProductionSecurityEnabled = false;
+    if (endpointSecurityInfo && !Object.keys(endpointSecurityInfo).includes('production')
+     && endpointSecurityInfo.username !== '') {
+        isProductionSecurityEnabled = true;
+    } else if (endpointSecurityInfo && endpointSecurityInfo.production.enabled) {
+        isProductionSecurityEnabled = endpointSecurityInfo.production.enabled;
+    }
+    let isSandboxSecurityEnabled = false;
+    if (endpointSecurityInfo && !Object.keys(endpointSecurityInfo).includes('sandbox')
+    && endpointSecurityInfo.username !== '') {
+        isSandboxSecurityEnabled = true;
+    } else if (endpointSecurityInfo && endpointSecurityInfo.sandbox.enabled) {
+        isSandboxSecurityEnabled = endpointSecurityInfo.sandbox.enabled;
+    }
+
     return (
         <>
             <ExpansionPanel
@@ -248,35 +290,74 @@ function GeneralConfiguration(props) {
                                         className={classes.endpointConfigSection}
                                         hidden={endpointType.key === 'awslambda'}
                                     >
-                                        <FormControlLabel
-                                            value='start'
-                                            checked={endpointSecurityInfo !== null}
-                                            control={(
-                                                <Switch
-                                                    color='primary'
-                                                    disabled={isRestricted(['apim:api_create'], api)}
-                                                />
-                                            )}
-                                            label={(
-                                                <Typography className={classes.securityHeading}>
-                                                    <FormattedMessage
-                                                        id={
-                                                            'Apis.Details.Endpoints.EndpointOverview.'
-                                                            + 'endpoint.security.enable.switch'
-                                                        }
-                                                        defaultMessage='Endpoint Security'
+                                        <FormGroup column>
+                                            <FormControlLabel
+                                                checked={(endpointSecurityInfo && isProductionSecurityEnabled)
+                                                     || state.production}
+                                                value='production'
+                                                control={(
+                                                    <Switch
+                                                        onChange={handleToggleEndpointSecurity('production')}
+                                                        color='primary'
+                                                        disabled={isRestricted(['apim:api_create'], api)}
                                                     />
-                                                </Typography>
-                                            )}
-                                            labelPlacement='start'
-                                            onChange={handleToggleEndpointSecurity}
-                                        />
-                                        <Collapse in={endpointSecurityInfo !== null}>
-                                            <EndpointSecurity
-                                                securityInfo={endpointSecurityInfo}
-                                                onChangeEndpointAuth={handleEndpointSecurityChange}
+                                                )}
+                                                label={(
+                                                    <Typography className={classes.securityHeading}>
+                                                        <FormattedMessage
+                                                            id={
+                                                                'Apis.Details.Endpoints.EndpointOverview.'
+                                                                + 'production.endpoint.security.enable.switch'
+                                                            }
+                                                            defaultMessage='Production Endpoint Security'
+                                                        />
+                                                    </Typography>
+                                                )}
                                             />
-                                        </Collapse>
+                                            <Collapse in={(endpointSecurityInfo && isProductionSecurityEnabled)
+                                                || state.production}
+                                            >
+                                                <EndpointSecurity
+                                                    securityInfo={endpointSecurityInfo
+                                                        && (endpointSecurityInfo.production
+                                                            ? endpointSecurityInfo.production : endpointSecurityInfo)}
+                                                    onChangeEndpointAuth={handleEndpointSecurityChange}
+                                                    isProduction
+                                                />
+                                            </Collapse>
+                                            <FormControlLabel
+                                                checked={isSandboxSecurityEnabled || state.sandbox}
+                                                value='sandbox'
+                                                control={(
+                                                    <Switch
+                                                        onChange={handleToggleEndpointSecurity('sandbox')}
+                                                        color='primary'
+                                                        disabled={isRestricted(['apim:api_create'], api)}
+                                                    />
+                                                )}
+                                                label={(
+                                                    <Typography className={classes.securityHeading}>
+                                                        <FormattedMessage
+                                                            id={
+                                                                'Apis.Details.Endpoints.EndpointOverview.'
+                                                                + 'sandbox.endpoint.security.enable.switch'
+                                                            }
+                                                            defaultMessage='Sandbox Endpoint Security'
+                                                        />
+                                                    </Typography>
+                                                )}
+                                            />
+                                            <Collapse in={(endpointSecurityInfo && isSandboxSecurityEnabled)
+                                                || state.sandbox}
+                                            >
+                                                <EndpointSecurity
+                                                    securityInfo={endpointSecurityInfo
+                                                        && (endpointSecurityInfo.sandbox
+                                                            ? endpointSecurityInfo.sandbox : endpointSecurityInfo)}
+                                                    onChangeEndpointAuth={handleEndpointSecurityChange}
+                                                />
+                                            </Collapse>
+                                        </FormGroup>
                                     </Grid>
                                 )}
                             </Grid>
@@ -305,7 +386,6 @@ function GeneralConfiguration(props) {
 GeneralConfiguration.propTypes = {
     epConfig: PropTypes.shape({}).isRequired,
     endpointSecurityInfo: PropTypes.shape({}).isRequired,
-    handleToggleEndpointSecurity: PropTypes.func.isRequired,
     handleEndpointSecurityChange: PropTypes.func.isRequired,
     endpointType: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
