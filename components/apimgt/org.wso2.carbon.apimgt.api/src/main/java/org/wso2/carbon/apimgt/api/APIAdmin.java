@@ -202,7 +202,26 @@ public interface APIAdmin  {
      */
     long getTimestamp(String date);
 
+    /**
+     * The method get all the pending workflow requests
+     *
+     * @param workflowType
+     * @param status
+     * @param tenantDomain
+     * @return Workflow[]
+     * @throws APIManagementException
+     */
     Workflow[] getworkflows(String workflowType, String status, String tenantDomain) throws APIManagementException;
 
-    Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status, String tenantDomain) throws APIManagementException;
+    /**
+     * The method get all the pending workflow requests
+     *
+     * @param externelWorkflowRef
+     * @param status
+     * @param tenantDomain
+     * @return Workflow
+     * @throws APIManagementException
+     */
+    Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status, String tenantDomain)
+            throws APIManagementException;
 }

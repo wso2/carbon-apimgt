@@ -1,3 +1,21 @@
+/*
+ *   Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.Workflow;
@@ -10,11 +28,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class manage mapping to DTO of  workflow requests
+ */
 public class WorkflowMappingUtil {
 
     private static Object WorkflowTypeEnum;
-
-
 
     public enum WorkflowTypeEnum {
         AM_APPLICATION_CREATION,  AM_SUBSCRIPTION_CREATION,  AM_USER_SIGNUP,  AM_APPLICATION_REGISTRATION_PRODUCTION,  AM_APPLICATION_REGISTRATION_SANDBOX,  AM_APPLICATION_DELETION,  AM_API_STATE,  AM_SUBSCRIPTION_DELETION,
@@ -54,14 +73,11 @@ public class WorkflowMappingUtil {
         workflowInfoDTO.setProperties(workflow.getProperties());
 
         return workflowInfoDTO;
-
-
     }
 
     public static void setPaginationParams(WorkflowListDTO workflowListDTO, Integer limit, Integer offset, int length) {
 
         Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, length);
-
         String paginatedPrevious = "";
         String paginatedNext = "";
 
@@ -70,7 +86,6 @@ public class WorkflowMappingUtil {
                     .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
         }
-
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
             paginatedNext = RestApiUtil
                     .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
@@ -78,6 +93,5 @@ public class WorkflowMappingUtil {
         }
         workflowListDTO.setNext(paginatedNext);
         workflowListDTO.setPrevious(paginatedPrevious);
-
     }
 }
