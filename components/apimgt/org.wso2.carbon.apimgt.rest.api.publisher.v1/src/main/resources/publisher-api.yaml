@@ -8810,6 +8810,13 @@ definitions:
             items:
               type: string
             example: ['admin','Internal/creator','Internal/publisher']
+      isGlobal:
+        type: boolean
+        description: |
+          States whether scope is global. This will not be honored when updating/adding scopes to APIs or when
+          adding/updating Global Scopes.
+        example: true
+
 
 #-----------------------------------------------------
 # The APIOperations resource
