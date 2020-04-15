@@ -324,4 +324,13 @@ public interface KeyManager {
      * @throws APIManagementException if an error occurs while checking the existence of the scope
      */
     Boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException;
+
+    /**
+     * This method will be used to register a service provider application in the authorization server for the given
+     * tenant.
+     *
+     * @param tenantDomain tenant domain to register the application
+     * @throws APIManagementException if an error occurs while registering application
+     */
+    OAuthApplicationInfo registerKeyManagerMgtApplication(String tenantDomain) throws APIManagementException;
 }
