@@ -20,6 +20,12 @@ package org.wso2.carbon.apimgt.impl.listeners;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.KMApplicationDAO;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -35,6 +41,7 @@ public class ServerStartupListener implements ServerStartupObserver {
     @Override
     public void completedServerStartup() {
         copyToExtensions();
+        registerKMApplication();
     }
 
     /**
@@ -110,6 +117,29 @@ public class ServerStartupListener implements ServerStartupObserver {
         } catch (IOException ex) {
             log.error("An error occurred while copying file to directory", ex);
             throw new IOException("An error occurred while copying file to directory", ex);
+        }
+    }
+
+    /**
+     * This method will call the KM server and register an oauth app to manage KM operations.
+     */
+    private static void registerKMApplication() {
+
+        String tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        try {
+            //check whether an application is already registered for the tenant
+            OAuthApplicationInfo oAuthApplicationInfo =
+                    KMApplicationDAO.getInstance().getApplicationForTenant(tenantId);
+            if (oAuthApplicationInfo == null) { // if not registered
+                oAuthApplicationInfo =
+                        KeyManagerHolder.getKeyManagerInstance().registerKeyManagerMgtApplication(tenantDomain);
+                // add the application info to the AM database
+                KMApplicationDAO.getInstance().AddApplication(oAuthApplicationInfo.getClientId(),
+                        oAuthApplicationInfo.getClientSecret(), tenantId);
+            }
+        } catch (APIManagementException e) {
+            log.error("Error registering KM Management Application for tenant: " + tenantDomain + e.getMessage());
         }
     }
 
