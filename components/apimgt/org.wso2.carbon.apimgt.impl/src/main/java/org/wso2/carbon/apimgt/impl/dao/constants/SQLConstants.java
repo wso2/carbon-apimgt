@@ -2548,15 +2548,21 @@ public class SQLConstants {
 
     public static final String GET_SCOPE_ROLES_OF_APPLICATION_SQL =
             "SELECT "
-                    + "DISTINCT A.NAME, C.SCOPE_BINDING "
-                    + "FROM ((IDN_OAUTH2_SCOPE AS A INNER JOIN AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) "
-                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) WHERE B.API_ID IN (";
+                    + "DISTINCT A.NAME, D.SCOPE_BINDING "
+                    + "FROM (("
+                    + "IDN_OAUTH2_SCOPE AS A INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING AS B ON A.NAME = B.SCOPE_NAME "
+                    + "INNER JOIN AM_API_URL_MAPPING AS C ON B.URL_MAPPING_ID = C.URL_MAPPING_ID) "
+                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING AS D ON A.SCOPE_ID = D.SCOPE_ID) "
+                    + "WHERE C.API_ID IN (";
 
     public static final String GET_SCOPE_ROLES_OF_APPLICATION_ORACLE_SQL =
             "SELECT "
-                    + "DISTINCT A.NAME, C.SCOPE_BINDING "
-                    + "FROM ((IDN_OAUTH2_SCOPE A INNER JOIN AM_API_SCOPES B ON A.SCOPE_ID = B.SCOPE_ID) "
-                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING C ON B.SCOPE_ID = C.SCOPE_ID ) WHERE B.API_ID IN (";
+                    + "DISTINCT A.NAME, D.SCOPE_BINDING "
+                    + "FROM (("
+                    + "IDN_OAUTH2_SCOPE A INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING B ON A.NAME = B.SCOPE_NAME "
+                    + "INNER JOIN AM_API_URL_MAPPING C ON B.URL_MAPPING_ID = C.URL_MAPPING_ID) "
+                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING AS D ON A.SCOPE_ID = D.SCOPE_ID) "
+                    + "WHERE C.API_ID IN (";
 
     public static final String CLOSING_BRACE = ")";
 
@@ -3487,6 +3493,8 @@ public class SQLConstants {
     public static final String DELETE_GLOBAL_SCOPE = "DELETE FROM AM_GLOBAL_SCOPE WHERE UUID = ?";
     public static final String GET_GLOBAL_SCOPE_BY_UUID = "SELECT * FROM AM_GLOBAL_SCOPE WHERE UUID = ?";
     public static final String GET_ALL_GLOBAL_SCOPES_BY_TENANT = "SELECT * FROM AM_GLOBAL_SCOPE WHERE TENANT_ID = ?";
+    public static final String GET_ALL_GLOBAL_SCOPE_KEYS_BY_TENANT =
+                                        "SELECT NAME FROM AM_GLOBAL_SCOPE WHERE TENANT_ID = ?";
     public static final String IS_GLOBAL_SCOPE_NAME_EXISTS = "SELECT UUID FROM AM_GLOBAL_SCOPE WHERE TENANT_ID = ? AND"
             + " NAME = ?";
 
@@ -3503,6 +3511,8 @@ public class SQLConstants {
                     "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_GLOBAL_SCOPE GS WHERE GS.TENANT_ID = ?) AND " +
                     "ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND " +
                     "AUM.API_ID = AM_API.API_ID";
+    public static final String IS_SCOPE_ATTACHED =
+            "SELECT * FROM AM_API_RESOURCE_SCOPE_MAPPING WHERE SCOPE_NAME = ? AND TENANT_ID = ?";
 
     public static final String REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL =
             " DELETE FROM AM_API_RESOURCE_SCOPE_MAPPING " +
@@ -3511,7 +3521,17 @@ public class SQLConstants {
     public static final String GET_LOCAL_SCOPES_FOR_API_SQL =
             " SELECT DISTINCT ARSM.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM " +
                     " WHERE ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND AUM.API_ID = ? AND ARSM.SCOPE_NAME NOT IN " +
-                        " (SELECT GS.NAME FROM AM_GLOBAL_SCOPE GS) ";
+                    " (SELECT GS.NAME FROM AM_GLOBAL_SCOPE GS) ";
+
+    public static final String GET_UNVERSIONED_LOCAL_SCOPES_FOR_API_SQL =
+            "SELECT DISTINCT ARSM.SCOPE_NAME " +
+                    "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM " +
+                    "WHERE ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND " +
+                    "AUM.API_ID = ? AND " +
+                    "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_GLOBAL_SCOPE GS) AND " +
+                    "ARSM.SCOPE_NAME NOT IN ( " +
+                    "SELECT ARSM2.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM2, AM_API_URL_MAPPING AUM2 " +
+                    "WHERE ARSM2.URL_MAPPING_ID = AUM2.URL_MAPPING_ID AND AUM2.API_ID != ? )" ;
 
     public static final String GET_URL_TEMPLATES_WITH_SCOPES_FOR_API_SQL =
             " SELECT " +
@@ -3534,4 +3554,19 @@ public class SQLConstants {
     public static final String GET_API_SCOPES_SQL =
             " SELECT ARSM.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM " +
                     " WHERE ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND AUM.API_ID = ?";
+
+    /**
+     * Static class to hold database queries related to AM_KM_OAUTH_APPLICATION table
+     */
+    public static class KMMgtApplicationConstants {
+
+        public static final String ADD_KM_APPLICATION =
+                "INSERT INTO AM_KM_MGT_APPLICATION (CONSUMER_KEY,CONSUMER_SECRET,TENANT_ID) VALUES (?,?,?)";
+
+        public static final String GET_KM_APPLICATION_FOR_TENANT =
+                "SELECT * FROM AM_KM_MGT_APPLICATION WHERE TENANT_ID = ?";
+
+        public static final String DELETE_KM_APPLICATION_FOR_TENANT = "DELETE FROM AM_KM_OAUTH_APPLICATION WHERE " +
+                "TENANT_ID = ?";
+    }
 }
