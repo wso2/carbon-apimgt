@@ -81,6 +81,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
         String userType = validationContext.getValidationInfoDTO().getUserType();
         String applicationTier = validationContext.getValidationInfoDTO().getApplicationTier();
         String enduserTenantId = String.valueOf(APIUtil.getTenantId(endUserName));
+        String apiName = validationContext.getValidationInfoDTO().getApiName();
         Application application = getApplicationbyId(Integer.parseInt(applicationId));
         String uuid = null;
         Map<String, String> appAttributes = null;
@@ -96,6 +97,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
         claims.put(dialect + "/applicationid", applicationId);
         claims.put(dialect + "/applicationname", applicationName);
         claims.put(dialect + "/applicationtier", applicationTier);
+        claims.put(dialect + "/apiname", apiName);
         claims.put(dialect + "/apicontext", validationContext.getContext());
         claims.put(dialect + "/version", validationContext.getVersion());
         claims.put(dialect + "/tier", tier);

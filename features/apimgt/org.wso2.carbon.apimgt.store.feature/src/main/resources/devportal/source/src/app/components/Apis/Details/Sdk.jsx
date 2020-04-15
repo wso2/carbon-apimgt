@@ -264,7 +264,7 @@ class Sdk extends React.Component {
                                                 <CardMedia
                                                     title={language.toString().toUpperCase()}
                                                     src={
-                                                        '/devportal/site/public/images/sdks/' +
+                                                        app.context + '/site/public/images/sdks/' +
                                                         new String(language) +
                                                         '.svg'
                                                     }
@@ -273,7 +273,7 @@ class Sdk extends React.Component {
                                                     <img
                                                         alt={language}
                                                         onError={this.addDefaultSrc}
-                                                        src={`/devportal/site/public/images/sdks/${language}.svg`}
+                                                        src={`${app.context}/site/public/images/sdks/${language}.svg`}
                                                         style={{ width: '100px', height: '100px', margin: '30px' }}
                                                     />
                                                 </CardMedia>
