@@ -32,9 +32,12 @@
   "leftmenu.secondary.throttlingpolicies.custompolicies": "CUSTOM POLICIES",
   "leftmenu.secondary.throttlingpolicies.blacklistpolicies": "BLACKLIST POLICIES",
   "leftmenu.secondary.analytics.apiavailability": "API AVAILABILITY",
-  "topmenu.microgateways.maintitle": "Microgateways",
-  "topmenu.microgateways.add.microgateway": "Add Microgateway",
-  "create.banner.create.microgateway": "Create Microgateway",
+  "create.banner.title.create.microgateway": "Create Microgateway",
+  "create.banner.title.create.api.categories": "Create API Categories",
+  "create.banner.description.microgateway": "Microgateway description",
+  "create.banner.description.api.category": "API category description",
   "create.banner.button.text.microgateway": "Create Microgateway",
-  "contents.main.title.microgateways": "Microgateways"
+  "create.banner.button.text.api.category": "Create API Category",
+  "contents.main.title.microgateways": "Microgateways",
+  "contents.main.title.api.categories": "API categories"
 }

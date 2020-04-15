@@ -58,7 +58,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const handleCreateClick = () => {
-    console.log('click create api category button');
+    const restApi = new API();
+    // following hardcoded line is only for dev purposes.
+    restApi.createAPICategory('finance', 'desc finance');
 };
 
 /**
@@ -73,12 +75,12 @@ export default function APICategories(props) {
     const restApi = new API();
     const [mgLabels, setMgLabels] = useState([]);
 
-    // useEffect(() => {
-    //     restApi.microgatewayLabelsGet()
-    //         .then((result) => {
-    //             setMgLabels(result.body.list);
-    //         });
-    // }, []);
+    useEffect(() => {
+        restApi.apiCategoriesListGet()
+            .then((result) => {
+                setMgLabels(result.body.list);
+            });
+    }, []);
     const title = (
         <FormattedMessage
             id='create.banner.title.create.api.categories'
@@ -113,9 +115,9 @@ export default function APICategories(props) {
                         <TableHead>
                             <TableRow>
                                 <TableCell />
-                                <TableCell align='left'>Label</TableCell>
+                                <TableCell align='left'>Category Name</TableCell>
                                 <TableCell align='left'>Description</TableCell>
-                                <TableCell align='left'>Access URL</TableCell>
+                                <TableCell align='left'>Number of APIs</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
