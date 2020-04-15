@@ -8068,9 +8068,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Delete global scope
+     * Delete global scope.
+     *
      * @param globalScopeId Global Scope Id
-     * @param tenantDomain tenant domain
+     * @param tenantDomain  tenant domain
      * @throws APIManagementException If failed to delete the scope
      */
     @Override
@@ -8078,8 +8079,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Scope scope = ApiMgtDAO.getInstance().getGlobalScope(globalScopeId);
         if (scope == null) {
-            throw new APIMgtResourceNotFoundException("Error while deleting Global Scope. Global Scope not found for " +
-                    "scope ID: " + globalScopeId,
+            throw new APIMgtResourceNotFoundException("Error while deleting Global Scope. Global Scope not found for "
+                    + "scope ID: " + globalScopeId,
                     ExceptionCodes.from(ExceptionCodes.GLOBAL_SCOPE_NOT_FOUND, globalScopeId));
         }
         KeyManagerHolder.getKeyManagerInstance().deleteScope(scope, tenantDomain);
