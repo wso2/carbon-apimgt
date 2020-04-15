@@ -47,7 +47,7 @@ public class KMConfigDeployer extends AbstractAxis2ConfigurationContextObserver 
                 oAuthApplicationInfo =
                         KeyManagerHolder.getKeyManagerInstance().registerKeyManagerMgtApplication(tenantDomain);
                 // add the application info to the AM database
-                KMApplicationDAO.getInstance().AddApplication(oAuthApplicationInfo.getClientId(),
+                KMApplicationDAO.getInstance().addApplication(oAuthApplicationInfo.getClientId(),
                         oAuthApplicationInfo.getClientSecret(), tenantId);
             }
         } catch (APIManagementException e) {

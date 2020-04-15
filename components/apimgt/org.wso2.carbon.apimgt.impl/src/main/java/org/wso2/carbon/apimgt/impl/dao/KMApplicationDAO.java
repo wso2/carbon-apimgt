@@ -60,7 +60,7 @@ public class KMApplicationDAO {
      * @param tenantId     Tenant Id
      * @throws APIManagementException If an error occurs while adding application
      */
-    public void AddApplication(String clientId, String clientSecret, int tenantId) throws APIManagementException {
+    public void addApplication(String clientId, String clientSecret, int tenantId) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement =
@@ -131,7 +131,7 @@ public class KMApplicationDAO {
      * @param tenantId TenantId
      * @throws APIManagementException If an error occurs while deleting application
      */
-    public void DeleteApplication(int tenantId) throws APIManagementException {
+    public void deleteApplication(int tenantId) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
