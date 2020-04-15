@@ -17,6 +17,7 @@ import java.util.List;
 public class GlobalScopeMappingUtil {
 
     private GlobalScopeMappingUtil() {
+
         throw new IllegalStateException("GlobalScope Mapping Utility class");
     }
 
