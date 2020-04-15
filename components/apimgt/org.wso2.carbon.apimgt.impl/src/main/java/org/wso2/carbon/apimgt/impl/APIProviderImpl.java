@@ -7974,7 +7974,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * Add Global Scope by registering it in the KM and adding the scope as a Global Scope in AM DB.
-     * @param scope Global Scope
+     *
+     * @param scope        Global Scope
      * @param tenantDomain Tenant domain
      * @return UUId of the added Global Scope object
      * @throws APIManagementException if failed to add a scope
@@ -7987,7 +7988,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Get all available global scopes
+     * Get all available global scopes.
      *
      * @param tenantDomain tenant domain
      * @return Global Scope list
@@ -8029,8 +8030,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Get global scope by UUID
-     * @param globalScopeId  Global scope Id
+     * Get global scope by UUID.
+     *
+     * @param globalScopeId Global scope Id
      * @param tenantDomain  tenant domain
      * @return Global Scope
      * @throws APIManagementException If failed to get the scope
@@ -8083,7 +8085,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Update a global scope
+     * Update a global scope.
      *
      * @param globalScope  Global Scope
      * @param tenantDomain tenant domain
