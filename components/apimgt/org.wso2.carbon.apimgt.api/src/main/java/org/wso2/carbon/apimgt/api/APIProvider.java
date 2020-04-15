@@ -1330,17 +1330,19 @@ public interface APIProvider extends APIManager {
     List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI);
 
     /**
-     * Check whether the given global scope name exists in the tenant domain
-     * @param scopeName Global Scope name
-     * @param tenantDomain  Tenant Domain
-     * @return  Scope availability
+     * Check whether the given global scope name exists in the tenant domain.
+     *
+     * @param scopeName    Global Scope name
+     * @param tenantDomain Tenant Domain
+     * @return Scope availability
      * @throws APIManagementException if failed to check the availability
      */
     Boolean isGlobalScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException;
 
     /**
-     * Add a global scope
-     * @param scope Global Scope
+     * Add a global scope.
+     *
+     * @param scope        Global Scope
      * @param tenantDomain Tenant domain
      * @return UUID of the added Global Scope
      * @throws APIManagementException if failed to add a scope
@@ -1348,35 +1350,58 @@ public interface APIProvider extends APIManager {
     String addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException;
 
     /**
-     * Get all available global scopes
-     * @param tenantDomain  tenant domain
-     * @return  Global Scope list
+     * Get all available global scopes.
+     *
+     * @param tenantDomain tenant domain
+     * @return Global Scope list
      * @throws APIManagementException if failed to get the scope list
      */
     List<Scope> getAllGlobalScopes(String tenantDomain) throws APIManagementException;
 
     /**
-     * Get global scope by UUID
-     * @param globalScopeId  Global scope Id
+     * Get all available global scope keys.
+     *
+     * @param tenantDomain tenant domain
+     * @return Global Scope Keyset
+     * @throws APIManagementException if failed to get the scope key set
+     */
+    Set<String> getAllGlobalScopeKeys(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get global scope by UUID.
+     *
+     * @param globalScopeId Global scope Id
      * @param tenantDomain  tenant domain
-     * @return  Global Scope
+     * @return Global Scope
      * @throws APIManagementException If failed to get the scope
      */
     Scope getGlobalScopeByUUID(String globalScopeId, String tenantDomain) throws APIManagementException;
 
     /**
-     * Delete global scope
+     * Get global scope by name.
+     *
+     * @param globalScopeName Global scope name
+     * @param tenantDomain    tenant domain
+     * @return Global scope
+     * @throws APIManagementException If failed to get the scope
+     */
+    Scope getGlobalScopeByName(String globalScopeName, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Delete global scope.
+     *
      * @param globalScopeId Global Scope Id
-     * @param tenantDomain tenant domain
-     * @throws APIManagementException   If failed to delete the scope
+     * @param tenantDomain  tenant domain
+     * @throws APIManagementException If failed to delete the scope
      */
     void deleteGlobalScope(String globalScopeId, String tenantDomain) throws APIManagementException;
 
     /**
-     * Update a global scope
-     * @param globalScope Global Scope
+     * Update a global scope.
+     *
+     * @param globalScope  Global Scope
      * @param tenantDomain tenant domain
-     * @throws APIManagementException   If failed to update
+     * @throws APIManagementException If failed to update
      */
     void updateGlobalScope(Scope globalScope, String tenantDomain) throws APIManagementException;
 }
