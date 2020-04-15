@@ -36,6 +36,8 @@ public class GlobalScopeMappingUtil {
             bindingsDTO.setValues(Arrays.asList((roles).split(",")));
         }
         scopeDTO.setBindings(bindingsDTO);
+        // Set isGlobal true by default
+        scopeDTO.setIsGlobal(Boolean.TRUE);
         return scopeDTO;
     }
 
