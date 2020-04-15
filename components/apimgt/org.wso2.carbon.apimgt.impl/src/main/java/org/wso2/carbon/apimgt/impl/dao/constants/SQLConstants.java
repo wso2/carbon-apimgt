@@ -1890,7 +1890,7 @@ public class SQLConstants {
     public static final String DELETE_WORKFLOW_REQUEST_SQL=
             " DELETE FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE = ?";
 
-    public static final String GET_ALL_WORKFLOW_DETAILS_BY_EWR =
+    public static final String GET_ALL_WORKFLOW_DETAILS_BY_EXTERNALWORKFLOWREF =
             " SELECT  * FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE = ?";
 
     public static final String GET_ALL_WORKFLOW_DETAILS_BY_WORKFLOW_TYPE =
@@ -1898,7 +1898,6 @@ public class SQLConstants {
 
     public static final String GET_ALL_WORKFLOW_DETAILS =
             " SELECT  * FROM AM_WORKFLOWS WHERE WF_STATUS = ? AND TENANT_DOMAIN = ?";
-
 
     public static final String GET_ALL_WORKFLOW_DETAILS_BY_EXTERNAL_WORKFLOW_REFERENCE =
             " SELECT  * FROM AM_WORKFLOWS " +

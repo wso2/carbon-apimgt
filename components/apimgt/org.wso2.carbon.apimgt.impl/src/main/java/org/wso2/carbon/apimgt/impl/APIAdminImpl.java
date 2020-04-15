@@ -347,21 +347,37 @@ public class APIAdminImpl implements APIAdmin {
         return length;
     }
 
+    /**
+     * The method converts the date into timestamp
+     *
+     * @param workflowType
+     * @param status
+     * @param tenantDomain
+     * @return Workflow[]
+     * @throws APIManagementException
+     */
     public Workflow[] getworkflows(String workflowType, String status, String tenantDomain ) throws APIManagementException {
-
-        return apiMgtDAO.getworkflows(workflowType, status , tenantDomain );
+        return apiMgtDAO.getworkflows(workflowType, status, tenantDomain);
     }
 
+    /**
+     * The method converts the date into timestamp
+     *
+     * @param externelWorkflowRef
+     * @param status
+     * @param tenantDomain
+     * @return Workflow
+     * @throws APIManagementException
+     */
     public Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status,
                                                                       String tenantDomain) throws APIManagementException {
 
         Workflow workflow=apiMgtDAO.getworkflowReferenceByExternalWorkflowReferenceID(externelWorkflowRef, status ,tenantDomain );
 
         if (workflow == null) {
-            String msg="External workflow Reference: " + externelWorkflowRef + " was not found.";
+            String msg = "External workflow Reference: " + externelWorkflowRef + " was not found.";
             throw new APIMgtResourceNotFoundException(msg);
         }
-
         return workflow;
     }
 }

@@ -49,7 +49,6 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
 
     private static final Log log = LogFactory.getLog(WorkflowsApiService.class);
 
-
     /**
      * This is used to get the workflow pending request according to ExternalWorkflowReference
      *
@@ -57,7 +56,6 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
      * @param ifNoneMatch If-None-Match header value
      * @return
      */
-
     @Override
     public Response workflowsExternalWorkflowRefGet(String externalWorkflowRef, String ifNoneMatch) {
         WorkflowInfoDTO workflowinfoDTO;
@@ -66,21 +64,13 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
 
             String status="CREATED";
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-
             APIAdmin apiAdmin = new APIAdminImpl();
             workflow=apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef, status ,tenantDomain);
-
-            try {
-                workflowinfoDTO = WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow);
-                return Response.ok().entity(workflowinfoDTO).build();
-            }
-            catch(NullPointerException e){
-                RestApiUtil.handleInternalServerError("Error while retrieving workflow request by the external workflow reference" , e,log);
-            }
+            workflowinfoDTO = WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow);
+            return Response.ok().entity(workflowinfoDTO).build();
         }
-
-        catch(APIManagementException e){
-            RestApiUtil.handleInternalServerError("Error while retrieving workflow request by the external workflow reference" , e, log);
+        catch(APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving workflow request by the external workflow reference. ", e, log);
         }
         return null;
     }
@@ -95,37 +85,25 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
      * @param workflowType is the the type of the workflow request. (e.g: Application Creation, Application Subscription etc.)
      * @return
      */
-
     @Override
     public Response workflowsGet(Integer limit, Integer offset, String accept, String ifNoneMatch, String workflowType) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
-
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-
         WorkflowListDTO workflowListDTO;
         try {
             Workflow[] workflows;
             String status="CREATED";
-
             APIAdmin apiAdmin = new APIAdminImpl();
             workflows=apiAdmin.getworkflows(workflowType, status ,tenantDomain);
-
-
-            try {
-                workflowListDTO = WorkflowMappingUtil.fromWorkflowsToDTO(workflows, limit, offset);
-                WorkflowMappingUtil.setPaginationParams(workflowListDTO, limit, offset,
+            workflowListDTO = WorkflowMappingUtil.fromWorkflowsToDTO(workflows, limit, offset);
+            WorkflowMappingUtil.setPaginationParams(workflowListDTO, limit, offset,
                         workflows.length);
-                return Response.ok().entity(workflowListDTO).build();
-            }
-            catch( NullPointerException e){
-                RestApiUtil.handleInternalServerError("Error while retrieving workflow requests" , e, log);
-            }
+            return Response.ok().entity(workflowListDTO).build();
         }
         catch(APIManagementException e){
-            RestApiUtil.handleInternalServerError("Error while retrieving workflow requests" , e, log);
+            RestApiUtil.handleInternalServerError("Error while retrieving workflow requests. ", e, log);
         }
         return null;
     }

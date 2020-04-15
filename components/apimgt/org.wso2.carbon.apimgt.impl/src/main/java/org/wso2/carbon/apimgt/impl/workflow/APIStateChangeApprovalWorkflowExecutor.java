@@ -1,3 +1,20 @@
+/*
+ *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.apimgt.impl.workflow;
 
 import org.apache.commons.logging.Log;
@@ -15,9 +32,16 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
 
-import java.util.*;
-
+/**
+ * Approval workflow for API state change.
+ *
+ */
 public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
 
     private static final Log log = LogFactory.getLog(APIStateChangeWSWorkflowExecutor.class);
@@ -31,7 +55,6 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
         this.stateList = stateList;
     }
 
-
     @Override
     public String getWorkflowType() {
         return WorkflowConstants.WF_TYPE_AM_API_STATE;
@@ -42,14 +65,16 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
         return Collections.emptyList();
     }
 
+    /**
+     * Execute the API state change workflow approval process.
+     * @param workflowDTO
+     */
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
             log.debug("Executing API State change Workflow.");
-            log.debug("Execute workflowDTO " + workflowDTO.toString());
         }
-
         if (stateList != null) {
             Map<String, List<String>> stateActionMap = getSelectedStatesToApprove();
             APIStateWorkflowDTO apiStateWorkFlowDTO = (APIStateWorkflowDTO) workflowDTO;
@@ -59,35 +84,20 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
                     .contains(apiStateWorkFlowDTO.getApiLCAction())) {
 
                 String callBackURL = apiStateWorkFlowDTO.getCallbackUrl();
-                String message = "Approval request for API State change action '" + apiStateWorkFlowDTO.getApiLCAction()
+                String message = "Approval request for API state change action '" + apiStateWorkFlowDTO.getApiLCAction()
                         + "' from '" + apiStateWorkFlowDTO.getApiCurrentState() + "' state for the API '"
                         + apiStateWorkFlowDTO.getApiName() + " : " + apiStateWorkFlowDTO.getApiVersion() + "' by "
                         + apiStateWorkFlowDTO.getApiProvider() + "";
 
                 apiStateWorkFlowDTO.setWorkflowDescription(message);
-
-                apiStateWorkFlowDTO.setMetadata("ClientId", apiStateWorkFlowDTO.getClientId());
-                apiStateWorkFlowDTO.setMetadata("ClientSecret", apiStateWorkFlowDTO.getClientSecret());
-                apiStateWorkFlowDTO.setMetadata("Scope", apiStateWorkFlowDTO.getScope());
-                apiStateWorkFlowDTO.setMetadata("TokenAPI", apiStateWorkFlowDTO.getTokenAPI());
                 apiStateWorkFlowDTO.setMetadata("CurrentState", apiStateWorkFlowDTO.getApiCurrentState());
                 apiStateWorkFlowDTO.setMetadata("Action", apiStateWorkFlowDTO.getApiLCAction());
                 apiStateWorkFlowDTO.setMetadata("ApiName", apiStateWorkFlowDTO.getApiName());
                 apiStateWorkFlowDTO.setMetadata("ApiVersion", apiStateWorkFlowDTO.getApiVersion());
                 apiStateWorkFlowDTO.setMetadata("ApiProvider", apiStateWorkFlowDTO.getApiProvider());
-                apiStateWorkFlowDTO.setMetadata("workflowExternalRef", apiStateWorkFlowDTO.getExternalWorkflowReference());
                 apiStateWorkFlowDTO.setMetadata("Invoker", apiStateWorkFlowDTO.getInvoker());
                 apiStateWorkFlowDTO.setMetadata("TenantId", String.valueOf(apiStateWorkFlowDTO.getTenantId()));
-                apiStateWorkFlowDTO.setMetadata("callBackURL", callBackURL != null ? callBackURL : "?");
-
-                apiStateWorkFlowDTO.setProperties("Workflow Process","Application Creation");
-
                 super.execute(workflowDTO);
-
-                if (log.isDebugEnabled()) {
-                    log.debug("APIStateChange payload: ");
-                }
-
             } else {
                 // For any other states, act as simple workflow executor.
                 workflowDTO.setStatus(WorkflowStatus.APPROVED);
@@ -95,42 +105,37 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
                 super.complete(workflowDTO);
             }
         } else {
-            String msg = "State change list is not provided. Please check <stateList> element in ";
+            String msg = "State change list is not provided. Please check <stateList> element in workflow-extensions.xml";
             log.error(msg);
             throw new WorkflowException(msg);
         }
-
         return new GeneralWorkflowResponse();
     }
 
     /**
-     * Complete the API state change workflow process.
+     * Complete the API state change workflow approval process.
+     * @param workflowDTO
      */
     @Override
-    public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException{
+    public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
         if (log.isDebugEnabled()) {
             log.debug("Completing API State change Workflow..");
-            log.debug("response: " + workflowDTO.toString());
         }
-
         workflowDTO.setUpdatedTime(System.currentTimeMillis());
         super.complete(workflowDTO);
-
         String externalWorkflowRef=workflowDTO.getExternalWorkflowReference();
 
         try {
-            ApiMgtDAO apiMgtDAO1 = ApiMgtDAO.getInstance();
-            Workflow workflow = apiMgtDAO1.getworkflowReferenceByExternalWorkflowReference(externalWorkflowRef);
-
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            Workflow workflow = apiMgtDAO.getworkflowReferenceByExternalWorkflowReference(externalWorkflowRef);
             String apiName = workflow.getMetadata("ApiName");
             String action = workflow.getMetadata("Action");
             String providerName = workflow.getMetadata("ApiProvider");
             String version = workflow.getMetadata("ApiVersion");
             String invoker = workflow.getMetadata("Invoker");
             String currentStatus = workflow.getMetadata("CurrentState");
-
             int tenantId = workflowDTO.getTenantId();
-            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            //ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             try {
                 //tenant flow is already started from the rest api service impl. no need to start from here
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(invoker);
@@ -152,23 +157,22 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
                         log.debug(logMessage);
                     }
                 }
-
             } catch (RegistryException e) {
                 String errorMsg = "Could not complete api state change workflow";
                 log.error(errorMsg, e);
                 throw new WorkflowException(errorMsg, e);
             }
-        }catch(APIManagementException e){
+        } catch (APIManagementException e) {
             String errorMsg = "Could not complete api state change workflow";
             log.error(errorMsg, e);
-
         }
         return new GeneralWorkflowResponse();
     }
 
     /**
-     * Handle cleanup task for api state change workflow ws executor. This queries the BPMN process related to the given
-     * workflow reference id and delete that process
+     * Handle cleanup task for api state change workflow Approval executor.
+     * Use workflow external reference  to delete the pending workflow request
+     * @param workflowExtRef External Workflow Reference of pending workflow process
      */
     @Override
     public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
@@ -177,14 +181,10 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
             log.debug("Starting cleanup task for APIStateChangeWSWorkflowExecutor for :" + workflowExtRef);
         }
         String errorMsg;
-
         super.cleanUpPendingTask(workflowExtRef);
         try {
-
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             apiMgtDAO.deleteWorkflowRequest(workflowExtRef);
-
-
         } catch (APIManagementException axisFault) {
             errorMsg = "Error sending out cancel pending application approval process message. cause: " + axisFault
                     .getMessage();
