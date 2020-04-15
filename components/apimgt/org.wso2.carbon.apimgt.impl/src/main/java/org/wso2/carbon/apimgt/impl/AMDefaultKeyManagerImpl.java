@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.KMApplicationDAO;
 import org.wso2.carbon.apimgt.impl.dto.KMRegisterProfileDTO;
+import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
@@ -807,8 +808,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             HttpPost httpPost = new HttpPost(scopeEndpoint);
             httpPost.setHeader(HttpHeaders.AUTHORIZATION, getBasicAuthorizationHeader());
             httpPost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope scopeDTO =
-                    new org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope();
+            ScopeDTO scopeDTO = new ScopeDTO();
             scopeDTO.setName(scopeKey);
             scopeDTO.setDisplayName(scope.getName());
             scopeDTO.setDescription(scope.getDescription());
@@ -911,7 +911,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public Scope getScopeByName(String scopeName, String tenantDomain) throws APIManagementException {
 
-        org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope scope;
+        ScopeDTO scopeDTO;
         String scopeEndpoint = getScopeManagementServiceEndpoint(tenantDomain)
                 + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
                 .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, scopeName));
@@ -925,8 +925,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             String responseString = readHttpResponseAsString(httpResponse);
             if (statusCode == HttpStatus.SC_OK && StringUtils.isNoneEmpty(responseString)) {
-                scope = new Gson().fromJson(responseString,
-                        org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope.class);
+                scopeDTO = new Gson().fromJson(responseString, ScopeDTO.class);
             } else {
                 throw new APIManagementException("Error occurred while retrieving scope: " + scopeName + " via "
                         + scopeEndpoint + ". Error Status: " + statusCode + ". Error Response: " + responseString);
@@ -935,7 +934,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             String errorMessage = "Error occurred while retrieving scope: " + scopeName + " via " + scopeEndpoint;
             throw new APIManagementException(errorMessage, e);
         }
-        return fromDTOToScope(scope);
+        return fromDTOToScope(scopeDTO);
     }
 
     /**
@@ -944,7 +943,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @param scopeDTO ScopeDTO response
      * @return Scope model object
      */
-    private Scope fromDTOToScope(org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope scopeDTO) {
+    private Scope fromDTOToScope(ScopeDTO scopeDTO) {
 
         Scope scope = new Scope();
         scope.setName(scopeDTO.getDisplayName());
@@ -961,10 +960,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @return Scope Object to Scope Name Mappings
      */
     private Map<String, Scope> fromDTOListToScopeListMapping(
-            List<org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope> scopeDTOList) {
+            List<ScopeDTO> scopeDTOList) {
 
         Map<String, Scope> scopeListMapping = new HashMap<>();
-        for (org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope scopeDTO : scopeDTOList) {
+        for (ScopeDTO scopeDTO : scopeDTOList) {
             scopeListMapping.put(scopeDTO.getName(), fromDTOToScope(scopeDTO));
         }
         return scopeListMapping;
@@ -981,7 +980,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public Map<String, Scope> getAllScopes(String tenantDomain) throws APIManagementException {
 
-        List<org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope> allScopes;
+        List<ScopeDTO> allScopeDTOS;
         // Get access token
         AccessTokenInfo accessToken = getKMAccessTokenForScopeMgt(tenantDomain);
         String scopeEndpoint = getScopeManagementServiceEndpoint(tenantDomain);
@@ -995,9 +994,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_OK && StringUtils.isNoneEmpty(responseString)) {
                 Type scopeListType =
-                        new TypeToken<ArrayList<org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope>>() {
-                        }.getType();
-                allScopes = new Gson().fromJson(responseString, scopeListType);
+                        new TypeToken<ArrayList<ScopeDTO>>() {}.getType();
+                allScopeDTOS = new Gson().fromJson(responseString, scopeListType);
             } else {
                 throw new APIManagementException("Error occurred while retrieving scopes via: " + scopeEndpoint
                         + ". Error Status: " + statusCode + " . Error Response: " + responseString);
@@ -1006,7 +1004,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             String errorMessage = "Error occurred while getting retrieving via " + scopeEndpoint;
             throw new APIManagementException(errorMessage, e);
         }
-        return fromDTOListToScopeListMapping(allScopes);
+        return fromDTOListToScopeListMapping(allScopeDTOS);
     }
 
     /**
@@ -1100,8 +1098,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             HttpPut httpPut = new HttpPut(scopeEndpoint);
             httpPut.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
             httpPut.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope scopeDTO =
-                    new org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope();
+            ScopeDTO scopeDTO = new ScopeDTO();
             scopeDTO.setDisplayName(scope.getName());
             scopeDTO.setDescription(scope.getDescription());
             if (scope.getRoles() != null) {
