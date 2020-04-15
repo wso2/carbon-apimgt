@@ -45,7 +45,7 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
     public static final Log log = LogFactory.getLog(GlobalScopesApiServiceImpl.class);
 
     /**
-     * Add Global Scope
+     * Add Global Scope.
      *
      * @param body           Scope DTO object to add
      * @param messageContext CXF Message Context
@@ -81,7 +81,7 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
     }
 
     /**
-     * Delete global scope
+     * Delete global scope.
      *
      * @param scopeId        Scope UUID
      * @param messageContext CXF Message Context
@@ -106,7 +106,7 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
     }
 
     /**
-     * Get global scope by Id
+     * Get global scope by Id.
      *
      * @param scopeId        UUID of the scope
      * @param messageContext CXF Message Context
@@ -127,7 +127,8 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
     }
 
     /**
-     * Get all global scopes for tenant
+     * Get all global scopes for tenant.
+     * TODO: Add pagination from rest api layer only
      *
      * @param messageContext CXF Message Context
      * @return Global Scopes DTO List
@@ -135,7 +136,6 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
      */
     public Response getGlobalScopes(MessageContext messageContext) throws APIManagementException {
 
-        //TODO: Add pagination from rest api layer only
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
@@ -145,7 +145,7 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
     }
 
     /**
-     * Update Global Scope By Id
+     * Update Global Scope By Id.
      *
      * @param scopeId        Global Scope Id
      * @param body           Global Scope DTO
