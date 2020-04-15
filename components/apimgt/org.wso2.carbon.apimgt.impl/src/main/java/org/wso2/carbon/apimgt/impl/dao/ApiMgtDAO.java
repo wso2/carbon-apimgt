@@ -9258,6 +9258,13 @@ public class ApiMgtDAO {
         return scopeToKeyMap;
     }
 
+    /**
+     * Get Scope keys attached to the given API.
+     *
+     * @param identifier API Identifier
+     * @return set of scope key attached to the API
+     * @throws APIManagementException if fails get API scope keys
+     */
     public Set<String> getAPIScopeKeys(APIIdentifier identifier) throws APIManagementException {
 
         Connection conn = null;
@@ -15192,8 +15199,9 @@ public class ApiMgtDAO {
         }
         return false;
     }
+
     /**
-     * Add global scope
+     * Add global scope.
      *
      * @param scope        Scope Object to add
      * @param tenantDomain Tenant domain
@@ -15228,7 +15236,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Delete global scope
+     * Delete global scope.
      *
      * @param uuid Global Scope ID
      * @throws APIManagementException if an error occurs while removing global scope
@@ -15255,7 +15263,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get global scope by uuid
+     * Get global scope by uuid.
      *
      * @param uuid UUID of global scope
      * @return Global scope object with UUID and scope key
@@ -15350,7 +15358,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get all global scopes for tenant
+     * Get all global scopes for tenant.
      *
      * @param tenantDomain Tenant Domain
      * @return global scope list
