@@ -273,7 +273,7 @@ public interface KeyManager {
     Map<String, Scope> getAllScopes(String tenantDomain) throws APIManagementException;
 
     /**
-     * This method will be used to attach a Scope in the authorization server to an API resource
+     * This method will be used to attach a Scope in the authorization server to an API resource.
      *
      * @param api          API
      * @param uriTemplate  URITemplate
@@ -285,7 +285,7 @@ public interface KeyManager {
             throws APIManagementException;
 
     /**
-     * This method will be used to detach a Scope in the authorization server from an API resource
+     * This method will be used to detach a Scope in the authorization server from an API resource.
      *
      * @param apiIdentifier
      * @param uriTemplate
@@ -297,7 +297,7 @@ public interface KeyManager {
             throws APIManagementException;
 
     /**
-     * This method will be used to delete a Scope in the authorization server
+     * This method will be used to delete a Scope in the authorization server.
      *
      * @param scope        Scope object
      * @param tenantDomain tenant domain to delete the scope from
@@ -306,7 +306,7 @@ public interface KeyManager {
     void deleteScope(Scope scope, String tenantDomain) throws APIManagementException;
 
     /**
-     * This method will be used to update a Scope in the authorization server
+     * This method will be used to update a Scope in the authorization server.
      *
      * @param scope        Scope object
      * @param tenantDomain tenant domain to update the scope
@@ -315,7 +315,8 @@ public interface KeyManager {
     void updateScope(Scope scope, String tenantDomain) throws APIManagementException;
 
     /**
-     * This method will be used to check whether the a Scope exists for the given scope name in the authorization server
+     * This method will be used to check whether the a Scope exists for the given scope name in the authorization
+     * server.
      *
      * @param scopeName    Scope Name
      * @param tenantDomain tenant Domain to check scope existence

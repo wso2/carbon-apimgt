@@ -381,8 +381,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 }
 
                 if (statusCode != 200) {
-                    String errorReason = "Token revoke failed : HTTP error code : " + statusCode +
-                            ". Reason " + responseBody;
+                    String errorReason = "Token revoke failed : HTTP error code : " + statusCode + ". Reason "
+                            + responseBody;
                     throw new APIManagementException(errorReason);
                 } else {
                     if (log.isDebugEnabled()) {
@@ -772,7 +772,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * Get scope management service tenant URL for given KM endpoint
+     * Get scope management service tenant URL for given KM endpoint.
      *
      * @return Scope Management Service host URL (Eg:https://localhost:9444/api/identity/oauth2/v1.0/scopes)
      * @throws APIManagementException If a malformed km endpoint is provided
@@ -826,8 +826,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 if (statusCode != HttpStatus.SC_CREATED) {
                     String responseString = readHttpResponseAsString(httpResponse);
                     throw new APIManagementException("Error occurred while registering scope: " + scopeKey + " via "
-                            + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: "
-                            + responseString);
+                            + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: " + responseString);
                 }
             }
         } catch (IOException e) {
@@ -837,7 +836,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * Read response body for HTTPResponse as a string
+     * Read response body for HTTPResponse as a string.
      *
      * @param httpResponse HTTPResponse
      * @return Response Body String
@@ -930,8 +929,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         org.wso2.carbon.apimgt.impl.clients.scopemgt.dto.Scope.class);
             } else {
                 throw new APIManagementException("Error occurred while retrieving scope: " + scopeName + " via "
-                        + scopeEndpoint + ". Error Status: " + statusCode + ". Error Response: "
-                        + responseString);
+                        + scopeEndpoint + ". Error Status: " + statusCode + ". Error Response: " + responseString);
             }
         } catch (IOException e) {
             String errorMessage = "Error occurred while retrieving scope: " + scopeName + " via " + scopeEndpoint;
@@ -1001,9 +999,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         }.getType();
                 allScopes = new Gson().fromJson(responseString, scopeListType);
             } else {
-                throw new APIManagementException("Error occurred while retrieving scopes via: "
-                        + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: "
-                        + responseString);
+                throw new APIManagementException("Error occurred while retrieving scopes via: " + scopeEndpoint
+                        + ". Error Status: " + statusCode + " . Error Response: " + responseString);
             }
         } catch (IOException e) {
             String errorMessage = "Error occurred while getting retrieving via " + scopeEndpoint;
@@ -1025,12 +1022,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public void attachScopeToResource(API api, URITemplate uriTemplate, Scope scope, String tenantDomain)
             throws APIManagementException {
 
-        //TODO: remove after validation completes
+        //TODO: remove after scope validation from swagger completes
         ApiMgtDAO.getInstance().addResourceScope(api, uriTemplate, scope, tenantDomain);
     }
 
     /**
-     * This method will be used to detach a Scope in the authorization server from an API resource
+     * This method will be used to detach a Scope in the authorization server from an API resource.
      *
      * @param apiIdentifier APIIdentifier
      * @param uriTemplate   URITemplate
@@ -1039,21 +1036,21 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @throws APIManagementException if an error occurs while detaching scope from resource
      */
     @Override
-    public void detachScopeToResource(APIIdentifier apiIdentifier, URITemplate uriTemplate, Scope scope, String tenantDomain)
-            throws APIManagementException {
+    public void detachScopeToResource(APIIdentifier apiIdentifier, URITemplate uriTemplate, Scope scope,
+                                      String tenantDomain) throws APIManagementException {
 
-        //TODO: remove after validation completes
+        //TODO: remove after scope validation from swagger completes
         ApiMgtDAO.getInstance().removeResourceScope(scope, tenantDomain);
     }
 
-    @Override
     /**
-     * This method will be used to delete a Scope in the authorization server
+     * This method will be used to delete a Scope in the authorization server.
      *
-     * @param scope Scope Object
-     * @param tenantDomain  tenant domain to delete the scope from
-     * @throws APIManagementException   if an error occurs while deleting the scope
+     * @param scope        Scope Object
+     * @param tenantDomain tenant domain to delete the scope from
+     * @throws APIManagementException if an error occurs while deleting the scope
      */
+    @Override
     public void deleteScope(Scope scope, String tenantDomain) throws APIManagementException {
 
         // Get access token
@@ -1073,9 +1070,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode != HttpStatus.SC_OK) {
                 String responseString = readHttpResponseAsString(httpResponse);
-                String errorMessage = "Error occurred while deleting scope: " + scopeName + " via: "
-                        + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: "
-                        + responseString;
+                String errorMessage = "Error occurred while deleting scope: " + scopeName + " via: " + scopeEndpoint
+                        + ". Error Status: " + statusCode + " . Error Response: " + responseString;
                 throw new APIManagementException(errorMessage);
             }
         } catch (IOException e) {
@@ -1085,7 +1081,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * This method will be used to update a Scope in the authorization server
+     * This method will be used to update a Scope in the authorization server.
      *
      * @param scope        Scope object
      * @param tenantDomain tenant domain to update the scope
@@ -1122,8 +1118,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 if (statusCode != HttpStatus.SC_OK) {
                     String responseString = readHttpResponseAsString(httpResponse);
                     throw new APIManagementException("Error occurred while updating scope: " + scopeName + " via: "
-                            + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: "
-                            + responseString);
+                            + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: " + responseString);
                 }
             }
         } catch (IOException e) {
@@ -1133,7 +1128,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * This method will be used to check whether the a Scope exists for the given scope name in the authorization server
+     * This method will be used to check whether the a Scope exists for the given scope name in the authorization
+     * server.
      *
      * @param scopeName    Scope Name
      * @param tenantDomain tenant Domain to check scope existence
@@ -1161,8 +1157,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 if (statusCode != HttpStatus.SC_NOT_FOUND) {
                     String responseString = readHttpResponseAsString(httpResponse);
                     String errorMessage = "Error occurred while checking existence of scope: " + scopeName + " via: "
-                            + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: "
-                            + responseString;
+                            + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: " + responseString;
                     throw new APIManagementException(errorMessage);
                 } else {
                     if (log.isDebugEnabled()) {
@@ -1187,6 +1182,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * tenant.
      *
      * @param tenantDomain tenant domain to register the application
+     * @return OAuthApplicationInfo object with clientId, clientSecret and client name of the registered OAuth app
      * @throws APIManagementException if an error occurs while registering application
      */
     @Override
@@ -1332,8 +1328,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     protected String getConfigurationElementValue(String property) {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .
-                        getFirstProperty(property);
+                .getFirstProperty(property);
     }
 
     /**
