@@ -3219,6 +3219,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             SwaggerData swaggerData;
             String definitionToAdd = validationResponse.getJsonContent();
             if (syncOperations) {
+                validateScopes(apiToAdd);
                 swaggerData = new SwaggerData(apiToAdd);
                 definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
             }
@@ -3231,11 +3232,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             boolean isBasepathExtractedFromSwagger = false;
             apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd, isBasepathExtractedFromSwagger);
             if (!syncOperations) {
+                validateScopes(apiToAdd);
                 swaggerData = new SwaggerData(apiToAdd);
                 definitionToAdd = apiDefinition
                         .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
             }
-            validateScopes(apiToAdd);
 
             // adding the API and definition
             apiProvider.addAPI(apiToAdd);
@@ -4132,17 +4133,26 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         APIIdentifier apiId = api.getId();
         String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        APIProvider apiProvider = RestApiUtil.getProvider(username);
 
         for (Scope scope : api.getScopes()) {
-            if (!(APIUtil.isWhiteListedScope(scope.getName()))) {
-                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-                int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-                APIProvider apiProvider = RestApiUtil.getProvider(username);
-
-                if (apiProvider.isScopeKeyAssignedLocally(apiId, scope.getName(), tenantId)) {
+            String scopeName = scope.getName();
+            if (!(APIUtil.isWhiteListedScope(scopeName))) {
+                // Check if each scope key is already assigned as a local scope to a different API which is also not a
+                // different version of the same API. If true, return error.
+                // If false, check if the scope key is already defined as a global scope. If so, do not honor the
+                // other scope attributes (description, role bindings) in the request payload, replace them with
+                // already defined values for the existing global scope.
+                if (apiProvider.isScopeKeyAssignedLocally(apiId, scopeName, tenantId)) {
                     RestApiUtil
-                            .handleBadRequest("Scope " + scope.getName() + " is already assigned locally by another "
+                            .handleBadRequest("Scope " + scopeName + " is already assigned locally by another "
                                     + "API", log);
+                } else if (apiProvider.isGlobalScopeNameExists(scopeName, tenantDomain)) {
+                    Scope globalScope = apiProvider.getGlobalScopeByName(scopeName, tenantDomain);
+                    scope.setDescription(globalScope.getDescription());
+                    scope.setRoles(globalScope.getRoles());
                 }
             }
             //set description as empty if it is not provided
