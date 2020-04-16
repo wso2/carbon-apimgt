@@ -2535,7 +2535,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     , Collections.<String, String>emptyMap());
 
             properties = new HashMap<String, String>();
-            properties.put("configKey", "gov:" + APIConstants.GA_CONFIGURATION_LOCATION);
+            properties.put("configKey", APIConstants.GA_CONF_KEY);
             vtb.addHandler(
                     "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
                     , properties);
@@ -2696,7 +2696,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 , Collections.<String, String>emptyMap());
 
         properties = new HashMap<String, String>();
-        properties.put("configKey", "gov:" + APIConstants.GA_CONFIGURATION_LOCATION);
+        properties.put("configKey", APIConstants.GA_CONF_KEY);
         vtb.addHandler(
                 "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
                 , properties);
