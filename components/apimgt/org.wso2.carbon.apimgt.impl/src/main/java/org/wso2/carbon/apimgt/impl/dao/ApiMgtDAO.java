@@ -15347,15 +15347,15 @@ public class ApiMgtDAO {
                 // Check if scope key is already assigned locally to a different API (Other than different versions of
                 // the same API.
                 if (!isScopeKeyAssignedLocally(apiIdentifier, scope.getKey(), tenantId)) {
-                    // Check if by any chance scope is key already registered in KM
+                    // Check if key already registered in KM. Scope Key may be already registered for a different
+                    // version.
                     if (!keyManager.isScopeExists(scopeKey, tenantDomain)) {
                         //register scope in KM
                         keyManager.registerScope(scope, tenantDomain);
                     } else {
-                        throw new APIManagementException("Error while adding local scopes for API name: "
-                                + apiIdentifier.getApiName() + " version: " + apiIdentifier.getVersion()
-                                + " provider: " + apiIdentifier.getProviderName() + ". Scope key: " + scopeKey
-                                + " already registered in KM");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Scope: " + scopeKey + " already registered in KM. Skipping registering scope.");
+                        }
                     }
                 } else {
                     throw new APIManagementException("Error while adding local scopes for API name: "
