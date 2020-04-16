@@ -959,8 +959,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @param scopeDTOList Scope DTO List
      * @return Scope Object to Scope Name Mappings
      */
-    private Map<String, Scope> fromDTOListToScopeListMapping(
-            List<ScopeDTO> scopeDTOList) {
+    private Map<String, Scope> fromDTOListToScopeListMapping(List<ScopeDTO> scopeDTOList) {
 
         Map<String, Scope> scopeListMapping = new HashMap<>();
         for (ScopeDTO scopeDTO : scopeDTOList) {
