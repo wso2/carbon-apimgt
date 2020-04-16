@@ -132,11 +132,14 @@ public class ServerStartupListener implements ServerStartupObserver {
             OAuthApplicationInfo oAuthApplicationInfo =
                     KMApplicationDAO.getInstance().getApplicationForTenant(tenantId);
             if (oAuthApplicationInfo == null) { // if not registered
+                log.info("Registering OAuth application for {super-tenant}");
                 oAuthApplicationInfo =
                         KeyManagerHolder.getKeyManagerInstance().registerKeyManagerMgtApplication(tenantDomain);
                 // add the application info to the AM database
                 KMApplicationDAO.getInstance().addApplication(oAuthApplicationInfo.getClientId(),
                         oAuthApplicationInfo.getClientSecret(), tenantId);
+            } else {
+                log.debug("OAuth application already registered for {super-tenant}. Skip registering.");
             }
         } catch (APIManagementException e) {
             log.error("Error registering KM Management Application for tenant: " + tenantDomain + e.getMessage());
