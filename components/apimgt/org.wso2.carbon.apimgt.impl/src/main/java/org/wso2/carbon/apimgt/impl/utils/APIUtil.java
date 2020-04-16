@@ -3910,28 +3910,34 @@ public final class APIUtil {
 
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
-            if (govRegistry.resourceExists(APIConstants.GA_CONFIGURATION_LOCATION)) {
-                log.debug("Google Analytics configuration already uploaded to the registry");
-                return;
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Adding Google Analytics configuration to the tenant's registry");
-            }
-            inputStream = APIManagerComponent.class.getResourceAsStream("/statistics/default-ga-config.xml");
-            byte[] data = IOUtils.toByteArray(inputStream);
-            Resource resource = govRegistry.newResource();
-            resource.setContent(data);
-            govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
+            // If resource does not exist
+            if (!govRegistry.resourceExists(APIConstants.GA_CONFIGURATION_LOCATION)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Adding Google Analytics configuration to the tenant's registry");
+                }
+                inputStream = APIManagerComponent.class.getResourceAsStream("/statistics/default-ga-config.xml");
+                byte[] data = IOUtils.toByteArray(inputStream);
+                Resource resource = govRegistry.newResource();
+                resource.setContent(data);
+                govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
 
-            /*set resource permission*/
-            org.wso2.carbon.user.api.AuthorizationManager authManager =
-                    ServiceReferenceHolder.getInstance().getRealmService().
-                            getTenantUserRealm(tenantID).getAuthorizationManager();
-            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.GA_CONFIGURATION_LOCATION);
-            authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+                /*set resource permission*/
+                org.wso2.carbon.user.api.AuthorizationManager authManager =
+                        ServiceReferenceHolder.getInstance().getRealmService().
+                                getTenantUserRealm(tenantID).getAuthorizationManager();
+                String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                        APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.GA_CONFIGURATION_LOCATION);
+                authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+            }
 
+            //Resource already in the registry, set media type as ga-config
+            log.debug("Google Analytics configuration already uploaded to the registry");
+            Resource resource = govRegistry.get(APIConstants.GA_CONFIGURATION_LOCATION);
+            if (!APIConstants.GA_CONF_MEDIA_TYPE.equals(resource.getMediaType())) {
+                resource.setMediaType(APIConstants.GA_CONF_MEDIA_TYPE);
+                govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
+            }
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving Google Analytics configuration information to the registry", e);
         } catch (IOException e) {
@@ -7192,12 +7198,11 @@ public final class APIUtil {
         return restAPIConfigJSON;
     }
 
-    public static String getGAConfig(String tenantDomain) throws APIManagementException {
+    public static String getGAConfigFromRegistry(String tenantDomain) throws APIManagementException {
         try {
             APIMRegistryServiceImpl apimRegistryService = new APIMRegistryServiceImpl();
-            String content = apimRegistryService.getGovernanceRegistryResourceContent(tenantDomain,
+            return apimRegistryService.getGovernanceRegistryResourceContent(tenantDomain,
                     APIConstants.GA_CONFIGURATION_LOCATION);
-            return content;
 
         } catch (UserStoreException e) {
             String msg = "UserStoreException thrown when loading GA config from registry";
