@@ -29,7 +29,6 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
 import Paper from '@material-ui/core/Paper';
-import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 import CreateBanner from './CreateBanner';
 
@@ -125,7 +124,7 @@ export default function MicroGateway(props) {
                                 <TableRow key={row.name}>
                                     <TableCell padding='checkbox'>
                                         <Checkbox
-                                            disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                            disabled={false}
                                             checked={selectedMgLabel.includes(row.name)}
                                             onChange={
                                                 (event) => {
