@@ -22,7 +22,6 @@ import { Route, Switch } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import Api from 'AppData/api';
 import User from 'AppData/User';
 import Utils from 'AppData/Utils';
 import Base from 'AppComponents/Base';
@@ -34,7 +33,6 @@ import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
 import { AppContextProvider } from 'AppComponents/Shared/AppContext';
-import Progress from 'AppComponents/Shared/Progress';
 import Configurations from 'Config';
 import LeftMenu from 'AppComponents/Base/Header/navbar/LeftMenu';
 
@@ -58,7 +56,6 @@ export default class Protected extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            settings: null,
             clientId: Utils.getCookieWithoutEnvironment(User.CONST.ADMIN_CLIENT_ID),
             sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.ADMIN_SESSION_STATE),
         };
@@ -136,7 +133,6 @@ export default class Protected extends Component {
                             width='0px'
                             height='0px'
                         />
-
                         <AppContextProvider value={{ user }}>
                             <Switch>
                                 <LeftMenu />
@@ -144,7 +140,6 @@ export default class Protected extends Component {
                             </Switch>
                         </AppContextProvider>
                     </Base>
-
                 </AppErrorBoundary>
             </MuiThemeProvider>
         );
