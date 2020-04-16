@@ -1633,6 +1633,9 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public boolean isScopeKeyAssignedToAPI(String scopeKey, String tenantDomain) throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Checking whether the scope:" + scopeKey + " is attached to any API in tenant: " + tenantDomain);
+        }
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         return apiMgtDAO.isScopeKeyAssigned(scopeKey, tenantId);
     }
