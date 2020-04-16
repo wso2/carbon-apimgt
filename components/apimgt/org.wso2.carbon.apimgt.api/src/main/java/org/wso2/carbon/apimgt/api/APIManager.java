@@ -468,6 +468,7 @@ public interface APIManager {
 
     /**
      * Check whether the given scope key is already assigned to an API as local scope under given tenant.
+     * This will return false if those APIs are different versions of the same API.
      *
      * @param apiIdentifier API Identifier
      * @param scopeKey   candidate scope key

@@ -1600,7 +1600,8 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Check whether the given scope key is already available under given tenant.
+     * Check whether the given global scope name exists in the tenant domain.
+     * If the scope does not exists in API-M (AM_DB) as a global scope, check the existence of scope name in the KM.
      *
      * @param scopeKey     candidate scope key
      * @param tenantDomain tenant domain
@@ -1610,7 +1611,14 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public boolean isScopeKeyExist(String scopeKey, String tenantDomain) throws APIManagementException {
 
-        return KeyManagerHolder.getKeyManagerInstance().isScopeExists(scopeKey, tenantDomain);
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        if (!ApiMgtDAO.getInstance().isGlobalScopeExists(scopeKey, tenantId)) {
+            return KeyManagerHolder.getKeyManagerInstance().isScopeExists(scopeKey, tenantDomain);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Scope name: " + scopeKey + " exists as a global scope in tenant: " + tenantDomain);
+        }
+        return true;
     }
 
     public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid)
@@ -1642,6 +1650,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     /**
      * Check whether the given scope key is already assigned to an API as local scope under given tenant.
+     * The different versions of the same API will not be take into consideration.
      *
      * @param apiIdentifier API Identifier
      * @param scopeKey   candidate scope key
@@ -1652,6 +1661,10 @@ public abstract class AbstractAPIManager implements APIManager {
     public boolean isScopeKeyAssignedLocally(APIIdentifier apiIdentifier, String scopeKey, int tenantId)
             throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Checking whether scope: " + scopeKey + " is assigned to another API as a local scope"
+                    + " in tenant: " + tenantId);
+        }
         return apiMgtDAO.isScopeKeyAssignedLocally(apiIdentifier, scopeKey, tenantId);
     }
 
