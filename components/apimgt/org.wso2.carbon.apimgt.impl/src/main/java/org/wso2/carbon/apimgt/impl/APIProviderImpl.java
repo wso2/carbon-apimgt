@@ -7999,6 +7999,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<Scope> getAllGlobalScopes(String tenantDomain) throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving all the global scopes for tenant: " + tenantDomain);
+        }
         //Get all global scopes
         List<Scope> allGlobalScopes = ApiMgtDAO.getInstance().getAllGlobalScopes(tenantDomain);
         //Get all scopes from KM
