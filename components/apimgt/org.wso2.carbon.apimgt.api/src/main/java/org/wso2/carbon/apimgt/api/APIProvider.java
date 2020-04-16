@@ -1330,7 +1330,7 @@ public interface APIProvider extends APIManager {
     List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI);
 
     /**
-     * Check whether the given global scope name exists in the tenant domain.
+     * Check whether the given scope name exists as a global scope in the tenant domain.
      *
      * @param scopeName    Global Scope name
      * @param tenantDomain Tenant Domain
