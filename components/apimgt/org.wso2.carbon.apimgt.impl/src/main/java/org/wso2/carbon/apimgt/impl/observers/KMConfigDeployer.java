@@ -44,11 +44,14 @@ public class KMConfigDeployer extends AbstractAxis2ConfigurationContextObserver 
             OAuthApplicationInfo oAuthApplicationInfo =
                     KMApplicationDAO.getInstance().getApplicationForTenant(tenantId);
             if (oAuthApplicationInfo == null) { // if not registered
+                log.info("Registering OAuth application for tenant: " + tenantDomain);
                 oAuthApplicationInfo =
                         KeyManagerHolder.getKeyManagerInstance().registerKeyManagerMgtApplication(tenantDomain);
                 // add the application info to the AM database
                 KMApplicationDAO.getInstance().addApplication(oAuthApplicationInfo.getClientId(),
                         oAuthApplicationInfo.getClientSecret(), tenantId);
+            } else if (log.isDebugEnabled()) {
+                log.debug("OAuth application already registered for tenant: " + tenantDomain + ". Skip registering.");
             }
         } catch (APIManagementException e) {
             log.error("Failed to register key manager management application for tenant: " + tenantDomain
