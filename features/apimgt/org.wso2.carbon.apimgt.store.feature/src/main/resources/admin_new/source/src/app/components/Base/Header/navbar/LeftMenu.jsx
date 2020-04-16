@@ -46,21 +46,21 @@ const styles = (theme) => ({
 });
 
 const subPaths = {
-    TASKS_USER_CREATION: '/admin/tasks/user_creation',
-    TASKS_APPLICATION_CREATION: '/admin/tasks/application_creation',
-    TASKS_SUBSCRIPTION_CREATION: '/admin/tasks/subscription_creation',
-    TASKS_APPLICATION_REGISTRATION: '/admin/tasks/applicationregistration',
-    TASKS_API_STATE_CHANGE: '/admin/tasks/apistatechange',
+    TASKS_USER_CREATION: '/admin/tasks/user creation',
+    TASKS_APPLICATION_CREATION: '/admin/tasks/application creation',
+    TASKS_SUBSCRIPTION_CREATION: '/admin/tasks/subscription creation',
+    TASKS_APPLICATION_REGISTRATION: '/admin/tasks/application registration',
+    TASKS_API_STATE_CHANGE: '/admin/tasks/api state change',
     SETTINGS_APPLICATIONS: '/admin/settings/applications',
-    SETTINGS_SCOPE_MAPPING: '/admin/settings/scopemapping',
+    SETTINGS_SCOPE_MAPPING: '/admin/settings/scope mapping',
     MICROGATEWAY_LABELS: '/admin/microgateway/labels',
-    CATEGORIES_API_CATEGORIES: '/admin/categories/apicategories',
-    THROTTLINGPOLICIES_ADVANCED_POLICIES: '/admin/throttlingpolicies/advancedpolicies',
-    THROTTLINGPOLICIES_APPLICATION_POLICIES: '/admin/throttlingpolicies/applicationpolicies',
-    THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES: '/admin/throttlingpolicies/subscriptionpolicies',
-    THROTTLINGPOLICIES_CUSTOM_POLICIES: '/admin/throttlingpolicies/custompolicies',
-    THROTTLINGPOLICIES_BLACKLIST_POLICIES: '/admin/throttlingpolicies/blacklistpolicies',
-    ANALYTICS_API_AVAILABILITY: '/admin/analytics/apiavailability',
+    CATEGORIES_API_CATEGORIES: '/admin/categories/api categories',
+    THROTTLINGPOLICIES_ADVANCED_POLICIES: '/admin/throttling policies/advanced policies',
+    THROTTLINGPOLICIES_APPLICATION_POLICIES: '/admin/throttling policies/application policies',
+    THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES: '/admin/throttling policies/subscription policies',
+    THROTTLINGPOLICIES_CUSTOM_POLICIES: '/admin/throttling policies/custom policies',
+    THROTTLINGPOLICIES_BLACKLIST_POLICIES: '/admin/throttling policies/blacklist policies',
+    ANALYTICS_API_AVAILABILITY: '/admin/analytics/api availability',
 };
 
 const tasksSubMenuDetails = (intl) => [
@@ -191,6 +191,7 @@ const botDetectionSubMenuDetails = () => [];
 //       Since Page contents are also rendered from this component.
 const LeftMenu = (props) => {
     const { classes, intl } = props;
+    console.log('props from lm', props);
     return (
         <Router>
             <div className={classes.LeftMenu}>
