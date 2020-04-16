@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Typography from '@material-ui/core/Typography';
@@ -100,30 +100,12 @@ function LeftMenuItemPrimary(props) {
   };
 
   const {
-    classes, theme, Icon, history, text, route, secondaryMenuDetails
+    classes, theme, Icon, text, secondaryMenuDetails
   } = props;
 
-  const routeToCheck = route || text;
   const { leftMenu } = theme.custom;
   const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
   const iconSize = theme.custom.leftMenuIconSize;
-  const ditectCurrentMenu = (location) => {
-    const { pathname } = location;
-    const test1 = new RegExp('/' + routeToCheck + '$', 'g');
-    const test2 = new RegExp('/' + routeToCheck + '/', 'g');
-    if (pathname.match(test1) || pathname.match(test2)) {
-      setSelected(true);
-    } else {
-      setSelected(false);
-    }
-  };
-  useEffect(() => {
-    const { location } = history;
-    ditectCurrentMenu(location);
-  }, []);
-  history.listen((location) => {
-    ditectCurrentMenu(location);
-  });
 
   const secondaryMenuItems = secondaryMenuDetails.map((item) =>
     <LeftMenuItemSecondary
