@@ -15424,6 +15424,10 @@ public class ApiMgtDAO {
     public void addScopeToResourceMapping(String scopeKey, Integer urlMappingId, int tenantId, Connection connection)
             throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Adding scope to resource mapping for scope key: " + scopeKey + " and URL mapping Id: "
+                    + urlMappingId);
+        }
         try (PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_API_RESOURCE_SCOPE_MAPPING)) {
             statement.setString(1, scopeKey);
             statement.setInt(2, urlMappingId);
@@ -15503,12 +15507,13 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Add local scopes for the API if the scopes does not exist as global scopes.
+     * Add local scopes for the API if the scopes does not exist as global scopes. The local scopes to add will be
+     * take from the URI templates.
      *
-     * @param apiIdentifier
-     * @param uriTemplates
-     * @param tenantId
-     * @throws APIManagementException
+     * @param apiIdentifier API Identifier
+     * @param uriTemplates  URI Templates
+     * @param tenantId      Tenant Id
+     * @throws APIManagementException if fails to add local scopes for the API
      */
     public void addLocalScopes(APIIdentifier apiIdentifier, int tenantId, Set<URITemplate> uriTemplates)
             throws APIManagementException {
@@ -15527,20 +15532,27 @@ public class ApiMgtDAO {
             String scopeKey = scope.getKey();
             //Check if it an existing global scope, if so skip adding scope
             if (!isGlobalScopeExists(scopeKey, tenantId)) {
+                // Check if scope key is already assigned locally to a different API (Other than different versions of
+                // the same API.
                 if (!isScopeKeyAssignedLocally(apiIdentifier, scope.getKey(), tenantId)) {
+                    // Check if by any chance scope is key already registered in KM
                     if (!keyManager.isScopeExists(scopeKey, tenantDomain)) {
                         //register scope in KM
                         keyManager.registerScope(scope, tenantDomain);
                     } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Scope: " + scopeKey + " already registered in KM. Skipping registering scope.");
-                        }
+                        throw new APIManagementException("Error while adding local scopes for API name: "
+                                + apiIdentifier.getApiName() + " version: " + apiIdentifier.getVersion()
+                                + " provider: " + apiIdentifier.getProviderName() + ". Scope key: " + scopeKey
+                                + " already registered in KM");
                     }
                 } else {
                     throw new APIManagementException("Error while adding local scopes for API name: "
                             + apiIdentifier.getApiName() + " version: " + apiIdentifier.getVersion()
-                            + " provider: " + apiIdentifier.getProviderName());
+                            + " provider: " + apiIdentifier.getProviderName() + ". Scope: " + scopeKey
+                            + " already assigned locally for a different API.");
                 }
+            } else if (log.isDebugEnabled()) {
+                log.debug("Scope " + scopeKey + " exists as a global scope. Skip adding as a local scope.");
             }
         }
     }
