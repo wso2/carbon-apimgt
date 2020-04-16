@@ -98,8 +98,8 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
         }
         Scope existingScope = apiProvider.getGlobalScopeByUUID(scopeId, tenantDomain);
         if (apiProvider.isScopeKeyAssignedToAPI(existingScope.getName(), tenantDomain)) {
-            RestApiUtil.handleConflict("Cannot remove the Global Scope " + scopeId + " as it is used by one "
-                    + "or more APIs", log);
+            throw new APIManagementException("Cannot remove the Global Scope " + scopeId + " as it is used by one "
+                    + "or more APIs", ExceptionCodes.from(ExceptionCodes.GLOBAL_SCOPE_ALREADY_ATTACHED, scopeId));
         }
         apiProvider.deleteGlobalScope(scopeId, tenantDomain);
         return Response.ok().build();
@@ -156,12 +156,11 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
     public Response updateGlobalScope(String scopeId, ScopeDTO body, MessageContext messageContext)
             throws APIManagementException {
 
-        String scopeName = body.getName();
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        if (StringUtils.isEmpty(scopeName)) {
-            throw new APIManagementException("Global Scope Name cannot be null or empty",
-                    ExceptionCodes.GLOBAL_SCOPE_NAME_NOT_SPECIFIED);
+        if (StringUtils.isEmpty(scopeId)) {
+            throw new APIManagementException("Global Scope Id cannot be null or empty",
+                    ExceptionCodes.GLOBAL_SCOPE_ID_NOT_SPECIFIED);
         }
         Scope existingScope = apiProvider.getGlobalScopeByUUID(scopeId, tenantDomain);
         //Override scope Id and name in request body from existing scope
