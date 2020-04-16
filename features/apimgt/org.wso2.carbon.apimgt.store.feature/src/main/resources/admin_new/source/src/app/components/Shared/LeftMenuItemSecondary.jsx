@@ -82,9 +82,9 @@ function LeftMenuItemSecondary(props) {
     const [selected, setSelected] = useState(false);
 
     const {
-        classes, theme, Icon, to, history, text, route,
+        classes, theme, Icon, to, history, text,
     } = props;
-    const routeToCheck = route || text;
+    const routeToCheck = text.toLowerCase();
     const { leftMenu } = theme.custom;
     const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
     const iconSize = theme.custom.leftMenuIconSize;
