@@ -7971,6 +7971,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!ApiMgtDAO.getInstance().isGlobalScopeExists(scopeName, tenantId)) {
             return KeyManagerHolder.getKeyManagerInstance().isScopeExists(scopeName, tenantDomain);
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Scope name: " + scopeName + " exists as a global scope in tenant: " + tenantDomain);
+        }
         return true;
     }
 
@@ -7986,6 +7989,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public String addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException {
 
         KeyManagerHolder.getKeyManagerInstance().registerScope(scope, tenantDomain);
+        if (log.isDebugEnabled()) {
+            log.debug("Adding global scope mapping: " + scope.getName());
+        }
         return ApiMgtDAO.getInstance().addGlobalScope(scope, tenantDomain);
     }
 
@@ -8045,6 +8051,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public Scope getGlobalScopeByUUID(String globalScopeId, String tenantDomain) throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving global scope: " + globalScopeId);
+        }
         Scope scope = ApiMgtDAO.getInstance().getGlobalScope(globalScopeId);
         if (scope != null) {
             scope = KeyManagerHolder.getKeyManagerInstance().getScopeByName(scope.getKey(), tenantDomain);
@@ -8080,6 +8089,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void deleteGlobalScope(String globalScopeId, String tenantDomain) throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting globalScope " + globalScopeId);
+        }
         Scope scope = ApiMgtDAO.getInstance().getGlobalScope(globalScopeId);
         if (scope == null) {
             throw new APIMgtResourceNotFoundException("Error while deleting Global Scope. Global Scope not found for "
