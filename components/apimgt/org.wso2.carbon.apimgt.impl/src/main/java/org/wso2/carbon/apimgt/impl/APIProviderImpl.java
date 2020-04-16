@@ -7954,8 +7954,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Check whether the given global scope name exists in the tenant domain.
-     * If the scope does not exists in API-M (AM_DB) as a global scope, check the existence of scope name in the KM.
+     * Check whether the given scope name exists as a global scope in the tenant domain.
      *
      * @param scopeName    Global Scope name
      * @param tenantDomain Tenant Domain
@@ -7965,14 +7964,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public Boolean isGlobalScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException {
 
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        if (!ApiMgtDAO.getInstance().isGlobalScopeExists(scopeName, tenantId)) {
-            return KeyManagerHolder.getKeyManagerInstance().isScopeExists(scopeName, tenantDomain);
-        }
         if (log.isDebugEnabled()) {
-            log.debug("Scope name: " + scopeName + " exists as a global scope in tenant: " + tenantDomain);
+            log.debug("Checking whether scope name: " + scopeName + " exists as a global scope in tenant: "
+                    + tenantDomain);
         }
-        return true;
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        return ApiMgtDAO.getInstance().isGlobalScopeExists(scopeName, tenantId);
     }
 
     /**

@@ -62,8 +62,8 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
                 throw new APIManagementException("Global Scope Name cannot be null or empty",
                         ExceptionCodes.GLOBAL_SCOPE_NAME_NOT_SPECIFIED);
             }
-            if (apiProvider.isGlobalScopeNameExists(scopeName, tenantDomain)) {
-                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.GLOBAL_SCOPE_ALREADY_REGISTERED,
+            if (apiProvider.isScopeKeyExist(scopeName, tenantDomain)) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.SCOPE_ALREADY_REGISTERED,
                         scopeName));
             }
             Scope scopeToAdd = GlobalScopeMappingUtil.fromDTOToScope(body);
