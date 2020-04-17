@@ -2,9 +2,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GlobalScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +34,7 @@ public class GlobalScopeMappingUtil {
         scopeDTO.setDescription(scope.getDescription());
         scopeDTO.setId(scope.getId());
         ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
+        //TODO:// Set binding DEFAULT
         String roles = scope.getRoles();
         if (StringUtils.isEmpty(roles)) {
             bindingsDTO.setValues(Collections.emptyList());
@@ -72,9 +73,9 @@ public class GlobalScopeMappingUtil {
      * @param scopeList List of Scope objects
      * @return GlobalScopeListDTO object
      */
-    public static GlobalScopeListDTO fromScopeListToDTO(List<Scope> scopeList) {
+    public static ScopeListDTO fromScopeListToDTO(List<Scope> scopeList) {
 
-        GlobalScopeListDTO globalScopeListDTO = new GlobalScopeListDTO();
+        ScopeListDTO globalScopeListDTO = new ScopeListDTO();
         List<ScopeDTO> scopeDTOList = globalScopeListDTO.getList();
         if (scopeList == null) {
             scopeList = new ArrayList<>();
