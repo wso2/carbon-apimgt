@@ -131,15 +131,18 @@ class API extends Resource {
 
     createAPICategory(name, description, callback = null) {
         const promise_create_api_category = this.client.then(client => {
+            const data = {
+                "name": name,
+                "description": description
+            };
+            const payload = {
+                body: data,
+                'Content-Type': 'application/json',
+            };
             return client.apis['API Category (Individual)'].post_api_categories(
-                {
-                    name: name,
-                    description: description
-                },
-                this._requestMetaData(),
+                payload, this._requestMetaData()
             );
         });
-
 
         if (callback) {
             return promise_create_api_category.then(callback);
