@@ -30,24 +30,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * This class is responsible for performing the DAO operations on AM_KM_MGT_APPLICATION table for
- * OAuth applications registered in the authorization server to manage KM operations.
+ * This class is responsible for performing the DAO operations related to key management of the registered
+ * authorization servers.
  */
-public class KMApplicationDAO {
+public class KeyMgtDAO {
 
-    private static final Logger log = LoggerFactory.getLogger(KMApplicationDAO.class);
-    private static boolean initialAutoCommit = false;
+    private static final Logger log = LoggerFactory.getLogger(KeyMgtDAO.class);
 
-    private KMApplicationDAO() {
+    private KeyMgtDAO() {
 
     }
 
     private static class KMAppDAOInstanceHolder {
 
-        private static final KMApplicationDAO INSTANCE = new KMApplicationDAO();
+        private static final KeyMgtDAO INSTANCE = new KeyMgtDAO();
     }
 
-    public static KMApplicationDAO getInstance() {
+    public static KeyMgtDAO getInstance() {
 
         return KMAppDAOInstanceHolder.INSTANCE;
     }
@@ -64,9 +63,8 @@ public class KMApplicationDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement =
-                     connection.prepareStatement(SQLConstants.KMMgtApplicationConstants.ADD_KM_APPLICATION)) {
+                     connection.prepareStatement(SQLConstants.KeyMgtConstants.ADD_KM_APPLICATION)) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 preparedStatement.setString(1, clientId);
                 preparedStatement.setString(2, clientSecret);
@@ -76,8 +74,6 @@ public class KMApplicationDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to add KM Mgt application: " + clientId + " for tenant: " + tenantId, e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to add KM Mgt application: " + clientId + " for tenant: " + tenantId, e);
@@ -110,10 +106,10 @@ public class KMApplicationDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement =
                      connection
-                             .prepareStatement(SQLConstants.KMMgtApplicationConstants.GET_KM_APPLICATION_FOR_TENANT)) {
+                             .prepareStatement(SQLConstants.KeyMgtConstants.GET_KM_APPLICATION_FOR_TENANT)) {
             statement.setInt(1, tenantId);
             try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
+                if (rs != null && rs.next()) {
                     oAuthApplicationInfo = new OAuthApplicationInfo();
                     oAuthApplicationInfo.setClientId(rs.getString("CONSUMER_KEY"));
                     oAuthApplicationInfo.setClientSecret(rs.getString("CONSUMER_SECRET"));
@@ -123,33 +119,5 @@ public class KMApplicationDAO {
             handleException("Failed to get KM mgt Application for tenant: " + tenantId, e);
         }
         return oAuthApplicationInfo;
-    }
-
-    /**
-     * Delete application.
-     *
-     * @param tenantId TenantId
-     * @throws APIManagementException If an error occurs while deleting application
-     */
-    public void deleteApplication(int tenantId) throws APIManagementException {
-
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.KMMgtApplicationConstants.DELETE_KM_APPLICATION_FOR_TENANT)) {
-            try {
-                initialAutoCommit = connection.getAutoCommit();
-                connection.setAutoCommit(false);
-                statement.setInt(1, tenantId);
-                statement.executeUpdate();
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Failed to remove KM mgt application for tenant: " + tenantId, e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
-            }
-        } catch (SQLException e) {
-            handleException("Failed to remove KM mgt application for tenant: " + tenantId, e);
-        }
     }
 }
