@@ -191,7 +191,6 @@ const botDetectionSubMenuDetails = () => [];
 //       Since Page contents are also rendered from this component.
 const LeftMenu = (props) => {
     const { classes, intl } = props;
-    console.log('props from lm', props);
     return (
         <Router>
             <div className={classes.LeftMenu}>
