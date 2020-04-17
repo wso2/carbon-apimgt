@@ -6731,9 +6731,9 @@ paths:
             $ref: '#/definitions/APICategoryList'
 
 ######################################################
-# The "Global Scopes" resource APIs
+# The "Scopes" resource APIs
 ######################################################
-  /global-scopes:
+  /scopes:
 
   #-------------------------------------------------------------
   # Retrieve the Global Scopes list
@@ -6747,14 +6747,14 @@ paths:
       summary: Get all available Global Scopes
       operationId: getGlobalScopes
       tags:
-        - Global Scopes
+        - Scopes
       responses:
         200:
           description: |
             OK.
             Global Scope list is returned.
           schema:
-            $ref: '#/definitions/GlobalScopeList'
+            $ref: '#/definitions/ScopeList'
           headers:
             Content-Type:
               description: |
@@ -6777,7 +6777,7 @@ paths:
         This operation can be used to add a new Global Scope.
       operationId: addGlobalScope
       tags:
-        - Global Scopes
+        - Scopes
       parameters:
         - in: body
           name: body
@@ -6812,7 +6812,7 @@ paths:
 ######################################################
 # The "Individual Global Scope" resource APIs
 ######################################################
-  /global-scopes/{scopeId}:
+  /scopes/{scopeId}:
 
   #-------------------------------------------------------------
   # Retrieve the details of a Global Scope
@@ -6826,7 +6826,7 @@ paths:
         This operation can be used to retrieve details of a Global Scope by a given scope Id.
       operationId: getGlobalScope
       tags:
-        - Global Scopes
+        - Scopes
       parameters:
         - $ref: '#/parameters/scopeId'
       responses:
@@ -6860,7 +6860,7 @@ paths:
         This operation can be used to update a Global Scope by a given scope Id.
       operationId: updateGlobalScope
       tags:
-        - Global Scopes
+        - Scopes
       parameters:
         - $ref: '#/parameters/scopeId'
         - in: body
@@ -6907,7 +6907,7 @@ paths:
         This operation can be used to delete a Global Scope proving the Id of the scope.
       operationId: deleteGlobalScope
       tags:
-        - Global Scopes
+        - Scopes
       parameters:
         - $ref: '#/parameters/scopeId'
       responses:
@@ -8854,13 +8854,13 @@ definitions:
 #-----------------------------------------------------
 # The Global Scope List resource
 #-----------------------------------------------------
-  GlobalScopeList:
+  ScopeList:
     title: Scope List
     properties:
       count:
         type: integer
         description: |
-          Number of Global Scopes returned.
+          Number of Scopes returned.
         example: 1
       list:
         type: array
