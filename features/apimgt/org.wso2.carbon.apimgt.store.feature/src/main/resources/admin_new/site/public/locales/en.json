@@ -39,5 +39,7 @@
   "create.banner.button.text.microgateway": "Create Microgateway",
   "create.banner.button.text.api.category": "Create API Category",
   "contents.main.title.microgateways": "Microgateways",
-  "contents.main.title.api.categories": "API categories"
+  "contents.main.title.api.categories": "API categories",
+  "topmenu.api.categories.add.api.category": "Add API category",
+  "contents.main.heading.api.categories.add_new": "Add New API Category"
 }
