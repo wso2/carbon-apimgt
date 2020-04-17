@@ -15216,7 +15216,6 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GLOBAL_SCOPE)) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 statement.setString(1, scopeName);
                 statement.setString(2, uuid);
@@ -15226,8 +15225,6 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to add Global Scope : " + scopeName, e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to add Global Scope: " + scopeName, e);
@@ -15246,7 +15243,6 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_GLOBAL_SCOPE)) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 statement.setString(1, uuid);
                 statement.executeUpdate();
@@ -15254,8 +15250,6 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to delete Global Scope : " + uuid, e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to delete Global Scope : " + uuid, e);
@@ -15455,7 +15449,6 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_OAUTH2_RESOURCE_SCOPE_SQL)) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 statement.setString(1, APIUtil.getResourceKey(api, uriTemplate));
                 statement.setString(2, scope.getKey());
@@ -15466,8 +15459,6 @@ public class ApiMgtDAO {
                 connection.rollback();
                 handleException("Failed to add resource scope: " + scope.getName() + " to URL Template: "
                         + uriTemplate.getId(), e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to add resource scope: " + scope.getName() + " to URL Template: "
@@ -15489,7 +15480,6 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.REMOVE_KM_RESOURCE_SCOPE_SQL)) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 statement.setString(1, scope.getKey());
                 statement.setInt(2, tenantId);
@@ -15498,8 +15488,6 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to remove resource scope: " + scope.getName(), e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to remove resource scope: " + scope.getName(), e);
