@@ -3450,7 +3450,7 @@ public class SQLConstants {
     public static final String GET_ALL_GLOBAL_SCOPE_KEYS_BY_TENANT =
             "SELECT NAME FROM AM_GLOBAL_SCOPE WHERE TENANT_ID = ?";
     public static final String IS_GLOBAL_SCOPE_NAME_EXISTS =
-            "SELECT UUID FROM AM_GLOBAL_SCOPE WHERE TENANT_ID = ? AND NAME = ?";
+            "SELECT 1 FROM AM_GLOBAL_SCOPE WHERE TENANT_ID = ? AND NAME = ?";
 
     //Resource Scope related constants
     public static final String ADD_API_RESOURCE_SCOPE_MAPPING =
@@ -3466,7 +3466,7 @@ public class SQLConstants {
                     + "ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND "
                     + "AUM.API_ID = AM_API.API_ID";
     public static final String IS_SCOPE_ATTACHED =
-            "SELECT * FROM AM_API_RESOURCE_SCOPE_MAPPING WHERE SCOPE_NAME = ? AND TENANT_ID = ?";
+            "SELECT 1 FROM AM_API_RESOURCE_SCOPE_MAPPING WHERE SCOPE_NAME = ? AND TENANT_ID = ?";
 
     public static final String REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL =
             " DELETE FROM AM_API_RESOURCE_SCOPE_MAPPING "
