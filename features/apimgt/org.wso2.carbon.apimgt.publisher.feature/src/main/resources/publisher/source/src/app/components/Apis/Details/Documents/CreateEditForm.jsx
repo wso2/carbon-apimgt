@@ -29,6 +29,7 @@ import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import Icon from '@material-ui/core/Icon';
 import TextField from '@material-ui/core/TextField';
+import MenuItem from '@material-ui/core/MenuItem';
 import Dropzone from 'react-dropzone';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Api from 'AppData/api';
@@ -130,6 +131,7 @@ class CreateEditForm extends React.Component {
             nameEmpty: false,
             summeryEmpty: false,
             urlEmpty: false,
+            visibility: 'API_LEVEL'
         };
     }
 
@@ -163,6 +165,8 @@ class CreateEditForm extends React.Component {
             this.setState({ sourceUrl: value });
         } else if (name === 'otherTypeName') {
             this.setState({ otherTypeName: value });
+        } else if (name === 'visibility') {
+            this.setState({ visibility: value });
         }
     };
 
@@ -174,14 +178,15 @@ class CreateEditForm extends React.Component {
         const { apiType } = this.props;
         const restAPI = apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
         const {
-            name, type, summary, sourceType, sourceUrl, file, otherTypeName,
+            name, type, summary, sourceType, sourceUrl, file, otherTypeName, visibility
         } = this.state;
         const docPromise = restAPI.addDocument(apiId, {
             name,
             type,
             summary,
             sourceType,
-            visibility: 'API_LEVEL',
+            // visibility: 'API_LEVEL',
+            visibility,
             sourceUrl,
             otherTypeName,
             inlineContent: '',
@@ -215,7 +220,7 @@ class CreateEditForm extends React.Component {
             docPromise
                 .then((doc) => {
                     const {
-                        name, type, summary, sourceType, sourceUrl, otherTypeName,
+                        name, type, summary, sourceType, sourceUrl, otherTypeName, visibility
                     } = doc.body;
                     this.setState({
                         name,
@@ -224,6 +229,7 @@ class CreateEditForm extends React.Component {
                         sourceType,
                         sourceUrl,
                         otherTypeName,
+                        visibility,
                     });
                 })
                 .catch((error) => {
@@ -237,7 +243,7 @@ class CreateEditForm extends React.Component {
                 });
         }
     }
-    validate(field=null, value=null) {
+    validate(field = null, value = null) {
         let invalidUrl = false;
         if (field === 'url') {
             invalidUrl = value ? APIValidation.url.validate(value).error : false;
@@ -311,7 +317,7 @@ class CreateEditForm extends React.Component {
         }
     }
     getUrlHelperText() {
-        const { invalidUrl, urlEmpty} = this.state;
+        const { invalidUrl, urlEmpty } = this.state;
 
         if (invalidUrl) {
             return (
@@ -351,6 +357,7 @@ class CreateEditForm extends React.Component {
             nameEmpty,
             summeryEmpty,
             urlEmpty,
+            visibility,
         } = this.state;
         const { classes, setSaveDisabled } = this.props;
         if (
@@ -421,11 +428,11 @@ class CreateEditForm extends React.Component {
                                     defaultMessage='Document summary can not be empty'
                                 />
                             ) : (
-                                <FormattedMessage
-                                    id='Apis.Details.Documents.CreateEditForm.document.summary.helper.text'
-                                    defaultMessage='Provide a brief description for the document'
-                                />
-                            )
+                                    <FormattedMessage
+                                        id='Apis.Details.Documents.CreateEditForm.document.summary.helper.text'
+                                        defaultMessage='Provide a brief description for the document'
+                                    />
+                                )
                         }
                         type='text'
                         name='summary'
@@ -437,6 +444,55 @@ class CreateEditForm extends React.Component {
                         }}
                         error={summeryEmpty}
                     />
+                </FormControl>
+                <FormControl margin='normal' className={classes.FormControlOdd}>
+                    <TextField
+                        fullWidth
+                        id='docVisibility-selector'
+                        select
+                        label={(
+                            <FormattedMessage
+                                id='Apis.Details.Documents.CreateEditForm.docVisibility.label'
+                                defaultMessage='Document Visibility'
+                            />
+                        )}
+                        value={visibility}
+                        name='visibility'
+                        onChange={this.handleChange('visibility')}
+                        SelectProps={{
+                            MenuProps: {
+                                className: classes.menu,
+                            },
+                        }}
+                        helperText={(
+                            <FormattedMessage
+                                id='Apis.Details.Documents.CreateEditForm.docVisibility.helper.text'
+                                defaultMessage='By default document is visible to all developer portal users'
+                            />
+                        )}
+                        margin='normal'
+                        variant='outlined'
+                    >
+                        <MenuItem value='API_LEVEL'>
+                            <FormattedMessage
+                                id='Apis.Details.Documents.CreateEditForm.docVisibility.dropdown.api.level'
+                                defaultMessage='Same as API visibility'
+                            />
+                            
+                        </MenuItem>
+                        <MenuItem value='OWNER_ONLY'>
+                            <FormattedMessage
+                                id='Apis.Details.Documents.CreateEditForm.docVisibility.dropdown.owner.only'
+                                defaultMessage='Visible to my Domain'
+                            />
+                        </MenuItem>
+                        <MenuItem value='PRIVATE'>
+                            <FormattedMessage
+                                id='Apis.Details.Documents.CreateEditForm.docVisibility.dropdown.private'
+                                defaultMessage='Private'
+                            />
+                        </MenuItem>
+                    </TextField>
                 </FormControl>
                 <FormControl component='fieldset' className={classes.formControlFirst}>
                     <FormLabel component='legend'>
