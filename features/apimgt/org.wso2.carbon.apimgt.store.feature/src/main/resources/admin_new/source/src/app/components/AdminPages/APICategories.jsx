@@ -21,6 +21,7 @@ import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
+import { Link } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -29,6 +30,8 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import AddCircle from '@material-ui/icons/AddCircle';
 import CreateBanner from './CreateBanner';
 
 const useStyles = makeStyles((theme) => ({
@@ -37,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
         flexWrap: 'wrap',
     },
     mainTitle: {
-        paddingTop: theme.spacing(3),
+        paddingLeft: 0,
     },
     gatewayPaper: {
         marginTop: theme.spacing(2),
@@ -49,16 +52,25 @@ const useStyles = makeStyles((theme) => ({
     emptyBox: {
         marginTop: theme.spacing(2),
     },
-    contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing(3),
+    buttonIcon: {
+        marginRight: theme.spacing(1),
+    },
+    titleWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: theme.spacing(2),
+    },
+    heading: {
+        flexGrow: 1,
+        marginTop: 10,
     },
 }));
 
 const handleCreateClick = () => {
     const restApi = new API();
     // following hardcoded line is only for dev purposes.
-    restApi.createAPICategory('finance', 'desc finance');
+    restApi.createAPICategory('new category', 'description goes here');
 };
 
 /**
@@ -98,13 +110,27 @@ export default function APICategories() {
     );
 
     return (
-        <>
-            <Typography variant='h4' align='left' className={classes.mainTitle}>
-                <FormattedMessage
-                    id='contents.main.title.api.categories'
-                    defaultMessage='API categories'
-                />
-            </Typography>
+        <div className={classes.heading}>
+            <div className={classes.titleWrapper}>
+                <Typography variant='h4' align='left' className={classes.mainTitle}>
+                    <FormattedMessage
+                        id='contents.main.title.api.categories'
+                        defaultMessage='API categories'
+                    />
+                </Typography>
+                <Link onClick={handleCreateClick}>
+                    <Button
+                        size='small'
+                        className={classes.button}
+                    >
+                        <AddCircle className={classes.buttonIcon} />
+                        <FormattedMessage
+                            id='contents.main.heading.api.categories.add_new'
+                            defaultMessage='Add New API Category'
+                        />
+                    </Button>
+                </Link>
+            </div>
             {mgLabels.length > 0 ? (
                 <Paper className={classes.gatewayPaper}>
                     <Table>
@@ -138,7 +164,7 @@ export default function APICategories() {
                         onClick={handleCreateClick}
                     />
                 )}
-        </>
+        </div>
     );
 }
 APICategories.defaultProps = {
