@@ -109,7 +109,7 @@ public class KeyMgtDAO {
                              .prepareStatement(SQLConstants.KeyMgtConstants.GET_KM_APPLICATION_FOR_TENANT)) {
             statement.setInt(1, tenantId);
             try (ResultSet rs = statement.executeQuery()) {
-                if (rs != null && rs.next()) {
+                if (rs.next()) {
                     oAuthApplicationInfo = new OAuthApplicationInfo();
                     oAuthApplicationInfo.setClientId(rs.getString("CONSUMER_KEY"));
                     oAuthApplicationInfo.setClientSecret(rs.getString("CONSUMER_SECRET"));
