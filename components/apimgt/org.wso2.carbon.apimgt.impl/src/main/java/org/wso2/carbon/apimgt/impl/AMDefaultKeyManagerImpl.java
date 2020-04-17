@@ -60,7 +60,7 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.KMApplicationDAO;
+import org.wso2.carbon.apimgt.impl.dao.KeyMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.KMRegisterProfileDTO;
 import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -112,11 +112,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private KeyManagerConfiguration configuration;
 
     private static final Log log = LogFactory.getLog(AMDefaultKeyManagerImpl.class);
-
-    protected CloseableHttpClient getKmHttpClient() {
-
-        return kmHttpClient;
-    }
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
@@ -802,11 +797,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void registerScope(Scope scope, String tenantDomain) throws APIManagementException {
 
+        AccessTokenInfo accessToken = getAccessTokenForScopeMgt(tenantDomain);
         String scopeEndpoint = getScopeManagementServiceEndpoint(tenantDomain);
         String scopeKey = scope.getKey();
         try {
             HttpPost httpPost = new HttpPost(scopeEndpoint);
-            httpPost.setHeader(HttpHeaders.AUTHORIZATION, getBasicAuthorizationHeader());
+            httpPost.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
             httpPost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             ScopeDTO scopeDTO = new ScopeDTO();
             scopeDTO.setName(scopeKey);
@@ -877,7 +873,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @param tenantDomain Tenant Domain
      * @return Access Token
      */
-    private AccessTokenInfo getKMAccessTokenForScopeMgt(String tenantDomain) throws APIManagementException {
+    private AccessTokenInfo getAccessTokenForScopeMgt(String tenantDomain) throws APIManagementException {
 
         OAuthApplicationInfo oAuthApplication = getKeyManagerMgtApplication(tenantDomain);
         // Set scope management resource scopes
@@ -912,11 +908,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public Scope getScopeByName(String scopeName, String tenantDomain) throws APIManagementException {
 
         ScopeDTO scopeDTO;
+        AccessTokenInfo accessToken = getAccessTokenForScopeMgt(tenantDomain);
         String scopeEndpoint = getScopeManagementServiceEndpoint(tenantDomain)
                 + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
                 .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, scopeName));
         HttpGet httpGet = new HttpGet(scopeEndpoint);
-        httpGet.setHeader(HttpHeaders.AUTHORIZATION, getBasicAuthorizationHeader());
+        httpGet.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
         if (log.isDebugEnabled()) {
             log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to get scope "
                     + scopeName);
@@ -981,7 +978,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         List<ScopeDTO> allScopeDTOS;
         // Get access token
-        AccessTokenInfo accessToken = getKMAccessTokenForScopeMgt(tenantDomain);
+        AccessTokenInfo accessToken = getAccessTokenForScopeMgt(tenantDomain);
         String scopeEndpoint = getScopeManagementServiceEndpoint(tenantDomain);
         HttpGet httpGet = new HttpGet(scopeEndpoint);
         httpGet.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
@@ -993,7 +990,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_OK && StringUtils.isNoneEmpty(responseString)) {
                 Type scopeListType =
-                        new TypeToken<ArrayList<ScopeDTO>>() {}.getType();
+                        new TypeToken<ArrayList<ScopeDTO>>() {
+                        }.getType();
                 allScopeDTOS = new Gson().fromJson(responseString, scopeListType);
             } else {
                 throw new APIManagementException("Error occurred while retrieving scopes via: " + scopeEndpoint
@@ -1043,7 +1041,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     /**
      * This method will be used to delete a Scope in the authorization server.
      *
-     * @param scope        Scope Object
+     * @param scope        Scope Object //TODO://pass scope name
      * @param tenantDomain tenant domain to delete the scope from
      * @throws APIManagementException if an error occurs while deleting the scope
      */
@@ -1051,7 +1049,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public void deleteScope(Scope scope, String tenantDomain) throws APIManagementException {
 
         // Get access token
-        AccessTokenInfo accessToken = getKMAccessTokenForScopeMgt(tenantDomain);
+        AccessTokenInfo accessToken = getAccessTokenForScopeMgt(tenantDomain);
         String scopeName = scope.getKey();
         String scopeEndpoint = getScopeManagementServiceEndpoint(tenantDomain)
                 + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
@@ -1088,7 +1086,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public void updateScope(Scope scope, String tenantDomain) throws APIManagementException {
 
         // Get access token
-        AccessTokenInfo accessToken = getKMAccessTokenForScopeMgt(tenantDomain);
+        AccessTokenInfo accessToken = getAccessTokenForScopeMgt(tenantDomain);
         String scopeName = scope.getKey();
         String scopeEndpoint = getScopeManagementServiceEndpoint(tenantDomain)
                 + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
@@ -1136,7 +1134,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public Boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException {
 
         // Get access token
-        AccessTokenInfo accessToken = getKMAccessTokenForScopeMgt(tenantDomain);
+        AccessTokenInfo accessToken = getAccessTokenForScopeMgt(tenantDomain);
         String scopeEndpoint = getScopeManagementServiceEndpoint(tenantDomain)
                 + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
                 .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, scopeName));
@@ -1181,8 +1179,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @return OAuthApplicationInfo object with clientId, clientSecret and client name of the registered OAuth app
      * @throws APIManagementException if an error occurs while registering application
      */
-    @Override
-    public OAuthApplicationInfo registerKeyManagerMgtApplication(String tenantDomain) throws APIManagementException {
+    public OAuthApplicationInfo registerKeyMgtApplication(String tenantDomain) throws APIManagementException {
 
         OAuthApplicationInfo oAuthApplicationInfo;
         String clientName = APIConstants.KEY_MANAGER_CLIENT_APPLICATION_PREFIX + tenantDomain;
@@ -1234,7 +1231,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public OAuthApplicationInfo getKeyManagerMgtApplication(String tenantDomain) throws APIManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        OAuthApplicationInfo oAuthApplicationInfo = KMApplicationDAO.getInstance().getApplicationForTenant(tenantId);
+        OAuthApplicationInfo oAuthApplicationInfo = KeyMgtDAO.getInstance().getApplicationForTenant(tenantId);
         if (oAuthApplicationInfo == null) {
             throw new APIManagementException("No OAuth application registered for KeyManager operations in tenant: "
                     + tenantDomain);
