@@ -1390,11 +1390,11 @@ public interface APIProvider extends APIManager {
     /**
      * Delete global scope.
      *
-     * @param globalScopeId Global Scope Id
+     * @param scopeName Global scope name
      * @param tenantDomain  tenant domain
      * @throws APIManagementException If failed to delete the scope
      */
-    void deleteGlobalScope(String globalScopeId, String tenantDomain) throws APIManagementException;
+    void deleteGlobalScope(String scopeName, String tenantDomain) throws APIManagementException;
 
     /**
      * Update a global scope.

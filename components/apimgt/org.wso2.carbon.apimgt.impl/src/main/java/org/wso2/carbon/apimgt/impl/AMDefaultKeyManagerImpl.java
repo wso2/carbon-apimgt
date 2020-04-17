@@ -1041,16 +1041,15 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     /**
      * This method will be used to delete a Scope in the authorization server.
      *
-     * @param scope        Scope Object //TODO://pass scope name
+     * @param scopeName    Scope name
      * @param tenantDomain tenant domain to delete the scope from
      * @throws APIManagementException if an error occurs while deleting the scope
      */
     @Override
-    public void deleteScope(Scope scope, String tenantDomain) throws APIManagementException {
+    public void deleteScope(String scopeName, String tenantDomain) throws APIManagementException {
 
         // Get access token
         AccessTokenInfo accessToken = getAccessTokenForScopeMgt(tenantDomain);
-        String scopeName = scope.getKey();
         String scopeEndpoint = getScopeManagementServiceEndpoint(tenantDomain)
                 + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
                 .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, scopeName));
