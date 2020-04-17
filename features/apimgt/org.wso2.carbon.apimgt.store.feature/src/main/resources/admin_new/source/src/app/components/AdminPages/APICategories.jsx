@@ -27,7 +27,6 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Checkbox from '@material-ui/core/Checkbox';
 import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
 import CreateBanner from './CreateBanner';
@@ -65,12 +64,10 @@ const handleCreateClick = () => {
 /**
  * Renders APICategories
  * @class APICategories
- * @param {*} props
  * @extends {React.Component}
  */
-export default function APICategories(props) {
+export default function APICategories() {
     const classes = useStyles();
-    const { selectedMgLabel, setSelectedMgLabel, api } = props;
     const restApi = new API();
     const [mgLabels, setMgLabels] = useState([]);
 
@@ -113,7 +110,6 @@ export default function APICategories(props) {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell />
                                 <TableCell align='left'>Category Name</TableCell>
                                 <TableCell align='left'>Description</TableCell>
                                 <TableCell align='left'>Number of APIs</TableCell>
@@ -122,31 +118,12 @@ export default function APICategories(props) {
                         <TableBody>
                             {mgLabels.map((row) => (
                                 <TableRow key={row.name}>
-                                    <TableCell padding='checkbox'>
-                                        <Checkbox
-                                            disabled={false}
-                                            checked={selectedMgLabel.includes(row.name)}
-                                            onChange={
-                                                (event) => {
-                                                    const { checked, name } = event.target;
-                                                    if (checked) {
-                                                        setSelectedMgLabel([...selectedMgLabel, name]);
-                                                    } else {
-                                                        setSelectedMgLabel(
-                                                            selectedMgLabel.filter((env) => env !== name),
-                                                        );
-                                                    }
-                                                }
-                                            }
-                                            name={row.name}
-                                            color='primary'
-                                        />
-                                    </TableCell>
                                     <TableCell component='th' scope='row' align='left'>
                                         {row.name}
                                     </TableCell>
                                     <TableCell align='left'>{row.description}</TableCell>
-                                    <TableCell align='left'>{row.access_urls.join(', ')}</TableCell>
+                                    {/* todo: Fill following table cell with Number_of_APIs per api category after API is modified */}
+                                    <TableCell align='left'>-</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -168,7 +145,5 @@ APICategories.defaultProps = {
     api: {},
 };
 APICategories.propTypes = {
-    selectedMgLabel: PropTypes.arrayOf(PropTypes.string).isRequired,
-    setSelectedMgLabel: PropTypes.func.isRequired,
     api: PropTypes.shape({}),
 };
