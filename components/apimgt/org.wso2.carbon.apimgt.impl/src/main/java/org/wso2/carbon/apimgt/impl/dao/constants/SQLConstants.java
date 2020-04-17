@@ -3509,9 +3509,9 @@ public class SQLConstants {
                     + "WHERE ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND AUM.API_ID = ?";
 
     /**
-     * Static class to hold database queries related to AM_KM_OAUTH_APPLICATION table
+     * Static class to hold database queries related to key management.
      */
-    public static class KMMgtApplicationConstants {
+    public static class KeyMgtConstants {
 
         public static final String ADD_KM_APPLICATION =
                 "INSERT INTO AM_KM_MGT_APPLICATION (CONSUMER_KEY,CONSUMER_SECRET,TENANT_ID) VALUES (?,?,?)";
