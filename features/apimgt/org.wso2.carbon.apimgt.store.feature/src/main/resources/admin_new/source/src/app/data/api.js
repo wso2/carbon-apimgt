@@ -301,6 +301,7 @@ class API extends Resource {
             );
         });
 
+
         if (callback) {
             return promiseDeleteLabel.then(callback);
         } else {
