@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 import java.io.IOException;
@@ -125,24 +126,25 @@ public class ServerStartupListener implements ServerStartupObserver {
      */
     private static void registerKMApplication() {
 
-        String tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         try {
             //check whether an application is already registered for the tenant
             OAuthApplicationInfo oAuthApplicationInfo =
-                    KMApplicationDAO.getInstance().getApplicationForTenant(tenantId);
+                    KMApplicationDAO.getInstance().getApplicationForTenant(MultitenantConstants.SUPER_TENANT_ID);
             if (oAuthApplicationInfo == null) { // if not registered
-                log.info("Registering OAuth application for {super-tenant}");
+                log.info("Registering OAuth application for " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 oAuthApplicationInfo =
-                        KeyManagerHolder.getKeyManagerInstance().registerKeyManagerMgtApplication(tenantDomain);
+                        KeyManagerHolder.getKeyManagerInstance()
+                                .registerKeyManagerMgtApplication(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 // add the application info to the AM database
                 KMApplicationDAO.getInstance().addApplication(oAuthApplicationInfo.getClientId(),
-                        oAuthApplicationInfo.getClientSecret(), tenantId);
+                        oAuthApplicationInfo.getClientSecret(), MultitenantConstants.SUPER_TENANT_ID);
             } else {
-                log.debug("OAuth application already registered for {super-tenant}. Skip registering.");
+                log.debug("OAuth application already registered for "
+                        + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME + ". Skip registering.");
             }
         } catch (APIManagementException e) {
-            log.error("Error registering KM Management Application for tenant: " + tenantDomain + e.getMessage());
+            log.error("Error registering KM Management Application for tenant: "
+                    + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME + e.getMessage());
         }
     }
 
