@@ -7395,7 +7395,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         int id;
-        List<Scope> localScopes;
+        List<String> localScopes;
         List<URITemplate> uriTemplateListWithScopes;
         String deleteLCEventQuery = SQLConstants.REMOVE_FROM_API_LIFECYCLE_SQL;
         String deleteAuditAPIMapping = SQLConstants.REMOVE_SECURITY_AUDIT_MAP_SQL;
@@ -7461,10 +7461,7 @@ public class ApiMgtDAO {
             try (ResultSet rs = prepStmt.executeQuery()) {
                 localScopes = new ArrayList<>();
                 while (rs.next()) {
-                    Scope scope = new Scope();
-                    scope.setKey(rs.getString("SCOPE_NAME"));
-                    scope.setName(rs.getString("SCOPE_NAME"));
-                    localScopes.add(scope);
+                    localScopes.add(rs.getString("SCOPE_NAME"));
                 }
             }
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
@@ -7519,7 +7516,7 @@ public class ApiMgtDAO {
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
             // remove the local scopes from the KM
-            for (Scope localScope: localScopes) {
+            for (String localScope : localScopes) {
                 KeyManagerHolder.getKeyManagerInstance().deleteScope(localScope, tenantDomain);
             }
 
@@ -9643,7 +9640,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         int apiId;
-        List<Scope> localScopes;
+        List<String> localScopes;
         List<URITemplate> uriTemplateListWithScopes;
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
 
@@ -9666,10 +9663,7 @@ public class ApiMgtDAO {
             try (ResultSet rs = prepStmt.executeQuery()) {
                 localScopes = new ArrayList<>();
                 while (rs.next()) {
-                    Scope scope = new Scope();
-                    scope.setKey(rs.getString("SCOPE_NAME"));
-                    scope.setName(rs.getString("SCOPE_NAME"));
-                    localScopes.add(scope);
+                    localScopes.add(rs.getString("SCOPE_NAME"));
                 }
             }
 
@@ -9718,7 +9712,7 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, apiId);
             prepStmt.execute();
             // remove the local scopes from the KM
-            for (Scope localScope : localScopes) {
+            for (String localScope : localScopes) {
                 KeyManagerHolder.getKeyManagerInstance().deleteScope(localScope, tenantDomain);
             }
             connection.commit();
@@ -15090,24 +15084,26 @@ public class ApiMgtDAO {
     /**
      * Delete global scope.
      *
-     * @param uuid Global Scope ID
+     * @param scopeName    global scope name
+     * @param tenantDomain tenant domain
      * @throws APIManagementException if an error occurs while removing global scope
      */
-    public void deleteGlobalScope(String uuid) throws APIManagementException {
+    public void deleteGlobalScope(String scopeName, String tenantDomain) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_GLOBAL_SCOPE)) {
             try {
                 connection.setAutoCommit(false);
-                statement.setString(1, uuid);
+                statement.setString(1, scopeName);
+                statement.setString(2, tenantDomain);
                 statement.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to delete Global Scope : " + uuid, e);
+                handleException("Failed to delete Global Scope : " + scopeName + " from tenant: " + tenantDomain, e);
             }
         } catch (SQLException e) {
-            handleException("Failed to delete Global Scope : " + uuid, e);
+            handleException("Failed to delete Global Scope : " + scopeName + " from tenant: " + tenantDomain, e);
         }
     }
 

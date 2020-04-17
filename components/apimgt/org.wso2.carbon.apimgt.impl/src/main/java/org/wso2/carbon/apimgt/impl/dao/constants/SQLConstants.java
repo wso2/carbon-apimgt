@@ -3444,7 +3444,7 @@ public class SQLConstants {
 
     //Global Scopes related constants
     public static final String ADD_GLOBAL_SCOPE = "INSERT INTO AM_GLOBAL_SCOPE (NAME, UUID, TENANT_ID) VALUES (?,?,?)";
-    public static final String DELETE_GLOBAL_SCOPE = "DELETE FROM AM_GLOBAL_SCOPE WHERE UUID = ?";
+    public static final String DELETE_GLOBAL_SCOPE = "DELETE FROM AM_GLOBAL_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
     public static final String GET_GLOBAL_SCOPE_BY_UUID = "SELECT * FROM AM_GLOBAL_SCOPE WHERE UUID = ?";
     public static final String GET_ALL_GLOBAL_SCOPES_BY_TENANT = "SELECT * FROM AM_GLOBAL_SCOPE WHERE TENANT_ID = ?";
     public static final String GET_ALL_GLOBAL_SCOPE_KEYS_BY_TENANT =

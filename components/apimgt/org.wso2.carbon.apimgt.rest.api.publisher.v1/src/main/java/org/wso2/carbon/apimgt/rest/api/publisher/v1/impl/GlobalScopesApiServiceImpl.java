@@ -101,7 +101,7 @@ public class GlobalScopesApiServiceImpl implements GlobalScopesApiService {
             throw new APIManagementException("Cannot remove the Global Scope " + scopeId + " as it is used by one "
                     + "or more APIs", ExceptionCodes.from(ExceptionCodes.GLOBAL_SCOPE_ALREADY_ATTACHED, scopeId));
         }
-        apiProvider.deleteGlobalScope(scopeId, tenantDomain);
+        apiProvider.deleteGlobalScope(existingScope.getName(), tenantDomain);
         return Response.ok().build();
     }
 

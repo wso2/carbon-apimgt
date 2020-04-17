@@ -299,11 +299,11 @@ public interface KeyManager {
     /**
      * This method will be used to delete a Scope in the authorization server.
      *
-     * @param scope        Scope object
+     * @param scopeName        Scope name
      * @param tenantDomain tenant domain to delete the scope from
      * @throws APIManagementException if an error occurs while deleting the scope
      */
-    void deleteScope(Scope scope, String tenantDomain) throws APIManagementException;
+    void deleteScope(String scopeName, String tenantDomain) throws APIManagementException;
 
     /**
      * This method will be used to update a Scope in the authorization server.
