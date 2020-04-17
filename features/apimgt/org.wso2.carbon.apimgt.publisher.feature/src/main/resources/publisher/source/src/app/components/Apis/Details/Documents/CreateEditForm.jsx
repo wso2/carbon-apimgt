@@ -185,7 +185,6 @@ class CreateEditForm extends React.Component {
             type,
             summary,
             sourceType,
-            // visibility: 'API_LEVEL',
             visibility,
             sourceUrl,
             otherTypeName,
@@ -205,7 +204,7 @@ class CreateEditForm extends React.Component {
             type,
             summary,
             sourceType,
-            visibility: 'API_LEVEL',
+            visibility,
             sourceUrl,
             otherTypeName,
             inlineContent: '',
@@ -459,15 +458,10 @@ class CreateEditForm extends React.Component {
                         value={visibility}
                         name='visibility'
                         onChange={this.handleChange('visibility')}
-                        SelectProps={{
-                            MenuProps: {
-                                className: classes.menu,
-                            },
-                        }}
                         helperText={(
                             <FormattedMessage
                                 id='Apis.Details.Documents.CreateEditForm.docVisibility.helper.text'
-                                defaultMessage='By default document is visible to all developer portal users'
+                                defaultMessage='By default document is visible to users of an API'
                             />
                         )}
                         margin='normal'
@@ -478,7 +472,6 @@ class CreateEditForm extends React.Component {
                                 id='Apis.Details.Documents.CreateEditForm.docVisibility.dropdown.api.level'
                                 defaultMessage='Same as API visibility'
                             />
-                            
                         </MenuItem>
                         <MenuItem value='OWNER_ONLY'>
                             <FormattedMessage
