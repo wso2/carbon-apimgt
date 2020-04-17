@@ -94,7 +94,7 @@
         cookie = {
             'name': 'AM_ACC_TOKEN_DEFAULT_P2',
             'value': accessTokenPart2,
-            'path': "/api/am/publisher/",
+            'path': "/api/am/admin/",
             "httpOnly": true,
             "secure": true,
             "maxAge": Integer(tokenResponse.expires_in)
