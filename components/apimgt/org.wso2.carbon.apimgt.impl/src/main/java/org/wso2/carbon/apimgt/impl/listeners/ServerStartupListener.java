@@ -20,10 +20,7 @@ package org.wso2.carbon.apimgt.impl.listeners;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.impl.dao.KeyMgtDAO;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -40,7 +37,8 @@ public class ServerStartupListener implements ServerStartupObserver {
     @Override
     public void completedServerStartup() {
         copyToExtensions();
-        registerKeyMgtApplication();
+        //TODO: Only register when API-M KeyManager Profile is used as the KM.
+        KeyMgtRegistrationService.registerKeyMgtApplication(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
     }
 
     /**
@@ -116,33 +114,6 @@ public class ServerStartupListener implements ServerStartupObserver {
         } catch (IOException ex) {
             log.error("An error occurred while copying file to directory", ex);
             throw new IOException("An error occurred while copying file to directory", ex);
-        }
-    }
-
-    /**
-     * This method will call the KM server and register an oauth app to manage KM operations.
-     */
-    private static void registerKeyMgtApplication() {
-        //TODO: Only register when API-M KeyManager Profile is used as the KM.
-        try {
-            //check whether an application is already registered for the tenant
-            OAuthApplicationInfo oAuthApplicationInfo =
-                    KeyMgtDAO.getInstance().getApplicationForTenant(MultitenantConstants.SUPER_TENANT_ID);
-            if (oAuthApplicationInfo == null) { // if not registered
-                log.info("Registering OAuth application for " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-                oAuthApplicationInfo =
-                        KeyManagerHolder.getKeyManagerInstance()
-                                .registerKeyManagerMgtApplication(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-                // add the application info to the AM database
-                KeyMgtDAO.getInstance().addApplication(oAuthApplicationInfo.getClientId(),
-                        oAuthApplicationInfo.getClientSecret(), MultitenantConstants.SUPER_TENANT_ID);
-            } else {
-                log.debug("OAuth application already registered for "
-                        + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME + ". Skip registering.");
-            }
-        } catch (APIManagementException e) {
-            log.error("Error registering KM Management Application for tenant: "
-                    + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME + e.getMessage());
         }
     }
 
