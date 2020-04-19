@@ -8,7 +8,7 @@
          <Property name="callbackURL">https://localhost:8243/services/WorkflowCallbackService</Property>
     </ApplicationCreation-->
     <ProductionApplicationRegistration executor="org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor"/>
-    <!--ProductionApplicationRegistration executor="org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationApprovalWorkflowExecutor"/-->
+    <!--ProductionApplicationRegistration executor="org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor"/-->
     <!--ProductionApplicationRegistration executor="org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationWSWorkflowExecutor">
         <Property name="serviceEndpoint">http://localhost:9765/services/ApplicationRegistrationWorkFlowProcess/</Property>
         <Property name="username">admin</Property>
@@ -65,9 +65,9 @@
     
     <!-- Publisher related workflows -->
     <APIStateChange executor="org.wso2.carbon.apimgt.impl.workflow.APIStateChangeSimpleWorkflowExecutor" />
-    <!-- <APIStateChange executor="org.wso2.carbon.apimgt.impl.workflow.UserSignUpApprovalWorkflowExecutor">
+    <!--APIStateChange executor="org.wso2.carbon.apimgt.impl.workflow.APIStateChangeApprovalWorkflowExecutor">
         <Property name="stateList">Created:Publish,Published:Block</Property>
-    </APIStateChange>-->
+    </APIStateChange-->
     <!-- <APIStateChange executor="org.wso2.carbon.apimgt.impl.workflow.APIStateChangeWSWorkflowExecutor">
         <Property name="processDefinitionKey">APIStateChangeApprovalProcess</Property>
         <Property name="stateList">Created:Publish,Published:Block</Property>        
