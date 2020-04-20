@@ -21,7 +21,7 @@ import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
-import { Link } from 'react-router-dom';
+import { Link, Router } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -32,7 +32,7 @@ import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import AddCircle from '@material-ui/icons/AddCircle';
-import CreateBanner from './CreateBanner';
+import CreateBanner from '../CreateBanner';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -118,7 +118,7 @@ export default function APICategories() {
                         defaultMessage='API categories'
                     />
                 </Typography>
-                <Link onClick={handleCreateClick}>
+                <Link to='/admin/categories/api categories/create api category'>
                     <Button
                         size='small'
                         className={classes.button}
