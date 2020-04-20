@@ -149,7 +149,7 @@ class AppErrorBoundary extends React.Component {
                                 </Typography>
                             </div>
                             <a href={`${Configurations.app.context}/apis/`}>
-                                <h3 className={classes.link}>API Listing</h3>
+                                <h3 className={classes.link}>Admin Portal</h3>
                             </a>
                         </div>
                     </div>

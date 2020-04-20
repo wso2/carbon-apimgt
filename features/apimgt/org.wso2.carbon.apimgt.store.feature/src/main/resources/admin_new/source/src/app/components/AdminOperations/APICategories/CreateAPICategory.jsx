@@ -17,6 +17,8 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
+import API from 'AppData/api';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -98,8 +100,36 @@ const styles = (theme) => ({
     },
 });
 
+let apiCategory = {};
+let mhistory;
+// let valid;
+
+const addAPICategory = () => {
+    // console.log('input name is', apiCategory.name);
+    // console.log('input desc is', apiCategory.description);
+    const restApi = new API();
+    restApi.createAPICategory(apiCategory.name, apiCategory.description);
+    console.log('Created');
+    mhistory.push('/admin/categories/api categories');
+};
+
+const validateAPICategoryName = (id, value) => {
+    // todo: do validations
+    apiCategory[id] = value;
+};
+
+const handleAPICategoryNameInput = ({ target: { id, value } }) => {
+    validateAPICategoryName(id, value);
+};
+
+const handleAPICategoryDescriptionInput = ({ target: { id, value } }) => {
+    apiCategory[id] = value;
+};
+
 const CreateAPICategory = (props) => {
-    const { classes } = props;
+    const { classes, history } = props;
+    console.log('props from create api category', props);
+    mhistory = history;
     return (
         <Grid container spacing={3}>
             <Grid item sm={12} md={12} />
@@ -136,12 +166,20 @@ const CreateAPICategory = (props) => {
                                     id='name'
                                     label='API Category Name'
                                     placeholder='Name'
+                                    helperText={(
+                                        <FormattedMessage
+                                            id='todo'
+                                            defaultMessage='Enter API Category Name ( Ex: finance )'
+                                        />
+                                    )}
                                     fullWidth
                                     margin='normal'
                                     variant='outlined'
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
+                                    onChange={handleAPICategoryNameInput}
+                                // value={apiCategory.name || ''}
                                 />
                             </FormControl>
                             <FormControl margin='normal' classes={{ root: classes.descriptionForm }}>
@@ -161,13 +199,14 @@ const CreateAPICategory = (props) => {
                                         shrink: true,
                                     }}
                                     multiline
+                                    onChange={handleAPICategoryDescriptionInput}
                                 />
                             </FormControl>
                             <div className={classes.addNewOther}>
                                 <Button
                                     variant='contained'
                                     color='primary'
-                                    onClick={console.log('todo here, clicked create button')}
+                                    onClick={addAPICategory}
                                     className={classes.saveButton}
                                 >
                                     <FormattedMessage
