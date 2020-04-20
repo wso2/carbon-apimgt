@@ -1029,6 +1029,27 @@ class API extends Resource {
     }
 
     /**
+     * Retrieve subscriber information for a given subscriptionId
+     * @param {String} id Subscription UUID
+     * @returns {Promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getSubscriberInfo(id, callback = null) {
+        const promise_subscription = this.client.then(client => {
+            return client.apis['Subscriber'].get_subscriptions__subscriptionId__subscriber_info(
+                {
+                    subscriptionId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        if (callback) {
+            return promise_subscription.then(callback);
+        } else {
+            return promise_subscription;
+        }
+    }
+
+    /**
      * Discovered Service Endpoints.
      * @returns {Promise} Promised list of discovered services
      *
