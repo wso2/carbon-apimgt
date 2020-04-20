@@ -20,7 +20,7 @@ public class ScopeDTO   {
     private String name = null;
     private String description = null;
     private ScopeBindingsDTO bindings = null;
-    private Boolean isGlobal = null;
+    private Boolean isShared = null;
 
   /**
    * UUID of the Scope 
@@ -95,21 +95,21 @@ public class ScopeDTO   {
   }
 
   /**
-   * States whether scope is global. This will not be honored when updating/adding scopes to APIs or when adding/updating Global Scopes. 
+   * States whether scope is shared. This will not be honored when updating/adding scopes to APIs or when adding/updating Shared Scopes. 
    **/
-  public ScopeDTO isGlobal(Boolean isGlobal) {
-    this.isGlobal = isGlobal;
+  public ScopeDTO isShared(Boolean isShared) {
+    this.isShared = isShared;
     return this;
   }
 
   
-  @ApiModelProperty(example = "true", value = "States whether scope is global. This will not be honored when updating/adding scopes to APIs or when adding/updating Global Scopes. ")
-  @JsonProperty("isGlobal")
-  public Boolean isIsGlobal() {
-    return isGlobal;
+  @ApiModelProperty(example = "true", value = "States whether scope is shared. This will not be honored when updating/adding scopes to APIs or when adding/updating Shared Scopes. ")
+  @JsonProperty("isShared")
+  public Boolean isIsShared() {
+    return isShared;
   }
-  public void setIsGlobal(Boolean isGlobal) {
-    this.isGlobal = isGlobal;
+  public void setIsShared(Boolean isShared) {
+    this.isShared = isShared;
   }
 
 
@@ -126,12 +126,12 @@ public class ScopeDTO   {
         Objects.equals(name, scope.name) &&
         Objects.equals(description, scope.description) &&
         Objects.equals(bindings, scope.bindings) &&
-        Objects.equals(isGlobal, scope.isGlobal);
+        Objects.equals(isShared, scope.isShared);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, bindings, isGlobal);
+    return Objects.hash(id, name, description, bindings, isShared);
   }
 
   @Override
@@ -143,7 +143,7 @@ public class ScopeDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    bindings: ").append(toIndentedString(bindings)).append("\n");
-    sb.append("    isGlobal: ").append(toIndentedString(isGlobal)).append("\n");
+    sb.append("    isShared: ").append(toIndentedString(isShared)).append("\n");
     sb.append("}");
     return sb.toString();
   }

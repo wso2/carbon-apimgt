@@ -15050,20 +15050,20 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Add global scope.
+     * Add shared scope.
      *
      * @param scope        Scope Object to add
      * @param tenantDomain Tenant domain
-     * @return UUID of the global scope
-     * @throws APIManagementException if an error occurs while adding global scope
+     * @return UUID of the shared scope
+     * @throws APIManagementException if an error occurs while adding shared scope
      */
-    public String addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException {
+    public String addSharedScope(Scope scope, String tenantDomain) throws APIManagementException {
 
         String uuid = UUID.randomUUID().toString();
         String scopeName = scope.getKey();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GLOBAL_SCOPE)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_SHARED_SCOPE)) {
             try {
                 connection.setAutoCommit(false);
                 statement.setString(1, scopeName);
@@ -15073,25 +15073,25 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to add Global Scope : " + scopeName, e);
+                handleException("Failed to add Shared Scope : " + scopeName, e);
             }
         } catch (SQLException e) {
-            handleException("Failed to add Global Scope: " + scopeName, e);
+            handleException("Failed to add Shared Scope: " + scopeName, e);
         }
         return uuid;
     }
 
     /**
-     * Delete global scope.
+     * Delete shared scope.
      *
-     * @param scopeName    global scope name
+     * @param scopeName    shared scope name
      * @param tenantDomain tenant domain
-     * @throws APIManagementException if an error occurs while removing global scope
+     * @throws APIManagementException if an error occurs while removing shared scope
      */
-    public void deleteGlobalScope(String scopeName, String tenantDomain) throws APIManagementException {
+    public void deleteSharedScope(String scopeName, String tenantDomain) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_GLOBAL_SCOPE)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_SHARED_SCOPE)) {
             try {
                 connection.setAutoCommit(false);
                 statement.setString(1, scopeName);
@@ -15100,25 +15100,25 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to delete Global Scope : " + scopeName + " from tenant: " + tenantDomain, e);
+                handleException("Failed to delete Shared Scope : " + scopeName + " from tenant: " + tenantDomain, e);
             }
         } catch (SQLException e) {
-            handleException("Failed to delete Global Scope : " + scopeName + " from tenant: " + tenantDomain, e);
+            handleException("Failed to delete Shared Scope : " + scopeName + " from tenant: " + tenantDomain, e);
         }
     }
 
     /**
-     * Get global scope by uuid.
+     * Get shared scope by uuid.
      *
-     * @param uuid UUID of global scope
-     * @return Global scope object with UUID and scope key
-     * @throws APIManagementException if an error occurs while getting global scope
+     * @param uuid UUID of shared scope
+     * @return Shared scope object with UUID and scope key
+     * @throws APIManagementException if an error occurs while getting shared scope
      */
-    public Scope getGlobalScope(String uuid) throws APIManagementException {
+    public Scope getSharedScope(String uuid) throws APIManagementException {
 
         Scope scope = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_GLOBAL_SCOPE_BY_UUID)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_SHARED_SCOPE_BY_UUID)) {
             statement.setString(1, uuid);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -15128,24 +15128,24 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get Global Scope : " + uuid, e);
+            handleException("Failed to get Shared Scope : " + uuid, e);
         }
         return scope;
     }
 
     /**
-     * Checks whether the given global scope name is already available under given tenant domain.
+     * Checks whether the given shared scope name is already available under given tenant domain.
      *
      * @param scopeName Scope Name
      * @param tenantId  Tenant ID
      * @return scope name availability
      * @throws APIManagementException If an error occurs while checking the availability
      */
-    public boolean isGlobalScopeExists(String scopeName, int tenantId) throws APIManagementException {
+    public boolean isSharedScopeExists(String scopeName, int tenantId) throws APIManagementException {
 
         boolean isExist = false;
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.IS_GLOBAL_SCOPE_NAME_EXISTS)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.IS_SHARED_SCOPE_NAME_EXISTS)) {
             statement.setInt(1, tenantId);
             statement.setString(2, scopeName);
             try (ResultSet rs = statement.executeQuery()) {
@@ -15154,24 +15154,24 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to check is exists Global Scope : " + scopeName + "-" + tenantId, e);
+            handleException("Failed to check is exists Shared Scope : " + scopeName + "-" + tenantId, e);
         }
         return isExist;
     }
 
     /**
-     * Get all global scopes for tenant.
+     * Get all shared scopes for tenant.
      *
      * @param tenantDomain Tenant Domain
-     * @return global scope list
-     * @throws APIManagementException if an error occurs while getting all global scopes for tenant
+     * @return shared scope list
+     * @throws APIManagementException if an error occurs while getting all shared scopes for tenant
      */
-    public List<Scope> getAllGlobalScopes(String tenantDomain) throws APIManagementException {
+    public List<Scope> getAllSharedScopes(String tenantDomain) throws APIManagementException {
 
         List<Scope> scopeList = null;
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_ALL_GLOBAL_SCOPES_BY_TENANT)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_ALL_SHARED_SCOPES_BY_TENANT)) {
             statement.setInt(1, tenantId);
             try (ResultSet rs = statement.executeQuery()) {
                 scopeList = new ArrayList<>();
@@ -15183,25 +15183,25 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get all Global Scopes for tenant: " + tenantDomain, e);
+            handleException("Failed to get all Shared Scopes for tenant: " + tenantDomain, e);
         }
         return scopeList;
     }
 
     /**
-     * Get all global scope keys for tenant.
+     * Get all shared scope keys for tenant.
      *
      * @param tenantDomain Tenant Domain
-     * @return global scope list
-     * @throws APIManagementException if an error occurs while getting all global scopes for tenant
+     * @return shared scope list
+     * @throws APIManagementException if an error occurs while getting all shared scopes for tenant
      */
-    public Set<String> getAllGlobalScopeKeys(String tenantDomain) throws APIManagementException {
+    public Set<String> getAllSharedScopeKeys(String tenantDomain) throws APIManagementException {
 
         Set<String> scopeKeys = null;
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.GET_ALL_GLOBAL_SCOPE_KEYS_BY_TENANT)) {
+                     .prepareStatement(SQLConstants.GET_ALL_SHARED_SCOPE_KEYS_BY_TENANT)) {
             statement.setInt(1, tenantId);
             try (ResultSet rs = statement.executeQuery()) {
                 scopeKeys = new HashSet<>();
@@ -15210,7 +15210,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get all Global Scope Keys for tenant: " + tenantDomain, e);
+            handleException("Failed to get all Shared Scope Keys for tenant: " + tenantDomain, e);
         }
         return scopeKeys;
     }
@@ -15303,7 +15303,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Add local scopes for the API if the scopes does not exist as global scopes. The local scopes to add will be
+     * Add local scopes for the API if the scopes does not exist as shared scopes. The local scopes to add will be
      * take from the URI templates.
      *
      * @param apiIdentifier API Identifier
@@ -15326,8 +15326,8 @@ public class ApiMgtDAO {
         }
         for (Scope scope : scopeSet) {
             String scopeKey = scope.getKey();
-            //Check if it an existing global scope, if so skip adding scope
-            if (!isGlobalScopeExists(scopeKey, tenantId)) {
+            //Check if it an existing shared scope, if so skip adding scope
+            if (!isSharedScopeExists(scopeKey, tenantId)) {
                 // Check if scope key is already assigned locally to a different API (Other than different versions of
                 // the same API.
                 if (!isScopeKeyAssignedLocally(apiIdentifier, scope.getKey(), tenantId)) {
@@ -15348,7 +15348,7 @@ public class ApiMgtDAO {
                             + " already assigned locally for a different API.");
                 }
             } else if (log.isDebugEnabled()) {
-                log.debug("Scope " + scopeKey + " exists as a global scope. Skip adding as a local scope.");
+                log.debug("Scope " + scopeKey + " exists as a shared scope. Skip adding as a local scope.");
             }
         }
     }

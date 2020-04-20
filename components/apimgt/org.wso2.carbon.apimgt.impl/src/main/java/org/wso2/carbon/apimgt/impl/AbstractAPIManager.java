@@ -1593,8 +1593,8 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Check whether the given global scope name exists in the tenant domain.
-     * If the scope does not exists in API-M (AM_DB) as a global scope, check the existence of scope name in the KM.
+     * Check whether the given shared scope name exists in the tenant domain.
+     * If the scope does not exists in API-M (AM_DB) as a shared scope, check the existence of scope name in the KM.
      *
      * @param scopeKey     candidate scope key
      * @param tenantDomain tenant domain
@@ -1605,11 +1605,11 @@ public abstract class AbstractAPIManager implements APIManager {
     public boolean isScopeKeyExist(String scopeKey, String tenantDomain) throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        if (!ApiMgtDAO.getInstance().isGlobalScopeExists(scopeKey, tenantId)) {
+        if (!ApiMgtDAO.getInstance().isSharedScopeExists(scopeKey, tenantId)) {
             return KeyManagerHolder.getKeyManagerInstance().isScopeExists(scopeKey, tenantDomain);
         }
         if (log.isDebugEnabled()) {
-            log.debug("Scope name: " + scopeKey + " exists as a global scope in tenant: " + tenantDomain);
+            log.debug("Scope name: " + scopeKey + " exists as a shared scope in tenant: " + tenantDomain);
         }
         return true;
     }

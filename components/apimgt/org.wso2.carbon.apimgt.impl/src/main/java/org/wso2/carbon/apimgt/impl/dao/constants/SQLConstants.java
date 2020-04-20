@@ -3442,15 +3442,15 @@ public class SQLConstants {
         public static final String DELETE_REVOKED_JWT = "DELETE FROM AM_REVOKED_JWT WHERE EXPIRY_TIMESTAMP < ?";
     }
 
-    //Global Scopes related constants
-    public static final String ADD_GLOBAL_SCOPE = "INSERT INTO AM_GLOBAL_SCOPE (NAME, UUID, TENANT_ID) VALUES (?,?,?)";
-    public static final String DELETE_GLOBAL_SCOPE = "DELETE FROM AM_GLOBAL_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
-    public static final String GET_GLOBAL_SCOPE_BY_UUID = "SELECT * FROM AM_GLOBAL_SCOPE WHERE UUID = ?";
-    public static final String GET_ALL_GLOBAL_SCOPES_BY_TENANT = "SELECT * FROM AM_GLOBAL_SCOPE WHERE TENANT_ID = ?";
-    public static final String GET_ALL_GLOBAL_SCOPE_KEYS_BY_TENANT =
-            "SELECT NAME FROM AM_GLOBAL_SCOPE WHERE TENANT_ID = ?";
-    public static final String IS_GLOBAL_SCOPE_NAME_EXISTS =
-            "SELECT 1 FROM AM_GLOBAL_SCOPE WHERE TENANT_ID = ? AND NAME = ?";
+    //Shared Scopes related constants
+    public static final String ADD_SHARED_SCOPE = "INSERT INTO AM_SHARED_SCOPE (NAME, UUID, TENANT_ID) VALUES (?,?,?)";
+    public static final String DELETE_SHARED_SCOPE = "DELETE FROM AM_SHARED_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
+    public static final String GET_SHARED_SCOPE_BY_UUID = "SELECT * FROM AM_SHARED_SCOPE WHERE UUID = ?";
+    public static final String GET_ALL_SHARED_SCOPES_BY_TENANT = "SELECT * FROM AM_SHARED_SCOPE WHERE TENANT_ID = ?";
+    public static final String GET_ALL_SHARED_SCOPE_KEYS_BY_TENANT =
+            "SELECT NAME FROM AM_SHARED_SCOPE WHERE TENANT_ID = ?";
+    public static final String IS_SHARED_SCOPE_NAME_EXISTS =
+            "SELECT 1 FROM AM_SHARED_SCOPE WHERE TENANT_ID = ? AND NAME = ?";
 
     //Resource Scope related constants
     public static final String ADD_API_RESOURCE_SCOPE_MAPPING =
@@ -3462,7 +3462,7 @@ public class SQLConstants {
                     + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM, AM_API "
                     + "WHERE ARSM.SCOPE_NAME = ? AND "
                     + "ARSM.TENANT_ID = ? AND "
-                    + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_GLOBAL_SCOPE GS WHERE GS.TENANT_ID = ?) AND "
+                    + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_SHARED_SCOPE GS WHERE GS.TENANT_ID = ?) AND "
                     + "ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND "
                     + "AUM.API_ID = AM_API.API_ID";
     public static final String IS_SCOPE_ATTACHED =
@@ -3475,14 +3475,14 @@ public class SQLConstants {
     public static final String GET_LOCAL_SCOPES_FOR_API_SQL =
             " SELECT DISTINCT ARSM.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM "
                     + "WHERE ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND AUM.API_ID = ? AND ARSM.SCOPE_NAME NOT IN "
-                    + "(SELECT GS.NAME FROM AM_GLOBAL_SCOPE GS) ";
+                    + "(SELECT GS.NAME FROM AM_SHARED_SCOPE GS) ";
 
     public static final String GET_UNVERSIONED_LOCAL_SCOPES_FOR_API_SQL =
             "SELECT DISTINCT ARSM.SCOPE_NAME "
                     + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM "
                     + "WHERE ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND "
                     + "AUM.API_ID = ? AND "
-                    + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_GLOBAL_SCOPE GS) AND "
+                    + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_SHARED_SCOPE GS) AND "
                     + "ARSM.SCOPE_NAME NOT IN ( "
                     + "SELECT ARSM2.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM2, AM_API_URL_MAPPING AUM2 "
                     + "WHERE ARSM2.URL_MAPPING_ID = AUM2.URL_MAPPING_ID AND AUM2.API_ID != ? )" ;

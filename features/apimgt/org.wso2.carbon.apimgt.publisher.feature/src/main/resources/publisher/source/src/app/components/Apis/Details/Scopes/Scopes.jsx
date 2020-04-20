@@ -224,7 +224,7 @@ class Scopes extends React.Component {
             customToolbar: false,
         };
         const scopesList = api.scopes.filter((scope) => {
-            return !scope.isGlobal;
+            return !scope.isShared;
         }).map((scope) => {
             const aScope = [];
             aScope.push(scope.name);

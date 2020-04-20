@@ -79,7 +79,7 @@ public final class RestApiConstants {
     public static final String DOCUMENTID_PARAM = "{documentId}";
     public static final String APICATEGORYID_PARAM = "{apiCategoryId}";
     public static final String API_VERSION_PARAM="{version}";
-    public static final String GLOBAL_SCOPE_ID_PARAM = "{scopeId}";
+    public static final String SHARED_SCOPE_ID_PARAM = "{scopeId}";
     public static final String URL_ENCODED_API_ID_DELIMITER = "%2D";
     public static final String CHARSET = "UTF-8";
 
@@ -89,9 +89,9 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
     public static final String RESOURCE_PATH_THROTTLING = "/throttling";
     public static final String RESOURCE_PATH_LABEL = "/labels";
-    public static final String RESOURCE_PATH_GLOBAL_SCOPES =  "/global-scopes";
-    public static final String RESOURCE_PATH_GLOBAL_SCOPES_SCOPE_ID =
-            RESOURCE_PATH_GLOBAL_SCOPES + "/" + GLOBAL_SCOPE_ID_PARAM;
+    public static final String RESOURCE_PATH_SHARED_SCOPES =  "/scopes";
+    public static final String RESOURCE_PATH_SHARED_SCOPES_SCOPE_ID =
+            RESOURCE_PATH_SHARED_SCOPES + "/" + SHARED_SCOPE_ID_PARAM;
     public static final String RESOURCE_PATH_THROTTLING_POLICIES = RESOURCE_PATH_THROTTLING + "/policies";
     public static final String RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS = RESOURCE_PATH_THROTTLING
             + "/blacklist";

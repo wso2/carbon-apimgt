@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ScopesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.GlobalScopeMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.SharedScopeMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -75,132 +75,132 @@ public class ScopesApiServiceImpl implements ScopesApiService {
     }
 
     /**
-     * Add Global Scope.
+     * Add Shared Scope.
      *
      * @param body           Scope DTO object to add
      * @param messageContext CXF Message Context
      * @return Created Scope as DTO
-     * @throws APIManagementException If an error occurs while adding global scope.
+     * @throws APIManagementException If an error occurs while adding shared scope.
      */
-    public Response addGlobalScope(ScopeDTO body, MessageContext messageContext) throws APIManagementException {
+    public Response addSharedScope(ScopeDTO body, MessageContext messageContext) throws APIManagementException {
 
         String scopeName = body.getName();
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             if (StringUtils.isEmpty(scopeName)) {
-                throw new APIManagementException("Global Scope Name cannot be null or empty",
-                        ExceptionCodes.GLOBAL_SCOPE_NAME_NOT_SPECIFIED);
+                throw new APIManagementException("Shared Scope Name cannot be null or empty",
+                        ExceptionCodes.SHARED_SCOPE_NAME_NOT_SPECIFIED);
             }
             if (apiProvider.isScopeKeyExist(scopeName, tenantDomain)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.SCOPE_ALREADY_REGISTERED,
                         scopeName));
             }
-            Scope scopeToAdd = GlobalScopeMappingUtil.fromDTOToScope(body);
-            String globalScopeId = apiProvider.addGlobalScope(scopeToAdd, tenantDomain);
-            //Get registered global scope
-            Scope createdScope = apiProvider.getGlobalScopeByUUID(globalScopeId, tenantDomain);
-            ScopeDTO createdScopeDTO = GlobalScopeMappingUtil.fromScopeToDTO(createdScope);
-            String createdScopeURIString = RestApiConstants.RESOURCE_PATH_GLOBAL_SCOPES_SCOPE_ID
-                    .replace(RestApiConstants.GLOBAL_SCOPE_ID_PARAM, createdScopeDTO.getId());
+            Scope scopeToAdd = SharedScopeMappingUtil.fromDTOToScope(body);
+            String sharedScopeId = apiProvider.addSharedScope(scopeToAdd, tenantDomain);
+            //Get registered shared scope
+            Scope createdScope = apiProvider.getSharedScopeByUUID(sharedScopeId, tenantDomain);
+            ScopeDTO createdScopeDTO = SharedScopeMappingUtil.fromScopeToDTO(createdScope);
+            String createdScopeURIString = RestApiConstants.RESOURCE_PATH_SHARED_SCOPES_SCOPE_ID
+                    .replace(RestApiConstants.SHARED_SCOPE_ID_PARAM, createdScopeDTO.getId());
             URI createdScopeURI = new URI(createdScopeURIString);
             return Response.created(createdScopeURI).entity(createdScopeDTO).build();
         } catch (URISyntaxException e) {
-            throw new APIManagementException("Error while creating global scope: " + scopeName, e);
+            throw new APIManagementException("Error while creating shared scope: " + scopeName, e);
         }
     }
 
     /**
-     * Delete global scope.
+     * Delete shared scope.
      *
      * @param scopeId        Scope UUID
      * @param messageContext CXF Message Context
      * @return Deletion Response
-     * @throws APIManagementException If an error occurs while deleting global scope
+     * @throws APIManagementException If an error occurs while deleting shared scope
      */
-    public Response deleteGlobalScope(String scopeId, MessageContext messageContext) throws APIManagementException {
+    public Response deleteSharedScope(String scopeId, MessageContext messageContext) throws APIManagementException {
 
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         if (StringUtils.isEmpty(scopeId)) {
             throw new APIManagementException("Scope Id cannot be null or empty",
-                    ExceptionCodes.GLOBAL_SCOPE_ID_NOT_SPECIFIED);
+                    ExceptionCodes.SHARED_SCOPE_ID_NOT_SPECIFIED);
         }
-        Scope existingScope = apiProvider.getGlobalScopeByUUID(scopeId, tenantDomain);
+        Scope existingScope = apiProvider.getSharedScopeByUUID(scopeId, tenantDomain);
         if (apiProvider.isScopeKeyAssignedToAPI(existingScope.getName(), tenantDomain)) {
-            throw new APIManagementException("Cannot remove the Global Scope " + scopeId + " as it is used by one "
-                    + "or more APIs", ExceptionCodes.from(ExceptionCodes.GLOBAL_SCOPE_ALREADY_ATTACHED, scopeId));
+            throw new APIManagementException("Cannot remove the Shared Scope " + scopeId + " as it is used by one "
+                    + "or more APIs", ExceptionCodes.from(ExceptionCodes.SHARED_SCOPE_ALREADY_ATTACHED, scopeId));
         }
-        apiProvider.deleteGlobalScope(existingScope.getName(), tenantDomain);
+        apiProvider.deleteSharedScope(existingScope.getName(), tenantDomain);
         return Response.ok().build();
     }
 
     /**
-     * Get global scope by Id.
+     * Get shared scope by Id.
      *
      * @param scopeId        UUID of the scope
      * @param messageContext CXF Message Context
-     * @return Global Scope DTO
-     * @throws APIManagementException If an error occurs while getting global scope
+     * @return Shared Scope DTO
+     * @throws APIManagementException If an error occurs while getting shared scope
      */
-    public Response getGlobalScope(String scopeId, MessageContext messageContext) throws APIManagementException {
+    public Response getSharedScope(String scopeId, MessageContext messageContext) throws APIManagementException {
 
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         if (StringUtils.isEmpty(scopeId)) {
             throw new APIManagementException("Scope Id cannot be null or empty",
-                    ExceptionCodes.GLOBAL_SCOPE_ID_NOT_SPECIFIED);
+                    ExceptionCodes.SHARED_SCOPE_ID_NOT_SPECIFIED);
         }
-        Scope scope = apiProvider.getGlobalScopeByUUID(scopeId, tenantDomain);
-        ScopeDTO scopeDTO = GlobalScopeMappingUtil.fromScopeToDTO(scope);
+        Scope scope = apiProvider.getSharedScopeByUUID(scopeId, tenantDomain);
+        ScopeDTO scopeDTO = SharedScopeMappingUtil.fromScopeToDTO(scope);
         return Response.ok().entity(scopeDTO).build();
     }
 
     /**
-     * Get all global scopes for tenant.
+     * Get all shared scopes for tenant.
      * TODO: Add pagination from rest api layer only
      *
      * @param messageContext CXF Message Context
-     * @return Global Scopes DTO List
-     * @throws APIManagementException if an error occurs while retrieving global scope
+     * @return Shared Scopes DTO List
+     * @throws APIManagementException if an error occurs while retrieving shared scope
      */
-    public Response getGlobalScopes(MessageContext messageContext) throws APIManagementException {
+    public Response getSharedScopes(MessageContext messageContext) throws APIManagementException {
 
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
-        List<Scope> scopeList = apiProvider.getAllGlobalScopes(tenantDomain);
-        ScopeListDTO globalScopeListDTO = GlobalScopeMappingUtil.fromScopeListToDTO(scopeList);
-        return Response.ok().entity(globalScopeListDTO).build();
+        List<Scope> scopeList = apiProvider.getAllSharedScopes(tenantDomain);
+        ScopeListDTO sharedScopeListDTO = SharedScopeMappingUtil.fromScopeListToDTO(scopeList);
+        return Response.ok().entity(sharedScopeListDTO).build();
     }
 
     /**
-     * Update Global Scope By Id.
+     * Update Shared Scope By Id.
      *
-     * @param scopeId        Global Scope Id
-     * @param body           Global Scope DTO
+     * @param scopeId        Shared Scope Id
+     * @param body           Shared Scope DTO
      * @param messageContext CXF Message Context
-     * @return Updated Global Scope DTO
-     * @throws APIManagementException if an error occurs while updating global scope
+     * @return Updated Shared Scope DTO
+     * @throws APIManagementException if an error occurs while updating shared scope
      */
-    public Response updateGlobalScope(String scopeId, ScopeDTO body, MessageContext messageContext)
+    public Response updateSharedScope(String scopeId, ScopeDTO body, MessageContext messageContext)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         if (StringUtils.isEmpty(scopeId)) {
-            throw new APIManagementException("Global Scope Id cannot be null or empty",
-                    ExceptionCodes.GLOBAL_SCOPE_ID_NOT_SPECIFIED);
+            throw new APIManagementException("Shared Scope Id cannot be null or empty",
+                    ExceptionCodes.SHARED_SCOPE_ID_NOT_SPECIFIED);
         }
-        Scope existingScope = apiProvider.getGlobalScopeByUUID(scopeId, tenantDomain);
+        Scope existingScope = apiProvider.getSharedScopeByUUID(scopeId, tenantDomain);
         //Override scope Id and name in request body from existing scope
         body.setId(existingScope.getId());
         body.setName(existingScope.getName());
-        Scope scope = GlobalScopeMappingUtil.fromDTOToScope(body);
-        apiProvider.updateGlobalScope(scope, tenantDomain);
-        //Get updated global scope
-        scope = apiProvider.getGlobalScopeByUUID(scope.getId(), tenantDomain);
-        ScopeDTO updatedScopeDTO = GlobalScopeMappingUtil.fromScopeToDTO(scope);
+        Scope scope = SharedScopeMappingUtil.fromDTOToScope(body);
+        apiProvider.updateSharedScope(scope, tenantDomain);
+        //Get updated shared scope
+        scope = apiProvider.getSharedScopeByUUID(scope.getId(), tenantDomain);
+        ScopeDTO updatedScopeDTO = SharedScopeMappingUtil.fromScopeToDTO(scope);
         return Response.ok().entity(updatedScopeDTO).build();
     }
 }

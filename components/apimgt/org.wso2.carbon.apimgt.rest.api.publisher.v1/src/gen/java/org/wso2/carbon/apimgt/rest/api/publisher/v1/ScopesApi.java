@@ -41,82 +41,82 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add a new Global Scope", notes = "This operation can be used to add a new Global Scope. ", response = ScopeDTO.class, authorizations = {
+    @ApiOperation(value = "Add a new Shared Scope", notes = "This operation can be used to add a new Shared Scope. ", response = ScopeDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:global_scope_manage", description = "Manage global scopes")
+            @AuthorizationScope(scope = "apim:shared_scope_manage", description = "Manage shared scopes")
         })
     }, tags={ "Scopes",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created Scope object as an entity in the body. ", response = ScopeDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = Void.class) })
-    public Response addGlobalScope(@ApiParam(value = "Scope object that needs to be added " ,required=true) ScopeDTO body) throws APIManagementException{
-        return delegate.addGlobalScope(body, securityContext);
+    public Response addSharedScope(@ApiParam(value = "Scope object that needs to be added " ,required=true) ScopeDTO body) throws APIManagementException{
+        return delegate.addSharedScope(body, securityContext);
     }
 
     @DELETE
     @Path("/{scopeId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete a Global Scope", notes = "This operation can be used to delete a Global Scope proving the Id of the scope. ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Delete a Shared Scope", notes = "This operation can be used to delete a Shared Scope proving the Id of the scope. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:global_scope_manage", description = "Manage global scopes")
+            @AuthorizationScope(scope = "apim:shared_scope_manage", description = "Manage shared scopes")
         })
     }, tags={ "Scopes",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be deleted does not exist. ", response = ErrorDTO.class) })
-    public Response deleteGlobalScope(@ApiParam(value = "Scope Id consisting the UUID of the global scope ",required=true) @PathParam("scopeId") String scopeId) throws APIManagementException{
-        return delegate.deleteGlobalScope(scopeId, securityContext);
+    public Response deleteSharedScope(@ApiParam(value = "Scope Id consisting the UUID of the shared scope ",required=true) @PathParam("scopeId") String scopeId) throws APIManagementException{
+        return delegate.deleteSharedScope(scopeId, securityContext);
     }
 
     @GET
     @Path("/{scopeId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get a Global Scope by Scope Id", notes = "This operation can be used to retrieve details of a Global Scope by a given scope Id. ", response = ScopeDTO.class, authorizations = {
+    @ApiOperation(value = "Get a Shared Scope by Scope Id", notes = "This operation can be used to retrieve details of a Shared Scope by a given scope Id. ", response = ScopeDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "Scopes",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Requested Global Scope is returned. ", response = ScopeDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested Global Scope does not exist. ", response = ErrorDTO.class) })
-    public Response getGlobalScope(@ApiParam(value = "Scope Id consisting the UUID of the global scope ",required=true) @PathParam("scopeId") String scopeId) throws APIManagementException{
-        return delegate.getGlobalScope(scopeId, securityContext);
+        @ApiResponse(code = 200, message = "OK. Requested Shared Scope is returned. ", response = ScopeDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested Shared Scope does not exist. ", response = ErrorDTO.class) })
+    public Response getSharedScope(@ApiParam(value = "Scope Id consisting the UUID of the shared scope ",required=true) @PathParam("scopeId") String scopeId) throws APIManagementException{
+        return delegate.getSharedScope(scopeId, securityContext);
     }
 
     @GET
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all available Global Scopes", notes = "This operation can be used to get all the available Global Scopes. ", response = ScopeListDTO.class, authorizations = {
+    @ApiOperation(value = "Get all available Shared Scopes", notes = "This operation can be used to get all the available Shared Scopes. ", response = ScopeListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "Scopes",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Global Scope list is returned. ", response = ScopeListDTO.class),
-        @ApiResponse(code = 500, message = "Internal server error while retrieving global scope list", response = ErrorDTO.class) })
-    public Response getGlobalScopes() throws APIManagementException{
-        return delegate.getGlobalScopes(securityContext);
+        @ApiResponse(code = 200, message = "OK. Shared Scope list is returned. ", response = ScopeListDTO.class),
+        @ApiResponse(code = 500, message = "Internal server error while retrieving shared scope list", response = ErrorDTO.class) })
+    public Response getSharedScopes() throws APIManagementException{
+        return delegate.getSharedScopes(securityContext);
     }
 
     @PUT
     @Path("/{scopeId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update a Global Scope", notes = "This operation can be used to update a Global Scope by a given scope Id. ", response = ScopeDTO.class, authorizations = {
+    @ApiOperation(value = "Update a Shared Scope", notes = "This operation can be used to update a Shared Scope by a given scope Id. ", response = ScopeDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:global_scope_manage", description = "Manage global scopes")
+            @AuthorizationScope(scope = "apim:shared_scope_manage", description = "Manage shared scopes")
         })
     }, tags={ "Scopes",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with updated Scope object ", response = ScopeDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class) })
-    public Response updateGlobalScope(@ApiParam(value = "Scope Id consisting the UUID of the global scope ",required=true) @PathParam("scopeId") String scopeId, @ApiParam(value = "Scope object that needs to be updated " ,required=true) ScopeDTO body) throws APIManagementException{
-        return delegate.updateGlobalScope(scopeId, body, securityContext);
+    public Response updateSharedScope(@ApiParam(value = "Scope Id consisting the UUID of the shared scope ",required=true) @PathParam("scopeId") String scopeId, @ApiParam(value = "Scope object that needs to be updated " ,required=true) ScopeDTO body) throws APIManagementException{
+        return delegate.updateSharedScope(scopeId, body, securityContext);
     }
 
     @HEAD

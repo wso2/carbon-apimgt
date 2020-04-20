@@ -4137,17 +4137,17 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (!(APIUtil.isWhiteListedScope(scopeName))) {
                 // Check if each scope key is already assigned as a local scope to a different API which is also not a
                 // different version of the same API. If true, return error.
-                // If false, check if the scope key is already defined as a global scope. If so, do not honor the
+                // If false, check if the scope key is already defined as a shared scope. If so, do not honor the
                 // other scope attributes (description, role bindings) in the request payload, replace them with
-                // already defined values for the existing global scope.
+                // already defined values for the existing shared scope.
                 if (apiProvider.isScopeKeyAssignedLocally(apiId, scopeName, tenantId)) {
                     RestApiUtil
                             .handleBadRequest("Scope " + scopeName + " is already assigned locally by another "
                                     + "API", log);
-                } else if (apiProvider.isGlobalScopeNameExists(scopeName, tenantDomain)) {
-                    Scope globalScope = apiProvider.getGlobalScopeByName(scopeName, tenantDomain);
-                    scope.setDescription(globalScope.getDescription());
-                    scope.setRoles(globalScope.getRoles());
+                } else if (apiProvider.isSharedScopeNameExists(scopeName, tenantDomain)) {
+                    Scope sharedScope = apiProvider.getSharedScopeByName(scopeName, tenantDomain);
+                    scope.setDescription(sharedScope.getDescription());
+                    scope.setRoles(sharedScope.getRoles());
                 }
             }
             //set description as empty if it is not provided
