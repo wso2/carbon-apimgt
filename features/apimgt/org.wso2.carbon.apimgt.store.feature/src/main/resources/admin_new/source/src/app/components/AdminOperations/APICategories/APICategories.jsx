@@ -83,12 +83,10 @@ export default function APICategories() {
     const restApi = new API();
     const [mgLabels, setMgLabels] = useState([]);
 
-    useEffect(() => {
-        restApi.apiCategoriesListGet()
-            .then((result) => {
-                setMgLabels(result.body.list);
-            });
-    }, []);
+    restApi.apiCategoriesListGet()
+        .then((result) => {
+            setMgLabels(result.body.list);
+        });
     const title = (
         <FormattedMessage
             id='create.banner.title.create.api.categories'
@@ -168,8 +166,8 @@ export default function APICategories() {
     );
 }
 APICategories.defaultProps = {
-    api: {},
+    testprop: 'testpropva;',
 };
-APICategories.propTypes = {
-    api: PropTypes.shape({}),
-};
+// APICategories.propTypes = {
+//     testprop: PropTypes.shape(),
+// };
