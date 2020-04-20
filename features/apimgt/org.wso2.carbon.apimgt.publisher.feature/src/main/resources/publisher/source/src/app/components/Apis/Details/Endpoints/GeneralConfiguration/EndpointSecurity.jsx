@@ -134,7 +134,7 @@ function EndpointSecurity(props) {
                         { ...endpointSecurityInfo, username: event.target.value },
                     )}
                     value={endpointSecurityInfo.username}
-                    onBlur={() => validateAndUpdateSecurityInfo(isProduction)}
+                    onBlur={() => validateAndUpdateSecurityInfo('username')}
                 />
             </Grid>
 
@@ -170,7 +170,7 @@ function EndpointSecurity(props) {
                     onChange={(event) => setEndpointSecurityInfo(
                         { ...endpointSecurityInfo, password: event.target.value },
                     )}
-                    onBlur={() => validateAndUpdateSecurityInfo(isProduction)}
+                    onBlur={() => validateAndUpdateSecurityInfo('password')}
                 />
             </Grid>
         </Grid>

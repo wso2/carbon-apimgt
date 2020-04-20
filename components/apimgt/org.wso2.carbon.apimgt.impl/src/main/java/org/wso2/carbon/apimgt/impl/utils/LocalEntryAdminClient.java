@@ -22,10 +22,12 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.client.Stub;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.util.URL;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.localentry.stub.APILocalEntryAdminStub;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
@@ -45,15 +47,16 @@ public class LocalEntryAdminClient {
 
     public LocalEntryAdminClient(Environment environment, String tenantDomain) throws AxisFault {
         this.tenantDomain = tenantDomain;
-        localEntryAdminServiceStub = new APILocalEntryAdminStub(null,
+        ConfigurationContext configurationContext = ServiceReferenceHolder.getContextService().getClientConfigContext();
+        localEntryAdminServiceStub = new APILocalEntryAdminStub(configurationContext,
                 environment.getServerURL() + "APILocalEntryAdmin");
-        setup(localEntryAdminServiceStub, environment);
+        setup(localEntryAdminServiceStub, environment, configurationContext);
         CarbonUtils.setBasicAccessSecurityHeaders(environment.getUserName(), environment.getPassword(),
                 localEntryAdminServiceStub._getServiceClient());
     }
 
-    protected final void setup(Stub stub, Environment environment) throws AxisFault {
-        String cookie = gatewayLogin(environment);
+    protected final void setup(Stub stub, Environment environment, ConfigurationContext configurationContext) throws AxisFault {
+        String cookie = gatewayLogin(environment, configurationContext);
         ServiceClient serviceClient = stub._getServiceClient();
         Options options = serviceClient.getOptions();
         options.setTimeOutInMilliSeconds(15 * 60 * 1000);
@@ -64,7 +67,7 @@ public class LocalEntryAdminClient {
 
     }
 
-    private String gatewayLogin(Environment environment) throws AxisFault {
+    private String gatewayLogin(Environment environment, ConfigurationContext configurationContext) throws AxisFault {
         String userName = environment.getUserName();
         String password = environment.getPassword();
         String serverURL = environment.getServerURL();
@@ -74,7 +77,7 @@ public class LocalEntryAdminClient {
         }
         String host;
         host = new URL(serverURL).getHost();
-        AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null,
+        AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(configurationContext,
                 serverURL + "AuthenticationAdmin");
         ServiceClient client = authAdminStub._getServiceClient();
         Options options = client.getOptions();
