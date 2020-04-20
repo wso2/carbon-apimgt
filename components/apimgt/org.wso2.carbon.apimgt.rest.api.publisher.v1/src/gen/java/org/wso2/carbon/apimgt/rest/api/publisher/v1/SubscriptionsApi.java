@@ -83,7 +83,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         })
     }, tags={ "Subscriber",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Details of a pending invoice returned. ", response = SubscriberInfoDTO.class),
+        @ApiResponse(code = 200, message = "OK.  Details of the subscriber are returned. ", response = SubscriberInfoDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Subscription does not exist. ", response = ErrorDTO.class) })
     public Response subscriptionsSubscriptionIdSubscriberInfoGet(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId) throws APIManagementException{
         return delegate.subscriptionsSubscriptionIdSubscriberInfoGet(subscriptionId, securityContext);
