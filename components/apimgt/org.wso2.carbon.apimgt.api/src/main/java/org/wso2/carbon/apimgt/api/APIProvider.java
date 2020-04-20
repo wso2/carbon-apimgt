@@ -1330,78 +1330,78 @@ public interface APIProvider extends APIManager {
     List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI);
 
     /**
-     * Check whether the given scope name exists as a global scope in the tenant domain.
+     * Check whether the given scope name exists as a shared scope in the tenant domain.
      *
-     * @param scopeName    Global Scope name
+     * @param scopeName    Shared Scope name
      * @param tenantDomain Tenant Domain
      * @return Scope availability
      * @throws APIManagementException if failed to check the availability
      */
-    Boolean isGlobalScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException;
+    Boolean isSharedScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException;
 
     /**
-     * Add a global scope.
+     * Add a shared scope.
      *
-     * @param scope        Global Scope
+     * @param scope        Shared Scope
      * @param tenantDomain Tenant domain
-     * @return UUID of the added Global Scope
+     * @return UUID of the added Shared Scope
      * @throws APIManagementException if failed to add a scope
      */
-    String addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException;
+    String addSharedScope(Scope scope, String tenantDomain) throws APIManagementException;
 
     /**
-     * Get all available global scopes.
+     * Get all available shared scopes.
      *
      * @param tenantDomain tenant domain
-     * @return Global Scope list
+     * @return Shared Scope list
      * @throws APIManagementException if failed to get the scope list
      */
-    List<Scope> getAllGlobalScopes(String tenantDomain) throws APIManagementException;
+    List<Scope> getAllSharedScopes(String tenantDomain) throws APIManagementException;
 
     /**
-     * Get all available global scope keys.
+     * Get all available shared scope keys.
      *
      * @param tenantDomain tenant domain
-     * @return Global Scope Keyset
+     * @return Shared Scope Keyset
      * @throws APIManagementException if failed to get the scope key set
      */
-    Set<String> getAllGlobalScopeKeys(String tenantDomain) throws APIManagementException;
+    Set<String> getAllSharedScopeKeys(String tenantDomain) throws APIManagementException;
 
     /**
-     * Get global scope by UUID.
+     * Get shared scope by UUID.
      *
-     * @param globalScopeId Global scope Id
+     * @param sharedScopeId Shared scope Id
      * @param tenantDomain  tenant domain
-     * @return Global Scope
+     * @return Shared Scope
      * @throws APIManagementException If failed to get the scope
      */
-    Scope getGlobalScopeByUUID(String globalScopeId, String tenantDomain) throws APIManagementException;
+    Scope getSharedScopeByUUID(String sharedScopeId, String tenantDomain) throws APIManagementException;
 
     /**
-     * Get global scope by name.
+     * Get shared scope by name.
      *
-     * @param globalScopeName Global scope name
+     * @param sharedScopeName Shared scope name
      * @param tenantDomain    tenant domain
-     * @return Global scope
+     * @return Shared scope
      * @throws APIManagementException If failed to get the scope
      */
-    Scope getGlobalScopeByName(String globalScopeName, String tenantDomain) throws APIManagementException;
+    Scope getSharedScopeByName(String sharedScopeName, String tenantDomain) throws APIManagementException;
 
     /**
-     * Delete global scope.
+     * Delete shared scope.
      *
-     * @param scopeName Global scope name
+     * @param scopeName Shared scope name
      * @param tenantDomain  tenant domain
      * @throws APIManagementException If failed to delete the scope
      */
-    void deleteGlobalScope(String scopeName, String tenantDomain) throws APIManagementException;
+    void deleteSharedScope(String scopeName, String tenantDomain) throws APIManagementException;
 
     /**
-     * Update a global scope.
+     * Update a shared scope.
      *
-     * @param globalScope  Global Scope
+     * @param sharedScope  Shared Scope
      * @param tenantDomain tenant domain
      * @throws APIManagementException If failed to update
      */
-    void updateGlobalScope(Scope globalScope, String tenantDomain) throws APIManagementException;
+    void updateSharedScope(Scope sharedScope, String tenantDomain) throws APIManagementException;
 }

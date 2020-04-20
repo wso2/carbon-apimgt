@@ -226,7 +226,7 @@
         "Roles": "admin"
       },
       {
-        "Name": "apim:global_scope_manage",
+        "Name": "apim:shared_scope_manage",
         "Roles": "admin"
       },
       {

@@ -7954,63 +7954,63 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Check whether the given scope name exists as a global scope in the tenant domain.
+     * Check whether the given scope name exists as a shared scope in the tenant domain.
      *
-     * @param scopeName    Global Scope name
+     * @param scopeName    Shared Scope name
      * @param tenantDomain Tenant Domain
      * @return Scope availability
      * @throws APIManagementException if failed to check the availability
      */
     @Override
-    public Boolean isGlobalScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException {
+    public Boolean isSharedScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Checking whether scope name: " + scopeName + " exists as a global scope in tenant: "
+            log.debug("Checking whether scope name: " + scopeName + " exists as a shared scope in tenant: "
                     + tenantDomain);
         }
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        return ApiMgtDAO.getInstance().isGlobalScopeExists(scopeName, tenantId);
+        return ApiMgtDAO.getInstance().isSharedScopeExists(scopeName, tenantId);
     }
 
     /**
-     * Add Global Scope by registering it in the KM and adding the scope as a Global Scope in AM DB.
+     * Add Shared Scope by registering it in the KM and adding the scope as a Shared Scope in AM DB.
      *
-     * @param scope        Global Scope
+     * @param scope        Shared Scope
      * @param tenantDomain Tenant domain
-     * @return UUId of the added Global Scope object
+     * @return UUId of the added Shared Scope object
      * @throws APIManagementException if failed to add a scope
      */
     @Override
-    public String addGlobalScope(Scope scope, String tenantDomain) throws APIManagementException {
+    public String addSharedScope(Scope scope, String tenantDomain) throws APIManagementException {
 
         KeyManagerHolder.getKeyManagerInstance().registerScope(scope, tenantDomain);
         if (log.isDebugEnabled()) {
-            log.debug("Adding global scope mapping: " + scope.getName());
+            log.debug("Adding shared scope mapping: " + scope.getName());
         }
-        return ApiMgtDAO.getInstance().addGlobalScope(scope, tenantDomain);
+        return ApiMgtDAO.getInstance().addSharedScope(scope, tenantDomain);
     }
 
     /**
-     * Get all available global scopes.
+     * Get all available shared scopes.
      *
      * @param tenantDomain tenant domain
-     * @return Global Scope list
+     * @return Shared Scope list
      * @throws APIManagementException if failed to get the scope list
      */
     @Override
-    public List<Scope> getAllGlobalScopes(String tenantDomain) throws APIManagementException {
+    public List<Scope> getAllSharedScopes(String tenantDomain) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Retrieving all the global scopes for tenant: " + tenantDomain);
+            log.debug("Retrieving all the shared scopes for tenant: " + tenantDomain);
         }
-        //Get all global scopes
-        List<Scope> allGlobalScopes = ApiMgtDAO.getInstance().getAllGlobalScopes(tenantDomain);
+        //Get all shared scopes
+        List<Scope> allSharedScopes = ApiMgtDAO.getInstance().getAllSharedScopes(tenantDomain);
         //Get all scopes from KM
         Map<String, Scope> allScopes = KeyManagerHolder.getKeyManagerInstance().getAllScopes(tenantDomain);
-        //Set name, roles and description to global scopes
-        for (Scope scope : allGlobalScopes) {
+        //Set name, roles and description to shared scopes
+        for (Scope scope : allSharedScopes) {
             if (!allScopes.containsKey(scope.getKey())) {
-                log.error("No matching scope found in authorization server for global scope name: " + scope.getKey());
+                log.error("No matching scope found in authorization server for shared scope name: " + scope.getKey());
             } else {
                 Scope kmScope = allScopes.get(scope.getKey());
                 scope.setName(kmScope.getName());
@@ -8018,90 +8018,90 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 scope.setDescription(kmScope.getDescription());
             }
         }
-        return allGlobalScopes;
+        return allSharedScopes;
     }
 
     /**
-     * Get all available global scope keys.
+     * Get all available shared scope keys.
      *
      * @param tenantDomain tenant domain
-     * @return Global Scope Keyset
+     * @return Shared Scope Keyset
      * @throws APIManagementException if failed to get the scope key set
      */
     @Override
-    public Set<String> getAllGlobalScopeKeys(String tenantDomain) throws APIManagementException {
+    public Set<String> getAllSharedScopeKeys(String tenantDomain) throws APIManagementException {
 
-        //Get all global scope keys
-        return ApiMgtDAO.getInstance().getAllGlobalScopeKeys(tenantDomain);
+        //Get all shared scope keys
+        return ApiMgtDAO.getInstance().getAllSharedScopeKeys(tenantDomain);
     }
 
     /**
-     * Get global scope by UUID.
+     * Get shared scope by UUID.
      *
-     * @param globalScopeId Global scope Id
+     * @param sharedScopeId Shared scope Id
      * @param tenantDomain  tenant domain
-     * @return Global Scope
+     * @return Shared Scope
      * @throws APIManagementException If failed to get the scope
      */
     @Override
-    public Scope getGlobalScopeByUUID(String globalScopeId, String tenantDomain) throws APIManagementException {
+    public Scope getSharedScopeByUUID(String sharedScopeId, String tenantDomain) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Retrieving global scope: " + globalScopeId);
+            log.debug("Retrieving shared scope: " + sharedScopeId);
         }
-        Scope scope = ApiMgtDAO.getInstance().getGlobalScope(globalScopeId);
+        Scope scope = ApiMgtDAO.getInstance().getSharedScope(sharedScopeId);
         if (scope != null) {
             scope = KeyManagerHolder.getKeyManagerInstance().getScopeByName(scope.getKey(), tenantDomain);
-            scope.setId(globalScopeId);
+            scope.setId(sharedScopeId);
         } else {
-            throw new APIMgtResourceNotFoundException("Global Scope not found for scope ID: " + globalScopeId,
-                    ExceptionCodes.from(ExceptionCodes.GLOBAL_SCOPE_NOT_FOUND, globalScopeId));
+            throw new APIMgtResourceNotFoundException("Shared Scope not found for scope ID: " + sharedScopeId,
+                    ExceptionCodes.from(ExceptionCodes.SHARED_SCOPE_NOT_FOUND, sharedScopeId));
         }
         return scope;
     }
 
     /**
-     * Get global scope by name.
+     * Get shared scope by name.
      *
-     * @param globalScopeName Global scope name
+     * @param sharedScopeName Shared scope name
      * @param tenantDomain    tenant domain
-     * @return Global scope
+     * @return Shared scope
      * @throws APIManagementException If failed to get the scope
      */
     @Override
-    public Scope getGlobalScopeByName(String globalScopeName, String tenantDomain) throws APIManagementException {
+    public Scope getSharedScopeByName(String sharedScopeName, String tenantDomain) throws APIManagementException {
 
-        return KeyManagerHolder.getKeyManagerInstance().getScopeByName(globalScopeName, tenantDomain);
+        return KeyManagerHolder.getKeyManagerInstance().getScopeByName(sharedScopeName, tenantDomain);
     }
 
     /**
-     * Delete global scope.
+     * Delete shared scope.
      *
-     * @param scopeName    Global scope name
+     * @param scopeName    Shared scope name
      * @param tenantDomain tenant domain
      * @throws APIManagementException If failed to delete the scope
      */
     @Override
-    public void deleteGlobalScope(String scopeName, String tenantDomain) throws APIManagementException {
+    public void deleteSharedScope(String scopeName, String tenantDomain) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Deleting globalScope " + scopeName);
+            log.debug("Deleting shared scope " + scopeName);
         }
         KeyManagerHolder.getKeyManagerInstance().deleteScope(scopeName, tenantDomain);
-        ApiMgtDAO.getInstance().deleteGlobalScope(scopeName, tenantDomain);
+        ApiMgtDAO.getInstance().deleteSharedScope(scopeName, tenantDomain);
     }
 
     /**
-     * Update a global scope.
+     * Update a shared scope.
      *
-     * @param globalScope  Global Scope
+     * @param sharedScope  Shared Scope
      * @param tenantDomain tenant domain
      * @throws APIManagementException If failed to update
      */
     @Override
-    public void updateGlobalScope(Scope globalScope, String tenantDomain) throws APIManagementException {
+    public void updateSharedScope(Scope sharedScope, String tenantDomain) throws APIManagementException {
 
-        KeyManagerHolder.getKeyManagerInstance().updateScope(globalScope, tenantDomain);
+        KeyManagerHolder.getKeyManagerInstance().updateScope(sharedScope, tenantDomain);
     }
 
     /**

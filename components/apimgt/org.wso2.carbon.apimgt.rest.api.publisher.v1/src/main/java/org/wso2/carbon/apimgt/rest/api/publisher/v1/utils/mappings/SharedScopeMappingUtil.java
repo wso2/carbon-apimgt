@@ -14,11 +14,11 @@ import java.util.List;
 /**
  * This class is responsible for mapping Scope Objects into REST API Scope related DTOs.
  */
-public class GlobalScopeMappingUtil {
+public class SharedScopeMappingUtil {
 
-    private GlobalScopeMappingUtil() {
+    private SharedScopeMappingUtil() {
 
-        throw new IllegalStateException("GlobalScope Mapping Utility class");
+        throw new IllegalStateException("SharedScope Mapping Utility class");
     }
 
     /**
@@ -42,8 +42,8 @@ public class GlobalScopeMappingUtil {
             bindingsDTO.setValues(Arrays.asList((roles).split(",")));
         }
         scopeDTO.setBindings(bindingsDTO);
-        // Set isGlobal true by default
-        scopeDTO.setIsGlobal(Boolean.TRUE);
+        // Set isShared true by default
+        scopeDTO.setIsShared(Boolean.TRUE);
         return scopeDTO;
     }
 
@@ -68,23 +68,23 @@ public class GlobalScopeMappingUtil {
     }
 
     /**
-     * Converts a list of Scope objects into a GlobalScopeListDTO.
+     * Converts a list of Scope objects into a SharedScopeListDTO.
      *
      * @param scopeList List of Scope objects
-     * @return GlobalScopeListDTO object
+     * @return SharedScopeListDTO object
      */
     public static ScopeListDTO fromScopeListToDTO(List<Scope> scopeList) {
 
-        ScopeListDTO globalScopeListDTO = new ScopeListDTO();
-        List<ScopeDTO> scopeDTOList = globalScopeListDTO.getList();
+        ScopeListDTO sharedScopeListDTO = new ScopeListDTO();
+        List<ScopeDTO> scopeDTOList = sharedScopeListDTO.getList();
         if (scopeList == null) {
             scopeList = new ArrayList<>();
         }
         for (Scope scope : scopeList) {
             scopeDTOList.add(fromScopeToDTO(scope));
         }
-        globalScopeListDTO.setList(scopeDTOList);
-        globalScopeListDTO.setCount(scopeDTOList.size());
-        return globalScopeListDTO;
+        sharedScopeListDTO.setList(scopeDTOList);
+        sharedScopeListDTO.setCount(scopeDTOList.size());
+        return sharedScopeListDTO;
     }
 }
