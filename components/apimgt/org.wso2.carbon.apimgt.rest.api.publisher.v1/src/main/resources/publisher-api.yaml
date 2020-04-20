@@ -6746,6 +6746,9 @@ paths:
         This operation can be used to get all the available Shared Scopes.
       summary: Get all available Shared Scopes
       operationId: getSharedScopes
+      parameters:
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
       tags:
         - Scopes
       responses:
@@ -8866,6 +8869,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Scope'
+      pagination:
+        $ref: '#/definitions/Pagination'
 
   #-----------------------------------------------------
   # The External-Store resource
