@@ -255,15 +255,15 @@ public enum ExceptionCodes implements ErrorHandler {
     BLOCK_CONDITION_ALREADY_EXISTS(900979, "The Block Condition exists.", 409, " The Block Condition already exists"),
     SYSTEM_APP_NOT_FOUND(900980, "System Application not found", 409, "System Application not found"),
 
-    GLOBAL_SCOPE_NOT_FOUND(900981, "Global Scope not found", 404,
-            "Requested Global Scope ID  %s could not be found"),
-    GLOBAL_SCOPE_ID_NOT_SPECIFIED(900982, "Global Scope ID not specified", 400,
-            "Global Scope ID not specified"),
-    GLOBAL_SCOPE_NAME_NOT_SPECIFIED(900983, "Global Scope name not specified", 400,
-            "Global Scope name not specified"),
+    SHARED_SCOPE_NOT_FOUND(900981, "Shared Scope not found", 404,
+            "Requested Shared Scope ID  %s could not be found"),
+    SHARED_SCOPE_ID_NOT_SPECIFIED(900982, "Shared Scope ID not specified", 400,
+            "Shared Scope ID not specified"),
+    SHARED_SCOPE_NAME_NOT_SPECIFIED(900983, "Shared Scope name not specified", 400,
+            "Shared Scope name not specified"),
     SCOPE_ALREADY_REGISTERED(900984, "Scope already exists", 409, "Scope %s already exists"),
-    GLOBAL_SCOPE_ALREADY_ATTACHED(900985, "Global Scope already attached", 409,
-            "Global Scope %s is already used by one or more APIs"),
+    SHARED_SCOPE_ALREADY_ATTACHED(900985, "Shared Scope already attached", 409,
+            "Shared Scope %s is already used by one or more APIs"),
     SCOPE_VALIDATION_FAILED(900986, "Scope validation failed", 412, "Scope validation failed"),
 
     //Dedicated container based gateway related Codes

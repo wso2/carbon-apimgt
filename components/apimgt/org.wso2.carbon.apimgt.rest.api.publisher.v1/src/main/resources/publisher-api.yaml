@@ -96,7 +96,7 @@ securityDefinitions:
       apim:ep_certificates_update: Update and delete backend endpoint certificates
       apim:publisher_settings: Retrieve store settings
       apim:pub_alert_manage: Get/ subscribe/ configure publisher alerts
-      apim:global_scope_manage: Manage global scopes
+      apim:shared_scope_manage: Manage shared scopes
 
 security:
   - OAuth2Security:
@@ -6761,7 +6761,7 @@ paths:
                 The content type of the body.
               type: string
         500:
-          description: Internal server error while retrieving global scope list
+          description: Internal server error while retrieving shared scope list
           schema:
             $ref: '#/definitions/Error'
 
@@ -6771,7 +6771,7 @@ paths:
     post:
       security:
         - OAuth2Security:
-            - apim:global_scope_manage
+            - apim:shared_scope_manage
       summary: Add a new Shared Scope
       description: |
         This operation can be used to add a new Shared Scope.
@@ -6849,12 +6849,12 @@ paths:
             $ref: '#/definitions/Error'
 
   #-------------------------------------------------------------
-  # Update a global scope
+  # Update a shared scope
   #-------------------------------------------------------------
     put:
       security:
         - OAuth2Security:
-            - apim:global_scope_manage
+            - apim:shared_scope_manage
       summary: Update a Shared Scope
       description: |
         This operation can be used to update a Shared Scope by a given scope Id.
@@ -6896,12 +6896,12 @@ paths:
             $ref: '#/definitions/Error'
 
   #-----------------------------------------------------
-  # Delete the global scope
+  # Delete the shared scope
   #-----------------------------------------------------
     delete:
       security:
         - OAuth2Security:
-            - apim:global_scope_manage
+            - apim:shared_scope_manage
       summary: Delete a Shared Scope
       description: |
         This operation can be used to delete a Shared Scope proving the Id of the scope.
@@ -7158,7 +7158,7 @@ parameters:
     name: scopeId
     in: path
     description: |
-      Scope Id consisting the UUID of the global scope
+      Scope Id consisting the UUID of the shared scope
     required: true
     type: string
 
@@ -8813,7 +8813,7 @@ definitions:
       isShared:
         type: boolean
         description: |
-          States whether scope is global. This will not be honored when updating/adding scopes to APIs or when
+          States whether scope is shared. This will not be honored when updating/adding scopes to APIs or when
           adding/updating Shared Scopes.
         example: true
 
