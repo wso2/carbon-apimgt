@@ -3,8 +3,9 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import LeftMenuItemPrimary from 'AppComponents/Shared/LeftMenuItemPrimary';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl } from 'react-intl';
-import MicroGateway from 'AppComponents/AdminPages/MicroGateway';
-import APICategories from 'AppComponents/AdminPages/APICategories';
+import MicroGateway from 'AppComponents/AdminOperations/MicroGateway';
+import APICategory from 'AppComponents/AdminOperations/APICategories';
+import CreateAPICategory from 'AppComponents/AdminOperations/APICategories/CreateAPICategory';
 
 const styles = (theme) => ({
     LeftMenu: {
@@ -274,7 +275,7 @@ const LeftMenu = (props) => {
                             <MicroGateway />
                         </Route>
                         <Route path={subPaths.CATEGORIES_API_CATEGORIES}>
-                            <APICategories />
+                            <APICategory />
                         </Route>
                         <Route path={subPaths.THROTTLINGPOLICIES_ADVANCED_POLICIES}>
                             <h1>Hello THROTTLINGPOLICIES_ADVANCED_POLICIES</h1>
