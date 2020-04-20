@@ -45,6 +45,7 @@ import javax.ws.rs.core.Response;
  * This is the service implementation class for scopes related operations
  */
 public class ScopesApiServiceImpl implements ScopesApiService {
+
     private static final Log log = LogFactory.getLog(ScopesApiServiceImpl.class);
 
     /**
@@ -54,7 +55,9 @@ public class ScopesApiServiceImpl implements ScopesApiService {
      * @param messageContext
      * @return boolean to indicate existence
      */
+    @Override
     public Response validateScope(String name, MessageContext messageContext) {
+
         boolean isScopeExist = false;
         String scopeName = new String(Base64.getUrlDecoder().decode(name));
         if (!APIUtil.isWhiteListedScope(scopeName)) {
@@ -82,6 +85,7 @@ public class ScopesApiServiceImpl implements ScopesApiService {
      * @return Created Scope as DTO
      * @throws APIManagementException If an error occurs while adding shared scope.
      */
+    @Override
     public Response addSharedScope(ScopeDTO body, MessageContext messageContext) throws APIManagementException {
 
         String scopeName = body.getName();
@@ -118,6 +122,7 @@ public class ScopesApiServiceImpl implements ScopesApiService {
      * @return Deletion Response
      * @throws APIManagementException If an error occurs while deleting shared scope
      */
+    @Override
     public Response deleteSharedScope(String scopeId, MessageContext messageContext) throws APIManagementException {
 
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -143,6 +148,7 @@ public class ScopesApiServiceImpl implements ScopesApiService {
      * @return Shared Scope DTO
      * @throws APIManagementException If an error occurs while getting shared scope
      */
+    @Override
     public Response getSharedScope(String scopeId, MessageContext messageContext) throws APIManagementException {
 
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -158,19 +164,26 @@ public class ScopesApiServiceImpl implements ScopesApiService {
 
     /**
      * Get all shared scopes for tenant.
-     * TODO: Add pagination from rest api layer only
      *
      * @param messageContext CXF Message Context
      * @return Shared Scopes DTO List
      * @throws APIManagementException if an error occurs while retrieving shared scope
      */
-    public Response getSharedScopes(MessageContext messageContext) throws APIManagementException {
+    @Override
+    public Response getSharedScopes(Integer limit, Integer offset, MessageContext messageContext)
+            throws APIManagementException {
 
+        // pre-processing
+        // setting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
         List<Scope> scopeList = apiProvider.getAllSharedScopes(tenantDomain);
-        ScopeListDTO sharedScopeListDTO = SharedScopeMappingUtil.fromScopeListToDTO(scopeList);
+        ScopeListDTO sharedScopeListDTO = SharedScopeMappingUtil.fromScopeListToDTO(scopeList, offset, limit);
+        SharedScopeMappingUtil
+                .setPaginationParams(sharedScopeListDTO, limit, offset, scopeList.size());
         return Response.ok().entity(sharedScopeListDTO).build();
     }
 
@@ -183,6 +196,7 @@ public class ScopesApiServiceImpl implements ScopesApiService {
      * @return Updated Shared Scope DTO
      * @throws APIManagementException if an error occurs while updating shared scope
      */
+    @Override
     public Response updateSharedScope(String scopeId, ScopeDTO body, MessageContext messageContext)
             throws APIManagementException {
 
