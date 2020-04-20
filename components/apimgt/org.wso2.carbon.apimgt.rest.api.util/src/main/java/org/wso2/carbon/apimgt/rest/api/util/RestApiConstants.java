@@ -195,6 +195,9 @@ public final class RestApiConstants {
     public static final String TAGS_GET_PAGINATION_URL =
             RESOURCE_PATH_TAGS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
+    public static final String SCOPES_GET_PAGINATION_URL =
+            RESOURCE_PATH_SHARED_SCOPES + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
     public static final String RESOURCE_PATH_PAGINATION_URL =
             RESOURCE_PATH_RESOURCE_PATHS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 

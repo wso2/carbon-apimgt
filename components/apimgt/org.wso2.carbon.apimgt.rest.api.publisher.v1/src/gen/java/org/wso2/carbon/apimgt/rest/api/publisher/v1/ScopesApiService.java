@@ -25,7 +25,7 @@ public interface ScopesApiService {
       public Response addSharedScope(ScopeDTO body, MessageContext messageContext) throws APIManagementException;
       public Response deleteSharedScope(String scopeId, MessageContext messageContext) throws APIManagementException;
       public Response getSharedScope(String scopeId, MessageContext messageContext) throws APIManagementException;
-      public Response getSharedScopes(MessageContext messageContext) throws APIManagementException;
+      public Response getSharedScopes(Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
       public Response updateSharedScope(String scopeId, ScopeDTO body, MessageContext messageContext) throws APIManagementException;
       public Response validateScope(String name, MessageContext messageContext) throws APIManagementException;
 }
