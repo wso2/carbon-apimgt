@@ -27,7 +27,6 @@ import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import Configurations from 'Config';
 import Avatar from './avatar/Avatar';
 import HeaderSearch from './headersearch/HeaderSearch';
-import AppContent from '../../../AppContents';
 
 const styles = (theme) => ({
     appBar: {
