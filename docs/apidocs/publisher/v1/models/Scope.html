@@ -27,7 +27,7 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">UUID of the Scope </p></td>
+                        <td class="parameter"><p class="marked">UUID of the Scope. Valid only for shared scopes. </p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
@@ -72,27 +72,12 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">role bindings list of the Scope </p></td>
                         <td class="parameter">
-                                <a href="#!/models#Scope_bindings">Scope_bindings</a>
+                                <a href="#!/models#array">array</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked"></p></td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <p>isShared</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td class="parameter"><p class="marked">States whether scope is shared. This will not be honored when updating/adding scopes to APIs or when adding/updating Shared Scopes. </p></td>
-                        <td class="parameter">
-                                <a href="#!/models#boolean">boolean</a>
-                        </td>
-                        <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">true</p></td>
+                        <td class="parameter"> <p class="marked">[&quot;admin&quot;,&quot;Internal/creator&quot;,&quot;Internal/publisher&quot;]</p></td>
                     </tr>
                 </tbody>
             </table>

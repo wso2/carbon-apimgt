@@ -3,7 +3,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -37,17 +36,12 @@ public class SharedScopeMappingUtil {
         scopeDTO.setName(scope.getKey());
         scopeDTO.setDescription(scope.getDescription());
         scopeDTO.setId(scope.getId());
-        ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
-        //TODO:// Set binding DEFAULT
         String roles = scope.getRoles();
         if (StringUtils.isEmpty(roles)) {
-            bindingsDTO.setValues(Collections.emptyList());
+            scopeDTO.setBindings(Collections.emptyList());
         } else {
-            bindingsDTO.setValues(Arrays.asList((roles).split(",")));
+            scopeDTO.setBindings(Arrays.asList((roles).split(",")));
         }
-        scopeDTO.setBindings(bindingsDTO);
-        // Set isShared true by default
-        scopeDTO.setIsShared(Boolean.TRUE);
         return scopeDTO;
     }
 
@@ -64,9 +58,8 @@ public class SharedScopeMappingUtil {
         scope.setDescription(scopeDTO.getDescription());
         scope.setKey(scopeDTO.getName());
         scope.setName(scopeDTO.getName());
-        ScopeBindingsDTO scopeBindingsDTO = scopeDTO.getBindings();
-        if (scopeBindingsDTO != null && scopeBindingsDTO.getValues() != null) {
-            scope.setRoles(String.join(",", scopeBindingsDTO.getValues()));
+        if (scopeDTO.getBindings() != null) {
+            scope.setRoles(String.join(",", scopeDTO.getBindings()));
         }
         return scope;
     }

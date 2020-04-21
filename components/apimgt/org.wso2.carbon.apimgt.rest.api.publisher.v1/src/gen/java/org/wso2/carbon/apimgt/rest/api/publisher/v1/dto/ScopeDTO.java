@@ -2,7 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -19,11 +20,10 @@ public class ScopeDTO   {
     private String id = null;
     private String name = null;
     private String description = null;
-    private ScopeBindingsDTO bindings = null;
-    private Boolean isShared = null;
+    private List<String> bindings = new ArrayList<>();
 
   /**
-   * UUID of the Scope 
+   * UUID of the Scope. Valid only for shared scopes. 
    **/
   public ScopeDTO id(String id) {
     this.id = id;
@@ -31,7 +31,7 @@ public class ScopeDTO   {
   }
 
   
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the Scope ")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the Scope. Valid only for shared scopes. ")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -78,38 +78,21 @@ public class ScopeDTO   {
   }
 
   /**
+   * role bindings list of the Scope 
    **/
-  public ScopeDTO bindings(ScopeBindingsDTO bindings) {
+  public ScopeDTO bindings(List<String> bindings) {
     this.bindings = bindings;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[\"admin\",\"Internal/creator\",\"Internal/publisher\"]", value = "role bindings list of the Scope ")
   @JsonProperty("bindings")
-  public ScopeBindingsDTO getBindings() {
+  public List<String> getBindings() {
     return bindings;
   }
-  public void setBindings(ScopeBindingsDTO bindings) {
+  public void setBindings(List<String> bindings) {
     this.bindings = bindings;
-  }
-
-  /**
-   * States whether scope is shared. This will not be honored when updating/adding scopes to APIs or when adding/updating Shared Scopes. 
-   **/
-  public ScopeDTO isShared(Boolean isShared) {
-    this.isShared = isShared;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "true", value = "States whether scope is shared. This will not be honored when updating/adding scopes to APIs or when adding/updating Shared Scopes. ")
-  @JsonProperty("isShared")
-  public Boolean isIsShared() {
-    return isShared;
-  }
-  public void setIsShared(Boolean isShared) {
-    this.isShared = isShared;
   }
 
 
@@ -125,13 +108,12 @@ public class ScopeDTO   {
     return Objects.equals(id, scope.id) &&
         Objects.equals(name, scope.name) &&
         Objects.equals(description, scope.description) &&
-        Objects.equals(bindings, scope.bindings) &&
-        Objects.equals(isShared, scope.isShared);
+        Objects.equals(bindings, scope.bindings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, bindings, isShared);
+    return Objects.hash(id, name, description, bindings);
   }
 
   @Override
@@ -143,7 +125,6 @@ public class ScopeDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    bindings: ").append(toIndentedString(bindings)).append("\n");
-    sb.append("    isShared: ").append(toIndentedString(isShared)).append("\n");
     sb.append("}");
     return sb.toString();
   }

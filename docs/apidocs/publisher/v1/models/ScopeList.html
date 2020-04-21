@@ -1,6 +1,6 @@
 <div class="main-content">
 
-        <h2>Scope_bindings</h2>
+        <h2>ScopeList</h2>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -21,22 +21,22 @@
                 <tbody>
                     <tr>
                         <td class="parameter">
-                            <p>type</p>
+                            <p>count</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">Type of binding role / permission </p></td>
+                        <td class="parameter"><p class="marked">Number of Scopes returned. </p></td>
                         <td class="parameter">
-                                <a href="#!/models#string">string</a>
+                                <a href="#!/models#integer">integer</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">DEFAULT</p></td>
+                        <td class="parameter"> <p class="marked">1</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>values</p>
+                            <p>list</p>
                             <p class="param-required">
                                 
                                 optional
@@ -47,7 +47,22 @@
                                 <a href="#!/models#array">array</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">[&quot;admin&quot;,&quot;Internal/creator&quot;,&quot;Internal/publisher&quot;]</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>pagination</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                                <a href="#!/models#Pagination">Pagination</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                 </tbody>
             </table>
