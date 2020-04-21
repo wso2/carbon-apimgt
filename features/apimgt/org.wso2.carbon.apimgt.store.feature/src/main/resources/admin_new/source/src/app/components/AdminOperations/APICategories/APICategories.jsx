@@ -18,10 +18,9 @@
 
 import React, { useState, useEffect } from 'react';
 import API from 'AppData/api';
-import PropTypes from 'prop-types';
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
-import { Link, Router } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -82,11 +81,16 @@ export default function APICategories() {
     const classes = useStyles();
     const restApi = new API();
     const [mgLabels, setMgLabels] = useState([]);
+    const [isUpdated, setUpdated] = useState(false);
 
-    restApi.apiCategoriesListGet()
-        .then((result) => {
-            setMgLabels(result.body.list);
+    useEffect(() => {
+        restApi.apiCategoriesListGet().then((result) => {
+            if (!isUpdated) {
+                setMgLabels(result.body.list);
+                setUpdated(true);
+            }
         });
+    });
     const title = (
         <FormattedMessage
             id='create.banner.title.create.api.categories'
@@ -110,17 +114,18 @@ export default function APICategories() {
     return (
         <div className={classes.heading}>
             <div className={classes.titleWrapper}>
-                <Typography variant='h4' align='left' className={classes.mainTitle}>
+                <Typography
+                    variant='h4'
+                    align='left'
+                    className={classes.mainTitle}
+                >
                     <FormattedMessage
                         id='contents.main.title.api.categories'
                         defaultMessage='API categories'
                     />
                 </Typography>
                 <Link to='/admin/categories/api categories/create api category'>
-                    <Button
-                        size='small'
-                        className={classes.button}
-                    >
+                    <Button size='small' className={classes.button}>
                         <AddCircle className={classes.buttonIcon} />
                         <FormattedMessage
                             id='contents.main.heading.api.categories.add_new'
@@ -134,18 +139,28 @@ export default function APICategories() {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell align='left'>Category Name</TableCell>
+                                <TableCell align='left'>
+                                    Category Name
+                                </TableCell>
                                 <TableCell align='left'>Description</TableCell>
-                                <TableCell align='left'>Number of APIs</TableCell>
+                                <TableCell align='left'>
+                                    Number of APIs
+                                </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {mgLabels.map((row) => (
                                 <TableRow key={row.name}>
-                                    <TableCell component='th' scope='row' align='left'>
+                                    <TableCell
+                                        component='th'
+                                        scope='row'
+                                        align='left'
+                                    >
                                         {row.name}
                                     </TableCell>
-                                    <TableCell align='left'>{row.description}</TableCell>
+                                    <TableCell align='left'>
+                                        {row.description}
+                                    </TableCell>
                                     {/* todo: Fill following table cell with Number_of_APIs per api category after API is modified */}
                                     <TableCell align='left'>-</TableCell>
                                 </TableRow>
@@ -153,21 +168,14 @@ export default function APICategories() {
                         </TableBody>
                     </Table>
                 </Paper>
-            )
-                : (
-                    <CreateBanner
-                        title={title}
-                        description={description}
-                        buttonText={buttonText}
-                        onClick={handleCreateClick}
-                    />
-                )}
+            ) : (
+                <CreateBanner
+                    title={title}
+                    description={description}
+                    buttonText={buttonText}
+                    onClick={handleCreateClick}
+                />
+            )}
         </div>
     );
 }
-APICategories.defaultProps = {
-    testprop: 'testpropva;',
-};
-// APICategories.propTypes = {
-//     testprop: PropTypes.shape(),
-// };
