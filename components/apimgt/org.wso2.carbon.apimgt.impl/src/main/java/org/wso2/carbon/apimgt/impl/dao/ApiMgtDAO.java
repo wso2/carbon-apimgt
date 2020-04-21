@@ -117,6 +117,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -10360,6 +10361,17 @@ public class ApiMgtDAO {
             policyStatement.executeUpdate();
 
             conn.commit();
+        } catch (SQLIntegrityConstraintViolationException e){
+            boolean isAppPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_APP, policy.getTenantId(),
+                    policy.getPolicyName());
+
+            if (isAppPolicyExists) {
+                log.warn(
+                        "Application Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                                + " is already persisted");
+            } else {
+                handleException("Failed to add Application Policy: " + policy, e);
+            }
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -10370,7 +10382,17 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the add Application Policy: " + policy.toString(), ex);
                 }
             }
-            handleException("Failed to add Application Policy: " + policy, e);
+            if (StringUtils.containsIgnoreCase(e.getMessage(), "Violation of UNIQUE KEY constraint")) {
+                boolean isAppPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_APP, policy.getTenantId(),
+                        policy.getPolicyName());
+
+                if (isAppPolicyExists) {
+                    log.warn("Application Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                            + " is already persisted");
+                }
+            } else {
+                handleException("Failed to add Application Policy: " + policy, e);
+            }
         } finally {
             APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
         }
@@ -10421,6 +10443,17 @@ public class ApiMgtDAO {
             policyStatement.executeUpdate();
 
             conn.commit();
+        } catch (SQLIntegrityConstraintViolationException e) {
+            boolean isSubscriptionPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_SUB, policy.getTenantId(),
+                    policy.getPolicyName());
+
+            if (isSubscriptionPolicyExists) {
+                log.warn(
+                        "Subscription Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                                + " is already persisted");
+            } else {
+                handleException("Failed to add Subscription Policy: " + policy, e);
+            }
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -10431,7 +10464,17 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the add Subscription Policy: " + policy.toString(), ex);
                 }
             }
-            handleException("Failed to add Subscription Policy: " + policy, e);
+            if (StringUtils.containsIgnoreCase(e.getMessage(), "Violation of UNIQUE KEY constraint")) {
+                boolean isSubscriptionPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_SUB, policy.getTenantId(),
+                        policy.getPolicyName());
+
+                if (isSubscriptionPolicyExists) {
+                    log.warn("Subscription Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                            + " is already persisted");
+                }
+            } else {
+                handleException("Failed to add Subscription Policy: " + policy, e);
+            }
         } finally {
             APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
         }
@@ -10452,6 +10495,17 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             addAPIPolicy(policy, connection);
             connection.commit();
+        } catch (SQLIntegrityConstraintViolationException e) {
+            boolean isAPIPolicyExists = isPolicyExist(connection, PolicyConstants.POLICY_LEVEL_API, policy.getTenantId(),
+                    policy.getPolicyName());
+
+            if (isAPIPolicyExists) {
+                log.warn(
+                        "API Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                                + " is already persisted");
+            } else {
+                handleException("Failed to add API Policy: " + policy, e);
+            }
         } catch (SQLException e) {
             if (connection != null) {
                 try {
@@ -10462,7 +10516,17 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the add Api Policy: " + policy.toString(), ex);
                 }
             }
-            handleException("Failed to add Api Policy: " + policy, e);
+            if (StringUtils.containsIgnoreCase(e.getMessage(), "Violation of UNIQUE KEY constraint")) {
+                boolean isAPIPolicyExists = isPolicyExist(connection, PolicyConstants.POLICY_LEVEL_API, policy.getTenantId(),
+                        policy.getPolicyName());
+
+                if (isAPIPolicyExists) {
+                    log.warn("API Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                            + " is already persisted");
+                }
+            } else {
+                handleException("Failed to add Api Policy: " + policy, e);
+            }
         } finally {
             APIMgtDBUtil.closeAllConnections(null, connection, null);
         }
@@ -12242,7 +12306,11 @@ public class ApiMgtDAO {
     }
 
     public boolean isPolicyExist(String policyType, int tenantId, String policyName) throws APIManagementException {
-        Connection connection = null;
+        return isPolicyExist(null, policyType, tenantId, policyName);
+    }
+
+    public boolean isPolicyExist(Connection connection, String policyType, int tenantId, String policyName)
+            throws APIManagementException {
         PreparedStatement isExistStatement = null;
 
         boolean isExist = false;
@@ -12257,8 +12325,11 @@ public class ApiMgtDAO {
             policyTable = PolicyConstants.POLICY_SUBSCRIPTION_TABLE;
         }
         try {
-            String query = "SELECT " + PolicyConstants.POLICY_ID + " FROM " + policyTable + " WHERE TENANT_ID =? AND NAME = ? ";
-            connection = APIMgtDBUtil.getConnection();
+            String query = "SELECT " + PolicyConstants.POLICY_ID + " FROM " + policyTable
+                    + " WHERE TENANT_ID =? AND NAME = ? ";
+            if (connection == null) {
+                connection = APIMgtDBUtil.getConnection();
+            }
             connection.setAutoCommit(true);
             isExistStatement = connection.prepareStatement(query);
             isExistStatement.setInt(1, tenantId);
