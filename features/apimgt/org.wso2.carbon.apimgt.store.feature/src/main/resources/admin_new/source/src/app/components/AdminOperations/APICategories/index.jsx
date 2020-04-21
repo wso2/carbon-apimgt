@@ -24,7 +24,11 @@ import APICategories from './APICategories';
 const APICategory = () => {
     return (
         <Switch>
-            <Route exact path='/admin/categories/api categories' component={APICategories} />
+            <Route
+                exact
+                path='/admin/categories/api categories'
+                component={APICategories}
+            />
             <Route
                 exact
                 path='/admin/categories/api categories/create api category'
