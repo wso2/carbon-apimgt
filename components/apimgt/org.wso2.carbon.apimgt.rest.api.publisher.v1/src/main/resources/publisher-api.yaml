@@ -7666,7 +7666,7 @@ definitions:
       scopes:
         type: array
         items:
-          $ref: '#/definitions/Scope'
+          $ref: '#/definitions/APIScope'
       operations:
         type: array
         items:
@@ -8789,7 +8789,7 @@ definitions:
       id:
         type: string
         description: |
-          UUID of the Scope
+          UUID of the Scope. Valid only for shared scopes.
         example: 01234567-0123-0123-0123-012345678901
       name:
         type: string
@@ -8802,24 +8802,29 @@ definitions:
           description of Scope
         example: 'This Scope can used to view Apis'
       bindings:
-        properties:
-          type:
-            type: string
-            description: |
-              Type of binding role / permission
-            example: 'DEFAULT'
-          values:
-            type: array
-            items:
-              type: string
-            example: ['admin','Internal/creator','Internal/publisher']
-      isShared:
-        type: boolean
         description: |
-          States whether scope is shared. This will not be honored when updating/adding scopes to APIs or when
-          adding/updating Shared Scopes.
-        example: true
+          role bindings list of the Scope
+        type: array
+        items:
+          type: string
+        example: ['admin','Internal/creator','Internal/publisher']
 
+#-----------------------------------------------------
+# The APIScope resource
+#-----------------------------------------------------
+  APIScope :
+    title: APIScope
+    required:
+      - scope
+    properties:
+       scope:
+         $ref: '#/definitions/Scope'
+       isShared:
+          type: boolean
+          description: |
+              States whether scope is shared. This will not be honored when updating/adding scopes to APIs or when
+              adding/updating Shared Scopes.
+          example: true
 
 #-----------------------------------------------------
 # The APIOperations resource

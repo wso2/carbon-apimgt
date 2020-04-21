@@ -70,6 +70,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
@@ -87,7 +88,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
@@ -873,7 +873,7 @@ public class APIMappingUtil {
             apiOperationsDTO = getOperationsFromAPI(model);
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
-            dto.setScopes(scopeDTOS);
+            dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS));
         }
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -1310,18 +1310,19 @@ public class APIMappingUtil {
     /**
      * This method returns the oauth scopes according to the given list of scopes
      *
-     * @param apiDTO list of scopes
+     * @param apiDTO list of APIScopes
      * @return scope set
      */
     public static Set<Scope> getScopes(APIDTO apiDTO) {
 
         Set<Scope> scopeSet = new LinkedHashSet<>();
-        for (ScopeDTO scopeDTO : apiDTO.getScopes()) {
+        for (APIScopeDTO apiScopeDTO : apiDTO.getScopes()) {
             Scope scope = new Scope();
+            ScopeDTO scopeDTO = apiScopeDTO.getScope();
             scope.setKey(scopeDTO.getName());
             scope.setName(scopeDTO.getName());
             scope.setDescription(scopeDTO.getDescription());
-            scope.setRoles(String.join(",", scopeDTO.getBindings().getValues()));
+            scope.setRoles(String.join(",", scopeDTO.getBindings()));
             scopeSet.add(scope);
         }
         return scopeSet;
@@ -1341,7 +1342,7 @@ public class APIMappingUtil {
             scope.setKey(scopeDTO.getName());
             scope.setName(scopeDTO.getName());
             scope.setDescription(scopeDTO.getDescription());
-            scope.setRoles(String.join(",", scopeDTO.getBindings().getValues()));
+            scope.setRoles(String.join(",", scopeDTO.getBindings()));
             scopeSet.add(scope);
         }
         return scopeSet;
@@ -2135,7 +2136,7 @@ public class APIMappingUtil {
 
         // scopes
         for (ScopeDTO scope : dto.getScopes()) {
-            for (String aRole : scope.getBindings().getValues()) {
+            for (String aRole : scope.getBindings()) {
                 boolean isValidRole = APIUtil.isRoleNameExist(provider, aRole);
                 if (!isValidRole) {
                     String error = "Role '" + aRole + "' Does not exist.";
@@ -2206,7 +2207,7 @@ public class APIMappingUtil {
      * @param offset  starting index
      * @return ResourcePathListDTO object containing ResourcePathDTOs
      */
-    public static ResourcePathListDTO fromResourcePathListToDTO(List<ResourcePath> resourcePathList, int limit,
+    public static ResourcePathListDTO   fromResourcePathListToDTO(List<ResourcePath> resourcePathList, int limit,
             int offset) {
         ResourcePathListDTO resourcePathListDTO = new ResourcePathListDTO();
         List<ResourcePathDTO> resourcePathDTOs = new ArrayList<ResourcePathDTO>();
@@ -2362,30 +2363,48 @@ public class APIMappingUtil {
      * @throws APIManagementException throw if parsing exception occur
      */
     private static List<ScopeDTO> getScopesFromSwagger(String swagger) throws APIManagementException {
+
         APIDefinition apiDefinition = OASParserUtil.getOASParser(swagger);
         Set<Scope> scopes = apiDefinition.getScopes(swagger);
         List<ScopeDTO> scopeDTOS = new ArrayList<>();
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        Set<String> allSharedScopeKeys = apiProvider.getAllSharedScopeKeys(tenantDomain);
         for (Scope aScope : scopes) {
             ScopeDTO scopeDTO = new ScopeDTO();
             String scopeName = aScope.getName();
             scopeDTO.setName(scopeName);
-            scopeDTO.setIsShared(allSharedScopeKeys.contains(scopeName) ? Boolean.TRUE : Boolean.FALSE);
             scopeDTO.setDescription(aScope.getDescription());
-            ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
             String roles = aScope.getRoles();
             if (roles == null || roles.isEmpty()) {
-                bindingsDTO.setValues(Collections.emptyList());
+                scopeDTO.setBindings(Collections.emptyList());
             } else {
-                bindingsDTO.setValues(Arrays.asList((roles).split(",")));
+                scopeDTO.setBindings(Arrays.asList((roles).split(",")));
             }
-            scopeDTO.setBindings(bindingsDTO);
             scopeDTOS.add(scopeDTO);
         }
         return scopeDTOS;
     }
+
+    /**
+     * Convert ScopeDTO List to APIScopesDTO List adding the attribute 'isShared'.
+     *
+     * @param scopeDTOS ScopeDTO List
+     * @return APIScopeDTO List
+     * @throws APIManagementException if an error occurs while converting ScopeDTOs to APIScopeDTOs
+     */
+    private static List<APIScopeDTO> getAPIScopesFromScopeDTOs(List<ScopeDTO> scopeDTOS) throws APIManagementException {
+
+        List<APIScopeDTO> apiScopeDTOS = new ArrayList<>();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        Set<String> allSharedScopeKeys = apiProvider.getAllSharedScopeKeys(tenantDomain);
+        scopeDTOS.forEach(scopeDTO -> {
+            APIScopeDTO apiScopeDTO = new APIScopeDTO();
+            apiScopeDTO.setScope(scopeDTO);
+            apiScopeDTO.setIsShared(allSharedScopeKeys.contains(scopeDTO.getName()) ? Boolean.TRUE : Boolean.FALSE);
+            apiScopeDTOS.add(apiScopeDTO);
+        });
+        return apiScopeDTOS;
+    }
+
     /**
      * This method is used to retrieve APIIdentifier from the apiId or UUID
      *
