@@ -17,7 +17,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import API from 'AppData/api';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
@@ -29,6 +28,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
 import Icon from '@material-ui/core/Icon';
 import Paper from '@material-ui/core/Paper';
+import Alert from 'AppComponents/Shared/Alert';
 
 const styles = (theme) => ({
     root: {
@@ -102,20 +102,48 @@ const styles = (theme) => ({
 
 let apiCategory = {};
 let mhistory;
-// let valid;
-
-const addAPICategory = () => {
-    // console.log('input name is', apiCategory.name);
-    // console.log('input desc is', apiCategory.description);
-    const restApi = new API();
-    restApi.createAPICategory(apiCategory.name, apiCategory.description);
-    console.log('Created');
-    mhistory.push('/admin/categories/api categories');
-};
+let valid = { name: { invalid: false } };
 
 const validateAPICategoryName = (id, value) => {
-    // todo: do validations
     apiCategory[id] = value;
+
+    valid[id].invalid = !(value && value.length > 0);
+    if (valid[id].invalid) {
+        valid[id].error = 'Scope name cannot be empty';
+    }
+
+    if (/\s/.test(value)) {
+        valid[id].invalid = true;
+        valid[id].error = 'Scope name cannot have spaces';
+    }
+
+    if (!valid[id].invalid && /[!@#$%^&*(),?"{}[\]|<>\t\n]/i.test(value)) {
+        valid[id].invalid = true;
+        valid[id].error = 'Field contains special characters';
+    }
+    if (!valid[id].invalid) {
+        valid[id].error = '';
+    }
+    return valid;
+};
+
+const addAPICategory = (intl) => {
+    // todo: fix calling this upon component loading
+    valid = validateAPICategoryName('name', apiCategory.name);
+    if (valid.name.invalid) {
+        console.log(valid.name.error);
+        Alert.error(valid.name.error);
+    } else {
+        const restApi = new API();
+        restApi.createAPICategory(apiCategory.name, apiCategory.description);
+        // Alert.info(
+        //     intl.formatMessage({
+        //         id: 'Apis.Details.Scopes.CreateScope.scope.added.successfully',
+        //         defaultMessage: 'Scope added successfully',
+        //     }),
+        // );
+        mhistory.push('/admin/categories/api categories');
+    }
 };
 
 const handleAPICategoryNameInput = ({ target: { id, value } }) => {
@@ -127,7 +155,7 @@ const handleAPICategoryDescriptionInput = ({ target: { id, value } }) => {
 };
 
 const CreateAPICategory = (props) => {
-    const { classes, history } = props;
+    const { classes, history, intl } = props;
     console.log('props from create api category', props);
     mhistory = history;
     return (
@@ -166,12 +194,12 @@ const CreateAPICategory = (props) => {
                                     id='name'
                                     label='API Category Name'
                                     placeholder='Name'
-                                    helperText={(
+                                    helperText={
                                         <FormattedMessage
                                             id='todo'
                                             defaultMessage='Enter API Category Name ( Ex: finance )'
                                         />
-                                    )}
+                                    }
                                     fullWidth
                                     margin='normal'
                                     variant='outlined'
@@ -179,21 +207,24 @@ const CreateAPICategory = (props) => {
                                         shrink: true,
                                     }}
                                     onChange={handleAPICategoryNameInput}
-                                // value={apiCategory.name || ''}
+                                    // value={apiCategory.name || ''}
                                 />
                             </FormControl>
-                            <FormControl margin='normal' classes={{ root: classes.descriptionForm }}>
+                            <FormControl
+                                margin='normal'
+                                classes={{ root: classes.descriptionForm }}
+                            >
                                 <TextField
                                     id='description'
                                     label='Description'
                                     variant='outlined'
                                     placeholder='Short description about the API category'
-                                    helperText={(
+                                    helperText={
                                         <FormattedMessage
                                             id='todo'
                                             defaultMessage='Short description about the API category'
                                         />
-                                    )}
+                                    }
                                     margin='normal'
                                     InputLabelProps={{
                                         shrink: true,
@@ -206,7 +237,7 @@ const CreateAPICategory = (props) => {
                                 <Button
                                     variant='contained'
                                     color='primary'
-                                    onClick={addAPICategory}
+                                    onClick={addAPICategory(intl)}
                                     className={classes.saveButton}
                                 >
                                     <FormattedMessage
