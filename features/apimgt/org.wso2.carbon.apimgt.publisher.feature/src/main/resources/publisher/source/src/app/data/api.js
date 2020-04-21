@@ -1033,7 +1033,7 @@ class API extends Resource {
      * @param {String} id Subscription UUID
      * @returns {Promise} With given callback attached to the success chain else API invoke promise.
      */
-    getSubscriberInfo(id, callback = null) {
+    getSubscriberInfo(id) {
         const promise_subscription = this.client.then(client => {
             return client.apis['Subscriber'].get_subscriptions__subscriptionId__subscriber_info(
                 {
@@ -1042,11 +1042,7 @@ class API extends Resource {
                 this._requestMetaData(),
             );
         });
-        if (callback) {
-            return promise_subscription.then(callback);
-        } else {
-            return promise_subscription;
-        }
+        return promise_subscription;
     }
 
     /**

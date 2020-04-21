@@ -125,10 +125,8 @@ const styles = (theme) => ({
         flexGrow: 1,
     },
     InfoToolTip: {
-        backgroundColor: '#f5f5f9',
-        color: 'rgba(0,0,0,0.87)',
         maxWidth: 500,
-        fontSize: theme.typography.pxToRem(14),
+        fontSize: theme.typography.fontSize,
         fontWeight: '400',
         border: '1px solid #dadde9',
         borderRadius: '5px',
