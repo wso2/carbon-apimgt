@@ -614,23 +614,18 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     private int getSubscriberIdBySubscriptionUUID(String subscriptionId) throws APIManagementException {
-        Connection connection = null;
-        ResultSet rs = null;
-        PreparedStatement ps = null;
         int subscirberId = 0;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            String query = SQLConstants.GET_SUBSCRIBER_ID_BY_SUBSCRIPTION_UUID_SQL;
-            ps = connection.prepareStatement(query);
+        String query = SQLConstants.GET_SUBSCRIBER_ID_BY_SUBSCRIPTION_UUID_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, subscriptionId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                subscirberId = rs.getInt(APIConstants.APPLICATION_SUBSCRIBER_ID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    subscirberId = rs.getInt(APIConstants.APPLICATION_SUBSCRIBER_ID);
+                }
             }
         } catch (SQLException e) {
             handleException("Error while retrieving Subscriber ID: ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
         }
         return subscirberId;
     }
