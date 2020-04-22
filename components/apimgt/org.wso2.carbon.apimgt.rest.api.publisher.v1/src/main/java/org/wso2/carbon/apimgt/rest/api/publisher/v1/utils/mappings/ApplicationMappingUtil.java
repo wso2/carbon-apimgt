@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApplicationInfoDTO;
 
 /**
