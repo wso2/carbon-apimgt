@@ -3548,7 +3548,7 @@ public class SQLConstants {
                     + "AND AUM.API_ID = ?";
 
     public static final String REMOVE_KM_RESOURCE_SCOPE_SQL =
-            " DELETE FROM IDN_OAUTH2_RESOURCE_SCOPE WHERE SCOPE_NAME = ? AND TENANT_ID = ?";
+            " DELETE FROM IDN_OAUTH2_RESOURCE_SCOPE WHERE SCOPE_NAME = ? AND TENANT_ID = ? AND RESOURCE_PATH = ?";
 
 
     public static final String GET_API_SCOPES_SQL =
