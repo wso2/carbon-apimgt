@@ -125,6 +125,7 @@ public class APIGatewayManagerTest {
         PowerMockito.when(APIUtil.isSandboxEndpointsExists(Mockito.anyString())).thenCallRealMethod();
         PowerMockito.when(APIUtil.getSequenceExtensionName((API) Mockito.anyObject())).thenCallRealMethod();
         PowerMockito.when(APIUtil.extractEnvironmentsForAPI(Mockito.anyString())).thenCallRealMethod();
+        PowerMockito.when(APIUtil.getGAConfigFromRegistry(Mockito.anyString())).thenReturn(null);
 
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId()).thenReturn(tenantID);

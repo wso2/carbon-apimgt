@@ -671,7 +671,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
             for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
                 if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
-                    if (gatewayAPIDTO.isOverride()) {
+                    if (!APIConstants.GA_CONF_KEY.equals(localEntry.getName()) && gatewayAPIDTO.isOverride()) {
                         localEntryServiceProxy.deleteEntry(localEntry.getName());
                         localEntryServiceProxy.addLocalEntry(localEntry.getContent());
                     }
