@@ -934,16 +934,19 @@ public class OASParserUtil {
      * Sets the scopes to the URL template object using the given list of scopes
      *
      * @param template URL template
-     * @param scopes   list of scopes
+     * @param resourceScopes   list of scopes of the resource
+     * @param apiScopes set of scopes defined for the API
      * @return URL template after setting the scopes
      */
-    public static URITemplate setScopesToTemplate(URITemplate template, List<String> scopes) {
-        for (String scope : scopes) {
-            Scope scopeObj = new Scope();
-            scopeObj.setKey(scope);
-            scopeObj.setName(scope);
+    public static URITemplate setScopesToTemplate(URITemplate template, List<String> resourceScopes,
+                                                  Set<Scope> apiScopes) throws APIManagementException {
 
-            template.setScopes(scopeObj);
+        for (String scopeName : resourceScopes) {
+            Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
+            if (scope == null) {
+                throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+            }
+            template.setScopes(scope);
         }
         return template;
     }
