@@ -476,12 +476,15 @@ public final class APIUtil {
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
 
             for (URITemplate uriTemplate : uriTemplates) {
-                Scope templateScope = uriTemplate.getScope();
-                if (templateScope != null) {
-                    Scope scope = scopeToKeyMapping.get(templateScope.getKey());
-                    uriTemplate.setScope(scope);
-                    uriTemplate.setScopes(scope);
+                List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
+                List<Scope> newTemplateScopes = new ArrayList<>();
+                if (!oldTemplateScopes.isEmpty()) {
+                    for (Scope templateScope: oldTemplateScopes) {
+                        Scope scope = scopeToKeyMapping.get(templateScope.getKey());
+                        newTemplateScopes.add(scope);
+                    }
                 }
+                uriTemplate.addAllScopes(newTemplateScopes);
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
             }
@@ -670,12 +673,15 @@ public final class APIUtil {
             for (URITemplate uriTemplate : uriTemplates) {
                 String uTemplate = uriTemplate.getUriTemplate();
                 String method = uriTemplate.getHTTPVerb();
-                Scope templateScope = uriTemplate.getScope();
-                if (templateScope != null) {
-                    Scope scope = scopeToKeyMapping.get(templateScope.getKey());
-                    uriTemplate.setScope(scope);
-                    uriTemplate.setScopes(scope);
+                List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
+                List<Scope> newTemplateScopes = new ArrayList<>();
+                if (!oldTemplateScopes.isEmpty()) {
+                    for (Scope templateScope: oldTemplateScopes) {
+                        Scope scope = scopeToKeyMapping.get(templateScope.getKey());
+                        newTemplateScopes.add(scope);
+                    }
                 }
+                uriTemplate.addAllScopes(newTemplateScopes);
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
                 // AWS Lambda: set arn & timeout to URI template
@@ -3396,10 +3402,17 @@ public final class APIUtil {
             for (URITemplate uriTemplate : uriTemplates) {
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-                Scope templateScope = uriTemplate.getScope();
-                if (templateScope != null) {
-                    uriTemplate.setScope(scopeToKeyMapping.get(templateScope.getKey()));
+                List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
+                List<Scope> newTemplateScopes = new ArrayList<>();
+                if (!oldTemplateScopes.isEmpty()) {
+                    for (Scope templateScope : oldTemplateScopes) {
+                        if (templateScope != null) {
+                            Scope scope = scopeToKeyMapping.get(templateScope.getKey());
+                            newTemplateScopes.add(scope);
+                        }
+                    }
                 }
+                uriTemplate.addAllScopes(newTemplateScopes);
             }
             api.setUriTemplates(uriTemplates);
 
@@ -5941,6 +5954,20 @@ public final class APIUtil {
         return APIUtil.getResourceKey(api.getContext(), api.getId().getVersion(), template.getUriTemplate(),
                 template.getHTTPVerb());
     }
+
+    /**
+     * Get the key of the Resource using context, version, uri template and http verb.( used in scopes)
+     *
+     * @param apiIdentifier - API Identifier
+     * @param template      - URI Template
+     * @return - The resource key
+     */
+    public static String getResourceKey(APIIdentifier apiIdentifier, String context, URITemplate template) {
+
+        return APIUtil.getResourceKey(context, apiIdentifier.getVersion(), template.getUriTemplate(),
+                template.getHTTPVerb());
+    }
+
 
     /**
      * Get the key of the Resource ( used in scopes)

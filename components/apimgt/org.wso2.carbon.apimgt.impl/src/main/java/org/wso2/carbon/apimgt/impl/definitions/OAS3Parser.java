@@ -78,6 +78,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYPE;
 
@@ -313,7 +315,7 @@ public class OAS3Parser extends APIDefinition {
                             template.setScope(scope);
                             template.setScopes(scope);
                         } else {
-                            template = OASParserUtil.setScopesToTemplate(template, opScopes);
+                            template = OASParserUtil.setScopesToTemplate(template, opScopes, scopes);
                         }
                     }
                     Map<String, Object> extensios = operation.getExtensions();
@@ -980,27 +982,29 @@ public class OAS3Parser extends APIDefinition {
         for (Map<String, List<String>> requirement : security) {
             if (requirement.get(OPENAPI_SECURITY_SCHEMA_KEY) != null) {
 
-                if (resource.getScope() == null) {
+                if (resource.getScopes().isEmpty()) {
                     requirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Collections.EMPTY_LIST);
                 } else {
-                    requirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Arrays.asList(resource.getScope().getKey()));
+                    requirement.put(OPENAPI_SECURITY_SCHEMA_KEY, resource.getScopes().stream().map(Scope::getKey)
+                            .collect(Collectors.toList()));
                 }
                 return;
             }
         }
         // if oauth2SchemeKey not present, add a new
         SecurityRequirement defaultRequirement = new SecurityRequirement();
-        if (resource.getScope() == null) {
+        if (resource.getScopes().isEmpty()) {
             defaultRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Collections.EMPTY_LIST);
         } else {
-            defaultRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Arrays.asList(resource.getScope().getKey()));
+            defaultRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, resource.getScopes().stream().map(Scope::getKey)
+                    .collect(Collectors.toList()));
         }
         security.add(defaultRequirement);
     }
 
     /**
      * Remove legacy scope information from swagger operation
-     *
+     * //TODO://@dushaniw how to deal with x-scope when multiple scopes present
      * @param operation
      */
     private void updateLegacyScopesFromOperation(SwaggerData.Resource resource, Operation operation) {

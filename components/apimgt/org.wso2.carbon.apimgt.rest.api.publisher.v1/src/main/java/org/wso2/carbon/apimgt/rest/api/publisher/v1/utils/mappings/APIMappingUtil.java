@@ -117,6 +117,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.sql.Timestamp;
+import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -1728,11 +1729,8 @@ public class APIMappingUtil {
         }
         operationsDTO.setVerb(uriTemplate.getHTTPVerb());
         operationsDTO.setTarget(uriTemplate.getUriTemplate());
-        if (uriTemplate.getScope() != null) {
-            operationsDTO.setScopes(new ArrayList<String>() {{
-                add(uriTemplate.getScope().getName());
-            }});
-        }
+        operationsDTO.setScopes(uriTemplate.retrieveAllScopes().stream().map(Scope::getName).collect(
+                Collectors.toList()));
         operationsDTO.setThrottlingPolicy(uriTemplate.getThrottlingTier());
         Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
         List<String> usedProductIds = new ArrayList<>();
