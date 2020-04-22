@@ -193,7 +193,7 @@ public interface APIProvider extends APIManager {
      * @return The looked up claims of the subscriber or null if the requested subscriber does not exist
      * @throws APIManagementException if failed to get Subscriber
      */
-    List getSubscriberClaims(String subscriber) throws APIManagementException;
+    Map getSubscriberClaims(String subscriber) throws APIManagementException;
 
     void addTier(Tier tier) throws APIManagementException;
 

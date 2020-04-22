@@ -879,7 +879,7 @@ public class APIProviderImplTest {
         PowerMockito.when(configurationService.getAPIManagerConfiguration()).thenReturn(configuration);
         Mockito.when(configuration.getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS)).
                 thenReturn(configuredClaims);
-        List subscriberClaims = apiProvider.getSubscriberClaims("admin");
+        Map subscriberClaims = apiProvider.getSubscriberClaims("admin");
         assertNotNull(subscriberClaims);
         assertEquals(configuredClaims.split(",").length, subscriberClaims.size());
     }

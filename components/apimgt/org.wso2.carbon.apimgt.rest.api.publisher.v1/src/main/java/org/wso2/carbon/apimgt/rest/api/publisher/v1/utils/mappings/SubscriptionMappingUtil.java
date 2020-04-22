@@ -228,19 +228,17 @@ public class SubscriptionMappingUtil {
      * @return SubscriberInfoDTO
      * @throws APIManagementException If an error occurs when getting display name of claim
      */
-    public static SubscriberInfoDTO fromSubscriberClaimsToDTO(List<Map> subscriberClaims, String subscriberName)
-            throws APIManagementException {
+    public static SubscriberInfoDTO fromSubscriberClaimsToDTO(Map<String, String> subscriberClaims,
+                                                              String subscriberName) throws APIManagementException {
         SubscriberInfoDTO subscriberInfoDTO = new SubscriberInfoDTO();
         subscriberInfoDTO.setName(subscriberName);
         List<ClaimDTO> claimDTOList = new ArrayList<>();
-        for (Map<String, String> claimMap : subscriberClaims) {
-            for (String key : claimMap.keySet()) {
-                ClaimDTO claimDTO = new ClaimDTO();
-                claimDTO.setName(APIUtil.getClaimDisplayName(key, subscriberName));
-                claimDTO.setURI(key);
-                claimDTO.setValue(claimMap.get(key));
-                claimDTOList.add(claimDTO);
-            }
+        for (String key : subscriberClaims.keySet()) {
+            ClaimDTO claimDTO = new ClaimDTO();
+            claimDTO.setName(APIUtil.getClaimDisplayName(key, subscriberName));
+            claimDTO.setURI(key);
+            claimDTO.setValue(subscriberClaims.get(key));
+            claimDTOList.add(claimDTO);
         }
         subscriberInfoDTO.setClaims(claimDTOList);
         return subscriberInfoDTO;

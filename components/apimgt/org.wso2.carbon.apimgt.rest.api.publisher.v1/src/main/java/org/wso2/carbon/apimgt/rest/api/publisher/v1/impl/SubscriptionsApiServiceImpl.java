@@ -225,7 +225,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         APIProvider apiProvider = RestApiUtil.getProvider(username);
         String subscriberName = apiProvider.getSubscriber(subscriptionId);
-        List subscriberClaims = apiProvider.getSubscriberClaims(subscriberName);
+        Map subscriberClaims = apiProvider.getSubscriberClaims(subscriberName);
         SubscriberInfoDTO subscriberInfoDTO = SubscriptionMappingUtil.fromSubscriberClaimsToDTO(subscriberClaims,
                 subscriberName);
         return Response.ok().entity(subscriberInfoDTO).build();
