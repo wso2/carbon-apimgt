@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.PreprocessSwagger;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.lifecycle.LifeCycle;
@@ -390,6 +391,7 @@ public final class APIImportUtil {
             //Swagger definition will only be available of API type HTTP. Web socket API does not have it.
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(importedApi.getType())) {
                 String swaggerContent = loadSwaggerFile(pathToArchive);
+                swaggerContent = PreprocessSwagger.preprocessSwagger(swaggerContent,importedApi);
                 addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
                 //If graphQL API, import graphQL schema definition to registry
                 if (StringUtils.equals(importedApi.getType(), APIConstants.APITransportType.GRAPHQL.toString())) {
