@@ -288,13 +288,14 @@ public interface KeyManager {
      * This method will be used to detach a Scope in the authorization server from an API resource.
      *
      * @param apiIdentifier
+     * @param context
      * @param uriTemplate
      * @param scope
      * @param tenantDomain
      * @throws APIManagementException
      */
-    void detachScopeToResource(APIIdentifier apiIdentifier, URITemplate uriTemplate, Scope scope, String tenantDomain)
-            throws APIManagementException;
+    void detachScopeToResource(APIIdentifier apiIdentifier, String context, URITemplate uriTemplate, Scope scope,
+                               String tenantDomain) throws APIManagementException;
 
     /**
      * This method will be used to delete a Scope in the authorization server.
