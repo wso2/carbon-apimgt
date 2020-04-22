@@ -62,6 +62,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.cache.Cache;
 
@@ -293,6 +294,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                     }
+                    validateAPIKeyRestrictions(payload, synCtx);
                 } else {
                     // Retrieve payload from ApiKey
                     if (log.isDebugEnabled()) {
@@ -320,6 +322,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                     }
+                    validateAPIKeyRestrictions(payload, synCtx);
                     if (isGatewayTokenCacheEnabled) {
                         JWTTokenPayloadInfo jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
                         jwtTokenPayloadInfo.setPayload(payload);
@@ -355,6 +358,78 @@ public class ApiKeyAuthenticator implements Authenticator {
             log.error("Error while parsing API Key", e);
             return new AuthenticationResponse(false, isMandatory, true, APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        }
+    }
+
+    private void validateAPIKeyRestrictions(JWTClaimsSet payload, MessageContext synCtx) throws APISecurityException {
+        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx).
+                getAxis2MessageContext();
+
+        String permittedIPList = null;
+        if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP) != null) {
+            permittedIPList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP);
+        }
+
+        if (StringUtils.isNotEmpty(permittedIPList)) {
+            // Validate client IP against permitted IPs
+            String clientIP = GatewayUtils.getIp(axis2MessageContext);
+
+            if (StringUtils.isNotEmpty(clientIP)) {
+                for (String restrictedIP : permittedIPList.split(",")) {
+                    if (APIUtil.isIpInNetwork(clientIP, restrictedIP.trim())) {
+                        // Client IP is allowed
+                        return;
+                    }
+                }
+                if (log.isDebugEnabled()) {
+                    String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+                    String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+
+                    if (StringUtils.isNotEmpty(clientIP)) {
+                        log.debug("Invocations to API: " + apiContext + ":" + apiVersion +
+                                " is not permitted for client with IP: " + clientIP);
+                    }
+                }
+                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                        "Access forbidden for the invocations");
+            }
+
+        }
+
+        String permittedRefererList = null;
+        if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER) != null) {
+            permittedRefererList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
+        }
+
+        if (StringUtils.isNotEmpty(permittedRefererList)) {
+            // Validate http referer against the permitted referrers
+            TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>)
+                    axis2MessageContext.getProperty
+                            (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            if (transportHeaderMap != null) {
+                String referer = transportHeaderMap.get("Referer");
+                if (StringUtils.isNotEmpty(referer)) {
+                    for (String restrictedReferer : permittedRefererList.split(",")) {
+                        String restrictedRefererRegExp = restrictedReferer.trim()
+                                .replace("*", "[^ ]*");
+                        if (referer.matches(restrictedRefererRegExp)) {
+                            // Referer is allowed
+                            return;
+                        }
+                    }
+                    if (log.isDebugEnabled()) {
+                        String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+                        String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+
+                        if (StringUtils.isNotEmpty(referer)) {
+                            log.debug("Invocations to API: " + apiContext + ":" + apiVersion +
+                                    " is not permitted for referer: " + referer);
+                        }
+                    }
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                            "Access forbidden for the invocations");
+                }
+            }
         }
     }
 
