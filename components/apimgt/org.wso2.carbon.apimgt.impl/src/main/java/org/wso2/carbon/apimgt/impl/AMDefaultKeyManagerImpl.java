@@ -1025,17 +1025,18 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * This method will be used to detach a Scope in the authorization server from an API resource.
      *
      * @param apiIdentifier APIIdentifier
+     * @param apiContext    API Context
      * @param uriTemplate   URITemplate
      * @param scope         Scope To detach from
      * @param tenantDomain  tenant domain
      * @throws APIManagementException if an error occurs while detaching scope from resource
      */
     @Override
-    public void detachScopeToResource(APIIdentifier apiIdentifier, URITemplate uriTemplate, Scope scope,
-                                      String tenantDomain) throws APIManagementException {
+    public void detachScopeToResource(APIIdentifier apiIdentifier, String apiContext, URITemplate uriTemplate,
+                                      Scope scope, String tenantDomain) throws APIManagementException {
 
         //TODO: remove after scope validation from swagger completes
-        ApiMgtDAO.getInstance().removeResourceScope(scope, tenantDomain);
+        ApiMgtDAO.getInstance().removeResourceScope(apiIdentifier, apiContext, uriTemplate, scope, tenantDomain);
     }
 
     /**
