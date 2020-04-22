@@ -230,7 +230,7 @@ class EditScope extends React.Component {
             });
     }
 
-    validateScopeDescription({ target: { id, value } }) {
+    validateScopeDescription({ target: { value } }) {
         const { apiScope } = this.state;
         const originalScope = apiScope.scope;
         apiScope.scope = {
