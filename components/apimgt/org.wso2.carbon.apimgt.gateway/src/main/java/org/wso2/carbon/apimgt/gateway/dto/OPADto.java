@@ -6,40 +6,40 @@ public class OPADto{
 
     private String[] scopes;
 
-    private String API_name;
+    private String APIName;
 
     private String version;
 
-    private String context_path;
+    private String contextPath;
 
-    private String resource_path;
+    private String resourcePath;
 
-    private String http_method;
+    private String httpMethod;
 
-    private String api_type;
+    private String apiType;
 
-    private String application_name;
+    private String applicationName;
 
-    private String client_ip;
+    private String clientIp;
 
-    public OPADto(String api_type) {
-        this.api_type = api_type;
+    public OPADto(String apiType) {
+        this.apiType = apiType;
     }
 
     public OPADto(String username, String[] scopes,
-                  String API_name, String api_version,
-                  String context_path, String resource_path,
-                  String http_method, String api_type, String application_name, String client_ip) {
+                  String APIName, String apiVersion,
+                  String contextPath, String resourcePath,
+                  String httpMethod, String apiType, String applicationName, String clientIp) {
         this.username = username;
         this.scopes = scopes;
-        this.API_name = API_name;
-        this.version = api_version;
-        this.context_path = context_path;
-        this.resource_path = resource_path;
-        this.http_method = http_method;
-        this.api_type = api_type;
-        this.application_name = application_name;
-        this.client_ip = client_ip;
+        this.APIName = APIName;
+        this.version = apiVersion;
+        this.contextPath = contextPath;
+        this.resourcePath = resourcePath;
+        this.httpMethod = httpMethod;
+        this.apiType = apiType;
+        this.applicationName = applicationName;
+        this.clientIp = clientIp;
     }
 
     public String getUsername() {
@@ -58,12 +58,12 @@ public class OPADto{
         this.version = version;
     }
 
-    public String getApi_type() {
-        return api_type;
+    public String getApiType() {
+        return apiType;
     }
 
-    public void setApi_type(String api_type) {
-        this.api_type = api_type;
+    public void setApiType(String apiType) {
+        this.apiType = apiType;
     }
 
     public String[] getScopes() {
@@ -74,51 +74,51 @@ public class OPADto{
         this.scopes = scopes;
     }
 
-    public String getAPI_name() {
-        return API_name;
+    public String getAPIName() {
+        return APIName;
     }
 
-    public void setAPI_name(String API_name) {
-        this.API_name = API_name;
+    public void setAPIName(String APIName) {
+        this.APIName = APIName;
     }
 
-    public String getContext_path() {
-        return context_path;
+    public String getContextPath() {
+        return contextPath;
     }
 
-    public void setContext_path(String context_path) {
-        this.context_path = context_path;
+    public void setContextPath(String contextPath) {
+        this.contextPath = contextPath;
     }
 
-    public String getResource_path() {
-        return resource_path;
+    public String getResourcePath() {
+        return resourcePath;
     }
 
-    public void setResource_path(String resource_path) {
-        this.resource_path = resource_path;
+    public void setResourcePath(String resourcePath) {
+        this.resourcePath = resourcePath;
     }
 
-    public String getHttp_method() {
-        return http_method;
+    public String getHttpMethod() {
+        return httpMethod;
     }
 
-    public void setHttp_method(String http_method) {
-        this.http_method = http_method;
+    public void setHttpMethod(String httpMethod) {
+        this.httpMethod = httpMethod;
     }
 
-    public String getApplication_name() {
-        return application_name;
+    public String getApplicationName() {
+        return applicationName;
     }
 
-    public void setApplication_name(String application_name) {
-        this.application_name = application_name;
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
     }
 
-    public String getClient_ip() {
-        return client_ip;
+    public String getClientIp() {
+        return clientIp;
     }
 
-    public void setClient_ip(String client_ip) {
-        this.client_ip = client_ip;
+    public void setClientIp(String clientIp) {
+        this.clientIp = clientIp;
     }
 }

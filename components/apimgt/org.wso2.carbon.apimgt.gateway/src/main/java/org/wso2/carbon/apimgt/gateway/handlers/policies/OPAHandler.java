@@ -13,6 +13,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.OPADto;
 
@@ -20,15 +21,12 @@ import org.json.simple.parser.ParseException;
 //import org.json.JSONObject;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 //import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
-import java.util.Properties;
 
 
 import java.io.*;
@@ -40,30 +38,30 @@ public class OPAHandler extends AbstractHandler {
 
     private String username;
     private String scopes;
-    private String api_name;
+    private String apiName;
     private String version;
-    private String api_context;
-    private String resource_path;
-    private String http_method;
-    private String api_type;
-    private String application_name;
-    private String client_ip;
+    private String apiContext;
+    private String resourcePath;
+    private String httpMethod;
+    private String apiType;
+    private String applicationName;
+    private String clientIp;
 
     OPADto opaDto;
-    HttpClient httpClient = APIUtil.getHttpClient(8181,"http");
+    private static HttpClient httpClient = null;
 
     @Override
     public boolean handleRequest(MessageContext messageContext) {
 
         setUsername(messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER).toString());
         setScopes(messageContext.getProperty("Access-Control-Allow-Headers").toString());
-        setApi_name(messageContext.getProperty(APIMgtGatewayConstants.API).toString());
+        setApiName(messageContext.getProperty(APIMgtGatewayConstants.API).toString());
         setVersion(messageContext.getProperty(APIMgtGatewayConstants.VERSION).toString());
-        setApi_context(messageContext.getProperty(RESTConstants.REST_API_CONTEXT).toString());
-        setResource_path(messageContext.getProperty(APIMgtGatewayConstants.RESOURCE).toString());
-        setHttp_method(messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD).toString());
-        setApi_type(messageContext.getProperty(APIMgtGatewayConstants.API_TYPE).toString());
-        setApplication_name(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME).toString());
+        setApiContext(messageContext.getProperty(RESTConstants.REST_API_CONTEXT).toString());
+        setResourcePath(messageContext.getProperty(APIMgtGatewayConstants.RESOURCE).toString());
+        setHttpMethod(messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD).toString());
+        setApiType(messageContext.getProperty(APIMgtGatewayConstants.API_TYPE).toString());
+        setApplicationName(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME).toString());
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
@@ -72,30 +70,30 @@ public class OPAHandler extends AbstractHandler {
                         (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
         if (transportHeaderMap != null) {
-            client_ip = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
+            clientIp = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         }
 
         //Setting IP of the client
-        if (client_ip != null && !client_ip.isEmpty()) {
-            if (client_ip.indexOf(",") > 0) {
-                client_ip = client_ip.substring(0, client_ip.indexOf(","));
+        if (clientIp != null && !clientIp.isEmpty()) {
+            if (clientIp.indexOf(",") > 0) {
+                clientIp = clientIp.substring(0, clientIp.indexOf(","));
             }
         } else {
-            client_ip = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+            clientIp = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
 
 
         opaDto = new OPADto(
                 getUsername(),
                 getScopes().split(","),
-                getApi_name(),
+                getApiName(),
                 getVersion(),
-                getApi_context(),
-                getResource_path(),
-                getHttp_method(),
-                getApi_type(),
-                getApplication_name(),
-                getClient_ip()
+                getApiContext(),
+                getResourcePath(),
+                getHttpMethod(),
+                getApiType(),
+                getApplicationName(),
+                getClientIp()
         );
 
         try {
@@ -131,9 +129,8 @@ public class OPAHandler extends AbstractHandler {
                     "Change request timeout in Settings > General",e);
         }
         catch (ParseException e) {
-            log.error("Error occurred while reading the response",e);
-        }
-        finally {
+            log.error("Error while evaluating HTTP response",e);
+        } finally {
             httpClient.getConnectionManager().shutdown();
         }
 
@@ -141,6 +138,7 @@ public class OPAHandler extends AbstractHandler {
     }
 
     private HttpResponse sendRequestToOPaServer(String jsonStr) throws IOException {
+        httpClient = APIUtil.getHttpClient(8181,"http");
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         Object serverEndpoint  =  configuration.getFirstProperty("APIGateway.Environments.Environment.OpaServer");
@@ -169,9 +167,10 @@ public class OPAHandler extends AbstractHandler {
         return object.toString();
     }
 
-    private void handleOPAPolicyFailure(MessageContext messageContext, int status){
+    private boolean handleOPAPolicyFailure(MessageContext messageContext, int status)  {
         log.error("wrong credentials: Request breaks provided policies");
         Utils.sendFault(messageContext, status);
+        return false;
     }
 
     @Override
@@ -199,12 +198,12 @@ public class OPAHandler extends AbstractHandler {
         this.scopes = scopes;
     }
 
-    public String getApi_name() {
-        return api_name;
+    public String getApiName() {
+        return apiName;
     }
 
-    public void setApi_name(String api_name) {
-        this.api_name = api_name;
+    public void setApiName(String apiName) {
+        this.apiName = apiName;
     }
 
     public String getVersion() {
@@ -215,51 +214,51 @@ public class OPAHandler extends AbstractHandler {
         this.version = version;
     }
 
-    public String getApi_context() {
-        return api_context;
+    public String getApiContext() {
+        return apiContext;
     }
 
-    public void setApi_context(String api_context) {
-        this.api_context = api_context;
+    public void setApiContext(String apiContext) {
+        this.apiContext = apiContext;
     }
 
-    public String getResource_path() {
-        return resource_path;
+    public String getResourcePath() {
+        return resourcePath;
     }
 
-    public void setResource_path(String resource_path) {
-        this.resource_path = resource_path;
+    public void setResourcePath(String resourcePath) {
+        this.resourcePath = resourcePath;
     }
 
-    public String getHttp_method() {
-        return http_method;
+    public String getHttpMethod() {
+        return httpMethod;
     }
 
-    public void setHttp_method(String http_method) {
-        this.http_method = http_method;
+    public void setHttpMethod(String httpMethod) {
+        this.httpMethod = httpMethod;
     }
 
-    public String getApi_type() {
-        return api_type;
+    public String getApiType() {
+        return apiType;
     }
 
-    public void setApi_type(String api_type) {
-        this.api_type = api_type;
+    public void setApiType(String apiType) {
+        this.apiType = apiType;
     }
 
-    public String getApplication_name() {
-        return application_name;
+    public String getApplicationName() {
+        return applicationName;
     }
 
-    public void setApplication_name(String application_name) {
-        this.application_name = application_name;
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
     }
 
-    public String getClient_ip() {
-        return client_ip;
+    public String getClientIp() {
+        return clientIp;
     }
 
-    public void setClient_ip(String client_ip) {
-        this.client_ip = client_ip;
+    public void setClientIp(String clientIp) {
+        this.clientIp = clientIp;
     }
 }

@@ -1598,7 +1598,6 @@
                 <artifactId>awslambda</artifactId>
                 <version>${org.wso2.orbit.com.amazonaws.version}</version>
             </dependency>
-<<<<<<< HEAD
 
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -1612,13 +1611,11 @@
 <!--                <version>2.5.3</version>-->
 <!--            </dependency>-->
 
-=======
             <dependency>
                 <groupId>org.wso2.orbit.io.jaeger</groupId>
                 <artifactId>jaeger-client</artifactId>
                 <version>${jaeger.client.version}</version>
             </dependency>
->>>>>>> de2943204eeb5f8587226e0d9af689d92a5d468e
         </dependencies>
     </dependencyManagement>
 
