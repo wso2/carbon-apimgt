@@ -27,6 +27,10 @@ import LastPageIcon from '@material-ui/icons/LastPage';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
 import TablePagination from '@material-ui/core/TablePagination';
 import Tooltip from '@material-ui/core/Tooltip';
 import withStyles from '@material-ui/core/styles/withStyles';
@@ -125,12 +129,18 @@ const styles = (theme) => ({
         flexGrow: 1,
     },
     InfoToolTip: {
-        maxWidth: 500,
+        backgroundColor: theme.custom.disableColor,
+        color: theme.palette.getContrastText(theme.custom.disableColor),
         fontSize: theme.typography.fontSize,
-        fontWeight: '400',
-        border: '1px solid #dadde9',
-        borderRadius: '5px',
-        padding: '15px 10px 0 18px',
+        fontWeight: theme.typography.h6.fontWeight,
+        border: 'solid 1px ' + theme.palette.grey,
+        borderRadius: theme.shape.borderRadius,
+        padding: theme.spacing(2),
+    },
+    subscriberHeader: {
+        fontSize: theme.typography.h6.fontSize,
+        color: theme.typography.h6.color,
+        fontWeight: theme.typography.h6.fontWeight,
     },
 });
 
@@ -634,20 +644,20 @@ class SubscriptionsTable extends Component {
                     </Grid>
                     {claimsObject.claims && (
                         <div>
-                            {claimsObject.claims.map((claim) => (
-                                <ol style={{ marginLeft: '-20px', marginTop: '8px', listStyleType: 'none' }}>
-                                    <li style={{ marginTop: '5px' }}>
-                                        <Grid container direction='row' spacing={1}>
-                                            <Grid item>
-                                                {claim.name}
-                                            </Grid>
-                                            <Grid item>
-                                                {claim.value}
-                                            </Grid>
-                                        </Grid>
-                                    </li>
-                                </ol>
-                            ))}
+                            <Table className={classes.table}>
+                                <TableBody>
+                                    {claimsObject.claims.map((claim) => (
+                                        <TableRow hover>
+                                            <TableCell>{claim.name}</TableCell>
+                                            {claim.value ? (
+                                                <TableCell>{claim.value}</TableCell>
+                                            ) : (
+                                                <TableCell>Not Available</TableCell>
+                                            )}
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
                         </div>
                     )}
                 </div>
@@ -705,6 +715,7 @@ class SubscriptionsTable extends Component {
                     />
                 ),
                 options: {
+                    sort: false,
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             return (
@@ -751,6 +762,9 @@ class SubscriptionsTable extends Component {
                         defaultMessage='Application'
                     />
                 ),
+                options: {
+                    sort: false,
+                },
             },
             {
                 name: 'applicationInfo.description',
@@ -774,6 +788,9 @@ class SubscriptionsTable extends Component {
                         defaultMessage='Tier'
                     />
                 ),
+                options: {
+                    sort: false,
+                },
             },
             {
                 name: 'subscriptionStatus',
@@ -783,6 +800,9 @@ class SubscriptionsTable extends Component {
                         defaultMessage='Status'
                     />
                 ),
+                options: {
+                    sort: false,
+                },
             },
             {
                 name: 'actions',
@@ -793,6 +813,7 @@ class SubscriptionsTable extends Component {
                     />
                 ),
                 options: {
+                    sort: false,
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             const status = tableMeta.rowData[7];
@@ -824,6 +845,7 @@ class SubscriptionsTable extends Component {
                     />
                 ),
                 options: {
+                    sort: false,
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             const throttlingPolicy = tableMeta.rowData[6];
