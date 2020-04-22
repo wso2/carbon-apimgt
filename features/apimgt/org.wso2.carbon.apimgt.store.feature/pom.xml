@@ -278,6 +278,7 @@
                         <phase>initialize</phase>
                         <configuration>
                             <workingDirectory>${basedir}/src/main/resources/devportal</workingDirectory>
+                            <workingDirectory>${basedir}/src/main/resources/admin_new</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>ci</argument>
@@ -293,6 +294,7 @@
                         <phase>compile</phase>
                         <configuration>
                             <workingDirectory>${basedir}/src/main/resources/devportal</workingDirectory>
+                            <workingDirectory>${basedir}/src/main/resources/admin_new</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>run</argument>
@@ -326,6 +328,22 @@
                     <include>devportal/package.json</include>
                     <include>devportal/webpack.config.js</include>
                     <include>devportal/Readme.txt</include>
+                    <include>admin_new/site/**</include>
+                    <include>admin_new/services/**</include>
+                    <include>admin_new/jaggery.conf</include>
+                    <include>admin_new/source/**</include>
+                    <include>admin_new/override/**</include>
+                    <include>admin_new/.eslintignore</include>
+                    <include>admin_new/.eslintrc.js</include>
+                    <include>admin_new/.npmrc</include>
+                    <include>admin_new/babel.config.js</include>
+                    <include>admin_new/jest.config.js</include>
+                    <include>admin_new/jsconfig.json</include>
+                    <include>admin_new/loader.js</include>
+                    <include>admin_new/package-lock.json</include>
+                    <include>admin_new/package.json</include>
+                    <include>admin_new/webpack.config.js</include>
+                    <include>admin_new/Readme.txt</include>
                     <include>p2.inf</include>
                     <include>admin/**</include>
                     <include>apistore/**</include>
