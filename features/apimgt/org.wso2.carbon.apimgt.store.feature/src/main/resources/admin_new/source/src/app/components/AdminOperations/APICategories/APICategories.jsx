@@ -34,6 +34,7 @@ import AddCircle from '@material-ui/icons/AddCircle';
 import Icon from '@material-ui/core/Icon';
 import CreateBanner from '../CreateBanner';
 import Alert from 'AppComponents/Shared/Alert';
+import settings from '../../../../../../site/public/conf/settings';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -158,7 +159,12 @@ export default function APICategories() {
                         defaultMessage='API categories'
                     />
                 </Typography>
-                <Link to='/admin_new/categories/api categories/create api category'>
+                <Link
+                    to={
+                        settings.app.context +
+                        '/categories/api-categories/create-api-category'
+                    }
+                >
                     <Button size='small' className={classes.button}>
                         <AddCircle className={classes.buttonIcon} />
                         <FormattedMessage
