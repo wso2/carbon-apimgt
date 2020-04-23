@@ -16,12 +16,13 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import API from 'AppData/api';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
@@ -109,17 +110,17 @@ const validateAPICategoryName = (id, value) => {
 
     valid[id].invalid = !(value && value.length > 0);
     if (valid[id].invalid) {
-        valid[id].error = 'Scope name cannot be empty';
+        valid[id].error = 'API Category name cannot be empty';
     }
 
     if (/\s/.test(value)) {
         valid[id].invalid = true;
-        valid[id].error = 'Scope name cannot have spaces';
+        valid[id].error = 'API Category name cannot have spaces';
     }
 
     if (!valid[id].invalid && /[!@#$%^&*(),?"{}[\]|<>\t\n]/i.test(value)) {
         valid[id].invalid = true;
-        valid[id].error = 'Field contains special characters';
+        valid[id].error = 'API Category name field contains special characters';
     }
     if (!valid[id].invalid) {
         valid[id].error = '';
@@ -127,23 +128,40 @@ const validateAPICategoryName = (id, value) => {
     return valid;
 };
 
-const addAPICategory = (intl) => {
-    // todo: fix calling this upon component loading
+const addAPICategory = (intl, setCreatingAPICategory) => {
     valid = validateAPICategoryName('name', apiCategory.name);
     if (valid.name.invalid) {
         console.log(valid.name.error);
         Alert.error(valid.name.error);
-    } else {
-        const restApi = new API();
-        restApi.createAPICategory(apiCategory.name, apiCategory.description);
-        // Alert.info(
-        //     intl.formatMessage({
-        //         id: 'Apis.Details.Scopes.CreateScope.scope.added.successfully',
-        //         defaultMessage: 'Scope added successfully',
-        //     }),
-        // );
-        mhistory.push('/admin/categories/api categories');
+        return;
     }
+    const restApi = new API();
+    setCreatingAPICategory(true);
+    const promisedCreateAPICategory = restApi.createAPICategory(
+        apiCategory.name,
+        apiCategory.description,
+    );
+    promisedCreateAPICategory
+        .then(() => {
+            Alert.info(
+                intl.formatMessage({
+                    id: 'api.categories.create.new.category.added.successfully',
+                    defaultMessage: 'API Category added successfully',
+                }),
+            );
+            mhistory.push('/admin_new/categories/api categories');
+        })
+        .catch((error) => {
+            const { response } = error;
+            if (response.body) {
+                const { description } = response.body;
+                Alert.error(description);
+            }
+        })
+        .finally(() => {
+            apiCategory = {};
+            setCreatingAPICategory(false);
+        });
 };
 
 const handleAPICategoryNameInput = ({ target: { id, value } }) => {
@@ -156,24 +174,23 @@ const handleAPICategoryDescriptionInput = ({ target: { id, value } }) => {
 
 const CreateAPICategory = (props) => {
     const { classes, history, intl } = props;
-    console.log('props from create api category', props);
     mhistory = history;
+    const [isCreatingAPICategory, setCreatingAPICategory] = useState(false);
     return (
         <Grid container spacing={3}>
             <Grid item sm={12} md={12} />
-            {/*
-    Following two grids control the placement of whole create page
-    For centering the content better use `container` props, but instead used an empty grid item for flexibility
-     */}
             <Grid item sm={0} md={0} lg={2} />
             <Grid item sm={12} md={12} lg={8}>
                 <Grid container spacing={5} className={classes.titleGrid}>
                     <Grid item md={12}>
                         <div className={classes.titleWrapper}>
-                            <Link to='/todo' className={classes.titleLink}>
+                            <Link
+                                to='/admin_new/categories/api categories'
+                                className={classes.titleLink}
+                            >
                                 <Typography variant='h4'>
                                     <FormattedMessage
-                                        id='todo'
+                                        id='contents.main.title.api.categories'
                                         defaultMessage='API categories'
                                     />
                                 </Typography>
@@ -181,7 +198,7 @@ const CreateAPICategory = (props) => {
                             <Icon>keyboard_arrow_right</Icon>
                             <Typography variant='h4'>
                                 <FormattedMessage
-                                    id='todo'
+                                    id='contents.api.categories.create.new.category'
                                     defaultMessage='Create New API Category'
                                 />
                             </Typography>
@@ -196,7 +213,7 @@ const CreateAPICategory = (props) => {
                                     placeholder='Name'
                                     helperText={
                                         <FormattedMessage
-                                            id='todo'
+                                            id='api.categories.create.new.category.short.description.name'
                                             defaultMessage='Enter API Category Name ( Ex: finance )'
                                         />
                                     }
@@ -207,7 +224,6 @@ const CreateAPICategory = (props) => {
                                         shrink: true,
                                     }}
                                     onChange={handleAPICategoryNameInput}
-                                    // value={apiCategory.name || ''}
                                 />
                             </FormControl>
                             <FormControl
@@ -221,7 +237,7 @@ const CreateAPICategory = (props) => {
                                     placeholder='Short description about the API category'
                                     helperText={
                                         <FormattedMessage
-                                            id='todo'
+                                            id='api.categories.create.new.category.short.description.description'
                                             defaultMessage='Short description about the API category'
                                         />
                                     }
@@ -237,18 +253,39 @@ const CreateAPICategory = (props) => {
                                 <Button
                                     variant='contained'
                                     color='primary'
-                                    onClick={addAPICategory(intl)}
+                                    onClick={() =>
+                                        addAPICategory(
+                                            intl,
+                                            setCreatingAPICategory,
+                                        )
+                                    }
                                     className={classes.saveButton}
+                                    disabled={isCreatingAPICategory}
                                 >
-                                    <FormattedMessage
-                                        id='Apis.Details.Scopes.CreateScope.save'
-                                        defaultMessage='Save'
-                                    />
+                                    {isCreatingAPICategory ? (
+                                        <>
+                                            <FormattedMessage
+                                                id='Apis.Details.Scopes.CreateScope.saving'
+                                                defaultMessage='Saving'
+                                            />
+                                            <CircularProgress
+                                                size={16}
+                                                classes={{
+                                                    root: classes.progress,
+                                                }}
+                                            />
+                                        </>
+                                    ) : (
+                                        <FormattedMessage
+                                            id='api.categories.create.new.category.save'
+                                            defaultMessage='Save'
+                                        />
+                                    )}
                                 </Button>
-                                <Link to='/todo'>
+                                <Link to='/admin_new/categories/api categories'>
                                     <Button>
                                         <FormattedMessage
-                                            id='todo'
+                                            id='api.categories.create.new.category.cancel'
                                             defaultMessage='Cancel'
                                         />
                                     </Button>
