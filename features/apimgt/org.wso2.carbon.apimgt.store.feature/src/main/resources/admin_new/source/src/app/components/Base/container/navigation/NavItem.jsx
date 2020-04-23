@@ -50,18 +50,23 @@ const styles = (theme) => ({
         paddingTop: theme.spacing(1),
         cursor: 'pointer',
         backgroundColor: theme.palette.background.leftMenuActive,
-        color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
+        color: theme.palette.getContrastText(
+            theme.palette.background.leftMenuActive,
+        ),
         textDecoration: 'none',
     },
 });
 
 const NavItem = (props) => {
     const {
-        listItemProps, listItemTextProps, iconProps, classes, theme, ...other
+        listItemProps,
+        listItemTextProps,
+        iconProps,
+        classes,
+        theme,
+        ...other
     } = props;
-    const {
-        selected, name, linkTo, NavIcon,
-    } = other;
+    const { selected, name, linkTo, NavIcon } = other;
     const { leftMenu, leftMenuIconMainSize } = theme.custom;
 
     return linkTo ? (
@@ -73,16 +78,25 @@ const NavItem = (props) => {
                 },
                 'leftLInk',
             )}
-            style={{ backgroundColor: selected ? theme.palette.background.appBar : '' }}
+            style={{
+                backgroundColor: selected
+                    ? theme.palette.background.appBar
+                    : '',
+            }}
         >
-            <Link to={linkTo} className={classNames(classes.leftLinkAnchor, 'leftLinkAnchor')}>
+            <Link
+                to={linkTo}
+                className={classNames(classes.leftLinkAnchor, 'leftLinkAnchor')}
+            >
                 {NavIcon}
                 <Typography
                     className={classNames(
                         classes.leftLInkText,
                         {
-                            [classes.leftLInkText_IconLeft]: leftMenu === 'icon left',
-                            [classes.leftLInkText_NoText]: leftMenu === 'no text',
+                            [classes.leftLInkText_IconLeft]:
+                                leftMenu === 'icon left',
+                            [classes.leftLInkText_NoText]:
+                                leftMenu === 'no text',
                         },
                         'leftLInkText',
                     )}
@@ -93,9 +107,13 @@ const NavItem = (props) => {
             </Link>
         </div>
     ) : (
-        <Link to='/apis'>
+        <Link to='/'>
             <div className={classes.leftLInkMain}>
-                <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon='api' />
+                <CustomIcon
+                    width={leftMenuIconMainSize}
+                    height={leftMenuIconMainSize}
+                    icon='api'
+                />
             </div>
         </Link>
     );

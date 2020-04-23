@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import LeftMenuItemPrimary from 'AppComponents/Shared/LeftMenuItemPrimary';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl } from 'react-intl';
-import MicroGateway from 'AppComponents/AdminPages/MicroGateway';
-import APICategories from 'AppComponents/AdminPages/APICategories';
+import MicroGateway from 'AppComponents/AdminOperations/MicroGateway';
+import APICategories from 'AppComponents/AdminOperations/APICategories';
 import settings from '../../../../../../../site/public/conf/settings';
 
 const styles = (theme) => ({
@@ -25,7 +25,9 @@ const styles = (theme) => ({
         paddingTop: theme.spacing(1),
         cursor: 'pointer',
         backgroundColor: theme.palette.background.leftMenuActive,
-        color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
+        color: theme.palette.getContrastText(
+            theme.palette.background.leftMenuActive,
+        ),
         textDecoration: 'none',
     },
     detailsContent: {
@@ -58,11 +60,15 @@ const subPaths = {
     SETTINGS_SCOPE_MAPPING: appName + '/settings/scope-mapping',
     MICROGATEWAY_LABELS: appName + '/microgateway/labels',
     CATEGORIES_API_CATEGORIES: appName + '/categories/api-categories',
-    THROTTLINGPOLICIES_ADVANCED_POLICIES: appName + '/throttling/advanced-policies',
-    THROTTLINGPOLICIES_APPLICATION_POLICIES: appName + '/throttling/application-policies',
-    THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES: appName + '/throttling/subscription-policies',
+    THROTTLINGPOLICIES_ADVANCED_POLICIES:
+        appName + '/throttling/advanced-policies',
+    THROTTLINGPOLICIES_APPLICATION_POLICIES:
+        appName + '/throttling/application-policies',
+    THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES:
+        appName + '/throttling/subscription-policies',
     THROTTLINGPOLICIES_CUSTOM_POLICIES: appName + '/throttling/custom-policies',
-    THROTTLINGPOLICIES_BLACKLIST_POLICIES: appName + '/throttling/blacklist-policies',
+    THROTTLINGPOLICIES_BLACKLIST_POLICIES:
+        appName + '/throttling/blacklist-policies',
     ANALYTICS_API_AVAILABILITY: appName + '/analytics/api-availability',
 };
 
@@ -230,7 +236,9 @@ const LeftMenu = (props) => {
                         id: 'leftmenu.primary.throttlingpolicies',
                         defaultMessage: 'THROTTLING POLICIES',
                     })}
-                    secondaryMenuDetails={throttlingPoliciesSubMenuDetails(intl)}
+                    secondaryMenuDetails={throttlingPoliciesSubMenuDetails(
+                        intl,
+                    )}
                 />
                 <LeftMenuItemPrimary
                     text={intl.formatMessage({
@@ -279,19 +287,39 @@ const LeftMenu = (props) => {
                         <Route path={subPaths.CATEGORIES_API_CATEGORIES}>
                             <APICategories />
                         </Route>
-                        <Route path={subPaths.THROTTLINGPOLICIES_ADVANCED_POLICIES}>
+                        <Route
+                            path={subPaths.THROTTLINGPOLICIES_ADVANCED_POLICIES}
+                        >
                             <h1>Hello THROTTLINGPOLICIES_ADVANCED_POLICIES</h1>
                         </Route>
-                        <Route path={subPaths.THROTTLINGPOLICIES_APPLICATION_POLICIES}>
-                            <h1>Hello THROTTLINGPOLICIES_APPLICATION_POLICIES</h1>
+                        <Route
+                            path={
+                                subPaths.THROTTLINGPOLICIES_APPLICATION_POLICIES
+                            }
+                        >
+                            <h1>
+                                Hello THROTTLINGPOLICIES_APPLICATION_POLICIES
+                            </h1>
                         </Route>
-                        <Route path={subPaths.THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES}>
-                            <h1>Hello THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES</h1>
+                        <Route
+                            path={
+                                subPaths.THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES
+                            }
+                        >
+                            <h1>
+                                Hello THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES
+                            </h1>
                         </Route>
-                        <Route path={subPaths.THROTTLINGPOLICIES_CUSTOM_POLICIES}>
+                        <Route
+                            path={subPaths.THROTTLINGPOLICIES_CUSTOM_POLICIES}
+                        >
                             <h1>Hello THROTTLINGPOLICIES_CUSTOM_POLICIES</h1>
                         </Route>
-                        <Route path={subPaths.THROTTLINGPOLICIES_BLACKLIST_POLICIES}>
+                        <Route
+                            path={
+                                subPaths.THROTTLINGPOLICIES_BLACKLIST_POLICIES
+                            }
+                        >
                             <h1>Hello THROTTLINGPOLICIES_BLACKLIST_POLICIES</h1>
                         </Route>
                         <Route path={subPaths.ANALYTICS_API_AVAILABILITY}>
