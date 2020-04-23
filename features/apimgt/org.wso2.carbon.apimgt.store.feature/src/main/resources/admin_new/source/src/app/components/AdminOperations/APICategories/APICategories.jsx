@@ -66,10 +66,20 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+let allCategories = [];
+
 const handleCreateClick = () => {
     const restApi = new API();
     // following hardcoded line is only for dev purposes.
     restApi.createAPICategory('new category', 'description goes here');
+};
+
+const deleteAllCategories = () => {
+    const restApi = new API();
+    allCategories.map((category) => {
+        console.log('delete request for id:', category.id);
+        restApi.deleteAPICategory(category.id);
+    });
 };
 
 /**
@@ -86,6 +96,7 @@ export default function APICategories() {
     useEffect(() => {
         restApi.apiCategoriesListGet().then((result) => {
             if (!isUpdated) {
+                allCategories = result.body.list;
                 setMgLabels(result.body.list);
                 setUpdated(true);
             }
@@ -124,15 +135,26 @@ export default function APICategories() {
                         defaultMessage='API categories'
                     />
                 </Typography>
-                <Link to='/admin/categories/api categories/create api category'>
+                <Link to='/admin_new/categories/api categories/create api category'>
                     <Button size='small' className={classes.button}>
                         <AddCircle className={classes.buttonIcon} />
                         <FormattedMessage
-                            id='contents.main.heading.api.categories.add_new'
+                            id='contents.main.heading.api.categories.add.new'
                             defaultMessage='Add New API Category'
                         />
                     </Button>
                 </Link>
+                <Button
+                    size='small'
+                    className={classes.button}
+                    onClick={deleteAllCategories}
+                >
+                    {/* todo: remove this button */}
+                    <FormattedMessage
+                        id='contents.main.heading.api.categories.add_new.todo.remove.this'
+                        defaultMessage='Delete all - for dev'
+                    />
+                </Button>
             </div>
             {mgLabels.length > 0 ? (
                 <Paper className={classes.gatewayPaper}>
