@@ -31,7 +31,9 @@ import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import AddCircle from '@material-ui/icons/AddCircle';
+import Icon from '@material-ui/core/Icon';
 import CreateBanner from '../CreateBanner';
+import Alert from 'AppComponents/Shared/Alert';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -82,10 +84,31 @@ const deleteAllCategories = () => {
     });
 };
 
+const deleteAPICategory = (id, name, setUpdated) => {
+    const restApi = new API();
+    const promisedDelete = restApi.deleteAPICategory(id);
+    promisedDelete
+        .then((response) => {
+            if (response.status !== 200) {
+                Alert.info('Something went wrong while deleting the API!');
+                return;
+            }
+            setUpdated(false);
+            Alert.info(`API category: ${name} deleted Successfully`);
+        })
+        .catch((error) => {
+            if (error.status === 409) {
+                Alert.error(
+                    '[ ' + name + ' ] : ' + error.response.body.description,
+                );
+            } else {
+                Alert.error('Something went wrong while deleting the API!');
+            }
+        });
+};
+
 /**
  * Renders APICategories
- * @class APICategories
- * @extends {React.Component}
  */
 export default function APICategories() {
     const classes = useStyles();
@@ -168,6 +191,7 @@ export default function APICategories() {
                                 <TableCell align='left'>
                                     Number of APIs
                                 </TableCell>
+                                <TableCell>Actions</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -185,6 +209,46 @@ export default function APICategories() {
                                     </TableCell>
                                     {/* todo: Fill following table cell with Number_of_APIs per api category after API is modified */}
                                     <TableCell align='left'>-</TableCell>
+                                    <TableCell>
+                                        <table className={classes.actionTable}>
+                                            <tr>
+                                                <td>
+                                                    <Link to='/todo'>
+                                                        <Button>
+                                                            <Icon>edit</Icon>
+                                                            <FormattedMessage
+                                                                id='api.categories.category.edit'
+                                                                defaultMessage='Edit'
+                                                            />
+                                                        </Button>
+                                                    </Link>
+                                                </td>
+                                                <td>
+                                                    <Button
+                                                        // todo: when the rest api is completed, send the number_of_apis
+                                                        // to this function and validate before deleting it.
+                                                        // also, disabling the delete button can be done
+                                                        onClick={() =>
+                                                            deleteAPICategory(
+                                                                row.id,
+                                                                row.name,
+                                                                setUpdated,
+                                                            )
+                                                        }
+                                                        disabled={!isUpdated}
+                                                    >
+                                                        <Icon>
+                                                            delete_forever
+                                                        </Icon>
+                                                        <FormattedMessage
+                                                            id='api.categories.category.delete'
+                                                            defaultMessage='Delete'
+                                                        />
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
