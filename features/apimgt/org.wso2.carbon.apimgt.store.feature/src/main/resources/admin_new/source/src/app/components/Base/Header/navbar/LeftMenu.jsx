@@ -25,7 +25,9 @@ const styles = (theme) => ({
         paddingTop: theme.spacing(1),
         cursor: 'pointer',
         backgroundColor: theme.palette.background.leftMenuActive,
-        color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
+        color: theme.palette.getContrastText(
+            theme.palette.background.leftMenuActive,
+        ),
         textDecoration: 'none',
     },
     detailsContent: {
@@ -230,7 +232,9 @@ const LeftMenu = (props) => {
                         id: 'leftmenu.primary.throttlingpolicies',
                         defaultMessage: 'THROTTLING POLICIES',
                     })}
-                    secondaryMenuDetails={throttlingPoliciesSubMenuDetails(intl)}
+                    secondaryMenuDetails={throttlingPoliciesSubMenuDetails(
+                        intl,
+                    )}
                 />
                 <LeftMenuItemPrimary
                     text={intl.formatMessage({
