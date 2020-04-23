@@ -3,9 +3,9 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import LeftMenuItemPrimary from 'AppComponents/Shared/LeftMenuItemPrimary';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl } from 'react-intl';
-import MicroGateway from 'AppComponents/AdminOperations/MicroGateway';
-import APICategory from 'AppComponents/AdminOperations/APICategories';
-import CreateAPICategory from 'AppComponents/AdminOperations/APICategories/CreateAPICategory';
+import MicroGateway from 'AppComponents/AdminPages/MicroGateway';
+import APICategories from 'AppComponents/AdminPages/APICategories';
+import settings from '../../../../../../../site/public/conf/settings';
 
 const styles = (theme) => ({
     LeftMenu: {
@@ -25,9 +25,7 @@ const styles = (theme) => ({
         paddingTop: theme.spacing(1),
         cursor: 'pointer',
         backgroundColor: theme.palette.background.leftMenuActive,
-        color: theme.palette.getContrastText(
-            theme.palette.background.leftMenuActive,
-        ),
+        color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
         textDecoration: 'none',
     },
     detailsContent: {
@@ -48,27 +46,24 @@ const styles = (theme) => ({
     },
 });
 
+const appName = settings.app.context;
+
 const subPaths = {
-    TASKS_USER_CREATION: '/admin_new/tasks/user creation',
-    TASKS_APPLICATION_CREATION: '/admin_new/tasks/application creation',
-    TASKS_SUBSCRIPTION_CREATION: '/admin_new/tasks/subscription creation',
-    TASKS_APPLICATION_REGISTRATION: '/admin_new/tasks/application registration',
-    TASKS_API_STATE_CHANGE: '/admin_new/tasks/api state change',
-    SETTINGS_APPLICATIONS: '/admin_new/settings/applications',
-    SETTINGS_SCOPE_MAPPING: '/admin_new/settings/scope mapping',
-    MICROGATEWAY_LABELS: '/admin_new/microgateway/labels',
-    CATEGORIES_API_CATEGORIES: '/admin_new/categories/api categories',
-    THROTTLINGPOLICIES_ADVANCED_POLICIES:
-        '/admin_new/throttling policies/advanced policies',
-    THROTTLINGPOLICIES_APPLICATION_POLICIES:
-        '/admin_new/throttling policies/application policies',
-    THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES:
-        '/admin_new/throttling policies/subscription policies',
-    THROTTLINGPOLICIES_CUSTOM_POLICIES:
-        '/admin_new/throttling policies/custom policies',
-    THROTTLINGPOLICIES_BLACKLIST_POLICIES:
-        '/admin_new/throttling policies/blacklist policies',
-    ANALYTICS_API_AVAILABILITY: '/admin_new/analytics/api availability',
+    TASKS_USER_CREATION: appName + '/tasks/user-creation',
+    TASKS_APPLICATION_CREATION: appName + '/tasks/application-creation',
+    TASKS_SUBSCRIPTION_CREATION: appName + '/tasks/subscription-creation',
+    TASKS_APPLICATION_REGISTRATION: appName + '/tasks/application-registration',
+    TASKS_API_STATE_CHANGE: appName + '/tasks/api-state-change',
+    SETTINGS_APPLICATIONS: appName + '/settings/applications',
+    SETTINGS_SCOPE_MAPPING: appName + '/settings/scope-mapping',
+    MICROGATEWAY_LABELS: appName + '/microgateway/labels',
+    CATEGORIES_API_CATEGORIES: appName + '/categories/api-categories',
+    THROTTLINGPOLICIES_ADVANCED_POLICIES: appName + '/throttling/advanced-policies',
+    THROTTLINGPOLICIES_APPLICATION_POLICIES: appName + '/throttling/application-policies',
+    THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES: appName + '/throttling/subscription-policies',
+    THROTTLINGPOLICIES_CUSTOM_POLICIES: appName + '/throttling/custom-policies',
+    THROTTLINGPOLICIES_BLACKLIST_POLICIES: appName + '/throttling/blacklist-policies',
+    ANALYTICS_API_AVAILABILITY: appName + '/analytics/api-availability',
 };
 
 const tasksSubMenuDetails = (intl) => [
@@ -235,9 +230,7 @@ const LeftMenu = (props) => {
                         id: 'leftmenu.primary.throttlingpolicies',
                         defaultMessage: 'THROTTLING POLICIES',
                     })}
-                    secondaryMenuDetails={throttlingPoliciesSubMenuDetails(
-                        intl,
-                    )}
+                    secondaryMenuDetails={throttlingPoliciesSubMenuDetails(intl)}
                 />
                 <LeftMenuItemPrimary
                     text={intl.formatMessage({
@@ -284,47 +277,27 @@ const LeftMenu = (props) => {
                             <MicroGateway />
                         </Route>
                         <Route path={subPaths.CATEGORIES_API_CATEGORIES}>
-                            <APICategory />
+                            <APICategories />
                         </Route>
-                        <Route
-                            path={subPaths.THROTTLINGPOLICIES_ADVANCED_POLICIES}
-                        >
+                        <Route path={subPaths.THROTTLINGPOLICIES_ADVANCED_POLICIES}>
                             <h1>Hello THROTTLINGPOLICIES_ADVANCED_POLICIES</h1>
                         </Route>
-                        <Route
-                            path={
-                                subPaths.THROTTLINGPOLICIES_APPLICATION_POLICIES
-                            }
-                        >
-                            <h1>
-                                Hello THROTTLINGPOLICIES_APPLICATION_POLICIES
-                            </h1>
+                        <Route path={subPaths.THROTTLINGPOLICIES_APPLICATION_POLICIES}>
+                            <h1>Hello THROTTLINGPOLICIES_APPLICATION_POLICIES</h1>
                         </Route>
-                        <Route
-                            path={
-                                subPaths.THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES
-                            }
-                        >
-                            <h1>
-                                Hello THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES
-                            </h1>
+                        <Route path={subPaths.THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES}>
+                            <h1>Hello THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES</h1>
                         </Route>
-                        <Route
-                            path={subPaths.THROTTLINGPOLICIES_CUSTOM_POLICIES}
-                        >
+                        <Route path={subPaths.THROTTLINGPOLICIES_CUSTOM_POLICIES}>
                             <h1>Hello THROTTLINGPOLICIES_CUSTOM_POLICIES</h1>
                         </Route>
-                        <Route
-                            path={
-                                subPaths.THROTTLINGPOLICIES_BLACKLIST_POLICIES
-                            }
-                        >
+                        <Route path={subPaths.THROTTLINGPOLICIES_BLACKLIST_POLICIES}>
                             <h1>Hello THROTTLINGPOLICIES_BLACKLIST_POLICIES</h1>
                         </Route>
                         <Route path={subPaths.ANALYTICS_API_AVAILABILITY}>
                             <h1>Hello ANALYTICS_API_AVAILABILITY</h1>
                         </Route>
-                        {/* todo: determine the component for /admin_new/ */}
+                        {/* todo: determine the component for /admin/ */}
                         <Route path='/admin_new/'>
                             <h1>Select submenu</h1>
                         </Route>
