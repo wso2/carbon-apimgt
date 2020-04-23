@@ -3292,11 +3292,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIDefinition apiDefinition = validationResponse.getParser();
             SwaggerData swaggerData;
             String definitionToAdd = validationResponse.getJsonContent();
-            definitionToAdd = PreprocessSwagger.preprocessSwagger(definitionToAdd, apiToAdd);
             if (syncOperations) {
                 swaggerData = new SwaggerData(apiToAdd);
                 definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
             }
+            definitionToAdd = PreprocessSwagger.preprocessSwagger(definitionToAdd, apiToAdd);
             Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
             Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
             apiToAdd.setUriTemplates(uriTemplates);

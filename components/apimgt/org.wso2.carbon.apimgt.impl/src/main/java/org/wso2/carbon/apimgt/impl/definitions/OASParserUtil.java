@@ -179,7 +179,7 @@ public class OASParserUtil {
         return oas3Parser;
     }
 
-    private static SwaggerVersion getSwaggerVersion(String apiDefinition) throws APIManagementException {
+    public static SwaggerVersion getSwaggerVersion(String apiDefinition) throws APIManagementException {
         ObjectMapper mapper;
         if (apiDefinition.trim().startsWith("{")) {
             mapper = ObjectMapperFactory.createJson();
