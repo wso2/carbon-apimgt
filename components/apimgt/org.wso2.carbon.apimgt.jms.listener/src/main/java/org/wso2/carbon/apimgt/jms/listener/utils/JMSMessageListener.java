@@ -352,6 +352,6 @@ public class JMSMessageListener implements MessageListener {
             isJwtToken = true;
         }
         ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                .revokedTokenFromGatewayCache(revokedToken, isJwtToken);
+                .removeTokenFromGatewayCache(revokedToken, isJwtToken);
     }
 }

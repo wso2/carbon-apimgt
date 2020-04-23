@@ -32,7 +32,7 @@ public class RevokedTokenDataImpl implements RevokedTokenService {
     }
 
     @Override
-    public void revokedTokenFromGatewayCache(String accessToken,boolean isJwtToken) {
+    public void removeTokenFromGatewayCache(String accessToken, boolean isJwtToken) {
         String cachedTenantDomain;
         try {
             PrivilegedCarbonContext.startTenantFlow();
