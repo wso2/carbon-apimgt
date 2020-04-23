@@ -20,18 +20,22 @@ import { Route, Switch } from 'react-router-dom';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CreateAPICategory from './CreateAPICategory';
 import APICategories from './APICategories';
+import settings from '../../../../../../site/public/conf/settings';
 
 const APICategory = () => {
     return (
         <Switch>
             <Route
                 exact
-                path='/admin_new/categories/api categories'
+                path={settings.app.context + '/categories/api-categories'}
                 component={APICategories}
             />
             <Route
                 exact
-                path='/admin_new/categories/api categories/create api category'
+                path={
+                    settings.app.context +
+                    '/categories/api-categories/create-api-category'
+                }
                 component={(props) => <CreateAPICategory {...props} />}
             />
             <Route component={ResourceNotFound} />
