@@ -25,7 +25,9 @@ const styles = (theme) => ({
         paddingTop: theme.spacing(1),
         cursor: 'pointer',
         backgroundColor: theme.palette.background.leftMenuActive,
-        color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
+        color: theme.palette.getContrastText(
+            theme.palette.background.leftMenuActive,
+        ),
         textDecoration: 'none',
     },
     detailsContent: {
@@ -47,21 +49,26 @@ const styles = (theme) => ({
 });
 
 const subPaths = {
-    TASKS_USER_CREATION: '/admin/tasks/user creation',
-    TASKS_APPLICATION_CREATION: '/admin/tasks/application creation',
-    TASKS_SUBSCRIPTION_CREATION: '/admin/tasks/subscription creation',
-    TASKS_APPLICATION_REGISTRATION: '/admin/tasks/application registration',
-    TASKS_API_STATE_CHANGE: '/admin/tasks/api state change',
-    SETTINGS_APPLICATIONS: '/admin/settings/applications',
-    SETTINGS_SCOPE_MAPPING: '/admin/settings/scope mapping',
-    MICROGATEWAY_LABELS: '/admin/microgateway/labels',
-    CATEGORIES_API_CATEGORIES: '/admin/categories/api categories',
-    THROTTLINGPOLICIES_ADVANCED_POLICIES: '/admin/throttling policies/advanced policies',
-    THROTTLINGPOLICIES_APPLICATION_POLICIES: '/admin/throttling policies/application policies',
-    THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES: '/admin/throttling policies/subscription policies',
-    THROTTLINGPOLICIES_CUSTOM_POLICIES: '/admin/throttling policies/custom policies',
-    THROTTLINGPOLICIES_BLACKLIST_POLICIES: '/admin/throttling policies/blacklist policies',
-    ANALYTICS_API_AVAILABILITY: '/admin/analytics/api availability',
+    TASKS_USER_CREATION: '/admin_new/tasks/user creation',
+    TASKS_APPLICATION_CREATION: '/admin_new/tasks/application creation',
+    TASKS_SUBSCRIPTION_CREATION: '/admin_new/tasks/subscription creation',
+    TASKS_APPLICATION_REGISTRATION: '/admin_new/tasks/application registration',
+    TASKS_API_STATE_CHANGE: '/admin_new/tasks/api state change',
+    SETTINGS_APPLICATIONS: '/admin_new/settings/applications',
+    SETTINGS_SCOPE_MAPPING: '/admin_new/settings/scope mapping',
+    MICROGATEWAY_LABELS: '/admin_new/microgateway/labels',
+    CATEGORIES_API_CATEGORIES: '/admin_new/categories/api categories',
+    THROTTLINGPOLICIES_ADVANCED_POLICIES:
+        '/admin_new/throttling policies/advanced policies',
+    THROTTLINGPOLICIES_APPLICATION_POLICIES:
+        '/admin_new/throttling policies/application policies',
+    THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES:
+        '/admin_new/throttling policies/subscription policies',
+    THROTTLINGPOLICIES_CUSTOM_POLICIES:
+        '/admin_new/throttling policies/custom policies',
+    THROTTLINGPOLICIES_BLACKLIST_POLICIES:
+        '/admin_new/throttling policies/blacklist policies',
+    ANALYTICS_API_AVAILABILITY: '/admin_new/analytics/api availability',
 };
 
 const tasksSubMenuDetails = (intl) => [
@@ -228,7 +235,9 @@ const LeftMenu = (props) => {
                         id: 'leftmenu.primary.throttlingpolicies',
                         defaultMessage: 'THROTTLING POLICIES',
                     })}
-                    secondaryMenuDetails={throttlingPoliciesSubMenuDetails(intl)}
+                    secondaryMenuDetails={throttlingPoliciesSubMenuDetails(
+                        intl,
+                    )}
                 />
                 <LeftMenuItemPrimary
                     text={intl.formatMessage({
@@ -277,26 +286,46 @@ const LeftMenu = (props) => {
                         <Route path={subPaths.CATEGORIES_API_CATEGORIES}>
                             <APICategory />
                         </Route>
-                        <Route path={subPaths.THROTTLINGPOLICIES_ADVANCED_POLICIES}>
+                        <Route
+                            path={subPaths.THROTTLINGPOLICIES_ADVANCED_POLICIES}
+                        >
                             <h1>Hello THROTTLINGPOLICIES_ADVANCED_POLICIES</h1>
                         </Route>
-                        <Route path={subPaths.THROTTLINGPOLICIES_APPLICATION_POLICIES}>
-                            <h1>Hello THROTTLINGPOLICIES_APPLICATION_POLICIES</h1>
+                        <Route
+                            path={
+                                subPaths.THROTTLINGPOLICIES_APPLICATION_POLICIES
+                            }
+                        >
+                            <h1>
+                                Hello THROTTLINGPOLICIES_APPLICATION_POLICIES
+                            </h1>
                         </Route>
-                        <Route path={subPaths.THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES}>
-                            <h1>Hello THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES</h1>
+                        <Route
+                            path={
+                                subPaths.THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES
+                            }
+                        >
+                            <h1>
+                                Hello THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES
+                            </h1>
                         </Route>
-                        <Route path={subPaths.THROTTLINGPOLICIES_CUSTOM_POLICIES}>
+                        <Route
+                            path={subPaths.THROTTLINGPOLICIES_CUSTOM_POLICIES}
+                        >
                             <h1>Hello THROTTLINGPOLICIES_CUSTOM_POLICIES</h1>
                         </Route>
-                        <Route path={subPaths.THROTTLINGPOLICIES_BLACKLIST_POLICIES}>
+                        <Route
+                            path={
+                                subPaths.THROTTLINGPOLICIES_BLACKLIST_POLICIES
+                            }
+                        >
                             <h1>Hello THROTTLINGPOLICIES_BLACKLIST_POLICIES</h1>
                         </Route>
                         <Route path={subPaths.ANALYTICS_API_AVAILABILITY}>
                             <h1>Hello ANALYTICS_API_AVAILABILITY</h1>
                         </Route>
-                        {/* todo: determine the component for /admin/ */}
-                        <Route path='/admin/'>
+                        {/* todo: determine the component for /admin_new/ */}
+                        <Route path='/admin_new/'>
                             <h1>Select submenu</h1>
                         </Route>
                     </Switch>
