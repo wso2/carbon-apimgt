@@ -108,7 +108,6 @@ public class PreprocessSwagger {
         if(securityDefinitions!=null) {
             for (Map.Entry<String, SecuritySchemeDefinition> definition : securityDefinitions.entrySet()) {
                 if (definition.getKey() != OPENAPI_SECURITY_SCHEMA_KEY) {
-                    System.out.println(definition.getKey());
                     otherSetofSchemes.add(definition.getKey());
                     //Check for default one
                     OAuth2Definition defaultType = (OAuth2Definition)securityDefinitions.get(OPENAPI_SECURITY_SCHEMA_KEY);
@@ -195,7 +194,6 @@ public class PreprocessSwagger {
             while (iterator.hasNext()) {
                 Map.Entry<String, SecurityScheme> entry = iterator.next();
                 if (entry.getKey() != OPENAPI_SECURITY_SCHEMA_KEY) {
-                    System.out.println(entry.getKey());
                     otherSetofSchemes.add(entry.getKey());
                     //Check for default one
                     SecurityScheme defaultType = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY);
