@@ -5,6 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { injectIntl } from 'react-intl';
 import MicroGateway from 'AppComponents/AdminPages/MicroGateway';
 import APICategories from 'AppComponents/AdminPages/APICategories';
+import settings from '../../../../../../../site/public/conf/settings';
 
 const styles = (theme) => ({
     LeftMenu: {
@@ -45,22 +46,24 @@ const styles = (theme) => ({
     },
 });
 
+const appName = settings.app.context;
+
 const subPaths = {
-    TASKS_USER_CREATION: '/admin/tasks/user_creation',
-    TASKS_APPLICATION_CREATION: '/admin/tasks/application_creation',
-    TASKS_SUBSCRIPTION_CREATION: '/admin/tasks/subscription_creation',
-    TASKS_APPLICATION_REGISTRATION: '/admin/tasks/applicationregistration',
-    TASKS_API_STATE_CHANGE: '/admin/tasks/apistatechange',
-    SETTINGS_APPLICATIONS: '/admin/settings/applications',
-    SETTINGS_SCOPE_MAPPING: '/admin/settings/scopemapping',
-    MICROGATEWAY_LABELS: '/admin/microgateway/labels',
-    CATEGORIES_API_CATEGORIES: '/admin/categories/apicategories',
-    THROTTLINGPOLICIES_ADVANCED_POLICIES: '/admin/throttlingpolicies/advancedpolicies',
-    THROTTLINGPOLICIES_APPLICATION_POLICIES: '/admin/throttlingpolicies/applicationpolicies',
-    THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES: '/admin/throttlingpolicies/subscriptionpolicies',
-    THROTTLINGPOLICIES_CUSTOM_POLICIES: '/admin/throttlingpolicies/custompolicies',
-    THROTTLINGPOLICIES_BLACKLIST_POLICIES: '/admin/throttlingpolicies/blacklistpolicies',
-    ANALYTICS_API_AVAILABILITY: '/admin/analytics/apiavailability',
+    TASKS_USER_CREATION: appName + '/tasks/user-creation',
+    TASKS_APPLICATION_CREATION: appName + '/tasks/application-creation',
+    TASKS_SUBSCRIPTION_CREATION: appName + '/tasks/subscription-creation',
+    TASKS_APPLICATION_REGISTRATION: appName + '/tasks/application-registration',
+    TASKS_API_STATE_CHANGE: appName + '/tasks/api-state-change',
+    SETTINGS_APPLICATIONS: appName + '/settings/applications',
+    SETTINGS_SCOPE_MAPPING: appName + '/settings/scope-mapping',
+    MICROGATEWAY_LABELS: appName + '/microgateway/labels',
+    CATEGORIES_API_CATEGORIES: appName + '/categories/api-categories',
+    THROTTLINGPOLICIES_ADVANCED_POLICIES: appName + '/throttling/advanced-policies',
+    THROTTLINGPOLICIES_APPLICATION_POLICIES: appName + '/throttling/application-policies',
+    THROTTLINGPOLICIES_SUBSCRIPTION_POLICIES: appName + '/throttling/subscription-policies',
+    THROTTLINGPOLICIES_CUSTOM_POLICIES: appName + '/throttling/custom-policies',
+    THROTTLINGPOLICIES_BLACKLIST_POLICIES: appName + '/throttling/blacklist-policies',
+    ANALYTICS_API_AVAILABILITY: appName + '/analytics/api-availability',
 };
 
 const tasksSubMenuDetails = (intl) => [
@@ -295,7 +298,7 @@ const LeftMenu = (props) => {
                             <h1>Hello ANALYTICS_API_AVAILABILITY</h1>
                         </Route>
                         {/* todo: determine the component for /admin/ */}
-                        <Route path='/admin/'>
+                        <Route path='/admin_new/'>
                             <h1>Select submenu</h1>
                         </Route>
                     </Switch>

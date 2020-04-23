@@ -150,7 +150,7 @@ class Admin extends React.Component {
                 <AdminRootErrorBoundary appName='Admin Application'>
                     <Router basename={Configurations.app.context}>
                         <Switch>
-                            <Redirect exact from='/login' to='/apis' />
+                            <Redirect exact from='/login' to='/' />
                             <Route path='/logout' component={Logout} />
                             <Route
                                 render={() => {
