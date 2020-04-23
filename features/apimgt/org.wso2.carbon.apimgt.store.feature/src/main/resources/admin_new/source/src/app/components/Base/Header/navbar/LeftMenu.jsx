@@ -299,6 +299,8 @@ const LeftMenu = (props) => {
                         </Route>
                         {/* todo: determine the component for /admin/ */}
                         <Route path='/admin_new/'>
+                        {/* todo: determine the component for /admin_new/ */}
+                        <Route path='/admin_new/'>
                             <h1>Select submenu</h1>
                         </Route>
                     </Switch>

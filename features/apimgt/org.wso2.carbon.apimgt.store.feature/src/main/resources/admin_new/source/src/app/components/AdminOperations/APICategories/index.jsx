@@ -26,12 +26,12 @@ const APICategory = () => {
         <Switch>
             <Route
                 exact
-                path='/admin/categories/api categories'
+                path='/admin_new/categories/api categories'
                 component={APICategories}
             />
             <Route
                 exact
-                path='/admin/categories/api categories/create api category'
+                path='/admin_new/categories/api categories/create api category'
                 component={(props) => <CreateAPICategory {...props} />}
             />
             <Route component={ResourceNotFound} />
