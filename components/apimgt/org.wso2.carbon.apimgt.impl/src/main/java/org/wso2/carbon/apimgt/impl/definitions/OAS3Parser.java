@@ -80,6 +80,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYPE;
@@ -784,10 +785,11 @@ public class OAS3Parser extends APIDefinition {
      * @return
      */
     private List<String> getScopeOfOperationsFromExtensions(Operation operation) {
+
         Map<String, Object> extensions = operation.getExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
             String scopeKey = (String) extensions.get(APIConstants.SWAGGER_X_SCOPE);
-            return Collections.singletonList(scopeKey);
+            return Stream.of(scopeKey.split(",")).collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
@@ -1017,15 +1019,19 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
-     * Remove legacy scope information from swagger operation
-     * //TODO://@dushaniw how to deal with x-scope when multiple scopes present
-     * @param operation
+     * Remove legacy scope information from swagger operation.
+     *
+     * @param resource  Given Resource in the input
+     * @param operation Operation in APIDefinition
      */
     private void updateLegacyScopesFromOperation(SwaggerData.Resource resource, Operation operation) {
+
         if (isLegacyExtensionsPreserved()) {
             log.debug("preserveLegacyExtensions is enabled.");
-            if (resource.getScope() != null) {
-                operation.addExtension(APIConstants.SWAGGER_X_SCOPE, resource.getScope().getKey());
+            if (!resource.getScopes().isEmpty()) {
+                List<String> scopes = resource.getScopes().stream().map(Scope::getKey).collect(Collectors.toList());
+                operation.addExtension(APIConstants.SWAGGER_X_SCOPE, StringUtils.join(scopes, ","));
+
             }
             return;
         }
