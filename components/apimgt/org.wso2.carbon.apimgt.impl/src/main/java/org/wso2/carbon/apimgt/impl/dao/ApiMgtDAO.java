@@ -7468,6 +7468,7 @@ public class ApiMgtDAO {
         String getLocalScopes = SQLConstants.GET_UNVERSIONED_LOCAL_SCOPES_FOR_API_SQL;
         String getURLTemplatesWithScope = SQLConstants.GET_URL_TEMPLATES_WITH_SCOPES_FOR_API_SQL;
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -7518,7 +7519,10 @@ public class ApiMgtDAO {
                 // Get local scopes for the given API which are not already assigned for different versions of the same API
                 prepStmt = connection.prepareStatement(getLocalScopes);
                 prepStmt.setInt(1, id);
-                prepStmt.setInt(2, id);
+                prepStmt.setInt(2, tenantId);
+                prepStmt.setInt(3, tenantId);
+                prepStmt.setInt(4, id);
+                prepStmt.setInt(5, tenantId);
                 try (ResultSet rs = prepStmt.executeQuery()) {
                     localScopes = new ArrayList<>();
                     while (rs.next()) {
