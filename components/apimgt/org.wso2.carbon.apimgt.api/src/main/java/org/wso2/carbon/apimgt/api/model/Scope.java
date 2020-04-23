@@ -77,7 +77,7 @@ public class Scope implements Serializable{
 
         Scope scope = (Scope) o;
 
-        if (!id.equals(scope.id)) return false;
+        if (id != null ? !id.equals(scope.id) : scope.id != null) return false;
         if (!key.equals(scope.key)) return false;
         if (!name.equals(scope.name)) return false;
         if (roles != null ? !roles.equals(scope.roles) : scope.roles != null) return false;
