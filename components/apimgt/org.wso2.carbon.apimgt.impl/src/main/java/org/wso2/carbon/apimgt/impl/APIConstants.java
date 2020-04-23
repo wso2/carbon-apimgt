@@ -1589,6 +1589,12 @@ public final class APIConstants {
         public static final String ENABLE_JWT_CLAIM_CONDITIONS = "EnableJWTClaimConditions";
         public static final String ENABLE_QUERY_PARAM_CONDITIONS = "EnableQueryParamConditions";
         public static final String ENABLED = "Enabled";
+        public static final String IS_THROTTLED = "isThrottled";
+        public static final String THROTTLE_KEY = "throttleKey";
+        public static final String EXPIRY_TIMESTAMP = "expiryTimeStamp";
+        public static final String EVALUATED_CONDITIONS = "evaluatedConditions";
+        public static final String TRUE = "true";
+        public static final String ADD = "add";
     }
 
     /**
@@ -2028,5 +2034,21 @@ public final class APIConstants {
             public static final String REMOTE_CLAIM = "RemoteClaim";
 
         }
+    }
+
+    public static class GlobalCacheInvalidation {
+        public static final String ENABLED = "Enabled";
+        public static final Object GLOBAL_CACHE_INVALIDATION = "GlobalCacheInvalidation";
+
+        public static final String Domain = "Domain";
+        public static final String Stream = "Stream";
+        public static final String REVEIVER_URL_GROUP = "ReceiverUrlGroup";
+        public static final String AUTH_URL_GROUP = "AuthUrlGroup";
+        public static final String USERNAME = "Username";
+        public static final String PASSWORD = "Password";
+        public static final String TOPIC_NAME = "Topic";
+        public static final String EXCLUDED_CACHES = "ExcludedCaches";
+
+        public static String ReceiverConnectionDetails  = "ReceiverConnectionDetails";
     }
 }

@@ -138,7 +138,7 @@ public class ThrottleDataHolder {
         blockedUserConditionsMap.put(name, value);
     }
 
-    public void addIplockingCondition(String tenantDomain, int conditionId, String value, String type) {
+    public void addIpBlockingCondition(String tenantDomain, int conditionId, String value, String type) {
 
         Set<IPRange> ipRanges = blockedIpConditionsMap.get(tenantDomain);
         if (ipRanges == null){

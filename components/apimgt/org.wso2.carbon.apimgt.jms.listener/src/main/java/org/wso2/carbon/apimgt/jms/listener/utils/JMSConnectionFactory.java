@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.jms.listener.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottlingRunTimeException;
+import org.wso2.carbon.apimgt.jms.listener.ThrottlingRunTimeException;
 
 import javax.jms.*;
 import javax.naming.Context;

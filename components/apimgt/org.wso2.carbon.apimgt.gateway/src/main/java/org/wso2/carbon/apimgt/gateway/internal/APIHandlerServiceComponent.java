@@ -15,7 +15,6 @@
  */
 package org.wso2.carbon.apimgt.gateway.internal;
 
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.commons.logging.Log;
@@ -40,10 +39,9 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.transformer.JWTTrans
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
-import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataServiceImpl;
-import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationService;
 import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationServiceImpl;
+import org.wso2.carbon.apimgt.gateway.service.RevokedTokenDataImpl;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
@@ -52,8 +50,11 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
+import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
@@ -111,9 +112,9 @@ public class APIHandlerServiceComponent {
                 if (configuration.getThrottleProperties().isEnabled()) {
                     ServiceReferenceHolder.getInstance().setThrottleDataPublisher(new ThrottleDataPublisher());
                     ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
-                    APIThrottleDataServiceImpl throttleDataServiceImpl = new APIThrottleDataServiceImpl();
+                    APIThrottleDataServiceImpl throttleDataServiceImpl =
+                            new APIThrottleDataServiceImpl(throttleDataHolder);
                     CacheInvalidationService cacheInvalidationService = new CacheInvalidationServiceImpl();
-                    throttleDataServiceImpl.setThrottleDataHolder(throttleDataHolder);
                     // Register APIThrottleDataService so that ThrottleData maps are available to other components.
                     registration = context.getBundleContext().registerService(APIThrottleDataService.class.getName(),
                             throttleDataServiceImpl, null);
@@ -154,7 +155,8 @@ public class APIHandlerServiceComponent {
                 registration =
                         context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
                                 new APIMgtGatewayUrlSafeJWTGeneratorImpl(), null);
-
+                registration = context.getBundleContext().registerService(RevokedTokenService.class,
+                        new RevokedTokenDataImpl(),null);
                 // Start JWT revoked map cleaner.
                 RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
                 revokedJWTMapCleaner.startJWTRevokedMapCleaner();

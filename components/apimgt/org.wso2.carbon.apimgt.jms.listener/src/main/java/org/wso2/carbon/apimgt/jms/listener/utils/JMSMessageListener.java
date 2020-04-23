@@ -26,23 +26,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
-import org.wso2.carbon.apimgt.gateway.dto.IPRange;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
-import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
-import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottleConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.jms.listener.APICondition;
 import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.Topic;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -51,6 +39,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.jms.JMSException;
+import javax.jms.MapMessage;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.Topic;
 
 public class JMSMessageListener implements MessageListener {
 
@@ -64,8 +58,6 @@ public class JMSMessageListener implements MessageListener {
     private Pattern resourcePattern = Pattern.compile("/.*/(.*)/\\1(.*)?:[A-Z]{0,5}_(condition_(\\d*)|default)");
     public static final int RESOURCE_PATTERN_GROUPS = 4;
     public static final int RESOURCE_PATTERN_CONDITION_INDEX = 3;
-    public static final String CONDITION_KEY = "condition";
-    public static final String RESOURCE_KEY = "key";
 
     public void onMessage(Message message) {
 
@@ -202,31 +194,31 @@ public class JMSMessageListener implements MessageListener {
 
     private void handleThrottleUpdateMessage(Map<String, Object> map) throws ParseException {
 
-        String throttleKey = map.get(APIThrottleConstants.THROTTLE_KEY).toString();
-        String throttleState = map.get(APIThrottleConstants.IS_THROTTLED).toString();
-        Long timeStamp = Long.parseLong(map.get(APIThrottleConstants.EXPIRY_TIMESTAMP).toString());
-        Object evaluatedConditionObject = map.get(APIThrottleConstants.EVALUATED_CONDITIONS);
+        String throttleKey = map.get(APIConstants.AdvancedThrottleConstants.THROTTLE_KEY).toString();
+        String throttleState = map.get(APIConstants.AdvancedThrottleConstants.IS_THROTTLED).toString();
+        Long timeStamp = Long.parseLong(map.get(APIConstants.AdvancedThrottleConstants.EXPIRY_TIMESTAMP).toString());
+        Object evaluatedConditionObject = map.get(APIConstants.AdvancedThrottleConstants.EVALUATED_CONDITIONS);
 
         if (log.isDebugEnabled()) {
             log.debug("Received Key -  throttleKey : " + throttleKey + " , " +
                     "isThrottled :" + throttleState + " , expiryTime : " + new Date(timeStamp).toString());
         }
 
-        if (ThrottleConstants.TRUE.equalsIgnoreCase(throttleState)) {
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().
+        if (APIConstants.AdvancedThrottleConstants.TRUE.equalsIgnoreCase(throttleState)) {
+            ServiceReferenceHolder.getInstance().getAPIThrottleDataService().
                     addThrottleData(throttleKey, timeStamp);
 
             APICondition extractedKey = extractAPIorResourceKey(throttleKey);
 
             if (extractedKey != null) {
                 if (evaluatedConditionObject != null) {
-                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().addThrottledApiConditions
+                    ServiceReferenceHolder.getInstance().getAPIThrottleDataService().addThrottledApiConditions
                             (extractedKey.getResourceKey(), extractedKey.getName(), APIUtil.extractConditionDto(
                                     (String) evaluatedConditionObject));
                 }
-                if (!ServiceReferenceHolder.getInstance().getThrottleDataHolder().isAPIThrottled(extractedKey
+                if (!ServiceReferenceHolder.getInstance().getAPIThrottleDataService().isAPIThrottled(extractedKey
                         .getResourceKey())) {
-                    ServiceReferenceHolder.getInstance().getThrottleDataHolder().addThrottledAPIKey(extractedKey
+                    ServiceReferenceHolder.getInstance().getAPIThrottleDataService().addThrottledAPIKey(extractedKey
                             .getResourceKey(), timeStamp);
                     if (log.isDebugEnabled()) {
                         log.debug("Adding throttling key : " + extractedKey);
@@ -235,16 +227,17 @@ public class JMSMessageListener implements MessageListener {
 
             }
         } else {
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder().
-                    removeThrottleData(throttleKey);
+            ServiceReferenceHolder.getInstance().getAPIThrottleDataService().removeThrottleData(throttleKey);
             APICondition extractedKey = extractAPIorResourceKey(throttleKey);
             if (extractedKey != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Removing throttling key : " + extractedKey.getResourceKey());
                 }
 
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeThrottledAPIKey(extractedKey.getResourceKey());
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeThrottledApiConditions(extractedKey.getResourceKey(), extractedKey.getName());
+                ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                        .removeThrottledAPIKey(extractedKey.getResourceKey());
+                ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                        .removeThrottledApiConditions(extractedKey.getResourceKey(), extractedKey.getName());
             }
         }
     }
@@ -255,7 +248,8 @@ public class JMSMessageListener implements MessageListener {
     private synchronized void handleBlockingMessage(Map<String, Object> map) {
 
         if (log.isDebugEnabled()) {
-            log.debug("Received Key -  blockingCondition : " + map.get(APIConstants.BLOCKING_CONDITION_KEY).toString() + " , " +
+            log.debug("Received Key -  blockingCondition : " + map.get(APIConstants.BLOCKING_CONDITION_KEY).toString() +
+                    " , " +
                     "conditionValue :" + map.get(APIConstants.BLOCKING_CONDITION_VALUE).toString() + " , " +
                     "tenantDomain : " + map.get(APIConstants.BLOCKING_CONDITION_DOMAIN));
         }
@@ -267,33 +261,37 @@ public class JMSMessageListener implements MessageListener {
         String tenantDomain = map.get(APIConstants.BLOCKING_CONDITION_DOMAIN).toString();
 
         if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(condition)) {
-            if (ThrottleConstants.TRUE.equals(conditionState)) {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().addApplicationBlockingCondition(conditionValue, conditionValue);
+            if (APIConstants.AdvancedThrottleConstants.TRUE.equals(conditionState)) {
+                ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                        .addBlockingCondition(APIConstants.BLOCKING_CONDITIONS_APPLICATION,conditionValue,
+                                conditionValue);
             } else {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeApplicationBlockingCondition(conditionValue);
+                ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                        .removeBlockCondition(APIConstants.BLOCKING_CONDITIONS_APPLICATION,conditionValue);
             }
         } else if (APIConstants.BLOCKING_CONDITIONS_API.equals(condition)) {
-            if (ThrottleConstants.TRUE.equals(conditionState)) {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().addAPIBlockingCondition(conditionValue,
-                        conditionValue);
+            if (APIConstants.AdvancedThrottleConstants.TRUE.equals(conditionState)) {
+                ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                        .addBlockingCondition(APIConstants.BLOCKING_CONDITIONS_API, conditionValue, conditionValue);
             } else {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeAPIBlockingCondition(conditionValue);
+                ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                        .removeBlockCondition(APIConstants.BLOCKING_CONDITIONS_API, conditionValue);
             }
         } else if (APIConstants.BLOCKING_CONDITIONS_USER.equals(condition)) {
-            if (ThrottleConstants.TRUE.equals(conditionState)) {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().addUserBlockingCondition(conditionValue,
-                        conditionValue);
+            if (APIConstants.AdvancedThrottleConstants.TRUE.equals(conditionState)) {
+                ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                        .addBlockingCondition(APIConstants.BLOCKING_CONDITIONS_USER, conditionValue, conditionValue);
             } else {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder()
-                        .removeUserBlockingCondition(conditionValue);
+                ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                        .removeBlockCondition(APIConstants.BLOCKING_CONDITIONS_USER, conditionValue);
             }
         } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(condition) ||
                 APIConstants.BLOCK_CONDITION_IP_RANGE.equals(condition)) {
-            if (ThrottleConstants.TRUE.equals(conditionState)) {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder()
-                        .addIplockingCondition(tenantDomain, conditionId, conditionValue, condition);
+            if (APIConstants.AdvancedThrottleConstants.TRUE.equals(conditionState)) {
+                ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
+                        .addIpBlockingCondition(tenantDomain, conditionId, conditionValue, condition);
             } else {
-                ServiceReferenceHolder.getInstance().getThrottleDataHolder().removeIpBlockingCondition(tenantDomain,
+                ServiceReferenceHolder.getInstance().getAPIThrottleDataService().removeIpBlockingCondition(tenantDomain,
                         conditionId);
             }
         }
@@ -328,16 +326,17 @@ public class JMSMessageListener implements MessageListener {
         }
         String keyTemplateValue = map.get(APIConstants.POLICY_TEMPLATE_KEY).toString();
         String keyTemplateState = map.get(APIConstants.TEMPLATE_KEY_STATE).toString();
-        if (ThrottleConstants.ADD.equals(keyTemplateState)) {
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder()
+        if (APIConstants.AdvancedThrottleConstants.ADD.equals(keyTemplateState)) {
+            ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
                     .addKeyTemplate(keyTemplateValue, keyTemplateValue);
         } else {
-            ServiceReferenceHolder.getInstance().getThrottleDataHolder()
+            ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
                     .removeKeyTemplate(keyTemplateValue);
         }
     }
 
     private void handleRevokedTokenMessage(String revokedToken, long expiryTime) {
+
         boolean isJwtToken = false;
         if (StringUtils.isEmpty(revokedToken)) {
             return;
@@ -346,34 +345,13 @@ public class JMSMessageListener implements MessageListener {
         //handle JWT tokens
         if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
             revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
-            RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedToken, expiryTime);  // Add revoked token to
+            ServiceReferenceHolder.getInstance().getRevokedTokenService()
+                    .addRevokedJWTIntoMap(revokedToken, expiryTime);  // Add revoked
+            // token to
             // revoked JWT map
             isJwtToken = true;
         }
-
-        //Find the actual tenant domain on which the access token was cached. It is stored as a reference in
-        //the super tenant cache.
-        String cachedTenantDomain;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
-                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            cachedTenantDomain = Utils.getCachedTenantDomain(revokedToken);
-            if (cachedTenantDomain == null) { //the token is not in cache
-                return;
-            }
-            Utils.removeCacheEntryFromGatewayCache(revokedToken);
-            Utils.putInvalidTokenEntryIntoInvalidTokenCache(revokedToken, cachedTenantDomain);
-            //Clear the API Key cache if revoked token is in the JWT format
-            if (isJwtToken) {
-                Utils.removeCacheEntryFromGatewayAPiKeyCache(revokedToken);
-            }
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-
-        //Remove token from the token's own tenant's cache.
-        Utils.removeTokenFromTenantTokenCache(revokedToken, cachedTenantDomain);
-        Utils.putInvalidTokenIntoTenantInvalidTokenCache(revokedToken, cachedTenantDomain);
+        ServiceReferenceHolder.getInstance().getRevokedTokenService()
+                .removeTokenFromGatewayCache(revokedToken, isJwtToken);
     }
 }
