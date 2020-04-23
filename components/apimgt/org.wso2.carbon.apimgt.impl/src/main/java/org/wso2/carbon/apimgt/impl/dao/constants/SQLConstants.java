@@ -478,6 +478,15 @@ public class SQLConstants {
             " WHERE " +
             "   API_ID = ? " +
             "   AND APPLICATION_ID = ?";
+
+    public static final String GET_SUBSCRIBER_ID_BY_SUBSCRIPTION_UUID_SQL =
+            " SELECT APPS.SUBSCRIBER_ID  AS SUBSCRIBER_ID " +
+            " FROM " +
+            " AM_APPLICATION APPS, " +
+            " AM_SUBSCRIPTION SUBS" +
+            " WHERE " +
+            " SUBS.APPLICATION_ID = APPS.APPLICATION_ID " +
+            " AND SUBS.UUID = ?";
     
     public static final String GET_SUBSCRIPTION_STATUS_BY_UUID_SQL =
             " SELECT SUB_STATUS " +

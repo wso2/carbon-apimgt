@@ -3893,6 +3893,35 @@ paths:
             $ref: '#/definitions/Error'
 
   ######################################################
+  # The get subscriber information
+  ######################################################
+  '/subscriptions/{subscriptionId}/subscriber-info':
+    get:
+      security:
+        - OAuth2Security:
+            - apim:subscription_view
+      summary: Get details of a user who subscribed an API
+      description: |
+        This operation can be used to get details of a user who subscribed to the API.
+      parameters:
+        - $ref: '#/parameters/subscriptionId'
+      tags:
+        - Subscriber
+      responses:
+        200:
+          description: |
+            OK.
+             Details of the subscriber are returned.
+          schema:
+            $ref: '#/definitions/SubscriberInfo'
+        404:
+          description: |
+            Not Found.
+            Requested Subscription does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+  ######################################################
   # The "Block Subscription" Processing Function resource API
   ######################################################
   /subscriptions/block-subscription:
@@ -7806,6 +7835,36 @@ definitions:
       technicalOwnerEmail:
         type: string
         example: technicalowner@wso2.com
+
+  #-----------------------------------------------------
+  # The Claim resource
+  #-----------------------------------------------------
+  Claim:
+    title: Claim
+    properties:
+      name:
+        type: string
+        example: email
+      URI:
+        type: string
+        example: http://wso2.org/claims/emailaddress
+      value:
+        type: string
+        example: admin@wso2.com
+
+  #-----------------------------------------------------
+  # The Subscriber resource
+  #-----------------------------------------------------
+  SubscriberInfo:
+    title: SubscriberInfo
+    properties:
+      name:
+        type: string
+        example: admin
+      claims:
+        type: array
+        items:
+          $ref: '#/definitions/Claim'
 
   #-----------------------------------------------------
   # The Application resource

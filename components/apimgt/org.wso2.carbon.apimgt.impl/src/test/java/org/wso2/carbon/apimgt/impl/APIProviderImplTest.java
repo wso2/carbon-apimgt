@@ -128,6 +128,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.cache.Caching;
@@ -142,6 +143,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_URI;
 
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor("org.wso2.carbon.context.PrivilegedCarbonContext")
@@ -847,6 +849,39 @@ public class APIProviderImplTest {
         assertFalse(apiProvider.deleteBlockConditionByUUID("testId"));
         //deleteState true
         assertTrue(apiProvider.deleteBlockConditionByUUID("testId"));
+    }
+
+    @Test
+    public void testGetSubscriberClaims() throws APIManagementException, UserStoreException {
+        String configuredClaims = "http://wso2.org/claim1,http://wso2.org/claim2";
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
+        // Mock retrieving the tenant domain
+        PowerMockito.mockStatic(MultitenantUtils.class);
+        PowerMockito.mockStatic(APIUtil.class);
+        Mockito.when(MultitenantUtils.getTenantDomain("admin")).thenReturn("carbon.super");
+        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
+        RealmService realmService = Mockito.mock(RealmService.class);
+        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        PowerMockito.when(tenantManager.getTenantId(Matchers.anyString())).thenReturn(-1234);
+
+        SortedMap<String, String> claimValues = new TreeMap<String, String>();
+        claimValues.put("claim1", "http://wso2.org/claim1");
+        claimValues.put("claim2", "http://wso2.org/claim2");
+        claimValues.put("claim3", "http://wso2.org/claim3");
+        PowerMockito.when(APIUtil.getClaims("admin", -1234, DEFAULT_DIALECT_URI))
+                .thenReturn(claimValues);
+        APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService configurationService = Mockito.mock(APIManagerConfigurationService.class);
+        PowerMockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(configurationService);
+        PowerMockito.when(configurationService.getAPIManagerConfiguration()).thenReturn(configuration);
+        Mockito.when(configuration.getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS)).
+                thenReturn(configuredClaims);
+        Map subscriberClaims = apiProvider.getSubscriberClaims("admin");
+        assertNotNull(subscriberClaims);
+        assertEquals(configuredClaims.split(",").length, subscriberClaims.size());
     }
 
     @Test
