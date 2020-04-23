@@ -38,7 +38,7 @@ class Logout extends Component {
         super(props);
         this.state = {
             logoutSuccess: false,
-            referrer: '/apis',
+            referrer: '/',
         };
     }
 
@@ -49,7 +49,9 @@ class Logout extends Component {
      */
     componentDidMount() {
         const environmentName = Utils.getCurrentEnvironment().label;
-        localStorage.removeItem(`${User.CONST.LOCAL_STORAGE_USER}_${environmentName}`);
+        localStorage.removeItem(
+            `${User.CONST.LOCAL_STORAGE_USER}_${environmentName}`,
+        );
         const newState = { logoutSuccess: true };
         let { search } = window.location;
         search = search.replace(/^\?/, '');

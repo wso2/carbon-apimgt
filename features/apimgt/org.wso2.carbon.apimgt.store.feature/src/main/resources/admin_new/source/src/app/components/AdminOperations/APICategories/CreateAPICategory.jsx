@@ -30,6 +30,7 @@ import Grid from '@material-ui/core/Grid';
 import Icon from '@material-ui/core/Icon';
 import Paper from '@material-ui/core/Paper';
 import Alert from 'AppComponents/Shared/Alert';
+import settings from '../../../../../../site/public/conf/settings';
 
 const styles = (theme) => ({
     root: {
@@ -185,7 +186,10 @@ const CreateAPICategory = (props) => {
                     <Grid item md={12}>
                         <div className={classes.titleWrapper}>
                             <Link
-                                to='/admin_new/categories/api categories'
+                                to={
+                                    settings.app.context +
+                                    '/categories/api-categories'
+                                }
                                 className={classes.titleLink}
                             >
                                 <Typography variant='h4'>
@@ -282,7 +286,12 @@ const CreateAPICategory = (props) => {
                                         />
                                     )}
                                 </Button>
-                                <Link to='/admin_new/categories/api categories'>
+                                <Link
+                                    to={
+                                        settings.app.context +
+                                        '/categories/api-categories'
+                                    }
+                                >
                                     <Button>
                                         <FormattedMessage
                                             id='api.categories.create.new.category.cancel'
