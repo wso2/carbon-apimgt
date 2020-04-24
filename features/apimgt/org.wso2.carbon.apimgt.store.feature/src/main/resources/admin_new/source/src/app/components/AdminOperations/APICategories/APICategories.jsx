@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -69,8 +69,6 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-let allCategories = [];
-
 const deleteAPICategory = (id, name, setUpdated) => {
     const restApi = new API();
     const promisedDelete = restApi.deleteAPICategory(id);
@@ -106,7 +104,6 @@ export default function APICategories() {
     useEffect(() => {
         restApi.apiCategoriesListGet().then((result) => {
             if (!isUpdated) {
-                allCategories = result.body.list;
                 setApiCategories(result.body.list);
                 setUpdated(true);
             }
