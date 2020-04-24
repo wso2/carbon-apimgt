@@ -9726,11 +9726,10 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         int apiId;
-        List<String> localScopes;
+        List<String> localScopesToRemove = new ArrayList<>();
         List<URITemplate> uriTemplateListWithScopes;
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-
-        String getLocalScopes = SQLConstants.GET_LOCAL_SCOPES_FOR_API_SQL;
+        String getUnVersionedLocalScopes = SQLConstants.GET_UNVERSIONED_LOCAL_SCOPES_FOR_API_SQL;
         String getURLTemplatesWithScope = SQLConstants.GET_URL_TEMPLATES_WITH_SCOPES_FOR_API_SQL;
         String deleteResourceScopeURLMappings = SQLConstants.REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL;
         try {
@@ -9743,13 +9742,16 @@ public class ApiMgtDAO {
                 return;
             }
 
-            //Get the local scope keys for API_ID
-            prepStmt = connection.prepareStatement(getLocalScopes);
+            //Get the unversioned local scope keys for API_ID
+            prepStmt = connection.prepareStatement(getUnVersionedLocalScopes);
             prepStmt.setInt(1, apiId);
+            prepStmt.setInt(2, tenantId);
+            prepStmt.setInt(3, tenantId);
+            prepStmt.setInt(4, apiId);
+            prepStmt.setInt(5, tenantId);
             try (ResultSet rs = prepStmt.executeQuery()) {
-                localScopes = new ArrayList<>();
                 while (rs.next()) {
-                    localScopes.add(rs.getString("SCOPE_NAME"));
+                    localScopesToRemove.add(rs.getString("SCOPE_NAME"));
                 }
             }
 
@@ -9799,7 +9801,7 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, apiId);
             prepStmt.execute();
             // remove the local scopes from the KM
-            for (String localScope : localScopes) {
+            for (String localScope : localScopesToRemove) {
                 KeyManagerHolder.getKeyManagerInstance().deleteScope(localScope, tenantDomain);
             }
             connection.commit();
