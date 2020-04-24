@@ -71,6 +71,10 @@ public class APICustomResourceDefinitionSpec implements KubernetesResource {
         this.mode = mode;
     }
 
+//    public String getVersion() { return version; }
+//
+//    public void setVersion(String version) { this.version = version; }
+
     /**
      * This method returns the string equivalent to the following json object.
      * {

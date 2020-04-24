@@ -80,7 +80,6 @@ public class DeploymentsMappingUtil {
                             deploymentClusterInfoDTO.setMasterURL(properties.get(ContainerBasedConstants.MASTER_URL).toString().replace("\\", ""));
                             deploymentClusterInfoDTO.setNamespace(properties.get(ContainerBasedConstants.NAMESPACE).toString());
                             deploymentClusterInfoDTO.setIngressURL(properties.get(ContainerBasedConstants.INGRESS_URL).toString().replace("\\", ""));
-
                             deploymentClusterInfoDTOList.add(deploymentClusterInfoDTO);
                         }
                         k8sClustersInfoDTO.setClusters(deploymentClusterInfoDTOList);

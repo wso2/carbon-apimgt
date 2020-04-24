@@ -6714,8 +6714,6 @@ public final class APIUtil {
         return environmentStringSet;
     }
 
-
-
     /**
      * This method used to set selected deployment environment values to governance artifact of API .
      *
@@ -6780,29 +6778,7 @@ public final class APIUtil {
         return publishedEnvironments.toString();
     }
 
-    /**
-     * This method used to set deployments values to governance artifact of API .
-     *
-     * @param api API object with the attributes value
-     */
-    public static String writeDeploymentsToArtifact(API api) {
-        StringBuilder publishedDeployments = new StringBuilder();
-        Set<String> apiDeployments = api.getDeployments();
-        if (apiDeployments != null) {
-            for (String deploymentName : apiDeployments) {
-                publishedDeployments.append(deploymentName).append(',');
-            }
 
-            if (apiDeployments.isEmpty()) {
-                publishedDeployments.append("none,");
-            }
-
-            if (!publishedDeployments.toString().isEmpty()) {
-                publishedDeployments.deleteCharAt(publishedDeployments.length() - 1);
-            }
-        }
-        return publishedDeployments.toString();
-    }
     /**
      * This method used to get the currently published gateway environments of an API .
      *

@@ -92,6 +92,7 @@ public class K8sManager implements ContainerManager {
     public void changeLCStateCreatedToPublished(API api, APIIdentifier apiIdentifier, Registry registry)
             throws ParseException, APIManagementException {
 
+        log.info("testing new API cr");
         if (!saToken.equals("") && !masterURL.equals("")) {
 
             String[] configmapNames = deployConfigMap(api, apiIdentifier, registry, openShiftClient, jwtSecurityCRName,
@@ -312,6 +313,7 @@ public class K8sManager implements ContainerManager {
         apiCustomResourceDefinitionSpec.setReplicas(replicas);
         apiCustomResourceDefinitionSpec.setOverride(override);
         apiCustomResourceDefinitionSpec.setUpdateTimeStamp("");
+//        apiCustomResourceDefinitionSpec.setVersion(apiIdentifier.getVersion());
 
         Status status = new Status();
 

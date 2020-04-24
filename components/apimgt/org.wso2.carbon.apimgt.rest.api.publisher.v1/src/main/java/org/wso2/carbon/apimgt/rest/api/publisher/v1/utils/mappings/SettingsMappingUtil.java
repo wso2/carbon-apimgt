@@ -172,6 +172,4 @@ public class SettingsMappingUtil {
         }
         return properties;
     }
-
-
 }

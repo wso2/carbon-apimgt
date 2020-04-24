@@ -5542,7 +5542,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact apiArtifact = getAPIArtifact(apiIdentifier);
             String targetStatus;
             if (apiArtifact != null) {
-
                 String providerName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
                 String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
                 String apiContext = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
