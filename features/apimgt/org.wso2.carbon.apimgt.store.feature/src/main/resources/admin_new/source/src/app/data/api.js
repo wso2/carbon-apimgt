@@ -191,6 +191,17 @@ class API extends Resource {
             return promise_create_api_category;
         }
     }
+
+    /**
+     * Get Application Throttling Policies
+     */
+    applicationThrottlingPoliciesGet() {
+        return this.client.then((client) => {
+            return client.apis['Application Policy (Collection)'].get_throttling_policies_application(
+                this._requestMetaData(),
+            );
+        });
+    }
 }
 
 API.CONSTS = {
