@@ -131,6 +131,27 @@ class API extends Resource {
         });
     }
 
+    updateAPICategory(id, name, description, callback = null) {
+        const promise_create_api_category = this.client.then((client) => {
+            const data = {
+                name: name,
+                description: description,
+            };
+            return client.apis[
+                'API Category (Individual)'
+            ].put_api_categories__apiCategoryId_(
+                { apiCategoryId: id, body: data },
+                this._requestMetaData(),
+            );
+        });
+
+        if (callback) {
+            return promise_create_api_category.then(callback);
+        } else {
+            return promise_create_api_category;
+        }
+    }
+
     deleteAPICategory(id, callback = null) {
         const promise_create_api_category = this.client.then((client) => {
             return client.apis[
