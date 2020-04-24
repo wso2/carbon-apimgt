@@ -111,7 +111,6 @@ const updateAPICategory = (
     setUpdatingAPICategory,
     intl,
 ) => {
-    console.log(apiCategoryId, name, apiCategory['description']);
     const restApi = new API();
     setUpdatingAPICategory(true);
     const promisedUpdate = restApi.updateAPICategory(
