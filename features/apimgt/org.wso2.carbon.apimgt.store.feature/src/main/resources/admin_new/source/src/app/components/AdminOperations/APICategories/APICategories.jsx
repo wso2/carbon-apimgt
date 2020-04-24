@@ -71,20 +71,6 @@ const useStyles = makeStyles((theme) => ({
 
 let allCategories = [];
 
-const handleCreateClick = () => {
-    const restApi = new API();
-    // following hardcoded line is only for dev purposes.
-    restApi.createAPICategory('new category', 'description goes here');
-};
-
-const deleteAllCategories = () => {
-    const restApi = new API();
-    allCategories.map((category) => {
-        console.log('delete request for id:', category.id);
-        restApi.deleteAPICategory(category.id);
-    });
-};
-
 const deleteAPICategory = (id, name, setUpdated) => {
     const restApi = new API();
     const promisedDelete = restApi.deleteAPICategory(id);
@@ -168,22 +154,11 @@ export default function APICategories() {
                     <Button size='small' className={classes.button}>
                         <AddCircle className={classes.buttonIcon} />
                         <FormattedMessage
-                            id='contents.main.heading.api.categories.add.new'
-                            defaultMessage='Add New API Category'
+                            id='contents.main.heading.api.categories.create.api.category'
+                            defaultMessage='Create API Category'
                         />
                     </Button>
                 </Link>
-                <Button
-                    size='small'
-                    className={classes.button}
-                    onClick={deleteAllCategories}
-                >
-                    {/* todo: remove this button */}
-                    <FormattedMessage
-                        id='contents.main.heading.api.categories.add_new.todo.remove.this'
-                        defaultMessage='Delete all - for dev'
-                    />
-                </Button>
             </div>
             {mgLabels.length > 0 ? (
                 <Paper className={classes.gatewayPaper}>
@@ -279,7 +254,10 @@ export default function APICategories() {
                     title={title}
                     description={description}
                     buttonText={buttonText}
-                    onClick={handleCreateClick}
+                    to={
+                        settings.app.context +
+                        '/categories/api-categories/create-api-category'
+                    }
                 />
             )}
         </div>
