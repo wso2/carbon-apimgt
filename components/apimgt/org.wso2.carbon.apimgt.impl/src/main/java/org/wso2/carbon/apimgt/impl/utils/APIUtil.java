@@ -191,6 +191,8 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.indexer.IndexerException;
 import org.wso2.carbon.registry.indexing.solr.SolrClient;
+import org.wso2.carbon.user.api.ClaimManager;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.Tenant;
@@ -265,6 +267,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -3910,28 +3913,34 @@ public final class APIUtil {
 
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
-            if (govRegistry.resourceExists(APIConstants.GA_CONFIGURATION_LOCATION)) {
-                log.debug("Google Analytics configuration already uploaded to the registry");
-                return;
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Adding Google Analytics configuration to the tenant's registry");
-            }
-            inputStream = APIManagerComponent.class.getResourceAsStream("/statistics/default-ga-config.xml");
-            byte[] data = IOUtils.toByteArray(inputStream);
-            Resource resource = govRegistry.newResource();
-            resource.setContent(data);
-            govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
+            // If resource does not exist
+            if (!govRegistry.resourceExists(APIConstants.GA_CONFIGURATION_LOCATION)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Adding Google Analytics configuration to the tenant's registry");
+                }
+                inputStream = APIManagerComponent.class.getResourceAsStream("/statistics/default-ga-config.xml");
+                byte[] data = IOUtils.toByteArray(inputStream);
+                Resource resource = govRegistry.newResource();
+                resource.setContent(data);
+                govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
 
-            /*set resource permission*/
-            org.wso2.carbon.user.api.AuthorizationManager authManager =
-                    ServiceReferenceHolder.getInstance().getRealmService().
-                            getTenantUserRealm(tenantID).getAuthorizationManager();
-            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.GA_CONFIGURATION_LOCATION);
-            authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+                /*set resource permission*/
+                org.wso2.carbon.user.api.AuthorizationManager authManager =
+                        ServiceReferenceHolder.getInstance().getRealmService().
+                                getTenantUserRealm(tenantID).getAuthorizationManager();
+                String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                        APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.GA_CONFIGURATION_LOCATION);
+                authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
+            }
 
+            //Resource already in the registry, set media type as ga-config
+            log.debug("Google Analytics configuration already uploaded to the registry");
+            Resource resource = govRegistry.get(APIConstants.GA_CONFIGURATION_LOCATION);
+            if (!APIConstants.GA_CONF_MEDIA_TYPE.equals(resource.getMediaType())) {
+                resource.setMediaType(APIConstants.GA_CONF_MEDIA_TYPE);
+                govRegistry.put(APIConstants.GA_CONFIGURATION_LOCATION, resource);
+            }
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving Google Analytics configuration information to the registry", e);
         } catch (IOException e) {
@@ -7192,6 +7201,21 @@ public final class APIUtil {
         return restAPIConfigJSON;
     }
 
+    public static String getGAConfigFromRegistry(String tenantDomain) throws APIManagementException {
+        try {
+            APIMRegistryServiceImpl apimRegistryService = new APIMRegistryServiceImpl();
+            return apimRegistryService.getGovernanceRegistryResourceContent(tenantDomain,
+                    APIConstants.GA_CONFIGURATION_LOCATION);
+
+        } catch (UserStoreException e) {
+            String msg = "UserStoreException thrown when loading GA config from registry";
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "RegistryException thrown when loading GA config from registry";
+            throw new APIManagementException(msg, e);
+        }
+    }
+
     public static JSONObject getTenantConfig(String tenantDomain) throws APIManagementException {
         int tenantId = getTenantIdFromTenantDomain(tenantDomain);
         return getTenantConfig(tenantId);
@@ -10409,4 +10433,69 @@ public final class APIUtil {
 
     }
 
+    /**
+     * Returns the user claims for the given user.
+     *
+     * @param endUserName name of the user whose claims needs to be returned
+     * @param tenantId    tenant id of the user
+     * @param dialectURI  claim dialect URI
+     * @return claims map
+     * @throws APIManagementException
+     */
+    public static SortedMap<String, String> getClaims(String endUserName, int tenantId, String dialectURI)
+            throws APIManagementException {
+        SortedMap<String, String> claimValues;
+        try {
+            ClaimManager claimManager = ServiceReferenceHolder.getInstance().getRealmService().
+                    getTenantUserRealm(tenantId).getClaimManager();
+            ClaimMapping[] claims = claimManager.getAllClaimMappings(dialectURI);
+            String[] claimURIs = claimMappingtoClaimURIString(claims);
+            UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance().getRealmService().
+                    getTenantUserRealm(tenantId).getUserStoreManager();
+            String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
+            claimValues = new TreeMap(userStoreManager.getUserClaimValues(tenantAwareUserName, claimURIs, null));
+            return claimValues;
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while retrieving user claim values from user store", e);
+        }
+    }
+
+    /**
+     * Returns the display name of the given claim URI.
+     *
+     * @param claimURI
+     * @param subscriber
+     * @return display name of the claim
+     * @throws APIManagementException
+     */
+    public static String getClaimDisplayName(String claimURI, String subscriber) throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(subscriber);
+        int tenantId;
+        String displayName;
+        try {
+            tenantId = getTenantId(tenantDomain);
+            ClaimManager claimManager = ServiceReferenceHolder.getInstance().getRealmService().
+                    getTenantUserRealm(tenantId).getClaimManager();
+            displayName = claimManager.getClaim(claimURI).getDisplayTag();
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while retrieving claim values from user store", e);
+        }
+        return displayName;
+    }
+
+    /**
+     * Helper method to convert array of <code>Claim</code> object to
+     * array of <code>String</code> objects corresponding to the ClaimURI values.
+     *
+     * @param claims claims object
+     * @return String array of claims
+     */
+    private static String[] claimMappingtoClaimURIString(ClaimMapping[] claims) {
+        String[] temp = new String[claims.length];
+        for (int i = 0; i < claims.length; i++) {
+            temp[i] = claims[i].getClaim().getClaimUri();
+
+        }
+        return temp;
+    }
 }

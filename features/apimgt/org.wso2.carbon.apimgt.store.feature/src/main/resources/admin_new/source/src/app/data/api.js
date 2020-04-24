@@ -105,9 +105,11 @@ class API extends Resource {
      * @memberof Wsdl
      */
     static importByUrl(url, additionalProperties, implementationType = 'SOAP') {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(
+            Utils.getCurrentEnvironment(),
+        ).client;
         return apiClient.then((client) => {
-            client.apis.APIs
+            client.apis.APIs;
             const promisedResponse = client.apis.APIs.importWSDLDefinition({
                 url,
                 additionalProperties: JSON.stringify(additionalProperties),
@@ -122,24 +124,45 @@ class API extends Resource {
      * Get list of api categories
      */
     apiCategoriesListGet() {
-        return this.client.then(client => {
+        return this.client.then((client) => {
             return client.apis['API Category (Collection)'].get_api_categories(
                 this._requestMetaData(),
             );
         });
     }
 
-    createAPICategory(name, description, callback = null) {
-        const promise_create_api_category = this.client.then(client => {
-            return client.apis['API Category (Individual)'].post_api_categories(
-                {
-                    name: name,
-                    description: description
-                },
+    deleteAPICategory(id, callback = null) {
+        const promise_create_api_category = this.client.then((client) => {
+            return client.apis[
+                'API Category (Individual)'
+            ].delete_api_categories__apiCategoryId_(
+                { apiCategoryId: id },
                 this._requestMetaData(),
             );
         });
 
+        if (callback) {
+            return promise_create_api_category.then(callback);
+        } else {
+            return promise_create_api_category;
+        }
+    }
+
+    createAPICategory(name, description, callback = null) {
+        const promise_create_api_category = this.client.then((client) => {
+            const data = {
+                name: name,
+                description: description,
+            };
+            const payload = {
+                body: data,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['API Category (Individual)'].post_api_categories(
+                payload,
+                this._requestMetaData(),
+            );
+        });
 
         if (callback) {
             return promise_create_api_category.then(callback);

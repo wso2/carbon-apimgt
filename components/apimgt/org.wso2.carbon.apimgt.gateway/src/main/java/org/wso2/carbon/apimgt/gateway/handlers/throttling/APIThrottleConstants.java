@@ -53,10 +53,6 @@ public class APIThrottleConstants {
     public static final String UTC = "UTC";
     public static final String GMT = "GMT";
     public static final String HEADER_RETRY_AFTER = "Retry-After";
-    public static final String IS_THROTTLED = "isThrottled";
-    public static final String THROTTLE_KEY = "throttleKey";
-    public static final String EXPIRY_TIMESTAMP = "expiryTimeStamp";
-    public static final String EVALUATED_CONDITIONS = "evaluatedConditions";
     public static final String IP = "ip";
     public static final String IPv6 = "ipv6";
     public static final String CONTENT_LENGTH = "Content-Length";
