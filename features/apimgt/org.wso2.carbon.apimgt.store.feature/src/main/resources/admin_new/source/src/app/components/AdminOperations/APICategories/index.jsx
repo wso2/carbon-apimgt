@@ -19,6 +19,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CreateAPICategory from './CreateAPICategory';
+import EditAPICategory from './EditAPICategory';
 import APICategories from './APICategories';
 import settings from '../../../../../../site/public/conf/settings';
 
@@ -37,6 +38,14 @@ const APICategory = () => {
                     '/categories/api-categories/create-api-category'
                 }
                 component={(props) => <CreateAPICategory {...props} />}
+            />
+            <Route
+                exact
+                path={
+                    settings.app.context +
+                    '/categories/api-categories/edit-api-category/:id'
+                }
+                component={(props) => <EditAPICategory {...props} />}
             />
             <Route component={ResourceNotFound} />
         </Switch>
