@@ -92,6 +92,272 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_APIM_RESTAPI_SECU
 public class OAS2Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS2Parser.class);
     private static final String SWAGGER_SECURITY_SCHEMA_KEY = "default";
+    static List<String> otherSchemes;
+
+    public static List<String> getOtherSchemes() {
+        return otherSchemes;
+    }
+
+    public static void setOtherSchemes(List<String> otherSchemes) {
+        OAS3Parser.otherSchemes = otherSchemes;
+    }
+
+    /**
+     * Get scope information from the extensions
+     *
+     * @param swagger swagger object
+     * @return Scope set
+     * @throws APIManagementException if an error occurred
+     */
+    private static Set<Scope> getScopesFromExtensions(Swagger swagger) throws APIManagementException {
+        Set<Scope> scopeList = new LinkedHashSet<>();
+        Map<String, Object> extensions = swagger.getVendorExtensions();
+        if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
+            Map<String, Object> securityDefinitions =
+                    (Map<String, Object>) extensions.get(APIConstants.SWAGGER_X_WSO2_SECURITY);
+            for (Map.Entry<String, Object> entry : securityDefinitions.entrySet()) {
+                Map<String, Object> securityDefinition = (Map<String, Object>) entry.getValue();
+                if (securityDefinition.containsKey(APIConstants.SWAGGER_X_WSO2_SCOPES)) {
+                    List<Map<String, String>> oauthScope =
+                            (List<Map<String, String>>) securityDefinition.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+                    for (Map<String, String> anOauthScope : oauthScope) {
+                        Scope scope = new Scope();
+                        scope.setKey(anOauthScope.get(APIConstants.SWAGGER_SCOPE_KEY));
+                        scope.setName(anOauthScope.get(APIConstants.SWAGGER_NAME));
+                        scope.setDescription(anOauthScope.get(APIConstants.SWAGGER_DESCRIPTION));
+                        scope.setRoles(anOauthScope.get(APIConstants.SWAGGER_ROLES));
+
+                        scopeList.add(scope);
+                    }
+                }
+            }
+        }
+        return scopeList;
+    }
+
+    /**
+     * Gets a list of scopes using the security requirements
+     *
+     * @param oauth2SchemeKey OAuth2 security element key
+     * @param operation       Swagger path operation
+     * @return list of scopes using the security requirements
+     */
+    private static List<String> getScopeOfOperations(String oauth2SchemeKey, Operation operation) {
+        List<Map<String, List<String>>> security = operation.getSecurity();
+        if (security != null) {
+            for (Map<String, List<String>> requirement : security) {
+                if (requirement.get(oauth2SchemeKey) != null) {
+                    return requirement.get(oauth2SchemeKey);
+                }
+            }
+        }
+        return getScopeOfOperationsFromExtensions(operation);
+    }
+
+    /**
+     * Get scope of operation
+     *
+     * @param operation
+     * @return
+     */
+    private static List<String> getScopeOfOperationsFromExtensions(Operation operation) {
+        Map<String, Object> extensions = operation.getVendorExtensions();
+        if (extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
+            String scopeKey = (String) extensions.get(APIConstants.SWAGGER_X_SCOPE);
+            return Collections.singletonList(scopeKey);
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Get parsed Swagger object
+     *
+     * @param oasDefinition OAS definition
+     * @return Swagger
+     * @throws APIManagementException
+     */
+    static Swagger getSwagger(String oasDefinition) {
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(oasDefinition);
+        if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
+            log.debug("Errors found when parsing OAS definition");
+        }
+        return parseAttemptForV2.getSwagger();
+    }
+
+    /**
+     * This method returns the oauth scopes according to the given swagger(version 2)
+     *
+     * @param swaggerContent resource json
+     * @return scope set as all defaults
+     * @throws APIManagementException
+     */
+    static Set<Scope> injectOtherScopesToDefault(String swaggerContent) throws APIManagementException {
+        Swagger swagger = getSwagger(swaggerContent);
+
+        Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        OAuth2Definition oAuth2Definition;
+        List<String> otherSetofSchemes = new ArrayList<>();
+        Set<Scope> scopeSet = new HashSet<>();
+        if (securityDefinitions != null) {
+            for (Map.Entry<String, SecuritySchemeDefinition> definition : securityDefinitions.entrySet()) {
+                if (definition.getKey() != SWAGGER_SECURITY_SCHEMA_KEY) {
+                    otherSetofSchemes.add(definition.getKey());
+                    //Check for default one
+                    OAuth2Definition defaultType = (OAuth2Definition) securityDefinitions.get(SWAGGER_SECURITY_SCHEMA_KEY);
+                    //If there is no default type schemes set a one
+                    if (defaultType == null) {
+                        defaultType = new OAuth2Definition();
+                        securityDefinitions.put(SWAGGER_SECURITY_SCHEMA_KEY, defaultType);
+                    }
+                    OAuth2Definition notdefFlowType = (OAuth2Definition) definition.getValue();
+                    OAuth2Definition defaultTypeFlow = (OAuth2Definition) securityDefinitions.get(SWAGGER_SECURITY_SCHEMA_KEY);
+                    Map<String, String> notdefFlowScopes = notdefFlowType.getScopes();
+                    Map<String, String> defaultTypeScopes = defaultTypeFlow.getScopes();
+                    if (defaultTypeScopes == null) {
+                        defaultTypeScopes = new HashMap<>() ;
+                        for (Map.Entry<String, String> input : notdefFlowScopes.entrySet()) {
+                            String name = input.getKey();
+                            String description = input.getValue();
+                            defaultTypeScopes.put(name, description);
+                            defaultTypeFlow.setScopes(defaultTypeScopes);
+                        }
+                        //Check X-Scope Bindings
+                        Map<String, String> notdefScopeBindings, defScopeBindings = null;
+                        Map<String, Object> defTypeExtension = defaultTypeFlow.getVendorExtensions();
+                        if (notdefFlowType.getVendorExtensions() != null && (notdefScopeBindings =
+                                (Map<String, String>) notdefFlowType.getVendorExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS))
+                                != null) {
+                            for (Map.Entry<String, String> roleInUse : notdefScopeBindings.entrySet()) {
+                                String notdeftypescope = roleInUse.getKey();
+                                String notdeftypeRole = roleInUse.getValue();
+                                defScopeBindings = (Map<String, String>) defTypeExtension.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+                                defScopeBindings = new HashMap<>();
+                                defScopeBindings.put(notdeftypescope, notdeftypeRole);
+                            }
+                        }
+                        defTypeExtension.put(APIConstants.SWAGGER_X_SCOPES_BINDINGS, defScopeBindings);
+                        defaultTypeFlow.setVendorExtensions(defTypeExtension);
+                        securityDefinitions.put(SWAGGER_SECURITY_SCHEMA_KEY, defaultTypeFlow);
+                    }
+                }
+            }
+        }
+        swagger.setSecurityDefinitions(securityDefinitions);
+        if (securityDefinitions != null
+                && (oAuth2Definition = (OAuth2Definition) securityDefinitions.get(SWAGGER_SECURITY_SCHEMA_KEY)) != null
+                && oAuth2Definition.getScopes() != null) {
+            for (Map.Entry<String, String> entry : oAuth2Definition.getScopes().entrySet()) {
+                Scope scope = new Scope();
+                scope.setKey(entry.getKey());
+                scope.setName(entry.getKey());
+                scope.setDescription(entry.getValue());
+                Map<String, String> scopeBindings;
+                if (oAuth2Definition.getVendorExtensions() != null && (scopeBindings =
+                        (Map<String, String>) oAuth2Definition.getVendorExtensions()
+                                .get(APIConstants.SWAGGER_X_SCOPES_BINDINGS)) != null) {
+                    if (scopeBindings.get(scope.getKey()) != null) {
+                        scope.setRoles(scopeBindings.get(scope.getKey()));
+                    }
+                }
+                scopeSet.add(scope);
+            }
+            setOtherSchemes(otherSetofSchemes);
+            return OASParserUtil.sortScopes(scopeSet);
+        } else {
+            setOtherSchemes(otherSetofSchemes);
+            return OASParserUtil.sortScopes(getScopesFromExtensions(swagger));
+        }
+    }
+
+    /**
+     * This method returns URI templates according to the given swagger file(Swagger version 2)
+     *
+     * @param resourceConfigsJSON swaggerJSON
+     * @return URI Templates
+     * @throws APIManagementException
+     */
+    static Set<URITemplate> injectOtherRescouceScopesToDefault(String resourceConfigsJSON) throws APIManagementException {
+        Swagger swagger = getSwagger(resourceConfigsJSON);
+        Set<URITemplate> urlTemplates = new LinkedHashSet<>();
+        Set<Scope> scopes = injectOtherScopesToDefault(resourceConfigsJSON);
+        List<String> schemes = getOtherSchemes();
+
+        for (String pathString : swagger.getPaths().keySet()) {
+            Path path = swagger.getPath(pathString);
+            Map<HttpMethod, io.swagger.models.Operation> operationMap = path.getOperationMap();
+            for (Map.Entry<HttpMethod, io.swagger.models.Operation> entry : operationMap.entrySet()) {
+                io.swagger.models.Operation operation = entry.getValue();
+                URITemplate template = new URITemplate();
+                template.setHTTPVerb(entry.getKey().name().toUpperCase());
+                template.setHttpVerbs(entry.getKey().name().toUpperCase());
+                template.setUriTemplate(pathString);
+                List<String> opScopesofDefault = getScopeOfOperations(SWAGGER_SECURITY_SCHEMA_KEY, operation);
+                if (opScopesofDefault == null) {
+                    //Handling scopes in resources which do not belong to 'default' scheme
+                    for (int i = 0; i < schemes.size(); i++) {
+                        List<String> opScopesOfOthers = getScopeOfOperations(schemes.get(i), operation);
+                        if (!opScopesOfOthers.isEmpty()) {
+                            if (opScopesOfOthers.size() == 1) {
+                                String firstScope = opScopesOfOthers.get(0);
+                                Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                                if (scope == null) {
+                                    throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                                }
+                                Scope duplication = scope;
+                                template.setScope(duplication);
+                                template.setScopes(duplication);
+                            } else {
+                                for (String scope : opScopesOfOthers) {
+                                    Scope scopeObj = new Scope();
+                                    scopeObj.setKey(SWAGGER_SECURITY_SCHEMA_KEY);
+                                    scopeObj.setName(SWAGGER_SECURITY_SCHEMA_KEY);
+
+                                    template.setScopes(scopeObj);
+                                }
+                            }
+                        }
+                    }
+                    if (!opScopesofDefault.isEmpty()) {
+                        if (opScopesofDefault.size() == 1) {
+                            String firstScope = opScopesofDefault.get(0);
+                            Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                            if (scope == null) {
+                                throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                            }
+                            template.setScope(scope);
+                            template.setScopes(scope);
+                        } else {
+                            template = OASParserUtil.setScopesToTemplate(template, opScopesofDefault);
+                        }
+                    }
+                    Map<String, Object> extensions = operation.getVendorExtensions();
+                    if (extensions != null) {
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_AUTH_TYPE)) {
+                            String authType = (String) extensions.get(APIConstants.SWAGGER_X_AUTH_TYPE);
+                            template.setAuthType(authType);
+                            template.setAuthTypes(authType);
+                        } else {
+                            template.setAuthType("Any");
+                            template.setAuthTypes("Any");
+                        }
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER)) {
+                            String throttlingTier = (String) extensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
+                            template.setThrottlingTier(throttlingTier);
+                            template.setThrottlingTiers(throttlingTier);
+                        }
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                            String mediationScript = (String) extensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
+                            template.setMediationScript(mediationScript);
+                            template.setMediationScripts(template.getHTTPVerb(), mediationScript);
+                        }
+                    }
+                    urlTemplates.add(template);
+                }
+            }
+        }
+        return urlTemplates;
+    }
 
     /**
      * This method  generates Sample/Mock payloads for Swagger (2.0) definitions
@@ -204,7 +470,7 @@ public class OAS2Parser extends APIDefinition {
     }
 
     /**
-     *Sets default script
+     * Sets default script
      *
      * @param genCode String builder
      */
@@ -339,39 +605,6 @@ public class OAS2Parser extends APIDefinition {
         } else {
             return OASParserUtil.sortScopes(getScopesFromExtensions(swagger));
         }
-    }
-
-    /**
-     * Get scope information from the extensions
-     *
-     * @param swagger swagger object
-     * @return Scope set
-     * @throws APIManagementException if an error occurred
-     */
-    private Set<Scope> getScopesFromExtensions(Swagger swagger) throws APIManagementException {
-        Set<Scope> scopeList = new LinkedHashSet<>();
-        Map<String, Object> extensions = swagger.getVendorExtensions();
-        if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
-            Map<String, Object> securityDefinitions =
-                    (Map<String, Object>) extensions.get(APIConstants.SWAGGER_X_WSO2_SECURITY);
-            for (Map.Entry<String, Object> entry : securityDefinitions.entrySet()) {
-                Map<String, Object> securityDefinition = (Map<String, Object>) entry.getValue();
-                if (securityDefinition.containsKey(APIConstants.SWAGGER_X_WSO2_SCOPES)) {
-                    List<Map<String, String>> oauthScope =
-                            (List<Map<String, String>>) securityDefinition.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
-                    for (Map<String, String> anOauthScope : oauthScope) {
-                        Scope scope = new Scope();
-                        scope.setKey(anOauthScope.get(APIConstants.SWAGGER_SCOPE_KEY));
-                        scope.setName(anOauthScope.get(APIConstants.SWAGGER_NAME));
-                        scope.setDescription(anOauthScope.get(APIConstants.SWAGGER_DESCRIPTION));
-                        scope.setRoles(anOauthScope.get(APIConstants.SWAGGER_ROLES));
-
-                        scopeList.add(scope);
-                    }
-                }
-            }
-        }
-        return scopeList;
     }
 
     /**
@@ -965,40 +1198,6 @@ public class OAS2Parser extends APIDefinition {
     }
 
     /**
-     * Gets a list of scopes using the security requirements
-     *
-     * @param oauth2SchemeKey OAuth2 security element key
-     * @param operation       Swagger path operation
-     * @return list of scopes using the security requirements
-     */
-    private List<String> getScopeOfOperations(String oauth2SchemeKey, Operation operation) {
-        List<Map<String, List<String>>> security = operation.getSecurity();
-        if (security != null) {
-            for (Map<String, List<String>> requirement : security) {
-                if (requirement.get(oauth2SchemeKey) != null) {
-                    return requirement.get(oauth2SchemeKey);
-                }
-            }
-        }
-        return getScopeOfOperationsFromExtensions(operation);
-    }
-
-    /**
-     * Get scope of operation
-     *
-     * @param operation
-     * @return
-     */
-    private List<String> getScopeOfOperationsFromExtensions(Operation operation) {
-        Map<String, Object> extensions = operation.getVendorExtensions();
-        if (extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
-            String scopeKey = (String) extensions.get(APIConstants.SWAGGER_X_SCOPE);
-            return Collections.singletonList(scopeKey);
-        }
-        return Collections.emptyList();
-    }
-
-    /**
      * Update OAS operations for Store
      *
      * @param swagger Swagger to be updated
@@ -1034,22 +1233,6 @@ public class OAS2Parser extends APIDefinition {
                 }
             }
         }
-    }
-
-    /**
-     * Get parsed Swagger object
-     *
-     * @param oasDefinition OAS definition
-     * @return Swagger
-     * @throws APIManagementException
-     */
-    Swagger getSwagger(String oasDefinition) {
-        SwaggerParser parser = new SwaggerParser();
-        SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(oasDefinition);
-        if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
-            log.debug("Errors found when parsing OAS definition");
-        }
-        return parseAttemptForV2.getSwagger();
     }
 
     /**

@@ -74,13 +74,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
@@ -1210,5 +1204,36 @@ public class OASParserUtil {
         List<Scope> scopesSortedlist = new ArrayList<>(scopeSet);
         scopesSortedlist.sort(Comparator.comparing(Scope::getName));
         return new LinkedHashSet<>(scopesSortedlist);
+    }
+
+    /**
+     * Preprocessing of scopes schemes to support multiple schemes other than 'default' type
+     * This method will change the given definition
+     *
+     * @param swaggerContent
+     * @param apiToAdd
+     * @return processedSwaggerContent
+     */
+    public static String preProcess(String swaggerContent, API apiToAdd) throws APIManagementException {
+        //Load required properties from swagger to the API
+        APIDefinition apiDefinition = getOASParser(swaggerContent);
+        SwaggerVersion swaggerVersion = getSwaggerVersion(swaggerContent);
+        if (swaggerVersion == SwaggerVersion.SWAGGER) {
+            Set<Scope> scopes = OAS2Parser.injectOtherScopesToDefault(swaggerContent);
+            Set<URITemplate> urlTemplates = OAS2Parser.injectOtherRescouceScopesToDefault(swaggerContent);
+            apiToAdd.setUriTemplates(urlTemplates);
+            apiToAdd.setScopes(scopes);
+            SwaggerData updatedSwager = new SwaggerData(apiToAdd);
+            String swaggerContentUpdated = apiDefinition.populateCustomManagementInfo(swaggerContent, updatedSwager);
+            return swaggerContentUpdated;
+        } else {
+            Set<Scope> scopes = OAS3Parser.injectOtherScopesToDefault(swaggerContent);
+            Set<URITemplate> urlTemplates = OAS3Parser.injectOtherRescouceScopesToDefault(swaggerContent);
+            apiToAdd.setUriTemplates(urlTemplates);
+            apiToAdd.setScopes(scopes);
+            SwaggerData updatedSwager = new SwaggerData(apiToAdd);
+            String swaggerContentUpdated = apiDefinition.populateCustomManagementInfo(swaggerContent, updatedSwager);
+            return swaggerContentUpdated;
+        }
     }
 }

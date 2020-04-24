@@ -23,7 +23,6 @@ import io.swagger.oas.inflector.examples.ExampleBuilder;
 import io.swagger.oas.inflector.examples.XmlExampleSerializer;
 import io.swagger.oas.inflector.examples.models.Example;
 import io.swagger.oas.inflector.processors.JsonNodeExampleSerializer;
-import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -87,6 +86,15 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYP
 public class OAS3Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS3Parser.class);
     static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
+    static List<String> otherSchemes;
+
+    public static List<String> getOtherSchemes() {
+        return otherSchemes;
+    }
+
+    public static void setOtherSchemes(List<String> otherSchemes) {
+        OAS3Parser.otherSchemes = otherSchemes;
+    }
 
     /**
      * This method  generates Sample/Mock payloads for Open API Specification (3.0) definitions
@@ -749,7 +757,7 @@ public class OAS3Parser extends APIDefinition {
      * @param operation       Swagger path operation
      * @return list of scopes using the security requirements
      */
-    private List<String> getScopeOfOperations(String oauth2SchemeKey, Operation operation) {
+    private static List<String> getScopeOfOperations(String oauth2SchemeKey, Operation operation) {
         List<SecurityRequirement> security = operation.getSecurity();
         if (security != null) {
             for (Map<String, List<String>> requirement : security) {
@@ -767,7 +775,7 @@ public class OAS3Parser extends APIDefinition {
      * @param operation
      * @return
      */
-    private List<String> getScopeOfOperationsFromExtensions(Operation operation) {
+    private static List<String> getScopeOfOperationsFromExtensions(Operation operation) {
         Map<String, Object> extensions = operation.getExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
             String scopeKey = (String) extensions.get(APIConstants.SWAGGER_X_SCOPE);
@@ -783,7 +791,7 @@ public class OAS3Parser extends APIDefinition {
      * @return Scope set
      * @throws APIManagementException if an error occurred
      */
-    private Set<Scope> getScopesFromExtensions(OpenAPI openAPI) throws APIManagementException {
+    private static Set<Scope> getScopesFromExtensions(OpenAPI openAPI) throws APIManagementException {
         Set<Scope> scopeList = new LinkedHashSet<>();
         Map<String, Object> extensions = openAPI.getExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
@@ -1141,7 +1149,7 @@ public class OAS3Parser extends APIDefinition {
      * @param oasDefinition OAS definition
      * @return OpenAPI
      */
-    OpenAPI getOpenAPI(String oasDefinition) {
+    static OpenAPI getOpenAPI(String oasDefinition) {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(oasDefinition, null, null);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
@@ -1234,4 +1242,196 @@ public class OAS3Parser extends APIDefinition {
             return Json.pretty(swagger);
         }
     }
+
+    /**
+     * This method returns the oauth scopes according to the given swagger(version 3)
+     *
+     * @param swaggerContent resource json
+     * @return scope set as all defaults
+     * @throws APIManagementException
+     */
+    static Set<Scope> injectOtherScopesToDefault(String swaggerContent) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swaggerContent);
+        Map<String, SecurityScheme> securitySchemes = null;
+        SecurityScheme securityScheme;
+        OAuthFlow oAuthFlow;
+        Scopes scopes;
+        Components component = openAPI.getComponents();
+        List<String> otherSetofSchemes = new ArrayList<>();
+        Set<Scope> scopeSet = new HashSet<>();
+
+        if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes()) != null) {
+            Iterator<Map.Entry<String, SecurityScheme>> iterator = securitySchemes.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, SecurityScheme> entry = iterator.next();
+                if (entry.getKey() != OPENAPI_SECURITY_SCHEMA_KEY) {
+                    otherSetofSchemes.add(entry.getKey());
+                    //Check for default one
+                    SecurityScheme defaultType = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY);
+                    //If there is no default type schemes set a one
+                    if (defaultType == null) {
+                        defaultType = new SecurityScheme();
+                        securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, defaultType);
+                    }
+                    OAuthFlows defaultTypeFlows = defaultType.getFlows();
+                    OAuthFlow defaultTypeFlow = defaultTypeFlows.getImplicit();
+                    Scopes defaultFlowScopes = defaultTypeFlow.getScopes();
+                    SecurityScheme notdeftype = entry.getValue();
+                    OAuthFlows notdefTypeFlows = notdeftype.getFlows();
+                    OAuthFlow notdefTypeFlow = notdeftype.getFlows().getImplicit();
+                    Scopes notdefFlowScopes = notdefTypeFlow.getScopes();
+                    if (defaultFlowScopes == null) {
+                        Scopes newDefaultFlowScopes = new Scopes();
+                        for (Map.Entry<String, String> input : notdefFlowScopes.entrySet()) {
+                            String name = input.getKey();
+                            String description = input.getValue();
+                            //Inject scopes set into default scheme
+                            newDefaultFlowScopes.addString(name, description);
+                            defaultTypeFlow.setScopes(newDefaultFlowScopes);
+                            defaultTypeFlows.setImplicit(defaultTypeFlow);
+                            defaultType.setFlows(defaultTypeFlows);
+                        }
+                        //Check X-Scope Bindings
+                        Map<String, String> notdefScopeBindings, defScopeBindings = null;
+                        Map<String, Object> defTypeExtension = defaultTypeFlow.getExtensions();
+                        if (notdefTypeFlow.getExtensions() != null && (notdefScopeBindings =
+                                (Map<String, String>) notdefTypeFlow.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS))
+                                != null) {
+                            for (Map.Entry<String, String> roleInUse : notdefScopeBindings.entrySet()) {
+                                String notdeftypescope = roleInUse.getKey();
+                                String notdeftypeRole = roleInUse.getValue();
+                                defScopeBindings = (Map<String, String>) defTypeExtension.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+                                defScopeBindings = new HashMap<>();
+                                defScopeBindings.put(notdeftypescope, notdeftypeRole);
+                            }
+                        }
+                        defTypeExtension.put(APIConstants.SWAGGER_X_SCOPES_BINDINGS, defScopeBindings);
+                        defaultTypeFlow.setExtensions(defTypeExtension);
+                        defaultTypeFlows.setImplicit(defaultTypeFlow);
+                        defaultType.setFlows(defaultTypeFlows);
+                    }
+                }
+            }
+        }
+        component.setSecuritySchemes(securitySchemes);
+        openAPI.setComponents(component);
+        //Check and set scope bindings
+        if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes()) != null
+                && (securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY)) != null
+                && (oAuthFlow = securityScheme.getFlows().getImplicit()) != null
+                && (scopes = oAuthFlow.getScopes()) != null) {
+            for (Map.Entry<String, String> entry : scopes.entrySet()) {
+                Scope scope = new Scope();
+                scope.setKey(entry.getKey());
+                scope.setName(entry.getKey());
+                scope.setDescription(entry.getValue());
+                Map<String, String> scopeBindings;
+                if (oAuthFlow.getExtensions() != null && (scopeBindings =
+                        (Map<String, String>) oAuthFlow.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS))
+                        != null) {
+                    if (scopeBindings.get(scope.getKey()) != null) {
+                        scope.setRoles(scopeBindings.get(scope.getKey()));
+                    }
+                }
+                scopeSet.add(scope);
+            }
+            setOtherSchemes(otherSetofSchemes);
+            return OASParserUtil.sortScopes(scopeSet);
+        } else {
+            setOtherSchemes(otherSetofSchemes);
+            return OASParserUtil.sortScopes(getScopesFromExtensions(openAPI));
+        }
+    }
+
+    /**
+     * This method returns URI templates according to the given swagger file(Swagger version 3)
+     *
+     * @param resourceConfigsJSON swaggerJSON
+     * @return URI Templates
+     * @throws APIManagementException
+     */
+    static Set<URITemplate> injectOtherRescouceScopesToDefault(String resourceConfigsJSON) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(resourceConfigsJSON);
+        Set<URITemplate> urlTemplates = new LinkedHashSet<>();
+        Set<Scope> scopes = injectOtherScopesToDefault(resourceConfigsJSON);
+        List<String> schemes = getOtherSchemes();
+
+        for (String pathKey : openAPI.getPaths().keySet()) {
+            PathItem pathItem = openAPI.getPaths().get(pathKey);
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
+                Operation operation = entry.getValue();
+                URITemplate template = new URITemplate();
+                if (APIConstants.SUPPORTED_METHODS.contains(entry.getKey().name().toLowerCase())) {
+                    template.setHTTPVerb(entry.getKey().name().toUpperCase());
+                    template.setHttpVerbs(entry.getKey().name().toUpperCase());
+                    template.setUriTemplate(pathKey);
+                    List<String> opScopesofDefault = getScopeOfOperations(OPENAPI_SECURITY_SCHEMA_KEY, operation);
+                    //Handling scopes in resources which do not belong to 'default' scheme
+                    if (opScopesofDefault == null) {
+                        for (int i = 0; i < schemes.size(); i++) {
+                            List<String> opScopesOfOthers = getScopeOfOperations(schemes.get(i), operation);
+                            if (!opScopesOfOthers.isEmpty()) {
+                                if (opScopesOfOthers.size() == 1) {
+                                    String firstScope = opScopesOfOthers.get(0);
+                                    Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                                    if (scope == null) {
+                                        throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                                    }
+                                    Scope duplication = scope;
+                                    template.setScope(duplication);
+                                    template.setScopes(duplication);
+                                } else {
+                                    for (String scope : opScopesOfOthers) {
+                                        Scope scopeObj = new Scope();
+                                        scopeObj.setKey(OPENAPI_SECURITY_SCHEMA_KEY);
+                                        scopeObj.setName(OPENAPI_SECURITY_SCHEMA_KEY);
+
+                                        template.setScopes(scopeObj);
+                                    }
+                                }
+                            }
+                        }
+                        //Handling scopes in resources which belong to 'default' scheme
+                        if (!opScopesofDefault.isEmpty()) {
+                            if (opScopesofDefault.size() == 1) {
+                                String firstScope = opScopesofDefault.get(0);
+                                Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                                if (scope == null) {
+                                    throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                                }
+                                template.setScope(scope);
+                                template.setScopes(scope);
+                            } else {
+                                template = OASParserUtil.setScopesToTemplate(template, opScopesofDefault);
+                            }
+                        }
+                        Map<String, Object> extensios = operation.getExtensions();
+                        if (extensios != null) {
+                            if (extensios.containsKey(APIConstants.SWAGGER_X_AUTH_TYPE)) {
+                                String scopeKey = (String) extensios.get(APIConstants.SWAGGER_X_AUTH_TYPE);
+                                template.setAuthType(scopeKey);
+                                template.setAuthTypes(scopeKey);
+                            } else {
+                                template.setAuthType("Any");
+                                template.setAuthTypes("Any");
+                            }
+                            if (extensios.containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER)) {
+                                String throttlingTier = (String) extensios.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
+                                template.setThrottlingTier(throttlingTier);
+                                template.setThrottlingTiers(throttlingTier);
+                            }
+                            if (extensios.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                                String mediationScript = (String) extensios.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
+                                template.setMediationScript(mediationScript);
+                                template.setMediationScripts(template.getHTTPVerb(), mediationScript);
+                            }
+                        }
+                        urlTemplates.add(template);
+                    }
+                }
+            }
+        }
+        return urlTemplates;
+    }
+
 }
