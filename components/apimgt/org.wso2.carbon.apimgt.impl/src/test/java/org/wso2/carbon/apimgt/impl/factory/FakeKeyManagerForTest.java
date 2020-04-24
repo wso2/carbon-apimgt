@@ -30,7 +30,22 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * KeyManageImplementation Wrapper for KeyManagerHolder unit tests.
+ */
 public class FakeKeyManagerForTest implements KeyManager {
+
+    @Override
+    public void detachScopeToResource(APIIdentifier apiIdentifier, String context, URITemplate uriTemplate, Scope scope,
+                                      String tenantDomain) throws APIManagementException {
+
+    }
+
+    @Override
+    public void deleteScope(String scopeName, String tenantDomain) throws APIManagementException {
+
+    }
+
     @Override public OAuthApplicationInfo createApplication(OAuthAppRequest oAuthAppRequest)
             throws APIManagementException {
         return null;
@@ -43,12 +58,6 @@ public class FakeKeyManagerForTest implements KeyManager {
 
     @Override public OAuthApplicationInfo updateApplicationOwner(OAuthAppRequest oAuthAppRequest, String owner)
             throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public OAuthApplicationInfo registerKeyManagerMgtApplication(String tenantDomain) throws APIManagementException {
-
         return null;
     }
 
@@ -169,24 +178,13 @@ public class FakeKeyManagerForTest implements KeyManager {
     }
 
     @Override
-    public void detachScopeToResource(APIIdentifier apiIdentifier, URITemplate uriTemplate, Scope scope,
-                                      String tenantDomain) throws APIManagementException {
-
-    }
-
-    @Override
-    public void deleteScope(Scope scope, String tenantDomain) throws APIManagementException {
-
-    }
-
-    @Override
     public void updateScope(Scope scope, String tenantDomain) throws APIManagementException {
 
     }
 
     @Override
-    public Boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException {
+    public boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException {
 
-        return null;
+        return false;
     }
 }
