@@ -25,12 +25,12 @@ import io.fabric8.kubernetes.api.model.KubernetesResource;
 
 public class APICustomResourceDefinitionSpec implements KubernetesResource {
 
-    private int replicas;
     private String mode;
+    private String updateTimeStamp;
+    private int replicas;
     private Definition definition;
     private boolean override;
-    private String updateTimeStamp;
-    private String interceptorConfName;
+//    private String version;
 
     public String getUpdateTimeStamp() {
         return updateTimeStamp;
@@ -38,14 +38,6 @@ public class APICustomResourceDefinitionSpec implements KubernetesResource {
 
     public void setUpdateTimeStamp(String updateTimeStamp) {
         this.updateTimeStamp = updateTimeStamp;
-    }
-
-    public String getInterceptorConfName() {
-        return interceptorConfName;
-    }
-
-    public void setInterceptorConfName(String interceptorConfName) {
-        this.interceptorConfName = interceptorConfName;
     }
 
     public boolean isOverride() {
@@ -80,18 +72,25 @@ public class APICustomResourceDefinitionSpec implements KubernetesResource {
         this.mode = mode;
     }
 
+//    public String getVersion() { return version; }
+//
+//    public void setVersion(String version) { this.version = version; }
+
     /**
      * This method returns the string equivalent to the following json object.
      * {
-     *      "definition": {
-     *          "configmapName": "${configmapName}",
-     *          "type": "${type}"
-     *      },
-     *      "replicas": "${replicas}",
-     *      "mode": "${mode}",
-     *      "override": bool,
-     *      "updateTimeStamp": "",
-     *      "interceptorConfName": ""
+     * "definition": {
+     * "swaggerConfigmapNames": ["${swaggerConfigmapNames}"],
+     * "type": "${type}",
+     * "interceptors": {
+     * "ballerina": ["${balInterceptorsConfigmapsNames}"],
+     * "java": ["${javaInterceptorsConfigmapsNames}"],
+     * },
+     * },
+     * "replicas": "${replicas}",
+     * "mode": "${mode}",
+     * "override": bool,
+     * "updateTimeStamp": "",
      * }
      *
      * @return
@@ -104,7 +103,6 @@ public class APICustomResourceDefinitionSpec implements KubernetesResource {
                 ", definition=" + definition +
                 ", override=" + override +
                 ", updateTimeStamp=" + updateTimeStamp +
-                ", interceptorConfName" + interceptorConfName +
                 "}";
     }
 }

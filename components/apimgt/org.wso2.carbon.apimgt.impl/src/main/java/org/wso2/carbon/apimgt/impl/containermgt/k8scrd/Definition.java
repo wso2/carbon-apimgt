@@ -21,20 +21,23 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
 
+import java.util.Arrays;
+
 @JsonDeserialize(using = JsonDeserializer.None.class)
 
 public class Definition implements KubernetesResource {
 
-    private String configmapName;
+    private String[] swaggerConfigmapNames;
     private String type;
+    private Interceptors interceptors;
 
-    public String getConfigmapName() {
-        return configmapName;
-    }
+    public String[] getSwaggerConfigmapNames() { return swaggerConfigmapNames; }
 
-    public void setconfigmapName(String configmapName) {
-        this.configmapName = configmapName;
-    }
+    public void setSwaggerConfigmapNames(String[] swaggerConfigmapNames) { this.swaggerConfigmapNames = swaggerConfigmapNames; }
+
+    public Interceptors getInterceptors() { return interceptors; }
+
+    public void setInterceptors(Interceptors interceptors) { this.interceptors = interceptors; }
 
     public String getType() {
         return type;
@@ -47,8 +50,12 @@ public class Definition implements KubernetesResource {
     /**
      * This method is to create the following json object
      * {
-     *      "configmapName": "${configmapName}",
-     *      "type": "swagger"
+     * "swaggerConfigmapNames": ["${swaggerConfigmapNames}"],
+     * "type": "swagger"
+     * "interceptors": {
+     * "ballerina": ["${balInterceptorsConfigmapsNames}"],
+     * "java": ["${javaInterceptorsConfigmapsNames}"],
+     * },
      * },
      *
      * @return
@@ -56,7 +63,9 @@ public class Definition implements KubernetesResource {
     @Override
     public String toString() {
         return "Definition{" +
-                "configmapName=" + configmapName +
-                ", type=" + type + "}";
+                "swaggerConfigmapNames=" + Arrays.toString(swaggerConfigmapNames) +
+                ", type='" + type + '\'' +
+                ", interceptors=" + interceptors +
+                '}';
     }
 }

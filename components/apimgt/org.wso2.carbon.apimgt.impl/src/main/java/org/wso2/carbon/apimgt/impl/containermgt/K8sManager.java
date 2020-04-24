@@ -93,12 +93,13 @@ public class K8sManager implements ContainerManager {
     public void changeLCStateCreatedToPublished(API api, APIIdentifier apiIdentifier)
             throws RegistryException, ParseException, APIManagementException {
 
+        log.info("testing new API cr");
         if (!saToken.equals("") && !masterURL.equals("")) {
 
-            String configmapName = deployConfigMap(api, apiIdentifier, openShiftClient, jwtSecurityCRName,
+            String[] configmapNames = deployConfigMap(api, apiIdentifier, openShiftClient, jwtSecurityCRName,
                     oauthSecurityCRName, basicAuthSecurityCRName, false);
 
-            applyAPICustomResourceDefinition(openShiftClient, configmapName, replicas, apiIdentifier, true);
+            applyAPICustomResourceDefinition(openShiftClient, configmapNames, replicas, apiIdentifier, true);
             log.info("Successfully deployed the [API] " + apiIdentifier.getApiName() + " in Kubernetes");
 
 
@@ -163,7 +164,7 @@ public class K8sManager implements ContainerManager {
 
         OpenShiftClient client = new DefaultOpenShiftClient(config);
 
-        String configMapName = deployConfigMap(api, apiId, client, clusterProperties.get(JWT_SECURITY_CR_NAME),
+        String[] configMapNames = deployConfigMap(api, apiId, client, clusterProperties.get(JWT_SECURITY_CR_NAME),
                 clusterProperties.get(OAUTH2_SECURITY_CR_NAME), clusterProperties.get(BASICAUTH_SECURITY_CR_NAME),
                 true);
 
@@ -176,7 +177,7 @@ public class K8sManager implements ContainerManager {
         APICustomResourceDefinition apiCustomResourceDefinition = crdClient.withName(apiName.toLowerCase()).get();
 
         apiCustomResourceDefinition.getSpec().setUpdateTimeStamp(getTimeStamp());
-        apiCustomResourceDefinition.getSpec().getDefinition().setconfigmapName(configMapName);
+        apiCustomResourceDefinition.getSpec().getDefinition().setSwaggerConfigmapNames(configMapNames);
 
         crdClient.createOrReplace(apiCustomResourceDefinition);
         log.info("Successfully Re-deployed the [API] " + apiName);
@@ -205,7 +206,7 @@ public class K8sManager implements ContainerManager {
      */
     @Override
     public void changeLCStateBlockedToRepublished(APIIdentifier apiId, Map<String, String> clusterProperties,
-                                                  String configMapName) {
+                                                  String[] configMapName) {
 
         String apiName = apiId.getApiName();
 
@@ -252,12 +253,12 @@ public class K8sManager implements ContainerManager {
     /**
      * Deploys the API Custom resource kind in kubernetes
      * @param client , Openshift client
-     * @param configmapName , Name of the configmap
+     * @param configmapNames , Name of the configmap
      * @param replicas , number of replicas
      * @param apiIdentifier , APIIdentifier
      * @param override , Checks whether the API CR needs to be overrode or not
      */
-    private void applyAPICustomResourceDefinition(OpenShiftClient client, String configmapName, int replicas,
+    private void applyAPICustomResourceDefinition(OpenShiftClient client, String[] configmapNames, int replicas,
                                                   APIIdentifier apiIdentifier, Boolean override) {
 
         CustomResourceDefinitionList customResourceDefinitionList = client.customResourceDefinitions().list();
@@ -287,15 +288,15 @@ public class K8sManager implements ContainerManager {
 
         Definition definition = new Definition();
         definition.setType(SWAGGER);
-        definition.setconfigmapName(configmapName);
+        definition.setSwaggerConfigmapNames(configmapNames);
 
         APICustomResourceDefinitionSpec apiCustomResourceDefinitionSpec = new APICustomResourceDefinitionSpec();
         apiCustomResourceDefinitionSpec.setDefinition(definition);
         apiCustomResourceDefinitionSpec.setMode(MODE);
         apiCustomResourceDefinitionSpec.setReplicas(replicas);
-        apiCustomResourceDefinitionSpec.setInterceptorConfName("");
         apiCustomResourceDefinitionSpec.setOverride(override);
         apiCustomResourceDefinitionSpec.setUpdateTimeStamp("");
+//        apiCustomResourceDefinitionSpec.setVersion(apiIdentifier.getVersion());
 
         Status status = new Status();
 
@@ -308,6 +309,8 @@ public class K8sManager implements ContainerManager {
         meta.setName(apiIdentifier.getApiName().toLowerCase());
         meta.setNamespace(client.getNamespace());
         apiCustomResourceDef.setMetadata(meta);
+
+        log.info("api cr ",apiCustomResourceDef);
 
         apiCrdClient.createOrReplace(apiCustomResourceDef);
 
@@ -329,7 +332,7 @@ public class K8sManager implements ContainerManager {
      * @throws APIManagementException
      * @throws ParseException
      */
-    private String deployConfigMap(API api, APIIdentifier apiIdentifier, OpenShiftClient client, String jwtSecurityCRName,
+    private String[] deployConfigMap(API api, APIIdentifier apiIdentifier, OpenShiftClient client, String jwtSecurityCRName,
                                    String oauthSecurityCRName, String basicAuthSecurityCRName, Boolean update)
             throws RegistryException, APIManagementException, ParseException {
 
@@ -346,6 +349,8 @@ public class K8sManager implements ContainerManager {
 
             configmapName = configmapName + "-up-" + getTimeStamp();
         }
+
+        String[] swaggerConfigmapNames = new String[]{configmapName};
 
         io.fabric8.kubernetes.client.dsl.Resource<ConfigMap, DoneableConfigMap> configMapResource = client
                 .configMaps().inNamespace(client.getNamespace()).withName(configmapName);
@@ -371,7 +376,7 @@ public class K8sManager implements ContainerManager {
             log.warn("Basic-Auth security custom resource name has not been provided,"
                     + " The [API] " + apiIdentifier.getApiName() + " may not be able to invoke via BasicAuth tokens");
         }
-        return configmapName;
+        return swaggerConfigmapNames;
     }
 
     /**

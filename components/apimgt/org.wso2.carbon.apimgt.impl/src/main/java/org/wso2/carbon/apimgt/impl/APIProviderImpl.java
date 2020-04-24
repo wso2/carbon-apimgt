@@ -4103,15 +4103,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             JSONParser jsonParser = new JSONParser();
             JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
             Map<String, Map<String, String>> allClusters = APIUtil.getClusterInfoFromConfig(tenantConf);
-            List<String> clusterNames = new ArrayList<String>();
-            //clusterNames.add("cluster1");
-
-            if (clusterNames.size() != 0) {
-
-                for (String clusterId : clusterNames) {
-
+            if (api.getDeployments().size() != 0) {
+                for (String clusterId : api.getDeployments()) {
                     ContainerManager containerManager = getContainerManagerInstance();
-
                     containerManager.deleteAPI(identifier, allClusters.get(clusterId));
                 }
             }
@@ -5506,7 +5500,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact apiArtifact = getAPIArtifact(apiIdentifier);
             String targetStatus;
             if (apiArtifact != null) {
-
                 String providerName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
                 String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
                 String apiContext = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
@@ -5596,12 +5589,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String content = getTenantConfigContent();
                     JSONParser jsonParser = new JSONParser();
                     JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
-
                     Map<String, Map<String, String>> allClusters = APIUtil.getClusterInfoFromConfig(tenantConf);
-                    List<String> clusterNames = new ArrayList<String>();
-                    clusterNames.add("docker-desktop");
-                    if (clusterNames.size() != 0) {
-                        for (String clusterId : clusterNames) {
+                    API api = getAPI(apiIdentifier);
+                    if (api.getDeployments().size() != 0) {
+                        for (String clusterId : api.getDeployments()) {
                             Map<String, String> clusterProperties = allClusters.get(clusterId);
                             ContainerManager containerManager = getContainerManagerInstance();
 
@@ -5617,8 +5608,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                                 String configmapName = apiIdentifier.getApiName().toLowerCase() +
                                         apiIdentifier.getVersion();
+                                String[] configmapNames = new String[]{configmapName};
                                 containerManager.changeLCStateBlockedToRepublished(apiIdentifier,
-                                        clusterProperties, configmapName);
+                                        clusterProperties, configmapNames);
 
                             } else if (currentStatus.equals(ContainerBasedConstants.PUBLISHED)
                                     && action.equals(ContainerBasedConstants.PUBLISH)) {
@@ -8680,16 +8672,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void publishInPrivateJet(API api, APIIdentifier apiIdentifier, List<String> clusterNames)
+    public void publishInPrivateJet(API api, APIIdentifier apiIdentifier)
             throws ParseException, UserStoreException, org.wso2.carbon.registry.api.RegistryException,
             IllegalAccessException, InstantiationException, ClassNotFoundException, APIManagementException {
 
         Map<String, Map<String, String>> allClusters = getAllClustersFromConfig();
 
-        if (clusterNames.size() != 0) {
+        if (api.getDeployments().size() != 0) {
 
             log.info("Publishing the [API] " + apiIdentifier.getApiName() + " in Kubernetes");
-            for (String clusterName : clusterNames) {
+            for (String clusterName : api.getDeployments()) {
                 Map<String, Map<String, String>> clusterDetails = allClusters.entrySet().stream()
                         .filter(val -> val.getKey().equals(clusterName))
                         .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()));

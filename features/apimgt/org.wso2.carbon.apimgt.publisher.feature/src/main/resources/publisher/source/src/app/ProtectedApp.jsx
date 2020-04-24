@@ -206,7 +206,6 @@ export default class Protected extends Component {
         const checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
         + clientId + '&redirect_uri=https://' + window.location.host
         + Configurations.app.context + '/services/auth/callback/login';
-        const { settings } = this.state;
         const { allDeployments } = this.state;
 
         if (!user) {

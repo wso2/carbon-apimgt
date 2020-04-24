@@ -49,7 +49,7 @@ public class DeploymentsMappingUtil {
             Object tenantObject = jsonParser.parse(getTenantDomainConfContent);
             JSONObject tenant_conf = (JSONObject) tenantObject;
             //get kubernetes cluster info
-            JSONObject ContainerMgtInfo = (JSONObject) tenant_conf.get("ContainerMgtInfo");
+            JSONObject ContainerMgtInfo = (JSONObject) tenant_conf.get("GatewayDeployments");
             DeploymentsDTO k8sClustersInfoDTO = new DeploymentsDTO();
             k8sClustersInfoDTO.setName((String) ContainerMgtInfo.get("Type"));
             //get clusters' properties
@@ -60,7 +60,7 @@ public class DeploymentsMappingUtil {
                 Object clusterProperties = clustersInfo.get(keyStr);
                 DeploymentClusterInfoDTO deploymentClusterInfoDTO = new DeploymentClusterInfoDTO();
                 deploymentClusterInfoDTO.setClusterId((String) keyStr);
-                deploymentClusterInfoDTO.setClusterName(((JSONObject) clusterProperties).get("Name").toString());
+                deploymentClusterInfoDTO.setClusterName(((JSONObject) clusterProperties).get("DisplayName").toString());
                 deploymentClusterInfoDTO.setMasterURL(((JSONObject) clusterProperties).get("MasterURL").toString());
                 deploymentClusterInfoDTO.setNamespace(((JSONObject) clusterProperties).get("Namespace").toString());
                 deploymentClusterInfoDTO.setIngressURL(((JSONObject)clusterProperties).get("IngressURL").toString());

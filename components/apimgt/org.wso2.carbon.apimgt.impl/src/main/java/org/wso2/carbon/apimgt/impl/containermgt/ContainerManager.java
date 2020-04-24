@@ -86,6 +86,6 @@ public interface ContainerManager {
      * @param configMapName Name of the Config Map
      */
     void changeLCStateBlockedToRepublished(APIIdentifier apiId, Map<String, String> clusterProperties,
-                                           String configMapName);
+                                           String[] configMapName);
 
 }

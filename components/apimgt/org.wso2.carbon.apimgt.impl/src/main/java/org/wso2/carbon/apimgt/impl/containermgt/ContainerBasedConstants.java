@@ -47,7 +47,8 @@ public final class ContainerBasedConstants {
     public static final String CLUSTER_INFO = "ClusterInfo";
     public static final String PROPERTIES = "Properties";
     public static final String CLUSTER_ID = "ClusterId";
-    public static final String CONTAINER_MANAGEMENT_INFO = "ContainerMgtInfo";
+    public static final String DISPLAY_NAME = "DisplayName";
+    public static final String CONTAINER_MANAGEMENT_INFO = "GatewayDeployments";
     public static final String CLASS_NAME = "ClassName";
     public static final String CLIENT_KEY_PASSPHRASE = "javax.net.ssl.keyStorePassword";
 

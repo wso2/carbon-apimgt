@@ -950,6 +950,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
 
+            //Get selected cluster info
+            List<String> selectedClusters = body.getDeployments();
+            if (body.getDeployments() != null) {
+                String errorMessage = RestApiPublisherUtils.validateAdditionalProperties(body.getAdditionalProperties());
+            }
+
             apiProvider.manageAPI(apiToUpdate);
 
             API updatedApi = apiProvider.getAPI(apiIdentifier);

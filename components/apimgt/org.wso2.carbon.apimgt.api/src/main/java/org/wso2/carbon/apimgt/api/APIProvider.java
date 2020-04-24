@@ -1469,6 +1469,6 @@ public interface APIProvider extends APIManager {
      * @throws IOException            if getTenantConfigContent returns nothing (But Never Happens that)
      * @throws ParseException         for json file reading
      */
-    void publishInPrivateJet(API api, APIIdentifier apiIdentifier, List<String> clusterNames) throws ParseException,
+    void publishInPrivateJet(API api, APIIdentifier apiIdentifier) throws ParseException,
             UserStoreException, RegistryException, IllegalAccessException, InstantiationException, ClassNotFoundException, APIManagementException;
 }

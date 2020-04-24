@@ -2,14 +2,14 @@
   "EnableMonetization" : false,
   "EnableRecommendation" : false,
   "IsUnlimitedTierPaid" : false,
-  "ContainerMgtInfo": {
+  "GatewayDeployments": {
     "Type": "Kubernetes",
     "ClassName": "org.wso2.carbon.apimgt.impl.containermgt.K8sManager",
     "ClusterInfo": [
       {
         "ClusterId": "",
+        "DisplayName": "",
         "Properties": {
-          "Name": "",
           "MasterURL": "",
           "IngressURL": "",
           "SAToken": "",

@@ -10925,6 +10925,7 @@ public final class APIUtil {
         for (int i = 0; i < ClusterInfo.size(); i++) {
 
             JSONObject clusterProperties = (JSONObject) ((JSONObject) ClusterInfo.get(i)).get(ContainerBasedConstants.PROPERTIES);
+            clusterProperties.put(ContainerBasedConstants.DISPLAY_NAME,((JSONObject) ClusterInfo.get(i)).get(ContainerBasedConstants.DISPLAY_NAME));
             String clusterId = ((JSONObject) ClusterInfo.get(i)).get(ContainerBasedConstants.CLUSTER_ID).toString();
             clusters.put(clusterId, clusterProperties);
         }
