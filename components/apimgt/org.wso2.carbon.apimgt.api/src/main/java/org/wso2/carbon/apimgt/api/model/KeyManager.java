@@ -324,6 +324,6 @@ public interface KeyManager {
      * @return whether scope exists or not
      * @throws APIManagementException if an error occurs while checking the existence of the scope
      */
-    Boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException;
+    boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException;
 
 }
