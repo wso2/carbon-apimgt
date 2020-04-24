@@ -31,7 +31,7 @@ import java.util.List;
  * Approval workflow for API Subscription.
  *
  */
-public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecutor{
+public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(SubscriptionCreationApprovalWorkflowExecutor.class);
 
@@ -47,6 +47,7 @@ public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecut
 
     /**
      * Execute the Application Creation workflow approval process.
+     *
      * @param workflowDTO
      */
     @Override
@@ -57,10 +58,9 @@ public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecut
         }
         SubscriptionWorkflowDTO subsWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
         String callBackURL = subsWorkflowDTO.getCallbackUrl();
-        String message="Approve API ["+ subsWorkflowDTO.getApiName()+" - "+subsWorkflowDTO.getApiVersion()+
-                "] subscription creation request from subscriber - "+subsWorkflowDTO.getSubscriber()+
-                " for the application - "+subsWorkflowDTO.getApplicationName();
-
+        String message = "Approve API [" + subsWorkflowDTO.getApiName() + " - " + subsWorkflowDTO.getApiVersion() +
+                "] subscription creation request from subscriber - " + subsWorkflowDTO.getSubscriber() +
+                " for the application - " + subsWorkflowDTO.getApplicationName();
         workflowDTO.setWorkflowDescription(message);
         super.execute(workflowDTO);
 
@@ -69,6 +69,7 @@ public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecut
 
     /**
      * Complete the Approval workflow executor for Subscription creation.
+     *
      * @param workflowDTO
      */
     @Override
@@ -103,6 +104,7 @@ public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecut
     /**
      * Handle cleanup task for subscription creation Approval workflow executor.
      * Use workflow external reference  to delete the pending workflow request
+     *
      * @param workflowExtRef Workflow external reference of pending workflow request
      */
     @Override

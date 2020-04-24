@@ -52,7 +52,7 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
      * This is used to get the workflow pending request according to ExternalWorkflowReference
      *
      * @param externalWorkflowRef is the unique identifier for workflow request
-     * @param ifNoneMatch If-None-Match header value
+     * @param ifNoneMatch         If-None-Match header value
      * @return
      */
     @Override
@@ -60,16 +60,15 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
         WorkflowInfoDTO workflowinfoDTO;
         try {
             Workflow workflow;
-
-            String status="CREATED";
+            String status = "CREATED";
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIAdmin apiAdmin = new APIAdminImpl();
-            workflow=apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef, status ,tenantDomain);
+            workflow = apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef, status, tenantDomain);
             workflowinfoDTO = WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow);
             return Response.ok().entity(workflowinfoDTO).build();
-        }
-        catch(APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving workflow request by the external workflow reference. ", e, log);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving workflow request by the " +
+                    "external workflow reference. ", e, log);
         }
         return null;
     }
@@ -77,10 +76,10 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
     /**
      * This is used to get the workflow pending requests
      *
-     * @param limit       maximum number of workflow returns
-     * @param offset      starting index
-     * @param accept      accept header value
-     * @param ifNoneMatch If-None-Match header value
+     * @param limit        maximum number of workflow returns
+     * @param offset       starting index
+     * @param accept       accept header value
+     * @param ifNoneMatch  If-None-Match header value
      * @param workflowType is the the type of the workflow request. (e.g: Application Creation, Application Subscription etc.)
      * @return
      */
@@ -93,15 +92,14 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
         WorkflowListDTO workflowListDTO;
         try {
             Workflow[] workflows;
-            String status="CREATED";
+            String status = "CREATED";
             APIAdmin apiAdmin = new APIAdminImpl();
-            workflows=apiAdmin.getworkflows(workflowType, status ,tenantDomain);
+            workflows = apiAdmin.getworkflows(workflowType, status, tenantDomain);
             workflowListDTO = WorkflowMappingUtil.fromWorkflowsToDTO(workflows, limit, offset);
             WorkflowMappingUtil.setPaginationParams(workflowListDTO, limit, offset,
-                        workflows.length);
+                    workflows.length);
             return Response.ok().entity(workflowListDTO).build();
-        }
-        catch(APIManagementException e){
+        } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving workflow requests. ", e, log);
         }
         return null;

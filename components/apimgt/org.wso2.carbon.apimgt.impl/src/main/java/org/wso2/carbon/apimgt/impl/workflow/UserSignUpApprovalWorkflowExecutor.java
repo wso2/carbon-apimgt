@@ -35,7 +35,7 @@ import java.util.List;
  * Approval workflow for User Self Sign Up.
  *
  */
-public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecutor{
+public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(UserSignUpWSWorkflowExecutor.class);
 
@@ -46,6 +46,7 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
 
     /**
      * Execute the User self sign up workflow approval process.
+     *
      * @param workflowDTO
      */
     @Override
@@ -56,8 +57,8 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
         }
         String callBackURL = workflowDTO.getCallbackUrl();
         String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
-        String message="Approve APIStore signup request done by "+tenantAwareUserName  +" from the tenant domain "+workflowDTO.getTenantDomain();
-
+        String message = "Approve APIStore signup request done by " + tenantAwareUserName + " from the tenant domain " +
+                workflowDTO.getTenantDomain();
         workflowDTO.setWorkflowDescription(message);
         super.execute(workflowDTO);
         return new GeneralWorkflowResponse();
@@ -65,6 +66,7 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
 
     /**
      * Complete the Approval workflow executor for User self sign up.
+     *
      * @param workflowDTO
      */
     @Override
@@ -87,9 +89,9 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
             String adminPassword = signupConfig.getAdminPassword();
             if (serverURL == null) {
                 throw new WorkflowException("Can't connect to the authentication manager. serverUrl is missing");
-            } else if(adminUsername == null) {
+            } else if (adminUsername == null) {
                 throw new WorkflowException("Can't connect to the authentication manager. adminUsername is missing");
-            } else if(adminPassword == null) {
+            } else if (adminPassword == null) {
                 throw new WorkflowException("Can't connect to the authentication manager. adminPassword is missing");
             }
             String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
@@ -118,6 +120,7 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
     /**
      * Handle cleanup task for user self sign up Approval workflow executor.
      * Use workflow external reference  to delete the pending workflow request
+     *
      * @param workflowExtRef Workflow external reference of pending workflow request
      */
     @Override
@@ -141,5 +144,4 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
     public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
         return null;
     }
-
 }

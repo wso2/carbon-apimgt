@@ -30,12 +30,13 @@ import java.util.List;
 /**
  * Approval workflow for Application Registration key generation.
  */
-public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApplicationRegistrationWorkflowExecutor{
+public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApplicationRegistrationWorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(ApplicationRegistrationApprovalWorkflowExecutor.class);
 
     /**
      * Execute the Application Creation workflow approval process.
+     *
      * @param workflowDTO
      */
     @Override
@@ -48,9 +49,8 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
         String callBackURL = appRegDTO.getCallbackUrl();
         String applicationCallbackUrl = application.getCallbackUrl();
         String applicationDescription = application.getDescription();
-        String message="Approve request to create "+appRegDTO.getKeyType()+" keys for [ "+application.getName()+
-                " ] from application creator - "+appRegDTO.getUserName()+" with throttling tier - "+application.getTier() ;
-
+        String message = "Approve request to create " + appRegDTO.getKeyType() + " keys for [ " + application.getName() +
+                " ] from application creator - " + appRegDTO.getUserName() + " with throttling tier - " + application.getTier();
         workflowDTO.setWorkflowDescription(message);
         super.execute(workflowDTO);
 
@@ -59,6 +59,7 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
 
     /**
      * Complete the Approval workflow executor for application key generation.
+     *
      * @param workFlowDTO
      */
     @Override
@@ -88,6 +89,7 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
     /**
      * Handle cleanup task for application registration Approval workflow executor.
      * Use workflow external reference  to delete the pending workflow request
+     *
      * @param workflowExtRef Workflow external reference of pending workflow request
      */
     @Override
