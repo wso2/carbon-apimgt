@@ -100,14 +100,14 @@ const deleteAPICategory = (id, name, setUpdated) => {
 export default function APICategories() {
     const classes = useStyles();
     const restApi = new API();
-    const [mgLabels, setMgLabels] = useState([]);
+    const [apiCategories, setApiCategories] = useState([]);
     const [isUpdated, setUpdated] = useState(false);
 
     useEffect(() => {
         restApi.apiCategoriesListGet().then((result) => {
             if (!isUpdated) {
                 allCategories = result.body.list;
-                setMgLabels(result.body.list);
+                setApiCategories(result.body.list);
                 setUpdated(true);
             }
         });
@@ -160,7 +160,7 @@ export default function APICategories() {
                     </Button>
                 </Link>
             </div>
-            {mgLabels.length > 0 ? (
+            {apiCategories.length > 0 ? (
                 <Paper className={classes.gatewayPaper}>
                     <Table>
                         <TableHead>
@@ -176,7 +176,7 @@ export default function APICategories() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {mgLabels.map((row) => (
+                            {apiCategories.map((row) => (
                                 <TableRow key={row.name}>
                                     <TableCell
                                         component='th'
