@@ -42,7 +42,7 @@ import java.util.ArrayList;
  * Approval workflow for API state change.
  *
  */
-public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
+public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(APIStateChangeWSWorkflowExecutor.class);
     private String stateList;
@@ -67,6 +67,7 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
 
     /**
      * Execute the API state change workflow approval process.
+     *
      * @param workflowDTO
      */
     @Override
@@ -88,7 +89,6 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
                         + "' from '" + apiStateWorkFlowDTO.getApiCurrentState() + "' state for the API '"
                         + apiStateWorkFlowDTO.getApiName() + " : " + apiStateWorkFlowDTO.getApiVersion() + "' by "
                         + apiStateWorkFlowDTO.getApiProvider() + "";
-
                 apiStateWorkFlowDTO.setWorkflowDescription(message);
                 apiStateWorkFlowDTO.setMetadata("CurrentState", apiStateWorkFlowDTO.getApiCurrentState());
                 apiStateWorkFlowDTO.setMetadata("Action", apiStateWorkFlowDTO.getApiLCAction());
@@ -114,6 +114,7 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
 
     /**
      * Complete the API state change workflow approval process.
+     *
      * @param workflowDTO
      */
     @Override
@@ -123,8 +124,7 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
         }
         workflowDTO.setUpdatedTime(System.currentTimeMillis());
         super.complete(workflowDTO);
-        String externalWorkflowRef=workflowDTO.getExternalWorkflowReference();
-
+        String externalWorkflowRef = workflowDTO.getExternalWorkflowReference();
         try {
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             Workflow workflow = apiMgtDAO.getworkflowReferenceByExternalWorkflowReference(externalWorkflowRef);
@@ -172,6 +172,7 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
     /**
      * Handle cleanup task for api state change workflow Approval executor.
      * Use workflow external reference  to delete the pending workflow request
+     *
      * @param workflowExtRef External Workflow Reference of pending workflow process
      */
     @Override
@@ -215,7 +216,7 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor{
                 }
             }
         }
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("selected states: " + stateAction.toString());
         }
         return stateAction;

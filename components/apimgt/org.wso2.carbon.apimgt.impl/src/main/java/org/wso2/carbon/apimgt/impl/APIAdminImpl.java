@@ -350,29 +350,30 @@ public class APIAdminImpl implements APIAdmin {
     /**
      * The method converts the date into timestamp
      *
-     * @param workflowType
-     * @param status
-     * @param tenantDomain
-     * @return Workflow[]
+     * @param workflowType workflow Type of workflow pending request
+     * @param status       Workflow status of workflow pending request
+     * @param tenantDomain tenant domain of user
+     * @return Workflow[]  list of workflow pending requests
      * @throws APIManagementException
      */
-    public Workflow[] getworkflows(String workflowType, String status, String tenantDomain ) throws APIManagementException {
+    public Workflow[] getworkflows(String workflowType, String status, String tenantDomain)
+            throws APIManagementException {
         return apiMgtDAO.getworkflows(workflowType, status, tenantDomain);
     }
 
     /**
      * The method converts the date into timestamp
      *
-     * @param externelWorkflowRef
-     * @param status
-     * @param tenantDomain
-     * @return Workflow
+     * @param externelWorkflowRef External Workflow Reference of workflow pending request
+     * @param status              Workflow status of workflow pending request
+     * @param tenantDomain        tenant domain of user
+     * @return Workflow           Workflow pending request
      * @throws APIManagementException
      */
     public Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status,
                                                                       String tenantDomain) throws APIManagementException {
-
-        Workflow workflow=apiMgtDAO.getworkflowReferenceByExternalWorkflowReferenceID(externelWorkflowRef, status ,tenantDomain );
+        Workflow workflow = apiMgtDAO.getworkflowReferenceByExternalWorkflowReferenceID(externelWorkflowRef,
+                status, tenantDomain);
 
         if (workflow == null) {
             String msg = "External workflow Reference: " + externelWorkflowRef + " was not found.";
