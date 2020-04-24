@@ -1131,7 +1131,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @throws APIManagementException if an error occurs while checking the existence of the scope
      */
     @Override
-    public Boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException {
+    public boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException {
 
         // Get access token
         AccessTokenInfo accessToken = getAccessTokenForScopeMgt(tenantDomain);
