@@ -219,7 +219,21 @@ export default function APICategories() {
                                         <table className={classes.actionTable}>
                                             <tr>
                                                 <td>
-                                                    <Link to='/todo'>
+                                                    <Link
+                                                        to={{
+                                                            pathname:
+                                                                settings.app
+                                                                    .context +
+                                                                '/categories/api-categories/edit-api-category/' +
+                                                                row.id,
+                                                            state: {
+                                                                fromNotifications: true,
+                                                            },
+                                                            name: row.name,
+                                                            description:
+                                                                row.description,
+                                                        }}
+                                                    >
                                                         <Button>
                                                             <Icon>edit</Icon>
                                                             <FormattedMessage
