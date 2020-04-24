@@ -1,5 +1,6 @@
 import React from 'react';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import { Link } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import 'react-tagsinput/react-tagsinput.css';
 import Button from '@material-ui/core/Button';
@@ -14,7 +15,10 @@ const styles = (theme) => ({
         position: 'relative',
         margin: theme.spacing(1),
     },
-    headline: { paddingTop: theme.spacing(1.25), paddingLeft: theme.spacing(2.5) },
+    headline: {
+        paddingTop: theme.spacing(1.25),
+        paddingLeft: theme.spacing(2.5),
+    },
     heading: {
         flexGrow: 1,
         marginTop: 10,
@@ -50,28 +54,31 @@ const styles = (theme) => ({
 });
 
 const CreateBanner = (props) => {
-    const {
-        classes, title, description, buttonText, onClick,
-    } = props;
+    const { classes, title, description, buttonText, to } = props;
     return (
         <div className={classes.contentWrapper}>
             <InlineMessage type='info' height={140}>
                 <div className={classes.contentWrapper}>
-                    <Typography variant='h5' component='h3' className={classes.head}>
+                    <Typography
+                        variant='h5'
+                        component='h3'
+                        className={classes.head}
+                    >
                         {title}
                     </Typography>
                     <Typography component='p' className={classes.content}>
                         {description}
                     </Typography>
                     <div className={classes.actions}>
-                        <Button
-                            variant='contained'
-                            color='primary'
-                            className={classes.button}
-                            onClick={onClick}
-                        >
-                            {buttonText}
-                        </Button>
+                        <Link to={to}>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                className={classes.button}
+                            >
+                                {buttonText}
+                            </Button>
+                        </Link>
                     </div>
                 </div>
             </InlineMessage>
