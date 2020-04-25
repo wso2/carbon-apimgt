@@ -2197,6 +2197,44 @@ public final class APIUtil {
     }
 
     /**
+     * Get the External IDP host name when UIs use an external IDP for SSO or other purpose
+     * By default this is equal to $ref{server.base_path} (i:e https://localhost:9443)
+     *
+     * @return Origin string of the external IDP
+     */
+
+    public static String getExternalIDPOrigin() throws APIManagementException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String idpEndpoint = config.getFirstProperty(APIConstants.IDENTITY_PROVIDER_SERVER_URL);
+        if (idpEndpoint == null) {
+            return getServerURL();
+        } else {
+            return idpEndpoint;
+        }
+    }
+
+    /**
+     * Get the check session URL to load in the session management iframe
+     *
+     * @return URL to be used in iframe source for the check session with IDP
+     */
+
+    public static String getExternalIDPCheckSessionEndpoint() throws APIManagementException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String oidcCheckSessionEndpoint = config.getFirstProperty(
+                APIConstants.IDENTITY_PROVIDER_OIDC_CHECK_SESSION_ENDPOINT);
+        if (oidcCheckSessionEndpoint == null) {
+            return getServerURL() + "/oidc/checksession";
+        } else {
+            return oidcCheckSessionEndpoint;
+        }
+    }
+
+    /**
      * Read the GateWay Endpoint from the APIConfiguration. If multiple Gateway
      * environments defined,
      * take only the production node's Endpoint.

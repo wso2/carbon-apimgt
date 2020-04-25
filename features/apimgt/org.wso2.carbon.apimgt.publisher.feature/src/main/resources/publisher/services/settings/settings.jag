@@ -19,13 +19,13 @@
 
 include("/services/constants.jag");
 var appUtils = require("/services/utils.js");
-var settings = require("/site/public/theme/settings.js");
+var settings = require("/site/public/conf/settings.js");
 response.contentType = "application/javascript";
-settings.Settings.app.context = appUtils.getTenantBaseStoreContext();
-settings.Settings.idp = {
+settings.AppConfig.idp = {
     origin: appUtils.getIDPOrigin(),
     checkSessionEndpoint: appUtils.getIDPCheckSessionEndpoint(),
 }
-var content = "const Settings ="+stringify(settings.Settings)+";";
+var content = "const AppConfig ="+stringify(settings.AppConfig)+";";
+
 print(content);
 %>

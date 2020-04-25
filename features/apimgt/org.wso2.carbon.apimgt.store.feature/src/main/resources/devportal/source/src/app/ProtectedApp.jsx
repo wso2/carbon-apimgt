@@ -175,7 +175,7 @@ class ProtectedApp extends Component {
         setInterval(() => {
             const { clientId, sessionStateCookie } = this.state;
             const msg = clientId + ' ' + sessionStateCookie;
-            document.getElementById('iframeOP').contentWindow.postMessage(msg, 'https://' + window.location.host);
+            document.getElementById('iframeOP').contentWindow.postMessage(msg, Settings.idp.origin);
         }, 2000);
     }
 
@@ -219,7 +219,7 @@ class ProtectedApp extends Component {
         const {
             userResolved, tenantList, notEnoughPermission, tenantResolved, clientId
         } = this.state;
-        const checkSessionURL = window.location.origin + '/oidc/checksession?client_id='
+        const checkSessionURL = Settings.idp.checkSessionEndpoint + '?client_id='
             + clientId + '&redirect_uri='+ window.location.origin
             + Settings.app.context + '/services/auth/callback/login';
         const { tenantDomain } = this.context;
@@ -235,7 +235,7 @@ class ProtectedApp extends Component {
         if (notEnoughPermission) {
             return <LoginDenied />;
         }
-        
+
         // Waiting till the tenant list is retrieved
         if (!tenantResolved) {
             return <Loading />;
@@ -259,9 +259,9 @@ class ProtectedApp extends Component {
                         width='0px'
                         height='0px'
                     />
-                    <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />  
+                    <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
                 </>
-            );  
+            );
         }
         /**
          * Note: AuthManager.getUser() method is a passive check, which simply
