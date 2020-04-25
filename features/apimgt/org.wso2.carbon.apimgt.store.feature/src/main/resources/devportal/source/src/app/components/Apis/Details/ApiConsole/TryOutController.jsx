@@ -101,7 +101,7 @@ function TryOutController(props) {
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
         setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes,
         setSecurityScheme, setUsername, setPassword, username, password,
-        setProductionApiKey, setSandboxApiKey, productionApiKey, sandboxApiKey,
+        setProductionApiKey, setSandboxApiKey, productionApiKey, sandboxApiKey, environmentObject, setURLs,
     } = props;
     const classes = styles();
 
@@ -304,6 +304,9 @@ function TryOutController(props) {
         switch (name) {
             case 'selectedEnvironment':
                 setSelectedEnvironment(value, true);
+                // eslint-disable-next-line no-case-declarations
+                const urls = environmentObject.find((elm) => value === elm.environmentName).URLs;
+                setURLs(urls);
                 break;
             case 'selectedApplication':
                 setProductionAccessToken('');
