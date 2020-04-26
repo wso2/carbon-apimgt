@@ -42,14 +42,14 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 
 /**
- * This is the service implementation class for scopes related operations
+ * This is the service implementation class for scopes related operations.
  */
 public class ScopesApiServiceImpl implements ScopesApiService {
 
     private static final Log log = LogFactory.getLog(ScopesApiServiceImpl.class);
 
     /**
-     * Check whether the given scope already used in APIs
+     * Check whether the given scope already used in APIs.
      *
      * @param name           Base64 URL encoded form of scope name -Base64URLEncode{scope name}
      * @param messageContext
