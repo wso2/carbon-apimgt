@@ -64,7 +64,8 @@ public class ScopesApiServiceImpl implements ScopesApiService {
             try {
                 APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-                isScopeExist = apiProvider.isScopeKeyExist(scopeName, tenantDomain);
+                isScopeExist =
+                        apiProvider.isScopeKeyExist(scopeName, APIUtil.getTenantIdFromTenantDomain(tenantDomain));
             } catch (APIManagementException e) {
                 RestApiUtil.handleInternalServerError("Error occurred while checking scope name", e, log);
             }
@@ -96,7 +97,7 @@ public class ScopesApiServiceImpl implements ScopesApiService {
                 throw new APIManagementException("Shared Scope Name cannot be null or empty",
                         ExceptionCodes.SHARED_SCOPE_NAME_NOT_SPECIFIED);
             }
-            if (apiProvider.isScopeKeyExist(scopeName, tenantDomain)) {
+            if (apiProvider.isScopeKeyExist(scopeName, APIUtil.getTenantIdFromTenantDomain(tenantDomain))) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.SCOPE_ALREADY_REGISTERED,
                         scopeName));
             }
