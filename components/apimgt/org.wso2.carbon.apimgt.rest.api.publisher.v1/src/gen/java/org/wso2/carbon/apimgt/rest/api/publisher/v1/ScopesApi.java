@@ -120,7 +120,7 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
     }
 
     @HEAD
-    @Path("/{name}")
+    @Path("/{scopeId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Check given scope name is already exist", notes = "Using this operation, user can check a given scope name exists or not. ", response = Void.class, authorizations = {
@@ -128,11 +128,11 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
-    }, tags={ "scope" })
+    }, tags={ "Scopes" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested scope name exists.", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested scope name does not exist.", response = Void.class) })
-    public Response validateScope(@ApiParam(value = "Scope name ",required=true) @PathParam("name") String name) throws APIManagementException{
-        return delegate.validateScope(name, securityContext);
+    public Response validateScope(@ApiParam(value = "Scope name ",required=true) @PathParam("scopeId") String scopeId) throws APIManagementException{
+        return delegate.validateScope(scopeId, securityContext);
     }
 }
