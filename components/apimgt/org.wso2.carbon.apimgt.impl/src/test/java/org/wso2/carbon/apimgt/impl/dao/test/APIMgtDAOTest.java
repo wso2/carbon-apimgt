@@ -117,6 +117,7 @@ import static org.junit.Assert.assertTrue;
 public class APIMgtDAOTest {
 
     public static ApiMgtDAO apiMgtDAO;
+    private KeyManager keyManager;
 
     @Before
     public void setUp() throws Exception {
@@ -131,7 +132,17 @@ public class APIMgtDAOTest {
         IdentityTenantUtil.setRealmService(new TestRealmService());
         String identityConfigPath = System.getProperty("IdentityConfigurationPath");
         IdentityConfigParser.getInstance(identityConfigPath);
-
+        keyManager = Mockito.mock(KeyManager.class);
+        PowerMockito.mockStatic(KeyManagerHolder.class);
+        BDDMockito.given(KeyManagerHolder.getKeyManagerInstance()).willReturn(keyManager);
+        Mockito.doNothing().when(keyManager)
+                .attachScopeToResource(Mockito.any(API.class), Mockito.any(URITemplate.class), Mockito.any(Scope.class),
+                        Mockito.anyString());
+        Mockito.doNothing().when(keyManager)
+                .detachScopeToResource(Mockito.any(APIIdentifier.class), Mockito.anyString(),
+                        Mockito.any(URITemplate.class),
+                        Mockito.any(Scope.class),
+                        Mockito.anyString());
     }
 
     private static void initializeDatabase(String configFilePath) {
@@ -947,9 +958,7 @@ public class APIMgtDAOTest {
 
     @Test
     public void testDeleteSubscriptionsForapiId() throws Exception {
-        KeyManager keyManager = Mockito.mock(KeyManager.class);
-        PowerMockito.mockStatic(KeyManagerHolder.class);
-        BDDMockito.given(KeyManagerHolder.getKeyManagerInstance()).willReturn(keyManager);
+
         Subscriber subscriber = new Subscriber("testCreateApplicationRegistrationEntry");
         subscriber.setTenantId(-1234);
         subscriber.setEmail("abc@wso2.com");
@@ -1479,6 +1488,7 @@ public class APIMgtDAOTest {
             scope1.setName(scope);
             scope1.setRoles("admin");
             uriTemplate.setScope(scope1);
+            uriTemplate.setScopes(scope1);
         }
         return uriTemplate;
     }
