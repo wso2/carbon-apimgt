@@ -5251,7 +5251,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 APIProvider apiProvider = getAPIProvider(thisObj);
 
                 try {
-                    scopeExist = apiProvider.isScopeKeyExist(scopeKey, tenantDomain);
+                    scopeExist = apiProvider.isScopeKeyExist(scopeKey, tenantId);
                 } catch (APIManagementException e) {
                     handleException("Error from registry while checking the input context is already exist", e);
                 }
