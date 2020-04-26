@@ -7964,7 +7964,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to check the availability
      */
     @Override
-    public Boolean isSharedScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException {
+    public boolean isSharedScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug("Checking whether scope name: " + scopeName + " exists as a shared scope in tenant: "
