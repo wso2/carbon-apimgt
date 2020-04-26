@@ -98,7 +98,7 @@ import javax.xml.namespace.QName;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
- * This is the default key manager supported by API Manager
+ * This is the default key manager supported by API Manager.
  */
 public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
@@ -1297,7 +1297,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * Executes the HTTP request and returns the response
+     * Executes the HTTP request and returns the response.
      *
      * @param port
      * @param protocol
@@ -1313,7 +1313,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * Returns the value of the provided APIM configuration element
+     * Returns the value of the provided APIM configuration element.
      *
      * @param property APIM configuration element name
      * @return APIM configuration element value
@@ -1325,7 +1325,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * Return the value of the provided configuration parameter
+     * Return the value of the provided configuration parameter.
      *
      * @param parameter Parameter name
      * @return Parameter value
@@ -1336,7 +1336,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * Returns the OAuth application details if the token is valid
+     * Returns the OAuth application details if the token is valid.
      *
      * @param requestDTO Token validation request
      * @return
@@ -1348,7 +1348,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * Check whether Token partitioning is enabled
+     * Check whether Token partitioning is enabled.
      *
      * @return true/false
      */
@@ -1358,7 +1358,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * Check whether user name assertion is enabled
+     * Check whether user name assertion is enabled.
      *
      * @return true/false
      */
@@ -1368,7 +1368,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
-     * Returns OAuth Configuration from identity.xml
+     * Returns OAuth Configuration from identity.xml.
      *
      * @return OAuth Configuration
      */
