@@ -1597,12 +1597,12 @@ public abstract class AbstractAPIManager implements APIManager {
      * If the scope does not exists in API-M (AM_DB) as a shared scope, check the existence of scope name in the KM.
      *
      * @param scopeKey     candidate scope key
-     * @param tenantId     tenant id
+     * @param tenantid     tenant id
      * @return true if the scope key is already available
      * @throws APIManagementException if failed to check the context availability
      */
     @Override
-    public boolean isScopeKeyExist(String scopeKey, int tenantId) throws APIManagementException {
+    public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException {
 
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         if (!ApiMgtDAO.getInstance().isSharedScopeExists(scopeKey, tenantId)) {
