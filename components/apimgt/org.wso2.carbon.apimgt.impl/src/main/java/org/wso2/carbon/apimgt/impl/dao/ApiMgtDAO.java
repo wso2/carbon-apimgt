@@ -5923,7 +5923,9 @@ public class ApiMgtDAO {
             connection.commit();
         } catch (SQLException e) {
             try {
-                connection.rollback();
+                if (connection != null) {
+                    connection.rollback();
+                }
             } catch (SQLException ex) {
                 // Rollback failed. Exception will be thrown later for upper exception
                 log.error("Failed to rollback the add API: " + api.getId(), ex);
@@ -7342,7 +7344,9 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             try {
-                connection.rollback();
+                if (connection != null) {
+                    connection.rollback();
+                }
             } catch (SQLException ex) {
                 // Rollback failed. Exception will be thrown later for upper exception
                 log.error("Failed to rollback the update API: " + api.getId(), ex);
@@ -7572,7 +7576,7 @@ public class ApiMgtDAO {
                 }
                 prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
-                String apiContext = getAPIContext(apiId);
+                String apiContext = getAPIContext(apiId, connection);
                 // for each URI Template with scope, detach the scope from resource in the KM
                 for (URITemplate uriTemplate : uriTemplateListWithScopes) {
                     KeyManagerHolder.getKeyManagerInstance()
@@ -8245,33 +8249,51 @@ public class ApiMgtDAO {
         return false;
     }
 
+    /**
+     * Get API Context using a new DB connection.
+     *
+     * @param identifier API Identifier
+     * @return API Context
+     * @throws APIManagementException if an error occurs
+     */
     public String getAPIContext(APIIdentifier identifier) throws APIManagementException {
-        Connection connection = null;
-        ResultSet resultSet = null;
-        PreparedStatement prepStmt = null;
 
         String context = null;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            context = getAPIContext(identifier, connection);
+        } catch (SQLException e) {
+            log.error("Failed to retrieve the API Context", e);
+            handleException("Failed to retrieve connection while getting the API Context for "
+                    + identifier.getProviderName() + '-' + identifier.getApiName() + '-' + identifier.getVersion(), e);
+        }
+        return context;
+    }
 
+    /**
+     * Get API Context by passing an existing DB connection.
+     *
+     * @param identifier API Identifier
+     * @param connection DB Connection
+     * @return API Context
+     * @throws APIManagementException if an error occurs
+     */
+    public String getAPIContext(APIIdentifier identifier, Connection connection) throws APIManagementException {
+
+        String context = null;
         String sql = SQLConstants.GET_API_CONTEXT_BY_API_NAME_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(sql);
+        try (PreparedStatement prepStmt = connection.prepareStatement(sql)) {
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmt.setString(2, identifier.getApiName());
             prepStmt.setString(3, identifier.getVersion());
-            resultSet = prepStmt.executeQuery();
-
-            while (resultSet.next()) {
-                context = resultSet.getString(1);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    context = resultSet.getString(1);
+                }
             }
         } catch (SQLException e) {
             log.error("Failed to retrieve the API Context", e);
-
-            handleException("Failed to retrieve the API Context for " +
-                    identifier.getProviderName() + '-' + identifier.getApiName() + '-' + identifier
-                    .getVersion(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+            handleException("Failed to retrieve the API Context for " + identifier.getProviderName() + '-'
+                    + identifier.getApiName() + '-' + identifier.getVersion(), e);
         }
         return context;
     }
@@ -9808,6 +9830,7 @@ public class ApiMgtDAO {
             for (String localScope : localScopesToRemove) {
                 KeyManagerHolder.getKeyManagerInstance().deleteScope(localScope, tenantDomain);
             }
+            addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
             connection.commit();
         } catch (SQLException e) {
             try {
@@ -9821,7 +9844,6 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
-        addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
     }
 
     public HashMap<String, String> getResourceToScopeMapping(APIIdentifier identifier) throws APIManagementException {
