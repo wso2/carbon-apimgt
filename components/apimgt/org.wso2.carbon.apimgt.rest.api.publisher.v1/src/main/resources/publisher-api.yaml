@@ -3449,37 +3449,6 @@ paths:
             $ref: '#/definitions/Error'
 
   ######################################################
-  # Check scope existence
-  ######################################################
-  /scopes/{name}:
-    #-----------------------------------------------------
-    # The scope name existence check resource
-    #-----------------------------------------------------
-    head:
-      security:
-        - OAuth2Security:
-            - apim:api_create
-            - apim:api_publish
-      operationId: validateScope
-      summary:
-        Check given scope name is already exist
-      description: |
-        Using this operation, user can check a given scope name exists or not.
-      parameters:
-        - $ref : '#/parameters/scopeName'
-      tags:
-        - scope
-      responses:
-        200:
-          description:
-            OK.
-            Requested scope name exists.
-        404:
-          description:
-            Not Found.
-            Requested scope name does not exist.
-
-  ######################################################
   # The "Resource Paths" resource
   ######################################################
   /apis/{apiId}/resource-paths:
@@ -6925,6 +6894,33 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  #-----------------------------------------------------
+  # The scope name existence check resource
+  #-----------------------------------------------------
+    head:
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_publish
+      operationId: validateScope
+      summary:
+        Check given scope name is already exist
+      description: |
+        Using this operation, user can check a given scope name exists or not.
+      parameters:
+        - $ref : '#/parameters/scopeName'
+      tags:
+        - Scopes
+      responses:
+        200:
+          description:
+            OK.
+            Requested scope name exists.
+        404:
+          description:
+            Not Found.
+            Requested scope name does not exist.
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -7149,7 +7145,7 @@ parameters:
 
   # Scope Name
   scopeName:
-    name: name
+    name: scopeId
     in: path
     description: |
       Scope name
