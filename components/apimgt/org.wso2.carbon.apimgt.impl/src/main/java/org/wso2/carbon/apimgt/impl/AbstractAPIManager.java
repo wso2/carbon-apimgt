@@ -1604,8 +1604,8 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException {
 
-        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-        if (!ApiMgtDAO.getInstance().isSharedScopeExists(scopeKey, tenantId)) {
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantid);
+        if (!apiMgtDAO.isSharedScopeExists(scopeKey, tenantid)) {
             return KeyManagerHolder.getKeyManagerInstance().isScopeExists(scopeKey, tenantDomain);
         }
         if (log.isDebugEnabled()) {
