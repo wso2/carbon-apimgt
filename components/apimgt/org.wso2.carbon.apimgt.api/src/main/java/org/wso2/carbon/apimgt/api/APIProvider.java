@@ -1337,7 +1337,7 @@ public interface APIProvider extends APIManager {
      * @return Scope availability
      * @throws APIManagementException if failed to check the availability
      */
-    Boolean isSharedScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException;
+    boolean isSharedScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException;
 
     /**
      * Add a shared scope.
