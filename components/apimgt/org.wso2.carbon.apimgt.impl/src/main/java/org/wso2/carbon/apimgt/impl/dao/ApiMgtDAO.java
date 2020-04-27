@@ -7349,6 +7349,7 @@ public class ApiMgtDAO {
             synchronized (scopeMutex) {
                 updateScopes(api, tenantId);
                 updateURLTemplates(api, tenantId);
+                //TODO://pass the same connection used to update scopes into URLtemplate update?
             }
         } catch (SQLException e) {
             try {
@@ -7491,6 +7492,7 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
 
             id = getAPIID(apiId, connection);
+            String apiContext = getAPIContext(apiId, connection);
 
             prepStmt = connection.prepareStatement(deleteAuditAPIMapping);
             prepStmt.setInt(1, id);
@@ -7584,7 +7586,6 @@ public class ApiMgtDAO {
                 }
                 prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
-                String apiContext = getAPIContext(apiId, connection);
                 // for each URI Template with scope, detach the scope from resource in the KM
                 for (URITemplate uriTemplate : uriTemplateListWithScopes) {
                     KeyManagerHolder.getKeyManagerInstance()
