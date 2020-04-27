@@ -117,15 +117,10 @@ public class DefaultClaimsRetrieverTestCase {
         Claim claim2 = new Claim();
         claim2.setClaimUri("http://wso2.com/claim2");
 
-        ClaimMapping[] cliams = new ClaimMapping[] { new ClaimMapping(claim1, "claim1"),
-                new ClaimMapping(claim2, "claim2") };
-        Mockito.when(claimManager.getAllClaimMappings(DEFAULT_DIALECT_URI)).thenReturn(cliams);
-
         SortedMap<String, String> claimValues = new TreeMap<String, String>();
         claimValues.put("claim1", "http://wso2.org/claim1");
         claimValues.put("claim2", "http://wso2.org/claim2");
-        Mockito.when(userStoreManager.getUserClaimValues(Matchers.any(String.class), Matchers.any(String[].class),
-                Matchers.any(String.class))).thenReturn(claimValues);
+        PowerMockito.when(APIUtil.getClaims(USER_NAME, TENANT_ID, DEFAULT_DIALECT_URI)).thenReturn(claimValues);
         SortedMap<String, String> claims = defaultClaimsRetriever.getClaims(USER_NAME);
 
         Assert.assertNotNull(claims);

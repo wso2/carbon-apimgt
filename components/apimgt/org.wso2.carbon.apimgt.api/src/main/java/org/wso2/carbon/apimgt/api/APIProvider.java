@@ -177,6 +177,24 @@ public interface APIProvider extends APIManager {
      */
     long getAPISubscriptionCountByAPI(APIIdentifier identifier) throws APIManagementException;
 
+    /**
+     * Returns the subscriber name for the given subscription id.
+     *
+     * @param subscriptionId The subscription id of the subscriber to be returned
+     * @return The subscriber or null if the requested subscriber does not exist
+     * @throws APIManagementException if failed to get Subscriber
+     */
+    String getSubscriber(String subscriptionId) throws APIManagementException;
+
+    /**
+     * Returns the claims of subscriber for the given subscriber.
+     *
+     * @param subscriber The name of the subscriber to be returned
+     * @return The looked up claims of the subscriber or null if the requested subscriber does not exist
+     * @throws APIManagementException if failed to get Subscriber
+     */
+    Map getSubscriberClaims(String subscriber) throws APIManagementException;
+
     void addTier(Tier tier) throws APIManagementException;
 
     void addPolicy(Policy policy) throws APIManagementException;

@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.service;
+package org.wso2.carbon.apimgt.impl.caching;
 
 import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
 

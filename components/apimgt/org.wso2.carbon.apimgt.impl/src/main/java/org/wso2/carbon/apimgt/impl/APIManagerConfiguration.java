@@ -89,6 +89,7 @@ public class APIManagerConfiguration {
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
     private JSONArray applicationAttributes = new JSONArray();
     private JSONArray monetizationAttributes = new JSONArray();
+    private CacheInvalidationConfiguration cacheInvalidationConfiguration;
 
     private RecommendationEnvironment recommendationEnvironment;
 
@@ -431,10 +432,87 @@ public class APIManagerConfiguration {
                 setJWTTokenIssuers(element);
             } else if (APIConstants.API_RECOMMENDATION.equals(localName)){
                 setRecommendationConfigurations(element);
+            } else if (APIConstants.GlobalCacheInvalidation.GLOBAL_CACHE_INVALIDATION.equals(localName)) {
+                setGlobalCacheInvalidationConfiguration(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
         }
+    }
+
+    private void setGlobalCacheInvalidationConfiguration(OMElement element) {
+
+        CacheInvalidationConfiguration cacheInvalidationConfiguration = new CacheInvalidationConfiguration();
+        OMElement enabledElement =
+                element.getFirstChildWithName(new QName(APIConstants.GlobalCacheInvalidation.ENABLED));
+        if (enabledElement != null) {
+            cacheInvalidationConfiguration.setEnabled(Boolean.parseBoolean(enabledElement.getText()));
+        }
+        OMElement domainElement = element.getFirstChildWithName(new QName(APIConstants.GlobalCacheInvalidation.Domain));
+        if (domainElement != null) {
+            cacheInvalidationConfiguration.setDomain(domainElement.getText());
+        }
+        OMElement streamNameElement =
+                element.getFirstChildWithName(new QName(APIConstants.GlobalCacheInvalidation.Stream));
+        if (streamNameElement != null) {
+            cacheInvalidationConfiguration.setStream(streamNameElement.getText());
+        }
+        OMElement usernameElement = element.getFirstChildWithName
+                (new QName(APIConstants.GlobalCacheInvalidation.USERNAME));
+        if (usernameElement != null) {
+            cacheInvalidationConfiguration.setUsername(APIUtil.replaceSystemProperty(usernameElement.getText()));
+        }
+        String password;
+        OMElement passwordElement =
+                element.getFirstChildWithName(new QName(APIConstants.GlobalCacheInvalidation.PASSWORD));
+        if (passwordElement != null) {
+            password = MiscellaneousUtil.resolve(passwordElement, secretResolver);
+            cacheInvalidationConfiguration.setPassword(APIUtil.replaceSystemProperty(password));
+        }
+        OMElement receiverUrlGroupElement =
+                element.getFirstChildWithName(new QName(APIConstants.GlobalCacheInvalidation.REVEIVER_URL_GROUP));
+        if (receiverUrlGroupElement != null) {
+            cacheInvalidationConfiguration
+                    .setReceiverUrlGroup(APIUtil.replaceSystemProperty(receiverUrlGroupElement.getText()));
+        }
+        OMElement authUrlGroupElement =
+                element.getFirstChildWithName(new QName(APIConstants.GlobalCacheInvalidation.AUTH_URL_GROUP));
+        if (authUrlGroupElement != null) {
+            cacheInvalidationConfiguration
+                    .setAuthUrlGroup(APIUtil.replaceSystemProperty(authUrlGroupElement.getText()));
+        }
+        OMElement receiverConnectionDetailsElement =
+                element.getFirstChildWithName(
+                        new QName(APIConstants.GlobalCacheInvalidation.ReceiverConnectionDetails));
+        if (receiverConnectionDetailsElement != null) {
+            Iterator receiverConnectionDetailsElements = receiverConnectionDetailsElement.getChildElements();
+            Properties properties = new Properties();
+            while (receiverConnectionDetailsElements.hasNext()) {
+                OMElement omElement = (OMElement) receiverConnectionDetailsElements.next();
+                String value = MiscellaneousUtil.resolve(omElement, secretResolver);
+                properties.put(omElement.getLocalName(), APIUtil.replaceSystemProperty(value));
+            }
+            cacheInvalidationConfiguration.setJmsConnectionParameters(properties);
+        }
+        OMElement topicNameElement =
+                element.getFirstChildWithName(new QName(APIConstants.GlobalCacheInvalidation.TOPIC_NAME));
+        if (topicNameElement != null) {
+            cacheInvalidationConfiguration.setCacheInValidationTopic(topicNameElement.getText());
+        }
+        OMElement excludedCachesElement =
+                element.getFirstChildWithName(new QName(APIConstants.GlobalCacheInvalidation.EXCLUDED_CACHES));
+        if (excludedCachesElement != null) {
+            Iterator excludedCaches = excludedCachesElement.getChildElements();
+            while (excludedCaches.hasNext()) {
+                cacheInvalidationConfiguration.addExcludedCaches(((OMElement) excludedCaches.next()).getText());
+            }
+        }
+        this.cacheInvalidationConfiguration = cacheInvalidationConfiguration;
+    }
+
+    public CacheInvalidationConfiguration getCacheInvalidationConfiguration() {
+
+        return cacheInvalidationConfiguration;
     }
 
     public JSONArray getApplicationAttributes() {
@@ -506,7 +584,7 @@ public class APIManagerConfiguration {
             list.add(value);
         }
     }
-    
+
     public Map<String, Environment> getApiGatewayEnvironments() {
         return apiGatewayEnvironments;
     }
@@ -538,7 +616,7 @@ public class APIManagerConfiguration {
         try {
             keyManagerURL = new URL(configuration.get(APIConstants.KEYMANAGER_SERVERURL).get(0));
             String hostname = keyManagerURL.getHost();
-            
+
             int port = keyManagerURL.getPort();
             if (port == -1) {
                 if (APIConstants.HTTPS_PROTOCOL.equals(keyManagerURL.getProtocol())) {
@@ -546,9 +624,9 @@ public class APIManagerConfiguration {
                 } else {
                     port = APIConstants.HTTP_PROTOCOL_PORT;
                 }
-            }           
+            }
             System.setProperty(APIConstants.KEYMANAGER_PORT, String.valueOf(port));
-            
+
             if (hostname.equals(System.getProperty(APIConstants.CARBON_LOCALIP))) {
                 System.setProperty(APIConstants.KEYMANAGER_HOSTNAME, "localhost");
             } else {

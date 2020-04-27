@@ -702,6 +702,7 @@ public final class APIConstants {
     public static final String API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS = API_PUBLISHER
             + "EnableAccessControl";
     public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
+    public static final String API_PUBLISHER_SUBSCRIBER_CLAIMS = API_PUBLISHER + "SubscriberClaims";
     public static final String WSO2_API_STORE_TYPE = "wso2";
 
     public static final String EXTERNAL_API_STORES = "ExternalAPIStores";
@@ -950,6 +951,7 @@ public final class APIConstants {
     public static final String API_USER_ROLE_CACHE = "appPublisherUserRoleCache";
     public static final String API_PUBLISHER_ADMIN_PERMISSION_CACHE = "apimAdminPermissionCache";
     public static final String API_SUBSCRIBER_CACHE = "subscriberCache";
+    public static final String EMAIL_CLAIM = "http://wso2.org/claims/emailaddress";
 
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =
@@ -1587,6 +1589,12 @@ public final class APIConstants {
         public static final String ENABLE_JWT_CLAIM_CONDITIONS = "EnableJWTClaimConditions";
         public static final String ENABLE_QUERY_PARAM_CONDITIONS = "EnableQueryParamConditions";
         public static final String ENABLED = "Enabled";
+        public static final String IS_THROTTLED = "isThrottled";
+        public static final String THROTTLE_KEY = "throttleKey";
+        public static final String EXPIRY_TIMESTAMP = "expiryTimeStamp";
+        public static final String EVALUATED_CONDITIONS = "evaluatedConditions";
+        public static final String TRUE = "true";
+        public static final String ADD = "add";
     }
 
     /**
@@ -2026,5 +2034,21 @@ public final class APIConstants {
             public static final String REMOTE_CLAIM = "RemoteClaim";
 
         }
+    }
+
+    public static class GlobalCacheInvalidation {
+        public static final String ENABLED = "Enabled";
+        public static final Object GLOBAL_CACHE_INVALIDATION = "GlobalCacheInvalidation";
+
+        public static final String Domain = "Domain";
+        public static final String Stream = "Stream";
+        public static final String REVEIVER_URL_GROUP = "ReceiverUrlGroup";
+        public static final String AUTH_URL_GROUP = "AuthUrlGroup";
+        public static final String USERNAME = "Username";
+        public static final String PASSWORD = "Password";
+        public static final String TOPIC_NAME = "Topic";
+        public static final String EXCLUDED_CACHES = "ExcludedCaches";
+
+        public static String ReceiverConnectionDetails  = "ReceiverConnectionDetails";
     }
 }

@@ -30,10 +30,11 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
-import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationService;
+import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
+import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.jms.listener.utils.JMSTransportHandler;
 import org.wso2.carbon.apimgt.jms.listener.utils.ListenerConstants;
@@ -116,7 +117,7 @@ public class JMSListenerComponent implements ServiceListener {
 
     @Reference(
              name = "throttle.data.service", 
-             service = org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService.class, 
+             service = APIThrottleDataService.class,
              cardinality = ReferenceCardinality.MANDATORY, 
              policy = ReferencePolicy.DYNAMIC, 
              unbind = "unsetAPIThrottleDataService")
@@ -145,9 +146,25 @@ public class JMSListenerComponent implements ServiceListener {
         log.debug("Setting APIM Configuration Service");
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(null);
     }
+
+    @Reference(
+            name = "revoke.token.service",
+            service = RevokedTokenService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRevokedTokenService")
+    protected void setRevokedTokenService(RevokedTokenService revokedTokenService) {
+        log.debug("Setting Revoked Token Service");
+        ServiceReferenceHolder.getInstance().setRevokedTokenService(revokedTokenService);
+    }
+
+    protected void unsetRevokedTokenService(RevokedTokenService revokedTokenService) {
+        log.debug("unSetting Revoked Token Service");
+        ServiceReferenceHolder.getInstance().setRevokedTokenService(null);
+    }
     @Reference(
             name = "api.manager.cache.invalidation.service",
-            service = org.wso2.carbon.apimgt.gateway.service.CacheInvalidationService.class,
+            service = CacheInvalidationService.class,
             cardinality = ReferenceCardinality.MANDATORY,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetCacheInvalidationService")
