@@ -304,9 +304,10 @@ function TryOutController(props) {
         switch (name) {
             case 'selectedEnvironment':
                 setSelectedEnvironment(value, true);
-                // eslint-disable-next-line no-case-declarations
-                const urls = environmentObject.find((elm) => value === elm.environmentName).URLs;
-                setURLs(urls);
+                if (environmentObject) {
+                    const urls = environmentObject.find((elm) => value === elm.environmentName).URLs;
+                    setURLs(urls);
+                }
                 break;
             case 'selectedApplication':
                 setProductionAccessToken('');
