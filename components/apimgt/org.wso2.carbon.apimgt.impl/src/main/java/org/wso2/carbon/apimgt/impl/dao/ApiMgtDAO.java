@@ -6923,6 +6923,14 @@ public class ApiMgtDAO {
             addURLTemplates(apiId, api, connection, tenantId);
             connection.commit();
         } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                // Rollback failed. Exception will be thrown later for upper exception
+                log.error("Failed to rollback the update API: " + api.getId(), ex);
+            }
             handleException("Error while deleting URL template(s) for API : " + api.getId(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
