@@ -24,6 +24,7 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
+import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
 
 const useStyles = makeStyles((theme) => ({
@@ -46,6 +47,44 @@ function ApplicationThrottlingPolicies(props) {
     const restApi = new API();
     const [data, setData] = useState(null);
     const { intl } = props;
+    const [isUpdated, setIsUpdated] = useState(false);
+    const [applicationThrottlingPolicyList, setApplicationThrottlingPolicyList] = useState(null);
+
+    const options = {
+        sort: true,
+        search: true,
+        viewColumns: true,
+        filter: true,
+        selectableRowsHeader: false,
+        selectableRows: 'none',
+        pagination: true,
+        download: true,
+    };
+
+    /**
+     * Delete an Application Policy
+     * @param {string} selectedPolicyName selected policy name
+     */
+    function deleteApplicationPolicy(selectedPolicyName) {
+        const selectedPolicy = applicationThrottlingPolicyList
+            .filter((policy) => policy.policyName === selectedPolicyName);
+
+        const policyId = selectedPolicy.length !== 0 && selectedPolicy[0].policyId;
+        restApi.deleteApplicationThrottlingPolicy(policyId).then(() => {
+            setIsUpdated(true);
+            Alert.info(`${intl.formatMessage({
+                id: 'Admin.Throttling.Application.Throttling.Policy.policy.delete.succesful',
+                defaultMessage: 'deleted successfully.',
+            })}`);
+        })
+            .catch(() => {
+                setIsUpdated(false);
+                Alert.error(`${intl.formatMessage({
+                    id: 'Admin.Throttling.Application.Throttling.Policy.policy.delete.error',
+                    defaultMessage: 'Policy could not be deleted.',
+                })}`);
+            });
+    }
 
     const columns = [
         intl.formatMessage({
@@ -65,48 +104,47 @@ function ApplicationThrottlingPolicies(props) {
             defaultMessage: 'Unit Time',
         }),
         {
+            name: 'Actions',
             options: {
-                filter: false,
-                sort: false,
-                empty: true,
-                customBodyRender: () => {
-                    return (
-                        <>
-                            <Button>
-                                <Icon>edit</Icon>
-                                <FormattedMessage
-                                    id='Admin.Throttling.Application.Throttling.policy.edit'
-                                    defaultMessage='Edit'
-                                />
-                            </Button>
-                            <Button>
-                                <Icon>delete</Icon>
-                                <FormattedMessage
-                                    id='Admin.Throttling.Application.Throttling.policy.edit'
-                                    defaultMessage='Delete'
-                                />
-                            </Button>
-                        </>
-                    );
+                customBodyRender: (value, tableMeta) => {
+                    if (tableMeta.rowData) {
+                        const row = tableMeta.rowData;
+                        return (
+                            <table className={classes.actionTable}>
+                                <tr>
+                                    <td>
+                                        <Button>
+                                            <Icon>edit</Icon>
+                                            <FormattedMessage
+                                                id='Admin.Throttling.Application.Throttling.Policy.edit'
+                                                defaultMessage='Edit'
+                                            />
+                                        </Button>
+                                    </td>
+                                    <td>
+                                        <Button
+                                            onClick={() => deleteApplicationPolicy(row[0])}
+                                        >
+                                            <Icon>delete_forever</Icon>
+                                            <FormattedMessage
+                                                id='Admin.Throttling.Application.Throttling.Policy.delete'
+                                                defaultMessage='Delete'
+                                            />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            </table>
+                        );
+                    }
+                    return false;
                 },
             },
         },
     ];
 
-    const options = {
-        sort: true,
-        search: true,
-        viewColumns: true,
-        filter: true,
-        selectableRowsHeader: false,
-        selectableRows: 'none',
-        pagination: true,
-        download: true,
-    };
-
-
     useEffect(() => {
         restApi.applicationThrottlingPoliciesGet().then((result) => {
+            setApplicationThrottlingPolicyList(result.body.list);
             const applicationPolicies = result.body.list.map((obj) => {
                 return {
                     policyName: obj.policyName,
@@ -122,14 +160,14 @@ function ApplicationThrottlingPolicies(props) {
             });
             setData(applicationThrottlingvalues);
         });
-    }, []);
+    }, [isUpdated]);
 
     return (
         <>
             <Box className={classes.mainTitle}>
                 <Typography variant='h4'>
                     <FormattedMessage
-                        id='Applications.Listing.Listing.applications'
+                        id='Admin.Throttling.Application.Throttling.Policy.title'
                         defaultMessage='Application Throttling Policies'
                     />
                 </Typography>
