@@ -1,5 +1,7 @@
 package org.wso2.carbon.throttle.service.impl;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.throttle.service.*;
 import org.wso2.carbon.throttle.service.dto.*;
 
@@ -13,10 +15,10 @@ import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
 
-public class IsThrottledApiServiceImpl extends IsThrottledApiService {
+public class IsThrottledApiServiceImpl implements IsThrottledApiService {
+
     @Override
-    public Response isThrottledGet(String query){
-        // do some magic!
+    public Response isThrottledGet(String query, MessageContext messageContext) throws APIManagementException {
         return Response.ok().entity(ThrottlingDBUtil.isThrottled(query)).build();
     }
 }
