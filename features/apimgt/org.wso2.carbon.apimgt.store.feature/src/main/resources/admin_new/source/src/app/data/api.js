@@ -202,6 +202,18 @@ class API extends Resource {
             );
         });
     }
+
+    /**
+     * Delete an Application Throttling Policy
+     */
+    deleteApplicationThrottlingPolicy(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Application Policy (Individual)'].delete_throttling_policies_application__policyId_(
+                { policyId: policyId },
+                this._requestMetaData(),
+            );
+        });
+    }
 }
 
 API.CONSTS = {
