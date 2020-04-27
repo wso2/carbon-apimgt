@@ -1,39 +1,50 @@
 package org.wso2.carbon.throttle.service;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.wso2.carbon.throttle.service.dto.ErrorDTO;
 import org.wso2.carbon.throttle.service.dto.RevokeAPIKeyDTO;
-import org.wso2.carbon.throttle.service.factories.ApikeyApiServiceFactory;
+import org.wso2.carbon.throttle.service.ApikeyApiService;
+import org.wso2.carbon.throttle.service.impl.ApikeyApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.inject.Inject;
 
+import io.swagger.annotations.*;
+import java.io.InputStream;
+
+import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
+
+import java.util.Map;
+import java.util.List;
+import javax.validation.constraints.*;
 @Path("/apikey")
-@Consumes({ "application/json" })
+
+@Api(description = "the apikey API")
+
 @Produces({ "application/json" })
 
 
 public class ApikeyApi  {
 
+  @Context MessageContext securityContext;
 
-  private final ApikeyApiService delegate = ApikeyApiServiceFactory.getApikeyApi();
+ApikeyApiService delegate = new ApikeyApiServiceImpl();
 
 
     @POST
     @Path("/revoke")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Revoke given API Key", notes = "Revoke and notify the provided API Key", response = Void.class, tags={  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. API key revoked successfully. ", response = Void.class),
-        @ApiResponse(code = 500, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response revokeAPIKey(@ApiParam(value = "API Key revoke request object" ) RevokeAPIKeyDTO body) {
-        return delegate.revokeAPIKey(body);
+        @ApiResponse(code = 200, message = "OK. Api key revoked successfully. ", response = Void.class),
+        @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
+    public Response apikeyRevokePost(@ApiParam(value = "API Key revoke request object " ) RevokeAPIKeyDTO body) throws APIManagementException{
+        return delegate.apikeyRevokePost(body, securityContext);
     }
 }
