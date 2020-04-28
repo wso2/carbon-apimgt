@@ -142,7 +142,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.util.stream.Collectors;
 
 /**
  * This class represent the ApiMgtDAO.
@@ -15627,9 +15627,11 @@ public class ApiMgtDAO {
     public void addLocalScopes(APIIdentifier apiIdentifier, int tenantId, Set<URITemplate> uriTemplates)
             throws APIManagementException {
 
+        Set<Scope> scopesToRegister = new HashSet<>();
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         Set<Scope> scopeSet = new HashSet<>();
+        //Get the attached scopes set from the URI templates
         for (URITemplate uriTemplate : uriTemplates) {
             List<Scope> scopesFromURITemplate = uriTemplate.retrieveAllScopes();
             for (Scope scopeFromURITemplate : scopesFromURITemplate) {
@@ -15639,6 +15641,8 @@ public class ApiMgtDAO {
                 scopeSet.add(scopeFromURITemplate);
             }
         }
+
+        //Validate and extract only the local scopes to register
         for (Scope scope : scopeSet) {
             String scopeKey = scope.getKey();
             //Check if it an existing shared scope, if so skip adding scope
@@ -15646,16 +15650,7 @@ public class ApiMgtDAO {
                 // Check if scope key is already assigned locally to a different API (Other than different versions of
                 // the same API.
                 if (!isScopeKeyAssignedLocally(apiIdentifier, scope.getKey(), tenantId)) {
-                    // Check if key already registered in KM. Scope Key may be already registered for a different
-                    // version.
-                    if (!keyManager.isScopeExists(scopeKey, tenantDomain)) {
-                        //register scope in KM
-                        keyManager.registerScope(scope, tenantDomain);
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Scope: " + scopeKey + " already registered in KM. Skipping registering scope.");
-                        }
-                    }
+                    scopesToRegister.add(scope);
                 } else {
                     throw new APIManagementException("Error while adding local scopes for API name: "
                             + apiIdentifier.getApiName() + " version: " + apiIdentifier.getVersion()
@@ -15664,6 +15659,20 @@ public class ApiMgtDAO {
                 }
             } else if (log.isDebugEnabled()) {
                 log.debug("Scope " + scopeKey + " exists as a shared scope. Skip adding as a local scope.");
+            }
+        }
+
+        //Register scopes
+        for (Scope scope : scopesToRegister) {
+            String scopeKey = scope.getKey();
+            // Check if key already registered in KM. Scope Key may be already registered for a different version.
+            if (!keyManager.isScopeExists(scopeKey, tenantDomain)) {
+                //register scope in KM
+                keyManager.registerScope(scope, tenantDomain);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Scope: " + scopeKey + " already registered in KM. Skipping registering scope.");
+                }
             }
         }
     }
