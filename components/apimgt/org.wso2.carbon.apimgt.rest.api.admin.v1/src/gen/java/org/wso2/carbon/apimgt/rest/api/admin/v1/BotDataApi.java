@@ -40,7 +40,11 @@ BotDataApiService delegate = new BotDataApiServiceImpl();
     @Path("/addEmail")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add an Email", notes = "Here we can use this to configure email ", response = EmailDTO.class, tags={  })
+    @ApiOperation(value = "Add an Email", notes = "Here we can use this to configure email ", response = EmailDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails")
+        })
+    }, tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Email List updated. ", response = EmailDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
@@ -53,7 +57,11 @@ BotDataApiService delegate = new BotDataApiServiceImpl();
     @Path("/deleteEmail")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete an configured email.", notes = "Delete an configured email from DB by pasing uuid. ", response = Void.class, tags={  })
+    @ApiOperation(value = "Delete an configured email.", notes = "Delete an configured email from DB by pasing uuid. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails")
+        })
+    }, tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Email successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class),
@@ -66,7 +74,11 @@ BotDataApiService delegate = new BotDataApiServiceImpl();
     @Path("/getEmailList")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all configured email list ", notes = "Get all email list which configured to trigger for BotData api email alert ", response = Void.class, tags={  })
+    @ApiOperation(value = "Get all configured email list ", notes = "Get all email list which configured to trigger for BotData api email alert ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails")
+        })
+    }, tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request.messageID Invalid request or validation error ", response = ErrorDTO.class),

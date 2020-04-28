@@ -41,7 +41,11 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all registered Labels", notes = "Get all registered Labels ", response = LabelListDTO.class, tags={ "Label Collection",  })
+    @ApiOperation(value = "Get all registered Labels", notes = "Get all registered Labels ", response = LabelListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:label_read", description = "Retrieve labels")
+        })
+    }, tags={ "Label Collection",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Labels returned ", response = LabelListDTO.class) })
     public Response labelsGet() throws APIManagementException{
@@ -52,7 +56,11 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     @Path("/{labelId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete a Label", notes = "Delete a Label by label Id ", response = Void.class, tags={ "Label",  })
+    @ApiOperation(value = "Delete a Label", notes = "Delete a Label by label Id ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:label_manage", description = "Manage labels")
+        })
+    }, tags={ "Label",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Label successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Label to be deleted does not exist. ", response = ErrorDTO.class) })
@@ -64,7 +72,11 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     @Path("/{labelId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update a Label", notes = "Update a Label by label Id ", response = LabelDTO.class, tags={ "Label",  })
+    @ApiOperation(value = "Update a Label", notes = "Update a Label by label Id ", response = LabelDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:label_manage", description = "Manage labels")
+        })
+    }, tags={ "Label",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Label updated. ", response = LabelDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
@@ -77,7 +89,11 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add a Label", notes = "Add a new gateway Label ", response = LabelDTO.class, tags={ "Label" })
+    @ApiOperation(value = "Add a Label", notes = "Add a new gateway Label ", response = LabelDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:label_manage", description = "Manage labels")
+        })
+    }, tags={ "Label" })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. ", response = LabelDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class) })

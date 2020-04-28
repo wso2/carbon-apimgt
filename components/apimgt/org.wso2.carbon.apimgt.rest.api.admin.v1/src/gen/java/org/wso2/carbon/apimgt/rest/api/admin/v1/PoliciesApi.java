@@ -41,7 +41,11 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Path("/mediation")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all global mediation policies ", notes = "This operation provides you a list of available all global level mediation policies. ", response = MediationListDTO.class, tags={ "Mediation Policy (Collection)",  })
+    @ApiOperation(value = "Get all global mediation policies ", notes = "This operation provides you a list of available all global level mediation policies. ", response = MediationListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies")
+        })
+    }, tags={ "Mediation Policy (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of mediation policies is returned. ", response = MediationListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -54,7 +58,11 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Path("/mediation/{mediationPolicyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete a global mediation policy", notes = "This operation can be used to delete an existing global mediation policy providing the Id of the mediation policy. ", response = Void.class, tags={ "Mediation Policy (Individual)",  })
+    @ApiOperation(value = "Delete a global mediation policy", notes = "This operation can be used to delete an existing global mediation policy providing the Id of the mediation policy. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create mediation policies")
+        })
+    }, tags={ "Mediation Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Mediation policy successfully deleted. ", response = Void.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified. ", response = ErrorDTO.class),
@@ -68,7 +76,11 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Path("/mediation/{mediationPolicyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get a global mediation policy", notes = "This operation can be used to retrieve a particular global mediation policy. ", response = MediationDTO.class, tags={ "Mediation Policy (Individual)",  })
+    @ApiOperation(value = "Get a global mediation policy", notes = "This operation can be used to retrieve a particular global mediation policy. ", response = MediationDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies")
+        })
+    }, tags={ "Mediation Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Mediation Policy returned. ", response = MediationDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -82,7 +94,11 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Path("/mediation/{mediationPolicyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update a global mediation policy", notes = "This operation can be used to update an existing global mediation policy. ", response = MediationDTO.class, tags={ "Mediation Policy (Individual)",  })
+    @ApiOperation(value = "Update a global mediation policy", notes = "This operation can be used to update an existing global mediation policy. ", response = MediationDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create mediation policies")
+        })
+    }, tags={ "Mediation Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with updated mediation policy object ", response = MediationDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
@@ -97,7 +113,11 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Path("/mediation")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add a global mediation policy", notes = "This operation can be used to add a new global mediation policy. ", response = MediationDTO.class, tags={ "Mediation Policy (Collection)" })
+    @ApiOperation(value = "Add a global mediation policy", notes = "This operation can be used to add a new global mediation policy. ", response = MediationDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create mediation policies")
+        })
+    }, tags={ "Mediation Policy (Collection)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Mediation policy added successfully. ", response = MediationDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),

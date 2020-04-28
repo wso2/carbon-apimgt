@@ -40,7 +40,11 @@ MonetizationApiService delegate = new MonetizationApiServiceImpl();
     @Path("/publish-usage")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Publish Usage Records", notes = "Publish Usage Records of Monetized APIs ", response = PublishStatusDTO.class, tags={ "Monetization (Collection)",  })
+    @ApiOperation(value = "Publish Usage Records", notes = "Publish Usage Records of Monetized APIs ", response = PublishStatusDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:monetization_usage_publish", description = "Retrieve and publish Monetization related usage records")
+        })
+    }, tags={ "Monetization (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Usage records successfully published.", response = PublishStatusDTO.class),
         @ApiResponse(code = 202, message = "Request is sucessfully accepted for processing.", response = PublishStatusDTO.class),
@@ -54,7 +58,11 @@ MonetizationApiService delegate = new MonetizationApiServiceImpl();
     @Path("/publish-usage/status")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get the status of Monetization usage publisher", notes = "Get the status of Monetization usage publisher ", response = MonetizationUsagePublishInfoDTO.class, tags={ "Monetization (Collection)" })
+    @ApiOperation(value = "Get the status of Monetization usage publisher", notes = "Get the status of Monetization usage publisher ", response = MonetizationUsagePublishInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:monetization_usage_publish", description = "Retrieve and publish Monetization related usage records")
+        })
+    }, tags={ "Monetization (Collection)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Status returned ", response = MonetizationUsagePublishInfoDTO.class) })
     public Response monetizationPublishUsageStatusGet() throws APIManagementException{

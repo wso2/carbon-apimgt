@@ -40,7 +40,11 @@ CustomUrlsApiService delegate = new CustomUrlsApiServiceImpl();
     @Path("/{tenantDomain}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get custom-url info of a tenant domain ", notes = "This operation is to get custom-url information of the provided tenant-domain ", response = CustomUrlInfoDTO.class, tags={ "Tenants" })
+    @ApiOperation(value = "Get custom-url info of a tenant domain ", notes = "This operation is to get custom-url information of the provided tenant-domain ", response = CustomUrlInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tenantInfo", description = "Retrieve tenant related information")
+        })
+    }, tags={ "Tenants" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Custom url info of the tenant is retrieved. ", response = CustomUrlInfoDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested user does not exist. ", response = ErrorDTO.class),

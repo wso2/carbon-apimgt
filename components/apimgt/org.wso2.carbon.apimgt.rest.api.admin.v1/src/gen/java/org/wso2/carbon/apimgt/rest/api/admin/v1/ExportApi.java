@@ -40,7 +40,11 @@ ExportApiService delegate = new ExportApiServiceImpl();
     @Path("/api")
     @Consumes({ "application/json" })
     @Produces({ "application/zip" })
-    @ApiOperation(value = "Export an API", notes = "This operation can be used to export the details of a particular API as a zip file. ", response = File.class, tags={ "API (Individual)",  })
+    @ApiOperation(value = "Export an API", notes = "This operation can be used to export the details of a particular API as a zip file. ", response = File.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs")
+        })
+    }, tags={ "API (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
@@ -53,7 +57,11 @@ ExportApiService delegate = new ExportApiServiceImpl();
     @Path("/applications")
     @Consumes({ "application/json" })
     @Produces({ "application/json", "application/zip" })
-    @ApiOperation(value = "Export an Application", notes = "This operation can be used to export the details of a particular Application as a zip file. ", response = File.class, tags={ "Application (Individual)" })
+    @ApiOperation(value = "Export an Application", notes = "This operation can be used to export the details of a particular Application as a zip file. ", response = File.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications")
+        })
+    }, tags={ "Application (Individual)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
