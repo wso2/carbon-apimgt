@@ -1,43 +1,49 @@
 package org.wso2.carbon.throttle.service;
 
-import org.wso2.carbon.throttle.service.dto.*;
-import org.wso2.carbon.throttle.service.KeyTemplatesApiService;
-import org.wso2.carbon.throttle.service.factories.KeyTemplatesApiServiceFactory;
-
-import io.swagger.annotations.ApiParam;
-
 import org.wso2.carbon.throttle.service.dto.ErrorDTO;
+import org.wso2.carbon.throttle.service.KeyTemplatesApiService;
+import org.wso2.carbon.throttle.service.impl.KeyTemplatesApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import java.util.List;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.inject.Inject;
 
+import io.swagger.annotations.*;
 import java.io.InputStream;
+
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
-
+import java.util.Map;
+import java.util.List;
+import javax.validation.constraints.*;
 @Path("/keyTemplates")
 
+@Api(description = "the keyTemplates API")
+
 @Produces({ "application/json" })
-@io.swagger.annotations.Api(value = "/keyTemplates", description = "the keyTemplates API")
+
+
 public class KeyTemplatesApi  {
 
-   private final KeyTemplatesApiService delegate = KeyTemplatesApiServiceFactory.getKeyTemplatesApi();
+  @Context MessageContext securityContext;
+
+KeyTemplatesApiService delegate = new KeyTemplatesApiServiceImpl();
+
 
     @GET
     
     
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "An Array of key templates according to custom policies", notes = "This will provide access to key templates define in custom policies", response = String.class, responseContainer = "List")
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "An array of shops around you"),
-        
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Unexpected error") })
-
-    public Response keyTemplatesGet()
-    {
-    return delegate.keyTemplatesGet();
+    @ApiOperation(value = "An Array of key templates according to custom policies", notes = "This will provide access to key templates define in custom policies ", response = String.class, responseContainer = "List", tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "An array of shops around you", response = String.class, responseContainer = "List"),
+        @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
+    public Response keyTemplatesGet() throws APIManagementException{
+        return delegate.keyTemplatesGet(securityContext);
     }
 }
-
