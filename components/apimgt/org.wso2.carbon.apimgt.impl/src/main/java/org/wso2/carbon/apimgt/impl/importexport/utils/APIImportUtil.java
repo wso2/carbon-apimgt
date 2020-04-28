@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -390,6 +391,17 @@ public final class APIImportUtil {
             //Swagger definition will only be available of API type HTTP. Web socket API does not have it.
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(importedApi.getType())) {
                 String swaggerContent = loadSwaggerFile(pathToArchive);
+
+                // Check whether any of the resources should be removed from the API when updating,
+                // that has already been used in API Products
+                List<APIResource> resourcesToRemove = apiProvider.getResourcesToBeRemovedFromAPIProducts(importedApi.getId(),
+                        swaggerContent);
+                // Do not allow to remove resources from API Products, hence throw an exception
+                if (!resourcesToRemove.isEmpty()) {
+                    throw new APIImportExportException("Cannot remove following resource paths " +
+                            resourcesToRemove.toString() + " because they are used by one or more API Products");
+                }
+
                 addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
                 //If graphQL API, import graphQL schema definition to registry
                 if (StringUtils.equals(importedApi.getType(), APIConstants.APITransportType.GRAPHQL.toString())) {
