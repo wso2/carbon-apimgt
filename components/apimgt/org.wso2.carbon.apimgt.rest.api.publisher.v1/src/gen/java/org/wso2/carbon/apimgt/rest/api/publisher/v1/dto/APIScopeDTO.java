@@ -17,7 +17,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class APIScopeDTO   {
   
     private ScopeDTO scope = null;
-    private Boolean isShared = null;
+    private Boolean shared = null;
 
   /**
    **/
@@ -40,19 +40,19 @@ public class APIScopeDTO   {
   /**
    * States whether scope is shared. This will not be honored when updating/adding scopes to APIs or when adding/updating Shared Scopes. 
    **/
-  public APIScopeDTO isShared(Boolean isShared) {
-    this.isShared = isShared;
+  public APIScopeDTO shared(Boolean shared) {
+    this.shared = shared;
     return this;
   }
 
   
   @ApiModelProperty(example = "true", value = "States whether scope is shared. This will not be honored when updating/adding scopes to APIs or when adding/updating Shared Scopes. ")
-  @JsonProperty("isShared")
-  public Boolean isIsShared() {
-    return isShared;
+  @JsonProperty("shared")
+  public Boolean isShared() {
+    return shared;
   }
-  public void setIsShared(Boolean isShared) {
-    this.isShared = isShared;
+  public void setShared(Boolean shared) {
+    this.shared = shared;
   }
 
 
@@ -66,12 +66,12 @@ public class APIScopeDTO   {
     }
     APIScopeDTO apIScope = (APIScopeDTO) o;
     return Objects.equals(scope, apIScope.scope) &&
-        Objects.equals(isShared, apIScope.isShared);
+        Objects.equals(shared, apIScope.shared);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scope, isShared);
+    return Objects.hash(scope, shared);
   }
 
   @Override
@@ -80,7 +80,7 @@ public class APIScopeDTO   {
     sb.append("class APIScopeDTO {\n");
     
     sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
-    sb.append("    isShared: ").append(toIndentedString(isShared)).append("\n");
+    sb.append("    shared: ").append(toIndentedString(shared)).append("\n");
     sb.append("}");
     return sb.toString();
   }
