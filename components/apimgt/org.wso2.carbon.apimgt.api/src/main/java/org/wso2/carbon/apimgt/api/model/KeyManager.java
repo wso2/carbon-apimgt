@@ -326,4 +326,17 @@ public interface KeyManager {
      */
     boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException;
 
+    /**
+     * This method will be used to validate the scope set provided and populate the additional parameters for each
+     * Scope object. Default implementation will return the received scope set as it is.
+     *
+     * @param scopes Scope List to validate
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException if an error occurs while validating and populating
+     */
+    default void validateScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException {
+
+        return;
+    }
+
 }
