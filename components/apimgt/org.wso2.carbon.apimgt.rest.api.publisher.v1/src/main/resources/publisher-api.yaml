@@ -8815,7 +8815,7 @@ definitions:
     properties:
        scope:
          $ref: '#/definitions/Scope'
-       isShared:
+       shared:
           type: boolean
           description: |
               States whether scope is shared. This will not be honored when updating/adding scopes to APIs or when
