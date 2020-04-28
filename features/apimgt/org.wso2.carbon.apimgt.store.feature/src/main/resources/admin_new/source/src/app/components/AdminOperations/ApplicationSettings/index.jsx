@@ -19,6 +19,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Applications from './Applications';
+import EditApplication from './EditApplication';
 import settings from '../../../../../../site/public/conf/settings';
 
 const ApplicationSettings = () => {
@@ -28,6 +29,14 @@ const ApplicationSettings = () => {
                 exact
                 path={settings.app.context + '/settings/applications'}
                 component={Applications}
+            />
+            <Route
+                exact
+                path={
+                    settings.app.context +
+                    '/settings/applications/edit/:applicationId'
+                }
+                component={EditApplication}
             />
             <Route component={ResourceNotFound} />
         </Switch>
