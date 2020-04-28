@@ -40,7 +40,11 @@ TenantInfoApiService delegate = new TenantInfoApiServiceImpl();
     @Path("/{username}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get tenant id of the user ", notes = "This operation is to get tenant id of the provided user ", response = TenantInfoDTO.class, tags={ "Tenants" })
+    @ApiOperation(value = "Get tenant id of the user ", notes = "This operation is to get tenant id of the provided user ", response = TenantInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tenantInfo", description = "Retrieve tenant related information")
+        })
+    }, tags={ "Tenants" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Tenant id of the user retrieved. ", response = TenantInfoDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested user does not exist. ", response = ErrorDTO.class),

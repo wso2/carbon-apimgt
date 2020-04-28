@@ -42,7 +42,11 @@ ImportApiService delegate = new ImportApiServiceImpl();
     @Path("/api")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Import an API", notes = "This operation can be used to import an API. ", response = Void.class, tags={ "API (Individual)",  })
+    @ApiOperation(value = "Import an API", notes = "This operation can be used to import an API. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs")
+        })
+    }, tags={ "API (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Created. API Imported Successfully. ", response = Void.class),
         @ApiResponse(code = 403, message = "Forbidden Not Authorized to import. ", response = ErrorDTO.class),
@@ -57,7 +61,11 @@ ImportApiService delegate = new ImportApiServiceImpl();
     @Path("/applications")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Import an Application", notes = "This operation can be used to import an Application. ", response = ApplicationInfoDTO.class, tags={ "Application (Individual)" })
+    @ApiOperation(value = "Import an Application", notes = "This operation can be used to import an Application. ", response = ApplicationInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications")
+        })
+    }, tags={ "Application (Individual)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with the updated object information as entity in the body. ", response = ApplicationInfoDTO.class),
         @ApiResponse(code = 207, message = "Multi Status. Partially successful response with skipped APIs information object as entity in the body. ", response = APIInfoListDTO.class),

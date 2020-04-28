@@ -49,7 +49,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/blacklist/{conditionId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete a Blocking condition", notes = "Deletes an existing Blocking condition ", response = Void.class, tags={ "Blacklist (Individual)",  })
+    @ApiOperation(value = "Delete a Blocking condition", notes = "Deletes an existing Blocking condition ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:bl_manage", description = "Update and delete blocking conditions")
+        })
+    }, tags={ "Blacklist (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class),
@@ -62,7 +66,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/blacklist/{conditionId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get a Blocking Condition", notes = "Retrieves a Blocking Condition providing the condition Id ", response = BlockingConditionDTO.class, tags={ "Blacklist (Individual)",  })
+    @ApiOperation(value = "Get a Blocking Condition", notes = "Retrieves a Blocking Condition providing the condition Id ", response = BlockingConditionDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:bl_view", description = "View blocking conditions")
+        })
+    }, tags={ "Blacklist (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Condition returned ", response = BlockingConditionDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -76,7 +84,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/blacklist")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all blocking condtions", notes = "Retrieves all existing blocking condtions. ", response = BlockingConditionListDTO.class, tags={ "Blacklist (Collection)",  })
+    @ApiOperation(value = "Get all blocking condtions", notes = "Retrieves all existing blocking condtions. ", response = BlockingConditionListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:bl_view", description = "View blocking conditions")
+        })
+    }, tags={ "Blacklist (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Blocking conditions returned ", response = BlockingConditionListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -89,7 +101,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/blacklist")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add a Blocking condition", notes = "Adds a new Blocking condition. ", response = BlockingConditionDTO.class, tags={ "Blacklist (Collection)",  })
+    @ApiOperation(value = "Add a Blocking condition", notes = "Adds a new Blocking condition. ", response = BlockingConditionDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:bl_manage", description = "Update and delete blocking conditions")
+        })
+    }, tags={ "Blacklist (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = BlockingConditionDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
@@ -102,7 +118,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/advanced")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all Advanced throttling policies.", notes = "Retrieves all existing Advanced level throttling policies. ", response = AdvancedThrottlePolicyListDTO.class, tags={ "Advanced Policy (Collection)",  })
+    @ApiOperation(value = "Get all Advanced throttling policies.", notes = "Retrieves all existing Advanced level throttling policies. ", response = AdvancedThrottlePolicyListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_view", description = "View tiers")
+        })
+    }, tags={ "Advanced Policy (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policies returned ", response = AdvancedThrottlePolicyListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -115,7 +135,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/advanced/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete an Advanced Throttling Policy", notes = "Deletes an Advanced level throttling policy. ", response = Void.class, tags={ "Advanced Policy (Individual)",  })
+    @ApiOperation(value = "Delete an Advanced Throttling Policy", notes = "Deletes an Advanced level throttling policy. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete tiers")
+        })
+    }, tags={ "Advanced Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class),
@@ -128,7 +152,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/advanced/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get an Advanced Policy", notes = "Retrieves an Advanced Policy. ", response = AdvancedThrottlePolicyDTO.class, tags={ "Advanced Policy (Individual)",  })
+    @ApiOperation(value = "Get an Advanced Policy", notes = "Retrieves an Advanced Policy. ", response = AdvancedThrottlePolicyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_view", description = "View tiers")
+        })
+    }, tags={ "Advanced Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policy returned ", response = AdvancedThrottlePolicyDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -142,7 +170,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/advanced/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update an Advanced Throttling Policy", notes = "Updates an existing Advanced level throttling policy. ", response = AdvancedThrottlePolicyDTO.class, tags={ "Advanced Policy (Individual)",  })
+    @ApiOperation(value = "Update an Advanced Throttling Policy", notes = "Updates an existing Advanced level throttling policy. ", response = AdvancedThrottlePolicyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete tiers")
+        })
+    }, tags={ "Advanced Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policy updated. ", response = AdvancedThrottlePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
@@ -156,7 +188,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/advanced")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add an Advanced Throttling Policy", notes = "Add a new Advanced level throttling policy. ", response = AdvancedThrottlePolicyDTO.class, tags={ "Advanced Policy (Collection)",  })
+    @ApiOperation(value = "Add an Advanced Throttling Policy", notes = "Add a new Advanced level throttling policy. ", response = AdvancedThrottlePolicyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete tiers")
+        })
+    }, tags={ "Advanced Policy (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = AdvancedThrottlePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
@@ -169,7 +205,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/application")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all Application Throttling Policies", notes = "Retrieves all existing application throttling policies. ", response = ApplicationThrottlePolicyListDTO.class, tags={ "Application Policy (Collection)",  })
+    @ApiOperation(value = "Get all Application Throttling Policies", notes = "Retrieves all existing application throttling policies. ", response = ApplicationThrottlePolicyListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_view", description = "View tiers")
+        })
+    }, tags={ "Application Policy (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policies returned ", response = ApplicationThrottlePolicyListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -182,7 +222,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/application/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete an Application Throttling policy", notes = "Deletes an Application level throttling policy. ", response = Void.class, tags={ "Application Policy (Individual)",  })
+    @ApiOperation(value = "Delete an Application Throttling policy", notes = "Deletes an Application level throttling policy. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete tiers")
+        })
+    }, tags={ "Application Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class),
@@ -195,7 +239,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/application/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get an Application Policy", notes = "Retrieves an Application Policy. ", response = ApplicationThrottlePolicyDTO.class, tags={ "Application Policy (Individual)",  })
+    @ApiOperation(value = "Get an Application Policy", notes = "Retrieves an Application Policy. ", response = ApplicationThrottlePolicyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_view", description = "View tiers")
+        })
+    }, tags={ "Application Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policy returned ", response = ApplicationThrottlePolicyDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -209,7 +257,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/application/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update an Application Throttling policy", notes = "Updates an existing Application level throttling policy. Upon succesfull, you will receive the updated application policy as the response. ", response = ApplicationThrottlePolicyDTO.class, tags={ "Application Policy (Individual)",  })
+    @ApiOperation(value = "Update an Application Throttling policy", notes = "Updates an existing Application level throttling policy. Upon succesfull, you will receive the updated application policy as the response. ", response = ApplicationThrottlePolicyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete tiers")
+        })
+    }, tags={ "Application Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policy updated. ", response = ApplicationThrottlePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
@@ -223,7 +275,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/application")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add an Application Throttling Policy", notes = "This operation can be used to add a new application level throttling policy. ", response = ApplicationThrottlePolicyDTO.class, tags={ "Application Policy (Collection)",  })
+    @ApiOperation(value = "Add an Application Throttling Policy", notes = "This operation can be used to add a new application level throttling policy. ", response = ApplicationThrottlePolicyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete tiers")
+        })
+    }, tags={ "Application Policy (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = ApplicationThrottlePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
@@ -236,7 +292,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/custom")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all Custom Rules", notes = "Retrieves all Custom Rules.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = CustomRuleListDTO.class, tags={ "Custom Rules (Collection)",  })
+    @ApiOperation(value = "Get all Custom Rules", notes = "Retrieves all Custom Rules.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = CustomRuleListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_view", description = "View tiers")
+        })
+    }, tags={ "Custom Rules (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policies returned ", response = CustomRuleListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -249,7 +309,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/custom")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add a Custom Rule", notes = "Adds a new Custom Rule.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = CustomRuleDTO.class, tags={ "Custom Rules (Collection)",  })
+    @ApiOperation(value = "Add a Custom Rule", notes = "Adds a new Custom Rule.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = CustomRuleDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete tiers")
+        })
+    }, tags={ "Custom Rules (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = CustomRuleDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
@@ -262,7 +326,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/custom/{ruleId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete a Custom Rule", notes = "Delete a Custom Rule. We need to provide the Id of the policy as a path parameter.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = Void.class, tags={ "Custom Rules (Individual)",  })
+    @ApiOperation(value = "Delete a Custom Rule", notes = "Delete a Custom Rule. We need to provide the Id of the policy as a path parameter.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete tiers")
+        })
+    }, tags={ "Custom Rules (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class),
@@ -275,7 +343,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/custom/{ruleId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get a Custom Rule", notes = "Retrieves a Custom Rule. We need to provide the policy Id as a path parameter.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = CustomRuleDTO.class, tags={ "Custom Rules (Individual)",  })
+    @ApiOperation(value = "Get a Custom Rule", notes = "Retrieves a Custom Rule. We need to provide the policy Id as a path parameter.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = CustomRuleDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_view", description = "View tiers")
+        })
+    }, tags={ "Custom Rules (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policy returned ", response = CustomRuleDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -289,7 +361,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/custom/{ruleId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update a Custom Rule", notes = "Updates an existing Custom Rule.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = CustomRuleDTO.class, tags={ "Custom Rules (Individual)",  })
+    @ApiOperation(value = "Update a Custom Rule", notes = "Updates an existing Custom Rule.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = CustomRuleDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete tiers")
+        })
+    }, tags={ "Custom Rules (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policy updated. ", response = CustomRuleDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
@@ -303,7 +379,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/subscription")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all Subscription Throttling Policies", notes = "This operation can be used to retrieve all Subscription level throttling policies. ", response = SubscriptionThrottlePolicyListDTO.class, tags={ "Subscription Policy (Collection)",  })
+    @ApiOperation(value = "Get all Subscription Throttling Policies", notes = "This operation can be used to retrieve all Subscription level throttling policies. ", response = SubscriptionThrottlePolicyListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_view", description = "View tiers")
+        })
+    }, tags={ "Subscription Policy (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policies returned ", response = SubscriptionThrottlePolicyListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -316,7 +396,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/subscription/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete a Subscription Policy", notes = "This operation can be used to delete a subscription-level throttling policy specifying the Id of the policy as a path paramter. ", response = Void.class, tags={ "Subscription Policy (Individual)",  })
+    @ApiOperation(value = "Delete a Subscription Policy", notes = "This operation can be used to delete a subscription-level throttling policy specifying the Id of the policy as a path paramter. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete tiers")
+        })
+    }, tags={ "Subscription Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class),
@@ -329,7 +413,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/subscription/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get a Subscription Policy", notes = "Retrieve a single subscription-level throttling policy. We should provide the Id of the policy as a path parameter. ", response = SubscriptionThrottlePolicyDTO.class, tags={ "Subscription Policy (Individual)",  })
+    @ApiOperation(value = "Get a Subscription Policy", notes = "Retrieve a single subscription-level throttling policy. We should provide the Id of the policy as a path parameter. ", response = SubscriptionThrottlePolicyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_view", description = "View tiers")
+        })
+    }, tags={ "Subscription Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policy returned ", response = SubscriptionThrottlePolicyDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -343,7 +431,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/subscription/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update a Subscription Policy", notes = "Updates an existing subscription-level throttling policy. ", response = SubscriptionThrottlePolicyDTO.class, tags={ "Subscription Policy (Individual)",  })
+    @ApiOperation(value = "Update a Subscription Policy", notes = "Updates an existing subscription-level throttling policy. ", response = SubscriptionThrottlePolicyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete tiers")
+        })
+    }, tags={ "Subscription Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policy updated. ", response = SubscriptionThrottlePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
@@ -357,7 +449,11 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @Path("/policies/subscription")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add a Subscription Throttling Policy", notes = "This operation can be used to add a Subscription level throttling policy specifying the details of the policy in the payload. ", response = SubscriptionThrottlePolicyDTO.class, tags={ "Subscription Policy (Collection)" })
+    @ApiOperation(value = "Add a Subscription Throttling Policy", notes = "This operation can be used to add a Subscription level throttling policy specifying the details of the policy in the payload. ", response = SubscriptionThrottlePolicyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete tiers")
+        })
+    }, tags={ "Subscription Policy (Collection)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = SubscriptionThrottlePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),

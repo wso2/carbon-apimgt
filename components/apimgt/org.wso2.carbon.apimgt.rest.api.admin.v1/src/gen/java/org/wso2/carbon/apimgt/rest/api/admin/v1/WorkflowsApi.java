@@ -40,7 +40,11 @@ WorkflowsApiService delegate = new WorkflowsApiServiceImpl();
     @Path("/update-workflow-status")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update workflow status", notes = "This operation can be used to approve or reject a workflow task. ", response = WorkflowDTO.class, tags={ "Workflows (Individual)" })
+    @ApiOperation(value = "Update workflow status", notes = "This operation can be used to approve or reject a workflow task. ", response = WorkflowDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_workflow", description = "Manage workflows")
+        })
+    }, tags={ "Workflows (Individual)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Workflow request information is returned. ", response = WorkflowDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),

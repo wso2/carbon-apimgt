@@ -41,7 +41,11 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
     @Path("/{apiCategoryId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete an API Category", notes = "Delete an API Category by API Category Id ", response = Void.class, tags={ "API Category (Individual)",  })
+    @ApiOperation(value = "Delete an API Category", notes = "Delete an API Category by API Category Id ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories")
+        })
+    }, tags={ "API Category (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API Category successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. API Category to be deleted does not exist. ", response = ErrorDTO.class) })
@@ -53,7 +57,11 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
     @Path("/{apiCategoryId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update an API Category", notes = "Update an API Category by category Id ", response = APICategoryDTO.class, tags={ "API Category (Individual)",  })
+    @ApiOperation(value = "Update an API Category", notes = "Update an API Category by category Id ", response = APICategoryDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories")
+        })
+    }, tags={ "API Category (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Label updated. ", response = APICategoryDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
@@ -66,7 +74,11 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all API categories", notes = "Get all API categories ", response = APICategoryListDTO.class, tags={ "API Category (Collection)",  })
+    @ApiOperation(value = "Get all API categories", notes = "Get all API categories ", response = APICategoryListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories")
+        })
+    }, tags={ "API Category (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Categories returned ", response = APICategoryListDTO.class) })
     public Response apiCategoriesGet() throws APIManagementException{
@@ -77,7 +89,11 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add a new API Category", notes = "Add a new API Category ", response = APICategoryDTO.class, tags={ "API Category (Individual)" })
+    @ApiOperation(value = "Add a new API Category", notes = "Add a new API Category ", response = APICategoryDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories")
+        })
+    }, tags={ "API Category (Individual)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. ", response = APICategoryDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class) })

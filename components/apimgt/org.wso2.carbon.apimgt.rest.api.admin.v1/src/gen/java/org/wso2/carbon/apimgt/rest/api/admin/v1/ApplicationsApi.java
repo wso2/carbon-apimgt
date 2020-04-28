@@ -40,7 +40,11 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Path("/{applicationId}/change-owner")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Change Application Owner", notes = "This operation is used to change the owner of an Application. In order to change the owner of an application, we need to pass the new application owner as a query parameter ", response = Void.class, tags={ "Application",  })
+    @ApiOperation(value = "Change Application Owner", notes = "This operation is used to change the owner of an Application. In order to change the owner of an application, we need to pass the new application owner as a query parameter ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_owner_change", description = "Retrieve and manage applications")
+        })
+    }, tags={ "Application",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Application owner changed successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
@@ -54,7 +58,11 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve/Search applications ", notes = "This operation can be used to retrieve list of applications that is belonged to the given user, If no user is provided then the application for the user associated with the provided access token will be returned. ", response = ApplicationListDTO.class, tags={ "Application (Collection)" })
+    @ApiOperation(value = "Retrieve/Search applications ", notes = "This operation can be used to retrieve list of applications that is belonged to the given user, If no user is provided then the application for the user associated with the provided access token will be returned. ", response = ApplicationListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_owner_change", description = "Retrieve and manage applications")
+        })
+    }, tags={ "Application (Collection)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Application list returned. ", response = ApplicationListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
