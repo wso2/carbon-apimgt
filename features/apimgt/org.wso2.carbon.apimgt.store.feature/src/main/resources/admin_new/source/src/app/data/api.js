@@ -232,7 +232,7 @@ class API extends Resource {
     }
 
     /**
-     * Get details of an Application Throttling Policy 
+     * Get details of an Application Throttling Policy
      */
     applicationThrottlingPolicyGet(policyId) {
         return this.client.then((client) => {
@@ -260,6 +260,14 @@ class API extends Resource {
         });
     }
 
+
+    getApplicationList() {
+        return this.client.then((client) => {
+            return client.apis['Application (Collection)'].get_applications(
+                this._requestMetaData(),
+            );
+        });
+    }
 }
 
 API.CONSTS = {
