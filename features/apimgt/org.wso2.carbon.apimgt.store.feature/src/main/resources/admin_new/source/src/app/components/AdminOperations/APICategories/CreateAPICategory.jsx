@@ -150,7 +150,7 @@ const addAPICategory = (intl, setCreatingAPICategory) => {
                     defaultMessage: 'API Category added successfully',
                 }),
             );
-            mhistory.push('/admin_new/categories/api-categories');
+            mhistory.push(settings.app.context + '/categories/api-categories');
         })
         .catch((error) => {
             const { response } = error;
