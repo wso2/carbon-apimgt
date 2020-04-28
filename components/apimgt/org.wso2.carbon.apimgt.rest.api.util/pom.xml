@@ -221,6 +221,26 @@
                             </resources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-admin-api-def</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources/</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/src/main/resources
+                                    </directory>
+                                    <includes>
+                                        <include>admin-api.yaml</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
