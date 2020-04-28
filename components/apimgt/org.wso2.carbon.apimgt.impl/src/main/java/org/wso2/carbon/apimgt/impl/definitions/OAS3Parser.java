@@ -1268,7 +1268,8 @@ public class OAS3Parser extends APIDefinition {
      * @return scope set as all defaults
      * @throws APIManagementException
      */
-    static Set<Scope> injectOtherScopesToDefault(String swaggerContent) throws APIManagementException {
+    @Override
+    public Set<Scope> injectOtherScopesToDefault(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
         Map<String, SecurityScheme> securitySchemes = null;
         SecurityScheme securityScheme;
@@ -1382,7 +1383,8 @@ public class OAS3Parser extends APIDefinition {
      * @return URI Templates
      * @throws APIManagementException
      */
-    static Set<URITemplate> injectOtherRescouceScopesToDefault(String resourceConfigsJSON) throws APIManagementException {
+    @Override
+    public Set<URITemplate> injectOtherRescouceScopesToDefault(String resourceConfigsJSON) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(resourceConfigsJSON);
         Set<URITemplate> urlTemplates = new LinkedHashSet<>();
         Set<Scope> scopes = injectOtherScopesToDefault(resourceConfigsJSON);

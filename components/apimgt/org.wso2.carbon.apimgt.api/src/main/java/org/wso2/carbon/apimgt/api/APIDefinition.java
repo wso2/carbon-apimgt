@@ -197,4 +197,20 @@ public abstract class APIDefinition {
     public abstract String getOASDefinitionWithTierContentAwareProperty(String oasDefinition,
             List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException;
 
+    /**
+     * This method manges the scopes from the API definition as it support different schemes
+     *
+     * @param resourceConfigsJSON resource json
+     * @return scopes
+     */
+    public abstract Set<Scope> injectOtherScopesToDefault(String swaggerContent) throws APIManagementException;
+
+    /**
+     * This method changes the URI templates from the API definition as it support different schemes
+     *
+     * @return URI templates
+     */
+    public abstract Set<URITemplate> injectOtherRescouceScopesToDefault(String resourceConfigsJSON)
+            throws APIManagementException;
+
 }

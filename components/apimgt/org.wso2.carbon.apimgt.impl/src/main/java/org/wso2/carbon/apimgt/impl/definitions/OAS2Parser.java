@@ -212,7 +212,8 @@ public class OAS2Parser extends APIDefinition {
      * @return scope set as all defaults
      * @throws APIManagementException
      */
-    static Set<Scope> injectOtherScopesToDefault(String swaggerContent) throws APIManagementException {
+    @Override
+    public Set<Scope> injectOtherScopesToDefault(String swaggerContent) throws APIManagementException {
         Swagger swagger = getSwagger(swaggerContent);
 
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
@@ -298,7 +299,8 @@ public class OAS2Parser extends APIDefinition {
      * @return URI Templates
      * @throws APIManagementException
      */
-    static Set<URITemplate> injectOtherRescouceScopesToDefault(String resourceConfigsJSON) throws APIManagementException {
+    @Override
+    public Set<URITemplate> injectOtherRescouceScopesToDefault(String resourceConfigsJSON) throws APIManagementException {
         Swagger swagger = getSwagger(resourceConfigsJSON);
         Set<URITemplate> urlTemplates = new LinkedHashSet<>();
         Set<Scope> scopes = injectOtherScopesToDefault(resourceConfigsJSON);

@@ -1218,22 +1218,12 @@ public class OASParserUtil {
         //Load required properties from swagger to the API
         APIDefinition apiDefinition = getOASParser(swaggerContent);
         SwaggerVersion swaggerVersion = getSwaggerVersion(swaggerContent);
-        if (swaggerVersion == SwaggerVersion.SWAGGER) {
-            Set<Scope> scopes = OAS2Parser.injectOtherScopesToDefault(swaggerContent);
-            Set<URITemplate> urlTemplates = OAS2Parser.injectOtherRescouceScopesToDefault(swaggerContent);
-            apiToAdd.setUriTemplates(urlTemplates);
-            apiToAdd.setScopes(scopes);
-            SwaggerData updatedSwager = new SwaggerData(apiToAdd);
-            String swaggerContentUpdated = apiDefinition.populateCustomManagementInfo(swaggerContent, updatedSwager);
-            return swaggerContentUpdated;
-        } else {
-            Set<Scope> scopes = OAS3Parser.injectOtherScopesToDefault(swaggerContent);
-            Set<URITemplate> urlTemplates = OAS3Parser.injectOtherRescouceScopesToDefault(swaggerContent);
-            apiToAdd.setUriTemplates(urlTemplates);
-            apiToAdd.setScopes(scopes);
-            SwaggerData updatedSwager = new SwaggerData(apiToAdd);
-            String swaggerContentUpdated = apiDefinition.populateCustomManagementInfo(swaggerContent, updatedSwager);
-            return swaggerContentUpdated;
-        }
+        Set<Scope> scopes = apiDefinition.injectOtherScopesToDefault(swaggerContent);
+        Set<URITemplate> urlTemplates = apiDefinition.injectOtherRescouceScopesToDefault(swaggerContent);
+        apiToAdd.setUriTemplates(urlTemplates);
+        apiToAdd.setScopes(scopes);
+        SwaggerData updatedSwager = new SwaggerData(apiToAdd);
+        String swaggerContentUpdated = apiDefinition.populateCustomManagementInfo(swaggerContent, updatedSwager);
+        return swaggerContentUpdated;
     }
 }
