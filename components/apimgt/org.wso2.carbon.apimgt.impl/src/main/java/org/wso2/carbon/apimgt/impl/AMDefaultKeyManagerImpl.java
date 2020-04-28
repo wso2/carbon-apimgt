@@ -1008,35 +1008,73 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * This method will be used to attach a Scope in the authorization server to a API resource.
      *
      * @param api          API
-     * @param uriTemplate  URITemplate
-     * @param scope        Scope to attach
+     * @param uriTemplates URITemplate set with attached scopes
      * @param tenantDomain tenant domain
      * @throws APIManagementException if an error occurs while attaching scope to resource
      */
     @Override
-    public void attachScopeToResource(API api, URITemplate uriTemplate, Scope scope, String tenantDomain)
+    public void attachResourceScopes(API api, Set<URITemplate> uriTemplates, String tenantDomain)
             throws APIManagementException {
 
         //TODO: remove after scope validation from swagger completes
-        ApiMgtDAO.getInstance().addResourceScope(api, uriTemplate, scope, tenantDomain);
+        ApiMgtDAO.getInstance().addResourceScopes(api, uriTemplates, tenantDomain);
     }
 
     /**
-     * This method will be used to detach a Scope in the authorization server from an API resource.
+     * This method will be used to update the local scopes and resource to scope attachments of an API in the
+     * authorization server.
      *
-     * @param apiIdentifier APIIdentifier
-     * @param apiContext    API Context
-     * @param uriTemplate   URITemplate
-     * @param scope         Scope To detach from
-     * @param tenantDomain  tenant domain
-     * @throws APIManagementException if an error occurs while detaching scope from resource
+     * @param api               API
+     * @param oldLocalScopeKeys Old local scopes of the API before update
+     * @param newLocalScopes    New local scopes of the API after update
+     * @param oldURITemplates   Old URI templates of the API before update
+     * @param newURITemplates   New URI templates of the API after update
+     * @param tenantDomain      Tenant Domain
+     * @throws APIManagementException if fails to update resources scopes
      */
     @Override
-    public void detachScopeToResource(APIIdentifier apiIdentifier, String apiContext, URITemplate uriTemplate,
-                                      Scope scope, String tenantDomain) throws APIManagementException {
+    public void updateResourceScopes(API api, Set<String> oldLocalScopeKeys, Set<Scope> newLocalScopes,
+                                     Set<URITemplate> oldURITemplates, Set<URITemplate> newURITemplates,
+                                     String tenantDomain) throws APIManagementException {
+
+        detachResourceScopes(api, oldURITemplates, tenantDomain);
+        // remove the old local scopes from the KM
+        for (String oldScope : oldLocalScopeKeys) {
+            deleteScope(oldScope, tenantDomain);
+        }
+        //Register scopes
+        for (Scope scope : newLocalScopes) {
+            String scopeKey = scope.getKey();
+            // Check if key already registered in KM. Scope Key may be already registered for a different version.
+            if (!isScopeExists(scopeKey, tenantDomain)) {
+                //register scope in KM
+                registerScope(scope, tenantDomain);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Scope: " + scopeKey + " already registered in KM. Skipping registering scope.");
+                }
+            }
+        }
+        attachResourceScopes(api, newURITemplates, tenantDomain);
+    }
+
+    /**
+     * This method will be used to detach the resource scopes of an API and delete the local scopes of that API from
+     * the authorization server.
+     *
+     * @param api          API   API
+     * @param uriTemplates URITemplate Set with attach scopes to detach
+     * @param tenantDomain Tenant Domain
+     * @throws APIManagementException if an error occurs while detaching resource scopes of the API.
+     */
+    @Override
+    public void detachResourceScopes(API api, Set<URITemplate> uriTemplates, String tenantDomain)
+            throws APIManagementException {
 
         //TODO: remove after scope validation from swagger completes
-        ApiMgtDAO.getInstance().removeResourceScope(apiIdentifier, apiContext, uriTemplate, scope, tenantDomain);
+        for (URITemplate uriTemplate : uriTemplates) {
+            ApiMgtDAO.getInstance().removeResourceScopes(api.getId(), api.getContext(), uriTemplate, tenantDomain);
+        }
     }
 
     /**
