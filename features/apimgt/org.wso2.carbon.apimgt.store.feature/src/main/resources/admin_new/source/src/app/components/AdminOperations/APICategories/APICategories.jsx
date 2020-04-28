@@ -67,14 +67,15 @@ const styles = (theme) => ({
 const deleteAPICategory = (id, name, setUpdated) => {
     const restApi = new API();
     const promisedDelete = restApi.deleteAPICategory(id);
+    setUpdated(false);
     promisedDelete
         .then((response) => {
             if (response.status !== 200) {
                 Alert.info('Something went wrong while deleting the API!');
                 return;
             }
-            setUpdated(false);
             Alert.info(`API category: ${name} deleted Successfully`);
+            setUpdated(true);
         })
         .catch((error) => {
             if (error.status === 409) {
@@ -94,16 +95,16 @@ function APICategories(props) {
     const { classes, intl } = props;
     const restApi = new API();
     const [apiCategories, setApiCategories] = useState([]);
-    const [isUpdated, setUpdated] = useState(false);
+    const [isUpdated, setUpdated] = useState(true);
 
     useEffect(() => {
-        restApi.apiCategoriesListGet().then((result) => {
-            if (!isUpdated) {
+        if (isUpdated) {
+            restApi.apiCategoriesListGet().then((result) => {
                 setApiCategories(result.body.list);
-                setUpdated(true);
-            }
-        });
-    });
+            });
+        }
+    }, [isUpdated]);
+
     const title = (
         <FormattedMessage
             id='create.banner.title.create.api.categories'
