@@ -1,13 +1,13 @@
-package {{package}}.impl;
+package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
-import {{package}}.*;
-import {{modelPackage}}.*;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-{{#imports}}import {{import}};
-{{/imports}}
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TenantInfoDTO;
 
 import java.util.List;
 
@@ -16,11 +16,9 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-{{>generatedAnnotation}}
-{{#operations}}
-public class {{classname}}ServiceImpl implements {{classname}}Service {
-  {{#operation}}
-  public Response {{nickname}}({{#allParams}}{{>serviceQueryParams}}{{>servicePathParams}}{{>serviceHeaderParams}}{{>serviceBodyParams}}{{>serviceFormParams}}, {{/allParams}}MessageContext messageContext) {
+
+public class TenantInfoApiServiceImpl implements TenantInfoApiService {
+  public Response getTenantInfoByUsername(String username, MessageContext messageContext) {
       // remove errorObject and add implementation code!
       ErrorDTO errorObject = new ErrorDTO();
       Response.Status status  = Response.Status.NOT_IMPLEMENTED;
@@ -29,6 +27,4 @@ public class {{classname}}ServiceImpl implements {{classname}}Service {
       errorObject.setDescription("The requested resource has not been implemented");
       return Response.status(status).entity(errorObject).build();
   }
-  {{/operation}}
 }
-{{/operations}}
