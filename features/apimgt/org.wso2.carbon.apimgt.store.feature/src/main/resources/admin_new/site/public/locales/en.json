@@ -41,11 +41,20 @@
     "contents.main.title.microgateways": "Microgateways",
     "contents.main.title.api.categories": "API categories",
     "topmenu.api.categories.add.api.category": "Add API category",
-    "contents.main.heading.api.categories.add.new": "Add New API Category",
+    "contents.main.heading.api.categories.create.api.category": "Create API Category",
     "contents.api.categories.create.new.category": "Create New API Category",
     "api.categories.create.new.category.short.description.name": "Enter API Category Name ( Ex: finance )",
     "api.categories.create.new.category.short.description.description": "Short description about the API category",
     "api.categories.create.new.category.save": "Save",
     "api.categories.create.new.category.cancel": "Cancel",
-    "api.categories.create.new.category.added.successfully": "API Category added successfully"
+    "api.categories.create.new.category.added.successfully": "API Category added successfully",
+    "api.categories.category.edit": "Edit",
+    "api.categories.category.delete": "Delete",
+    "api.categories.edit.category.updated.successfully": "API Category updated successfully",
+    "contents.api.categories.edit.api.category": "Edit API Category",
+    "api.categories.edit.category.short.description.name": "Editing API Category Name",
+    "api.categories.edit.category.short.description.description": "Short description about the API category",
+    "api.categories.edit.category.save": "Save",
+    "api.categories.edit.category.saving": "Saving",
+    "api.categories.edit.category.cancel": "Cancel"
 }

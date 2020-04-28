@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,8 +131,29 @@ class API extends Resource {
         });
     }
 
+    updateAPICategory(id, name, description, callback = null) {
+        const promise_update_api_category = this.client.then((client) => {
+            const data = {
+                name: name,
+                description: description,
+            };
+            return client.apis[
+                'API Category (Individual)'
+            ].put_api_categories__apiCategoryId_(
+                { apiCategoryId: id, body: data },
+                this._requestMetaData(),
+            );
+        });
+
+        if (callback) {
+            return promise_update_api_category.then(callback);
+        } else {
+            return promise_update_api_category;
+        }
+    }
+
     deleteAPICategory(id, callback = null) {
-        const promise_create_api_category = this.client.then((client) => {
+        const promise_delete_api_category = this.client.then((client) => {
             return client.apis[
                 'API Category (Individual)'
             ].delete_api_categories__apiCategoryId_(
@@ -142,9 +163,9 @@ class API extends Resource {
         });
 
         if (callback) {
-            return promise_create_api_category.then(callback);
+            return promise_delete_api_category.then(callback);
         } else {
-            return promise_create_api_category;
+            return promise_delete_api_category;
         }
     }
 

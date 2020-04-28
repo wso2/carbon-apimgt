@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -19,24 +19,19 @@
 import React, { useState, useEffect } from 'react';
 import API from 'AppData/api';
 import 'react-tagsinput/react-tagsinput.css';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
+import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
-import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import AddCircle from '@material-ui/icons/AddCircle';
+import MUIDataTable from 'mui-datatables';
 import Icon from '@material-ui/core/Icon';
 import CreateBanner from '../CreateBanner';
 import Alert from 'AppComponents/Shared/Alert';
 import settings from '../../../../../../site/public/conf/settings';
 
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
     root: {
         display: 'flex',
         flexWrap: 'wrap',
@@ -67,35 +62,31 @@ const useStyles = makeStyles((theme) => ({
         flexGrow: 1,
         marginTop: 10,
     },
-}));
+});
 
-let allCategories = [];
-
-const handleCreateClick = () => {
-    const restApi = new API();
-    // following hardcoded line is only for dev purposes.
-    restApi.createAPICategory('new category', 'description goes here');
-};
-
-const deleteAllCategories = () => {
-    const restApi = new API();
-    allCategories.map((category) => {
-        console.log('delete request for id:', category.id);
-        restApi.deleteAPICategory(category.id);
-    });
-};
-
-const deleteAPICategory = (id, name, setUpdated) => {
+const deleteAPICategory = (id, name, setUpdated, intl) => {
     const restApi = new API();
     const promisedDelete = restApi.deleteAPICategory(id);
+    setUpdated(false);
     promisedDelete
         .then((response) => {
             if (response.status !== 200) {
-                Alert.info('Something went wrong while deleting the API!');
+                Alert.info(
+                    intl.formatMessage({
+                        id: 'api.categories.delete.api.category.unsuccesful',
+                        defaultMessage:
+                            'Something went wrong while deleting the API!',
+                    }),
+                );
                 return;
             }
-            setUpdated(false);
-            Alert.info(`API category: ${name} deleted Successfully`);
+            Alert.info(
+                intl.formatMessage({
+                    id: 'api.categories.delete.api.category.succesful',
+                    defaultMessage: 'API Category deleted successfully.',
+                }),
+            );
+            setUpdated(true);
         })
         .catch((error) => {
             if (error.status === 409) {
@@ -103,7 +94,13 @@ const deleteAPICategory = (id, name, setUpdated) => {
                     '[ ' + name + ' ] : ' + error.response.body.description,
                 );
             } else {
-                Alert.error('Something went wrong while deleting the API!');
+                Alert.error(
+                    intl.formatMessage({
+                        id: 'api.categories.delete.api.category.unsuccesful',
+                        defaultMessage:
+                            'Something went wrong while deleting the API!',
+                    }),
+                );
             }
         });
 };
@@ -111,21 +108,20 @@ const deleteAPICategory = (id, name, setUpdated) => {
 /**
  * Renders APICategories
  */
-export default function APICategories() {
-    const classes = useStyles();
+function APICategories(props) {
+    const { classes, intl } = props;
     const restApi = new API();
-    const [mgLabels, setMgLabels] = useState([]);
-    const [isUpdated, setUpdated] = useState(false);
+    const [apiCategories, setApiCategories] = useState([]);
+    const [isUpdated, setUpdated] = useState(true);
 
     useEffect(() => {
-        restApi.apiCategoriesListGet().then((result) => {
-            if (!isUpdated) {
-                allCategories = result.body.list;
-                setMgLabels(result.body.list);
-                setUpdated(true);
-            }
-        });
-    });
+        if (isUpdated) {
+            restApi.apiCategoriesListGet().then((result) => {
+                setApiCategories(result.body.list);
+            });
+        }
+    }, [isUpdated]);
+
     const title = (
         <FormattedMessage
             id='create.banner.title.create.api.categories'
@@ -145,6 +141,111 @@ export default function APICategories() {
             defaultMessage='Create API Category'
         />
     );
+
+    const columns = [
+        { name: 'id', options: { display: false } },
+        {
+            name: 'name',
+            label: intl.formatMessage({
+                id: 'api.categories.table.header.category.name',
+                defaultMessage: 'Category Name',
+            }),
+        },
+        {
+            name: 'description',
+            label: intl.formatMessage({
+                id: 'api.categories.table.header.category.description',
+                defaultMessage: 'Description',
+            }),
+        },
+        {
+            name: 'noOfApis',
+            label: intl.formatMessage({
+                id: 'api.categories.table.header.category.number.of.apis',
+                defaultMessage: 'Number of APIs',
+            }),
+        },
+        {
+            name: 'actions',
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    if (tableMeta.rowData) {
+                        const row = tableMeta.rowData;
+                        return (
+                            <table className={classes.actionTable}>
+                                <tr>
+                                    <td>
+                                        <Link
+                                            to={{
+                                                pathname:
+                                                    settings.app.context +
+                                                    '/categories/api-categories/edit-api-category/' +
+                                                    row[0],
+                                                name: row[1],
+                                                description: row[2],
+                                            }}
+                                        >
+                                            <Button>
+                                                <Icon>edit</Icon>
+                                                <FormattedMessage
+                                                    id='api.categories.category.edit'
+                                                    defaultMessage='Edit'
+                                                />
+                                            </Button>
+                                        </Link>
+                                    </td>
+                                    <td>
+                                        <Button
+                                            // todo: when the rest api is completed, send the number_of_apis
+                                            // to this function and validate before deleting it.
+                                            // also, disabling the delete button can be done
+
+                                            onClick={() =>
+                                                deleteAPICategory(
+                                                    row[0],
+                                                    row[1],
+                                                    setUpdated,
+                                                    intl,
+                                                )
+                                            }
+                                            disabled={!isUpdated}
+                                        >
+                                            <Icon>delete_forever</Icon>
+                                            <FormattedMessage
+                                                id='api.categories.category.delete'
+                                                defaultMessage='Delete'
+                                            />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            </table>
+                        );
+                    }
+                    return false;
+                },
+                filter: false,
+                sort: false,
+                label: (
+                    <FormattedMessage
+                        id='api.categories.table.header.actions'
+                        defaultMessage='Actions'
+                    />
+                ),
+            },
+        },
+    ];
+
+    const options = {
+        filterType: 'multiselect',
+        selectableRows: 'none',
+        title: false,
+        filter: false,
+        sort: false,
+        print: false,
+        download: false,
+        viewColumns: false,
+        customToolbar: false,
+    };
 
     return (
         <div className={classes.heading}>
@@ -168,106 +269,32 @@ export default function APICategories() {
                     <Button size='small' className={classes.button}>
                         <AddCircle className={classes.buttonIcon} />
                         <FormattedMessage
-                            id='contents.main.heading.api.categories.add.new'
-                            defaultMessage='Add New API Category'
+                            id='contents.main.heading.api.categories.create.api.category'
+                            defaultMessage='Create API Category'
                         />
                     </Button>
                 </Link>
-                <Button
-                    size='small'
-                    className={classes.button}
-                    onClick={deleteAllCategories}
-                >
-                    {/* todo: remove this button */}
-                    <FormattedMessage
-                        id='contents.main.heading.api.categories.add_new.todo.remove.this'
-                        defaultMessage='Delete all - for dev'
-                    />
-                </Button>
             </div>
-            {mgLabels.length > 0 ? (
-                <Paper className={classes.gatewayPaper}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell align='left'>
-                                    Category Name
-                                </TableCell>
-                                <TableCell align='left'>Description</TableCell>
-                                <TableCell align='left'>
-                                    Number of APIs
-                                </TableCell>
-                                <TableCell>Actions</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {mgLabels.map((row) => (
-                                <TableRow key={row.name}>
-                                    <TableCell
-                                        component='th'
-                                        scope='row'
-                                        align='left'
-                                    >
-                                        {row.name}
-                                    </TableCell>
-                                    <TableCell align='left'>
-                                        {row.description}
-                                    </TableCell>
-                                    {/* todo: Fill following table cell with Number_of_APIs per api category after API is modified */}
-                                    <TableCell align='left'>-</TableCell>
-                                    <TableCell>
-                                        <table className={classes.actionTable}>
-                                            <tr>
-                                                <td>
-                                                    <Link to='/todo'>
-                                                        <Button>
-                                                            <Icon>edit</Icon>
-                                                            <FormattedMessage
-                                                                id='api.categories.category.edit'
-                                                                defaultMessage='Edit'
-                                                            />
-                                                        </Button>
-                                                    </Link>
-                                                </td>
-                                                <td>
-                                                    <Button
-                                                        // todo: when the rest api is completed, send the number_of_apis
-                                                        // to this function and validate before deleting it.
-                                                        // also, disabling the delete button can be done
-                                                        onClick={() =>
-                                                            deleteAPICategory(
-                                                                row.id,
-                                                                row.name,
-                                                                setUpdated,
-                                                            )
-                                                        }
-                                                        disabled={!isUpdated}
-                                                    >
-                                                        <Icon>
-                                                            delete_forever
-                                                        </Icon>
-                                                        <FormattedMessage
-                                                            id='api.categories.category.delete'
-                                                            defaultMessage='Delete'
-                                                        />
-                                                    </Button>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </Paper>
+            {apiCategories.length > 0 ? (
+                <MUIDataTable
+                    title={false}
+                    data={apiCategories}
+                    columns={columns}
+                    options={options}
+                />
             ) : (
                 <CreateBanner
                     title={title}
                     description={description}
                     buttonText={buttonText}
-                    onClick={handleCreateClick}
+                    to={
+                        settings.app.context +
+                        '/categories/api-categories/create-api-category'
+                    }
                 />
             )}
         </div>
     );
 }
+
+export default injectIntl(withStyles(styles)(APICategories));

@@ -104,50 +104,26 @@ const styles = (theme) => ({
 
 let apiCategory = {};
 let mhistory;
-let valid = { name: { invalid: false } };
 
-const validateAPICategoryName = (id, value) => {
-    apiCategory[id] = value;
-
-    valid[id].invalid = !(value && value.length > 0);
-    if (valid[id].invalid) {
-        valid[id].error = 'API Category name cannot be empty';
-    }
-
-    if (/\s/.test(value)) {
-        valid[id].invalid = true;
-        valid[id].error = 'API Category name cannot have spaces';
-    }
-
-    if (!valid[id].invalid && /[!@#$%^&*(),?"{}[\]|<>\t\n]/i.test(value)) {
-        valid[id].invalid = true;
-        valid[id].error = 'API Category name field contains special characters';
-    }
-    if (!valid[id].invalid) {
-        valid[id].error = '';
-    }
-    return valid;
-};
-
-const addAPICategory = (intl, setCreatingAPICategory) => {
-    valid = validateAPICategoryName('name', apiCategory.name);
-    if (valid.name.invalid) {
-        console.log(valid.name.error);
-        Alert.error(valid.name.error);
-        return;
-    }
+const updateAPICategory = (
+    apiCategoryId,
+    name,
+    setUpdatingAPICategory,
+    intl,
+) => {
     const restApi = new API();
-    setCreatingAPICategory(true);
-    const promisedCreateAPICategory = restApi.createAPICategory(
-        apiCategory.name,
-        apiCategory.description,
+    setUpdatingAPICategory(true);
+    const promisedUpdate = restApi.updateAPICategory(
+        apiCategoryId,
+        name,
+        apiCategory['description'],
     );
-    promisedCreateAPICategory
+    promisedUpdate
         .then(() => {
             Alert.info(
                 intl.formatMessage({
-                    id: 'api.categories.create.new.category.added.successfully',
-                    defaultMessage: 'API Category added successfully',
+                    id: 'api.categories.edit.category.updated.successfully',
+                    defaultMessage: 'API Category updated successfully',
                 }),
             );
             mhistory.push(settings.app.context + '/categories/api-categories');
@@ -161,22 +137,20 @@ const addAPICategory = (intl, setCreatingAPICategory) => {
         })
         .finally(() => {
             apiCategory = {};
-            setCreatingAPICategory(false);
+            setUpdatingAPICategory(false);
         });
-};
-
-const handleAPICategoryNameInput = ({ target: { id, value } }) => {
-    validateAPICategoryName(id, value);
 };
 
 const handleAPICategoryDescriptionInput = ({ target: { id, value } }) => {
     apiCategory[id] = value;
 };
 
-const CreateAPICategory = (props) => {
+const EditAPICategory = (props) => {
     const { classes, history, intl } = props;
+    const { name, description } = props.location;
+    const apiCategoryId = props.match.params.id;
     mhistory = history;
-    const [isCreatingAPICategory, setCreatingAPICategory] = useState(false);
+    const [isUpdatingAPICategory, setUpdatingAPICategory] = useState(false);
     return (
         <Grid container spacing={3}>
             <Grid item sm={12} md={12} />
@@ -202,8 +176,8 @@ const CreateAPICategory = (props) => {
                             <Icon>keyboard_arrow_right</Icon>
                             <Typography variant='h4'>
                                 <FormattedMessage
-                                    id='contents.api.categories.create.new.category'
-                                    defaultMessage='Create New API Category'
+                                    id='contents.api.categories.edit.api.category'
+                                    defaultMessage='Edit API Category'
                                 />
                             </Typography>
                         </div>
@@ -217,8 +191,8 @@ const CreateAPICategory = (props) => {
                                     placeholder='Name'
                                     helperText={
                                         <FormattedMessage
-                                            id='api.categories.create.new.category.short.description.name'
-                                            defaultMessage='Enter API Category Name ( Ex: finance )'
+                                            id='api.categories.edit.category.short.description.name'
+                                            defaultMessage='Editing API Category Name'
                                         />
                                     }
                                     fullWidth
@@ -227,7 +201,8 @@ const CreateAPICategory = (props) => {
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
-                                    onChange={handleAPICategoryNameInput}
+                                    value={name}
+                                    disabled={true}
                                 />
                             </FormControl>
                             <FormControl
@@ -241,7 +216,7 @@ const CreateAPICategory = (props) => {
                                     placeholder='Short description about the API category'
                                     helperText={
                                         <FormattedMessage
-                                            id='api.categories.create.new.category.short.description.description'
+                                            id='api.categories.edit.category.short.description.description'
                                             defaultMessage='Short description about the API category'
                                         />
                                     }
@@ -249,6 +224,7 @@ const CreateAPICategory = (props) => {
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
+                                    defaultValue={description}
                                     multiline
                                     onChange={handleAPICategoryDescriptionInput}
                                 />
@@ -258,18 +234,20 @@ const CreateAPICategory = (props) => {
                                     variant='contained'
                                     color='primary'
                                     onClick={() =>
-                                        addAPICategory(
+                                        updateAPICategory(
+                                            apiCategoryId,
+                                            name,
+                                            setUpdatingAPICategory,
                                             intl,
-                                            setCreatingAPICategory,
                                         )
                                     }
                                     className={classes.saveButton}
-                                    disabled={isCreatingAPICategory}
+                                    disabled={isUpdatingAPICategory}
                                 >
-                                    {isCreatingAPICategory ? (
+                                    {isUpdatingAPICategory ? (
                                         <>
                                             <FormattedMessage
-                                                id='Apis.Details.Scopes.CreateScope.saving'
+                                                id='api.categories.edit.category.saving'
                                                 defaultMessage='Saving'
                                             />
                                             <CircularProgress
@@ -281,7 +259,7 @@ const CreateAPICategory = (props) => {
                                         </>
                                     ) : (
                                         <FormattedMessage
-                                            id='api.categories.create.new.category.save'
+                                            id='api.categories.edit.category.save'
                                             defaultMessage='Save'
                                         />
                                     )}
@@ -294,7 +272,7 @@ const CreateAPICategory = (props) => {
                                 >
                                     <Button>
                                         <FormattedMessage
-                                            id='api.categories.create.new.category.cancel'
+                                            id='api.categories.edit.category.cancel'
                                             defaultMessage='Cancel'
                                         />
                                     </Button>
@@ -308,4 +286,4 @@ const CreateAPICategory = (props) => {
     );
 };
 
-export default injectIntl(withStyles(styles)(CreateAPICategory));
+export default injectIntl(withStyles(styles)(EditAPICategory));

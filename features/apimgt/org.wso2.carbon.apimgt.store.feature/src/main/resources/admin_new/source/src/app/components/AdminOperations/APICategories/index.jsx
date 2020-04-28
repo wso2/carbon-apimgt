@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -19,6 +19,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CreateAPICategory from './CreateAPICategory';
+import EditAPICategory from './EditAPICategory';
 import APICategories from './APICategories';
 import settings from '../../../../../../site/public/conf/settings';
 
@@ -37,6 +38,14 @@ const APICategory = () => {
                     '/categories/api-categories/create-api-category'
                 }
                 component={(props) => <CreateAPICategory {...props} />}
+            />
+            <Route
+                exact
+                path={
+                    settings.app.context +
+                    '/categories/api-categories/edit-api-category/:id'
+                }
+                component={(props) => <EditAPICategory {...props} />}
             />
             <Route component={ResourceNotFound} />
         </Switch>
