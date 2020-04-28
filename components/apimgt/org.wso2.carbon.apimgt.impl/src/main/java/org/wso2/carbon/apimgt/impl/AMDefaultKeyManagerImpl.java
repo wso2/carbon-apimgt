@@ -1172,6 +1172,23 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     /**
+     * This method will be used to validate the scope set provided and populate the additional parameters
+     * (description and bindings) for each Scope object.
+     *
+     * @param scopes Scope set to validate
+     * @throws APIManagementException if an error occurs while validating and populating
+     */
+    @Override
+    public void validateScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException {
+
+        for (Scope scope : scopes) {
+            Scope sharedScope = getScopeByName(scope.getName(), tenantDomain);
+            scope.setDescription(sharedScope.getDescription());
+            scope.setRoles(sharedScope.getRoles());
+        }
+    }
+
+    /**
      * This method will be used to register a service provider application in the authorization server for the given
      * tenant.
      *

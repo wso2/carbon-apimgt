@@ -1378,16 +1378,6 @@ public interface APIProvider extends APIManager {
     Scope getSharedScopeByUUID(String sharedScopeId, String tenantDomain) throws APIManagementException;
 
     /**
-     * Get shared scope by name.
-     *
-     * @param sharedScopeName Shared scope name
-     * @param tenantDomain    tenant domain
-     * @return Shared scope
-     * @throws APIManagementException If failed to get the scope
-     */
-    Scope getSharedScopeByName(String sharedScopeName, String tenantDomain) throws APIManagementException;
-
-    /**
      * Delete shared scope.
      *
      * @param scopeName Shared scope name
@@ -1404,4 +1394,13 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If failed to update
      */
     void updateSharedScope(Scope sharedScope, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Validate a shared scopes set. Add the additional attributes (scope description, bindings etc).
+     *
+     * @param scopes       Shared scopes set
+     * @param tenantDomain Tenant domain
+     * @throws APIManagementException If failed to validate
+     */
+    void validateSharedScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException;
 }
