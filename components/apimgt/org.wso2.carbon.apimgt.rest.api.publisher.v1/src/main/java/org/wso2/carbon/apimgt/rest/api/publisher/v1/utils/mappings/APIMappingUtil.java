@@ -2397,7 +2397,7 @@ public class APIMappingUtil {
         scopeDTOS.forEach(scopeDTO -> {
             APIScopeDTO apiScopeDTO = new APIScopeDTO();
             apiScopeDTO.setScope(scopeDTO);
-            apiScopeDTO.setIsShared(allSharedScopeKeys.contains(scopeDTO.getName()) ? Boolean.TRUE : Boolean.FALSE);
+            apiScopeDTO.setShared(allSharedScopeKeys.contains(scopeDTO.getName()) ? Boolean.TRUE : Boolean.FALSE);
             apiScopeDTOS.add(apiScopeDTO);
         });
         return apiScopeDTOS;

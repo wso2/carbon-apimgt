@@ -275,7 +275,7 @@ class CreateScope extends React.Component {
         });
         scopes.push({
             scope,
-            isShared: false,
+            shared: false,
         });
         const updateProperties = { scopes };
         const promisedApiUpdate = updateAPI(updateProperties);
