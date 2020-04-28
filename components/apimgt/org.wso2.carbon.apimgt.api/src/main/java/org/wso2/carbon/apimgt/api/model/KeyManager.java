@@ -273,29 +273,43 @@ public interface KeyManager {
     Map<String, Scope> getAllScopes(String tenantDomain) throws APIManagementException;
 
     /**
-     * This method will be used to attach a Scope in the authorization server to an API resource.
+     * This method will be used to attach the resource scopes of an API in the authorization server.
      *
      * @param api          API
-     * @param uriTemplate  URITemplate
-     * @param scope        Scope to attach
+     * @param uriTemplates URITemplate Set with attached scopes
      * @param tenantDomain tenant domain
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs while attaching resource scopes of the API
      */
-    void attachScopeToResource(API api, URITemplate uriTemplate, Scope scope, String tenantDomain)
+    void attachResourceScopes(API api, Set<URITemplate> uriTemplates, String tenantDomain)
             throws APIManagementException;
 
     /**
-     * This method will be used to detach a Scope in the authorization server from an API resource.
+     * This method will be used to update the local scopes and resource to scope attachments of an API in the
+     * authorization server.
      *
-     * @param apiIdentifier
-     * @param context
-     * @param uriTemplate
-     * @param scope
-     * @param tenantDomain
-     * @throws APIManagementException
+     * @param api               API
+     * @param oldLocalScopeKeys Old local scopes of the API before update
+     * @param newLocalScopes    New local scopes of the API after update
+     * @param oldURITemplates   Old URI templates of the API before update
+     * @param newURITemplates   New URI templates of the API after update
+     * @param tenantDomain      Tenant Domain
+     * @throws APIManagementException if fails to update resources scopes
      */
-    void detachScopeToResource(APIIdentifier apiIdentifier, String context, URITemplate uriTemplate, Scope scope,
-                               String tenantDomain) throws APIManagementException;
+    void updateResourceScopes(API api, Set<String> oldLocalScopeKeys, Set<Scope> newLocalScopes,
+                              Set<URITemplate> oldURITemplates, Set<URITemplate> newURITemplates, String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * This method will be used to detach the resource scopes of an API and delete the local scopes of that API from
+     * the authorization server.
+     *
+     * @param api          API   API
+     * @param uriTemplates URITemplate Set with attach scopes to detach
+     * @param tenantDomain Tenant Domain
+     * @throws APIManagementException if an error occurs while detaching resource scopes of the API.
+     */
+    void detachResourceScopes(API api, Set<URITemplate> uriTemplates, String tenantDomain)
+            throws APIManagementException;
 
     /**
      * This method will be used to delete a Scope in the authorization server.
