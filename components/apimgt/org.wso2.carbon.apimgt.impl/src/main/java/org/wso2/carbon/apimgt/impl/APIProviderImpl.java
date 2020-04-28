@@ -826,7 +826,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(
                     "Error in retrieving Tenant Information while adding api :" + api.getId().getApiName(), e);
         }
-        apiMgtDAO.addAPI(api, tenantId);
+        addAPI(api, tenantId);
 
         JSONObject apiLogObject = new JSONObject();
         apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
@@ -859,6 +859,114 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //notify key manager with API addition
         registerOrUpdateResourceInKeyManager(api);
     }
+
+    /**
+     * Add API metadata, local scopes and URI templates to the database and KeyManager.
+     *
+     * @param api      API to add
+     * @param tenantId Tenant Id
+     * @throws APIManagementException if an error occurs while adding the API
+     */
+    private void addAPI(API api, int tenantId) throws APIManagementException {
+
+        int apiId = apiMgtDAO.addAPI(api, tenantId);
+        addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
+        addURITemplates(apiId, api, tenantId);
+    }
+
+    /**
+     * Add local scopes for the API if the scopes does not exist as shared scopes. The local scopes to add will be
+     * take from the URI templates.
+     *
+     * @param apiIdentifier API Identifier
+     * @param uriTemplates  URI Templates
+     * @param tenantId      Tenant Id
+     * @throws APIManagementException if fails to add local scopes for the API
+     */
+    private void addLocalScopes(APIIdentifier apiIdentifier, int tenantId, Set<URITemplate> uriTemplates)
+            throws APIManagementException {
+
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        //Get the local scopes set to register for the API from URI templates
+        Set<Scope> scopesToRegister = getScopesToRegisterFromURITemplates(apiIdentifier, tenantId, uriTemplates);
+        //Register scopes
+        for (Scope scope : scopesToRegister) {
+            String scopeKey = scope.getKey();
+            // Check if key already registered in KM. Scope Key may be already registered for a different version.
+            if (!keyManager.isScopeExists(scopeKey, tenantDomain)) {
+                //register scope in KM
+                keyManager.registerScope(scope, tenantDomain);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Scope: " + scopeKey + " already registered in KM. Skipping registering scope.");
+                }
+            }
+        }
+    }
+
+    /**
+     * Extract the scopes set from URI templates which needs to be registered as local scopes for the API.
+     *
+     * @param apiIdentifier API Identifier
+     * @param tenantId      Tenant Id
+     * @param uriTemplates  URI templates
+     * @return Local Scopes set to register
+     * @throws APIManagementException if fails to extract Scopes from URI templates
+     */
+    private Set<Scope> getScopesToRegisterFromURITemplates(APIIdentifier apiIdentifier, int tenantId,
+                                                           Set<URITemplate> uriTemplates)
+            throws APIManagementException {
+
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        Set<Scope> scopesToRegister = new HashSet<>();
+        Set<Scope> uriTemplateScopes = new HashSet<>();
+        //Get the attached scopes set from the URI templates
+        for (URITemplate uriTemplate : uriTemplates) {
+            List<Scope> scopesFromURITemplate = uriTemplate.retrieveAllScopes();
+            for (Scope scopeFromURITemplate : scopesFromURITemplate) {
+                if (scopeFromURITemplate == null) {
+                    continue; // No scopes attached for the URI Template
+                }
+                uriTemplateScopes.add(scopeFromURITemplate);
+            }
+        }
+
+        //Validate and extract only the local scopes which need to be registered in KM
+        for (Scope scope : uriTemplateScopes) {
+            String scopeKey = scope.getKey();
+            //Check if it an existing shared scope, if so skip adding scope
+            if (!isSharedScopeNameExists(scopeKey, tenantDomain)) {
+                // Check if scope key is already assigned locally to a different API (Other than different versions of
+                // the same API.
+                if (!isScopeKeyAssignedLocally(apiIdentifier, scope.getKey(), tenantId)) {
+                    scopesToRegister.add(scope);
+                } else {
+                    throw new APIManagementException("Error while adding local scopes for API " + apiIdentifier
+                            + ". Scope: " + scopeKey + " already assigned locally for a different API.");
+                }
+            } else if (log.isDebugEnabled()) {
+                log.debug("Scope " + scopeKey + " exists as a shared scope. Skip adding as a local scope.");
+            }
+        }
+        return scopesToRegister;
+    }
+
+    /**
+     * Add URI templates for the API.
+     *
+     * @param apiId    API Id
+     * @param api      API
+     * @param tenantId Tenant Id
+     * @throws APIManagementException if fails to add URI templates for the API
+     */
+    private void addURITemplates(int apiId, API api, int tenantId) throws APIManagementException {
+
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        apiMgtDAO.addURITemplates(apiId, api, tenantId);
+        KeyManagerHolder.getKeyManagerInstance().attachResourceScopes(api, api.getUriTemplates(), tenantDomain);
+    }
+
 
     /**
      * Notify the key manager with API update or addition
@@ -1226,7 +1334,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //get product resource mappings on API before updating the API. Update uri templates on api will remove all
             //product mappings as well.
             List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
-            apiMgtDAO.updateAPI(api, tenantId, userNameWithoutChange);
+            updateAPI(api, tenantId, userNameWithoutChange);
             updateProductResourceMappings(api, productResources);
 
             if (log.isDebugEnabled()) {
@@ -1360,6 +1468,52 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //notify key manager with API update
         registerOrUpdateResourceInKeyManager(api);
+    }
+
+    /**
+     * Update API metadata and resources.
+     *
+     * @param api      API to update
+     * @param tenantId Tenant Id
+     * @param username Username of the user who is updating
+     * @throws APIManagementException If fails to update API.
+     */
+    private void updateAPI(API api, int tenantId, String username) throws APIManagementException {
+
+        apiMgtDAO.updateAPI(api, tenantId, username);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
+        }
+        int apiId = apiMgtDAO.getAPIID(api.getId(), null);
+        updateAPIResources(apiId, api, tenantId);
+    }
+
+    /**
+     * Update resources of the API including local scopes and resource to scope attachments.
+     *
+     * @param apiId    API Id
+     * @param api      API
+     * @param tenantId Tenant Id
+     * @throws APIManagementException If fails to update local scopes of the API.
+     */
+    private void updateAPIResources(int apiId, API api, int tenantId) throws APIManagementException {
+
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        Set<String> oldLocalScopeKeys = apiMgtDAO.getUnversionedLocalScopeKeysForAPI(apiId, tenantId);
+        Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(api.getId());
+        Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(api.getId(), tenantId, api.getUriTemplates());
+        apiMgtDAO.updateURITemplates(apiId, api, tenantId);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully updated the URI templates of API: " + api.getId() + " in the database");
+        }
+        // Update the resource scopes of the API in KM.
+        // Need to remove the old local scopes and register new local scopes and, update the resource scope mappings
+        // using the updated URI templates of the API.
+        KeyManagerHolder.getKeyManagerInstance().updateResourceScopes(api, oldLocalScopeKeys, newLocalScopes,
+                oldURITemplates, api.getUriTemplates(), tenantDomain);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully updated the resource scopes of API: " + api.getId() + " in Key Manager");
+        }
     }
 
     private void updateEndpointSecurity(API oldApi, API api) throws APIManagementException {
@@ -3068,7 +3222,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         + api.getId().getApiName(), e);
             }
 
-            apiMgtDAO.addAPI(newAPI, tenantId);
+            addAPI(newAPI, tenantId);
             registry.commitTransaction();
             transactionCommitted = true;
 
@@ -3812,7 +3966,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 contextCache.remove(context);
                 contextCache.put(context, Boolean.FALSE);
             }
-            apiMgtDAO.deleteAPI(identifier);
+            deleteAPI(api);
             if (log.isDebugEnabled()) {
                 String logMessage =
                         "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
@@ -3879,6 +4033,42 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Failed to remove the API from : " + path, e);
         } catch (WorkflowException e) {
             handleException("Failed to execute workflow cleanup task ", e);
+        }
+    }
+
+    /**
+     * Deletes API from the database and delete local scopes and resource scope attachments from KM.
+     *
+     * @param api API to delete
+     * @throws APIManagementException if fails to delete the API
+     */
+    private void deleteAPI(API api) throws APIManagementException {
+
+        APIIdentifier apiIdentifier = api.getId();
+        int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        int apiId = apiMgtDAO.getAPIID(apiIdentifier, null);
+        // Get local scopes for the given API which are not already assigned for different versions of the same API
+        Set<String> localScopeKeysToDelete = apiMgtDAO.getUnversionedLocalScopeKeysForAPI(apiId, tenantId);
+        // Get the URI Templates for the given API to detach the resources scopes from
+        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier);
+        // Detach all the resource scopes from the API resources in KM
+        KeyManagerHolder.getKeyManagerInstance().detachResourceScopes(api, uriTemplates, tenantDomain);
+        if (log.isDebugEnabled()) {
+            log.debug("Resource scopes are successfully detached for the API : " + apiIdentifier
+                    + " from KeyManager.");
+        }
+        // remove the local scopes from the KM
+        for (String localScope : localScopeKeysToDelete) {
+            KeyManagerHolder.getKeyManagerInstance().deleteScope(localScope, tenantDomain);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Local scopes are successfully deleted for the API : " + apiIdentifier
+                    + " from KeyManager.");
+        }
+        apiMgtDAO.deleteAPI(apiIdentifier);
+        if (log.isDebugEnabled()) {
+            log.debug("API : " + apiIdentifier + " is successfully deleted from the database and KeyManager.");
         }
     }
 
