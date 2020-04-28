@@ -8063,20 +8063,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Get shared scope by name.
-     *
-     * @param sharedScopeName Shared scope name
-     * @param tenantDomain    tenant domain
-     * @return Shared scope
-     * @throws APIManagementException If failed to get the scope
-     */
-    @Override
-    public Scope getSharedScopeByName(String sharedScopeName, String tenantDomain) throws APIManagementException {
-
-        return KeyManagerHolder.getKeyManagerInstance().getScopeByName(sharedScopeName, tenantDomain);
-    }
-
-    /**
      * Delete shared scope.
      *
      * @param scopeName    Shared scope name
@@ -8104,6 +8090,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void updateSharedScope(Scope sharedScope, String tenantDomain) throws APIManagementException {
 
         KeyManagerHolder.getKeyManagerInstance().updateScope(sharedScope, tenantDomain);
+    }
+
+    /**
+     * Validate a shared scopes set. Add the additional attributes (scope description, bindings etc).
+     *
+     * @param scopes Shared scopes set
+     * @throws APIManagementException If failed to validate
+     */
+    @Override
+    public void validateSharedScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException {
+
+        KeyManagerHolder.getKeyManagerInstance().validateScopes(scopes, tenantDomain);
     }
 
     /**

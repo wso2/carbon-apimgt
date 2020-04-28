@@ -124,6 +124,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
@@ -4131,6 +4132,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         APIProvider apiProvider = RestApiUtil.getProvider(username);
+        Set<Scope> sharedAPIScopes = new HashSet<>();
 
         for (Scope scope : api.getScopes()) {
             String scopeName = scope.getName();
@@ -4145,9 +4147,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                             .handleBadRequest("Scope " + scopeName + " is already assigned locally by another "
                                     + "API", log);
                 } else if (apiProvider.isSharedScopeNameExists(scopeName, tenantDomain)) {
-                    Scope sharedScope = apiProvider.getSharedScopeByName(scopeName, tenantDomain);
-                    scope.setDescription(sharedScope.getDescription());
-                    scope.setRoles(sharedScope.getRoles());
+                    sharedAPIScopes.add(scope);
+                    continue;
                 }
             }
             //set description as empty if it is not provided
@@ -4164,6 +4165,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
         }
+
+        apiProvider.validateSharedScopes(sharedAPIScopes, tenantDomain);
     }
 
     /**
