@@ -18,6 +18,7 @@
  */
 
 package org.wso2.carbon.apimgt.impl.definitions;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.swagger.oas.inflector.examples.ExampleBuilder;
@@ -67,6 +68,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -78,6 +80,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYPE;
 
@@ -85,16 +88,16 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYP
  * Models API definition using OAS (OpenAPI 3.0) parser
  */
 public class OAS3Parser extends APIDefinition {
-    private static final Log log = LogFactory.getLog(OAS3Parser.class);
     static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
-    static List<String> otherSchemes;
+    private static final Log log = LogFactory.getLog(OAS3Parser.class);
+    private List<String> otherSchemes;
 
-    public static List<String> getOtherSchemes() {
+    private  List<String> getOtherSchemes() {
         return otherSchemes;
     }
 
-    public static void setOtherSchemes(List<String> otherSchemes) {
-        OAS3Parser.otherSchemes = otherSchemes;
+    private void setOtherSchemes(List<String> otherSchemes) {
+        this.otherSchemes = otherSchemes;
     }
 
     /**
@@ -758,7 +761,7 @@ public class OAS3Parser extends APIDefinition {
      * @param operation       Swagger path operation
      * @return list of scopes using the security requirements
      */
-    private static List<String> getScopeOfOperations(String oauth2SchemeKey, Operation operation) {
+    private  List<String> getScopeOfOperations(String oauth2SchemeKey, Operation operation) {
         List<SecurityRequirement> security = operation.getSecurity();
         if (security != null) {
             for (Map<String, List<String>> requirement : security) {
@@ -776,7 +779,7 @@ public class OAS3Parser extends APIDefinition {
      * @param operation
      * @return
      */
-    private static List<String> getScopeOfOperationsFromExtensions(Operation operation) {
+    private List<String> getScopeOfOperationsFromExtensions(Operation operation) {
         Map<String, Object> extensions = operation.getExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
             String scopeKey = (String) extensions.get(APIConstants.SWAGGER_X_SCOPE);
@@ -792,7 +795,7 @@ public class OAS3Parser extends APIDefinition {
      * @return Scope set
      * @throws APIManagementException if an error occurred
      */
-    private static Set<Scope> getScopesFromExtensions(OpenAPI openAPI) throws APIManagementException {
+    private Set<Scope> getScopesFromExtensions(OpenAPI openAPI) throws APIManagementException {
         Set<Scope> scopeList = new LinkedHashSet<>();
         Map<String, Object> extensions = openAPI.getExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
@@ -1150,7 +1153,7 @@ public class OAS3Parser extends APIDefinition {
      * @param oasDefinition OAS definition
      * @return OpenAPI
      */
-    static OpenAPI getOpenAPI(String oasDefinition) {
+    OpenAPI getOpenAPI(String oasDefinition) {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(oasDefinition, null, null);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
@@ -1251,11 +1254,11 @@ public class OAS3Parser extends APIDefinition {
      * @return is default is given already
      * @throws APIManagementException
      */
-    static boolean isDefaultIsGiven (String swaggerContent) throws APIManagementException {
+    private boolean isDefaultGiven(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
         boolean isDefaultIsGiven = true;
         SecurityScheme checkDefault = openAPI.getComponents().getSecuritySchemes().get(OPENAPI_SECURITY_SCHEMA_KEY);
-        if(checkDefault == null){
+        if (checkDefault == null) {
             isDefaultIsGiven = false;
         }
         return isDefaultIsGiven;
@@ -1269,7 +1272,7 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException
      */
     @Override
-    public Set<Scope> injectOtherScopesToDefault(String swaggerContent) throws APIManagementException {
+    public Set<Scope> injectOtherScopesToDefaultScheme(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
         Map<String, SecurityScheme> securitySchemes = null;
         SecurityScheme securityScheme;
@@ -1278,13 +1281,13 @@ public class OAS3Parser extends APIDefinition {
         Components component = openAPI.getComponents();
         List<String> otherSetofSchemes = new ArrayList<>();
         Set<Scope> scopeSet = new HashSet<>();
-        boolean isDefaultAvailable = isDefaultIsGiven(swaggerContent);
+        boolean isDefaultAvailable = isDefaultGiven(swaggerContent);
 
         if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes()) != null
-            && !isDefaultAvailable) {
+                && !isDefaultAvailable) {
             //If there is no default type schemes set a one
             SecurityScheme newDefault = new SecurityScheme();
-            securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY,newDefault);
+            securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, newDefault);
             Iterator<Map.Entry<String, SecurityScheme>> iterator = securitySchemes.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<String, SecurityScheme> entry = iterator.next();
@@ -1301,17 +1304,17 @@ public class OAS3Parser extends APIDefinition {
                         defaultTypeFlow = new OAuthFlow();
                     }
                     Scopes defaultFlowScopes = defaultTypeFlow.getScopes();
-                    if (defaultFlowScopes == null){
-                        defaultFlowScopes = new Scopes();
-                    }
-                    SecurityScheme notdeftype = entry.getValue();
-                    OAuthFlows notdefTypeFlows = notdeftype.getFlows();
-                    OAuthFlow notdefTypeFlow = notdeftype.getFlows().getImplicit();
-                    Scopes notdefFlowScopes = notdefTypeFlow.getScopes();
                     if (defaultFlowScopes == null) {
                         defaultFlowScopes = new Scopes();
                     }
-                    for (Map.Entry<String, String> input : notdefFlowScopes.entrySet()) {
+                    SecurityScheme noneDefaultType = entry.getValue();
+                    OAuthFlows noneDefaultTypeFlows = noneDefaultType.getFlows();
+                    OAuthFlow noneDefaultTypeFlow = noneDefaultType.getFlows().getImplicit();
+                    Scopes noneDefaultFlowScopes = noneDefaultTypeFlow.getScopes();
+                    if (defaultFlowScopes == null) {
+                        defaultFlowScopes = new Scopes();
+                    }
+                    for (Map.Entry<String, String> input : noneDefaultFlowScopes.entrySet()) {
                         String name = input.getKey();
                         String description = input.getValue();
                         //Inject scopes set into default scheme
@@ -1321,26 +1324,26 @@ public class OAS3Parser extends APIDefinition {
                         defaultType.setFlows(defaultTypeFlows);
                     }
                     //Check X-Scope Bindings
-                    Map<String, String> notdefScopeBindings, defScopeBindings = null;
-                    Map<String, Object> defTypeExtension = defaultTypeFlow.getExtensions();
-                    if (defTypeExtension == null) {
-                        defTypeExtension = new HashMap<>();
+                    Map<String, String> noneDefaultScopeBindings, defaultScopeBindings = null;
+                    Map<String, Object> defaultTypeExtension = defaultTypeFlow.getExtensions();
+                    if (defaultTypeExtension == null) {
+                        defaultTypeExtension = new HashMap<>();
                     }
-                    if (notdefTypeFlow.getExtensions() != null && (notdefScopeBindings =
-                            (Map<String, String>) notdefTypeFlow.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS))
+                    if (noneDefaultTypeFlow.getExtensions() != null && (noneDefaultScopeBindings =
+                            (Map<String, String>) noneDefaultTypeFlow.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS))
                             != null) {
-                        defScopeBindings = (Map<String, String>) defTypeExtension.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
-                        if (defScopeBindings == null) {
-                            defScopeBindings = new HashMap<>();
+                        defaultScopeBindings = (Map<String, String>) defaultTypeExtension.get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+                        if (defaultScopeBindings == null) {
+                            defaultScopeBindings = new HashMap<>();
                         }
-                        for (Map.Entry<String, String> roleInUse : notdefScopeBindings.entrySet()) {
-                            String notdeftypescope = roleInUse.getKey();
-                            String notdeftypeRole = roleInUse.getValue();
-                            defScopeBindings.put(notdeftypescope, notdeftypeRole);
+                        for (Map.Entry<String, String> roleInUse : noneDefaultScopeBindings.entrySet()) {
+                            String noneDefaultTypeScope = roleInUse.getKey();
+                            String noneDefaultTypeRole = roleInUse.getValue();
+                            defaultScopeBindings.put(noneDefaultTypeScope, noneDefaultTypeRole);
                         }
                     }
-                    defTypeExtension.put(APIConstants.SWAGGER_X_SCOPES_BINDINGS, defScopeBindings);
-                    defaultTypeFlow.setExtensions(defTypeExtension);
+                    defaultTypeExtension.put(APIConstants.SWAGGER_X_SCOPES_BINDINGS, defaultScopeBindings);
+                    defaultTypeFlow.setExtensions(defaultTypeExtension);
                     defaultTypeFlows.setImplicit(defaultTypeFlow);
                     defaultType.setFlows(defaultTypeFlows);
                 }
@@ -1384,12 +1387,12 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException
      */
     @Override
-    public Set<URITemplate> injectOtherRescouceScopesToDefault(String resourceConfigsJSON) throws APIManagementException {
+    public Set<URITemplate> injectOtherResourceScopesToDefaultScheme(String resourceConfigsJSON) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(resourceConfigsJSON);
         Set<URITemplate> urlTemplates = new LinkedHashSet<>();
-        Set<Scope> scopes = injectOtherScopesToDefault(resourceConfigsJSON);
+        Set<Scope> scopes = injectOtherScopesToDefaultScheme(resourceConfigsJSON);
         List<String> schemes = getOtherSchemes();
-        boolean isDefaultAvailable = isDefaultIsGiven(resourceConfigsJSON);
+        boolean isDefaultAvailable = isDefaultGiven(resourceConfigsJSON);
 
         for (String pathKey : openAPI.getPaths().keySet()) {
             PathItem pathItem = openAPI.getPaths().get(pathKey);
@@ -1405,7 +1408,7 @@ public class OAS3Parser extends APIDefinition {
                         opScopesofDefault = new ArrayList<>();
                     }
                     //Handling scopes in resources which do not belong to 'default' scheme
-                    if(!isDefaultAvailable){
+                    if (!isDefaultAvailable) {
                         for (int i = 0; i < schemes.size(); i++) {
                             List<String> opScopesOfOthers = getScopeOfOperations(schemes.get(i), operation);
                             if (!opScopesOfOthers.isEmpty()) {

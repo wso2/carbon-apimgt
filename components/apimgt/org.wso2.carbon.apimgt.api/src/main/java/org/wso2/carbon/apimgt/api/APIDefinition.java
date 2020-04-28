@@ -203,14 +203,14 @@ public abstract class APIDefinition {
      * @param resourceConfigsJSON resource json
      * @return scopes
      */
-    public abstract Set<Scope> injectOtherScopesToDefault(String swaggerContent) throws APIManagementException;
+    public abstract Set<Scope> injectOtherScopesToDefaultScheme(String swaggerContent) throws APIManagementException;
 
     /**
      * This method changes the URI templates from the API definition as it support different schemes
      *
      * @return URI templates
      */
-    public abstract Set<URITemplate> injectOtherRescouceScopesToDefault(String resourceConfigsJSON)
+    public abstract Set<URITemplate> injectOtherResourceScopesToDefaultScheme(String resourceConfigsJSON)
             throws APIManagementException;
 
 }

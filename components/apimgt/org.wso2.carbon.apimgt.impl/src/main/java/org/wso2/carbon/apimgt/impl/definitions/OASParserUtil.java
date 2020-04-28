@@ -55,7 +55,6 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.converter.SwaggerConverter;
-import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1225,8 +1224,8 @@ public class OASParserUtil {
         //Load required properties from swagger to the API
         APIDefinition apiDefinition = getOASParser(swaggerContent);
         SwaggerVersion swaggerVersion = getSwaggerVersion(swaggerContent);
-        Set<Scope> scopes = apiDefinition.injectOtherScopesToDefault(swaggerContent);
-        Set<URITemplate> urlTemplates = apiDefinition.injectOtherRescouceScopesToDefault(swaggerContent);
+        Set<Scope> scopes = apiDefinition.injectOtherScopesToDefaultScheme(swaggerContent);
+        Set<URITemplate> urlTemplates = apiDefinition.injectOtherResourceScopesToDefaultScheme(swaggerContent);
         apiToAdd.setUriTemplates(urlTemplates);
         apiToAdd.setScopes(scopes);
         SwaggerData updatedSwager = new SwaggerData(apiToAdd);
