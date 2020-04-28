@@ -64,17 +64,28 @@ const styles = (theme) => ({
     },
 });
 
-const deleteAPICategory = (id, name, setUpdated) => {
+const deleteAPICategory = (id, name, setUpdated, intl) => {
     const restApi = new API();
     const promisedDelete = restApi.deleteAPICategory(id);
     setUpdated(false);
     promisedDelete
         .then((response) => {
             if (response.status !== 200) {
-                Alert.info('Something went wrong while deleting the API!');
+                Alert.info(
+                    intl.formatMessage({
+                        id: 'api.categories.delete.api.category.unsuccesful',
+                        defaultMessage:
+                            'Something went wrong while deleting the API!',
+                    }),
+                );
                 return;
             }
-            Alert.info(`API category: ${name} deleted Successfully`);
+            Alert.info(
+                intl.formatMessage({
+                    id: 'api.categories.delete.api.category.succesful',
+                    defaultMessage: 'API Category deleted successfully.',
+                }),
+            );
             setUpdated(true);
         })
         .catch((error) => {
@@ -83,7 +94,13 @@ const deleteAPICategory = (id, name, setUpdated) => {
                     '[ ' + name + ' ] : ' + error.response.body.description,
                 );
             } else {
-                Alert.error('Something went wrong while deleting the API!');
+                Alert.error(
+                    intl.formatMessage({
+                        id: 'api.categories.delete.api.category.unsuccesful',
+                        defaultMessage:
+                            'Something went wrong while deleting the API!',
+                    }),
+                );
             }
         });
 };
@@ -188,6 +205,7 @@ function APICategories(props) {
                                                     row[0],
                                                     row[1],
                                                     setUpdated,
+                                                    intl,
                                                 )
                                             }
                                             disabled={!isUpdated}
