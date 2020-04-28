@@ -268,6 +268,23 @@ class API extends Resource {
             );
         });
     }
+
+    updateApplicationOwner(id, owner, callback = null) {
+        const promise_update_application_owner = this.client.then((client) => {
+            return client.apis[
+                'Application'
+            ].post_applications__applicationId__change_owner(
+                { owner: owner, applicationId: id },
+                this._requestMetaData(),
+            );
+        });
+
+        if (callback) {
+            return promise_update_application_owner.then(callback);
+        } else {
+            return promise_update_application_owner;
+        }
+    }
 }
 
 API.CONSTS = {
