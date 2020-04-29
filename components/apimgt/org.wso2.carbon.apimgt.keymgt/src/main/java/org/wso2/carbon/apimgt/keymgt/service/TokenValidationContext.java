@@ -27,9 +27,7 @@ import org.wso2.carbon.identity.application.authentication.framework.model.Authe
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by Amila on 2/5/15.
- */
+
 public class TokenValidationContext {
 
     private String context;
@@ -46,7 +44,7 @@ public class TokenValidationContext {
     private AccessTokenInfo tokenInfo;
     private AuthenticatedUser user;
     private String authorizationCode;
-
+    private String tenantDomain;
     public AccessTokenInfo getTokenInfo() {
         return tokenInfo;
     }
@@ -157,5 +155,15 @@ public class TokenValidationContext {
 
     public void setAuthorizationCode(String authorizationCode) {
         this.authorizationCode = authorizationCode;
+    }
+
+    public String getTenantDomain() {
+
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+
+        this.tenantDomain = tenantDomain;
     }
 }

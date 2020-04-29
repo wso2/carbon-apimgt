@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -1887,22 +1886,8 @@ public abstract class AbstractAPIManager implements APIManager {
         throw new ApplicationNameWithInvalidCharactersException(msg);
     }
 
-    public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {
-        return apiMgtDAO.isAccessTokenExists(accessToken);
-    }
-
-    public boolean isApplicationTokenRevoked(String accessToken) throws APIManagementException {
-        return apiMgtDAO.isAccessTokenRevoked(accessToken);
-    }
-
-
     public APIKey getAccessTokenData(String accessToken) throws APIManagementException {
         return apiMgtDAO.getAccessTokenData(accessToken);
-    }
-
-    public Map<Integer, APIKey> searchAccessToken(String searchType, String searchTerm, String loggedInUser)
-            throws APIManagementException {
-        return Collections.emptyMap();
     }
 
     public Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException {
@@ -2749,7 +2734,8 @@ public abstract class AbstractAPIManager implements APIManager {
             String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
             // setting scope
             if (!apiIdsString.isEmpty()) {
-                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
                 Map<String, Set<Scope>> apiScopeSet = keyManager.getScopesForAPIS(apiIdsString, tenantDomain);
                 if (apiScopeSet.size() > 0) {
                     for (int i = 0; i < apiCount; i++) {
@@ -3139,7 +3125,7 @@ public abstract class AbstractAPIManager implements APIManager {
         String consumerKey = apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(String.valueOf(applicationId), keyType);
         if (StringUtils.isNotEmpty(consumerKey)) {
             String consumerKeyStatus = apiMgtDAO.getKeyStatusOfApplication(keyType, applicationId).getState();
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
             OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
             AccessTokenInfo tokenInfo = keyManager.getAccessTokenByConsumerKey(consumerKey);
             APIKey apiKey = new APIKey();

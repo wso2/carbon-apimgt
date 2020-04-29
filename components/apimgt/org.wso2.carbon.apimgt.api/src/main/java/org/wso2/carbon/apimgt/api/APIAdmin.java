@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -24,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * APIAdmin responsible for providing helper functionality
@@ -209,4 +211,15 @@ public interface APIAdmin  {
      * @return Timestamp in long format
      */
     long getTimestamp(String date);
+
+    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByTenant(String tenantDomain) throws APIManagementException;
+    Map<String, List<KeyManagerConfigurationDTO>> getAllKeyManagerConfigurations() throws APIManagementException;
+
+    KeyManagerConfigurationDTO getKeyManagerConfigurationById(String tenantDomain, String id) throws APIManagementException;
+    boolean isKeyManagerConfigurationExistById(String tenantDomain, String id) throws APIManagementException;
+    KeyManagerConfigurationDTO addKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO) throws APIManagementException;
+    KeyManagerConfigurationDTO updateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO) throws APIManagementException;
+    void deleteKeyManagerConfigurationById(String tenantDomain,String id) throws APIManagementException;
+
+    KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String tenantDomain, String name) throws APIManagementException;
 }

@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Arrays;
 
@@ -132,7 +133,8 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
         try {
             //get new key manager
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
 
             workflowDTO.getAppInfoDTO().getOAuthApplicationInfo()
                        .setClientName(application.getName());
@@ -155,7 +157,8 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
             AccessTokenInfo tokenInfo;
             if (oAuthApplication.getJsonString().contains(APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS)) {
-                AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication, null);
+                AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(keyManager,
+                        oAuthApplication, null);
                 tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
             } else {
                 tokenInfo = new AccessTokenInfo();

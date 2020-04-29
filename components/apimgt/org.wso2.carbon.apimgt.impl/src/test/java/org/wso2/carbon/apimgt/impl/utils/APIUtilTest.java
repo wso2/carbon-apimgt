@@ -60,8 +60,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.ServiceReferenceHolderMockCreator;
-import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
-import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -119,8 +117,7 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getOAuthConfigurationFro
 @RunWith(PowerMockRunner.class)
 @PrepareForTest( {LogFactory.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class,
         GovernanceUtils.class, AuthorizationManager.class, MultitenantUtils.class, GenericArtifactManager.class,
-        APIUtil.class, KeyManagerHolder.class, SubscriberKeyMgtClient.class, ApplicationManagementServiceClient
-        .class, OAuthAdminClient.class,ApiMgtDAO.class})
+        APIUtil.class, KeyManagerHolder.class, SubscriberKeyMgtClient.class,ApiMgtDAO.class})
 @PowerMockIgnore("javax.net.ssl.*")
 public class APIUtilTest {
 
@@ -1298,83 +1295,6 @@ public class APIUtilTest {
 
     }
 
-    @Test
-    public void testGetgetKeyManagementClient() throws Exception {
-        PowerMockito.mockStatic(KeyManagerHolder.class);
-        KeyManagerConfiguration keyManagerConfiguration = Mockito.mock(KeyManagerConfiguration.class);
-        KeyManager keyManagr = Mockito.mock(KeyManager.class);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManagr);
-        Mockito.when(keyManagr.getKeyManagerConfiguration()).thenReturn(keyManagerConfiguration);
-        Mockito.when(keyManagerConfiguration.getParameter(APIConstants.AUTHSERVER_URL)).thenReturn
-                ("https://localhost").thenReturn(null).thenReturn("https://localhost").thenReturn("https://localhost");
-        Mockito.when(keyManagerConfiguration.getParameter(APIConstants.KEY_MANAGER_USERNAME)).thenReturn("admin")
-                .thenReturn(null).thenReturn("admin").thenReturn(null).thenReturn("admin");
-        Mockito.when(keyManagerConfiguration.getParameter(APIConstants.KEY_MANAGER_PASSWORD)).thenReturn("admin")
-                .thenReturn("admin").thenReturn(null).thenReturn(null).thenReturn("admin");
-        PowerMockito.mockStatic(SubscriberKeyMgtClient.class);
-        SubscriberKeyMgtClient subscriberKeyMgtClient = Mockito.mock(SubscriberKeyMgtClient.class);
-        PowerMockito.whenNew(SubscriberKeyMgtClient.class).withArguments(Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString()).thenReturn(subscriberKeyMgtClient).thenThrow(Exception.class);
-
-        APIUtil.getKeyManagementClient();
-        try{
-            APIUtil.getKeyManagementClient();
-            Assert.fail();
-        }catch (APIManagementException ex){
-            Assert.assertTrue(ex.getMessage().contains("API key manager URL unspecified"));
-        }
-        try{
-            APIUtil.getKeyManagementClient();
-            Assert.fail();
-        }catch (APIManagementException ex){
-            Assert.assertTrue(ex.getMessage().contains("Authentication credentials for API key manager unspecified"));
-        }
-        try{
-            APIUtil.getKeyManagementClient();
-            Assert.fail();
-        }catch (APIManagementException ex){
-            Assert.assertTrue(ex.getMessage().contains("Authentication credentials for API key manager unspecified"));
-        }
-        try{
-            APIUtil.getKeyManagementClient();
-            Assert.fail();
-        }catch (APIManagementException ex){
-            Assert.assertTrue(ex.getMessage().contains("Error while initializing the subscriber key management client"));
-        }
-
-    }
-    @Test
-    public void testGetApplicationManagementServiceClient() throws Exception {
-        PowerMockito.mockStatic(ApplicationManagementServiceClient.class);
-        ApplicationManagementServiceClient applicationManagementServiceClient = Mockito.mock
-                (ApplicationManagementServiceClient.class);
-        PowerMockito.whenNew(ApplicationManagementServiceClient.class).withNoArguments().thenReturn
-                (applicationManagementServiceClient).thenThrow(Exception.class);
-        APIUtil.getApplicationManagementServiceClient();
-        Assert.assertTrue(true);
-        try{
-            APIUtil.getApplicationManagementServiceClient();
-            Assert.fail();
-        }catch (APIManagementException ex){
-            Assert.assertTrue(ex.getMessage().contains("Error while initializing the Application Management Service " +
-                    "client"));
-        }
-    }
-    @Test
-    public void testGetOAuthAdminClient() throws Exception {
-        PowerMockito.mockStatic(OAuthAdminClient.class);
-        OAuthAdminClient oAuthAdminClient = Mockito.mock(OAuthAdminClient.class);
-        PowerMockito.whenNew(OAuthAdminClient.class).withNoArguments().thenReturn(oAuthAdminClient).thenThrow
-                (Exception.class);
-        APIUtil.getOauthAdminClient();
-        Assert.assertTrue(true);
-        try{
-            APIUtil.getOauthAdminClient();
-            Assert.fail();
-        }catch (APIManagementException ex){
-            Assert.assertTrue(ex.getMessage().contains("Error while initializing the OAuth admin client"));
-        }
-    }
 
     @Test
     public void testGetRoleNamesNonSuperTenant() throws Exception {

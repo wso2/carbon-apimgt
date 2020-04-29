@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
@@ -313,7 +312,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     }
                     String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
                     if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
-                        info = getApiKeyDataForWSClient(apiKey);
+                        info = getApiKeyDataForWSClient(apiKey,tenantDomain);
                     } else {
                         return false;
                     }
@@ -348,8 +347,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey) throws APISecurityException {
-        return new WebsocketWSClient().getAPIKeyData(apiContextUri, version, apiKey);
+    protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey, String tenantDomain) throws APISecurityException {
+
+        return new WebsocketWSClient().getAPIKeyData(apiContextUri, version, apiKey, tenantDomain);
     }
 
     protected APIManagerAnalyticsConfiguration getApiManagerAnalyticsConfiguration() {

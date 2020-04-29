@@ -182,12 +182,12 @@ public class APIKeyValidator {
             }
         }
 
+        String tenantDomain = getTenantDomain();
         APIKeyValidationInfoDTO info = doGetKeyValidationInfo(context, prefixedVersion, apiKey, authenticationScheme, clientDomain,
-                matchingResource, httpVerb);
+                matchingResource, httpVerb,tenantDomain);
         if (info != null) {
             if (gatewayKeyCacheEnabled) {
                 //Get the tenant domain of the API that is being invoked.
-                String tenantDomain = getTenantDomain();
 
                 if (info.getValidationStatus() == APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS) {
                     // if Token is not valid token (expired,invalid,revoked) put into invalid token cache
@@ -245,10 +245,11 @@ public class APIKeyValidator {
 
     protected APIKeyValidationInfoDTO doGetKeyValidationInfo(String context, String apiVersion, String apiKey,
                                                              String authenticationScheme, String clientDomain,
-                                                             String matchingResource, String httpVerb) throws APISecurityException {
+                                                             String matchingResource, String httpVerb,
+                                                             String tenantDomain) throws APISecurityException {
 
         return dataStore.getAPIKeyData(context, apiVersion, apiKey, authenticationScheme, clientDomain,
-                matchingResource, httpVerb);
+                matchingResource, httpVerb,tenantDomain);
     }
 
     public void cleanup() {

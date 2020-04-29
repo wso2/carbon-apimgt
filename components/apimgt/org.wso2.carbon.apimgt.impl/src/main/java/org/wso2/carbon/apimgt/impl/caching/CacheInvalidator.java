@@ -20,19 +20,19 @@
 
 package org.wso2.carbon.apimgt.impl.caching;
 
-import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -110,12 +110,17 @@ public class CacheInvalidator {
 
             try {
                 consumerKeys = ApiMgtDAO.getInstance().getConsumerKeysOfApplication(appId);
-                activeTokens = new HashSet<String>();
-                for (String consumerKey : consumerKeys) {
-                    Set<String> tempTokens = KeyManagerHolder.getKeyManagerInstance().
-                            getActiveTokensByConsumerKey(consumerKey);
-                    if (tempTokens != null) {
-                        activeTokens.addAll(tempTokens);
+                Application application = ApiMgtDAO.getInstance().getLightweightApplicationById(appId);
+                String tenantDomain = MultitenantUtils.getTenantDomain(application.getSubscriber().getName());
+                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
+                if (keyManager != null) {
+                    activeTokens = new HashSet<>();
+                    for (String consumerKey : consumerKeys) {
+                        Set<String> tempTokens;
+                        tempTokens = keyManager.getActiveTokensByConsumerKey(consumerKey);
+                        if (tempTokens != null) {
+                            activeTokens.addAll(tempTokens);
+                        }
                     }
                 }
             } catch (APIManagementException e) {

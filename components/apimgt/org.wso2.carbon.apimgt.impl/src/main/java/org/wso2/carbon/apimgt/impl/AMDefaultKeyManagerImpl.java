@@ -70,7 +70,6 @@ import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClientPool;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
-import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
@@ -103,16 +102,15 @@ import javax.xml.namespace.QName;
  */
 public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
+    private static final Log log = LogFactory.getLog(AMDefaultKeyManagerImpl.class);
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
     private static final String GRANT_TYPE_VALUE = "client_credentials";
     private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
-    private static final String CONFIG_ELEM_OAUTH = "OAuth";
 
     private CloseableHttpClient kmHttpClient;
     private KeyManagerConfiguration configuration;
-
-    private static final Log log = LogFactory.getLog(AMDefaultKeyManagerImpl.class);
+    private SubscriberKeyMgtClientPool subscriberKeyMgtClientPool;
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
@@ -275,13 +273,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         SubscriberKeyMgtClient keyMgtClient = null;
         try {
-            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
+            keyMgtClient = subscriberKeyMgtClientPool.get();
             keyMgtClient.deleteOAuthApplication(consumerKey);
         } catch (Exception e) {
             handleException("Can not remove service provider for the given consumer key : " + consumerKey, e);
         } finally {
             if (keyMgtClient != null) {
-                SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+                subscriberKeyMgtClientPool.release(keyMgtClient);
             }
         }
     }
@@ -626,56 +624,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     @Override
     public void loadConfiguration(KeyManagerConfiguration configuration) throws APIManagementException {
-
-        if (configuration != null) {
-            this.configuration = configuration;
-        } else {
-            // If the provided configuration is null, read the Server-URL and other properties from
-            // APIKeyValidator section.            
-
-            /*
-             * we need to read identity.xml here because we need to get default validity time for access_token in order
-             * to set in semi-manual.
-             */
-            OMElement oauthElem = getOAuthConfigElement();
-
-            String validityPeriod = null;
-
-            if (oauthElem != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("identity configs have loaded. ");
-                }
-                // Primary/Secondary supported login mechanisms
-                OMElement loginConfigElem =
-                        oauthElem.getFirstChildWithName(getQNameWithIdentityNS("AccessTokenDefaultValidityPeriod"));
-                validityPeriod = loginConfigElem.getText();
-            }
-
-            if (this.configuration == null) {
-                this.configuration = new KeyManagerConfiguration();
-                this.configuration.setManualModeSupported(true);
-                this.configuration.setResourceRegistrationEnabled(true);
-                this.configuration.setTokenValidityConfigurable(true);
-                this.configuration.addParameter(APIConstants.AUTHSERVER_URL, getConfigurationElementValue(APIConstants
-                        .KEYMANAGER_SERVERURL));
-                this.configuration.addParameter(APIConstants.KEY_MANAGER_USERNAME,
-                        getConfigurationElementValue(APIConstants.API_KEY_VALIDATOR_USERNAME));
-                this.configuration.addParameter(APIConstants.KEY_MANAGER_PASSWORD,
-                        getConfigurationElementValue(APIConstants.API_KEY_VALIDATOR_PASSWORD))
-                ;
-                this.configuration.addParameter(APIConstants.REVOKE_URL, getConfigurationElementValue(APIConstants
-                        .REVOKE_API_URL));
-                this.configuration.addParameter(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD, validityPeriod);
-                String revokeUrl = getConfigurationElementValue(APIConstants.REVOKE_API_URL);
-
-                // Read the revoke url and replace revoke part to get token url.
-                String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
-                this.configuration.addParameter(APIConstants.TOKEN_URL, tokenUrl);
-            }
-        }
-
-        SubscriberKeyMgtClientPool.getInstance().setConfiguration(this.configuration);
-        //Initialize a Http Client and Connection Manager using the ServerURL of KM
+        this.configuration = configuration;
+        subscriberKeyMgtClientPool  = new SubscriberKeyMgtClientPool();
+        subscriberKeyMgtClientPool.setConfiguration(configuration);//Initialize a Http Client and Connection Manager using the ServerURL of KM
         initializeHttpClient();
     }
 
@@ -1311,10 +1262,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         SubscriberKeyMgtClient keyMgtClient = null;
         try {
-            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
+            keyMgtClient = subscriberKeyMgtClientPool.get();
             return keyMgtClient.createOAuthApplicationbyApplicationInfo(applicationToCreate);
         } finally {
-            SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+            subscriberKeyMgtClientPool.release(keyMgtClient);
         }
 
     }
@@ -1328,11 +1279,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         SubscriberKeyMgtClient keyMgtClient = null;
         try {
-            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
+            keyMgtClient = subscriberKeyMgtClientPool.get();
             return keyMgtClient
                     .updateOAuthApplication(userId, applicationName, callBackURL, clientId, grantTypes);
         } finally {
-            SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+            subscriberKeyMgtClientPool.release(keyMgtClient);
         }
 
     }
@@ -1343,11 +1294,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         SubscriberKeyMgtClient keyMgtClient = null;
         try {
-            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
+            keyMgtClient = subscriberKeyMgtClientPool.get();
             return keyMgtClient
                     .updateOAuthApplicationOwner(userId, owner, applicationName, callBackURL, clientId, grantTypes);
         } finally {
-            SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+            subscriberKeyMgtClientPool.release(keyMgtClient);
         }
     }
 
@@ -1356,10 +1307,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         SubscriberKeyMgtClient keyMgtClient = null;
         try {
-            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
+            keyMgtClient = subscriberKeyMgtClientPool.get();
             return keyMgtClient.getOAuthApplication(consumerKey);
         } finally {
-            SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+            subscriberKeyMgtClientPool.release(keyMgtClient);
         }
     }
 
@@ -1399,7 +1350,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      */
     protected String getConfigurationParamValue(String parameter) {
 
-        return configuration.getParameter(parameter);
+        return (String) configuration.getParameter(parameter);
     }
 
     /**

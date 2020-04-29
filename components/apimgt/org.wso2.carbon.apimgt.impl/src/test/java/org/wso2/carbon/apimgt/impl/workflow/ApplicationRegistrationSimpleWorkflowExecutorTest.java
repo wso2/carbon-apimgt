@@ -67,7 +67,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutorTest {
         workflowDTO.setApplication(application);
         workflowDTO.setAppInfoDTO(oAuthAppRequest);
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
+        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super")).thenReturn(keyManager);
         applicationRegistrationSimpleWorkflowExecutor = new ApplicationRegistrationSimpleWorkflowExecutor();
 
     }

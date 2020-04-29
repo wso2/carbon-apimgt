@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
@@ -99,6 +100,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
+
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
@@ -164,7 +166,6 @@ public class APIConsumerImplTest {
         PowerMockito.mockStatic(CacheInvalidator.class);
         PowerMockito.mockStatic(RegistryUtils.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
         PowerMockito.when(CacheInvalidator.getInstance()).thenReturn(cacheInvalidator);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantUserRealm(Mockito.anyInt())).thenReturn(userRealm);
@@ -173,7 +174,7 @@ public class APIConsumerImplTest {
         Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
         Mockito.when(registryService.getGovernanceSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authorizationManager);
-
+        Mockito.when(KeyManagerHolder.getKeyManagerInstance(Mockito.anyString())).thenReturn(keyManager);
         PowerMockito.when(APIUtil.replaceSystemProperty(anyString())).thenAnswer((Answer<String>) invocation -> {
             Object[] args = invocation.getArguments();
             return (String) args[0];
@@ -710,49 +711,6 @@ public class APIConsumerImplTest {
         assertNotNull(apiConsumer.renewConsumerSecret(clientId));
     }
 
-    @Test
-    public void testRenewAccessToken() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        String args[] = {UUID.randomUUID().toString(), UUID.randomUUID().toString()};
-        AccessTokenRequest tokenRequest = new AccessTokenRequest();
-        AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
-        Mockito.when(keyManager.getNewApplicationAccessToken((AccessTokenRequest) Mockito.anyObject())).thenReturn
-                (accessTokenInfo);
-        Mockito.when(ApplicationUtils.populateTokenRequest(Mockito.anyString(), (AccessTokenRequest) Mockito
-                .anyObject()))
-                .thenReturn(tokenRequest);
-        apiConsumer.username = "subscriber";
-        String oldAccessToken = UUID.randomUUID().toString();
-        String clientId = UUID.randomUUID().toString();
-        String applicationId = "1";
-
-        Map<String, String> consumerKeyTokenTypeMap = new HashMap<>();
-        consumerKeyTokenTypeMap.put("application_id", applicationId);
-        consumerKeyTokenTypeMap.put("token_type", "PRODUCTION");
-
-        Application application = Mockito.mock(Application.class);
-        Subscriber subscriber = Mockito.mock(Subscriber.class);
-        Mockito.when(application.getSubscriber()).thenReturn(subscriber);
-        Mockito.when(subscriber.getName()).thenReturn("subscriber");
-
-        apiConsumer.apiMgtDAO = apiMgtDAO;
-        Mockito.when(apiMgtDAO.getApplicationIdAndTokenTypeByConsumerKey(clientId)).thenReturn(consumerKeyTokenTypeMap);
-        Mockito.when(apiMgtDAO.getApplicationById(Integer.parseInt(applicationId))).thenReturn(application);
-        assertNotNull(apiConsumer.renewAccessToken(oldAccessToken, clientId, UUID.randomUUID().toString(),
-                "3600", args, "{}"));
-
-        // Error path
-        Mockito.when(ApplicationUtils.populateTokenRequest(Mockito.anyString(), (AccessTokenRequest) Mockito
-                .anyObject()))
-                .thenThrow(APIManagementException.class);
-        try {
-            apiConsumer.renewAccessToken(oldAccessToken, clientId, UUID.randomUUID().toString(),
-                    "3600", args, "{}");
-            assertTrue(false);
-        } catch (APIManagementException e) {
-            assertTrue(true);
-        }
-    }
 
     @Test
     public void testGetSubscriptionCount() throws APIManagementException {
@@ -909,17 +867,7 @@ public class APIConsumerImplTest {
         assertNotNull(apiConsumer.getSubscribedAPIs(subscriber, "testApplication","testID"));
     }
 
-    @Test
-    public void testDeleteOAuthApplication() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Map<String, String> applicationIdAndTokenTypeMap =new HashMap<String, String>();
-        applicationIdAndTokenTypeMap.put("application_id", "testId");
-        applicationIdAndTokenTypeMap.put("token_type", "testType");
-        Mockito.when(apiMgtDAO.getApplicationIdAndTokenTypeByConsumerKey("testKey")).
-                thenReturn(applicationIdAndTokenTypeMap);
-        apiConsumer.deleteOAuthApplication("testKey");
-        Assert.assertNotNull(KeyManagerHolder.getKeyManagerInstance());
-    }
+
 
     @Test
     public void testGetApplicationsByName() throws APIManagementException {
@@ -1036,7 +984,8 @@ public class APIConsumerImplTest {
         oAuthAppRequest.setOAuthApplicationInfo(oAuthApplicationInfo);
         BDDMockito.when(ApplicationUtils
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
+                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(oAuthAppRequest);
         Mockito.when(apiMgtDAO
                 .getConsumerKeyForApplicationKeyType(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString())).thenReturn(consumerKey);
@@ -1069,14 +1018,6 @@ public class APIConsumerImplTest {
                 .getClientName(), clientName);
     }
 
-    @Test
-    public void testGetApplications() throws APIManagementException {
-        Application[] applications = new Application[] { new Application(1), new Application(2) };
-        Mockito.when(apiMgtDAO.getApplications((Subscriber) Mockito.any(), Mockito.anyString()))
-                .thenReturn(applications);
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Assert.assertEquals(apiConsumer.getApplications(new Subscriber("sub1"), "1").length, 2);
-    }
 
     @Test
     public void testGetApplicationsWithPagination() throws APIManagementException {
@@ -1174,13 +1115,6 @@ public class APIConsumerImplTest {
         Assert.assertEquals(apiConsumer.getDeniedTiers().size(), 2);
     }
 
-    @Test
-    public void testIsApplicationTokenExists() throws APIManagementException {
-        Mockito.when(apiMgtDAO.isAccessTokenExists(Mockito.anyString())).thenReturn(false, true);
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Assert.assertFalse(apiConsumer.isApplicationTokenExists("sdsad-sfdsf"));
-        Assert.assertTrue(apiConsumer.isApplicationTokenExists("dsfdnR4V-TY56SF"));
-    }
 
     @Test
     public void testRequestApprovalForApplicationRegistration() throws APIManagementException, UserStoreException {
@@ -1231,7 +1165,8 @@ public class APIConsumerImplTest {
         application = new Application("app1", new Subscriber("1"));
         BDDMockito.when(ApplicationUtils
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
+                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                        Mockito.anyString())).thenReturn(oAuthAppRequest);
         BDDMockito.when(ApplicationUtils
                 .retrieveApplication(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(application);
@@ -1412,14 +1347,15 @@ public class APIConsumerImplTest {
         oAuthAppRequest.setOAuthApplicationInfo(oAuthApplicationInfo);
         BDDMockito.when(ApplicationUtils
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
+                        Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                        Mockito.anyString())).thenReturn(oAuthAppRequest);
         Mockito.when(apiMgtDAO.isMappingExistsforConsumerKey(Mockito.anyString())).thenReturn(true, false);
         Mockito.when(keyManager.mapOAuthApplication((OAuthAppRequest) Mockito.any())).thenReturn(oAuthApplicationInfo);
         Mockito.doNothing().when(apiMgtDAO).createApplicationKeyTypeMappingForManualClients(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
-        BDDMockito.when(ApplicationUtils.createAccessTokenRequest(oAuthApplicationInfo, null)).thenReturn
+        BDDMockito.when(ApplicationUtils.createAccessTokenRequest(keyManager,oAuthApplicationInfo, null)).thenReturn
                 (accessTokenRequest);
         Mockito.when(keyManager.getNewApplicationAccessToken(accessTokenRequest)).thenReturn(accessTokenInfo);
         try {
@@ -1604,7 +1540,6 @@ public class APIConsumerImplTest {
                 .thenReturn(apiKey1.getConsumerKey());
         Mockito.when(apiMgtDAO.getKeyStatusOfApplication(Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn(apiKey1);
-
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         accessTokenInfo.setAccessToken(UUID.randomUUID().toString());
         Mockito.when(keyManager.getAccessTokenByConsumerKey(Mockito.anyString())).thenReturn(accessTokenInfo);

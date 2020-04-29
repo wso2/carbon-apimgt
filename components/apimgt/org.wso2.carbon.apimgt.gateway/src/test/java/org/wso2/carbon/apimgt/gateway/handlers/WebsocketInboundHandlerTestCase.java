@@ -37,8 +37,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -62,16 +60,17 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Cache;
-import javax.cache.CacheBuilder;
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
+
+import javax.cache.Cache;
+import javax.cache.CacheBuilder;
+import javax.cache.CacheConfiguration;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 
 import static org.junit.Assert.fail;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_VALIDATOR_WS_CLIENT;
@@ -265,7 +264,7 @@ public class WebsocketInboundHandlerTestCase {
         try {
             PowerMockito.whenNew(APIKeyValidationServiceStub.class).withArguments(ctx, API_KEY_VALIDATOR_URL +
                     "APIKeyValidationService").thenReturn(apiKeyValidationServiceStub);
-            PowerMockito.when(websocketWSClient.getAPIKeyData(TENANT_URL, "1.0", "587hfbt4i8ydno87ywq"))
+            PowerMockito.when(websocketWSClient.getAPIKeyData(TENANT_URL, "1.0", "587hfbt4i8ydno87ywq", "abc.com"))
                     .thenReturn(apiKeyValidationInfoDTO);
             PowerMockito.whenNew(WebsocketWSClient.class).withNoArguments().thenReturn(websocketWSClient);
             websocketInboundHandler1.channelRead(channelHandlerContext, fullHttpRequest);
@@ -391,7 +390,8 @@ public class WebsocketInboundHandlerTestCase {
         try {
             PowerMockito.whenNew(APIKeyValidationServiceStub.class).withArguments(ctx, API_KEY_VALIDATOR_URL +
                     "APIKeyValidationService").thenReturn(apiKeyValidationServiceStub);
-            PowerMockito.when(websocketWSClient.getAPIKeyData(SUPER_TENANT_URL, "1.0", "587hfbt4i8ydno87ywq"))
+            PowerMockito.when(websocketWSClient.getAPIKeyData(SUPER_TENANT_URL, "1.0", "587hfbt4i8ydno87ywq","carbon" +
+                    ".super"))
                     .thenReturn(apiKeyValidationInfoDTO);
             PowerMockito.whenNew(WebsocketWSClient.class).withAnyArguments().thenReturn(websocketWSClient);
             websocketInboundHandler1.channelRead(channelHandlerContext, fullHttpRequest);
@@ -404,7 +404,8 @@ public class WebsocketInboundHandlerTestCase {
             APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
 
             @Override
-            protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey) throws APISecurityException {
+            protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey, String tenantDomain)
+                    throws APISecurityException {
                 return info;
             }
         };
@@ -424,7 +425,8 @@ public class WebsocketInboundHandlerTestCase {
             APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
 
             @Override
-            protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey) throws APISecurityException {
+            protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey, String tenantDomain)
+                    throws APISecurityException {
                 info.setAuthorized(true);
                 info.setApiName("Phoneverify*1.0");
                 info.setType(APIConstants.API_KEY_TYPE_PRODUCTION);

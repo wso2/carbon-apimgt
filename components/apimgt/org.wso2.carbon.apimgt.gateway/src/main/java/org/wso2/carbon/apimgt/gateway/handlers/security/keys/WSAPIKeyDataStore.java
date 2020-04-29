@@ -41,14 +41,15 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
 
     @MethodStats
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey,String requiredAuthenticationLevel, String clientDomain,
-                                                 String matchingResource, String httpVerb)
+                                                 String apiKey, String requiredAuthenticationLevel, String clientDomain,
+                                                 String matchingResource, String httpVerb,
+                                                 String tenantDomain)
             throws APISecurityException {
         APIKeyValidatorClient client = null;
         try {
             client = clientPool.get();
             return client.getAPIKeyData(context, apiVersion, apiKey,requiredAuthenticationLevel, clientDomain,
-                                        matchingResource, httpVerb);
+                                        matchingResource, httpVerb,tenantDomain);
         }catch (APISecurityException ex) {
             throw new APISecurityException(ex.getErrorCode(),
                     "Resource forbidden", ex);

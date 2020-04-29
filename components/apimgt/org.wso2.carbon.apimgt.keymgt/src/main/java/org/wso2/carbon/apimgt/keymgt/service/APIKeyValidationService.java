@@ -100,7 +100,7 @@ public class APIKeyValidationService extends AbstractAdmin {
      */
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
                                                String requiredAuthenticationLevel, String clientDomain,
-                                               String matchingResource, String httpVerb)
+                                               String matchingResource, String httpVerb,String tenantDomain)
             throws APIKeyMgtException, APIManagementException {
 
         TracingSpan validateMainSpan = null;
@@ -167,6 +167,7 @@ public class APIKeyValidationService extends AbstractAdmin {
         validationContext.setRequiredAuthenticationLevel(requiredAuthenticationLevel);
         validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
         validationContext.setVersion(version);
+        validationContext.setTenantDomain(tenantDomain);
 
         if (Util.tracingEnabled()) {
             getAccessTokenCacheSpan =
@@ -374,7 +375,7 @@ public class APIKeyValidationService extends AbstractAdmin {
      * @throws APIManagementException
      */
     public APIKeyValidationInfoDTO validateKeyforHandshake(String context, String version,
-                                                           String accessToken)
+                                                           String accessToken, String tenantDomain)
             throws APIKeyMgtException, APIManagementException {
         boolean defaultVersionInvoked = false;
         APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
@@ -384,6 +385,7 @@ public class APIKeyValidationService extends AbstractAdmin {
         validationContext.setContext(context);
         validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
         validationContext.setVersion(version);
+        validationContext.setTenantDomain(tenantDomain);
         validationContext.setRequiredAuthenticationLevel("Any");
         boolean state = keyValidationHandler.validateToken(validationContext);
         ApiMgtDAO dao = ApiMgtDAO.getInstance();

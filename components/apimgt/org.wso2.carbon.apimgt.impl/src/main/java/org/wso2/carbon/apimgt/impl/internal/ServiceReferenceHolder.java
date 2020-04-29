@@ -17,10 +17,12 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.UserRealm;
@@ -45,6 +47,8 @@ public class ServiceReferenceHolder {
     private APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher;
     private KeyStore trustStore;
     private AccessTokenGenerator accessTokenGenerator;
+    private KeyManagerConfigurationService keyManagerConfigurationService;
+    private OAuthServerConfiguration oauthServerConfiguration;
     private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
 
     public static ConfigurationContextService getContextService() {
@@ -135,6 +139,26 @@ public class ServiceReferenceHolder {
             AccessTokenGenerator accessTokenGenerator) {
 
         this.accessTokenGenerator = accessTokenGenerator;
+    }
+
+    public KeyManagerConfigurationService getKeyManagerConfigurationService() {
+
+        return keyManagerConfigurationService;
+    }
+
+    public void setKeyManagerConfigurationService(
+            KeyManagerConfigurationService keyManagerConfigurationService) {
+
+        this.keyManagerConfigurationService = keyManagerConfigurationService;
+    }
+
+    public void setOauthServerConfiguration(OAuthServerConfiguration oauthServerConfiguration) {
+        this.oauthServerConfiguration = oauthServerConfiguration;
+    }
+
+    public OAuthServerConfiguration getOauthServerConfiguration() {
+
+        return oauthServerConfiguration;
     }
 
     public Map<String, List<Notifier>> getNotifiersMap() {

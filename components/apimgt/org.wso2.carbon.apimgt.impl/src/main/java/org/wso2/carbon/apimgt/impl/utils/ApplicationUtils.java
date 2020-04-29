@@ -70,15 +70,17 @@ public class ApplicationUtils {
      * This method will parse json String and set properties in  OAuthApplicationInfo object.
      * Further it will initiate new OauthAppRequest  object and set applicationInfo object as its own property.
      * @param clientName client Name.
+     * @param clientId The ID of the client
      * @param callbackURL This is the call back URL of the application
      * @param tokenScope The token scope
      * @param clientDetails The client details
-     * @param clientId The ID of the client
+     * @param tenantDomain
      * @return appRequest object of OauthAppRequest.
      * @throws APIManagementException
      */
     public static OAuthAppRequest createOauthAppRequest(String clientName, String clientId, String callbackURL,
-            String tokenScope, String clientDetails, String tokenType)
+                                                        String tokenScope, String clientDetails, String tokenType,
+                                                        String tenantDomain)
             throws
             APIManagementException {
 
@@ -93,7 +95,7 @@ public class ApplicationUtils {
 
         if (clientDetails != null) {
             //parse json string and set applicationInfo parameters.
-            authApplicationInfo = KeyManagerHolder.getKeyManagerInstance().buildFromJSON(authApplicationInfo,
+            authApplicationInfo = KeyManagerHolder.getKeyManagerInstance(tenantDomain).buildFromJSON(authApplicationInfo,
                     clientDetails);
 
             if (log.isDebugEnabled()) {
@@ -113,32 +115,34 @@ public class ApplicationUtils {
 
     /**
      * This method adds additional parameters specified in JSON input to TokenRequest.
+     *
+     * @param keyManager
      * @param jsonParams Additional Parameters required by the Authorization Server.
      * @param tokenRequest Values captured in TokenRequest.
      * @return Token Request after adding parameters in JSON input.
      * @throws APIManagementException
      */
-    public static AccessTokenRequest populateTokenRequest(String jsonParams, AccessTokenRequest tokenRequest)
+    public static AccessTokenRequest populateTokenRequest(KeyManager keyManager,
+                                                          String jsonParams, AccessTokenRequest tokenRequest)
             throws APIManagementException {
         if (tokenRequest == null) {
             tokenRequest = new AccessTokenRequest();
         }
 
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         if (keyManager != null) {
             return keyManager.buildAccessTokenRequestFromJSON(jsonParams, tokenRequest);
         }
         return null;
     }
 
-    public static AccessTokenRequest createAccessTokenRequest(OAuthApplicationInfo oAuthApplication,
+    public static AccessTokenRequest createAccessTokenRequest(KeyManager keyManager,
+                                                              OAuthApplicationInfo oAuthApplication,
                                                               AccessTokenRequest tokenRequest)
             throws APIManagementException {
         if (tokenRequest == null) {
             tokenRequest = new AccessTokenRequest();
         }
 
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         if (keyManager != null) {
             return keyManager.buildAccessTokenRequestFromOAuthApp(oAuthApplication, tokenRequest);
         }

@@ -20,6 +20,7 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.BlockApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.RevokedjwtApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApikeyApi"/>
+            <bean class="org.wso2.carbon.throttle.service.KeymanagersApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
