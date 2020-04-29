@@ -214,6 +214,23 @@ class API extends Resource {
             );
         });
     }
+
+    /**
+     * Add an Application Throttling Policy
+     */
+    addApplicationThrottlingPolicy(body) {
+        console.log('body', body);
+        return this.client.then((client) => {
+            const payload = {
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Application Policy (Collection)'].post_throttling_policies_application(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
 }
 
 API.CONSTS = {
