@@ -19,85 +19,73 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Footer from './Footer/Footer';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
+import Header from 'AppComponents/Base/Header';
+
+function Copyright() {
+    return (
+        <Typography variant="body2" color="textSecondary" align="center">
+            <FormattedMessage
+                id='Base.Footer.Footer.product_details'
+                defaultMessage='WSO2 API-M v3.1.0 | © 2020 WSO2 Inc'
+            />
+        </Typography>
+    );
+}
+
+const drawerWidth = 256;
 
 const styles = (theme) => ({
-    appBar: {
-        position: 'relative',
-        background: theme.palette.background.appBar,
+    root: {
+        display: 'flex',
+        minHeight: '100vh',
     },
-    icon: {
-        marginRight: theme.spacing(2),
-    },
-    menuIcon: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
-        fontSize: 35,
-    },
-    userLink: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
-    },
-    // Page layout styles
     drawer: {
-        top: 64,
-    },
-    wrapper: {
-        minHeight: '100%',
-        marginBottom: -50,
-        background: theme.custom.wrapperBackground,
-    },
-    contentWrapper: {
-        display: 'flex',
-        flexDirection: 'row',
-        position: 'relative',
-        minHeight: 'calc(100vh - 114px)',
-    },
-    push: {
-        height: 50,
-    },
-    footer: {
-        backgroundColor: theme.palette.grey.A100,
-        paddingLeft: theme.spacing(3),
-        height: 50,
-        alignItems: 'center',
-        display: 'flex',
-    },
-    toolbar: {
-        minHeight: 56,
-        [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
-            minHeight: 48,
-        },
         [theme.breakpoints.up('sm')]: {
-            minHeight: 64,
+            width: drawerWidth,
+            flexShrink: 0,
         },
+    },
+    app: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+    },
+
+    footer: {
+        padding: theme.spacing(2),
+        background: '#eaeff1',
     },
 });
 
-/**
- * Base Component for the admin portal app
- * Adding a padding to Base container to avoid overlapping content with the Header AppBar
- * Following padding top values are based on material UI AppBar height parameters as described in here:
- * https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810
- * @class Layout
- * @extends {React.Component}
- */
-const Base = ({ classes, children, header }) => {
-    return (
-        <>
-            <div className={classes.wrapper}>
-                {header}
-                <div className={classes.contentWrapper}>{children}</div>
+function Base(props) {
+    const { classes, children, leftMenu, header } = props;
 
-                <div className={classes.push} />
+
+    return (
+        <div className={classes.root}>
+            <CssBaseline />
+            <nav className={classes.drawer}>
+                {leftMenu}
+            </nav>
+            <div className={classes.app}>
+                {header}
+                {children}
+                <footer className={classes.footer}>
+                    <Copyright />
+                </footer>
             </div>
-            <Footer />
-        </>
+        </div>
     );
-};
+}
 
 Base.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     children: PropTypes.element.isRequired,
     header: PropTypes.element.isRequired,
+    handleDrawerToggle: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(Base);
