@@ -15,7 +15,6 @@
  */
 
 /* eslint-disable */
-// import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 import Resource from './Resource';
 import cloneDeep from 'lodash.clonedeep';
@@ -132,7 +131,7 @@ class API extends Resource {
     }
 
     updateAPICategory(id, name, description, callback = null) {
-        const promise_update_api_category = this.client.then((client) => {
+        const promiseUpdateApiCategory = this.client.then((client) => {
             const data = {
                 name: name,
                 description: description,
@@ -146,14 +145,14 @@ class API extends Resource {
         });
 
         if (callback) {
-            return promise_update_api_category.then(callback);
+            return promiseUpdateApiCategory.then(callback);
         } else {
-            return promise_update_api_category;
+            return promiseUpdateApiCategory;
         }
     }
 
     deleteAPICategory(id, callback = null) {
-        const promise_delete_api_category = this.client.then((client) => {
+        const promiseDeleteApiCategory = this.client.then((client) => {
             return client.apis[
                 'API Category (Individual)'
             ].delete_api_categories__apiCategoryId_(
@@ -163,14 +162,14 @@ class API extends Resource {
         });
 
         if (callback) {
-            return promise_delete_api_category.then(callback);
+            return promiseDeleteApiCategory.then(callback);
         } else {
-            return promise_delete_api_category;
+            return promiseDeleteApiCategory;
         }
     }
 
     createAPICategory(name, description, callback = null) {
-        const promise_create_api_category = this.client.then((client) => {
+        const promiseCreateApiCategory = this.client.then((client) => {
             const data = {
                 name: name,
                 description: description,
@@ -186,9 +185,9 @@ class API extends Resource {
         });
 
         if (callback) {
-            return promise_create_api_category.then(callback);
+            return promiseCreateApiCategory.then(callback);
         } else {
-            return promise_create_api_category;
+            return promiseCreateApiCategory;
         }
     }
 
@@ -270,7 +269,7 @@ class API extends Resource {
     }
 
     updateApplicationOwner(id, owner, callback = null) {
-        const promise_update_application_owner = this.client.then((client) => {
+        const promiseUpdateApplicationOwner = this.client.then((client) => {
             return client.apis[
                 'Application'
             ].post_applications__applicationId__change_owner(
@@ -280,9 +279,9 @@ class API extends Resource {
         });
 
         if (callback) {
-            return promise_update_application_owner.then(callback);
+            return promiseUpdateApplicationOwner.then(callback);
         } else {
-            return promise_update_application_owner;
+            return promiseUpdateApplicationOwner;
         }
     }
 }
