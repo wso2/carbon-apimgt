@@ -111,25 +111,19 @@ public class KeyManagersApiServiceImpl extends KeyManagersApiService {
     }
 
     @Override
-    public Response keyManagersPost(KeyManagerDTO body) {
+    public Response keyManagersPost(KeyManagerDTO body) throws APIManagementException {
 
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(tenantDomain, body);
-            KeyManagerConfigurationDTO retrievedKeyManagerConfiguration =
-                    apiAdmin.getKeyManagerConfigurationByName(tenantDomain, keyManagerConfigurationDTO.getName());
-            if (retrievedKeyManagerConfiguration != null){
-                RestApiUtil.handleResourceAlreadyExistsError("A Key Manager already exists with name " + body.getName(),
-                        log);
-            }
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
                     apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
             URI location = new URI(RestApiConstants.KEY_MANAGERS + "/" + createdKeyManagerConfiguration.getUuid());
             return Response.created(location)
                     .entity(KeyManagerMappingUtil.toKeyManagerDTO(createdKeyManagerConfiguration)).build();
-        } catch (APIManagementException | URISyntaxException e) {
+        } catch (URISyntaxException e) {
             String error = "Error while Creating Key Manager configuration in tenant " + tenantDomain;
             RestApiUtil.handleInternalServerError(error, e, log);
         }

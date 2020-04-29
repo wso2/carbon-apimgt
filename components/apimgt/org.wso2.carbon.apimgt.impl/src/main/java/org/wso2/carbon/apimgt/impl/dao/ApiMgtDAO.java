@@ -8960,6 +8960,25 @@ public class ApiMgtDAO {
         return keyManagerConfigurationDTOS;
     }
 
+    public boolean isKeyManagerConfigurationExistByName(String name, String tenantDomain)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            final String query = "SELECT 1 FROM AM_KEY_MANAGER WHERE NAME = ? AND TENANT_DOMAIN = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, name);
+                preparedStatement.setString(2, tenantDomain);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()){
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retriving key manager existence",e);
+        }
+        return false;
+    }
     private class SubscriptionInfo {
         private int subscriptionId;
         private String tierId;

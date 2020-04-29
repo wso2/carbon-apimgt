@@ -26,7 +26,8 @@ import java.util.Arrays;
  * This enum class holds error codes that we need to pass to upper level. For example, to the UI.
  * You have to define your custom error codes here.
  */
-public enum ExceptionCodes implements ErrorHandler {
+public enum
+ExceptionCodes implements ErrorHandler {
 
     // API, Application related codes
     API_ALREADY_EXISTS(900300, "The API already exists.", 409, " The API already exists"),
@@ -307,7 +308,12 @@ public enum ExceptionCodes implements ErrorHandler {
 
 
     // Tenant related
-    INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found");
+    INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),
+    // Key Manager Related
+    INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
+    REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missed",400,"Missing " +
+            "required configuration"),
+    KEY_MANAGER_ALREADY_EXIST(901402, "Key Manager Already Exist", 409, "Key Manager Already Exist");
 
 
     private final long errorCode;

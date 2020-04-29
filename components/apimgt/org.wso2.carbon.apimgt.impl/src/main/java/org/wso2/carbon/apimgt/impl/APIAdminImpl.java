@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
@@ -32,6 +33,8 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -339,6 +342,13 @@ public class APIAdminImpl implements APIAdmin {
     public KeyManagerConfigurationDTO addKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
         ApiMgtDAO instance = ApiMgtDAO.getInstance();
+        if (instance.isKeyManagerConfigurationExistByName(keyManagerConfigurationDTO.getName(),
+                keyManagerConfigurationDTO.getTenantDomain())){
+            throw new APIManagementException(
+                    "Key manager Already Exist by Name " + keyManagerConfigurationDTO.getName() + " in tenant " +
+                            keyManagerConfigurationDTO.getTenantDomain(), ExceptionCodes.KEY_MANAGER_ALREADY_EXIST);
+        }
+        validateKeyManagerConfiguration(keyManagerConfigurationDTO);
         keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
         instance.addKeyManagerConfiguration(keyManagerConfigurationDTO);
         new KeyMgtNotificationSender()
@@ -349,6 +359,7 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public KeyManagerConfigurationDTO updateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
+        validateKeyManagerConfiguration(keyManagerConfigurationDTO);
         ApiMgtDAO instance = ApiMgtDAO.getInstance();
         instance.updateKeyManagerConfiguration(keyManagerConfigurationDTO);
         new KeyMgtNotificationSender()
@@ -479,5 +490,43 @@ public class APIAdminImpl implements APIAdmin {
         Map<String, Object> result = apiProvider
                 .searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE, true);
         return (int) (Integer) result.get("length");
+    }
+
+    private void validateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
+
+        APIManagerConfigurationService apiManagerConfigurationService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+        if (apiManagerConfigurationService != null){
+            APIManagerConfiguration apiManagerConfiguration =
+                    apiManagerConfigurationService.getAPIManagerConfiguration();
+            KeyManagerConfigurationsDto keyManagerConfiguration =
+                    apiManagerConfiguration.getKeyManagerConfigurationsDto();
+            if (keyManagerConfiguration != null){
+                Map<String, KeyManagerConfigurationsDto.KeyManagerConfigurationDto> keyManagerConfigurationDtoMap =
+                        keyManagerConfiguration.getKeyManagerConfiguration();
+                KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerDeploymentConfiguration =
+                        keyManagerConfigurationDtoMap.get(keyManagerConfigurationDTO.getType());
+                if (keyManagerDeploymentConfiguration != null){
+                    throw new APIManagementException("Key Manager Type "+ keyManagerConfigurationDTO.getType() +  "is" +
+                            " invalid", ExceptionCodes.INVALID_KEY_MANAGER_TYPE);
+                }
+                for (KeyManagerConfigurationsDto.ConfigurationDto configurationDto : keyManagerDeploymentConfiguration
+                        .getConnectionConfigurationDtoList()) {
+                    if (configurationDto.isRequired()){
+                        if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                                .containsKey(configurationDto.getName())) {
+                            if (StringUtils.isNotEmpty(configurationDto.getDefaultValue())){
+                                keyManagerConfigurationDTO.getAdditionalProperties().put(configurationDto.getName(),
+                                        configurationDto.getDefaultValue());
+                            }
+                            throw new APIManagementException(
+                                    "Key Manager Configuration value for " + configurationDto.getLabel() + "is" +
+                                            "required", ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
