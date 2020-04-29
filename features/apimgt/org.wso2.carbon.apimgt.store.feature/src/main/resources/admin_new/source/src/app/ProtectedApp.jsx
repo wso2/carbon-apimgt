@@ -18,31 +18,151 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
+import Hidden from '@material-ui/core/Hidden';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import User from 'AppData/User';
 import Utils from 'AppData/Utils';
 import Base from 'AppComponents/Base';
 import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
-import Avatar from 'AppComponents/Base/Header/avatar/Avatar';
+import Avatar from 'AppComponents/Base/Header/Avatar';
 import Themes from 'Themes';
+import merge from 'lodash.merge';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
 import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import Configurations from 'Config';
-import LeftMenu from 'AppComponents/Base/Header/navbar/LeftMenu';
+import Navigator from 'AppComponents/Base/Navigator';
+import RouteMenuMapping from 'AppComponents/Base/RouteMenuMapping';
+import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
 
-const theme = createMuiTheme(Themes.light);
+const drawerWidth = 256;
+
+const themeJSON = merge(Themes.light, {
+    palette: {
+        primary: {
+            light: '#63ccff',
+            main: '#009be5',
+            dark: '#006db3',
+        },
+    },
+    typography: {
+        h5: {
+            fontWeight: 500,
+            fontSize: 26,
+            letterSpacing: 0.5,
+        },
+    },
+    shape: {
+        borderRadius: 8,
+    },
+    props: {
+        MuiTab: {
+            disableRipple: true,
+        },
+    },
+    mixins: {
+        toolbar: {
+            minHeight: 48,
+        },
+    },
+    custom: {
+        drawerWidth,
+    }
+});
+let theme = createMuiTheme(themeJSON);
+
+theme = {
+    ...theme,
+    overrides: {
+        MuiDrawer: {
+            paper: {
+                backgroundColor: '#18202c',
+            },
+        },
+        MuiButton: {
+            label: {
+                textTransform: 'none',
+            },
+            contained: {
+                boxShadow: 'none',
+                '&:active': {
+                    boxShadow: 'none',
+                },
+            },
+        },
+        MuiTabs: {
+            root: {
+                marginLeft: theme.spacing(1),
+            },
+            indicator: {
+                height: 3,
+                borderTopLeftRadius: 3,
+                borderTopRightRadius: 3,
+                backgroundColor: theme.palette.common.white,
+            },
+        },
+        MuiTab: {
+            root: {
+                textTransform: 'none',
+                margin: '0 16px',
+                minWidth: 0,
+                padding: 0,
+                [theme.breakpoints.up('md')]: {
+                    padding: 0,
+                    minWidth: 0,
+                },
+            },
+        },
+        MuiIconButton: {
+            root: {
+                padding: theme.spacing(1),
+            },
+        },
+        MuiTooltip: {
+            tooltip: {
+                borderRadius: 4,
+            },
+        },
+        MuiDivider: {
+            root: {
+                backgroundColor: '#404854',
+            },
+        },
+        MuiListItemText: {
+            primary: {
+                fontWeight: theme.typography.fontWeightMedium,
+            },
+        },
+        MuiListItemIcon: {
+            root: {
+                color: 'inherit',
+                marginRight: 0,
+                '& svg': {
+                    fontSize: 20,
+                },
+            },
+        },
+        MuiAvatar: {
+            root: {
+                width: 32,
+                height: 32,
+            },
+        },
+    },
+};
+
 
 /**
  * Language.
  * @type {string}
  */
 const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
+let allRoutes = [];
 
 /**
  * Render protected application paths, Implements container presenter pattern
@@ -58,12 +178,28 @@ export default class Protected extends Component {
         this.state = {
             clientId: Utils.getCookieWithoutEnvironment(User.CONST.ADMIN_CLIENT_ID),
             sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.ADMIN_SESSION_STATE),
+            mobileOpen: false,
         };
         this.environments = [];
         this.checkSession = this.checkSession.bind(this);
         this.handleMessage = this.handleMessage.bind(this);
+        this.handleDrawerToggle = this.handleDrawerToggle(this);
+        
+        for (var i = 0; i < RouteMenuMapping.length; i++) {
+            let childRoutes = RouteMenuMapping[i].children;
+            if(childRoutes) {
+                for (var j = 0; j < childRoutes.length; j++) {
+                    allRoutes.push(childRoutes[j]);
+                }
+            } else {
+                allRoutes.push(RouteMenuMapping[i]);
+            }
+            
+        }
     }
 
+    handleDrawerToggle() {
+    };
     /**
      * @inheritDoc
      * @memberof Protected
@@ -109,8 +245,10 @@ export default class Protected extends Component {
      * @memberof Protected
      */
     render() {
-        const { user = AuthManager.getUser(), messages } = this.state;
-        const header = <Header avatar={<Avatar user={user} />} user={user} />;
+        const { user = AuthManager.getUser(), messages, mobileOpen } = this.state;
+        const header = <Header avatar={<Avatar user={user} />} user={user} handleDrawerToggle={() => {
+            this.setState((oldState) => ({ mobileOpen: !oldState.mobileOpen }));
+        }} />;
         const { clientId } = this.state;
         const checkSessionURL = 'https://' + window.location.host + '/oidc/checksession?client_id='
             + clientId + '&redirect_uri=https://' + window.location.host
@@ -122,24 +260,47 @@ export default class Protected extends Component {
                 </IntlProvider>
             );
         }
+        const leftMenu = <AppContextProvider value={{ user }}>
+            <>
+                <Hidden smUp implementation="js">
+                    <Navigator
+                        PaperProps={{ style: { width: drawerWidth } }}
+                        variant="temporary"
+                        open={mobileOpen}
+                        onClose={() => {
+                            this.setState((oldState) => ({ mobileOpen: !oldState.mobileOpen }));
+                        }}
+                    />
+                </Hidden>
+                <Hidden xsDown implementation="css">
+                    <Navigator PaperProps={{ style: { width: drawerWidth } }} />
+                </Hidden>
+            </>
+        </AppContextProvider>;
         return (
             <MuiThemeProvider theme={theme}>
                 <AppErrorBoundary>
-                    <Base header={header}>
-                        <iframe
-                            title='iframeOP'
-                            id='iframeOP'
-                            src={checkSessionURL}
-                            width='0px'
-                            height='0px'
-                        />
-                        <AppContextProvider value={{ user }}>
+
+                    <Base header={header} leftMenu={leftMenu}>
+                        <Route>
                             <Switch>
-                                <LeftMenu />
+                                <Redirect exact from='/' to='/dashboard' />
+                                <Route path='/dashboard' component={Dashboard} />
+                                {allRoutes.map((r) => {
+                                    return <Route path={r.path} component={r.component} />
+                                })}
                                 <Route component={ResourceNotFound} />
                             </Switch>
-                        </AppContextProvider>
+                        </Route>
                     </Base>
+                    <iframe
+                        title='iframeOP'
+                        id='iframeOP'
+                        src={checkSessionURL}
+                        width='0px'
+                        height='0px'
+                        style={{ color: "red", position: 'absolute' }}
+                    />
                 </AppErrorBoundary>
             </MuiThemeProvider>
         );

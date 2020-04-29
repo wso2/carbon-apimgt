@@ -20,7 +20,6 @@ import { Toolbar, AppBar } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
-import Footer from 'AppComponents/Base/Footer/Footer';
 import { FormattedMessage } from 'react-intl';
 import Configurations from 'Config';
 
@@ -164,7 +163,6 @@ class AppErrorBoundary extends React.Component {
                             </pre>
                         </div>
                     </div>
-                    <Footer />
                 </>
             );
         } else {
