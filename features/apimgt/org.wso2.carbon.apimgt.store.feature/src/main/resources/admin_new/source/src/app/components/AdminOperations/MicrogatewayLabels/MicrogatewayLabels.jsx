@@ -65,7 +65,38 @@ const styles = (theme) => ({
 });
 
 const deleteMgLabel = (id, name, setUpdated, intl) => {
-    // todo: implement this.
+    const restApi = new API();
+    const promisedDelete = restApi.deleteMicrogatewayLabel(id);
+    setUpdated(false);
+    promisedDelete
+        .then((response) => {
+            if (response.status !== 200) {
+                Alert.info(
+                    intl.formatMessage({
+                        id: 'microgateway.labels.delete.label.unsuccesful',
+                        defaultMessage:
+                            'Something went wrong while deleting the label!',
+                    }),
+                );
+                return;
+            }
+            Alert.info(
+                intl.formatMessage({
+                    id: 'microgateway.labels.delete.label.succesful',
+                    defaultMessage: 'Microgateway label deleted successfully.',
+                }),
+            );
+            setUpdated(true);
+        })
+        .catch(() => {
+            Alert.error(
+                intl.formatMessage({
+                    id: 'microgateway.labels.delete.label.unsuccesful',
+                    defaultMessage:
+                        'Something went wrong while deleting the label!',
+                }),
+            );
+        });
 };
 
 /**
