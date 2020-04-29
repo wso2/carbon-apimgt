@@ -284,6 +284,14 @@ class API extends Resource {
             return promiseUpdateApplicationOwner;
         }
     }
+
+    getMicrogatewayLabelList() {
+        return this.client.then((client) => {
+            return client.apis['Label Collection'].get_labels(
+                this._requestMetaData(),
+            );
+        });
+    }
 }
 
 API.CONSTS = {
