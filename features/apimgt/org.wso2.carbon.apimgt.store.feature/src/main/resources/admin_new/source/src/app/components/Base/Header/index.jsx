@@ -17,26 +17,104 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import HeaderOriginal from './HeaderOriginal';
+import AppBar from '@material-ui/core/AppBar';
+import { Avatar as AvatarComponent } from '@material-ui/core';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import HelpIcon from '@material-ui/icons/Help';
+import Hidden from '@material-ui/core/Hidden';
+import IconButton from '@material-ui/core/IconButton';
+import Link from '@material-ui/core/Link';
+import MenuIcon from '@material-ui/icons/Menu';
+import NotificationsIcon from '@material-ui/icons/Notifications';
+import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
+import Toolbar from '@material-ui/core/Toolbar';
+import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
+import Avatar from 'AppComponents/Base/Header/Avatar';
+import Breadcrumbs from 'AppComponents/Base/Header/Breadcrumbs';
 
-/**
- * Acts as an extension point.
- * You can return the Header original component with additional
- * props to override the defualt look and feel.
- * <HeaderOriginal avatar={<NewSettings />}
-        user={user}
-        settings={<NewSettings />}
-        menuItems={[<SettingsButton />, <SettingsButton />]}
-    />
- * @param {object} props props passed down from the parent.
- * @returns {element} Original header component.
- */
-export default function Header(props) {
-    const { avatar, user } = props;
-    return <HeaderOriginal avatar={avatar} user={user} />;
+const lightColor = 'rgba(255, 255, 255, 0.7)';
+
+const styles = (theme) => ({
+    secondaryBar: {
+        zIndex: 0,
+    },
+    menuButton: {
+        marginLeft: -theme.spacing(1),
+    },
+    iconButtonAvatar: {
+        padding: 4,
+    },
+    link: {
+        textDecoration: 'none',
+        color: lightColor,
+        '&:hover': {
+            color: theme.palette.common.white,
+        },
+    },
+    button: {
+        borderColor: lightColor,
+    },
+});
+
+function Header(props) {
+    const { classes, handleDrawerToggle, avatar } = props;
+
+    return (
+        <React.Fragment>
+            <AppBar color="primary" position="sticky" elevation={0}>
+                <Toolbar>
+                    <Grid container spacing={1} alignItems="center">
+                        <Hidden smUp>
+                            <Grid item>
+                                <IconButton
+                                    color="inherit"
+                                    aria-label="open drawer"
+                                    onClick={() => handleDrawerToggle()}
+                                    className={classes.menuButton}
+                                >
+                                    <MenuIcon />
+                                </IconButton>
+                            </Grid>
+                        </Hidden>
+                        <Breadcrumbs />
+                        <Grid item xs />
+                        <Grid item>
+                            <Link className={classes.link} href="#" variant="body2">
+                                Go to docs
+                            </Link>
+                        </Grid>
+                        <Grid item>
+                            <Tooltip title="Alerts • No alerts">
+                                <IconButton color="inherit">
+                                    <NotificationsIcon />
+                                </IconButton>
+                            </Tooltip>
+                        </Grid>
+                        <Grid item>
+                            {avatar}
+                            {/* <IconButton color="inherit" className={classes.iconButtonAvatar}>
+                <Avatar src="/static/images/avatar/1.jpg" alt="My Avatar" />
+              </IconButton> */}
+                        </Grid>
+                    </Grid>
+                </Toolbar>
+            </AppBar>
+        </React.Fragment>
+    );
 }
 
-Header.propTypes = {
-    avatar: PropTypes.element.isRequired,
-    user: PropTypes.shape({ name: PropTypes.string.isRequired }).isRequired,
+Header.defaultProps = {
+    avatar: <AvatarComponent />,
 };
+
+Header.propTypes = {
+    classes: PropTypes.object.isRequired,
+    onDrawerToggle: PropTypes.func.isRequired,
+    avatar: PropTypes.element,
+};
+
+export default withStyles(styles)(Header);
