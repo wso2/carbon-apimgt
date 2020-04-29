@@ -35,6 +35,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -55,6 +56,8 @@ import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
@@ -75,6 +78,8 @@ import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.oauth2.Oauth2ScopeConstants;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -114,6 +119,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.cache.Cache;
 
@@ -187,6 +193,10 @@ public class APIManagerComponent {
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
+            KeyManagerConfigurationServiceImpl keyManagerConfigurationService = new KeyManagerConfigurationServiceImpl();
+            registration = componentContext.getBundleContext().registerService(KeyManagerConfigurationService.class,
+                    keyManagerConfigurationService,null);
+            ServiceReferenceHolder.getInstance().setKeyManagerConfigurationService(keyManagerConfigurationService);
             APIStatusObserverList.getInstance().init(configuration);
             log.debug("Reading Analytics Configuration from file...");
             // This method is called in two places. Mostly by the time activate hits,
@@ -237,8 +247,8 @@ public class APIManagerComponent {
             } catch (APIManagementException e) {
                 log.error("Failed to convert NULL THROTTLING_TIERS to Unlimited");
             }
-            // Initialise KeyManager.
-            KeyManagerHolder.initializeKeyManager(configuration);
+//            // Initialise KeyManager.
+//            KeyManagerHolder.initializeKeyManager(configuration);
             // Initialise sql constants
             SQLConstantManagerFactory.initializeSQLConstantManager();
             // Initialize PasswordResolver
@@ -286,12 +296,14 @@ public class APIManagerComponent {
             //Initialize Recommendation wso2event output publisher
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
+            APIUtil.registerDefaultKeyManager(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
             log.fatal("Error while Creating the database", e);
         }
     }
+
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
@@ -733,6 +745,30 @@ public class APIManagerComponent {
                 }
             }
         }
+    }
+
+    /**
+     * Initialize the Oauth Server configuration Service Service dependency
+     *
+     * @param oauthServerConfiguration Output EventAdapter Service reference
+     */
+    @Reference(
+            name = "oauth.config.service",
+            service = OAuthServerConfiguration.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOauthServerConfiguration")
+    protected void setOauthServerConfiguration(OAuthServerConfiguration oauthServerConfiguration) {
+        ServiceReferenceHolder.getInstance().setOauthServerConfiguration(oauthServerConfiguration);
+    }
+
+    /**
+     * De-reference the Oauth Server configuration Service dependency.
+     *
+     * @param oAuthServerConfiguration
+     */
+    protected void unsetOauthServerConfiguration(OAuthServerConfiguration oAuthServerConfiguration) {
+        ServiceReferenceHolder.getInstance().setOauthServerConfiguration(null);
     }
 
     private void setupAccessTokenGenerator(){

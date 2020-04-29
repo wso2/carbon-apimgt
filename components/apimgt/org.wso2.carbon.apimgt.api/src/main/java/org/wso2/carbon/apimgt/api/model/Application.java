@@ -50,7 +50,7 @@ public class Application {
     private String tokenType;
     private String keyType;
     private int subscriptionCount;
-
+    private String keyManager;
     public String getCreatedTime() {
         return createdTime;
     }
@@ -284,5 +284,15 @@ public class Application {
 
     public void setTierQuotaType(String tierQuotaType) {
         this.tierQuotaType = tierQuotaType;
+    }
+
+    public String getKeyManager() {
+
+        return keyManager;
+    }
+
+    public void setKeyManager(String keyManager) {
+
+        this.keyManager = keyManager;
     }
 }

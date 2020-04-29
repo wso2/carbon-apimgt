@@ -18,32 +18,21 @@
 
 package org.wso2.carbon.apimgt.impl.factory;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMException;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This is a factory class.you have to use this when you need to initiate classes by reading config file.
@@ -51,59 +40,48 @@ import java.util.Set;
  */
 public class KeyManagerHolder {
 
-
     private static Log log = LogFactory.getLog(KeyManagerHolder.class);
-    private static KeyManager keyManager = null;
+    private static Map<String, Map<String, KeyManager>> keyManagerMap = new HashMap<>();
+    private static Map<String,KeyManager> tenantKeyManager = new HashMap<>();
 
-
-    /**
-     * Read values from APIManagerConfiguration.
-     *
-     * @param apiManagerConfiguration API Manager Configuration
-     * @throws APIManagementException
-     */
-    public static void initializeKeyManager(APIManagerConfiguration apiManagerConfiguration)
+    public static void addKeyManagerConfiguration(String tenantDomain, String name, String type,
+                                                  KeyManagerConfiguration keyManagerConfiguration)
             throws APIManagementException {
-        if (apiManagerConfiguration != null) {
-            try {
-                // If APIKeyManager section is disabled, we are reading values defined in APIKeyValidator section.
-                if (apiManagerConfiguration.getFirstProperty(APIConstants.KEY_MANAGER_CLIENT) == null) {
-                    //keyManager = (KeyManager) Class.forName("org.wso2.carbon.apimgt.keymgt.AMDefaultKeyManagerImpl").newInstance();
-                    keyManager = new AMDefaultKeyManagerImpl();
-                    keyManager.loadConfiguration(null);
-                } else {
-                    // If APIKeyManager section is enabled, class name is picked from there.
-                    String clazz = apiManagerConfiguration.getFirstProperty(APIConstants.KEY_MANAGER_CLIENT);
-                    keyManager = (KeyManager) APIUtil.getClassForName(clazz).newInstance();
-                    Set<String> configKeySet = apiManagerConfiguration.getConfigKeySet();
 
-                    KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
-
-                    // Iterating through the Configuration and seeing which elements are starting with APIKeyManager
-                    // .Configuration. Values of those keys will be set in KeyManagerConfiguration object.
-                    String startKey = APIConstants.API_KEY_MANAGER + APIConstants.API_KEY_MANAGER_CONFIGURATION;
-                    for (String configKey : configKeySet) {
-                        if (configKey.startsWith(startKey)) {
-                            keyManagerConfiguration.addParameter(configKey.replace(startKey, ""),
-                                                                 apiManagerConfiguration.getFirstProperty(configKey));
-                        }
+        Map<String, KeyManager> tenantWiseKeyManagerMap = keyManagerMap.getOrDefault(tenantDomain, new HashMap<>());
+        KeyManager keyManager = tenantWiseKeyManagerMap.get(name);
+        if (keyManager == null) {
+            APIManagerConfiguration apiManagerConfiguration =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration();
+            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(type)) {
+                keyManager = new AMDefaultKeyManagerImpl();
+                keyManager.loadConfiguration(keyManagerConfiguration);
+                tenantWiseKeyManagerMap.put(APIConstants.KeyManager.DEFAULT_KEY_MANAGER, keyManager);
+            }
+            KeyManagerConfigurationsDto keyManagerConfigurationsDto =
+                    apiManagerConfiguration.getKeyManagerConfigurationsDto();
+            if (keyManagerConfigurationsDto != null) {
+                KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerConfigurationDto =
+                        keyManagerConfigurationsDto.getKeyManagerConfigurationList().get(type);
+                if (keyManagerConfigurationDto != null &&
+                        StringUtils.isNotEmpty(keyManagerConfigurationDto.getImplementationClass())) {
+                    try {
+                        keyManager =
+                                (KeyManager) Class.forName(keyManagerConfigurationDto.getImplementationClass())
+                                        .newInstance();
+                        keyManager.loadConfiguration(keyManagerConfiguration);
+                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                        throw new APIManagementException("Error while loading keymanager configuration", e);
                     }
 
-                    // Set the created configuration in the KeyManager instance.
-                    keyManager.loadConfiguration(keyManagerConfiguration);
                 }
-            } catch (ClassNotFoundException e) {
-                log.error("Error occurred while instantiating KeyManager implementation");
-                throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
-            } catch (InstantiationException e) {
-                log.error("Error occurred while instantiating KeyManager implementation");
-                throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
-            } catch (IllegalAccessException e) {
-                log.error("Error occurred while instantiating KeyManager implementation");
-                throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
             }
+            tenantWiseKeyManagerMap.put(name, keyManager);
         }
+        keyManagerMap.put(tenantDomain, tenantWiseKeyManagerMap);
     }
+
 
     /**
      * This method will take hardcoded class name from api-manager.xml file and will return that class's instance.
@@ -111,8 +89,81 @@ public class KeyManagerHolder {
      *
      * @return keyManager instance.
      */
-    public static KeyManager getKeyManagerInstance() {
-        return keyManager;
+    public static KeyManager getKeyManagerInstance(String tenantDomain) {
+
+        if (tenantKeyManager.containsKey(tenantDomain)) {
+            return tenantKeyManager.get(tenantDomain);
+        }
+
+        Map<String, KeyManager> tenantWiseKeyManger = keyManagerMap.get(tenantDomain);
+        Iterator<KeyManager> iterator = tenantWiseKeyManger.values().iterator();
+        if (iterator.hasNext()) {
+            KeyManager effectiveKeyManager = iterator.next();
+            tenantKeyManager.put(tenantDomain, effectiveKeyManager);
+            return effectiveKeyManager;
+        }
+        return null;
     }
 
+    private KeyManagerHolder() {
+
+    }
+
+    public static void updateKeyManagerConfiguration(String tenantDomain, String name, String type,
+                                                     KeyManagerConfiguration keyManagerConfiguration, boolean enabled)
+            throws APIManagementException {
+
+        Map<String, KeyManager> tenantWiseKeyManagerMap = keyManagerMap.get(tenantDomain);
+        if (tenantWiseKeyManagerMap == null) {
+            throw new APIManagementException("KeyManager didn't configured for tenant" + tenantDomain);
+        }
+        KeyManager keyManager = tenantWiseKeyManagerMap.get(name);
+        if (keyManager == null) {
+            throw new APIManagementException(
+                    "KeyManager " + name + " didn't configured for tenant" + tenantDomain);
+        }
+        if (enabled) {
+            APIManagerConfiguration apiManagerConfiguration =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration();
+            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(type)) {
+                keyManager = new AMDefaultKeyManagerImpl();
+                keyManager.loadConfiguration(keyManagerConfiguration);
+                tenantWiseKeyManagerMap.put(APIConstants.KeyManager.DEFAULT_KEY_MANAGER, keyManager);
+            }
+            KeyManagerConfigurationsDto keyManagerConfigurationsDto =
+                    apiManagerConfiguration.getKeyManagerConfigurationsDto();
+            if (keyManagerConfigurationsDto != null) {
+                KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerConfigurationDto =
+                        keyManagerConfigurationsDto.getKeyManagerConfigurationList().get(type);
+                if (keyManagerConfigurationDto != null &&
+                        StringUtils.isNotEmpty(keyManagerConfigurationDto.getImplementationClass())) {
+                    try {
+                        keyManager =
+                                (KeyManager) Class.forName(keyManagerConfigurationDto.getImplementationClass())
+                                        .newInstance();
+                        keyManager.loadConfiguration(keyManagerConfiguration);
+                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                        throw new APIManagementException("Error while loading keymanager configuration", e);
+                    }
+
+                }
+            }
+            tenantWiseKeyManagerMap.put(name, keyManager);
+        } else {
+            tenantWiseKeyManagerMap.remove(name);
+        }
+        keyManagerMap.put(tenantDomain, tenantWiseKeyManagerMap);
+        tenantWiseKeyManagerMap.remove(tenantDomain);
+    }
+
+    public static void removeKeyManagerConfiguration(String tenantDomain, String name) {
+
+        Map<String, KeyManager> tenantWiseKeyManagerMap = keyManagerMap.get(tenantDomain);
+        if (tenantWiseKeyManagerMap != null){
+            tenantWiseKeyManagerMap.remove(name);
+            keyManagerMap.put(tenantDomain,tenantWiseKeyManagerMap);
+            tenantWiseKeyManagerMap.remove(tenantDomain);
+        }
+    }
 }

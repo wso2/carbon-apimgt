@@ -48,12 +48,13 @@ public interface APIKeyDataStore {
      * @param apiVersion A valid version of the API
      * @param apiKey An API key string - Not necessarily a valid key
      * @param requiredAuthenticationLevel - type of  key. can be one of 'Application or Application_User'
+     * @param tenantDomain
      * @return an APIKeyValidationInfoDTO instance containing key validation data
      * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
      */
     APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
-                                                 String requiredAuthenticationLevel, String clientDomain,
-                                                 String matchingResource, String httpVerb) throws APISecurityException;
+                                          String requiredAuthenticationLevel, String clientDomain,
+                                          String matchingResource, String httpVerb, String tenantDomain) throws APISecurityException;
 
     /**
      * Get API Resource URI Templates

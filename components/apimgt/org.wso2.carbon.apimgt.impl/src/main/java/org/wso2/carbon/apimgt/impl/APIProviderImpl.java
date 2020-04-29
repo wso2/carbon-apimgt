@@ -990,7 +990,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void registerOrUpdateResourceInKeyManager(API api) throws APIManagementException {
         //get new key manager instance for  resource registration.
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
         Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
         if (registeredResource == null) {
             boolean isNewResourceRegistered = keyManager.registerNewResource(api, null);
@@ -4065,7 +4065,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
             }
             */
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
             if (identifier.toString() != null) {
                 keyManager.deleteRegisteredResourceByAPIId(identifier.toString());
             }

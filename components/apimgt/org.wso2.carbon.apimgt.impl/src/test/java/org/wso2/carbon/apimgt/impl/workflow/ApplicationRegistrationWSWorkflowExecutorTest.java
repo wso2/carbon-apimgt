@@ -83,7 +83,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         application.setTier("Unlimited");
         PowerMockito.mockStatic(KeyManagerHolder.class);
         keyManager = Mockito.mock(KeyManager.class);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
+        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super")).thenReturn(keyManager);
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         PowerMockito.when(keyManager.createApplication((OAuthAppRequest) Mockito.anyObject())).thenReturn
                 (oAuthApplicationInfo);

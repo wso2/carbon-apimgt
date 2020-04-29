@@ -189,7 +189,7 @@ public class APIProviderImplTest {
         certificateManager = Mockito.mock(CertificateManagerImpl.class);
         Mockito.when(keyManager.getResourceByApiId(Mockito.anyString())).thenReturn(null);
         Mockito.when(keyManager.registerNewResource(Mockito.any(API.class), Mockito.any(Map.class))).thenReturn(true);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
+        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance(Mockito.anyString())).thenReturn(keyManager);
         PowerMockito.when(CertificateManagerImpl.getInstance()).thenReturn(certificateManager);
 
         PowerMockito.when(APIUtil.isAPIManagementEnabled()).thenReturn(false);

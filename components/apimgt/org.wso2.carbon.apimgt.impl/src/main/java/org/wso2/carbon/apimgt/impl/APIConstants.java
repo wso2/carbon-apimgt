@@ -636,8 +636,6 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
     public static final String API_KEY_VALIDATOR_USERNAME = API_KEY_VALIDATOR + "Username";
     public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
-    public static final String API_KEY_VALIDATOR_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_VALIDATOR
-            + "ApplicationTokenDefaultValidityPeriod";
 
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
@@ -2073,6 +2071,68 @@ public final class APIConstants {
             public static final String LOCAL_CLAIM = "LocalClaim";
             public static final String REMOTE_CLAIM = "RemoteClaim";
 
+        }
+    }
+
+    public static class KeyManager {
+        public static final String SERVICE_URL = "ServiceURL";
+        public static final String INIT_DELAY = "InitDelay";
+        public static final String INTROSPECTION_ENDPOINT = "introspection_endpoint";
+        public static final String CLIENT_REGISTRATION_ENDPOINT = "client_registration_endpoint";
+        public static final String TOKEN_ENDPOINT = "token_endpoint";
+        public static final String REVOKE_ENDPOINT = "revoke_endpoint";
+        public static final String SCOPE_MANAGEMENT_ENDPOINT = "scope_endpoint";
+        public static final String AVAILABLE_GRANT_TYPE = "grant_types";
+        public static final String ENABLE_TOKEN_GENERATION = "enable_token_generation";
+        public static final String ENABLE_TOKEN_HASH = "enable_token_hash";
+        public static final String ENABLE_TOKEN_ENCRYPTION = "enable_token_encryption";
+        public static final String ENABLE_OAUTH_APP_CREATION = "enable_oauth_app_creation";
+        public static final String DEFAULT_KEY_MANAGER = "Default";
+        public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
+        public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Key Manager";
+
+        public static final String ISSUER = "issuer";
+        public static final String JWKS_ENDPOINT = "jwks_endpoint";
+        public static final String USERINFO_ENDPOINT = "userinfo_endpoint";
+        public static final String AUTHORIZE_ENDPOINT = "authorize_endpoint";
+        public static final String KEY_MANAGER_CONFIGURATIONS = "KeyManagerConfigurations";
+        public static final String KEY_MANAGER = "KeyManager";
+        public static final String IMPLEMENTATION = "Implementation";
+        public static final String ADDITIONAL_CONFIGURATION = "AdditionalConfigurations";
+        public static final String CONNECTION_CONFIGURATIONS = "ConnectionConfigurations";
+        public static final String CONNECTION_CONFIGURATION = "ConnectionConfiguration";
+        public static final String APPLICATION_CONFIGURATIONS = "ApplicationConfigurations";
+        public static final String APPLICATION_CONFIGURATION = "ApplicationConfiguration";
+        public static final String CONFIGURATION_RETRIEVER = "ConfigurationRetriever";
+        public static final String CONFIGURATION_NAME = "name";
+        public static final String CONFIGURATION_TYPE = "type";
+        public static final String CONFIGURATION_REQUIRED = "required";
+        public static final String CONFIGURATION_MASK = "mask";
+        public static final String CONFIGURATION_LABEL = "label";
+        public static final String CONFIGURATION_TOOL_TIP = "tooltip";
+        public static final String CONFIGURATION_DEFAULT = "default";
+        public static final String CONFIGURATION_MULTIPLE = "multiple";
+        public static final String CONFIGURATION_VALUES = "values";
+        public static final String CONFIGURATION_VALUE = "values";
+
+        public static final String ENABLE = "Enable";
+        public static final String USERNAME = "Username";
+        public static final String PASSWORD = "Password";
+
+        public static class KeyManagerEvent {
+
+            public static final String EVENT_TYPE = "event_type";
+            public static final String KEY_MANAGER_CONFIGURATION = "key_manager_configuration";
+            public static final String ACTION = "action";
+            public static final String NAME = "name";
+            public static final String ENABLED = "enabled";
+            public static final String VALUE = "value";
+            public static final String TENANT_DOMAIN = "tenantDomain";
+            public static final String ACTION_ADD = "add";
+            public static final String ACTION_UPDATE = "update";
+            public static final String ACTION_DELETE = "delete";
+            public static final String TYPE = "type";
+            public static final String KEY_MANAGER_STREAM_ID = "org.wso2.apimgt.keymgt.stream:1.0.0";
         }
     }
 

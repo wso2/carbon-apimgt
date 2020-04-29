@@ -1383,19 +1383,7 @@ public class AbstractAPIManagerTestCase {
         }
     }
 
-    @Test
-    public void testIsApplicationTokenExists() throws APIManagementException {
-        Mockito.when(apiMgtDAO.isAccessTokenExists(Mockito.anyString())).thenReturn(true);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Assert.assertEquals(abstractAPIManager.isApplicationTokenExists(SAMPLE_RESOURCE_ID), true);
-    }
 
-    @Test
-    public void testIsApplicationTokenRevoked() throws APIManagementException {
-        Mockito.when(apiMgtDAO.isAccessTokenRevoked(Mockito.anyString())).thenReturn(true);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Assert.assertEquals(abstractAPIManager.isApplicationTokenRevoked(SAMPLE_RESOURCE_ID), true);
-    }
 
     @Test
     public void testGetAccessTokenData() throws APIManagementException {
@@ -1407,11 +1395,6 @@ public class AbstractAPIManagerTestCase {
                 SAMPLE_RESOURCE_ID);
     }
 
-    @Test
-    public void testSearchAccessToken() throws APIManagementException {
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Assert.assertEquals(abstractAPIManager.searchAccessToken("Before", "query1", API_PROVIDER).size(), 0);
-    }
 
     @Test
     public void testGetAPIByAccessToken() throws APIManagementException {

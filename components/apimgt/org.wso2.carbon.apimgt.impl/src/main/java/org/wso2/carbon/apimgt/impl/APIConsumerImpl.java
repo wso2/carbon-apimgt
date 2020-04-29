@@ -954,7 +954,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
 
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
         return keyManager.getNewApplicationConsumerSecret(tokenRequest);
     }
 
@@ -1335,8 +1335,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         try {
             // Populating additional parameters.
-            tokenRequest = ApplicationUtils.populateTokenRequest(jsonInput, tokenRequest);
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
+            tokenRequest = ApplicationUtils.populateTokenRequest(keyManager,jsonInput, tokenRequest);
 
             JSONObject appLogObject = new JSONObject();
             appLogObject.put("Re-Generated Keys for application with client Id", clientId);
@@ -2550,9 +2550,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, clientId, callBackURL,
                                                                                  "default",
-                                                                                  jsonString, tokenType);
+                                                                                  jsonString, tokenType,this.tenantDomain);
 
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
 
         // Checking if clientId is mapped with another application.
         if (apiMgtDAO.isMappingExistsforConsumerKey(clientId)) {
@@ -2570,7 +2570,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         AccessTokenInfo tokenInfo;
         if (oAuthApplication.getJsonString().contains(APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS)) {
-            AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication, null);
+            AccessTokenRequest tokenRequest =
+                    ApplicationUtils.createAccessTokenRequest(keyManager, oAuthApplication, null);
             tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
         } else {
             tokenInfo = new AccessTokenInfo();
@@ -4109,7 +4110,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Build key manager instance and create oAuthAppRequest by jsonString.
             OAuthAppRequest request =
                     ApplicationUtils.createOauthAppRequest(applicationName, null,
-                            callbackUrl, authScopeString, jsonString, applicationTokenType);
+                            callbackUrl, authScopeString, jsonString, applicationTokenType, this.tenantDomain);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_CALLBACK_URL, callbackUrl);
@@ -4301,7 +4302,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Build key manager instance and create oAuthAppRequest by jsonString.
             OAuthAppRequest request = ApplicationUtils
                     .createOauthAppRequest(applicationName, null, callbackUrl, authScopeString, jsonParams,
-                            applicationTokenType);
+                            applicationTokenType, this.tenantDomain);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_CALLBACK_URL, callbackUrl);
@@ -4659,11 +4660,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {
-        return apiMgtDAO.isAccessTokenExists(accessToken);
-    }
-
-    @Override
     public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
         return getGraphqlSchemaDefinition(apiId);
     }
@@ -4948,7 +4944,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String consumerKey = apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(String.valueOf(applicationId), keyType);
         if (StringUtils.isNotEmpty(consumerKey)) {
             String consumerKeyStatus = apiMgtDAO.getKeyStatusOfApplication(keyType, applicationId).getState();
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
             OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
             AccessTokenInfo tokenInfo = keyManager.getAccessTokenByConsumerKey(consumerKey);
             APIKey apiKey = new APIKey();
@@ -5045,7 +5041,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             //Create OauthAppRequest object by passing json String.
             OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
-                    tokenScope, jsonString, application.getTokenType());
+                    tokenScope, jsonString, application.getTokenType(), this.tenantDomain);
 
             oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
 
@@ -5054,7 +5050,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
             //get key manager instance.
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
             // set application attributes
             oauthAppRequest.getOAuthApplicationInfo().putAllAppAttributes(application.getApplicationAttributes());
             //call update method.
@@ -5103,13 +5099,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Application application = ApplicationUtils.retrieveApplicationById(applicationId);
             //Create OauthAppRequest object by passing json String.
             OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
-                    tokenScope, jsonString, application.getTokenType());
+                    tokenScope, jsonString, application.getTokenType(), this.tenantDomain);
             oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
             String consumerKey = apiMgtDAO.getConsumerKeyForApplicationKeyType(applicationId, userId, tokenType,
                     groupingId);
             oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
             //get key manager instance.
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
             //call update method.
             OAuthApplicationInfo updatedAppInfo = keyManager.updateApplication(oauthAppRequest);
             JSONObject appLogObject = new JSONObject();
@@ -5135,7 +5131,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public void deleteOAuthApplication(String consumerKey) throws APIManagementException {
         //get key manager instance.
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
         //delete oAuthApplication by calling key manager implementation
         keyManager.deleteApplication(consumerKey);
 
@@ -5180,7 +5176,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 String applicationName = application.getName();
                 if (!APIUtil.isApplicationOwnedBySubscriber(userId, applicationName)) {
                     for (int i = 0; i < application.getKeys().size(); i++) {
-                        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+                        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
                              /* retrieving OAuth application information for specific consumer key */
                         consumerKey = ((APIKey) ((ArrayList) application.getKeys()).get(i)).getConsumerKey();
                         OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
@@ -5188,7 +5184,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(oAuthApplicationInfo.
                                             getParameter(ApplicationConstants.OAUTH_CLIENT_NAME).toString(), null,
                                     oAuthApplicationInfo.getCallBackURL(), null,
-                                    null, application.getTokenType());
+                                    null, application.getTokenType(), this.tenantDomain);
                             oauthAppRequest.getOAuthApplicationInfo().setAppOwner(userId);
                             oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
                              /* updating the owner of the OAuth application with userId */

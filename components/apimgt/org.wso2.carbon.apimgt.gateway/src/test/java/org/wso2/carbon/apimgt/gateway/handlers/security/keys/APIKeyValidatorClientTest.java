@@ -89,6 +89,7 @@ public class APIKeyValidatorClientTest {
 
     @Test
     public void getAPIKeyData() throws Exception {
+        String tenantDomain = "carbon.super";
         wireMockRule = new WireMockRule(wireMockConfiguration);
         wireMockRule.stubFor(WireMock.post(urlEqualTo("/services/APIKeyValidationService")).withBasicAuth("admin",
                 "admin").willReturn(aResponse().withBody("<soapenv:Envelope " +
@@ -148,7 +149,7 @@ public class APIKeyValidatorClientTest {
         WSAPIKeyDataStore wsapiKeyDataStore = new WSAPIKeyDataStore();
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = wsapiKeyDataStore.getAPIKeyData("/pizzashack/1.0.0",
                 "1.0.0", "eaa0e467-36f7-367b-ba8c-87ab9849456f",
-                "ANY", "http://localhost", "/menu", "GET");
+                "ANY", "http://localhost", "/menu", "GET", tenantDomain);
         wireMockRule.resetAll();
         wireMockRule.stop();
         Assert.assertNotNull(apiKeyValidationInfoDTO);
@@ -164,6 +165,7 @@ public class APIKeyValidatorClientTest {
 
     @Test
     public void getAPIKeyDataWhileKeyManagerCallFailed() throws Exception {
+        String tenantDomain = "carbon.super";
         wireMockRule = new WireMockRule(wireMockConfiguration);
         wireMockRule.stubFor(WireMock.post(urlEqualTo("/services/APIKeyValidationService")).withBasicAuth("admin",
                 "admin").willReturn(aResponse().withBody("<soapenv:Envelope " +
@@ -223,7 +225,7 @@ public class APIKeyValidatorClientTest {
             WSAPIKeyDataStore wsapiKeyDataStore = new WSAPIKeyDataStore();
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO = wsapiKeyDataStore.getAPIKeyData("/pizzashack/1.0.0",
                     "1.0.0", "eaa0e467-36f7-367b-ba8c-87ab9849456f",
-                    "ANY", "http://localhost", "/menu", "GET");
+                    "ANY", "http://localhost", "/menu", "GET", tenantDomain);
         } catch (APISecurityException e) {
             if (e.getMessage().contains("Error while accessing backend services for API key validation")) {
                 Assert.assertTrue(true);

@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
-
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.transformer.JWTTransformer;
@@ -36,9 +35,7 @@ import org.wso2.carbon.sequences.services.SequenceAdmin;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class ServiceReferenceHolder {
 
@@ -97,6 +94,9 @@ public class ServiceReferenceHolder {
 
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigService) {
         this.amConfigService = amConfigService;
+        if (amConfigService != null && amConfigService.getAPIManagerConfiguration() != null){
+            setThrottleProperties(amConfigService.getAPIManagerConfiguration().getThrottleProperties());
+        }
     }
 
     public ThrottleProperties getThrottleProperties() {

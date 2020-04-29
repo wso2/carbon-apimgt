@@ -23,13 +23,13 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.core.util.KeyStoreManager;
-import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.nio.charset.Charset;
-import java.security.*;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -72,7 +72,8 @@ public class ApiKeyGenerator {
         } else {
             expireIn = currentTime + jwtTokenInfoDTO.getExpirationTime();
         }
-        String issuerIdentifier = OAuthServerConfiguration.getInstance().getOpenIDConnectIDTokenIssuerIdentifier();
+        String issuerIdentifier = ServiceReferenceHolder.getInstance().getOauthServerConfiguration()
+                .getOpenIDConnectIDTokenIssuerIdentifier();
         JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
         jwtClaimsSetBuilder.claim("sub", APIUtil.getUserNameWithTenantSuffix(jwtTokenInfoDTO.getEndUserName()));
         jwtClaimsSetBuilder.claim("jti", UUID.randomUUID().toString());

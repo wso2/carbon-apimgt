@@ -28,7 +28,6 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl;
@@ -49,7 +48,6 @@ import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
@@ -81,7 +79,6 @@ public class APIHandlerServiceComponent {
 
     private APIKeyValidatorClientPool clientPool;
 
-    private APIManagerConfiguration configuration = new APIManagerConfiguration();
 
     private ServiceRegistration registration;
 
@@ -99,17 +96,14 @@ public class APIHandlerServiceComponent {
             if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(APISecurityUtils.getKeyValidatorClientType())) {
                 clientPool = APIKeyValidatorClientPool.getInstance();
             }
-            String filePath = getFilePath();
-            configuration.load(filePath);
-            ServiceReferenceHolder.getInstance()
-                    .setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl(configuration));
-            ServiceReferenceHolder.getInstance().setThrottleProperties(configuration.getThrottleProperties());
-            String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+            APIManagerConfiguration apiManagerConfiguration =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+            String gatewayType = apiManagerConfiguration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
             if ("Synapse".equalsIgnoreCase(gatewayType)) {
                 // Register Tenant service creator to deploy tenant specific common synapse configurations
                 TenantServiceCreator listener = new TenantServiceCreator();
                 bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
-                if (configuration.getThrottleProperties().isEnabled()) {
+                if (apiManagerConfiguration.getThrottleProperties().isEnabled()) {
                     ServiceReferenceHolder.getInstance().setThrottleDataPublisher(new ThrottleDataPublisher());
                     ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
                     APIThrottleDataServiceImpl throttleDataServiceImpl =
@@ -124,7 +118,7 @@ public class APIHandlerServiceComponent {
                     ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
                     log.debug("APIThrottleDataService Registered...");
                     // start web service throttle data retriever as separate thread and start it.
-                    if (configuration.getThrottleProperties().getBlockCondition().isEnabled()) {
+                    if (apiManagerConfiguration.getThrottleProperties().getBlockCondition().isEnabled()) {
                         BlockingConditionRetriever webServiceThrottleDataRetriever = new BlockingConditionRetriever();
                         webServiceThrottleDataRetriever.startWebServiceThrottleDataRetriever();
                         KeyTemplateRetriever webServiceBlockConditionsRetriever = new KeyTemplateRetriever();
@@ -140,7 +134,7 @@ public class APIHandlerServiceComponent {
 
                 // Set APIM Gateway JWT Generator
 
-                JWTConfigurationDto jwtConfigurationDto = configuration.getJwtConfigurationDto();
+                JWTConfigurationDto jwtConfigurationDto = apiManagerConfiguration.getJwtConfigurationDto();
                 Properties defaultClaimMappings = new Properties();
                 InputStream resourceAsStream =
                         this.getClass().getClassLoader().getResourceAsStream("default-claim-mapping.properties");
@@ -163,7 +157,7 @@ public class APIHandlerServiceComponent {
                 ServiceReferenceHolder.getInstance().setTracer(ServiceReferenceHolder.getInstance().getTracingService()
                         .buildTracer(APIMgtGatewayConstants.SERVICE_NAME));
             }
-        } catch (APIManagementException | IOException e) {
+        } catch (IOException e) {
             log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
         }
         // Create caches for the super tenant

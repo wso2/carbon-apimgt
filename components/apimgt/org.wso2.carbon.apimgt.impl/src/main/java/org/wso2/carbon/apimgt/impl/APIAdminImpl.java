@@ -23,15 +23,16 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
@@ -40,12 +41,16 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.text.SimpleDateFormat;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
 
 /**
  * This class provides the core API admin functionality.
@@ -263,6 +268,120 @@ public class APIAdminImpl implements APIAdmin {
         return time;
     }
 
+    @Override
+    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByTenant(String tenantDomain)
+            throws APIManagementException {
+
+        ApiMgtDAO instance = ApiMgtDAO.getInstance();
+        List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
+                instance.getKeyManagerConfigurationsByTenant(tenantDomain);
+        Iterator<KeyManagerConfigurationDTO> iterator = keyManagerConfigurationsByTenant.iterator();
+        KeyManagerConfigurationDTO defaultKeyManagerConfiguration = null;
+        while (iterator.hasNext()) {
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO = iterator.next();
+            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
+                defaultKeyManagerConfiguration = keyManagerConfigurationDTO;
+                iterator.remove();
+                break;
+            }
+        }
+        if (defaultKeyManagerConfiguration != null) {
+            APIUtil.getAndSetDefaultKeyManagerConfiguration(defaultKeyManagerConfiguration);
+            keyManagerConfigurationsByTenant.add(defaultKeyManagerConfiguration);
+        }
+        return keyManagerConfigurationsByTenant;
+    }
+
+    @Override
+    public Map<String, List<KeyManagerConfigurationDTO>> getAllKeyManagerConfigurations() throws APIManagementException {
+        ApiMgtDAO instance = ApiMgtDAO.getInstance();
+        List<KeyManagerConfigurationDTO> keyManagerConfigurations = instance.getKeyManagerConfigurations();
+        Map<String,List<KeyManagerConfigurationDTO>> keyManagerConfigurationsByTenant = new HashMap<>();
+        for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
+            List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS;
+            if (keyManagerConfigurationsByTenant.containsKey(keyManagerConfiguration.getTenantDomain())){
+                keyManagerConfigurationDTOS =
+                        keyManagerConfigurationsByTenant.get(keyManagerConfiguration.getTenantDomain());
+            }else{
+                keyManagerConfigurationDTOS = new ArrayList<>();
+            }
+            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
+                APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
+            }
+            keyManagerConfigurationDTOS.add(keyManagerConfiguration);
+            keyManagerConfigurationsByTenant.put(keyManagerConfiguration.getTenantDomain(),keyManagerConfigurationDTOS);
+        }
+        return keyManagerConfigurationsByTenant;
+    }
+
+    @Override
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationById(String tenantDomain, String id)
+            throws APIManagementException {
+
+        ApiMgtDAO instance = ApiMgtDAO.getInstance();
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO = instance.getKeyManagerConfigurationByID(tenantDomain, id);
+        if (keyManagerConfigurationDTO != null &&
+                APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())){
+            APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfigurationDTO);
+        }
+
+        return keyManagerConfigurationDTO;
+    }
+
+    @Override
+    public boolean isKeyManagerConfigurationExistById(String tenantDomain, String id) throws APIManagementException {
+
+        ApiMgtDAO instance = ApiMgtDAO.getInstance();
+        return instance.isKeyManagerConfigurationExistById(tenantDomain,id);
+    }
+
+    @Override
+    public KeyManagerConfigurationDTO addKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
+        ApiMgtDAO instance = ApiMgtDAO.getInstance();
+        keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
+        instance.addKeyManagerConfiguration(keyManagerConfigurationDTO);
+        new KeyMgtNotificationSender()
+                .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD);
+        return keyManagerConfigurationDTO;
+    }
+
+    @Override
+    public KeyManagerConfigurationDTO updateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
+        ApiMgtDAO instance = ApiMgtDAO.getInstance();
+        instance.updateKeyManagerConfiguration(keyManagerConfigurationDTO);
+        new KeyMgtNotificationSender()
+                .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE);
+        return keyManagerConfigurationDTO;
+    }
+
+    @Override
+    public void deleteKeyManagerConfigurationById(String tenantDomain, String id) throws APIManagementException {
+        ApiMgtDAO instance = ApiMgtDAO.getInstance();
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO =
+                instance.getKeyManagerConfigurationByID(tenantDomain, id);
+        if (keyManagerConfigurationDTO != null){
+            instance.deleteKeyManagerConfigurationById(id,tenantDomain);
+            new KeyMgtNotificationSender()
+                    .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
+        }
+    }
+
+    @Override
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String tenantDomain, String name)
+            throws APIManagementException {
+
+        ApiMgtDAO instance = ApiMgtDAO.getInstance();
+        KeyManagerConfigurationDTO keyManagerConfiguration =
+                instance.getKeyManagerConfigurationByName(tenantDomain, name);
+        if (keyManagerConfiguration != null &&
+                APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
+            APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
+        }
+        return keyManagerConfiguration;
+    }
+
     /**
      * configure email list to which the alert needs to be sent
      */
@@ -359,7 +478,6 @@ public class APIAdminImpl implements APIAdmin {
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         Map<String, Object> result = apiProvider
                 .searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE, true);
-        int length = (Integer) result.get("length");
-        return length;
+        return (int) (Integer) result.get("length");
     }
 }

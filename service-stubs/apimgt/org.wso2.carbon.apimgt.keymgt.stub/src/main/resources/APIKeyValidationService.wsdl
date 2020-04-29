@@ -72,6 +72,7 @@
                   <xs:element minOccurs="0" name="clientDomain" nillable="true" type="xs:string"/>
                   <xs:element minOccurs="0" name="matchingResource" nillable="true" type="xs:string"/>
                   <xs:element minOccurs="0" name="httpVerb" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
@@ -134,6 +135,7 @@
                   <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"/>
                   <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
                   <xs:element minOccurs="0" name="accessToken" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>

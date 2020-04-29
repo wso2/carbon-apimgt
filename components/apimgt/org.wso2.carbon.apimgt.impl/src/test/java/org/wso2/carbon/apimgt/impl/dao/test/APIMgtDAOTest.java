@@ -127,6 +127,9 @@ public class APIMgtDAOTest {
         config.load(dbConfigPath);
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl
                 (config));
+        PowerMockito.mockStatic(KeyManagerHolder.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        Mockito.when(KeyManagerHolder.getKeyManagerInstance(Mockito.anyString())).thenReturn(keyManager);
         APIMgtDBUtil.initialize();
         apiMgtDAO = ApiMgtDAO.getInstance();
         IdentityTenantUtil.setRealmService(new TestRealmService());
@@ -1023,9 +1026,6 @@ public class APIMgtDAOTest {
         assertNotNull(apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, application.getName(), 0, 10, null));
         Set<SubscribedAPI> subscribedAPIS = apiMgtDAO.getSubscribedAPIs(subscriber, application.getName(), null);
         assertEquals(subscribedAPIS.size(), 1);
-        assertTrue(apiMgtDAO.isAccessTokenExists(tokenProduction));
-        assertTrue(clientIdProduction.equals(apiMgtDAO.findConsumerKeyFromAccessToken(tokenProduction)));
-        apiMgtDAO.revokeAccessToken(tokenProduction);
         apiMgtDAO.updateSubscription(apiId, APIConstants.SubscriptionStatus.BLOCKED, application.getId());
         subscribedAPI.setSubStatus(APIConstants.SubscriptionStatus.REJECTED);
         apiMgtDAO.updateSubscription(subscribedAPI);
@@ -1035,7 +1035,6 @@ public class APIMgtDAOTest {
                 PolicyConstants.POLICY_LEVEL_APP));
         assertTrue(apiMgtDAO.hasSubscription(apiPolicy.getPolicyName(), subscriber.getName(),
                 PolicyConstants.POLICY_LEVEL_API));
-        assertFalse(apiMgtDAO.isAccessTokenRevoked(tokenProduction));
         assertTrue(apiPolicy.getPolicyName().equals(apiMgtDAO.getAPILevelTier(apiMgtDAO.getAPIID(apiId, null))));
         apiMgtDAO.recordAPILifeCycleEvent(apiId, "CREATED", "PUBLISHED", "testCreateApplicationRegistrationEntry",
                 -1234);

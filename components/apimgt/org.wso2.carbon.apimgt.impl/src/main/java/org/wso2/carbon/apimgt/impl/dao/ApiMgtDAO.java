@@ -19,6 +19,10 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +34,7 @@ import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
@@ -59,6 +64,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -74,7 +80,6 @@ import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
@@ -100,7 +105,6 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -2112,67 +2116,7 @@ public class ApiMgtDAO {
         subscribedAPI.setApplication(application);
     }
 
-    public boolean isAccessTokenExists(String accessToken) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
 
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        accessTokenStoreTable = getAccessTokenStoreTableFromAccessToken(accessToken, accessTokenStoreTable);
-
-        String getTokenSql = SQLConstants.IS_ACCESS_TOKEN_EXISTS_PREFIX + accessTokenStoreTable +
-                SQLConstants.IS_ACCESS_TOKEN_EXISTS_SUFFIX;
-        boolean tokenExists = false;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            ps = connection.prepareStatement(getTokenSql);
-            String encryptedAccessToken = APIUtil.encryptToken(accessToken);
-            ps.setString(1, encryptedAccessToken);
-            result = ps.executeQuery();
-            while (result.next()) {
-                tokenExists = true;
-            }
-        } catch (SQLException e) {
-            handleException("Failed to check availability of the access token. ", e);
-        } catch (CryptoException e) {
-            handleException("Failed to check availability of the access token. ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
-        }
-        return tokenExists;
-    }
-
-    public boolean isAccessTokenRevoked(String accessToken) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
-
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        accessTokenStoreTable = getAccessTokenStoreTableFromAccessToken(accessToken, accessTokenStoreTable);
-
-        String getTokenSql = SQLConstants.IS_ACCESS_TOKEN_REVOKED_PREFIX + accessTokenStoreTable +
-                SQLConstants.IS_ACCESS_TOKE_REVOKED_SUFFIX;
-        boolean tokenExists = false;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            ps = connection.prepareStatement(getTokenSql);
-            String encryptedAccessToken = APIUtil.encryptToken(accessToken);
-            ps.setString(1, encryptedAccessToken);
-            result = ps.executeQuery();
-            while (result.next()) {
-                if (!"REVOKED".equals(result.getString("TOKEN_STATE"))) {
-                    tokenExists = true;
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to check availability of the access token. ", e);
-        } catch (CryptoException e) {
-            handleException("Failed to check availability of the access token. ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
-        }
-        return tokenExists;
-    }
 
     public APIKey getAccessTokenData(String accessToken) throws APIManagementException {
         Connection connection = null;
@@ -2365,14 +2309,15 @@ public class ApiMgtDAO {
     }
 
 
-    private Map<String, OAuthApplicationInfo> getOAuthApplications(int applicationId) throws APIManagementException {
+    private Map<String, OAuthApplicationInfo> getOAuthApplications(
+            KeyManager keyManager, int applicationId) throws APIManagementException {
         Map<String, OAuthApplicationInfo> map = new HashMap<String, OAuthApplicationInfo>();
-        OAuthApplicationInfo prodApp = getClientOfApplication(applicationId, "PRODUCTION");
+        OAuthApplicationInfo prodApp = getClientOfApplication(keyManager,applicationId, "PRODUCTION");
         if (prodApp != null) {
             map.put("PRODUCTION", prodApp);
         }
 
-        OAuthApplicationInfo sandboxApp = getClientOfApplication(applicationId, "SANDBOX");
+        OAuthApplicationInfo sandboxApp = getClientOfApplication(keyManager,applicationId, "SANDBOX");
         if (sandboxApp != null) {
             map.put("SANDBOX", sandboxApp);
         }
@@ -2380,11 +2325,11 @@ public class ApiMgtDAO {
         return map;
     }
 
-    public OAuthApplicationInfo getClientOfApplication(int applicationID, String keyType)
+    public OAuthApplicationInfo getClientOfApplication(KeyManager keyManager,
+                                                       int applicationID, String keyType)
             throws APIManagementException {
         String sqlQuery = SQLConstants.GET_CLIENT_OF_APPLICATION_SQL;
 
-        KeyManager keyManager = null;
         OAuthApplicationInfo oAuthApplication = null;
         Connection connection = null;
         PreparedStatement ps = null;
@@ -2402,7 +2347,6 @@ public class ApiMgtDAO {
             }
 
             if (consumerKey != null) {
-                keyManager = KeyManagerHolder.getKeyManagerInstance();
                 oAuthApplication = keyManager.retrieveApplication(consumerKey);
             }
         } catch (SQLException e) {
@@ -3497,25 +3441,16 @@ public class ApiMgtDAO {
         return subscriptions;
     }
 
-    private void updateOAuthConsumerApp(String appName, String callbackUrl)
-            throws IdentityOAuthAdminException, APIManagementException {
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        String sqlStmt = SQLConstants.UPDATE_OAUTH_CONSUMER_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
+    private void updateOAuthConsumerApp(Connection connection, String appName, String callbackUrl)
+            throws APIManagementException {
 
-            prepStmt = connection.prepareStatement(sqlStmt);
+        String sqlStmt = SQLConstants.UPDATE_OAUTH_CONSUMER_SQL;
+        try (PreparedStatement prepStmt = connection.prepareStatement(sqlStmt)) {
             prepStmt.setString(1, callbackUrl);
             prepStmt.setString(2, appName);
             prepStmt.execute();
-
-            connection.commit();
         } catch (SQLException e) {
             handleException("Error when updating OAuth consumer App for " + appName, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
     }
 
@@ -3551,12 +3486,11 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
             applicationId = addApplication(application, loginUserName, conn);
+            Subscriber subscriber = getSubscriber(userId);
+            String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
 
             if (multiGroupAppSharingEnabled) {
-                Subscriber subscriber = getSubscriber(userId);
-                String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                updateGroupIDMappings(conn, applicationId, application.getGroupId(),
-                        tenantDomain);
+                updateGroupIDMappings(conn, applicationId, application.getGroupId(), tenantDomain);
             }
             conn.commit();
         } catch (SQLException e) {
@@ -4222,8 +4156,8 @@ public class ApiMgtDAO {
             if (application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
                 addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), tenantId);
             }
+            updateOAuthConsumerApp(conn,application.getName(), application.getCallbackUrl());
             conn.commit();
-            updateOAuthConsumerApp(application.getName(), application.getCallbackUrl());
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -4233,9 +4167,7 @@ public class ApiMgtDAO {
                 }
             }
             handleException("Failed to update Application", e);
-        } catch (IdentityOAuthAdminException e) {
-            handleException("Failed to update OAuth Consumer Application", e);
-        } finally {
+        }  finally {
             APIMgtDBUtil.closeAllConnections(ps, null, null);
             APIMgtDBUtil.closeAllConnections(preparedStatement, conn, null);
         }
@@ -4830,10 +4762,11 @@ public class ApiMgtDAO {
     public Application[] getApplications(Subscriber subscriber, String groupingId) throws APIManagementException {
 
         Application[] applications = getLightWeightApplications(subscriber, groupingId);
+        String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
 
         for (Application application : applications) {
-
-            Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
+            KeyManager keyManager  = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
+            Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(keyManager,application.getId());
 
             for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
                 application.addOAuthApp(entry.getKey(), entry.getValue());
@@ -5145,6 +5078,8 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void deleteApplication(Application application) throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(application.getSubscriber().getName());
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
         Connection connection = null;
         PreparedStatement deleteMappingQuery = null;
         PreparedStatement prepStmt = null;
@@ -5198,8 +5133,9 @@ public class ApiMgtDAO {
                 if (consumerKey != null) {
                     deleteDomainApp.setString(1, consumerKey);
                     deleteDomainApp.addBatch();
-
-                    KeyManagerHolder.getKeyManagerInstance().deleteMappedApplication(consumerKey);
+                    if (keyManager != null){
+                        keyManager.deleteMappedApplication(consumerKey);
+                    }
                     // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
                     // call delete.
                     if (!APIConstants.OAuthAppMode.MAPPED.equals(mode)) {
@@ -5214,7 +5150,9 @@ public class ApiMgtDAO {
                 if (log.isDebugEnabled()) {
                     log.debug("Deleting Oauth application with consumer key " + consumerKey + " from the Oauth server");
                 }
-                KeyManagerHolder.getKeyManagerInstance().deleteApplication(consumerKey);
+                if (keyManager != null){
+                    keyManager.deleteApplication(consumerKey);
+                }
             }
 
             deleteMappingQuery = connection.prepareStatement(deleteKeyMappingQuery);
@@ -6477,9 +6415,11 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         Application application = getApplicationByName(applicationName, userId, groupId);
+        String tenantDomain = MultitenantUtils.getTenantDomain(application.getSubscriber().getName());
+        KeyManager keyManager  = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
 
         if (application != null) {
-            Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
+            Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(keyManager, application.getId());
 
             for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
                 application.addOAuthApp(entry.getKey(), entry.getValue());
@@ -6735,7 +6675,9 @@ public class ApiMgtDAO {
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
 
-                Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
+                String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
+                KeyManager keyManager  = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
+                Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(keyManager, application.getId());
                 for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
                     application.addOAuthApp(entry.getKey(), entry.getValue());
                 }
@@ -6886,7 +6828,9 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
 
-                Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
+                String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
+                KeyManager keyManager  = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
+                Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(keyManager, application.getId());
                 for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
                     application.addOAuthApp(entry.getKey(), entry.getValue());
                 }
@@ -7620,36 +7564,6 @@ public class ApiMgtDAO {
         }
     }
 
-    /**
-     * Change access token status in to revoked in database level.
-     *
-     * @param key API Key to be revoked
-     * @throws APIManagementException on error in revoking access token
-     */
-    public void revokeAccessToken(String key) throws APIManagementException {
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        accessTokenStoreTable = getAccessTokenStoreTableFromAccessToken(key, accessTokenStoreTable);
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-
-            String query = SQLConstants.REMOVE_ACCESS_TOKEN_PREFIX + accessTokenStoreTable + SQLConstants
-                    .REVOKE_ACCESS_TOKEN_SUFFIX;
-            ps = conn.prepareStatement(query);
-            ps.setString(1, APIUtil.encryptToken(key));
-            ps.execute();
-
-            conn.commit();
-        } catch (SQLException e) {
-            handleException("Error in revoking access token: " + e.getMessage(), e);
-        } catch (CryptoException e) {
-            handleException("Error in revoking access token: " + e.getMessage(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, null);
-        }
-    }
 
 
     /**
@@ -7882,32 +7796,6 @@ public class ApiMgtDAO {
         return null;
     }
 
-    public String findConsumerKeyFromAccessToken(String accessToken) throws APIManagementException {
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        accessTokenStoreTable = getAccessTokenStoreTableFromAccessToken(accessToken, accessTokenStoreTable);
-        Connection connection = null;
-        PreparedStatement smt = null;
-        ResultSet rs = null;
-        String consumerKey = null;
-        try {
-            String getConsumerKeySql = SQLConstants.GET_CONSUMER_KEY_BY_ACCESS_TOKEN_PREFIX + accessTokenStoreTable +
-                    SQLConstants.GET_CONSUMER_KEY_BY_ACCESS_TOKEN_SUFFIX;
-            connection = APIMgtDBUtil.getConnection();
-            smt = connection.prepareStatement(getConsumerKeySql);
-            smt.setString(1, APIUtil.encryptToken(accessToken));
-            rs = smt.executeQuery();
-            while (rs.next()) {
-                consumerKey = rs.getString(1);
-            }
-        } catch (SQLException e) {
-            handleException("Error while getting authorized domians.", e);
-        } catch (CryptoException e) {
-            handleException("Error while getting authorized domians.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(smt, connection, rs);
-        }
-        return consumerKey;
-    }
 
     /**
      * Adds a comment for an API
@@ -8356,10 +8244,11 @@ public class ApiMgtDAO {
                 workflowDTO.setUserName(subscriber.getName());
                 workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
                 workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
+                String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                 OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
                         application.getCallbackUrl(), rs
                                 .getString("TOKEN_SCOPE"),
-                        rs.getString("INPUTS"), application.getTokenType());
+                        rs.getString("INPUTS"), application.getTokenType(),tenantDomain);
                 workflowDTO.setAppInfoDTO(request);
             }
         } catch (SQLException e) {
@@ -8823,6 +8712,252 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, null, rs);
         }
         return status;
+    }
+
+    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByTenant(String tenantDomain)
+            throws APIManagementException {
+        List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE TENANT_DOMAIN = ? ";
+        try (Connection conn = APIMgtDBUtil.getConnection();
+        PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+            preparedStatement.setString(1, tenantDomain);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()){
+                    KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                    String uuid = resultSet.getString("UUID");
+                    keyManagerConfigurationDTO.setUuid(uuid);
+                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
+                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
+                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+                    keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
+                        String configurationContent = IOUtils.toString(configuration);
+                        Map map = new Gson().fromJson(configurationContent, Map.class);
+                        keyManagerConfigurationDTO.setAdditionalProperties(map);
+                    } catch (IOException e) {
+                        log.error("Error while converting configurations in " + uuid, e);
+                    }
+                    keyManagerConfigurationDTOS.add(keyManagerConfigurationDTO);
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager configurations for tenant " + tenantDomain, e);
+        }
+
+        return keyManagerConfigurationDTOS;
+    }
+
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationByID(String tenantDomain, String id)
+            throws APIManagementException {
+
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE UUID = ? AND TENANT_DOMAIN = ?";
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+            preparedStatement.setString(1, id);
+            preparedStatement.setString(2,tenantDomain);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()){
+                    KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                    String uuid = resultSet.getString("UUID");
+                    keyManagerConfigurationDTO.setUuid(uuid);
+                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
+                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
+                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+                    keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
+                        String configurationContent = IOUtils.toString(configuration);
+                        Map map = new Gson().fromJson(configurationContent, Map.class);
+                        keyManagerConfigurationDTO.setAdditionalProperties(map);
+                    }
+                    return keyManagerConfigurationDTO;
+                }
+            }
+        } catch (SQLException | IOException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager configuration for " + id + " in tenant " + tenantDomain, e);
+        }
+        return null;
+
+    }
+
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String tenantDomain, String name)
+            throws APIManagementException {
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND TENANT_DOMAIN = ?";
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            return  getKeyManagerConfigurationByName(conn,tenantDomain,name);
+        } catch (SQLException | IOException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager configuration for " + name + " in tenant " + tenantDomain, e);
+        }
+    }
+
+    private KeyManagerConfigurationDTO getKeyManagerConfigurationByName(Connection connection ,String tenantDomain,
+                                                                        String name)
+            throws SQLException, IOException {
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND TENANT_DOMAIN = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2,tenantDomain);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()){
+                    KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                    String uuid = resultSet.getString("UUID");
+                    keyManagerConfigurationDTO.setUuid(uuid);
+                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
+                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
+                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+                    keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
+                        String configurationContent = IOUtils.toString(configuration);
+                        Map map = new Gson().fromJson(configurationContent, Map.class);
+                        keyManagerConfigurationDTO.setAdditionalProperties(map);
+                    }
+                    return keyManagerConfigurationDTO;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void addKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = conn
+                    .prepareStatement(SQLConstants.KeyManagerSqlConstants.ADD_KEY_MANAGER)) {
+                preparedStatement.setString(1, keyManagerConfigurationDTO.getUuid());
+                preparedStatement.setString(2, keyManagerConfigurationDTO.getName());
+                preparedStatement.setString(3, keyManagerConfigurationDTO.getDescription());
+                preparedStatement.setString(4, keyManagerConfigurationDTO.getType());
+                String configurationJson = new Gson().toJson(keyManagerConfigurationDTO.getAdditionalProperties());
+                preparedStatement.setBinaryStream(5, new ByteArrayInputStream(configurationJson.getBytes()));
+                preparedStatement.setString(6, keyManagerConfigurationDTO.getTenantDomain());
+                preparedStatement.setBoolean(7,keyManagerConfigurationDTO.isEnabled());
+                preparedStatement.executeUpdate();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                if (e instanceof SQLIntegrityConstraintViolationException){
+                    if (getKeyManagerConfigurationByName(conn,keyManagerConfigurationDTO.getTenantDomain(),
+                            keyManagerConfigurationDTO.getName())!= null){
+                        log.warn(keyManagerConfigurationDTO.getName() + " Key Manager Already Registered in tenant" +
+                                keyManagerConfigurationDTO.getTenantDomain());
+                    }else {
+                        throw new APIManagementException("Error while Storing key manager configuration with name " +
+                                keyManagerConfigurationDTO.getName() + " in tenant " +
+                                keyManagerConfigurationDTO.getTenantDomain(), e);
+                    }
+                }
+            }
+        } catch (SQLException | IOException e) {
+            throw new APIManagementException(
+                    "Error while Storing key manager configuration with name " + keyManagerConfigurationDTO.getName() +
+                            " in tenant " + keyManagerConfigurationDTO.getTenantDomain(), e);
+        }
+    }
+
+    public boolean isKeyManagerConfigurationExistById(String tenantDomain, String id) throws APIManagementException {
+        final String query = "SELECT 1 FROM AM_KEY_MANAGER WHERE UUID = ? AND TENANT_DOMAIN = ?";
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+            preparedStatement.setString(1, id);
+            preparedStatement.setString(2, tenantDomain);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager configuration for " + id + " in tenant " + tenantDomain, e);
+        }
+        return false;
+
+    }
+
+    public void updateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = conn
+                    .prepareStatement(SQLConstants.KeyManagerSqlConstants.UPDATE_KEY_MANAGER)) {
+                preparedStatement.setString(1, keyManagerConfigurationDTO.getName());
+                preparedStatement.setString(2, keyManagerConfigurationDTO.getDescription());
+                preparedStatement.setString(3, keyManagerConfigurationDTO.getType());
+                String configurationJson = new Gson().toJson(keyManagerConfigurationDTO.getAdditionalProperties());
+                preparedStatement.setBinaryStream(4, new ByteArrayInputStream(configurationJson.getBytes()));
+                preparedStatement.setString(5, keyManagerConfigurationDTO.getTenantDomain());
+                preparedStatement.setBoolean(6,keyManagerConfigurationDTO.isEnabled());
+                preparedStatement.setString(7, keyManagerConfigurationDTO.getUuid());
+                preparedStatement.executeUpdate();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(
+                    "Error while Updating key manager configuration with name " + keyManagerConfigurationDTO.getName() +
+                            " in tenant " + keyManagerConfigurationDTO.getTenantDomain(), e);
+        }
+    }
+
+    public void deleteKeyManagerConfigurationById(String id, String tenantDomain) throws APIManagementException {
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = conn
+                    .prepareStatement(SQLConstants.KeyManagerSqlConstants.DELETE_KEY_MANAGER)) {
+                preparedStatement.setString(1, id);
+                preparedStatement.setString(2, tenantDomain);
+                preparedStatement.executeUpdate();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(
+                    "Error while deleting key manager configuration with id " + id + " in tenant " + tenantDomain, e);
+        }
+
+    }
+
+
+    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurations() throws APIManagementException {
+        List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();
+        final String query = "SELECT * FROM AM_KEY_MANAGER";
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()){
+                    KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                    String uuid = resultSet.getString("UUID");
+                    keyManagerConfigurationDTO.setUuid(uuid);
+                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
+                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
+                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+                    keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
+                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
+                        String configurationContent = IOUtils.toString(configuration);
+                        Map map = new Gson().fromJson(configurationContent, Map.class);
+                        keyManagerConfigurationDTO.setAdditionalProperties(map);
+                    } catch (IOException e) {
+                        log.error("Error while converting configurations in " + uuid, e);
+                    }
+                    keyManagerConfigurationDTOS.add(keyManagerConfigurationDTO);
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving all key manager configurations", e);
+        }
+
+        return keyManagerConfigurationDTOS;
     }
 
     private class SubscriptionInfo {

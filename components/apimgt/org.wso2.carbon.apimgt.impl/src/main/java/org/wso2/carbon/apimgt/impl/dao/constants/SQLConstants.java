@@ -3548,4 +3548,24 @@ public class SQLConstants {
 
     public static final String GET_OAUTH2_SCOPE_ID_BY_NAME_SQL =
             "SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
+    public static class KeyManagerSqlConstants {
+        public static final String ADD_KEY_MANAGER =
+                " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,TENANT_DOMAIN,ENABLED) VALUES " +
+                        "(?,?,?,?,?,?,?)";
+        public static final String UPDATE_KEY_MANAGER =
+                "UPDATE AM_KEY_MANAGER SET NAME = ?,DESCRIPTION = ?,TYPE = ?,CONFIGURATION = ?,TENANT_DOMAIN = ?," +
+                        "ENABLED = ? WHERE UUID = ?";
+
+        public static final String DELETE_KEY_MANAGER =
+                "DELETE FROM AM_KEY_MANAGER WHERE UUID = ? AND TENANT_DOMAIN = ?";
+        public static final String ADD_KEY_MANAGER_MAPPING =
+                "INSERT INTO AM_KEYMGT_MAPPING (APPLICATION_ID,KEY_MANAGER_ID) VALUES" + "(?,SELECT UUID FROM " +
+                        "AM_KEY_MANAGER WHERE NAME = ? AND TENANT_DOMAIN = ?)";
+        public static final String RETRIEVE_KEY_MANAGER_NAME_BY_APPID =
+                "SELECT NAME FROM AM_KEY_MANAGER WHERE UUID = (SELECT KEY_MANAGER_ID FROM AM_KEYMGT_MAPPING WHERE " +
+                        "APPLICATION_ID = ?)";
+        public static final String UPDATE_KEY_MANAGER_MAPPING =
+                "UPDATE AM_KEYMGT_MAPPING SET KEY_MANAGER_ID = (SELECT UUID FROM AM_KEY_MANAGER WHERE NAME = ? AND " +
+                        "TENANT_DOMAIN = ?) WHERE APPLICATION_ID=?";
+    }
 }

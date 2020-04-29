@@ -705,14 +705,6 @@ public interface APIConsumer extends APIManager {
     Set<API> getPublishedAPIsByProvider(String providerId, int limit) throws APIManagementException;
 
     /**
-     * Check whether an application access token is already persist in database.
-     * @param accessToken
-     * @return
-     * @throws APIManagementException
-     */
-    boolean isApplicationTokenExists(String accessToken) throws APIManagementException;
-
-    /**
      * Returns a list of Tiers denied for the current user
      *
      * @return Set<String>
