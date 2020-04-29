@@ -56,7 +56,7 @@ public class KeyManagerConfigurationsDto {
         this.keyManagerConfigurationRetrieverDto = keyManagerConfigurationRetrieverDto;
     }
 
-    public Map<String, KeyManagerConfigurationDto> getKeyManagerConfigurationList() {
+    public Map<String, KeyManagerConfigurationDto> getKeyManagerConfiguration() {
 
         return keyManagerConfigurationDtoMap;
     }
@@ -64,11 +64,6 @@ public class KeyManagerConfigurationsDto {
     public void putKeyManagerConfigurationDto(String type, KeyManagerConfigurationDto keyManagerConfigurationDto) {
 
         this.keyManagerConfigurationDtoMap.put(type, keyManagerConfigurationDto);
-    }
-
-    public void removeKeyManagerConfigurationDto(String type, KeyManagerConfigurationDto keyManagerConfigurationDto) {
-
-        this.keyManagerConfigurationDtoMap.remove(type);
     }
 
     public String getUsername() {

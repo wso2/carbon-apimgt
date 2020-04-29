@@ -63,7 +63,7 @@ public class KeyManagerHolder {
                     apiManagerConfiguration.getKeyManagerConfigurationsDto();
             if (keyManagerConfigurationsDto != null) {
                 KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerConfigurationDto =
-                        keyManagerConfigurationsDto.getKeyManagerConfigurationList().get(type);
+                        keyManagerConfigurationsDto.getKeyManagerConfiguration().get(type);
                 if (keyManagerConfigurationDto != null &&
                         StringUtils.isNotEmpty(keyManagerConfigurationDto.getImplementationClass())) {
                     try {
@@ -135,7 +135,7 @@ public class KeyManagerHolder {
                     apiManagerConfiguration.getKeyManagerConfigurationsDto();
             if (keyManagerConfigurationsDto != null) {
                 KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerConfigurationDto =
-                        keyManagerConfigurationsDto.getKeyManagerConfigurationList().get(type);
+                        keyManagerConfigurationsDto.getKeyManagerConfiguration().get(type);
                 if (keyManagerConfigurationDto != null &&
                         StringUtils.isNotEmpty(keyManagerConfigurationDto.getImplementationClass())) {
                     try {
