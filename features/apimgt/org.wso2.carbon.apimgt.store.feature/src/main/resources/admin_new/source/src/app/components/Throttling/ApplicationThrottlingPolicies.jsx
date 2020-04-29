@@ -26,18 +26,14 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
+import CreateApplicationThrottlingPolicy from './CreateApplicationThrottlingPolicy';
 
 const useStyles = makeStyles((theme) => ({
     mainTitle: {
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(3),
     },
-    editButton: {
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(3),
-    },
 }));
-
 
 /**
  * Displays Application Throttling Policies
@@ -48,7 +44,10 @@ function ApplicationThrottlingPolicies(props) {
     const [data, setData] = useState(null);
     const { intl } = props;
     const [isUpdated, setIsUpdated] = useState(false);
-    const [applicationThrottlingPolicyList, setApplicationThrottlingPolicyList] = useState(null);
+    const [
+        applicationThrottlingPolicyList,
+        setApplicationThrottlingPolicyList,
+    ] = useState(null);
 
     const options = {
         sort: true,
@@ -62,27 +61,36 @@ function ApplicationThrottlingPolicies(props) {
     };
 
     /**
-     * Delete an Application Policy
-     * @param {string} selectedPolicyName selected policy name
-     */
+   * Delete an Application Policy
+   * @param {string} selectedPolicyName selected policy name
+   */
     function deleteApplicationPolicy(selectedPolicyName) {
-        const selectedPolicy = applicationThrottlingPolicyList
-            .filter((policy) => policy.policyName === selectedPolicyName);
+        const selectedPolicy = applicationThrottlingPolicyList.filter(
+            (policy) => policy.policyName === selectedPolicyName,
+        );
 
         const policyId = selectedPolicy.length !== 0 && selectedPolicy[0].policyId;
-        restApi.deleteApplicationThrottlingPolicy(policyId).then(() => {
-            setIsUpdated(true);
-            Alert.info(`${intl.formatMessage({
-                id: 'Admin.Throttling.Application.Throttling.Policy.policy.delete.succesful',
-                defaultMessage: 'deleted successfully.',
-            })}`);
-        })
+        restApi
+            .deleteApplicationThrottlingPolicy(policyId)
+            .then(() => {
+                setIsUpdated(true);
+                Alert.info(
+                    `${intl.formatMessage({
+                        id:
+              'Admin.Throttling.Application.Throttling.Policy.policy.delete.succesful',
+                        defaultMessage: 'deleted successfully.',
+                    })}`,
+                );
+            })
             .catch(() => {
                 setIsUpdated(false);
-                Alert.error(`${intl.formatMessage({
-                    id: 'Admin.Throttling.Application.Throttling.Policy.policy.delete.error',
-                    defaultMessage: 'Policy could not be deleted.',
-                })}`);
+                Alert.error(
+                    `${intl.formatMessage({
+                        id:
+              'Admin.Throttling.Application.Throttling.Policy.policy.delete.error',
+                        defaultMessage: 'Policy could not be deleted.',
+                    })}`,
+                );
             });
     }
 
@@ -92,7 +100,8 @@ function ApplicationThrottlingPolicies(props) {
             defaultMessage: 'Name',
         }),
         intl.formatMessage({
-            id: 'Admin.Throttling.Application.Throttling.policy.table.header.quota.policy',
+            id:
+        'Admin.Throttling.Application.Throttling.policy.table.header.quota.policy',
             defaultMessage: 'Quota Policy',
         }),
         intl.formatMessage({
@@ -100,7 +109,8 @@ function ApplicationThrottlingPolicies(props) {
             defaultMessage: 'Quota',
         }),
         intl.formatMessage({
-            id: 'Admin.Throttling.Application.Throttling.policy.table.header.unit.time',
+            id:
+        'Admin.Throttling.Application.Throttling.policy.table.header.unit.time',
             defaultMessage: 'Unit Time',
         }),
         {
@@ -122,9 +132,7 @@ function ApplicationThrottlingPolicies(props) {
                                         </Button>
                                     </td>
                                     <td>
-                                        <Button
-                                            onClick={() => deleteApplicationPolicy(row[0])}
-                                        >
+                                        <Button onClick={() => deleteApplicationPolicy(row[0])}>
                                             <Icon>delete_forever</Icon>
                                             <FormattedMessage
                                                 id='Admin.Throttling.Application.Throttling.Policy.delete'
@@ -149,39 +157,34 @@ function ApplicationThrottlingPolicies(props) {
                 return {
                     policyName: obj.policyName,
                     quotaPolicy: obj.defaultLimit.type,
-                    quota: obj.defaultLimit.requestCount,
-                    unitTime: (obj.defaultLimit.unitTime + ' ' + obj.defaultLimit.timeUnit),
+                    quota: obj.defaultLimit.requestCount
+                    || obj.defaultLimit.dataAmount + ' ' + obj.defaultLimit.dataUnit,
+                    unitTime: obj.defaultLimit.unitTime + ' ' + obj.defaultLimit.timeUnit,
                 };
             });
 
-            const applicationThrottlingvalues = applicationPolicies.filter((policy) => policy.policyName
-            !== 'Unlimited').map((obj) => {
-                return Object.values(obj);
-            });
+            const applicationThrottlingvalues = applicationPolicies
+                .filter((policy) => policy.policyName !== 'Unlimited')
+                .map((obj) => {
+                    return Object.values(obj);
+                });
             setData(applicationThrottlingvalues);
         });
     }, [isUpdated]);
 
     return (
         <>
-            <Box className={classes.mainTitle}>
+            <Box display='flex' flexDirection='row' className={classes.mainTitle}>
                 <Typography variant='h4'>
                     <FormattedMessage
                         id='Admin.Throttling.Application.Throttling.Policy.title'
                         defaultMessage='Application Throttling Policies'
                     />
                 </Typography>
-
+                <CreateApplicationThrottlingPolicy setIsUpdated={setIsUpdated} />
             </Box>
-            {data && (
-                <MUIDataTable
-                    data={data}
-                    columns={columns}
-                    options={options}
-                />
-            )}
+            {data && <MUIDataTable data={data} columns={columns} options={options} />}
         </>
-
     );
 }
 export default injectIntl(ApplicationThrottlingPolicies);
