@@ -292,6 +292,21 @@ class API extends Resource {
             );
         });
     }
+
+    deleteMicrogatewayLabel(id, callback = null) {
+        const promiseDeleteLabel = this.client.then((client) => {
+            return client.apis['Label'].delete_labels__labelId_(
+                { labelId: id },
+                this._requestMetaData(),
+            );
+        });
+
+        if (callback) {
+            return promiseDeleteLabel.then(callback);
+        } else {
+            return promiseDeleteLabel;
+        }
+    }
 }
 
 API.CONSTS = {
