@@ -19,6 +19,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import MicrogatewayLabels from './MicrogatewayLabels';
+import CreateMicrogatewayLabel from './CreateMicrogatewayLabel';
 import settings from '../../../../../../site/public/conf/settings';
 
 const MgLabels = () => {
@@ -28,6 +29,14 @@ const MgLabels = () => {
                 exact
                 path={settings.app.context + '/microgateway/labels'}
                 component={MicrogatewayLabels}
+            />
+            <Route
+                exact
+                path={
+                    settings.app.context +
+                    '/microgateway/labels/create-microgateway-label'
+                }
+                component={CreateMicrogatewayLabel}
             />
             <Route component={ResourceNotFound} />
         </Switch>

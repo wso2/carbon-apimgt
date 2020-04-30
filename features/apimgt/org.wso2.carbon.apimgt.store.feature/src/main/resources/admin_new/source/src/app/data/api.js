@@ -307,6 +307,10 @@ class API extends Resource {
             return promiseDeleteLabel;
         }
     }
+
+    createMgLabel(name, description, callback = null) {
+        // todo: impl this
+    }
 }
 
 API.CONSTS = {
