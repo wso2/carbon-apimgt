@@ -3455,8 +3455,6 @@ public class SQLConstants {
     //Resource Scope related constants
     public static final String ADD_API_RESOURCE_SCOPE_MAPPING =
             "INSERT INTO AM_API_RESOURCE_SCOPE_MAPPING (SCOPE_NAME, URL_MAPPING_ID, TENANT_ID) VALUES (?, ?, ?)";
-    public static final String ADD_OAUTH2_RESOURCE_SCOPE_SQL =
-            "INSERT INTO IDN_OAUTH2_RESOURCE_SCOPE (RESOURCE_PATH, SCOPE_NAME, TENANT_ID) VALUES (?,?,?)";
     public static final String IS_SCOPE_ATTACHED_LOCALLY =
             "SELECT AM_API.API_NAME, AM_API.API_PROVIDER "
                     + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM, AM_API "
@@ -3470,17 +3468,25 @@ public class SQLConstants {
 
     public static final String REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL =
             " DELETE FROM AM_API_RESOURCE_SCOPE_MAPPING "
-                    + "WHERE URL_MAPPING_ID IN ( SELECT URL_MAPPING_ID FROM AM_API_URL_MAPPING " + "WHERE API_ID = ? )";
+                    + "WHERE URL_MAPPING_ID IN ( SELECT URL_MAPPING_ID FROM AM_API_URL_MAPPING WHERE API_ID = ? )";
 
     public static final String GET_UNVERSIONED_LOCAL_SCOPES_FOR_API_SQL =
             "SELECT DISTINCT ARSM.SCOPE_NAME "
-                    + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM "
-                    + "WHERE ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND "
-                    + "AUM.API_ID = ? AND ARSM.TENANT_ID = ? AND "
+                    + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM INNER JOIN AM_API_URL_MAPPING AUM "
+                    + "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID "
+                    + "WHERE AUM.API_ID = ? AND ARSM.TENANT_ID = ? AND "
                     + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_SHARED_SCOPE GS WHERE GS.TENANT_ID = ?) AND "
                     + "ARSM.SCOPE_NAME NOT IN ( "
-                    + "SELECT ARSM2.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM2, AM_API_URL_MAPPING AUM2 "
-                    + "WHERE ARSM2.URL_MAPPING_ID = AUM2.URL_MAPPING_ID AND AUM2.API_ID != ? AND ARSM2.TENANT_ID = ?)" ;
+                    + "SELECT ARSM2.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM2 "
+                    + "INNER JOIN AM_API_URL_MAPPING AUM2 ON ARSM2.URL_MAPPING_ID = AUM2.URL_MAPPING_ID "
+                    + "WHERE AUM2.API_ID != ? AND ARSM2.TENANT_ID = ?)";
+
+    public static final String GET_ALL_LOCAL_SCOPES_FOR_API_SQL =
+            "SELECT DISTINCT ARSM.SCOPE_NAME "
+                    + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM INNER JOIN AM_API_URL_MAPPING AUM "
+                    + "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID "
+                    + "WHERE AUM.API_ID = ? AND ARSM.TENANT_ID = ? AND "
+                    + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_SHARED_SCOPE GS WHERE GS.TENANT_ID = ?)";
 
     public static final String GET_URL_TEMPLATES_WITH_SCOPES_FOR_API_SQL =
             " SELECT AUM.URL_MAPPING_ID, "
@@ -3494,10 +3500,6 @@ public class SQLConstants {
                     + "AM_API_URL_MAPPING AUM "
                     + "INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID "
                     + "AND AUM.API_ID = ?";
-
-    public static final String REMOVE_KM_RESOURCE_SCOPE_SQL =
-            " DELETE FROM IDN_OAUTH2_RESOURCE_SCOPE WHERE SCOPE_NAME = ? AND TENANT_ID = ? AND RESOURCE_PATH = ?";
-
 
     public static final String GET_API_SCOPES_SQL =
             " SELECT ARSM.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM "
@@ -3513,8 +3515,18 @@ public class SQLConstants {
 
         public static final String GET_KM_APPLICATION_FOR_TENANT =
                 "SELECT * FROM AM_KM_MGT_APPLICATION WHERE TENANT_ID = ?";
-
-        public static final String DELETE_KM_APPLICATION_FOR_TENANT = "DELETE FROM AM_KM_OAUTH_APPLICATION WHERE "
-                + "TENANT_ID = ?";
     }
+
+    //TODO: Need remove after KM seperation
+    public static final String
+            REMOVE_OAUTH2_RESOURCE_SCOPE_SQL =
+            " DELETE FROM IDN_OAUTH2_RESOURCE_SCOPE WHERE SCOPE_ID IN "
+                    + "(SELECT IS.SCOPE_ID FROM IDN_OAUTH2_SCOPE IS WHERE IS.SCOPE_NAME = ? AND IS.TENANT_ID = ?) "
+                    + "AND RESOURCE_PATH = ?";
+
+    public static final String ADD_OAUTH2_RESOURCE_SCOPE_SQL =
+            "INSERT INTO IDN_OAUTH2_RESOURCE_SCOPE (RESOURCE_PATH, SCOPE_ID, TENANT_ID) VALUES (?,?,?)";
+
+    public static final String GET_OAUTH2_RESOURCE_SCOPE_ID_BY_NAME_SQL =
+            "SELECT SCOPE_ID FROM IDN_OAUTH2_RESOURCE_SCOPE WHERE SCOPE_NAME = ? AND TENANT_ID = ?";
 }

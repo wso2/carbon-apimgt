@@ -280,8 +280,11 @@ public interface KeyManager {
      * @param tenantDomain tenant domain
      * @throws APIManagementException if an error occurs while attaching resource scopes of the API
      */
-    void attachResourceScopes(API api, Set<URITemplate> uriTemplates, String tenantDomain)
-            throws APIManagementException;
+    default void attachResourceScopes(API api, Set<URITemplate> uriTemplates, String tenantDomain)
+            throws APIManagementException {
+        // Doing nothing in default implementation. If KM supports attach resource scopes operation, override the
+        // implementation.
+    }
 
     /**
      * This method will be used to update the local scopes and resource to scope attachments of an API in the
@@ -295,9 +298,12 @@ public interface KeyManager {
      * @param tenantDomain      Tenant Domain
      * @throws APIManagementException if fails to update resources scopes
      */
-    void updateResourceScopes(API api, Set<String> oldLocalScopeKeys, Set<Scope> newLocalScopes,
-                              Set<URITemplate> oldURITemplates, Set<URITemplate> newURITemplates, String tenantDomain)
-            throws APIManagementException;
+    default void updateResourceScopes(API api, Set<String> oldLocalScopeKeys, Set<Scope> newLocalScopes,
+                                      Set<URITemplate> oldURITemplates, Set<URITemplate> newURITemplates,
+                                      String tenantDomain) throws APIManagementException {
+        // Doing nothing in default implementation. If KM supports update resource scopes operation, override the
+        // implementation.
+    }
 
     /**
      * This method will be used to detach the resource scopes of an API and delete the local scopes of that API from
@@ -308,13 +314,16 @@ public interface KeyManager {
      * @param tenantDomain Tenant Domain
      * @throws APIManagementException if an error occurs while detaching resource scopes of the API.
      */
-    void detachResourceScopes(API api, Set<URITemplate> uriTemplates, String tenantDomain)
-            throws APIManagementException;
+    default void detachResourceScopes(API api, Set<URITemplate> uriTemplates, String tenantDomain)
+            throws APIManagementException {
+        // Doing nothing in default implementation. If KM supports detach resource scopes operation, override the
+        // implementation.
+    }
 
     /**
      * This method will be used to delete a Scope in the authorization server.
      *
-     * @param scopeName        Scope name
+     * @param scopeName    Scope name
      * @param tenantDomain tenant domain to delete the scope from
      * @throws APIManagementException if an error occurs while deleting the scope
      */
@@ -344,13 +353,13 @@ public interface KeyManager {
      * This method will be used to validate the scope set provided and populate the additional parameters for each
      * Scope object. Default implementation will return the received scope set as it is.
      *
-     * @param scopes Scope List to validate
+     * @param scopes       Scope List to validate
      * @param tenantDomain tenant domain
      * @throws APIManagementException if an error occurs while validating and populating
      */
     default void validateScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException {
-
-        return;
+        // Doing nothing in default implementation. If KM supports validate scopes operation, override the
+        // implementation.
     }
 
 }
