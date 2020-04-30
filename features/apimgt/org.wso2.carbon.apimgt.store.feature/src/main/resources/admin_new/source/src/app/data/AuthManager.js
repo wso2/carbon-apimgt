@@ -18,7 +18,6 @@
 
 import qs from 'qs';
 import CONSTS from 'AppData/Constants';
-import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import Configurations from 'Config';
 import Utils from './Utils';
 import User from './User';

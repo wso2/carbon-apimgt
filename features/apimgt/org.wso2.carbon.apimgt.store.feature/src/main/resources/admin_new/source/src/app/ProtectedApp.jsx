@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -33,7 +33,7 @@ import Themes from 'Themes';
 import merge from 'lodash.merge';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider, injectIntl } from 'react-intl';
 import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import Configurations from 'Config';
 import Navigator from 'AppComponents/Base/Navigator';
@@ -72,7 +72,7 @@ const themeJSON = merge(Themes.light, {
     },
     custom: {
         drawerWidth,
-    }
+    },
 });
 let theme = createMuiTheme(themeJSON);
 
@@ -162,12 +162,12 @@ theme = {
  * @type {string}
  */
 const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
-let allRoutes = [];
+const allRoutes = [];
 
 /**
  * Render protected application paths, Implements container presenter pattern
  */
-export default class Protected extends Component {
+class Protected extends Component {
     /**
      * Creates an instance of Protected.
      * @param {any} props @inheritDoc
@@ -183,23 +183,20 @@ export default class Protected extends Component {
         this.environments = [];
         this.checkSession = this.checkSession.bind(this);
         this.handleMessage = this.handleMessage.bind(this);
-        this.handleDrawerToggle = this.handleDrawerToggle(this);
-        
-        for (var i = 0; i < RouteMenuMapping.length; i++) {
-            let childRoutes = RouteMenuMapping[i].children;
-            if(childRoutes) {
-                for (var j = 0; j < childRoutes.length; j++) {
+        const { intl } = props;
+        const routeMenuMapping = RouteMenuMapping(intl);
+        for (let i = 0; i < routeMenuMapping.length; i++) {
+            const childRoutes = routeMenuMapping[i].children;
+            if (childRoutes) {
+                for (let j = 0; j < childRoutes.length; j++) {
                     allRoutes.push(childRoutes[j]);
                 }
             } else {
-                allRoutes.push(RouteMenuMapping[i]);
+                allRoutes.push(routeMenuMapping[i]);
             }
-            
         }
     }
 
-    handleDrawerToggle() {
-    };
     /**
      * @inheritDoc
      * @memberof Protected
@@ -246,9 +243,15 @@ export default class Protected extends Component {
      */
     render() {
         const { user = AuthManager.getUser(), messages, mobileOpen } = this.state;
-        const header = <Header avatar={<Avatar user={user} />} user={user} handleDrawerToggle={() => {
-            this.setState((oldState) => ({ mobileOpen: !oldState.mobileOpen }));
-        }} />;
+        const header = (
+            <Header
+                avatar={<Avatar user={user} />}
+                user={user}
+                handleDrawerToggle={() => {
+                    this.setState((oldState) => ({ mobileOpen: !oldState.mobileOpen }));
+                }}
+            />
+        );
         const { clientId } = this.state;
         const checkSessionURL = 'https://' + window.location.host + '/oidc/checksession?client_id='
             + clientId + '&redirect_uri=https://' + window.location.host
@@ -260,23 +263,25 @@ export default class Protected extends Component {
                 </IntlProvider>
             );
         }
-        const leftMenu = <AppContextProvider value={{ user }}>
-            <>
-                <Hidden smUp implementation="js">
-                    <Navigator
-                        PaperProps={{ style: { width: drawerWidth } }}
-                        variant="temporary"
-                        open={mobileOpen}
-                        onClose={() => {
-                            this.setState((oldState) => ({ mobileOpen: !oldState.mobileOpen }));
-                        }}
-                    />
-                </Hidden>
-                <Hidden xsDown implementation="css">
-                    <Navigator PaperProps={{ style: { width: drawerWidth } }} />
-                </Hidden>
-            </>
-        </AppContextProvider>;
+        const leftMenu = (
+            <AppContextProvider value={{ user }}>
+                <>
+                    <Hidden smUp implementation='js'>
+                        <Navigator
+                            PaperProps={{ style: { width: drawerWidth } }}
+                            variant='temporary'
+                            open={mobileOpen}
+                            onClose={() => {
+                                this.setState((oldState) => ({ mobileOpen: !oldState.mobileOpen }));
+                            }}
+                        />
+                    </Hidden>
+                    <Hidden xsDown implementation='css'>
+                        <Navigator PaperProps={{ style: { width: drawerWidth } }} />
+                    </Hidden>
+                </>
+            </AppContextProvider>
+        );
         return (
             <MuiThemeProvider theme={theme}>
                 <AppErrorBoundary>
@@ -287,7 +292,7 @@ export default class Protected extends Component {
                                 <Redirect exact from='/' to='/dashboard' />
                                 <Route path='/dashboard' component={Dashboard} />
                                 {allRoutes.map((r) => {
-                                    return <Route path={r.path} component={r.component} />
+                                    return <Route path={r.path} component={r.component} />;
                                 })}
                                 <Route component={ResourceNotFound} />
                             </Switch>
@@ -299,7 +304,7 @@ export default class Protected extends Component {
                         src={checkSessionURL}
                         width='0px'
                         height='0px'
-                        style={{ color: "red", position: 'absolute' }}
+                        style={{ color: 'red', position: 'absolute' }}
                     />
                 </AppErrorBoundary>
             </MuiThemeProvider>
@@ -310,3 +315,5 @@ export default class Protected extends Component {
 Protected.propTypes = {
     user: PropTypes.shape({}).isRequired,
 };
+
+export default injectIntl(Protected);

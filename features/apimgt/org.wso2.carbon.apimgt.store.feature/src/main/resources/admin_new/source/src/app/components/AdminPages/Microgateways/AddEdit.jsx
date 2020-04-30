@@ -1,6 +1,26 @@
+/*
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React, { useReducer, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import DialogContentText from '@material-ui/core/DialogContentText';
+import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
 import Alert from 'AppComponents/Shared/Alert';
@@ -11,11 +31,15 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-// Mock API call to save or edit
+
+/**
+ * Mock API call
+ * @returns {Promise}.
+ */
 function apiCall() {
-    return new Promise(function (resolve, reject) {
-        setTimeout(() => { resolve('Successfully did something') }, 2000);
-    });
+    return new Promise(((resolve) => {
+        setTimeout(() => { resolve('Successfully did something'); }, 2000);
+    }));
 }
 
 let initialState = {
@@ -23,14 +47,26 @@ let initialState = {
     description: '',
 };
 
+
+/**
+ * Reducer
+ * @param {JSON} state The second number.
+ * @returns {Promise}.
+ */
 function reducer(state, { field, value }) {
     return {
         ...state,
         [field]: value,
-    }
+    };
 }
 
-export default function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
+/**
+ * Render a list
+ * @returns {JSX} Header AppBar components.
+ */
+function AddEdit({
+    updateList, dataRow, icon, triggerButtonText, title,
+}) {
     const classes = useStyles();
     let id = null;
     // If the dataRow is there ( form is in edit mode ) else it's a new creation
@@ -38,33 +74,36 @@ export default function AddEdit({ updateList, dataRow, icon, triggerButtonText, 
         initialState = {
             label: '',
             description: '',
-        }   
+        };
     }, [title]);
 
     if (dataRow) {
+        // eslint-disable-next-line react/prop-types
         const { label: originalLabel, description: originalDescription } = dataRow;
         id = dataRow.id;
 
         initialState = {
             label: originalLabel,
             description: originalDescription,
-        }
+        };
     }
     const [state, dispatch] = useReducer(reducer, initialState);
     const { label, description } = state;
 
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
-    }
+    };
     const hasErrors = (fieldName, value) => {
         let error = false;
         switch (fieldName) {
             case 'label':
                 error = value === '' ? fieldName + ' is Empty' : false;
                 break;
+            default:
+                break;
         }
         return error;
-    }
+    };
     const getAllFormErrors = () => {
         let errorText = '';
         const labelErrors = hasErrors('label', label);
@@ -72,7 +111,7 @@ export default function AddEdit({ updateList, dataRow, icon, triggerButtonText, 
             errorText += labelErrors + '\n';
         }
         return errorText;
-    }
+    };
 
     const formSaveCallback = () => {
         const formErrors = getAllFormErrors();
@@ -81,7 +120,7 @@ export default function AddEdit({ updateList, dataRow, icon, triggerButtonText, 
             return (false);
         }
         // Do the API call
-        let promiseAPICall = apiCall();
+        const promiseAPICall = apiCall();
         if (id) {
             // assign the update promise to the promiseAPICall
         }
@@ -93,41 +132,77 @@ export default function AddEdit({ updateList, dataRow, icon, triggerButtonText, 
                 return (e);
             });
         return (promiseAPICall);
-    }
+    };
 
-    return <FormDialogBase
-        title={title}
-        saveButtonText='Save'
-        icon={icon}
-        triggerButtonText={triggerButtonText}
-        formSaveCallback={formSaveCallback}
-    >
-        <DialogContentText>
-            To subscribe to this website, please enter your email address here. We will send updates
-            occasionally.
-        </DialogContentText>
-        <TextField
-            autoFocus
-            margin="dense"
-            name="label"
-            value={label}
-            onChange={onChange}
-            label={<span>Label <span className={classes.error}>*</span></span>}
-            fullWidth
-            error={hasErrors('label', label)}
-            helperText={hasErrors('label', label) || 'Enter gateway label'}
-            variant="outlined"
-        />
-        <TextField
-            margin="dense"
-            name="description"
-            value={description}
-            onChange={onChange}
-            label="Description"
-            fullWidth
-            multiline={true}
-            helperText='Enter description'
-            variant="outlined"
-        />
-    </FormDialogBase>;
+    return (
+        <FormDialogBase
+            title={title}
+            saveButtonText='Save'
+            icon={icon}
+            triggerButtonText={triggerButtonText}
+            formSaveCallback={formSaveCallback}
+        >
+            <DialogContentText>
+                <FormattedMessage
+                    id='AdminPages.Microgateways.AddEdit.form.info'
+                    defaultMessage={'To subscribe to this website, please enter your'
+                        + 'email address here. We will send updates'
+                        + 'occasionally.'}
+                />
+
+            </DialogContentText>
+            <TextField
+                autoFocus
+                margin='dense'
+                name='label'
+                value={label}
+                onChange={onChange}
+                label={(
+                    <span>
+                        <FormattedMessage
+                            id='AdminPages.Microgateways.AddEdit.form.label'
+                            defaultMessage='Label'
+                        />
+
+                        <span className={classes.error}>*</span>
+                    </span>
+                )}
+                fullWidth
+                error={hasErrors('label', label)}
+                helperText={hasErrors('label', label) || 'Enter gateway label'}
+                variant='outlined'
+            />
+            <TextField
+                margin='dense'
+                name='description'
+                value={description}
+                onChange={onChange}
+                label='Description'
+                fullWidth
+                multiline
+                helperText='Enter description'
+                variant='outlined'
+            />
+        </FormDialogBase>
+    );
 }
+
+AddEdit.defaultProps = {
+    icon: null,
+    dataRow: null,
+};
+
+AddEdit.propTypes = {
+    updateList: PropTypes.func.isRequired,
+    dataRow: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        description: PropTypes.string.isRequired,
+        label: PropTypes.string.isRequired,
+    }),
+    icon: PropTypes.element,
+    triggerButtonText: PropTypes.shape({}).isRequired,
+    title: PropTypes.shape({}).isRequired,
+};
+
+
+export default AddEdit;
