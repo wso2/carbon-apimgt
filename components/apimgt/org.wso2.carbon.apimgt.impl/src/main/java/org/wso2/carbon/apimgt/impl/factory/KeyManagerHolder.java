@@ -105,6 +105,14 @@ public class KeyManagerHolder {
         return null;
     }
 
+    public static Map<String, KeyManager> getTenantKeyManagers(String tenantDomain) {
+
+        Map<String, KeyManager> tenantWiseKeyManger = keyManagerMap.get(tenantDomain);
+        return tenantWiseKeyManger;
+    }
+
+
+
     private KeyManagerHolder() {
 
     }

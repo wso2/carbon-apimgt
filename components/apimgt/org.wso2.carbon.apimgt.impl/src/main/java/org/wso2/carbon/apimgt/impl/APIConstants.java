@@ -2118,6 +2118,15 @@ public final class APIConstants {
         public static final String ENABLE = "Enable";
         public static final String USERNAME = "Username";
         public static final String PASSWORD = "Password";
+        public static final String SELF_VALIDATE_JWT = "self_validate_jwt";
+        public static final String CLAIM_MAPPING = "claim_mappings" ;
+        public static final String VALIDATION_TYPE = "validation_type";
+        public static final String VALIDATION_JWT = "jwt";
+        public static final String VALIDATION_REGEX = "regex";
+        public static final String VALIDATION_CUSTOM = "custom";
+        public static final String VALIDATION_VALUE = "validation_value";
+        public static final String ENABLE_TOKEN_VALIDATION = "validation_enable";
+        public static final String VALIDATION_ENTRY_JWT_BODY = "body";
 
         public static class KeyManagerEvent {
 

@@ -4143,6 +4143,16 @@ definitions:
         type: boolean
         example: false
         default: false
+      enableSelfValidationJWT:
+        type: boolean
+        example: true
+        default: true
+      claimMapping:
+        type: array
+        items:
+          $ref: '#/definitions/ClaimMappingEntry'
+      tokenValidation:
+        $ref: '#/definitions/TokenValidation'
       enabled:
         type: boolean
         example: true
@@ -4191,6 +4201,35 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/KeyManagerInfo'
+  #-----------------------------------------------------
+  # The Claim Mapping Resource
+  #-----------------------------------------------------
+
+  ClaimMappingEntry:
+    title: Claim Mapping Configuration
+    properties:
+      remoteClaim:
+        type: string
+        example: "http://idp.org/username"
+      localClaim:
+        type: string
+        example: "http://wso2.org/username"
+
+  TokenValidation:
+    title: Token handling Configuration
+    properties:
+      enable:
+        type: boolean
+        example: false
+        default: true
+      type:
+        type: string
+        enum:
+          - REGEX
+          - JWT
+          - CUSTOM
+      value:
+        type: object
 
 #-----------------------------------------------------
 # END-OF-FILE

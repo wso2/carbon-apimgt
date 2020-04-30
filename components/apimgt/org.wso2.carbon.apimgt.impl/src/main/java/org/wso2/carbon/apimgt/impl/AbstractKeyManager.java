@@ -20,6 +20,9 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -29,10 +32,13 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Mostly common features of  keyManager implementations will be handle here.
@@ -40,6 +46,7 @@ import java.util.Map;
  */
 public abstract class AbstractKeyManager implements KeyManager {
     private static Log log = LogFactory.getLog(AbstractKeyManager.class);
+    protected KeyManagerConfiguration configuration;
 
     public AccessTokenRequest buildAccessTokenRequestFromJSON(String jsonInput, AccessTokenRequest tokenRequest)
             throws APIManagementException {
@@ -151,6 +158,49 @@ public abstract class AbstractKeyManager implements KeyManager {
         }
 
         return tokenRequest;
+    }
+
+    @Override
+    public boolean canHandleToken(String accessToken) throws APIManagementException {
+
+        Object enabledTokenValidation = configuration.getParameter(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION);
+        if (enabledTokenValidation != null && (Boolean) enabledTokenValidation) {
+            Object tokenHandlingScript = configuration.getParameter(APIConstants.KeyManager.VALIDATION_VALUE);
+            Object tokenHandlingType = configuration.getParameter(APIConstants.KeyManager.VALIDATION_TYPE);
+            if (APIConstants.KeyManager.VALIDATION_REGEX.equals(tokenHandlingType)) {
+                if (tokenHandlingScript != null && StringUtils.isNotEmpty((CharSequence) tokenHandlingScript)) {
+                    Pattern pattern = Pattern.compile((String) tokenHandlingScript);
+                    Matcher matcher = pattern.matcher(accessToken);
+                    return matcher.find();
+                }
+            } else if (APIConstants.KeyManager.VALIDATION_JWT.equals(tokenHandlingType)) {
+                Map<String, Map<String, String>> validationJson = (Map) tokenHandlingScript;
+                try {
+                    SignedJWT signedJWT = SignedJWT.parse(accessToken);
+                    JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
+                    for (Map.Entry<String, Map<String, String>> entry : validationJson.entrySet()) {
+                        if (APIConstants.KeyManager.VALIDATION_ENTRY_JWT_BODY.equals(entry.getKey())) {
+                            for (Map.Entry<String, String> e : entry.getValue().entrySet()) {
+                                String key = e.getKey();
+                                String value = e.getValue();
+                                Object claimValue = jwtClaimsSet.getClaim(key);
+                                if (claimValue == null) {
+                                    return false;
+                                }
+                                Pattern pattern = Pattern.compile(value);
+                                Matcher matcher = pattern.matcher((String) claimValue);
+                                if (matcher.find()) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                } catch (java.text.ParseException e) {
+                    throw new APIManagementException("Error while parsing jwt", e);
+                }
+            }
+        }
+        return true;
     }
 
     /**

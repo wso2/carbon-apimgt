@@ -235,6 +235,19 @@ public interface KeyManager {
      * @return {@link java.util.Map} having scopes of each API
      * @throws APIManagementException
      */
+    Map<String,Set<Scope>> getScopesForAPIS(String apiIdsString) throws  APIManagementException;
+
+    /**
+     * This method will check for token get validated from Key Manager
+     * @param accessToken
+     * @return
+     * @throws APIManagementException
+     */
+    default boolean canHandleToken(String accessToken) throws APIManagementException {
+
+        return true;
+    }
+
     Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString, String tenantDomain) throws APIManagementException;
 
     /**

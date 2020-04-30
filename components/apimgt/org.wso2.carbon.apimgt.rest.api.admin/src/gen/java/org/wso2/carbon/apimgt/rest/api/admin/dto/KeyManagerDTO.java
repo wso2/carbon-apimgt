@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ClaimMappingEntryDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.TokenValidationDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -69,6 +71,15 @@ public class KeyManagerDTO  {
   
   
   private Boolean enableMapOauthConsumerApps = false;
+  
+  
+  private Boolean enableSelfValidationJWT = true;
+  
+  
+  private List<ClaimMappingEntryDTO> claimMapping = new ArrayList<ClaimMappingEntryDTO>();
+  
+  
+  private TokenValidationDTO tokenValidation = null;
   
   
   private Boolean enabled = null;
@@ -296,6 +307,42 @@ public class KeyManagerDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
+  @JsonProperty("enableSelfValidationJWT")
+  public Boolean getEnableSelfValidationJWT() {
+    return enableSelfValidationJWT;
+  }
+  public void setEnableSelfValidationJWT(Boolean enableSelfValidationJWT) {
+    this.enableSelfValidationJWT = enableSelfValidationJWT;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("claimMapping")
+  public List<ClaimMappingEntryDTO> getClaimMapping() {
+    return claimMapping;
+  }
+  public void setClaimMapping(List<ClaimMappingEntryDTO> claimMapping) {
+    this.claimMapping = claimMapping;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("tokenValidation")
+  public TokenValidationDTO getTokenValidation() {
+    return tokenValidation;
+  }
+  public void setTokenValidation(TokenValidationDTO tokenValidation) {
+    this.tokenValidation = tokenValidation;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
   @JsonProperty("enabled")
   public Boolean getEnabled() {
     return enabled;
@@ -341,6 +388,9 @@ public class KeyManagerDTO  {
     sb.append("  enableTokenEncryption: ").append(enableTokenEncryption).append("\n");
     sb.append("  enableTokenHashing: ").append(enableTokenHashing).append("\n");
     sb.append("  enableMapOauthConsumerApps: ").append(enableMapOauthConsumerApps).append("\n");
+    sb.append("  enableSelfValidationJWT: ").append(enableSelfValidationJWT).append("\n");
+    sb.append("  claimMapping: ").append(claimMapping).append("\n");
+    sb.append("  tokenValidation: ").append(tokenValidation).append("\n");
     sb.append("  enabled: ").append(enabled).append("\n");
     sb.append("  additionalProperties: ").append(additionalProperties).append("\n");
     sb.append("}\n");

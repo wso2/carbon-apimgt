@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
@@ -82,7 +83,16 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
             // Obtaining details about the token.
             if (StringUtils.isNotEmpty(validationContext.getTenantDomain())){
-                KeyManager keyManagerInstance = KeyManagerHolder.getKeyManagerInstance(validationContext.getTenantDomain());
+                Map<String, KeyManager>
+                        tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(validationContext.getTenantDomain());
+                KeyManager keyManagerInstance = null;
+                for (KeyManager keyManager : tenantKeyManagers.values()) {
+                    if (keyManager.canHandleToken(validationContext.getAccessToken())) {
+                        keyManagerInstance = keyManager;
+                        break;
+                    }
+                }
+
                 if (keyManagerInstance != null){
                     tokenInfo = keyManagerInstance.getTokenMetaData(validationContext.getAccessToken());
                 }
