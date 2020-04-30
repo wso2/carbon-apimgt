@@ -1,0 +1,306 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "This specifies a **RESTful API** for WSO2 **API Manager** - Endpoint Registry.\n",
+    "version" : "v1.0",
+    "title" : "WSO2 API Manager - Endpoint Registry API",
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host" : "apis.wso2.com",
+  "basePath" : "/api/am/endpoint-registry/v1",
+  "schemes" : [ "https", "http" ],
+  "consumes" : [ "application/json" ],
+  "produces" : [ "application/json" ],
+  "paths" : {
+    "/registries" : {
+      "get" : {
+        "summary" : "Retrieve/Search Registries\n",
+        "description" : "This operation provides an array of available Registries\n",
+        "operationId" : "getAllRegistries",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nArray of Registries is returned.\n",
+            "schema" : {
+              "$ref" : "#/definitions/RegistryArray"
+            }
+          }
+        }
+      },
+      "post" : {
+        "summary" : "Create a new Registry",
+        "description" : "This operation can be used to create a new Registry specifying the details of the Registry in the payload.\n",
+        "operationId" : "addRegistry",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Regsitry object that needs to be added\n",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Registry"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "Created.\nSuccessful response with the newly created Registry object as entity in the body.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Registry"
+            }
+          },
+          "405" : {
+            "description" : "Bad Request.\nInvalid request or validation error.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "415" : {
+            "description" : "Unsupported Media Type.\nThe entity of the request was in a not supported format.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/registries/{registryId}" : {
+      "get" : {
+        "tags" : [ "Registries" ],
+        "summary" : "Get details of a Registry",
+        "description" : "Using this operation, you can retrieve complete details of a single Registry by providing the uuid.\n",
+        "operationId" : "getRegistryByUUID",
+        "parameters" : [ {
+          "name" : "registryId",
+          "in" : "path",
+          "description" : "**UUID** of the Registry.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nRequested Registry is returned\n",
+            "schema" : {
+              "$ref" : "#/definitions/Registry"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid UUID provided\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested Registry does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/registries/{registryId}/entries" : {
+      "get" : {
+        "tags" : [ "Registries" ],
+        "summary" : "Get all the entries in a Registry",
+        "description" : "Using this operation, you can retrieve the entries added in a single Registry by providing the Registry Id.\n",
+        "operationId" : "getAllEntriesInRegistry",
+        "parameters" : [ {
+          "name" : "registryId",
+          "in" : "path",
+          "description" : "**UUID** of the Registry.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nRequested Entries in the Registry are returned\n",
+            "schema" : {
+              "$ref" : "#/definitions/RegistryEntryList"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid UUID provided\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested Registry does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post" : {
+        "summary" : "Add new entry to a Registry",
+        "description" : "Using this operation, you can add new entry to Registry.\n",
+        "operationId" : "addRegistryEntry",
+        "parameters" : [ {
+          "name" : "registryId",
+          "in" : "path",
+          "description" : "**UUID** of the Registry.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "registryEntry",
+          "description" : "Registry Entry object that needs to be added\n",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/RegistryEntry"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "Created.\nSuccessful response with the newly created Registry Entry as entity in the body.\n",
+            "schema" : {
+              "$ref" : "#/definitions/RegistryEntry"
+            }
+          },
+          "405" : {
+            "description" : "Bad Request.\nInvalid request or validation error.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "415" : {
+            "description" : "Unsupported Media Type.\nThe entity of the request was in a not supported format.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "RegistryArray" : {
+      "title" : "RegistryArray",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Registry"
+      }
+    },
+    "Registry" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "example" : "WSO2 Registry"
+        },
+        "id" : {
+          "type" : "string",
+          "example" : "01234567-0123-0123-0123-012345678901"
+        },
+        "type" : {
+          "type" : "string",
+          "example" : "wso2",
+          "enum" : [ "wso2", "k8", "etcd" ]
+        },
+        "mode" : {
+          "type" : "string",
+          "example" : "read_only",
+          "enum" : [ "readOnly", "readWrite" ]
+        }
+      }
+    },
+    "RegistryEntryList" : {
+      "title" : "RegistryEntryList",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/RegistryEntry"
+      }
+    },
+    "RegistryEntry" : {
+      "type" : "object",
+      "properties" : {
+        "entryName" : {
+          "type" : "string",
+          "example" : "Pizzashack-Endpoint"
+        },
+        "service-url" : {
+          "type" : "string",
+          "example" : "http://localhost/pizzashack"
+        },
+        "serviceType" : {
+          "type" : "string",
+          "example" : "REST",
+          "description" : "Type of the backend connecting to",
+          "enum" : [ "REST", "SOAP_1_1", "GQL", "WS" ]
+        },
+        "definitionType" : {
+          "type" : "string",
+          "example" : "OAS",
+          "description" : "Type of the definition provided",
+          "enum" : [ "OAS", "WSDL1", "WSDL2", "GQL-SDL" ]
+        },
+        "definitionUrl" : {
+          "type" : "string",
+          "example" : "http://localhost/pizzashack?swagger.json"
+        },
+        "metadata" : {
+          "type" : "string",
+          "example" : "{ \"mutualTLS\" : true }"
+        }
+      }
+    },
+    "Error" : {
+      "required" : [ "code", "message" ],
+      "properties" : {
+        "code" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "message" : {
+          "type" : "string",
+          "description" : "Error message."
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "A detail description about the error message.\n"
+        },
+        "moreInfo" : {
+          "type" : "string",
+          "description" : "Preferably an url with more details about the error.\n"
+        },
+        "error" : {
+          "type" : "array",
+          "description" : "If there are more than one error list them out.\nFor example, list out validation errors by each field.\n",
+          "items" : {
+            "$ref" : "#/definitions/ErrorListItem"
+          }
+        }
+      },
+      "title" : "Error object returned with 4XX HTTP Status"
+    },
+    "ErrorListItem" : {
+      "required" : [ "code", "message" ],
+      "properties" : {
+        "code" : {
+          "type" : "string"
+        },
+        "message" : {
+          "type" : "string",
+          "description" : "Description about individual errors occurred\n"
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "A detail description about the error message."
+        }
+      },
+      "title" : "Description of individual errors that may have occurred during a request."
+    }
+  },
+  "parameters" : {
+    "registryId" : {
+      "name" : "registryId",
+      "in" : "path",
+      "description" : "**UUID** of the Registry.\n",
+      "required" : true,
+      "type" : "string"
+    }
+  }
+}

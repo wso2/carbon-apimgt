@@ -1,0 +1,380 @@
+#   Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+################################################################################
+
+swagger: '2.0'
+######################################################
+# Prolog
+######################################################
+info:
+  version: "v1.0"
+  title: "WSO2 API Manager - Endpoint Registry API"
+  description: |
+    This specifies a **RESTful API** for WSO2 **API Manager** - Endpoint Registry.
+  license:
+      name: "Apache 2.0"
+      url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+######################################################
+# The fixed parts of the URLs of the API
+######################################################
+
+# The schemes supported by the API
+schemes:
+  - https
+  - http
+
+# The domain of the API.
+# This is configured by the customer during deployment.
+# The given host is just an example.
+host: apis.wso2.com
+
+# The base path of the API.
+# Will be prefixed to all paths.
+basePath: /api/am/endpoint-registry/v1
+
+# The following media types can be passed as input in message bodies of the API.
+# The actual media type must be specified in the Content-Type header field of the request.
+# The default is json, i.e. the Content-Type header is not needed to
+# be set, but supporting it serves extensibility.
+consumes:
+  - application/json
+
+# The following media types may be passed as output in message bodies of the API.
+# The media type(s) consumable by the requester is specified in the Accept header field
+# of the corresponding request.
+# The actual media type returned will be specified in the Content-Type header field
+# of the of the response.
+# The default of the Accept header is json, i.e. there is not needed to
+# set the value, but supporting it serves extensibility.
+produces:
+  - application/json
+
+######################################################
+# The Endpoint Registry resource APIs
+######################################################
+paths:
+  /registries:
+
+    #-----------------------------------------------------
+    # Retrieving the array of all Registries
+    #-----------------------------------------------------
+    get:
+      summary: |
+        Retrieve/Search Registries
+      description: |
+        This operation provides an array of available Registries
+      operationId: getAllRegistries
+      responses:
+        200:
+          description: |
+            OK.
+            Array of Registries is returned.
+          schema:
+            $ref: '#/definitions/RegistryArray'
+
+    #-----------------------------------------------------
+    # Create a new Registry
+    #-----------------------------------------------------
+    post:
+      summary: Create a new Registry
+      description: |
+        This operation can be used to create a new Registry specifying the details of the Registry in the payload.
+      operationId: addRegistry
+      parameters:
+        - in: body
+          name: body
+          description: |
+            Regsitry object that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/Registry'
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created Registry object as entity in the body.
+          schema:
+            $ref: '#/definitions/Registry'
+        405:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported Media Type.
+            The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
+
+  #-----------------------------------------------------
+  # Retrieve the details of a Registry
+  #-----------------------------------------------------
+  /registries/{registryId}:
+    get:
+      summary: Get details of a Registry
+      description: |
+        Using this operation, you can retrieve complete details of a single Registry by providing the uuid.
+      operationId: getRegistryByUUID
+      parameters:
+        - $ref: '#/parameters/registryId'
+      tags:
+        - Registries
+      responses:
+        200:
+          description: |
+            OK.
+            Requested Registry is returned
+          schema:
+            $ref: '#/definitions/Registry'
+        404:
+          description: |
+            Not Found.
+            Requested Registry does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        400:
+          description: |
+            Bad Request.
+            Invalid UUID provided
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "Individual Registry" resource APIs
+######################################################
+  /registries/{registryId}/entries:
+    #-----------------------------------------------------
+    # Retrieve all the entries in a Registry
+    #-----------------------------------------------------
+    get:
+      summary: Get all the entries in a Registry
+      description: |
+        Using this operation, you can retrieve the entries added in a single Registry by providing the Registry Id.
+      tags:
+        - Registries
+      operationId: getAllEntriesInRegistry
+      parameters:
+        - $ref: '#/parameters/registryId'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested Entries in the Registry are returned
+          schema:
+            $ref: '#/definitions/RegistryEntryList'
+        404:
+          description: |
+            Not Found.
+            Requested Registry does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        400:
+          description: |
+            Bad Request.
+            Invalid UUID provided
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-----------------------------------------------------
+    # Create an entry in a Registry
+    #-----------------------------------------------------
+    post:
+      summary: Add new entry to a Registry
+      description: |
+        Using this operation, you can add new entry to Registry.
+      operationId: addRegistryEntry
+      parameters:
+        - $ref: '#/parameters/registryId'
+        - in: body
+          name: registryEntry
+          description: |
+            Registry Entry object that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/RegistryEntry'
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created Registry Entry as entity in the body.
+          schema:
+            $ref: '#/definitions/RegistryEntry'
+        405:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported Media Type.
+            The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# Parameters - required by some of the APIs above
+######################################################
+parameters:
+
+  # Registry Identifier
+  # Specified as part of the path expression
+  registryId:
+    name: registryId
+    in: path
+    description: |
+      **UUID** of the Registry.
+    required: true
+    type: string
+
+
+######################################################
+# The resources used by some of the APIs above within the message body
+######################################################
+definitions:
+
+  #-----------------------------------------------------
+  # The Registry Array resource
+  #-----------------------------------------------------
+  RegistryArray:
+    title: RegistryArray
+    type: array
+    items:
+      $ref: '#/definitions/Registry'
+
+  #-----------------------------------------------------
+  # The Registry resource
+  #-----------------------------------------------------
+  Registry:
+    type: object
+    properties:
+      name:
+        type: string
+        example: WSO2 Registry
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      type:
+        type: string
+        example: wso2
+        enum:
+        - wso2
+        - k8
+        - etcd
+      mode:
+        type: string
+        example: read_only
+        enum:
+        - readOnly
+        - readWrite
+
+  #-----------------------------------------------------
+  # The Registry Entry List resource
+  #-----------------------------------------------------
+  RegistryEntryList:
+    title: RegistryEntryList
+    type: array
+    items:
+      $ref: '#/definitions/RegistryEntry'
+
+  #-----------------------------------------------------
+  # The Registry Entry resource
+  #-----------------------------------------------------
+  RegistryEntry:
+    type: object
+    properties:
+      entryName:
+        type: string
+        example: Pizzashack-Endpoint
+      service-url:
+        type: string
+        example: http://localhost/pizzashack
+      serviceType:
+        description: Type of the backend connecting to
+        type: string
+        example: REST
+        enum:
+        - REST
+        - SOAP_1_1
+        - GQL
+        - WS
+      definitionType:
+        type: string
+        description: Type of the definition provided
+        example: OAS
+        enum:
+        - OAS
+        - WSDL1
+        - WSDL2
+        - GQL-SDL
+      definitionUrl:
+        type: string
+        example: http://localhost/pizzashack?swagger.json
+      metadata:
+        type: string
+        example: '{ "mutualTLS" : true }'
+
+  #-----------------------------------------------------
+  # The Error resource
+  #-----------------------------------------------------
+  Error:
+    title: Error object returned with 4XX HTTP Status
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
+        description: Error message.
+      description:
+        type: string
+        description: |
+          A detail description about the error message.
+      moreInfo:
+        type: string
+        description: |
+          Preferably an url with more details about the error.
+      error:
+        type: array
+        description: |
+          If there are more than one error list them out.
+          For example, list out validation errors by each field.
+        items:
+          $ref: '#/definitions/ErrorListItem'
+
+  #-----------------------------------------------------
+  # The Error List Item resource
+  #-----------------------------------------------------
+  ErrorListItem:
+    title: Description of individual errors that may have occurred during a request.
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+        description: |
+          Description about individual errors occurred
+      description:
+        type: string
+        description: |
+          A detail description about the error message.
