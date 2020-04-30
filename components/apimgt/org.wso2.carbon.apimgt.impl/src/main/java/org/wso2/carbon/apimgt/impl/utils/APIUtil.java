@@ -10693,6 +10693,18 @@ public final class APIUtil {
             keyManagerConfigurationDTO.addProperty(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD,
                     String.valueOf(validityPeriod));
         }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION, false);
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                APIConstants.KeyManager.SELF_VALIDATE_JWT)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.SELF_VALIDATE_JWT, true);
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                APIConstants.KeyManager.ISSUER)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ISSUER, issuerIdentifier);
+        }
         return keyManagerConfigurationDTO;
     }
 

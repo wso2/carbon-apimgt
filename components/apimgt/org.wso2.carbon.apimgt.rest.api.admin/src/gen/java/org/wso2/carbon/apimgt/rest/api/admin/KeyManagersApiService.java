@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.admin;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.admin.*;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
 
@@ -20,6 +19,6 @@ public abstract class KeyManagersApiService {
     public abstract Response keyManagersKeyManagerIdDelete(String keyManagerId);
     public abstract Response keyManagersKeyManagerIdGet(String keyManagerId);
     public abstract Response keyManagersKeyManagerIdPut(String keyManagerId,KeyManagerDTO body);
-    public abstract Response keyManagersPost(KeyManagerDTO body) throws APIManagementException;
+    public abstract Response keyManagersPost(KeyManagerDTO body);
 }
 

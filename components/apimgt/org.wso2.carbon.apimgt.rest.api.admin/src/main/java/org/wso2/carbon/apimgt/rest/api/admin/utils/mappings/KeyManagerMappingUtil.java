@@ -1,17 +1,19 @@
 package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ClaimMappingEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.KeyManagerListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.TokenValidationDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,50 +86,84 @@ public class KeyManagerMappingUtil {
             jsonObject.remove(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE);
         }
         JsonElement issuerElement = jsonObject.get(APIConstants.KeyManager.ISSUER);
-        if (issuerElement != null){
+        if (issuerElement != null) {
             keyManagerDTO.setIssuer(issuerElement.getAsString());
             jsonObject.remove(APIConstants.KeyManager.ISSUER);
         }
         JsonElement jwksEndpointElement = jsonObject.get(APIConstants.KeyManager.JWKS_ENDPOINT);
-        if (jwksEndpointElement != null){
+        if (jwksEndpointElement != null) {
             keyManagerDTO.setJwksEndpoint(jwksEndpointElement.getAsString());
             jsonObject.remove(APIConstants.KeyManager.JWKS_ENDPOINT);
         }
         JsonElement userInfoEndpoint = jsonObject.get(APIConstants.KeyManager.USERINFO_ENDPOINT);
-        if (userInfoEndpoint != null){
+        if (userInfoEndpoint != null) {
             keyManagerDTO.setUserInfoEndpoint(userInfoEndpoint.getAsString());
             jsonObject.remove(APIConstants.KeyManager.USERINFO_ENDPOINT);
         }
         JsonElement authorizeEndpoint = jsonObject.get(APIConstants.KeyManager.AUTHORIZE_ENDPOINT);
-        if (userInfoEndpoint != null){
+        if (userInfoEndpoint != null) {
             keyManagerDTO.setAuthorizeEndpoint(authorizeEndpoint.getAsString());
             jsonObject.remove(APIConstants.KeyManager.AUTHORIZE_ENDPOINT);
         }
         JsonElement enableOauthAppCreation = jsonObject.get(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
-        if (enableOauthAppCreation != null){
+        if (enableOauthAppCreation != null) {
             keyManagerDTO.setEnableMapOauthConsumerApps(enableOauthAppCreation.getAsBoolean());
             jsonObject.remove(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
         }
         JsonElement enableTokenEncryption = jsonObject.get(APIConstants.KeyManager.ENABLE_TOKEN_ENCRYPTION);
-        if (enableTokenEncryption != null){
+        if (enableTokenEncryption != null) {
             keyManagerDTO.setEnableTokenEncryption(enableTokenEncryption.getAsBoolean());
             jsonObject.remove(APIConstants.KeyManager.ENABLE_TOKEN_ENCRYPTION);
         }
         JsonElement enableTokenHHashing = jsonObject.get(APIConstants.KeyManager.ENABLE_TOKEN_HASH);
-        if (enableTokenEncryption != null){
+        if (enableTokenEncryption != null) {
             keyManagerDTO.setEnableTokenHashing(enableTokenHHashing.getAsBoolean());
             jsonObject.remove(APIConstants.KeyManager.ENABLE_TOKEN_HASH);
         }
         JsonElement enableTokenGeneration = jsonObject.get(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
-        if (enableTokenGeneration != null){
+        if (enableTokenGeneration != null) {
             keyManagerDTO.setEnableTokenGneration(enableTokenGeneration.getAsBoolean());
             jsonObject.remove(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
+        }
+        JsonElement selfValidateJWTElement = jsonObject.get(APIConstants.KeyManager.SELF_VALIDATE_JWT);
+        JsonElement validationEnableElement = jsonObject.get(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION);
+        JsonElement validationTypeElement = jsonObject.get(APIConstants.KeyManager.VALIDATION_TYPE);
+        JsonElement validationValueElement = jsonObject.get(APIConstants.KeyManager.VALIDATION_VALUE);
+        TokenValidationDTO tokenValidationDTO = new TokenValidationDTO();
+        if (validationEnableElement != null) {
+            tokenValidationDTO.setEnable(validationEnableElement.getAsBoolean());
+            jsonObject.remove(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION);
+        }
+        if (validationTypeElement != null) {
+            if (APIConstants.KeyManager.VALIDATION_JWT.equals(validationTypeElement.getAsString())) {
+                tokenValidationDTO.setType(TokenValidationDTO.TypeEnum.JWT);
+            } else if (APIConstants.KeyManager.VALIDATION_REGEX.equals(validationTypeElement.getAsString())) {
+                tokenValidationDTO.setType(TokenValidationDTO.TypeEnum.REGEX);
+            } else if (APIConstants.KeyManager.VALIDATION_CUSTOM.equals(validationTypeElement.getAsString())) {
+                tokenValidationDTO.setType(TokenValidationDTO.TypeEnum.CUSTOM);
+            }
+            jsonObject.remove(APIConstants.KeyManager.VALIDATION_TYPE);
+        }
+        if (validationValueElement != null && StringUtils.isNotEmpty(validationValueElement.getAsString())) {
+            tokenValidationDTO.setValue(validationValueElement.getAsString());
+            jsonObject.remove(APIConstants.KeyManager.VALIDATION_VALUE);
+        }
+        keyManagerDTO.setTokenValidation(tokenValidationDTO);
+        if (selfValidateJWTElement != null) {
+            keyManagerDTO.setEnableSelfValidationJWT(selfValidateJWTElement.getAsBoolean());
+        }
+        JsonElement claimMappingElement = jsonObject.get(APIConstants.KeyManager.CLAIM_MAPPING);
+        if (claimMappingElement != null) {
+            keyManagerDTO.setClaimMapping(
+                    Arrays.asList(new Gson().fromJson(claimMappingElement, ClaimMappingEntryDTO[].class)));
+            jsonObject.remove(APIConstants.KeyManager.CLAIM_MAPPING);
         }
         keyManagerDTO.setAdditionalProperties(new Gson().fromJson(jsonObject, Map.class));
         return keyManagerDTO;
     }
 
-    public static KeyManagerConfigurationDTO toKeyManagerConfigurationDTO(String tenantDomain,KeyManagerDTO keyManagerDTO) {
+    public static KeyManagerConfigurationDTO toKeyManagerConfigurationDTO(String tenantDomain,
+                                                                          KeyManagerDTO keyManagerDTO) {
 
         KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
         keyManagerConfigurationDTO.setName(keyManagerDTO.getName());
@@ -154,23 +190,24 @@ public class KeyManagerMappingUtil {
             additionalProperties.put(APIConstants.KeyManager.REVOKE_ENDPOINT, keyManagerDTO.getRevokeEndpoint());
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getScopeManagementEndpoint())) {
-            additionalProperties.put(APIConstants.KeyManager.SCOPE_MANAGEMENT_ENDPOINT, keyManagerDTO.getScopeManagementEndpoint());
+            additionalProperties
+                    .put(APIConstants.KeyManager.SCOPE_MANAGEMENT_ENDPOINT, keyManagerDTO.getScopeManagementEndpoint());
         }
         if (keyManagerDTO.getAvailableGrantTypes() != null) {
             additionalProperties.put(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE,
                     keyManagerDTO.getAvailableGrantTypes());
         }
-        if (StringUtils.isNotEmpty(keyManagerDTO.getIssuer())){
-            additionalProperties.put(APIConstants.KeyManager.ISSUER,keyManagerDTO.getIssuer());
+        if (StringUtils.isNotEmpty(keyManagerDTO.getIssuer())) {
+            additionalProperties.put(APIConstants.KeyManager.ISSUER, keyManagerDTO.getIssuer());
         }
-        if (StringUtils.isNotEmpty(keyManagerDTO.getJwksEndpoint())){
-            additionalProperties.put(APIConstants.KeyManager.JWKS_ENDPOINT,keyManagerDTO.getJwksEndpoint());
+        if (StringUtils.isNotEmpty(keyManagerDTO.getJwksEndpoint())) {
+            additionalProperties.put(APIConstants.KeyManager.JWKS_ENDPOINT, keyManagerDTO.getJwksEndpoint());
         }
-        if (StringUtils.isNotEmpty(keyManagerDTO.getUserInfoEndpoint())){
-            additionalProperties.put(APIConstants.KeyManager.USERINFO_ENDPOINT,keyManagerDTO.getUserInfoEndpoint());
+        if (StringUtils.isNotEmpty(keyManagerDTO.getUserInfoEndpoint())) {
+            additionalProperties.put(APIConstants.KeyManager.USERINFO_ENDPOINT, keyManagerDTO.getUserInfoEndpoint());
         }
-        if (StringUtils.isNotEmpty(keyManagerDTO.getAuthorizeEndpoint())){
-            additionalProperties.put(APIConstants.KeyManager.AUTHORIZE_ENDPOINT,keyManagerDTO.getAuthorizeEndpoint());
+        if (StringUtils.isNotEmpty(keyManagerDTO.getAuthorizeEndpoint())) {
+            additionalProperties.put(APIConstants.KeyManager.AUTHORIZE_ENDPOINT, keyManagerDTO.getAuthorizeEndpoint());
         }
         additionalProperties
                 .put(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, keyManagerDTO.getEnableMapOauthConsumerApps());
@@ -181,6 +218,26 @@ public class KeyManagerMappingUtil {
                 .put(APIConstants.KeyManager.ENABLE_TOKEN_HASH, keyManagerDTO.getEnableTokenHashing());
         additionalProperties
                 .put(APIConstants.KeyManager.ENABLE_TOKEN_ENCRYPTION, keyManagerDTO.getEnableTokenEncryption());
+        additionalProperties
+                .put(APIConstants.KeyManager.SELF_VALIDATE_JWT, keyManagerDTO.getEnableSelfValidationJWT());
+        TokenValidationDTO tokenValidation = keyManagerDTO.getTokenValidation();
+        if (tokenValidation != null) {
+            additionalProperties
+                    .put(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION, tokenValidation.getEnable());
+            if (TokenValidationDTO.TypeEnum.JWT.equals(tokenValidation.getType())) {
+                additionalProperties
+                        .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_JWT);
+            } else if (TokenValidationDTO.TypeEnum.REGEX.equals(tokenValidation.getType())) {
+                additionalProperties
+                        .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_REGEX);
+            }else{
+                additionalProperties
+                        .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_CUSTOM);
+            }
+            additionalProperties.put(APIConstants.KeyManager.VALIDATION_VALUE,tokenValidation.getValue());
+        }
+        additionalProperties
+                .put(APIConstants.KeyManager.CLAIM_MAPPING, new Gson().toJson(keyManagerDTO.getClaimMapping()));
         keyManagerConfigurationDTO.setAdditionalProperties(additionalProperties);
         return keyManagerConfigurationDTO;
     }

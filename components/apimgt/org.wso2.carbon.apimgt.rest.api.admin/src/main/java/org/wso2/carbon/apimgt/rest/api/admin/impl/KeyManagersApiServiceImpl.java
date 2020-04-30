@@ -93,7 +93,7 @@ public class KeyManagersApiServiceImpl extends KeyManagersApiService {
                     apiAdmin.getKeyManagerConfigurationById(tenantDomain, keyManagerId);
             if (oldKeyManagerConfigurationDTO == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_KEY_MANAGER, keyManagerId, log);
-            }else{
+            } else {
                 if (!oldKeyManagerConfigurationDTO.getName().equals(keyManagerConfigurationDTO.getName())) {
                     RestApiUtil.handleBadRequest("Key Manager name couldn't able to change", log);
                 }
