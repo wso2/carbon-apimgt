@@ -88,6 +88,7 @@ securityDefinitions:
       apim:bot_data: Manage emails  #TODO: Verify Description
       apim:tenantInfo: Retrieve tenant related information  #TODO: Verify Description
       apim:admin_operations: Manage API categories
+      apim:admin_settings: Retrieve admin settings
 
 ######################################################
 # The "API Collection" resource APIs
@@ -2888,6 +2889,36 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The Admin settings List
+######################################################
+  /settings:
+#-----------------------------------------------------
+# Retrieve store settings
+#-----------------------------------------------------
+    get:
+      summary: Retreive admin settings
+      security:
+        - OAuth2Security:
+            - apim:admin_settings
+      description: |
+        Retreive admin settings
+      tags:
+        - Settings
+      responses:
+        200:
+          description: |
+            OK.
+            Settings returned
+          schema:
+            $ref: '#/definitions/Settings'
+        404:
+          description: |
+            Not Found.
+            Requested Settings does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -3977,6 +4008,16 @@ definitions:
         description: media-type of the file
         example: "image/jpeg"
 
+  #-----------------------------------------------------
+  # The Settings resource
+  #-----------------------------------------------------
+  Settings:
+    title: Settings
+    properties:
+      scopes:
+        type: array
+        items:
+          type: string
 
 #-----------------------------------------------------
 # END-OF-FILE
