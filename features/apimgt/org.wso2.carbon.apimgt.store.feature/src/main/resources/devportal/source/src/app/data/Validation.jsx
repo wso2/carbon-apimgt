@@ -21,6 +21,13 @@ import Joi from '@hapi/joi';
 const definition = {
     number: Joi.number().integer(),
     url: Joi.string().uri().allow(''),
+    ipAddress: Joi.string().ip({
+      version: [
+        'ipv4',
+        'ipv6'
+      ],
+      cidr: 'optional'
+    }),
 };
 
 export default definition;
