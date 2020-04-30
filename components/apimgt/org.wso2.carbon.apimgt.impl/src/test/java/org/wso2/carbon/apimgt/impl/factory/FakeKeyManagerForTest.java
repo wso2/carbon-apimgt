@@ -36,30 +36,6 @@ import java.util.Set;
 public class FakeKeyManagerForTest implements KeyManager {
 
     @Override
-    public void attachResourceScopes(API api, Set<URITemplate> uriTemplates, String tenantDomain)
-            throws APIManagementException {
-
-    }
-
-    @Override
-    public void updateResourceScopes(API api, Set<String> oldLocalScopeKeys, Set<Scope> newLocalScopes,
-                                     Set<URITemplate> oldURITemplates, Set<URITemplate> newURITemplates,
-                                     String tenantDomain) throws APIManagementException {
-
-    }
-
-    @Override
-    public void detachResourceScopes(API api, Set<URITemplate> uriTemplates, String tenantDomain)
-            throws APIManagementException {
-
-    }
-
-    @Override
-    public void validateScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException {
-
-    }
-
-    @Override
     public void deleteScope(String scopeName, String tenantDomain) throws APIManagementException {
 
     }

@@ -1072,9 +1072,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             throws APIManagementException {
 
         //TODO: remove after scope validation from swagger completes
-        for (URITemplate uriTemplate : uriTemplates) {
-            ApiMgtDAO.getInstance().removeResourceScopes(api.getId(), api.getContext(), uriTemplate, tenantDomain);
-        }
+        ApiMgtDAO.getInstance().removeResourceScopes(api.getId(), api.getContext(), uriTemplates, tenantDomain);
     }
 
     /**
