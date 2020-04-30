@@ -19,21 +19,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import AppBar from '@material-ui/core/AppBar';
 import { Avatar as AvatarComponent } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import HelpIcon from '@material-ui/icons/Help';
 import Hidden from '@material-ui/core/Hidden';
 import IconButton from '@material-ui/core/IconButton';
 import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
 import Toolbar from '@material-ui/core/Toolbar';
 import Tooltip from '@material-ui/core/Tooltip';
-import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-import Avatar from 'AppComponents/Base/Header/Avatar';
 import Breadcrumbs from 'AppComponents/Base/Header/Breadcrumbs';
 
 const lightColor = 'rgba(255, 255, 255, 0.7)';
@@ -59,20 +53,24 @@ const styles = (theme) => ({
         borderColor: lightColor,
     },
 });
-
+/**
+ * Render header component
+ * @param {JSON} props .
+ * @returns {JSX} Header AppBar components.
+ */
 function Header(props) {
     const { classes, handleDrawerToggle, avatar } = props;
 
     return (
-        <React.Fragment>
-            <AppBar color="primary" position="sticky" elevation={0}>
+        <>
+            <AppBar color='primary' position='sticky' elevation={0}>
                 <Toolbar>
-                    <Grid container spacing={1} alignItems="center">
+                    <Grid container spacing={1} alignItems='center'>
                         <Hidden smUp>
                             <Grid item>
                                 <IconButton
-                                    color="inherit"
-                                    aria-label="open drawer"
+                                    color='inherit'
+                                    aria-label='open drawer'
                                     onClick={() => handleDrawerToggle()}
                                     className={classes.menuButton}
                                 >
@@ -83,13 +81,13 @@ function Header(props) {
                         <Breadcrumbs />
                         <Grid item xs />
                         <Grid item>
-                            <Link className={classes.link} href="#" variant="body2">
+                            <Link className={classes.link} href='#' variant='body2'>
                                 Go to docs
                             </Link>
                         </Grid>
                         <Grid item>
-                            <Tooltip title="Alerts • No alerts">
-                                <IconButton color="inherit">
+                            <Tooltip title='Alerts • No alerts'>
+                                <IconButton color='inherit'>
                                     <NotificationsIcon />
                                 </IconButton>
                             </Tooltip>
@@ -103,7 +101,7 @@ function Header(props) {
                     </Grid>
                 </Toolbar>
             </AppBar>
-        </React.Fragment>
+        </>
     );
 }
 
@@ -112,8 +110,8 @@ Header.defaultProps = {
 };
 
 Header.propTypes = {
-    classes: PropTypes.object.isRequired,
-    onDrawerToggle: PropTypes.func.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    handleDrawerToggle: PropTypes.func.isRequired,
     avatar: PropTypes.element,
 };
 
