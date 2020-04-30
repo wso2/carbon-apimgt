@@ -1484,25 +1484,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
         }
-        int apiId = apiMgtDAO.getAPIID(api.getId(), null);
-        updateAPIResources(apiId, api, tenantId);
+        updateAPIResources(api, tenantId);
     }
 
     /**
      * Update resources of the API including local scopes and resource to scope attachments.
      *
-     * @param apiId    API Id
      * @param api      API
      * @param tenantId Tenant Id
      * @throws APIManagementException If fails to update local scopes of the API.
      */
-    private void updateAPIResources(int apiId, API api, int tenantId) throws APIManagementException {
+    private void updateAPIResources(API api, int tenantId) throws APIManagementException {
 
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-        Set<String> oldLocalScopeKeys = apiMgtDAO.getUnversionedLocalScopeKeysForAPI(apiId, tenantId);
+        Set<String> oldLocalScopeKeys = apiMgtDAO.getAllLocalScopeKeysForAPI(api.getId(), tenantId);
         Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(api.getId());
         Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(api.getId(), tenantId, api.getUriTemplates());
-        apiMgtDAO.updateURITemplates(apiId, api, tenantId);
+        apiMgtDAO.updateURITemplates(api, tenantId);
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the URI templates of API: " + api.getId() + " in the database");
         }
@@ -4047,9 +4045,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIIdentifier apiIdentifier = api.getId();
         int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-        int apiId = apiMgtDAO.getAPIID(apiIdentifier, null);
         // Get local scopes for the given API which are not already assigned for different versions of the same API
-        Set<String> localScopeKeysToDelete = apiMgtDAO.getUnversionedLocalScopeKeysForAPI(apiId, tenantId);
+        Set<String> localScopeKeysToDelete = apiMgtDAO.getUnversionedLocalScopeKeysForAPI(apiIdentifier, tenantId);
         // Get the URI Templates for the given API to detach the resources scopes from
         Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier);
         // Detach all the resource scopes from the API resources in KM

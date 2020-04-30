@@ -6921,17 +6921,18 @@ public class ApiMgtDAO {
     /**
      * Update URI templates define for an API.
      *
-     * @param apiId apiId
-     * @param api   API to update
-     * @param tenantId  tenant Id
-     * @throws APIManagementException   if fails to update URI template of the API.
+     * @param api      API to update
+     * @param tenantId tenant Id
+     * @throws APIManagementException if fails to update URI template of the API.
      */
-    public void updateURITemplates(int apiId, API api, int tenantId) throws APIManagementException {
+    public void updateURITemplates(API api, int tenantId) throws APIManagementException {
 
+        int apiId;
         String deleteOldMappingsQuery = SQLConstants.REMOVE_FROM_URI_TEMPLATES_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(deleteOldMappingsQuery)) {
             connection.setAutoCommit(false);
+            apiId = getAPIID(api.getId(), connection);
             prepStmt.setInt(1, apiId);
             try {
                 prepStmt.execute();
@@ -7478,6 +7479,7 @@ public class ApiMgtDAO {
         String deleteSubscriptionQuery = SQLConstants.REMOVE_FROM_API_SUBSCRIPTION_SQL;
         String deleteExternalAPIStoresQuery = SQLConstants.REMOVE_FROM_EXTERNAL_STORES_SQL;
         String deleteAPIQuery = SQLConstants.REMOVE_FROM_API_SQL;
+        String deleteResourceScopeMappingsQuery = SQLConstants.REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
 
         try {
@@ -7522,6 +7524,12 @@ public class ApiMgtDAO {
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
             prepStmt.setString(2, apiId.getApiName());
             prepStmt.setString(3, apiId.getVersion());
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            //Delete resource scope mappings of the API
+            prepStmt = connection.prepareStatement(deleteResourceScopeMappingsQuery);
+            prepStmt.setInt(1, id);
             prepStmt.execute();
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
@@ -9677,19 +9685,22 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get the local scope keys set of the API.
+     * Get the unversioned local scope keys set of the API.
      *
-     * @param apiId      API ID
-     * @param tenantId Tenant Id
+     * @param apiIdentifier API Identifier
+     * @param tenantId      Tenant Id
      * @return Local Scope keys set
      * @throws APIManagementException if fails to get local scope keys for API
      */
-    public Set<String> getUnversionedLocalScopeKeysForAPI(int apiId, int tenantId) throws APIManagementException {
+    public Set<String> getUnversionedLocalScopeKeysForAPI(APIIdentifier apiIdentifier, int tenantId)
+            throws APIManagementException {
 
+        int apiId;
         Set<String> localScopes = new HashSet<>();
         String getUnVersionedLocalScopes = SQLConstants.GET_UNVERSIONED_LOCAL_SCOPES_FOR_API_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(getUnVersionedLocalScopes)) {
+            apiId = getAPIID(apiIdentifier, connection);
             preparedStatement.setInt(1, apiId);
             preparedStatement.setInt(2, tenantId);
             preparedStatement.setInt(3, tenantId);
@@ -9701,7 +9712,39 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed while getting local scopes for API Id:" + apiId + " tenant: " + tenantId, e);
+            handleException("Failed while getting unversioned local scopes for API:" + apiIdentifier + " tenant: "
+                    + tenantId, e);
+        }
+        return localScopes;
+    }
+
+    /**
+     * Get the local scope keys set of the API.
+     *
+     * @param apiIdentifier API Identifier
+     * @param tenantId      Tenant Id
+     * @return Local Scope keys set
+     * @throws APIManagementException if fails to get local scope keys for API
+     */
+    public Set<String> getAllLocalScopeKeysForAPI(APIIdentifier apiIdentifier, int tenantId)
+            throws APIManagementException {
+
+        int apiId;
+        Set<String> localScopes = new HashSet<>();
+        String getAllLocalScopesStmt = SQLConstants.GET_ALL_LOCAL_SCOPES_FOR_API_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(getAllLocalScopesStmt)) {
+            apiId = getAPIID(apiIdentifier, connection);
+            preparedStatement.setInt(1, apiId);
+            preparedStatement.setInt(2, tenantId);
+            preparedStatement.setInt(3, tenantId);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                while (rs.next()) {
+                    localScopes.add(rs.getString("SCOPE_NAME"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed while getting local scopes for API:" + apiIdentifier + " tenant: " + tenantId, e);
         }
         return localScopes;
     }
@@ -15390,20 +15433,20 @@ public class ApiMgtDAO {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_OAUTH2_RESOURCE_SCOPE_SQL)) {
+             PreparedStatement addScopeStmt = connection.prepareStatement(SQLConstants.ADD_OAUTH2_RESOURCE_SCOPE_SQL)) {
             try {
                 connection.setAutoCommit(false);
                 for (URITemplate uriTemplate : uriTemplates) {
                     String resourceKey = APIUtil.getResourceKey(api, uriTemplate);
                     for (Scope scope : uriTemplate.retrieveAllScopes()) {
-                        statement.setString(1, resourceKey);
-                        statement.setString(2, scope.getKey());
-                        statement.setInt(3, tenantId);
-                        statement.addBatch();
+                        int scopeId = getResourceScopeIdByName(scope.getKey(), tenantId, connection);
+                        addScopeStmt.setString(1, resourceKey);
+                        addScopeStmt.setInt(2, scopeId);
+                        addScopeStmt.setInt(3, tenantId);
+                        addScopeStmt.addBatch();
                     }
                 }
-                statement.executeBatch();
-                statement.clearBatch();
+                addScopeStmt.executeBatch();
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -15415,37 +15458,59 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get resource scope Id by scope name. KM operation. //TODO: remove after KM seperation
+     */
+    public int getResourceScopeIdByName(String scopeName, int tenantId, Connection connection) throws SQLException,
+            APIManagementException {
+
+        int scopeId = -1;
+        try (PreparedStatement getScopeIdStmt =
+                     connection.prepareStatement(SQLConstants.GET_OAUTH2_RESOURCE_SCOPE_ID_BY_NAME_SQL)) {
+            getScopeIdStmt.setString(1, scopeName);
+            getScopeIdStmt.setInt(2, tenantId);
+            try (ResultSet rs = getScopeIdStmt.executeQuery()) {
+                if (rs.next()) {
+                    scopeId = rs.getInt(1);
+                }
+            }
+        }
+        if (scopeId == -1) {
+            throw new APIManagementException("Unable to find the Scope: " + scopeName + " in the database");
+        }
+        return scopeId;
+    }
+
+    /**
      * Remove resource scope from KM database.
      * //TODO:remove once scope validation from swagger is fixed.
      *
      * @throws APIManagementException
      */
-    public void removeResourceScopes(APIIdentifier apiIdentifier, String context, URITemplate uriTemplate,
+    public void removeResourceScopes(APIIdentifier apiIdentifier, String context, Set<URITemplate> uriTemplates,
                                      String tenantDomain) throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        List<String> scopeList = uriTemplate.retrieveAllScopes().stream().map(Scope::getName).collect(
-                Collectors.toList());
-        String resourceKey = APIUtil.getResourceKey(apiIdentifier, context, uriTemplate);
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.REMOVE_KM_RESOURCE_SCOPE_SQL)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.REMOVE_OAUTH2_RESOURCE_SCOPE_SQL)) {
             try {
                 connection.setAutoCommit(false);
-                for (String scope : scopeList) {
-                    statement.setString(1, scope);
-                    statement.setInt(2, tenantId);
-                    statement.setString(3, resourceKey);
-                    statement.addBatch();
+                for (URITemplate uriTemplate : uriTemplates) {
+                    String resourceKey = APIUtil.getResourceKey(apiIdentifier, context, uriTemplate);
+                    for (Scope scope : uriTemplate.retrieveAllScopes()) {
+                        statement.setString(1, scope.getKey());
+                        statement.setInt(2, tenantId);
+                        statement.setString(3, resourceKey);
+                        statement.addBatch();
+                    }
                 }
                 statement.executeBatch();
-                statement.clearBatch();
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to remove resource scopes for: " + resourceKey, e);
+                handleException("Failed to remove resource scopes for: " + apiIdentifier, e);
             }
         } catch (SQLException e) {
-            handleException("Failed to remove resource scopes for: " + resourceKey, e);
+            handleException("Failed to remove resource scopes for: " + apiIdentifier, e);
         }
     }
 
