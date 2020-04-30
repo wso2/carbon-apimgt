@@ -219,7 +219,6 @@ class API extends Resource {
      * Add an Application Throttling Policy
      */
     addApplicationThrottlingPolicy(body) {
-        console.log('body', body);
         return this.client.then((client) => {
             const payload = {
                 body,
@@ -231,6 +230,35 @@ class API extends Resource {
             );
         });
     }
+
+    /**
+     * Get details of an Application Throttling Policy 
+     */
+    applicationThrottlingPolicyGet(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Application Policy (Individual)'].get_throttling_policies_application__policyId_(
+                { policyId: policyId },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+     /**
+     * Update an Application Throttling Policy
+     */
+    updateApplicationThrottlingPolicy(body) {
+        return this.client.then((client) => {
+            const payload = {
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Application Policy (Individual)'].put_throttling_policies_application__policyId_(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+
 }
 
 API.CONSTS = {
