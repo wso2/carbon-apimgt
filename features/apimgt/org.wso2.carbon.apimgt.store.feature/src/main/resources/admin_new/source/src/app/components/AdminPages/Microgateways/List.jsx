@@ -80,7 +80,7 @@ const styles = (theme) => ({
 /**
  * Render a list
  * @param {JSON} props .
- * @returns {JSX} Header AppBar components.
+ * @returns {JSX} Header AppBar components .
  */
 function ListLabels(props) {
     const { classes, intl } = props;
