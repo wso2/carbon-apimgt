@@ -18,7 +18,7 @@
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -83,7 +83,7 @@ const styles = (theme) => ({
  * @returns {JSX} Header AppBar components.
  */
 function ListLabels(props) {
-    const { classes } = props;
+    const { classes, intl } = props;
     const [data, setData] = useState(null);
     const [searchText, setSearchText] = useState('');
 
@@ -91,7 +91,7 @@ function ListLabels(props) {
         setSearchText(event.target.value);
     };
     const fetchData = () => {
-    // Fetch data from backend
+        // Fetch data from backend
         setData(null);
         const promiseAPICall = apiCall();
         promiseAPICall.then((LocalData) => {
@@ -200,12 +200,10 @@ function ListLabels(props) {
                             <Grid item xs>
                                 <TextField
                                     fullWidth
-                                    placeholder={(
-                                        <FormattedMessage
-                                            id='AdminPages.Microgateways.List.search.default'
-                                            defaultMessage='Search by Microgateway label'
-                                        />
-                                    )}
+                                    placeholder={intl.formatMessage({
+                                        id: 'AdminPages.Microgateways.List.search.default',
+                                        defaultMessage: 'Search by Microgateway label',
+                                    })}
                                     InputProps={{
                                         disableUnderline: true,
                                         className: classes.searchInput,
@@ -255,6 +253,7 @@ function ListLabels(props) {
 
 ListLabels.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(ListLabels);
+export default injectIntl(withStyles(styles)(ListLabels));
