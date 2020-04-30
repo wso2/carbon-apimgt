@@ -40,7 +40,7 @@ import HelpBase from 'AppComponents/AdminPages/Addons/HelpBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
 import AddEdit from 'AppComponents/AdminPages/Microgateways/AddEdit';
 import Alert from 'AppComponents/Shared/Alert';
-import Delete from 'AppComponents/AdminPages/MicroGateways/Delete';
+import Delete from 'AppComponents/AdminPages/Microgateways/Delete';
 
 /**
  * Mock API call
