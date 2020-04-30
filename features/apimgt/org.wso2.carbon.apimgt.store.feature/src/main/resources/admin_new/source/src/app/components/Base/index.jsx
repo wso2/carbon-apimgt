@@ -22,11 +22,14 @@ import { withStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
-import Header from 'AppComponents/Base/Header';
 
+/**
+ * Render copyright
+ * @returns {JSX}.
+ */
 function Copyright() {
     return (
-        <Typography variant="body2" color="textSecondary" align="center">
+        <Typography variant='body2' color='textSecondary' align='center'>
             <FormattedMessage
                 id='Base.Footer.Footer.product_details'
                 defaultMessage='WSO2 API-M v3.1.0 | © 2020 WSO2 Inc'
@@ -60,8 +63,15 @@ const styles = (theme) => ({
     },
 });
 
+/**
+ * Render base page component.
+ * @param {JSON} props component props.
+ * @returns {JSX} Loading animation.
+ */
 function Base(props) {
-    const { classes, children, leftMenu, header } = props;
+    const {
+        classes, children, leftMenu, header,
+    } = props;
 
 
     return (
@@ -85,7 +95,7 @@ Base.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     children: PropTypes.element.isRequired,
     header: PropTypes.element.isRequired,
-    handleDrawerToggle: PropTypes.func.isRequired,
+    leftMenu: PropTypes.element.isRequired,
 };
 
 export default withStyles(styles)(Base);
