@@ -67,14 +67,15 @@ const useStyles = makeStyles((theme) => ({
  */
 function ListLabels(props) {
     const {
-        columProps, pageProps, addButtonProps,
-        searchProps, apiCall, emptyBoxProps: {
+        columProps, pageProps, addButtonProps, addButtonOverride,
+        searchProps: { active: searchActive, searchPlaceholder }, apiCall, emptyBoxProps: {
             title: emptyBoxTitle,
             content: emptyBoxContent,
         },
         actionColumnProps: {
             editIconShow, editIconOverride, deleteIconShow,
         },
+        noDataMessage,
     } = props;
 
     const classes = useStyles();
@@ -154,13 +155,8 @@ function ListLabels(props) {
     if (data && data.length === 0) {
         return (
             <ContentBase
+                {...pageProps}
                 pageStyle='small'
-                title={(
-                    <FormattedMessage
-                        id='AdminPages.Microgateways.ListBase.nodata.title'
-                        defaultMessage='Microgateways'
-                    />
-                )}
             >
                 <Card className={classes.root}>
                     <CardActionArea>
@@ -170,10 +166,12 @@ function ListLabels(props) {
                         </CardContent>
                     </CardActionArea>
                     <CardActions>
-                        <AddEdit
-                            updateList={fetchData}
-                            {...addButtonProps}
-                        />
+                        {addButtonOverride || (
+                            <AddEdit
+                                updateList={fetchData}
+                                {...addButtonProps}
+                            />
+                        )}
                     </CardActions>
                 </Card>
             </ContentBase>
@@ -191,19 +189,19 @@ function ListLabels(props) {
 
         <>
             <ContentBase {...pageProps}>
-                {(searchProps || addButtonProps) && (
+                {(searchActive || addButtonProps) && (
                     <AppBar className={classes.searchBar} position='static' color='default' elevation={0}>
                         <Toolbar>
                             <Grid container spacing={2} alignItems='center'>
 
                                 <Grid item>
-                                    {searchProps && (<SearchIcon className={classes.block} color='inherit' />)}
+                                    {searchActive && (<SearchIcon className={classes.block} color='inherit' />)}
                                 </Grid>
                                 <Grid item xs>
-                                    {searchProps && (
+                                    {searchActive && (
                                         <TextField
                                             fullWidth
-                                            placeholder={searchProps.searchHelpText}
+                                            placeholder={searchPlaceholder}
                                             InputProps={{
                                                 disableUnderline: true,
                                                 className: classes.searchInput,
@@ -213,7 +211,7 @@ function ListLabels(props) {
                                     )}
                                 </Grid>
                                 <Grid item>
-                                    {addButtonProps && (
+                                    {addButtonOverride || (
                                         <AddEdit
                                             updateList={fetchData}
                                             {...addButtonProps}
@@ -241,10 +239,7 @@ function ListLabels(props) {
                 {data && data.length === 0 && (
                     <div className={classes.contentWrapper}>
                         <Typography color='textSecondary' align='center'>
-                            <FormattedMessage
-                                id='AdminPages.Microgateways.List.nodata.message'
-                                defaultMessage='No Gateway Labels Yet'
-                            />
+                            {noDataMessage}
                         </Typography>
                     </div>
                 )}
@@ -253,19 +248,32 @@ function ListLabels(props) {
     );
 }
 ListLabels.defaultProps = {
-    addButtonProps: null,
-    searchProps: null,
+    addButtonProps: {},
+    addButtonOverride: null,
+    searchProps: {
+        searchPlaceholder: '',
+        active: true,
+    },
     actionColumnProps: {
         editIconShow: true,
         editIconOverride: null,
         deleteIconShow: true,
     },
+    noDataMessage: (
+        <FormattedMessage
+            id='AdminPages.Addons.ListBase.nodata.message'
+            defaultMessage='No items yet'
+        />
+    ),
 };
 ListLabels.propTypes = {
     columProps: PropTypes.element.isRequired,
     pageProps: PropTypes.shape({}).isRequired,
     addButtonProps: PropTypes.shape({}),
-    searchProps: PropTypes.shape({}),
+    searchProps: PropTypes.shape({
+        searchPlaceholder: PropTypes.string.isRequired,
+        active: PropTypes.bool.isRequired,
+    }),
     apiCall: PropTypes.func.isRequired,
     emptyBoxProps: PropTypes.shape({
         title: PropTypes.element.isRequired,
@@ -276,5 +284,7 @@ ListLabels.propTypes = {
         editIconOverride: PropTypes.element,
         deleteIconShow: PropTypes.bool,
     }),
+    noDataMessage: PropTypes.element,
+    addButtonOverride: PropTypes.element,
 };
 export default ListLabels;
