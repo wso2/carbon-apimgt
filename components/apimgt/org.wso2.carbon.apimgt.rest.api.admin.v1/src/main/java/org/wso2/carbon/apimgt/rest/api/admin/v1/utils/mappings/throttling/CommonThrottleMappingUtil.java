@@ -1,6 +1,5 @@
 /*
- *
- *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -603,13 +602,12 @@ public class CommonThrottleMappingUtil {
      */
     private static IPConditionDTO.IpConditionTypeEnum mapIPConditionTypeFromModelToDTO(String ipConditionType) {
         switch (ipConditionType) {
-        case PolicyConstants.IP_RANGE_TYPE:
-            return IPConditionDTO.IpConditionTypeEnum.IPRANGE;
-        case PolicyConstants.IP_SPECIFIC_TYPE:
-            return IPConditionDTO.IpConditionTypeEnum.IPSPECIFIC;
-        default:
-            return null;
+            case PolicyConstants.IP_RANGE_TYPE:
+                return IPConditionDTO.IpConditionTypeEnum.IPRANGE;
+            case PolicyConstants.IP_SPECIFIC_TYPE:
+                return IPConditionDTO.IpConditionTypeEnum.IPSPECIFIC;
+            default:
+                return null;
         }
     }
-
 }
