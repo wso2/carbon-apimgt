@@ -77,7 +77,7 @@ public class GlobalThrottlePolicyMappingUtil {
      * @return Model object derived from DTO
      * @throws UnsupportedThrottleLimitTypeException
      */
-    /**public static GlobalPolicy fromGlobalThrottlePolicyDTOToModel(CustomRuleDTO dto)
+    public static GlobalPolicy fromGlobalThrottlePolicyDTOToModel(CustomRuleDTO dto)
             throws UnsupportedThrottleLimitTypeException {
 
         //update mandatory fields such as tenantDomain etc.
@@ -88,5 +88,5 @@ public class GlobalThrottlePolicyMappingUtil {
         globalPolicy.setKeyTemplate(dto.getKeyTemplate());
         globalPolicy.setSiddhiQuery(dto.getSiddhiQuery());
         return globalPolicy;
-    }**/
+    }
 }
