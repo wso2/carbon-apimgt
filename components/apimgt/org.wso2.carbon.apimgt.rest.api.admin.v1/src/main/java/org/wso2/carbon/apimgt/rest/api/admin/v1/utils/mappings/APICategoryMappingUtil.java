@@ -28,6 +28,7 @@ public class APICategoryMappingUtil {
 
     /**
      * Converts a CategoryDTO to APICategory
+     *
      * @param categoryDTO
      * @return APICategoty
      */
@@ -42,6 +43,7 @@ public class APICategoryMappingUtil {
 
     /**
      * Converts a Category to CategoryDTO
+     *
      * @param category
      * @return categoryDTO
      */
@@ -84,6 +86,4 @@ public class APICategoryMappingUtil {
         }
         return categoryDTOs;
     }
-
-
 }

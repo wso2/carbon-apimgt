@@ -1,6 +1,5 @@
 /*
- *
- *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -28,8 +27,8 @@ public class RestApiAdminUtils {
 
     /**
      * Checks whether given policy is allowed to access to user
-     * 
-     * @param user username with tenant domain
+     *
+     * @param user   username with tenant domain
      * @param policy policy to check
      * @return true if user is allowed to access the policy
      */
@@ -47,11 +46,11 @@ public class RestApiAdminUtils {
     /**
      * Checks whether given block condition is allowed to access to user
      *
-     * @param user username with tenant domain
+     * @param user           username with tenant domain
      * @param blockCondition Block condition to check
      * @return true if user is allowed to access the block condition
      */
-    public static boolean isBlockConditionAccessibleToUser (String user, BlockConditionsDTO blockCondition) {
+    public static boolean isBlockConditionAccessibleToUser(String user, BlockConditionsDTO blockCondition) {
         String userTenantDomain = MultitenantUtils.getTenantDomain(user);
         return !StringUtils.isBlank(blockCondition.getTenantDomain()) && blockCondition.getTenantDomain()
                 .equals(userTenantDomain);
