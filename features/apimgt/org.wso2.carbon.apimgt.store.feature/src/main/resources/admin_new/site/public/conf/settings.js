@@ -18,6 +18,7 @@ const AppConfig = {
             enable: false,
             serviceURL: '', // Check `/source/src/app/components/Base/Footer/FeedbackForm.jsx` for details
         },
+        docUrl: 'https://apim.docs.wso2.com/en/latest/',
     },
 };
 

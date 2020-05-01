@@ -31,6 +31,11 @@ const styles = (theme) => ({
         margin: 'auto',
         overflow: 'hidden',
     },
+    smallBox: {
+        maxWidth: 450,
+        margin: 'auto',
+        overflow: 'hidden',
+    },
     searchBar: {
         borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
     },
@@ -98,24 +103,31 @@ function ContentBase(props) {
                                 {title}
                             </Typography>
                         </Grid>
-                        <Grid item>
-                            {help}
-                        </Grid>
+                        {help && (
+                            <Grid item>
+                                {help}
+                            </Grid>
+                        )}
                     </Grid>
                 </Toolbar>
             </AppBar>
             <main className={classes.main}>
-                {!pageStyle && (
+                {pageStyle && (pageStyle === 'half') && (
                     <Paper className={classes.paper}>
                         {children}
                     </Paper>
                 )}
-                {pageStyle && (pageStyle === 'no-paper') && (
+                {pageStyle && (pageStyle === 'paperLess') && (
                     <>
                         {children}
                     </>
                 )}
-                {pageStyle && (pageStyle === 'full-page') && (
+                {pageStyle && (pageStyle === 'small') && (
+                    <div className={classes.smallBox}>
+                        {children}
+                    </div>
+                )}
+                {pageStyle && (pageStyle === 'full') && (
                     <Paper>
                         {children}
                     </Paper>
