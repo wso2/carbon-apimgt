@@ -112,7 +112,13 @@ function AddEdit({
         }
         return errorText;
     };
-
+    const dialogOpenCallback = () => {
+        // We can do an API call when we are in the editing mode
+        if (id) {
+            // eslint-disable-next-line no-alert
+            alert('use id=' + id + ' or what ever you got to make a backend call if you want.');
+        }
+    };
     const formSaveCallback = () => {
         const formErrors = getAllFormErrors();
         if (formErrors !== '') {
@@ -141,6 +147,7 @@ function AddEdit({
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
+            dialogOpenCallback={dialogOpenCallback}
         >
             <DialogContentText>
                 <FormattedMessage

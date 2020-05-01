@@ -60,7 +60,7 @@ export default function Dashboard() {
     const bull = <span className={classes.bullet}>•</span>;
 
     return (
-        <ContentBase title='Dashboard' pageStyle='no-paper'>
+        <ContentBase title='Dashboard' pageStyle='paperLess'>
 
             <div className={classes.rootGrid}>
                 <Grid container spacing={3}>
