@@ -4486,7 +4486,7 @@ definitions:
       token:
         $ref: '#/definitions/ApplicationToken'
       additionalProperties:
-        type: string
+        type: object
         description: additionalProperties (if any).
 
 #-----------------------------------------------------
@@ -4560,7 +4560,7 @@ definitions:
         description: Client secret for generating access token. This is given together with the client Id.
         example: ""
       additionalProperties:
-        type: string
+        type: object
         description: Additional properties needed.
         example: ""
 
@@ -5321,7 +5321,15 @@ definitions:
         type: boolean
         example: true
         default: true
-      additional_properties:
+      enableMapOAuthConsumerApps:
+        type: boolean
+        example: false
+        default: false
+      applicationConfiguration:
+        type: array
+        items:
+          type: object
+      additionalProperties:
         type: array
         items:
           type: object

@@ -1537,7 +1537,7 @@ public class APIManagerConfiguration {
                                     .getFirstChildWithName(new QName(APIConstants.KeyManager.ADDITIONAL_CONFIGURATION));
                     if (additionalConfigurationElement != null) {
                         OMElement connectionConfigurationsElement =
-                                omElement.getFirstChildWithName(
+                                additionalConfigurationElement.getFirstChildWithName(
                                         new QName(APIConstants.KeyManager.CONNECTION_CONFIGURATIONS));
                         if (connectionConfigurationsElement != null) {
                             Iterator connectionConfigurations =
@@ -1553,16 +1553,16 @@ public class APIManagerConfiguration {
                             }
                         }
                         OMElement applicationConfigurationsElement =
-                                omElement.getFirstChildWithName(
+                                additionalConfigurationElement.getFirstChildWithName(
                                         new QName(APIConstants.KeyManager.APPLICATION_CONFIGURATIONS));
                         if (applicationConfigurationsElement != null) {
-                            Iterator connectionConfigurations =
-                                    connectionConfigurationsElement
+                            Iterator applicationConfigurations =
+                                    applicationConfigurationsElement
                                             .getChildrenWithLocalName(
                                                     APIConstants.KeyManager.APPLICATION_CONFIGURATION);
-                            if (connectionConfigurations != null) {
-                                while (connectionConfigurations.hasNext()) {
-                                    OMElement connectionConfiguration = (OMElement) connectionConfigurations.next();
+                            if (applicationConfigurations != null) {
+                                while (applicationConfigurations.hasNext()) {
+                                    OMElement connectionConfiguration = (OMElement) applicationConfigurations.next();
                                     KeyManagerConfigurationsDto.ConfigurationDto configurationDto =
                                             getConfigurationDto(connectionConfiguration);
                                     keyManagerConfigurationDto.addApplicationConfigurationDtoList(configurationDto);

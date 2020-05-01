@@ -59,7 +59,6 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -67,7 +66,6 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.Certificate;
@@ -78,6 +76,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
@@ -510,8 +510,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         }
                     }
                     
-                    if (!StringUtils.isEmpty(body.getAdditionalProperties())) {
-                        jsonParamObj.put(APIConstants.JSON_ADDITIONAL_PROPERTIES, body.getAdditionalProperties());
+                    if (body.getAdditionalProperties() != null) {
+                        if (body.getAdditionalProperties() instanceof String &&
+                                StringUtils.isNotEmpty((String) body.getAdditionalProperties())) {
+                            jsonParamObj.put(APIConstants.JSON_ADDITIONAL_PROPERTIES, body.getAdditionalProperties());
+                        }else if (body.getAdditionalProperties() instanceof Map){
+                            String jsonContent = new Gson().toJson(body.getAdditionalProperties());
+                            jsonParamObj.put(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonContent);
+                        }
                     }
                     String jsonParams = jsonParamObj.toString();
                     String tokenScopes = StringUtils.join(body.getScopes(), " ");
@@ -645,7 +651,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                     "application " + applicationId + ". Invalid jsonInput \'"
                                     + body.getAdditionalProperties() + "\' provided.", log);
                         }
-
+                        if (StringUtils.isNotEmpty(body.getConsumerSecret())){
+                            appKey.setConsumerSecret(body.getConsumerSecret());
+                        }
                         String[] scopes = body.getScopes().toArray(new String[0]);
                         AccessTokenInfo response = apiConsumer.renewAccessToken(body.getRevokeToken(),
                                 appKey.getConsumerKey(), appKey.getConsumerSecret(),
@@ -727,7 +735,16 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     JsonObject jsonParams = new JsonObject();
                     jsonParams.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);
                     jsonParams.addProperty(APIConstants.JSON_USERNAME, username);
-                    jsonParams.addProperty(APIConstants.JSON_ADDITIONAL_PROPERTIES, body.getAdditionalProperties());
+                    if (body.getAdditionalProperties() != null) {
+                        if (body.getAdditionalProperties() instanceof String &&
+                                StringUtils.isNotEmpty((String) body.getAdditionalProperties())) {
+                            jsonParams.addProperty(APIConstants.JSON_ADDITIONAL_PROPERTIES,
+                                    (String) body.getAdditionalProperties());
+                        } else if (body.getAdditionalProperties() instanceof Map) {
+                            String jsonContent = new Gson().toJson(body.getAdditionalProperties());
+                            jsonParams.addProperty(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonContent);
+                        }
+                    }
                     OAuthApplicationInfo updatedData = apiConsumer.updateAuthClient(username, application.getName(),
                             keyType, body.getCallbackUrl(), null, null, null, body.getGroupId(),
                             new Gson().toJson(jsonParams));

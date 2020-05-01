@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
@@ -144,8 +145,12 @@ public class KeyManagerMappingUtil {
             }
             jsonObject.remove(APIConstants.KeyManager.VALIDATION_TYPE);
         }
-        if (validationValueElement != null && StringUtils.isNotEmpty(validationValueElement.getAsString())) {
+        if (validationValueElement instanceof JsonPrimitive) {
             tokenValidationDTO.setValue(validationValueElement.getAsString());
+            jsonObject.remove(APIConstants.KeyManager.VALIDATION_VALUE);
+        }else if (validationValueElement instanceof JsonObject){
+            Map validationValue = new Gson().fromJson(validationValueElement,Map.class);
+            tokenValidationDTO.setValue(validationValue);
             jsonObject.remove(APIConstants.KeyManager.VALIDATION_VALUE);
         }
         keyManagerDTO.setTokenValidation(tokenValidationDTO);
@@ -237,7 +242,7 @@ public class KeyManagerMappingUtil {
             additionalProperties.put(APIConstants.KeyManager.VALIDATION_VALUE,tokenValidation.getValue());
         }
         additionalProperties
-                .put(APIConstants.KeyManager.CLAIM_MAPPING, new Gson().toJson(keyManagerDTO.getClaimMapping()));
+                .put(APIConstants.KeyManager.CLAIM_MAPPING, keyManagerDTO.getClaimMapping());
         keyManagerConfigurationDTO.setAdditionalProperties(additionalProperties);
         return keyManagerConfigurationDTO;
     }

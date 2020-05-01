@@ -377,6 +377,7 @@ public class JWTValidator {
 
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         try {
 
             String consumerkey = null;
@@ -386,7 +387,7 @@ public class JWTValidator {
                 consumerkey = payload.getStringClaim(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY);
             }
             if (consumerkey != null) {
-                return apiKeyValidator.validateSubscription(apiContext, apiVersion, consumerkey);
+                return apiKeyValidator.validateSubscription(apiContext, apiVersion, consumerkey, tenantDomain);
             }
             log.debug("Cannot call Key Manager to validate subscription. " +
                     "Payload of the token does not contain the Authorized party - the party to which the ID Token was " +

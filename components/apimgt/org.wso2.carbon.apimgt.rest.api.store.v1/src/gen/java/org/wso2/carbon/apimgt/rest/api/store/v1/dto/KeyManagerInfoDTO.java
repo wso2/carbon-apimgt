@@ -30,6 +30,8 @@ public class KeyManagerInfoDTO   {
     private Boolean enableTokenEncryption = false;
     private Boolean enableTokenHashing = false;
     private Boolean enableOAuthAppCreation = true;
+    private Boolean enableMapOAuthConsumerApps = false;
+    private List<Object> applicationConfiguration = new ArrayList<>();
     private List<Object> additionalProperties = new ArrayList<>();
 
   /**
@@ -257,6 +259,40 @@ public class KeyManagerInfoDTO   {
 
   /**
    **/
+  public KeyManagerInfoDTO enableMapOAuthConsumerApps(Boolean enableMapOAuthConsumerApps) {
+    this.enableMapOAuthConsumerApps = enableMapOAuthConsumerApps;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("enableMapOAuthConsumerApps")
+  public Boolean isEnableMapOAuthConsumerApps() {
+    return enableMapOAuthConsumerApps;
+  }
+  public void setEnableMapOAuthConsumerApps(Boolean enableMapOAuthConsumerApps) {
+    this.enableMapOAuthConsumerApps = enableMapOAuthConsumerApps;
+  }
+
+  /**
+   **/
+  public KeyManagerInfoDTO applicationConfiguration(List<Object> applicationConfiguration) {
+    this.applicationConfiguration = applicationConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("applicationConfiguration")
+  public List<Object> getApplicationConfiguration() {
+    return applicationConfiguration;
+  }
+  public void setApplicationConfiguration(List<Object> applicationConfiguration) {
+    this.applicationConfiguration = applicationConfiguration;
+  }
+
+  /**
+   **/
   public KeyManagerInfoDTO additionalProperties(List<Object> additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
@@ -264,7 +300,7 @@ public class KeyManagerInfoDTO   {
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("additional_properties")
+  @JsonProperty("additionalProperties")
   public List<Object> getAdditionalProperties() {
     return additionalProperties;
   }
@@ -295,12 +331,14 @@ public class KeyManagerInfoDTO   {
         Objects.equals(enableTokenEncryption, keyManagerInfo.enableTokenEncryption) &&
         Objects.equals(enableTokenHashing, keyManagerInfo.enableTokenHashing) &&
         Objects.equals(enableOAuthAppCreation, keyManagerInfo.enableOAuthAppCreation) &&
+        Objects.equals(enableMapOAuthConsumerApps, keyManagerInfo.enableMapOAuthConsumerApps) &&
+        Objects.equals(applicationConfiguration, keyManagerInfo.applicationConfiguration) &&
         Objects.equals(additionalProperties, keyManagerInfo.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, description, enabled, availableGrantTypes, tokenEndpoint, revokeEndpoint, userInfoEndpoint, enableTokenGneration, enableTokenEncryption, enableTokenHashing, enableOAuthAppCreation, additionalProperties);
+    return Objects.hash(id, name, type, description, enabled, availableGrantTypes, tokenEndpoint, revokeEndpoint, userInfoEndpoint, enableTokenGneration, enableTokenEncryption, enableTokenHashing, enableOAuthAppCreation, enableMapOAuthConsumerApps, applicationConfiguration, additionalProperties);
   }
 
   @Override
@@ -321,6 +359,8 @@ public class KeyManagerInfoDTO   {
     sb.append("    enableTokenEncryption: ").append(toIndentedString(enableTokenEncryption)).append("\n");
     sb.append("    enableTokenHashing: ").append(toIndentedString(enableTokenHashing)).append("\n");
     sb.append("    enableOAuthAppCreation: ").append(toIndentedString(enableOAuthAppCreation)).append("\n");
+    sb.append("    enableMapOAuthConsumerApps: ").append(toIndentedString(enableMapOAuthConsumerApps)).append("\n");
+    sb.append("    applicationConfiguration: ").append(toIndentedString(applicationConfiguration)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
