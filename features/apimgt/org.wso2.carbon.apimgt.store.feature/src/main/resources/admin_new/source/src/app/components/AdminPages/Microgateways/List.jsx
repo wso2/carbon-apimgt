@@ -24,7 +24,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 import HelpBase from 'AppComponents/AdminPages/Addons/HelpBase';
-import ListBase from 'AppComponents/AdminPages/Microgateways/ListBase';
+import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
 import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
@@ -37,10 +37,10 @@ function apiCall() {
     return new Promise(((resolve) => {
         setTimeout(() => {
             resolve([
-                { id: '1', label: 'West Wing', description: "It's somewhat hot" },
-                { id: '2', label: 'East Wing', description: "It's cool" },
-                { id: '3', label: 'South Wing', description: "It's red zone" },
-                { id: '4', label: 'Noth Wing', description: "It's blue zone" },
+                // { id: '1', label: 'West Wing', description: "It's somewhat hot" },
+                // { id: '2', label: 'East Wing', description: "It's cool" },
+                // { id: '3', label: 'South Wing', description: "It's red zone" },
+                // { id: '4', label: 'Noth Wing', description: "It's blue zone" },
             ]);
         }, 1000);
     }));
@@ -77,20 +77,18 @@ export default function ListMG() {
             id: 'AdminPages.Microgateways.List.addButtonProps.triggerButtonText',
             defaultMessage: 'Add Microgateway',
         }),
+        /* This title is what as the title of the popup dialog box */
         title: intl.formatMessage({
             id: 'AdminPages.Microgateways.List.addButtonProps.title',
             defaultMessage: 'Add Microgateway',
         }),
-        searchText: intl.formatMessage({
-            id: 'AdminPages.Microgateways.List.addButtonProps.searchText',
-            defaultMessage: 'Search by Microgateway label',
-        }),
     };
     const searchProps = {
-        searchHelpText: intl.formatMessage({
+        searchPlaceholder: intl.formatMessage({
             id: 'AdminPages.Microgateways.List.search.default',
             defaultMessage: 'Search by Microgateway label',
         }),
+        active: true,
     };
     const pageProps = {
         help: (
@@ -186,6 +184,32 @@ export default function ListMG() {
 
             </Typography>),
     };
+    /*
+    If the add button wants to route to a new page, we need to override the Button component completely.
+    Send the following prop to ListBase component.
+    import { Link as RouterLink } from 'react-router-dom';
+    import Button from '@material-ui/core/Button';
+
+    const addButtonOverride = (
+        <RouterLink to='/'>
+            <Button variant='contained' color='primary'>
+                <FormattedMessage
+                    id='AdminPages.Microgateways.List.help.link.one'
+                    defaultMessage='Create a Microgateway label'
+                />
+            </Button>
+        </RouterLink>
+    );
+    */
+    /* *************************************************************** */
+    /* To override the no data message send the following with the props to ListBase
+    const noDataMessage = (
+        <FormattedMessage
+            id='AdminPages.Addons.ListBase.nodata.message'
+            defaultMessage='No items yet'
+        />
+    )
+    /* **************************************************************** */
     /*
     Send the following props to ListBase to override the action column.
 
