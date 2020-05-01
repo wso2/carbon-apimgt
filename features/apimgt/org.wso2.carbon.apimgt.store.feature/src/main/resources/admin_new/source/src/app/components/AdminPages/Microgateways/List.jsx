@@ -16,31 +16,18 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import { FormattedMessage, injectIntl } from 'react-intl';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
-import { withStyles } from '@material-ui/core/styles';
-import SearchIcon from '@material-ui/icons/Search';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import React from 'react';
+import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import EditIcon from '@material-ui/icons/Edit';
-import MUIDataTable from 'mui-datatables';
-import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
+import Typography from '@material-ui/core/Typography';
 import HelpBase from 'AppComponents/AdminPages/Addons/HelpBase';
-import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
-import AddEdit from 'AppComponents/AdminPages/Microgateways/AddEdit';
-import Alert from 'AppComponents/Shared/Alert';
-import Delete from 'AppComponents/AdminPages/Microgateways/Delete';
+import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
+import DescriptionIcon from '@material-ui/icons/Description';
+import Link from '@material-ui/core/Link';
+import Configurations from 'Config';
 
 /**
  * Mock API call
@@ -50,210 +37,203 @@ function apiCall() {
     return new Promise(((resolve) => {
         setTimeout(() => {
             resolve([
-                { id: '1', label: 'West Wing', description: "It's somewhat hot" },
-                { id: '2', label: 'East Wing', description: "It's cool" },
-                { id: '3', label: 'South Wing', description: "It's red zone" },
-                { id: '4', label: 'Noth Wing', description: "It's blue zone" },
+                // { id: '1', label: 'West Wing', description: "It's somewhat hot" },
+                // { id: '2', label: 'East Wing', description: "It's cool" },
+                // { id: '3', label: 'South Wing', description: "It's red zone" },
+                // { id: '4', label: 'Noth Wing', description: "It's blue zone" },
             ]);
         }, 1000);
     }));
 }
 
-const styles = (theme) => ({
-    searchBar: {
-        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+const columProps = [
+    {
+        name: 'label',
+        label: 'Label',
+        options: {
+            filter: true,
+            sort: true,
+        },
     },
-    searchInput: {
-        fontSize: theme.typography.fontSize,
+    {
+        name: 'description',
+        label: 'Description',
+        options: {
+            filter: true,
+            sort: false,
+        },
     },
-    block: {
-        display: 'block',
-    },
-    contentWrapper: {
-        margin: '40px 16px',
-    },
-    button: {
-        borderColor: 'rgba(255, 255, 255, 0.7)',
-    },
-});
+];
+
 
 /**
  * Render a list
- * @param {JSON} props .
- * @returns {JSX} Header AppBar components .
+ * @returns {JSX} Header AppBar components.
  */
-function ListLabels(props) {
-    const { classes, intl } = props;
-    const [data, setData] = useState(null);
-    const [searchText, setSearchText] = useState('');
-
-    const filterData = (event) => {
-        setSearchText(event.target.value);
+export default function ListMG() {
+    const intl = useIntl();
+    const addButtonProps = {
+        triggerButtonText: intl.formatMessage({
+            id: 'AdminPages.Microgateways.List.addButtonProps.triggerButtonText',
+            defaultMessage: 'Add Microgateway',
+        }),
+        /* This title is what as the title of the popup dialog box */
+        title: intl.formatMessage({
+            id: 'AdminPages.Microgateways.List.addButtonProps.title',
+            defaultMessage: 'Add Microgateway',
+        }),
     };
-    const fetchData = () => {
-        // Fetch data from backend
-        setData(null);
-        const promiseAPICall = apiCall();
-        promiseAPICall.then((LocalData) => {
-            setData(LocalData);
-        })
-            .catch((e) => {
-                Alert.error(e);
-            });
+    const searchProps = {
+        searchPlaceholder: intl.formatMessage({
+            id: 'AdminPages.Microgateways.List.search.default',
+            defaultMessage: 'Search by Microgateway label',
+        }),
+        active: true,
     };
-    useEffect(() => {
-        fetchData();
-    }, []);
-    const columns = [
-        {
-            name: 'label',
-            label: 'Label',
-            options: {
-                filter: true,
-                sort: true,
-            },
-        },
-        {
-            name: 'description',
-            label: 'Description',
-            options: {
-                filter: true,
-                sort: false,
-            },
-        },
-        {
-            name: 'id',
-            label: 'Actions',
-            options: {
-                filter: false,
-                sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    return (
-                        <>
-                            <AddEdit
-                                dataRow={dataRow}
-                                updateList={() => fetchData()}
-                                icon={<EditIcon />}
-                                title='Edit Microgateway'
+    const pageProps = {
+        help: (
+            <HelpBase>
+                <List component='nav' aria-label='main mailbox folders'>
+                    <ListItem button>
+                        <ListItemIcon>
+                            <DescriptionIcon />
+                        </ListItemIcon>
+                        <Link
+                            target='_blank'
+                            href={Configurations.app.docUrl
+                        + 'learn/api-microgateway/grouping-apis-with-labels/#grouping-apis-with-microgateway-labels'}
+                        >
+                            <ListItemText primary={(
+                                <FormattedMessage
+                                    id='AdminPages.Microgateways.List.help.link.one'
+                                    defaultMessage='Create a Microgateway label'
+                                />
+                            )}
                             />
-                            <Delete dataRow={dataRow} updateList={() => fetchData()} />
-                        </>
-                    );
-                },
-                setCellProps: () => {
-                    return {
-                        style: { width: 200 },
-                    };
-                },
-            },
-        },
-    ];
 
+                        </Link>
+                    </ListItem>
+                    <ListItem button>
+                        <ListItemIcon>
+                            <DescriptionIcon />
+                        </ListItemIcon>
+                        <Link
+                            target='_blank'
+                            href={Configurations.app.docUrl
+                        + 'learn/api-microgateway/grouping-apis-with-labels/#grouping-apis-with-microgateway-labels'}
+                        >
+                            <ListItemText primary={(
+                                <FormattedMessage
+                                    id='AdminPages.Microgateways.List.help.link.two'
+                                    defaultMessage='Assign the Microgateway label to an API'
+                                />
+                            )}
+                            />
 
-    const options = {
-        filterType: 'checkbox',
-        selectableRows: 'none',
-        filter: false,
-        search: false,
-        print: false,
-        download: false,
-        viewColumns: false,
-        customToolbar: null,
-        responsive: 'stacked',
-        searchText,
+                        </Link>
+                    </ListItem>
+                    <ListItem button>
+                        <ListItemIcon>
+                            <DescriptionIcon />
+                        </ListItemIcon>
+                        <Link
+                            target='_blank'
+                            href={Configurations.app.docUrl
+                        + 'learn/api-microgateway/grouping-apis-with-labels/#grouping-apis-with-microgateway-labels'}
+                        >
+                            <ListItemText primary={(
+                                <FormattedMessage
+                                    id='AdminPages.Microgateways.List.help.link.three'
+                                    defaultMessage='View the Microgateway labels'
+                                />
+                            )}
+                            />
+
+                        </Link>
+                    </ListItem>
+                </List>
+            </HelpBase>),
+        /*
+        pageStyle='half' center part of the screen.
+        pageStyle='full' = Take the full content area.
+        pageStyle='paperLess' = Avoid from displaying background paper. ( For dashbord we need this )
+        */
+        pageStyle: 'half',
+        title: intl.formatMessage({
+            id: 'AdminPages.Microgateways.List.title.microgateways',
+            defaultMessage: 'Microgateways',
+        }),
     };
-    const help = (
-        <HelpBase>
-            <List component='nav' aria-label='main mailbox folders'>
-                <ListItem button>
-                    <ListItemIcon>
-                        <RefreshIcon />
-                    </ListItemIcon>
-                    <ListItemText primary='Inbox' />
-                </ListItem>
-                <ListItem button>
-                    <ListItemIcon>
-                        <RefreshIcon />
-                    </ListItemIcon>
-                    <ListItemText primary='Drafts' />
-                </ListItem>
-            </List>
-        </HelpBase>
+
+    const emptyBoxProps = {
+        content: (
+            <Typography variant='body2' color='textSecondary' component='p'>
+                <FormattedMessage
+                    id='AdminPages.Microgateways.List.empty.content.microgateways'
+                    defaultMessage={'It is possible to create a Microgateway distribution '
+                    + 'for a group of APIs. In order to group APIs, a label needs to be created'
+                    + ' and attached to the APIs that need to be in a single group.'}
+                />
+            </Typography>),
+        title: (
+            <Typography gutterBottom variant='h5' component='h2'>
+                <FormattedMessage
+                    id='AdminPages.Microgateways.List.empty.title.microgateways'
+                    defaultMessage='Microgateways'
+                />
+
+            </Typography>),
+    };
+    /*
+    If the add button wants to route to a new page, we need to override the Button component completely.
+    Send the following prop to ListBase component.
+    import { Link as RouterLink } from 'react-router-dom';
+    import Button from '@material-ui/core/Button';
+
+    const addButtonOverride = (
+        <RouterLink to='/'>
+            <Button variant='contained' color='primary'>
+                <FormattedMessage
+                    id='AdminPages.Microgateways.List.help.link.one'
+                    defaultMessage='Create a Microgateway label'
+                />
+            </Button>
+        </RouterLink>
     );
+    */
+    /* *************************************************************** */
+    /* To override the no data message send the following with the props to ListBase
+    const noDataMessage = (
+        <FormattedMessage
+            id='AdminPages.Addons.ListBase.nodata.message'
+            defaultMessage='No items yet'
+        />
+    )
+    /* **************************************************************** */
+    /*
+    Send the following props to ListBase to override the action column.
+
+    Following imports needs to go to the header.
+    import { Link as RouterLink } from 'react-router-dom';
+    import EditIcon from '@material-ui/icons/Edit';
+
+    const actionColumnProps = {
+        editIconShow: true,
+        editIconOverride: (
+            <RouterLink to='/'>
+                <EditIcon />
+            </RouterLink>
+        ),
+        deleteIconShow: false,
+    }; */
     return (
-
-        <>
-            {/*
-                without pageStyle attribute = This is the default case where it
-                takes fixed size center part of the screen.
-                pageStyle='full-page' = Take the full content area.
-                pageStyle='no-paper' = Avoid from displaying background paper. ( For dashbord we need this )
-             */}
-            <ContentBase title='Microgateways' subtitle='Microgateways' help={help} pageStyle='full-page'>
-                <AppBar className={classes.searchBar} position='static' color='default' elevation={0}>
-                    <Toolbar>
-                        <Grid container spacing={2} alignItems='center'>
-                            <Grid item>
-                                <SearchIcon className={classes.block} color='inherit' />
-                            </Grid>
-                            <Grid item xs>
-                                <TextField
-                                    fullWidth
-                                    placeholder={intl.formatMessage({
-                                        id: 'AdminPages.Microgateways.List.search.default',
-                                        defaultMessage: 'Search by Microgateway label',
-                                    })}
-                                    InputProps={{
-                                        disableUnderline: true,
-                                        className: classes.searchInput,
-                                    }}
-                                    onChange={filterData}
-                                />
-                            </Grid>
-                            <Grid item>
-                                <AddEdit
-                                    updateList={() => fetchData()}
-                                    triggerButtonText='Add Microgateway'
-                                    title='Add Microgateway'
-                                />
-                                <Tooltip title='Reload'>
-                                    <IconButton onClick={fetchData}>
-                                        <RefreshIcon className={classes.block} color='inherit' />
-                                    </IconButton>
-                                </Tooltip>
-                            </Grid>
-                        </Grid>
-                    </Toolbar>
-                </AppBar>
-
-                {data && data.length > 0 && (
-                    <MUIDataTable
-                        title={null}
-                        data={data}
-                        columns={columns}
-                        options={options}
-                    />
-                )}
-                {data && data.length === 0 && (
-                    <div className={classes.contentWrapper}>
-                        <Typography color='textSecondary' align='center'>
-                            <FormattedMessage
-                                id='AdminPages.Microgateways.List.nodata.message'
-                                defaultMessage='No Gateway Labels Yet'
-                            />
-                        </Typography>
-                    </div>
-                )}
-                {!data && (<InlineProgress />)}
-            </ContentBase>
-        </>
+        <ListBase
+            columProps={columProps}
+            pageProps={pageProps}
+            addButtonProps={addButtonProps}
+            searchProps={searchProps}
+            emptyBoxProps={emptyBoxProps}
+            apiCall={apiCall}
+        />
     );
 }
-
-ListLabels.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({}).isRequired,
-};
-
-export default injectIntl(withStyles(styles)(ListLabels));
