@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.admin;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
 import org.wso2.carbon.apimgt.rest.api.admin.KeyManagersApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.factories.KeyManagersApiServiceFactory;
@@ -97,7 +98,7 @@ public class KeyManagersApi  {
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error\n") })
 
     public Response keyManagersPost(@ApiParam(value = "Key Manager object that should to be added\n" ,required=true ) KeyManagerDTO body)
-    {
+            throws APIManagementException {
     return delegate.keyManagersPost(body);
     }
 }

@@ -123,7 +123,7 @@ public class WebsocketWSClientTestCase {
 
         websocketWSClient.setKeyValidationServiceStub(apiKeyValidationServiceStub);
         Mockito.when(apiKeyValidationServiceStub.validateKeyforHandshake("/ishara", "1.0",
-                "PhoneVerify","carbon.super")).thenReturn(apiKeyValidationInfoDTO1);
+                "PhoneVerify","carbon.super",new String[]{"all"})).thenReturn(apiKeyValidationInfoDTO1);
         APIKeyValidationInfoDTO apiKeyValidationInfoDTOActual = websocketWSClient.getAPIKeyData("/ishara", "1.0",
                 "PhoneVerify","carbon.super");
         Assert.assertTrue(apiKeyValidationInfoDTOActual.isAuthorized());

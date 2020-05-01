@@ -92,7 +92,8 @@ public class APIKeyValidatorClient {
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
                                                  String requiredAuthenticationLevel, String clientDomain,
-                                                 String matchingResource, String httpVerb, String tenantDomain)
+                                                 String matchingResource, String httpVerb, String tenantDomain,
+                                                 List<String> keyManagers)
             throws APISecurityException {
 
         CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());
@@ -131,7 +132,8 @@ public class APIKeyValidatorClient {
             }
             org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
                     keyValidationServiceStub.validateKey(context, apiVersion, apiKey, requiredAuthenticationLevel, clientDomain,
-                                                         matchingResource, httpVerb, tenantDomain);
+                                                         matchingResource, httpVerb, tenantDomain,
+                            keyManagers.toArray(new String[keyManagers.size()]));
             if (log.isDebugEnabled()) {
                 log.debug("KeyValidation response received to gateway from keymanager via web service call for:"
                         + context + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "

@@ -116,7 +116,7 @@ public class OAuthAuthenticator implements Authenticator {
         TracingSpan keyInfo = null;
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
+        List<String> keyManagers = (List<String>) synCtx.getProperty(APIConstants.KeyManager.API_LEVEL_KEY_MANAGERS);
         if (headers != null) {
             requestOrigin = (String) headers.get("Origin");
 
@@ -357,7 +357,7 @@ public class OAuthAuthenticator implements Authenticator {
             }
             try {
                 info = getAPIKeyValidator().getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
-                        matchingResource, httpMethod, defaultVersionInvoked);
+                        matchingResource, httpMethod, defaultVersionInvoked,keyManagers);
             } catch (APISecurityException ex) {
                 return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
             }

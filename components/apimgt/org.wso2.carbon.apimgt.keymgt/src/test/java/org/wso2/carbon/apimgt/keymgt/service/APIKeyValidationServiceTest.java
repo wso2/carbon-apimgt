@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.keymgt.service;
  * under the License.
  */
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.wsdl.WSDLConstants;
@@ -45,6 +46,7 @@ import org.wso2.carbon.metrics.manager.MetricService;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
@@ -83,7 +85,7 @@ public class APIKeyValidationServiceTest {
     private ApiMgtDAO apiMgtDAO;
     private APIManagerConfiguration apiManagerConfiguration;
     private MetricService metricService;
-
+    private List<String> keymanagers = Arrays.asList(new String[]{"all"});
     @Before
     public void Init() throws Exception {
 
@@ -157,7 +159,7 @@ public class APIKeyValidationServiceTest {
         try {
             APIKeyValidationService apiKeyValidationService = new APIKeyValidationService();
             apiKeyValidationService
-                    .validateKeyforHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN);
+                    .validateKeyforHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN,keymanagers);
             Assert.fail("NullPointerException expected");
         } catch (Exception e) {
             Assert.assertEquals(e.getMessage(), e.getMessage());
@@ -166,7 +168,7 @@ public class APIKeyValidationServiceTest {
         try {
             APIKeyValidationService apiKeyValidationService = new APIKeyValidationService();
             apiKeyValidationService
-                    .validateKeyforHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN);
+                    .validateKeyforHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN,keymanagers);
             Assert.fail("NullPointerException expected");
         } catch (Exception e) {
             Assert.assertEquals(e.getMessage(), e.getMessage());
@@ -175,7 +177,7 @@ public class APIKeyValidationServiceTest {
         try {
             APIKeyValidationService apiKeyValidationService = new APIKeyValidationService();
             apiKeyValidationService
-                    .validateKeyforHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN);
+                    .validateKeyforHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN, keymanagers);
             Assert.fail("NullPointerException expected");
         } catch (Exception e) {
             Assert.assertEquals(e.getMessage(), e.getMessage());

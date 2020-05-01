@@ -2127,6 +2127,8 @@ public final class APIConstants {
         public static final String VALIDATION_VALUE = "validation_value";
         public static final String ENABLE_TOKEN_VALIDATION = "validation_enable";
         public static final String VALIDATION_ENTRY_JWT_BODY = "body";
+        public static final String API_LEVEL_KEY_MANAGERS = "api_level_key_managers";
+        public static final String API_LEVEL_ALL_KEY_MANAGERS = "all";
 
         public static class KeyManagerEvent {
 

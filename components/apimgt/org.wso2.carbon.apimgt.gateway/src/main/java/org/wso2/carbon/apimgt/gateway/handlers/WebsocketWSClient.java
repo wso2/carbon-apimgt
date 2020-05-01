@@ -127,7 +127,8 @@ public class WebsocketWSClient {
 
 		try {
 			org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
-					keyValidationServiceStub.validateKeyforHandshake(context, apiVersion, apiKey, tenantDomain);
+					keyValidationServiceStub.validateKeyforHandshake(context, apiVersion, apiKey, tenantDomain,
+							new String[]{APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS});
 			return toDTO(dto);
 		} catch (Exception e) {
 			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
