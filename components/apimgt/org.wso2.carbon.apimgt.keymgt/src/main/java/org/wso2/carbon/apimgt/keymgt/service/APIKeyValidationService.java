@@ -59,30 +59,6 @@ public class APIKeyValidationService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(APIKeyValidationService.class);
     private static KeyValidationHandler keyValidationHandler;
 
-    public APIKeyValidationService() {
-        try {
-            if (keyValidationHandler == null) {
-
-                KeyValidationHandler validationHandler = (KeyValidationHandler) APIUtil.getClassForName
-                        (ServiceReferenceHolder.getInstance().
-                                getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                                getFirstProperty(APIConstants.API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME).trim()).newInstance();
-                log.info("Initialised KeyValidationHandler instance successfully");
-                if (keyValidationHandler == null) {
-                    synchronized (this) {
-                        keyValidationHandler = validationHandler;
-                    }
-                }
-            }
-        } catch (InstantiationException e) {
-            log.error("Error while instantiating class" + e.toString());
-        } catch (IllegalAccessException e) {
-            log.error("Error while accessing class" + e.toString());
-        } catch (ClassNotFoundException e) {
-            log.error("Error while creating keyManager instance" + e.toString());
-        }
-    }
-
     /**
      * Validates the access tokens issued for a particular user to access an API.
      *
@@ -197,6 +173,8 @@ public class APIKeyValidationService extends AbstractAdmin {
         if (Util.tracingEnabled()) {
             validateTokenSpan = Util.startSpan(TracingConstants.VALIDATE_TOKEN, validateMainSpan, tracer);
         }
+        KeyValidationHandler keyValidationHandler =
+                ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         boolean state = keyValidationHandler.validateToken(validationContext);
         timerContext2.stop();
         if (Util.tracingEnabled()) {
@@ -385,6 +363,8 @@ public class APIKeyValidationService extends AbstractAdmin {
         validationContext.setTenantDomain(tenantDomain);
         validationContext.setRequiredAuthenticationLevel("Any");
         validationContext.setKeyManagers(Arrays.asList(keyManagers));
+        KeyValidationHandler keyValidationHandler =
+                ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         boolean state = keyValidationHandler.validateToken(validationContext);
         ApiMgtDAO dao = ApiMgtDAO.getInstance();
         if (state) {
@@ -452,8 +432,12 @@ public class APIKeyValidationService extends AbstractAdmin {
      * authorized, tier information will be <pre>null</pre>
      * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
-    public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey)
-            throws APIKeyMgtException, APIManagementException  {
+    public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
+                                                        String tenantDomain)
+            throws APIKeyMgtException, APIManagementException {
+
+        KeyValidationHandler keyValidationHandler =
+                ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         return keyValidationHandler.validateSubscription(context, version, consumerKey);
     }
 }

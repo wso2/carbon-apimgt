@@ -173,7 +173,8 @@ public abstract class AbstractKeyManager implements KeyManager {
                     Matcher matcher = pattern.matcher(accessToken);
                     return matcher.find();
                 }
-            } else if (APIConstants.KeyManager.VALIDATION_JWT.equals(tokenHandlingType)) {
+            } else if (APIConstants.KeyManager.VALIDATION_JWT.equals(tokenHandlingType) &&
+                    accessToken.contains(APIConstants.DOT)) {
                 Map<String, Map<String, String>> validationJson = (Map) tokenHandlingScript;
                 try {
                     SignedJWT signedJWT = SignedJWT.parse(accessToken);
@@ -199,8 +200,10 @@ public abstract class AbstractKeyManager implements KeyManager {
                     throw new APIManagementException("Error while parsing jwt", e);
                 }
             }
+        } else {
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**

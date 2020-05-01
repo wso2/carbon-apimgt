@@ -125,44 +125,14 @@ public class KeyManagerHolder {
         if (tenantWiseKeyManagerMap == null) {
             throw new APIManagementException("KeyManager didn't configured for tenant" + tenantDomain);
         }
-        KeyManager keyManager = tenantWiseKeyManagerMap.get(name);
-        if (keyManager == null) {
-            throw new APIManagementException(
-                    "KeyManager " + name + " didn't configured for tenant" + tenantDomain);
-        }
-        if (enabled) {
-            APIManagerConfiguration apiManagerConfiguration =
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                            .getAPIManagerConfiguration();
-            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(type)) {
-                keyManager = new AMDefaultKeyManagerImpl();
-                keyManager.loadConfiguration(keyManagerConfiguration);
-                tenantWiseKeyManagerMap.put(APIConstants.KeyManager.DEFAULT_KEY_MANAGER, keyManager);
-            }
-            KeyManagerConfigurationsDto keyManagerConfigurationsDto =
-                    apiManagerConfiguration.getKeyManagerConfigurationsDto();
-            if (keyManagerConfigurationsDto != null) {
-                KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerConfigurationDto =
-                        keyManagerConfigurationsDto.getKeyManagerConfiguration().get(type);
-                if (keyManagerConfigurationDto != null &&
-                        StringUtils.isNotEmpty(keyManagerConfigurationDto.getImplementationClass())) {
-                    try {
-                        keyManager =
-                                (KeyManager) Class.forName(keyManagerConfigurationDto.getImplementationClass())
-                                        .newInstance();
-                        keyManager.loadConfiguration(keyManagerConfiguration);
-                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-                        throw new APIManagementException("Error while loading keymanager configuration", e);
-                    }
 
-                }
-            }
-            tenantWiseKeyManagerMap.put(name, keyManager);
+        if (enabled) {
+            addKeyManagerConfiguration(tenantDomain, name, type, keyManagerConfiguration);
         } else {
             tenantWiseKeyManagerMap.remove(name);
         }
         keyManagerMap.put(tenantDomain, tenantWiseKeyManagerMap);
-        tenantWiseKeyManagerMap.remove(tenantDomain);
+        tenantKeyManager.remove(tenantDomain);
     }
 
     public static void removeKeyManagerConfiguration(String tenantDomain, String name) {
@@ -171,7 +141,7 @@ public class KeyManagerHolder {
         if (tenantWiseKeyManagerMap != null){
             tenantWiseKeyManagerMap.remove(name);
             keyManagerMap.put(tenantDomain,tenantWiseKeyManagerMap);
-            tenantWiseKeyManagerMap.remove(tenantDomain);
+            tenantKeyManager.remove(tenantDomain);
         }
     }
 }

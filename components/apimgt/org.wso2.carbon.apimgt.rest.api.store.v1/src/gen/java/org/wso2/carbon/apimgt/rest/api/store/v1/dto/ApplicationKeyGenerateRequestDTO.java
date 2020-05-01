@@ -57,7 +57,7 @@ public enum KeyTypeEnum {
     private String validityTime = null;
     private String clientId = null;
     private String clientSecret = null;
-    private String additionalProperties = null;
+    private Object additionalProperties = null;
 
   /**
    **/
@@ -188,18 +188,18 @@ public enum KeyTypeEnum {
   /**
    * Additional properties needed.
    **/
-  public ApplicationKeyGenerateRequestDTO additionalProperties(String additionalProperties) {
+  public ApplicationKeyGenerateRequestDTO additionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
 
   
-  @ApiModelProperty(example = "", value = "Additional properties needed.")
+  @ApiModelProperty(example = "\"\"", value = "Additional properties needed.")
   @JsonProperty("additionalProperties")
-  public String getAdditionalProperties() {
+  public Object getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(String additionalProperties) {
+  public void setAdditionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 

@@ -1104,7 +1104,7 @@
      </MutualSSL>
 
      <KeyManagerConfigurations>
-        <Enable>{{apim.key_manager.connector.enable}}</Enable>
+        <Enable>{{apim.key_manager.enable}}</Enable>
         {% if apim.key_manager.connector.service_url is defined %}
         <ServiceUrl>{{apim.key_manager.connector.service_url}}</ServiceUrl>
         {% endif %}
@@ -1113,7 +1113,7 @@
           {% endif %}
      {% for key_manager in apim.key_manager.connector %}
         <KeyManager type = "{{key_manager.type}}">
-        <Implementation>{{key_manager.impl}}</Implementation>
+        <Implementation>{{key_manager.implementation}}</Implementation>
         <AdditionalConfigurations>
         <ConnectionConfigurations>
         {% for connection_configuration in key_manager.configuration%}
@@ -1121,31 +1121,33 @@
             <name>{{connection_configuration.name}}</name>
             <type>{{connection_configuration.type}}</type>
             <required>{{connection_configuration.required}}</required>
-            <password>{{connection_configuration.password}}</password>
+            <password>{{connection_configuration.mask}}</password>
             <label>{{connection_configuration.label}}</label>
             <default>{{connection_configuration.default}}</default>
-            <tooltip>{{connection_configuration.tool_tip}}</tooltip>
+            <tooltip>{{connection_configuration.tooltip}}</tooltip>
             <values>
             {% for value in connection_configuration.values%}
             <value>{{value}}</value>
             {% endfor %}
+	    </values>
           </ConnectionConfiguration>
           {% endfor %}
         </ConnectionConfigurations>
         <ApplicationConfigurations>
         {% for application_configuration in key_manager.application_configuration %}
-          <ConnectionConfiguration>
+          <ApplicationConfiguration>
             <name>{{application_configuration.name}}</name>
             <type>{{application_configuration.type}}</type>
             <required>{{application_configuration.required}}</required>
-            <password>{{application_configuration.password}}</password>
+            <password>{{application_configuratio.mask}}</password>
             <label>{{application_configuration.label}}</label>
             <default>{{application_configuration.default}}</default>
-            <tooltip>{{application_configuration.tool_tip}}</tooltip>
+            <tooltip>{{application_configuration.tooltip}}</tooltip>
             <values>
             {% for value in application_configuration.values %}
             <value>{{value}}</value>
             {% endfor %}
+	    </values>
           </ApplicationConfiguration>
           {% endfor %}
          </ApplicationConfigurations>

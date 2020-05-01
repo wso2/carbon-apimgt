@@ -165,7 +165,8 @@ public class APIKeyValidatorClient {
         }
     }
 
-    public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey)
+    public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
+                                                        String tenantDomain)
             throws APISecurityException {
         CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());
         if (cookie != null) {
@@ -180,7 +181,7 @@ public class APIKeyValidatorClient {
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
             org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
-                    keyValidationServiceStub.validateSubscription(context, version, consumerKey);
+                    keyValidationServiceStub.validateSubscription(context, version, consumerKey, tenantDomain);
             if (log.isDebugEnabled()) {
                 log.debug("Subscription Validation response received to gateway " +
                         "from key manager via web service call for:"

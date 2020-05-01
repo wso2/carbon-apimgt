@@ -59,7 +59,7 @@ public enum KeyTypeEnum {
     private KeyTypeEnum keyType = null;
     private String groupId = null;
     private ApplicationTokenDTO token = null;
-    private String additionalProperties = null;
+    private Object additionalProperties = null;
 
   /**
    * Consumer key of the application
@@ -207,7 +207,7 @@ public enum KeyTypeEnum {
   /**
    * additionalProperties (if any).
    **/
-  public ApplicationKeyDTO additionalProperties(String additionalProperties) {
+  public ApplicationKeyDTO additionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
@@ -215,10 +215,10 @@ public enum KeyTypeEnum {
   
   @ApiModelProperty(value = "additionalProperties (if any).")
   @JsonProperty("additionalProperties")
-  public String getAdditionalProperties() {
+  public Object getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(String additionalProperties) {
+  public void setAdditionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 

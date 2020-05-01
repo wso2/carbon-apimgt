@@ -90,6 +90,7 @@
                   <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"/>
                   <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
                   <xs:element minOccurs="0" name="consumerKey" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
                </xs:sequence>
             </xs:complexType>
          </xs:element>
