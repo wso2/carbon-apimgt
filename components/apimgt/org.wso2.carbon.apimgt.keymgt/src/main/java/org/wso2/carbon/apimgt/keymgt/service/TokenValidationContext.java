@@ -24,7 +24,9 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -45,6 +47,7 @@ public class TokenValidationContext {
     private AuthenticatedUser user;
     private String authorizationCode;
     private String tenantDomain;
+    private List<String> keyManagers = new ArrayList<>();
     public AccessTokenInfo getTokenInfo() {
         return tokenInfo;
     }
@@ -165,5 +168,15 @@ public class TokenValidationContext {
     public void setTenantDomain(String tenantDomain) {
 
         this.tenantDomain = tenantDomain;
+    }
+
+    public List<String> getKeyManagers() {
+
+        return keyManagers;
+    }
+
+    public void setKeyManagers(List<String> keyManagers) {
+
+        this.keyManagers = keyManagers;
     }
 }

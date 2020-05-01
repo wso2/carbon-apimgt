@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides a web service interface for the API key data store. This implementation
@@ -43,13 +44,13 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
                                                  String apiKey, String requiredAuthenticationLevel, String clientDomain,
                                                  String matchingResource, String httpVerb,
-                                                 String tenantDomain)
+                                                 String tenantDomain, List<String> keyManagers)
             throws APISecurityException {
         APIKeyValidatorClient client = null;
         try {
             client = clientPool.get();
-            return client.getAPIKeyData(context, apiVersion, apiKey,requiredAuthenticationLevel, clientDomain,
-                                        matchingResource, httpVerb,tenantDomain);
+            return client.getAPIKeyData(context, apiVersion, apiKey, requiredAuthenticationLevel, clientDomain,
+                    matchingResource, httpVerb, tenantDomain, keyManagers);
         }catch (APISecurityException ex) {
             throw new APISecurityException(ex.getErrorCode(),
                     "Resource forbidden", ex);

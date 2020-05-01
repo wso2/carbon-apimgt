@@ -105,6 +105,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -134,6 +135,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
+import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -170,7 +172,6 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -201,12 +202,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
 
 /**
@@ -865,7 +866,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         //notify key manager with API addition
-        registerOrUpdateResourceInKeyManager(api);
+        registerOrUpdateResourceInKeyManager(api, tenantDomain);
     }
 
     /**
@@ -986,9 +987,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Notify the key manager with API update or addition
      *
      * @param api API
+     * @param tenantDomain
      * @throws APIManagementException when error occurs when register/update API at Key Manager side
      */
-    private void registerOrUpdateResourceInKeyManager(API api) throws APIManagementException {
+    private void registerOrUpdateResourceInKeyManager(API api, String tenantDomain) throws APIManagementException {
         //get new key manager instance for  resource registration.
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
         Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
@@ -1481,7 +1483,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         //notify key manager with API update
-        registerOrUpdateResourceInKeyManager(api);
+        registerOrUpdateResourceInKeyManager(api, tenantDomain);
 
         int apiId = apiMgtDAO.getAPIID(api.getId(), null);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
@@ -3268,7 +3270,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             transactionCommitted = true;
 
             //notify key manager with API addition
-            registerOrUpdateResourceInKeyManager(newAPI);
+            registerOrUpdateResourceInKeyManager(newAPI,tenantDomain);
 
             if (log.isDebugEnabled()) {
                 String logMessage = "Successfully created new version : " + newVersion + " of : " + api.getId().getApiName();
