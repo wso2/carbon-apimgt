@@ -530,7 +530,7 @@
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.throttle.service</artifactId>
+                <artifactId>org.wso2.carbon.apimgt.internal.service</artifactId>
                 <type>war</type>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
