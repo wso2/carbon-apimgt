@@ -122,7 +122,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, Boolean expand,
                             String targetTenantDomain) {
-        List<API> allMatchedApis = new ArrayList<>();
+        List<Object> allMatchedApis = new ArrayList<>();
         APIListDTO apiListDTO;
 
         //pre-processing
@@ -157,7 +157,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             Map<String, Object> result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain,
                                         offset, limit, false);
-            Set<API> apis = (Set<API>) result.get("apis");
+            Set<Object> apis = (Set<Object>) result.get("apis");
             allMatchedApis.addAll(apis);
 
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, expand);
