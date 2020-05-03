@@ -42,7 +42,7 @@ import java.util.List;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-03T14:18:31.828+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-03T15:59:22.999+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
     @Context MessageContext securityContext;
