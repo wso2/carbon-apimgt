@@ -32,12 +32,13 @@ import Alert from 'AppComponents/Shared/Alert';
  * @returns {JSX} Header AppBar components.
  */
 function FormDialogBase({
-    title, children, icon, triggerButtonText, saveButtonText, formSaveCallback,
+    title, children, icon, triggerButtonText, saveButtonText, formSaveCallback, dialogOpenCallback,
 }) {
     const [open, setOpen] = React.useState(false);
     const [saving, setSaving] = useState(false);
 
     const handleClickOpen = () => {
+        dialogOpenCallback();
         setOpen(true);
     };
 
@@ -91,6 +92,9 @@ function FormDialogBase({
         </>
     );
 }
+FormDialogBase.defaultProps = {
+    dialogOpenCallback: () => {},
+};
 
 FormDialogBase.propTypes = {
     title: PropTypes.string.isRequired,
@@ -99,6 +103,7 @@ FormDialogBase.propTypes = {
     triggerButtonText: PropTypes.string.isRequired,
     saveButtonText: PropTypes.string.isRequired,
     formSaveCallback: PropTypes.func.isRequired,
+    dialogOpenCallback: PropTypes.func,
 };
 
 export default FormDialogBase;
