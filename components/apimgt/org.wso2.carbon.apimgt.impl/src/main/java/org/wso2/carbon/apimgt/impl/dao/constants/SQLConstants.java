@@ -3567,12 +3567,12 @@ public class SQLConstants {
     public static final String
             REMOVE_OAUTH2_RESOURCE_SCOPE_SQL =
             " DELETE FROM IDN_OAUTH2_RESOURCE_SCOPE WHERE SCOPE_ID IN "
-                    + "(SELECT IS.SCOPE_ID FROM IDN_OAUTH2_SCOPE IS WHERE IS.SCOPE_NAME = ? AND IS.TENANT_ID = ?) "
+                    + "(SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID = ?) "
                     + "AND RESOURCE_PATH = ?";
 
     public static final String ADD_OAUTH2_RESOURCE_SCOPE_SQL =
             "INSERT INTO IDN_OAUTH2_RESOURCE_SCOPE (RESOURCE_PATH, SCOPE_ID, TENANT_ID) VALUES (?,?,?)";
 
-    public static final String GET_OAUTH2_RESOURCE_SCOPE_ID_BY_NAME_SQL =
-            "SELECT SCOPE_ID FROM IDN_OAUTH2_RESOURCE_SCOPE WHERE SCOPE_NAME = ? AND TENANT_ID = ?";
+    public static final String GET_OAUTH2_SCOPE_ID_BY_NAME_SQL =
+            "SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
 }
