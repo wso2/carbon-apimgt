@@ -46,9 +46,6 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
         }
         ApplicationRegistrationWorkflowDTO appRegDTO = (ApplicationRegistrationWorkflowDTO) workflowDTO;
         Application application = appRegDTO.getApplication();
-        String callBackURL = appRegDTO.getCallbackUrl();
-        String applicationCallbackUrl = application.getCallbackUrl();
-        String applicationDescription = application.getDescription();
         String message = "Approve request to create " + appRegDTO.getKeyType() + " keys for [ " + application.getName() +
                 " ] from application creator - " + appRegDTO.getUserName() + " with throttling tier - " + application.getTier();
         workflowDTO.setWorkflowDescription(message);

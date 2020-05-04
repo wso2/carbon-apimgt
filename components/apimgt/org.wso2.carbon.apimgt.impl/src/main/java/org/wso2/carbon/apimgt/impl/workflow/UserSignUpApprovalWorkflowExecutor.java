@@ -55,7 +55,6 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
         if (log.isDebugEnabled()) {
             log.debug("Executing User SignUp Webservice Workflow for " + workflowDTO.getWorkflowReference());
         }
-        String callBackURL = workflowDTO.getCallbackUrl();
         String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
         String message = "Approve APIStore signup request done by " + tenantAwareUserName + " from the tenant domain " +
                 workflowDTO.getTenantDomain();

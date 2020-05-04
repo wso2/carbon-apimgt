@@ -53,7 +53,6 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
         }
         ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
         Application application = appWorkFlowDTO.getApplication();
-        String callBackURL = appWorkFlowDTO.getCallbackUrl();
         String message = "Approve application [" + application.getName() + "] creation request from application creator -"
                 + appWorkFlowDTO.getUserName() + " with throttling tier - " + application.getTier();
         workflowDTO.setWorkflowDescription(message);
