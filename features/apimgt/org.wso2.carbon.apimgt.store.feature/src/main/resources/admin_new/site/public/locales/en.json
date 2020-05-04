@@ -1,6 +1,7 @@
 {
   "AdminPages.Addons.InlineProgress.message": "Loading...",
   "AdminPages.Addons.ListBase.nodata.message": "No items yet",
+  "AdminPages.Addons.ListBase.reload": "Reload",
   "AdminPages.Microgateways.AddEdit.form.info": "To subscribe to this website, please enter youremail address here. We will send updatesoccasionally.",
   "AdminPages.Microgateways.AddEdit.form.label": "Label",
   "AdminPages.Microgateways.List.addButtonProps.title": "Add Microgateway",

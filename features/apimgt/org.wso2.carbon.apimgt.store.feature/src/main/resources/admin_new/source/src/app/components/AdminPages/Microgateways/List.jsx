@@ -28,6 +28,9 @@ import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
 import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
+import Delete from 'AppComponents/AdminPages/Microgateways/Delete';
+import AddEdit from 'AppComponents/AdminPages/Microgateways/AddEdit';
+import EditIcon from '@material-ui/icons/Edit';
 
 /**
  * Mock API call
@@ -37,10 +40,10 @@ function apiCall() {
     return new Promise(((resolve) => {
         setTimeout(() => {
             resolve([
-                // { id: '1', label: 'West Wing', description: "It's somewhat hot" },
-                // { id: '2', label: 'East Wing', description: "It's cool" },
-                // { id: '3', label: 'South Wing', description: "It's red zone" },
-                // { id: '4', label: 'Noth Wing', description: "It's blue zone" },
+                { id: '1', label: 'West Wing', description: "It's somewhat hot" },
+                { id: '2', label: 'East Wing', description: "It's cool" },
+                { id: '3', label: 'South Wing', description: "It's red zone" },
+                { id: '4', label: 'Noth Wing', description: "It's blue zone" },
             ]);
         }, 1000);
     }));
@@ -213,19 +216,21 @@ export default function ListMG() {
     /*
     Send the following props to ListBase to override the action column.
 
-    Following imports needs to go to the header.
+
+    To disable the Edit button pass an empty component. Ex EditComponent={() => <span />}
+    To disable the Delete button pass an empty component. Ex DeleteComponent={() => <span />}
+    To make the edit link go to a new page send a react-router-dom as the EditComponent.
+    Ex:
     import { Link as RouterLink } from 'react-router-dom';
     import EditIcon from '@material-ui/icons/Edit';
-
-    const actionColumnProps = {
-        editIconShow: true,
-        editIconOverride: (
-            <RouterLink to='/'>
+    .....
+    .....
+    EditComponent={() => <RouterLink to='/'>
                 <EditIcon />
-            </RouterLink>
-        ),
-        deleteIconShow: false,
-    }; */
+            </RouterLink> }
+    .....
+
+    */
     return (
         <ListBase
             columProps={columProps}
@@ -234,6 +239,12 @@ export default function ListMG() {
             searchProps={searchProps}
             emptyBoxProps={emptyBoxProps}
             apiCall={apiCall}
+            EditComponent={AddEdit}
+            editComponentProps={{
+                icon: <EditIcon />,
+                title: 'Edit Microgateway',
+            }}
+            DeleteComponent={Delete}
         />
     );
 }

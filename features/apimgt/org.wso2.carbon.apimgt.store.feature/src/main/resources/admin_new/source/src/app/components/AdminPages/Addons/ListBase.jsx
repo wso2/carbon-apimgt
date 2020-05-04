@@ -30,7 +30,6 @@ import IconButton from '@material-ui/core/IconButton';
 import { makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import EditIcon from '@material-ui/icons/Edit';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
@@ -38,8 +37,6 @@ import CardContent from '@material-ui/core/CardContent';
 import MUIDataTable from 'mui-datatables';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
-import Delete from 'AppComponents/AdminPages/Microgateways/Delete';
-import AddEdit from 'AppComponents/AdminPages/Microgateways/AddEdit';
 import Alert from 'AppComponents/Shared/Alert';
 
 const useStyles = makeStyles((theme) => ({
@@ -67,13 +64,11 @@ const useStyles = makeStyles((theme) => ({
  */
 function ListLabels(props) {
     const {
+        EditComponent, editComponentProps, DeleteComponent, showActionColumn,
         columProps, pageProps, addButtonProps, addButtonOverride,
         searchProps: { active: searchActive, searchPlaceholder }, apiCall, emptyBoxProps: {
             title: emptyBoxTitle,
             content: emptyBoxContent,
-        },
-        actionColumnProps: {
-            editIconShow, editIconOverride, deleteIconShow,
         },
         noDataMessage,
     } = props;
@@ -104,7 +99,7 @@ function ListLabels(props) {
     const columns = [
         ...columProps,
     ];
-    if (deleteIconShow || editIconShow) {
+    if (showActionColumn) {
         columns.push(
             {
                 name: '',
@@ -116,18 +111,12 @@ function ListLabels(props) {
                         const dataRow = data[tableMeta.rowIndex];
                         return (
                             <>
-                                {editIconShow && !editIconOverride && (
-                                    <AddEdit
-                                        dataRow={dataRow}
-                                        updateList={fetchData}
-                                        icon={<EditIcon />}
-                                        title='Edit Microgateway'
-                                    />
-                                )}
-                                {editIconShow && editIconOverride && (
-                                    editIconOverride
-                                )}
-                                {deleteIconShow && (<Delete dataRow={dataRow} updateList={fetchData} />)}
+                                <EditComponent
+                                    dataRow={dataRow}
+                                    updateList={fetchData}
+                                    {...editComponentProps}
+                                />
+                                <DeleteComponent dataRow={dataRow} updateList={fetchData} />
                             </>
                         );
                     },
@@ -167,10 +156,7 @@ function ListLabels(props) {
                     </CardActionArea>
                     <CardActions>
                         {addButtonOverride || (
-                            <AddEdit
-                                updateList={fetchData}
-                                {...addButtonProps}
-                            />
+                            <EditComponent updateList={fetchData} {...addButtonProps} />
                         )}
                     </CardActions>
                 </Card>
@@ -212,12 +198,18 @@ function ListLabels(props) {
                                 </Grid>
                                 <Grid item>
                                     {addButtonOverride || (
-                                        <AddEdit
+                                        <EditComponent
                                             updateList={fetchData}
                                             {...addButtonProps}
                                         />
                                     )}
-                                    <Tooltip title='Reload'>
+                                    <Tooltip title={(
+                                        <FormattedMessage
+                                            id='AdminPages.Addons.ListBase.reload'
+                                            defaultMessage='Reload'
+                                        />
+                                    )}
+                                    >
                                         <IconButton onClick={fetchData}>
                                             <RefreshIcon className={classes.block} color='inherit' />
                                         </IconButton>
@@ -265,8 +257,13 @@ ListLabels.defaultProps = {
             defaultMessage='No items yet'
         />
     ),
+    showActionColumn: true,
 };
 ListLabels.propTypes = {
+    EditComponent: PropTypes.element.isRequired,
+    editComponentProps: PropTypes.shape({}).isRequired,
+    DeleteComponent: PropTypes.element.isRequired,
+    showActionColumn: PropTypes.bool,
     columProps: PropTypes.element.isRequired,
     pageProps: PropTypes.shape({}).isRequired,
     addButtonProps: PropTypes.shape({}),
