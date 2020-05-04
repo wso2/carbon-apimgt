@@ -9280,29 +9280,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get scopes attached to the API.
-     *
-     * @param identifier   API Identifier
-     * @param tenantDomain Tenant Domain
-     * @return Scope key to Scope object mapping
-     * @throws APIManagementException if an error occurs while getting scope attached to API
-     */
-    public Map<String, Scope> getAPIScopes(APIIdentifier identifier, String tenantDomain)
-            throws APIManagementException {
-
-        Map<String, Scope> scopeToKeyMap = new HashMap<>();
-        Set<String> scopeKeys = getAPIScopeKeys(identifier);
-        Scope scope;
-        for (String scopeKey : scopeKeys) {
-            scope = KeyManagerHolder.getKeyManagerInstance().getScopeByName(scopeKey, tenantDomain);
-            if (scope != null) {
-                scopeToKeyMap.put(scopeKey, scope);
-            }
-        }
-        return scopeToKeyMap;
-    }
-
-    /**
      * Get Scope keys attached to the given API.
      *
      * @param identifier API Identifier
