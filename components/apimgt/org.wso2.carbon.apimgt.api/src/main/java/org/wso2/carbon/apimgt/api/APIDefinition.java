@@ -134,7 +134,7 @@ public abstract class APIDefinition {
      * @return APIDefinitionValidationResponse object with validation information
      */
     public abstract APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition,
-            boolean returnJsonContent) throws APIManagementException;
+                                                                          boolean returnJsonContent) throws APIManagementException;
 
     /**
      * Populate definition with wso2 APIM specific information
@@ -193,24 +193,16 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     public abstract String getOASVersion(String oasDefinition) throws APIManagementException;
-    
-    public abstract String getOASDefinitionWithTierContentAwareProperty(String oasDefinition,
-            List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException;
 
-    /**
-     * This method manges the scopes from the API definition as it support different schemes
-     *
-     * @param resourceConfigsJSON resource json
-     * @return scopes
-     */
-    public abstract Set<Scope> injectOtherScopesToDefaultScheme(String swaggerContent) throws APIManagementException;
+    public abstract String getOASDefinitionWithTierContentAwareProperty(String oasDefinition,
+                                                                        List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException;
 
     /**
      * This method changes the URI templates from the API definition as it support different schemes
-     *
+     * @throws APIManagementException throws if an error occurred
      * @return URI templates
      */
-    public abstract Set<URITemplate> injectOtherResourceScopesToDefaultScheme(String resourceConfigsJSON)
+    public abstract String processOtherSchemeScopes(String resourceConfigsJSON)
             throws APIManagementException;
 
 }

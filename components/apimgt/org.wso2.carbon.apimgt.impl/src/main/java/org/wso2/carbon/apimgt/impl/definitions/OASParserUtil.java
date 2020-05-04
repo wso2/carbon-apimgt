@@ -1169,15 +1169,15 @@ public class OASParserUtil {
      * @param security          application security
      * @return JsonNode
      */
-     static JsonNode getAppSecurity(String security) {
-         List<String> appSecurityList = new ArrayList<>();
-         ObjectNode endpointResult = objectMapper.createObjectNode();
-         boolean appSecurityOptional = false;
-         if (security != null) {
-             List<String> securityList = Arrays.asList(security.split(","));
-             appSecurityList = getAPISecurity(securityList);
-             appSecurityOptional = !securityList.contains(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
-         }
+    static JsonNode getAppSecurity(String security) {
+        List<String> appSecurityList = new ArrayList<>();
+        ObjectNode endpointResult = objectMapper.createObjectNode();
+        boolean appSecurityOptional = false;
+        if (security != null) {
+            List<String> securityList = Arrays.asList(security.split(","));
+            appSecurityList = getAPISecurity(securityList);
+            appSecurityOptional = !securityList.contains(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+        }
         ArrayNode appSecurityTypes = objectMapper.valueToTree(appSecurityList);
         endpointResult.set(APIConstants.WSO2_APP_SECURITY_TYPES, appSecurityTypes);
         endpointResult.put(APIConstants.OPTIONAL, appSecurityOptional);
@@ -1217,19 +1217,12 @@ public class OASParserUtil {
      * This method will change the given definition
      *
      * @param swaggerContent
-     * @param apiToAdd
      * @return processedSwaggerContent
      */
-    public static String preProcess(String swaggerContent, API apiToAdd) throws APIManagementException {
+    public static String preProcess(String swaggerContent) throws APIManagementException {
         //Load required properties from swagger to the API
         APIDefinition apiDefinition = getOASParser(swaggerContent);
-        SwaggerVersion swaggerVersion = getSwaggerVersion(swaggerContent);
-        Set<Scope> scopes = apiDefinition.injectOtherScopesToDefaultScheme(swaggerContent);
-        Set<URITemplate> urlTemplates = apiDefinition.injectOtherResourceScopesToDefaultScheme(swaggerContent);
-        apiToAdd.setUriTemplates(urlTemplates);
-        apiToAdd.setScopes(scopes);
-        SwaggerData updatedSwager = new SwaggerData(apiToAdd);
-        String swaggerContentUpdated = apiDefinition.populateCustomManagementInfo(swaggerContent, updatedSwager);
+        String swaggerContentUpdated = apiDefinition.processOtherSchemeScopes(swaggerContent);
         return swaggerContentUpdated;
     }
 }

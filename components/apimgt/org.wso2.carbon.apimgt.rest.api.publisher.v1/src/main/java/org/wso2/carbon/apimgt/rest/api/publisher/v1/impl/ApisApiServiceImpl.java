@@ -2866,7 +2866,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIDefinition oasParser = response.getParser();
         String apiDefinition = response.getJsonContent();
-        apiDefinition = OASParserUtil.preProcess(apiDefinition,existingAPI);
+        apiDefinition = OASParserUtil.preProcess(apiDefinition);
         Set<URITemplate> uriTemplates = null;
         try {
             uriTemplates = oasParser.getURITemplates(apiDefinition);
@@ -3222,7 +3222,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 swaggerData = new SwaggerData(apiToAdd);
                 definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
             }
-            definitionToAdd = OASParserUtil.preProcess(definitionToAdd, apiToAdd);
+            definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
             Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
             Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
             apiToAdd.setUriTemplates(uriTemplates);

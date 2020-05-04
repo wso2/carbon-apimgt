@@ -389,7 +389,6 @@ public final class APIImportUtil {
             //Swagger definition will only be available of API type HTTP. Web socket API does not have it.
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(importedApi.getType())) {
                 String swaggerContent = loadSwaggerFile(pathToArchive);
-                swaggerContent = OASParserUtil.preProcess(swaggerContent,importedApi);
 
                 // Check whether any of the resources should be removed from the API when updating,
                 // that has already been used in API Products
@@ -400,6 +399,7 @@ public final class APIImportUtil {
                     throw new APIImportExportException("Cannot remove following resource paths " +
                             resourcesToRemove.toString() + " because they are used by one or more API Products");
                 }
+                swaggerContent = OASParserUtil.preProcess(swaggerContent);
                 addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
                 //If graphQL API, import graphQL schema definition to registry
                 if (StringUtils.equals(importedApi.getType(), APIConstants.APITransportType.GRAPHQL.toString())) {
