@@ -70,7 +70,6 @@ public class OAS3ParserTest extends OASTestBase {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
 
         // check remove vendor extensions
-        System.setProperty(APIDefinition.KEEP_LEGACY_EXTENSION_PROP, Boolean.toString(false));
         String definition = testGenerateAPIDefinitionWithExtension(oas3Parser, oas3Resources);
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
         OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
@@ -89,7 +88,6 @@ public class OAS3ParserTest extends OASTestBase {
         }
 
         // check preserve vendor extensions
-        System.setProperty(APIDefinition.KEEP_LEGACY_EXTENSION_PROP, Boolean.toString(true));
         definition = testGenerateAPIDefinitionWithExtension(oas3Parser, oas3Resources);
         parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
         openAPI = parseAttemptForV3.getOpenAPI();

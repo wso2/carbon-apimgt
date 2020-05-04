@@ -148,16 +148,6 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     /**
-     * Check extension migration is disabled
-     *
-     * @return boolean
-     */
-    protected boolean isLegacyExtensionsPreserved() {
-        String keepLegacyExtension = System.getProperty(KEEP_LEGACY_EXTENSION_PROP);
-        return Boolean.parseBoolean(keepLegacyExtension);
-    }
-
-    /**
      * Update the OAS definition for API consumers
      *
      * @param api            API
