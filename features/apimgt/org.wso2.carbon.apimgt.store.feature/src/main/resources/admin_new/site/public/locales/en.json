@@ -181,5 +181,11 @@
   "create.banner.description.api.category": "API category description",
   "create.banner.description.microgateway": "Microgateway description",
   "create.banner.title.create.api.categories": "Create API Categories",
-  "create.banner.title.create.microgateway": "Create Microgateway"
+  "create.banner.title.create.microgateway": "Create Microgateway",
+  "AdminPages.ApiCategories.List.addButtonProps.triggerButtonText": "Add API Category",
+  "AdminPages.ApiCategories.List.addButtonProps.title": "Add API Category",
+  "AdminPages.ApiCategories.List.search.default": "Search by API Category name",
+  "AdminPages.ApiCategories.List.help.link.one": "API Category based Grouping",
+  "AdminPages.ApiCategories.List.title.apicategories": "API Categories",
+  "AdminPages.ApiCategories.List.empty.title.apicategories": "API Categories"
 }
