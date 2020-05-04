@@ -1,6 +1,7 @@
 {
   "AdminPages.Addons.InlineProgress.message": "",
   "AdminPages.Addons.ListBase.nodata.message": "",
+  "AdminPages.Addons.ListBase.reload": "",
   "AdminPages.Microgateways.AddEdit.form.info": "",
   "AdminPages.Microgateways.AddEdit.form.label": "",
   "AdminPages.Microgateways.List.addButtonProps.title": "",
