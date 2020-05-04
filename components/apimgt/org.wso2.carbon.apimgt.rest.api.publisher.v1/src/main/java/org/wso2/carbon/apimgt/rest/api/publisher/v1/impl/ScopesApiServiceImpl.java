@@ -133,11 +133,11 @@ public class ScopesApiServiceImpl implements ScopesApiService {
                     ExceptionCodes.SHARED_SCOPE_ID_NOT_SPECIFIED);
         }
         Scope existingScope = apiProvider.getSharedScopeByUUID(scopeId, tenantDomain);
-        if (apiProvider.isScopeKeyAssignedToAPI(existingScope.getName(), tenantDomain)) {
+        if (apiProvider.isScopeKeyAssignedToAPI(existingScope.getKey(), tenantDomain)) {
             throw new APIManagementException("Cannot remove the Shared Scope " + scopeId + " as it is used by one "
                     + "or more APIs", ExceptionCodes.from(ExceptionCodes.SHARED_SCOPE_ALREADY_ATTACHED, scopeId));
         }
-        apiProvider.deleteSharedScope(existingScope.getName(), tenantDomain);
+        apiProvider.deleteSharedScope(existingScope.getKey(), tenantDomain);
         return Response.ok().build();
     }
 
@@ -210,7 +210,7 @@ public class ScopesApiServiceImpl implements ScopesApiService {
         Scope existingScope = apiProvider.getSharedScopeByUUID(scopeId, tenantDomain);
         //Override scope Id and name in request body from existing scope
         body.setId(existingScope.getId());
-        body.setName(existingScope.getName());
+        body.setName(existingScope.getKey());
         Scope scope = SharedScopeMappingUtil.fromDTOToScope(body);
         apiProvider.updateSharedScope(scope, tenantDomain);
         //Get updated shared scope

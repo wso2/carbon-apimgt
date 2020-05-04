@@ -6992,7 +6992,6 @@ public class ApiMgtDAO {
                         !scopeToURL.get(key).contains(scopeName) && uriTemplateMap.containsKey(key)) {
                     scope = new Scope();
                     scope.setKey(scopeName);
-                    scope.setName(scopeName);
                     uriTemplateMap.get(key).setScopes(scope);
                     scopeToURL.get(key).add(scopeName);
                     continue;
@@ -7011,7 +7010,6 @@ public class ApiMgtDAO {
                 if (StringUtils.isNotEmpty(scopeName)) {
                     scope = new Scope();
                     scope.setKey(scopeName);
-                    scope.setName(scopeName);
                     uriTemplate.setScope(scope);
                     uriTemplate.setScopes(scope);
                     Set<String> templateScopes = new HashSet<>();
@@ -7130,7 +7128,6 @@ public class ApiMgtDAO {
                         && !scopeToURL.get(key).contains(scopeName) && uriTemplateMap.containsKey(key)) {
                     Scope scope = new Scope();
                     scope.setKey(scopeName);
-                    scope.setName(scopeName);
                     uriTemplateMap.get(key).setScopes(scope);
                     scopeToURL.get(key).add(scopeName);
                 }
@@ -7147,7 +7144,6 @@ public class ApiMgtDAO {
                 if (StringUtils.isNotEmpty(scopeName)) {
                     Scope scope = new Scope();
                     scope.setKey(scopeName);
-                    scope.setName(scopeName);
                     uriTemplate.setScope(scope);
                     uriTemplate.setScopes(scope);
                     Set<String> templateScopes = new HashSet<>();
@@ -7705,7 +7701,6 @@ public class ApiMgtDAO {
                             && uriTemplates.containsKey(uriTemplateId)) {
                         Scope scope = new Scope();
                         scope.setKey(scopeName);
-                        scope.setName(scopeName);
                         scopeToURITemplateId.get(uriTemplateId).add(scopeName);
                         uriTemplates.get(uriTemplateId).setScopes(scope);
                         continue;
@@ -7722,7 +7717,6 @@ public class ApiMgtDAO {
                     if (StringUtils.isNotEmpty(scopeName)) {
                         Scope scope = new Scope();
                         scope.setKey(scopeName);
-                        scope.setName(scopeName);
                         uriTemplate.setScope(scope);
                         uriTemplate.setScopes(scope);
                         Set<String> templateScopes = new HashSet<>();
@@ -9434,7 +9428,7 @@ public class ApiMgtDAO {
                     String apiId = resultSet.getString(1);
                     Scope scope = new Scope();
                     scope.setId(String.valueOf(resultSet.getInt(2)));
-                    scope.setName(resultSet.getString(3));
+                    scope.setKey(resultSet.getString(3));
                     scope.setDescription(resultSet.getString(4));
                     Set<Scope> scopeList = apiScopeSet.get(apiId);
                     if (scopeList == null) {
