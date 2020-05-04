@@ -1125,7 +1125,7 @@ public class APIManagerConfiguration {
                                         .getText()));
                     } else {
                         String serviceUrl = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
-                                System.getProperty(APIConstants.KEYMANAGER_PORT) + "/throttle/data/v1";
+                                System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.UTILITY_WEB_APP_EP;
                         blockConditionRetrieverConfiguration.setServiceUrl(serviceUrl);
                     }
 
