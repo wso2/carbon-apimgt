@@ -745,8 +745,8 @@ public class OAS2Parser extends APIDefinition {
         if (scopes != null && !scopes.isEmpty()) {
             Map<String, String> scopeBindings = new HashMap<>();
             for (Scope scope : scopes) {
-                oAuth2Definition.addScope(scope.getName(), scope.getDescription());
-                scopeBindings.put(scope.getName(), scope.getRoles());
+                oAuth2Definition.addScope(scope.getKey(), scope.getDescription());
+                scopeBindings.put(scope.getKey(), scope.getRoles());
             }
             oAuth2Definition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
         }
@@ -796,7 +796,7 @@ public class OAS2Parser extends APIDefinition {
                 if (resource.getScopes().isEmpty()) {
                     requirement.put(oauth2SchemeKey, Collections.EMPTY_LIST);
                 } else {
-                     requirement.put(oauth2SchemeKey, resource.getScopes().stream().map(Scope::getName).collect(
+                     requirement.put(oauth2SchemeKey, resource.getScopes().stream().map(Scope::getKey).collect(
                             Collectors.toList()));
                 }
                 return;
@@ -807,7 +807,7 @@ public class OAS2Parser extends APIDefinition {
         if (resource.getScopes().isEmpty()) {
             defaultRequirement.put(oauth2SchemeKey, Collections.EMPTY_LIST);
         } else {
-            defaultRequirement.put(oauth2SchemeKey, resource.getScopes().stream().map(Scope::getName).collect(
+            defaultRequirement.put(oauth2SchemeKey, resource.getScopes().stream().map(Scope::getKey).collect(
                     Collectors.toList()));
         }
         security.add(defaultRequirement);

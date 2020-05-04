@@ -4140,7 +4140,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         Set<Scope> sharedAPIScopes = new HashSet<>();
 
         for (Scope scope : api.getScopes()) {
-            String scopeName = scope.getName();
+            String scopeName = scope.getKey();
             if (!(APIUtil.isWhiteListedScope(scopeName))) {
                 // Check if each scope key is already assigned as a local scope to a different API which is also not a
                 // different version of the same API. If true, return error.

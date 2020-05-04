@@ -1214,7 +1214,7 @@ public class OASParserUtil {
      */
     static Set<Scope> sortScopes(Set<Scope> scopeSet) {
         List<Scope> scopesSortedlist = new ArrayList<>(scopeSet);
-        scopesSortedlist.sort(Comparator.comparing(Scope::getName));
+        scopesSortedlist.sort(Comparator.comparing(Scope::getKey));
         return new LinkedHashSet<>(scopesSortedlist);
     }
 
