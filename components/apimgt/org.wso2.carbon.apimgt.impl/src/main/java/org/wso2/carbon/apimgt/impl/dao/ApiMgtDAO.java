@@ -138,7 +138,6 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * This class represent the ApiMgtDAO.
@@ -15191,7 +15190,7 @@ public class ApiMgtDAO {
                 for (URITemplate uriTemplate : uriTemplates) {
                     String resourceKey = APIUtil.getResourceKey(api, uriTemplate);
                     for (Scope scope : uriTemplate.retrieveAllScopes()) {
-                        int scopeId = getResourceScopeIdByName(scope.getKey(), tenantId, connection);
+                        int scopeId = getOAuthScopeIdByName(scope.getKey(), tenantId, connection);
                         addScopeStmt.setString(1, resourceKey);
                         addScopeStmt.setInt(2, scopeId);
                         addScopeStmt.setInt(3, tenantId);
@@ -15212,12 +15211,12 @@ public class ApiMgtDAO {
     /**
      * Get resource scope Id by scope name. KM operation. //TODO: remove after KM seperation
      */
-    public int getResourceScopeIdByName(String scopeName, int tenantId, Connection connection) throws SQLException,
+    public int getOAuthScopeIdByName(String scopeName, int tenantId, Connection connection) throws SQLException,
             APIManagementException {
 
         int scopeId = -1;
         try (PreparedStatement getScopeIdStmt =
-                     connection.prepareStatement(SQLConstants.GET_OAUTH2_RESOURCE_SCOPE_ID_BY_NAME_SQL)) {
+                     connection.prepareStatement(SQLConstants.GET_OAUTH2_SCOPE_ID_BY_NAME_SQL)) {
             getScopeIdStmt.setString(1, scopeName);
             getScopeIdStmt.setInt(2, tenantId);
             try (ResultSet rs = getScopeIdStmt.executeQuery()) {
