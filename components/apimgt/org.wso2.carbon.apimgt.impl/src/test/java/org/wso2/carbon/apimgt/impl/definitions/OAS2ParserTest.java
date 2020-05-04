@@ -86,7 +86,6 @@ public class OAS2ParserTest extends OASTestBase {
         SwaggerParser swaggerParser = new SwaggerParser();
 
         // check remove vendor extensions
-        System.setProperty(APIDefinition.KEEP_LEGACY_EXTENSION_PROP, Boolean.toString(false));
         String definition = testGenerateAPIDefinitionWithExtension(oas2Parser, oas2Resources);
         Swagger swaggerObj = swaggerParser.parse(definition);
         boolean isExtensionNotFound =
@@ -105,7 +104,6 @@ public class OAS2ParserTest extends OASTestBase {
         }
 
         // check preserve vendor extensions
-        System.setProperty(APIDefinition.KEEP_LEGACY_EXTENSION_PROP, Boolean.toString(true));
         definition = testGenerateAPIDefinitionWithExtension(oas2Parser, oas2Resources);
         swaggerObj = swaggerParser.parse(definition);
         Assert.assertTrue(swaggerObj.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY));
