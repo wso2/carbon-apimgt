@@ -27,6 +27,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ApiCategoriesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.CustomUrlsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.SwaggerYamlApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
