@@ -40,10 +40,10 @@ function apiCall() {
     return new Promise(((resolve) => {
         setTimeout(() => {
             resolve([
-                // { id: '1', label: 'West Wing', description: "It's somewhat hot" },
-                // { id: '2', label: 'East Wing', description: "It's cool" },
-                // { id: '3', label: 'South Wing', description: "It's red zone" },
-                // { id: '4', label: 'Noth Wing', description: "It's blue zone" },
+                { id: '1', label: 'West Wing', description: "It's somewhat hot" },
+                { id: '2', label: 'East Wing', description: "It's cool" },
+                { id: '3', label: 'South Wing', description: "It's red zone" },
+                { id: '4', label: 'Noth Wing', description: "It's blue zone" },
             ]);
         }, 1000);
     }));
