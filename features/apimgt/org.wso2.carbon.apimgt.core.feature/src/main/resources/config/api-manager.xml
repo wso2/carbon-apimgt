@@ -497,7 +497,11 @@
                 <URI>/api/am/publisher/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </WhiteListedURI>
-                        <WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/admin/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
                 <URI>/api/am/store/{version}/api-products</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
