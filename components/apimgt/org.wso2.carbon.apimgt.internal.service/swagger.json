@@ -1,0 +1,326 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "This API allows you to find shops near you and get price estimation for products you need.",
+    "version" : "1.0.0",
+    "title" : "Shop Around You API"
+  },
+  "host" : "shop.wso2.com",
+  "basePath" : "/v1",
+  "schemes" : [ "https" ],
+  "produces" : [ "application/json" ],
+  "paths" : {
+    "/throttle" : {
+      "get" : {
+        "tags" : [ "Shops" ],
+        "summary" : "throttled events available",
+        "description" : "This will provide access to throttled events in database.\n",
+        "parameters" : [ {
+          "name" : "query",
+          "in" : "query",
+          "description" : "**Search condition**.\n\nYou can search for an application by specifying the name as \"query\" attribute.\n\nEg.\n\"app1\" will match an application if the name is exactly \"app1\".\n\nCurrently this does not support wildcards. Given name must exactly match the application name.\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of shops around you",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/ThrottledEvent"
+              }
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/throttleAsString" : {
+      "get" : {
+        "tags" : [ "Shops" ],
+        "summary" : "throttled events available",
+        "description" : "This will provide access to throttled events in database.\n",
+        "parameters" : [ {
+          "name" : "query",
+          "in" : "query",
+          "description" : "**Search condition**.\n\nYou can search for an application by specifying the name as \"query\" attribute.\n\nEg.\n\"app1\" will match an application if the name is exactly \"app1\".\n\nCurrently this does not support wildcards. Given name must exactly match the application name.\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of shops around you",
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/isThrottled" : {
+      "get" : {
+        "tags" : [ "Shops" ],
+        "summary" : "throttled events available",
+        "description" : "This will provide access to throttled events in database.\n",
+        "parameters" : [ {
+          "name" : "query",
+          "in" : "query",
+          "description" : "**Search condition**.\n\nYou can search for an application by specifying the name as \"query\" attribute.\n\nEg.\n\"app1\" will match an application if the name is exactly \"app1\".\n\nCurrently this does not support wildcards. Given name must exactly match the application name.\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of shops around you",
+            "schema" : {
+              "$ref" : "#/definitions/ThrottledEvent"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/block" : {
+      "get" : {
+        "summary" : "throttled events available",
+        "description" : "This will provide access to throttled events in database.\n",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of shops around you",
+            "schema" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "$ref" : "#/definitions/BlockConditions"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/keyTemplates" : {
+      "get" : {
+        "summary" : "An Array of key templates according to custom policies",
+        "description" : "This will provide access to key templates define in custom policies\n",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of shops around you",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/revokedjwt" : {
+      "get" : {
+        "summary" : "JTIs of revoked jwt tokens",
+        "description" : "This will provide access to JTIs of revoked JWT tokens in database.\n",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of shops around you",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/RevokedJWTList"
+              }
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apikey/revoke" : {
+      "post" : {
+        "summary" : "Revoke given API Key",
+        "description" : "Revoke and notify the provided API Key",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "API Key revoke request object\n",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/RevokeAPIKey"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nApi key revoked successfully.\n"
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "ThrottledEvent" : {
+      "properties" : {
+        "throttle_key" : {
+          "type" : "string",
+          "description" : "throttle key."
+        },
+        "last_updated_time" : {
+          "type" : "string",
+          "description" : "Last time decision updated."
+        },
+        "throttle_state" : {
+          "type" : "string",
+          "description" : "throttle state."
+        }
+      }
+    },
+    "Error" : {
+      "properties" : {
+        "code" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "message" : {
+          "type" : "string"
+        },
+        "fields" : {
+          "type" : "string"
+        }
+      }
+    },
+    "BlockConditions" : {
+      "properties" : {
+        "api" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "application" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "ip" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/IPLevel"
+          }
+        },
+        "user" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "custom" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "RevokedJWTList" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/RevokedJWT"
+      }
+    },
+    "RevokedJWT" : {
+      "properties" : {
+        "jwt_signature" : {
+          "type" : "string",
+          "description" : "signature of the JWT token."
+        },
+        "expiry_time" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "expiry timestamp."
+        }
+      }
+    },
+    "RevokeAPIKey" : {
+      "properties" : {
+        "apiKey" : {
+          "type" : "string",
+          "description" : "API Key token."
+        },
+        "expiryTime" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "expiry timestamp."
+        },
+        "tenantId" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "expiry timestamp."
+        }
+      }
+    },
+    "IPLevel" : {
+      "properties" : {
+        "type" : {
+          "type" : "string",
+          "example" : "iprange"
+        },
+        "fixedIp" : {
+          "type" : "string",
+          "description" : "IP address."
+        },
+        "startingIp" : {
+          "type" : "string",
+          "description" : "Ip Range Starting IP"
+        },
+        "endingIp" : {
+          "type" : "string",
+          "description" : "Ip Range Ending IP."
+        },
+        "invert" : {
+          "type" : "boolean",
+          "description" : "Condition is invert."
+        },
+        "tenantDomain" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "integer"
+        }
+      }
+    }
+  }
+}
