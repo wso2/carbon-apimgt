@@ -5,6 +5,7 @@ target
 .project
 *.i??
 .idea
+.factorypath
 features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/repository/database/WSO2AM_DB.h2.db
 *.DS_Store
 WSO2AM_DB.trace.db
