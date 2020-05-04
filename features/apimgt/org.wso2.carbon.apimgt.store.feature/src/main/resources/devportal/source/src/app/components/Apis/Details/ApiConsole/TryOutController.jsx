@@ -332,6 +332,17 @@ function TryOutController(props) {
             case 'password':
                 setPassword(value);
                 break;
+            case 'accessToken':
+                if (securitySchemeType === 'API-KEY' && selectedKeyType === 'PRODUCTION') {
+                    setProductionApiKey(value);
+                } else if (securitySchemeType === 'API-KEY' && selectedKeyType === 'SANDBOX') {
+                    setSandboxApiKey(value);
+                } else if (selectedKeyType === 'PRODUCTION') {
+                    setProductionAccessToken(value);
+                } else {
+                    setSandboxAccessToken(value);
+                }
+                break;
             default:
         }
     }
@@ -503,7 +514,7 @@ function TryOutController(props) {
                                                 name='accessToken'
                                                 onChange={handleChanges}
                                                 type={showToken ? 'text' : 'password'}
-                                                value={tokenValue}
+                                                value={tokenValue || ''}
                                                 helperText={(
                                                     <FormattedMessage
                                                         id='enter.access.token'

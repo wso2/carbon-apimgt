@@ -333,6 +333,9 @@ public final class APIUtil {
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + APIConstants.SUPER_TENANT_DOMAIN;
 
+    private static final int IPV4_ADDRESS_BIT_LENGTH = 32;
+    private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
+
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
         tenantIdleTimeMillis =
@@ -8232,6 +8235,47 @@ public final class APIUtil {
     
     public static InetAddress getAddress(String ipAddress) throws UnknownHostException {
         return InetAddress.getByName(ipAddress);
+    }
+
+    public static boolean isIpInNetwork(String ip, String cidr) {
+        if (StringUtils.isEmpty(ip) || StringUtils.isEmpty(cidr)) {
+            return false;
+        }
+        ip = ip.trim();
+        cidr = cidr.trim();
+
+        if (cidr.contains("/")) {
+            String[] cidrArr = cidr.split("/");
+            if (cidrArr.length < 2 || (ip.contains(".") && !cidr.contains(".")) ||
+                    (ip.contains(":") && !cidr.contains(":"))) {
+                return false;
+            }
+
+            BigInteger netAddress = ipToBigInteger(cidrArr[0]);
+            int netBits = Integer.parseInt(cidrArr[1]);
+            BigInteger givenIP = ipToBigInteger(ip);
+
+            if (ip.contains(".")) {
+                // IPv4
+                if ( netAddress.shiftRight(IPV4_ADDRESS_BIT_LENGTH - netBits)
+                        .shiftLeft(IPV4_ADDRESS_BIT_LENGTH - netBits).compareTo(
+                        givenIP.shiftRight(IPV4_ADDRESS_BIT_LENGTH - netBits)
+                                .shiftLeft(IPV4_ADDRESS_BIT_LENGTH - netBits)) == 0) {
+                    return true;
+                }
+            } else if (ip.contains(":")) {
+                // IPv6
+                if ( netAddress.shiftRight(IPV6_ADDRESS_BIT_LENGTH - netBits)
+                        .shiftLeft(IPV6_ADDRESS_BIT_LENGTH - netBits).compareTo(
+                        givenIP.shiftRight(IPV6_ADDRESS_BIT_LENGTH - netBits)
+                                .shiftLeft(IPV6_ADDRESS_BIT_LENGTH - netBits)) == 0) {
+                    return true;
+                }
+            }
+        } else if (ip.equals(cidr)){
+            return true;
+        }
+        return false;
     }
 
     public String getFullLifeCycleData(Registry registry) throws XMLStreamException, RegistryException {
