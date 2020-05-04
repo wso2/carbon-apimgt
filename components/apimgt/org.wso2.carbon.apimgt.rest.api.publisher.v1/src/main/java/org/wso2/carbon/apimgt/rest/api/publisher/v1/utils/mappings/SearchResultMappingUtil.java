@@ -81,6 +81,7 @@ public class SearchResultMappingUtil {
         apiProductResultDTO.setId(apiProduct.getUuid());
         APIProductIdentifier apiproductId = apiProduct.getId();
         apiProductResultDTO.setName(apiproductId.getName());
+        apiProductResultDTO.setVersion(apiproductId.getVersion());
         apiProductResultDTO.setProvider(APIUtil.replaceEmailDomainBack(apiproductId.getProviderName()));
         String context = apiProduct.getContextTemplate();
         if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
@@ -89,6 +90,7 @@ public class SearchResultMappingUtil {
         apiProductResultDTO.setContext(context);
         apiProductResultDTO.setType(SearchResultDTO.TypeEnum.APIPRODUCT);
         apiProductResultDTO.setDescription(apiProduct.getDescription());
+        apiProductResultDTO.setStatus(apiProduct.getState());
         apiProductResultDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
         return apiProductResultDTO;
     }

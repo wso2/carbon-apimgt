@@ -480,9 +480,13 @@ export default class API extends Resource {
         }
     }
 
-    generateApiKey(applicationId, keyType, validityPeriod) {
+    generateApiKey(applicationId, keyType, validityPeriod, restrictions) {
         const promiseGet = this.client.then((client) => {
-            const payload = { applicationId, keyType, body: { validityPeriod } };
+            const payload = { applicationId, keyType,
+              body: {
+                validityPeriod: validityPeriod,
+                additionalProperties: restrictions
+              } };
             return client.apis['API Keys'].post_applications__applicationId__api_keys__keyType__generate(
                 payload,
                 this._requestMetaData(),

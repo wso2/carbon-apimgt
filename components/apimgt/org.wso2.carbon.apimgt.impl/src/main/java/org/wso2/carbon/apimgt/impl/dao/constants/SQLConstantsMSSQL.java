@@ -48,7 +48,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "   (GROUP_ID= ?  OR  (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER(?)))" +
+            "   (GROUP_ID= ?  OR  (GROUP_ID='' AND SUB.USER_ID COLLATE Latin1_General_CS_AS =?))" +
             " And " +
             "    NAME like ?" +
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
@@ -80,7 +80,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "   (GROUP_ID= ?  OR (GROUP_ID='' AND SUB.USER_ID=?))"+
+            "   (GROUP_ID= ?  OR (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER(?)))"+
             " And "+
             "    NAME like ?"+
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
@@ -112,7 +112,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     " AND (" +
                     "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
                     "           OR " +
-                    "    (LOWER (SUB.USER_ID) = LOWER(?))" +
+                    "    SUB.USER_ID COLLATE Latin1_General_CS_AS =?" +
                     "           OR " +
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
@@ -183,7 +183,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "    LOWER(SUB.USER_ID) = LOWER(?)"+
+            "    SUB.USER_ID COLLATE Latin1_General_CS_AS =?"+
             " And "+
             "    NAME like ?"+
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
@@ -213,7 +213,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "   SUB.USER_ID=?" +
+            "    LOWER(SUB.USER_ID) = LOWER(?)" +
             " And "+
             "    NAME like ?"+
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+

@@ -9216,6 +9216,10 @@ definitions:
             type: string
             description: A string that represents the context of the user's request
             example: CalculatorAPI
+          version:
+            type: string
+            description: The version of the API Product
+            example: 1.0.0
           provider:
             description: |
               If the provider value is not given, the user invoking the API will be used as the provider.
