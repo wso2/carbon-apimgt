@@ -821,14 +821,6 @@ public class OAS2Parser extends APIDefinition {
      */
     private void updateLegacyScopesFromOperation(SwaggerData.Resource resource, Operation operation) {
 
-        if (isLegacyExtensionsPreserved()) {
-            log.debug("preserveLegacyExtensions is enabled.");
-            if (!resource.getScopes().isEmpty()) {
-                List<String> scopes = resource.getScopes().stream().map(Scope::getKey).collect(Collectors.toList());
-                operation.setVendorExtension(APIConstants.SWAGGER_X_SCOPE, StringUtils.join(scopes, ","));
-            }
-            return;
-        }
         Map<String, Object> extensions = operation.getVendorExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
             extensions.remove(APIConstants.SWAGGER_X_SCOPE);
@@ -841,11 +833,7 @@ public class OAS2Parser extends APIDefinition {
      * @param swagger
      */
     private void updateLegacyScopesFromSwagger(Swagger swagger, SwaggerData swaggerData) {
-        if (isLegacyExtensionsPreserved()) {
-            log.debug("preserveLegacyExtensions is enabled.");
-            setLegacyScopeExtensionToSwagger(swagger, swaggerData);
-            return;
-        }
+
         Map<String, Object> extensions = swagger.getVendorExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
             extensions.remove(APIConstants.SWAGGER_X_WSO2_SECURITY);
