@@ -92,6 +92,15 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_APIM_RESTAPI_SECU
 public class OAS2Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS2Parser.class);
     private static final String SWAGGER_SECURITY_SCHEMA_KEY = "default";
+    private List<String> otherSchemes;
+
+    private List<String> getOtherSchemes() {
+        return otherSchemes;
+    }
+
+    private void setOtherSchemes(List<String> otherSchemes) {
+        this.otherSchemes = otherSchemes;
+    }
 
     /**
      * This method  generates Sample/Mock payloads for Swagger (2.0) definitions
@@ -1170,5 +1179,165 @@ public class OAS2Parser extends APIDefinition {
             return Json.pretty(swagger);
         }
 
+    }
+
+    /**
+     * This method returns the boolean value which checks whether the swagge is included default security scheme or not
+     *
+     * @param swaggerContent resource json
+     * @return is default is given already
+     * @throws APIManagementException
+     */
+    private boolean isDefaultGiven(String swaggerContent) throws APIManagementException {
+        Swagger swagger = getSwagger(swaggerContent);
+        boolean isDefaultIsGiven = true;
+        Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        if (securityDefinitions == null) {
+            securityDefinitions = new HashMap<>();
+        }
+        OAuth2Definition checkDefault = (OAuth2Definition) securityDefinitions.get(SWAGGER_SECURITY_SCHEMA_KEY);
+        if (checkDefault == null) {
+            isDefaultIsGiven = false;
+        }
+        return isDefaultIsGiven;
+    }
+
+    /**
+     * This method will inject scopes of other schemes to the swagger definition
+     *
+     * @param swaggerContent resource json
+     * @return updated json string
+     * @throws APIManagementException
+     */
+    @Override
+    public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
+        Swagger swagger = getSwagger(swaggerContent);
+        boolean isDefaultAvailable = isDefaultGiven(swaggerContent);
+        swagger = injectOtherScopesToDefaultScheme(swagger, isDefaultAvailable);
+        swagger = injectOtherResourceScopesToDefaultScheme(swagger, isDefaultAvailable);
+        return getSwaggerJsonString(swagger);
+    }
+
+    /**
+     * This method returns the oauth scopes according to the given swagger(version 2)
+     *
+     * @param swagger            resource json
+     * @param isDefaultAvailable boolean
+     * @return scope set as all defaults
+     * @throws APIManagementException
+     */
+    private Swagger injectOtherScopesToDefaultScheme(Swagger swagger, boolean isDefaultAvailable) throws APIManagementException {
+
+        Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        List<String> otherSetOfSchemes = new ArrayList<>();
+        Map<String, String> defaultScopeBindings = null;
+        if (securityDefinitions != null && !isDefaultAvailable) {
+            //If there is no default type schemes set a one
+            OAuth2Definition newDefault = new OAuth2Definition();
+            securityDefinitions.put(SWAGGER_SECURITY_SCHEMA_KEY, newDefault);
+            for (Map.Entry<String, SecuritySchemeDefinition> definition : securityDefinitions.entrySet()) {
+                String checkType = definition.getValue().getType();
+                if (!SWAGGER_SECURITY_SCHEMA_KEY.equals(definition.getKey()) && "oauth2".equals(checkType)) {
+                    otherSetOfSchemes.add(definition.getKey());
+                    //Check for default one
+                    OAuth2Definition noneDefaultFlowType = (OAuth2Definition) definition.getValue();
+                    OAuth2Definition defaultTypeFlow = (OAuth2Definition) securityDefinitions.get(SWAGGER_SECURITY_SCHEMA_KEY);
+                    Map<String, String> noneDefaultFlowScopes = noneDefaultFlowType.getScopes();
+                    Map<String, String> defaultTypeScopes = defaultTypeFlow.getScopes();
+                    if (defaultTypeScopes == null) {
+                        defaultTypeScopes = new HashMap<>();
+                    }
+                    for (Map.Entry<String, String> input : noneDefaultFlowScopes.entrySet()) {
+                        String name = input.getKey();
+                        String description = input.getValue();
+                        defaultTypeScopes.put(name, description);
+                        defaultTypeFlow.setScopes(defaultTypeScopes);
+                    }
+                    //Check X-Scope Bindings
+                    Map<String, String> noneDefaultScopeBindings = null;
+                    Map<String, Object> defaultTypeExtension = defaultTypeFlow.getVendorExtensions();
+                    if (noneDefaultFlowType.getVendorExtensions() != null && (noneDefaultScopeBindings =
+                            (Map<String, String>) noneDefaultFlowType.getVendorExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS))
+                            != null) {
+                        if (defaultScopeBindings == null) {
+                            defaultScopeBindings = new HashMap<>();
+                        }
+                        for (Map.Entry<String, String> roleInUse : noneDefaultScopeBindings.entrySet()) {
+                            String noneDefaultTypeScope = roleInUse.getKey();
+                            String noneDefaultTypeeRole = roleInUse.getValue();
+                            defaultScopeBindings.put(noneDefaultTypeScope, noneDefaultTypeeRole);
+                        }
+                    }
+                    defaultTypeExtension.put(APIConstants.SWAGGER_X_SCOPES_BINDINGS, defaultScopeBindings);
+                    defaultTypeFlow.setVendorExtensions(defaultTypeExtension);
+                    securityDefinitions.put(SWAGGER_SECURITY_SCHEMA_KEY, defaultTypeFlow);
+                }
+            }
+        }
+        setOtherSchemes(otherSetOfSchemes);
+        swagger.setSecurityDefinitions(securityDefinitions);
+        return swagger;
+    }
+
+    /**
+     * This method returns URI templates according to the given swagger file(Swagger version 2)
+     *
+     * @param swagger            Swagger
+     * @param isDefaultAvailable boolean
+     * @return URI Templates
+     * @throws APIManagementException
+     */
+    public Swagger injectOtherResourceScopesToDefaultScheme(Swagger swagger, boolean isDefaultAvailable) throws APIManagementException {
+        List<String> schemes = getOtherSchemes();
+
+        Map<String, Path> paths = swagger.getPaths();
+        if (!isDefaultAvailable) {
+            for (String pathKey : paths.keySet()) {
+                Path pathItem = paths.get(pathKey);
+                Map<HttpMethod, Operation> operationsMap = pathItem.getOperationMap();
+                for (Map.Entry<HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                    HttpMethod httpMethod = entry.getKey();
+                    Operation operation = entry.getValue();
+                    Map<String, List<String>> updatedDefaultSecurityRequirement = new HashMap<>();
+                    List<Map<String, List<String>>> securityRequirements = operation.getSecurity();
+                    if (securityRequirements == null) {
+                        securityRequirements = new ArrayList<>();
+                    }
+                    if (APIConstants.SUPPORTED_METHODS.contains(httpMethod.name().toLowerCase())) {
+                        List<String> opScopesDefault = new ArrayList<>();
+                        List<String> opScopesDefaultInstance = getScopeOfOperations(SWAGGER_SECURITY_SCHEMA_KEY, operation);
+                        if (opScopesDefaultInstance != null) {
+                            opScopesDefault.addAll(opScopesDefaultInstance);
+                        }
+                        updatedDefaultSecurityRequirement.put(SWAGGER_SECURITY_SCHEMA_KEY, opScopesDefault);
+                        securityRequirements.add(updatedDefaultSecurityRequirement);
+                        for (Map<String, List<String>> input : securityRequirements) {
+                            for (String scheme : schemes) {
+                                if (!SWAGGER_SECURITY_SCHEMA_KEY.equals(scheme)) {
+                                    List<String> opScopesOthers = getScopeOfOperations(scheme, operation);
+                                    if (opScopesOthers != null) {
+                                        for (String scope : opScopesOthers) {
+                                            if (!opScopesDefault.contains(scope)) {
+                                                opScopesDefault.add(scope);
+                                            }
+                                        }
+                                    }
+                                }
+                                updatedDefaultSecurityRequirement.put(SWAGGER_SECURITY_SCHEMA_KEY, opScopesDefault);
+                            }
+                            if (input.containsKey(SWAGGER_SECURITY_SCHEMA_KEY)) {
+                                input = updatedDefaultSecurityRequirement;
+                            }
+                        }
+                    }
+                    operation.setSecurity(securityRequirements);
+                    entry.setValue(operation);
+                    operationsMap.put(httpMethod, operation);
+                }
+                paths.put(pathKey, pathItem);
+            }
+            swagger.setPaths(paths);
+        }
+        return swagger;
     }
 }

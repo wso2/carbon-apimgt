@@ -1211,4 +1211,18 @@ public class OASParserUtil {
         scopesSortedlist.sort(Comparator.comparing(Scope::getName));
         return new LinkedHashSet<>(scopesSortedlist);
     }
+
+    /**
+     * Preprocessing of scopes schemes to support multiple schemes other than 'default' type
+     * This method will change the given definition
+     *
+     * @param swaggerContent
+     * @return processedSwaggerContent
+     */
+    public static String preProcess(String swaggerContent) throws APIManagementException {
+        //Load required properties from swagger to the API
+        APIDefinition apiDefinition = getOASParser(swaggerContent);
+        String swaggerContentUpdated = apiDefinition.processOtherSchemeScopes(swaggerContent);
+        return swaggerContentUpdated;
+    }
 }
