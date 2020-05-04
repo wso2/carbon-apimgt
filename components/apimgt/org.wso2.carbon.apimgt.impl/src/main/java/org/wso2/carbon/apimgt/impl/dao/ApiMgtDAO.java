@@ -15341,35 +15341,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get all shared scopes for tenant.
-     *
-     * @param tenantDomain Tenant Domain
-     * @return shared scope list
-     * @throws APIManagementException if an error occurs while getting all shared scopes for tenant
-     */
-    public List<Scope> getAllSharedScopes(String tenantDomain) throws APIManagementException {
-
-        List<Scope> scopeList = null;
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_ALL_SHARED_SCOPES_BY_TENANT)) {
-            statement.setInt(1, tenantId);
-            try (ResultSet rs = statement.executeQuery()) {
-                scopeList = new ArrayList<>();
-                while (rs.next()) {
-                    Scope scope = new Scope();
-                    scope.setId( rs.getString("UUID"));
-                    scope.setKey(rs.getString("NAME"));
-                    scopeList.add(scope);
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get all Shared Scopes for tenant: " + tenantDomain, e);
-        }
-        return scopeList;
-    }
-
-    /**
      * Get all shared scope keys for tenant.
      *
      * @param tenantDomain Tenant Domain
