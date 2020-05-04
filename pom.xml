@@ -1293,6 +1293,11 @@
                 <version>${swagger.codegen.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.swagger.codegen.v3</groupId>
+                <artifactId>swagger-codegen-maven-plugin</artifactId>
+                <version>${swagger3-codegen-maven-plugin.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-yaml</artifactId>
                 <version>${fasterxml.jackson.version}</version>
