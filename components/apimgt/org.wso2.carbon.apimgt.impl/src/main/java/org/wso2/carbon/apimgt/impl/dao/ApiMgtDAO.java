@@ -15095,29 +15095,27 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get shared scope by uuid.
+     * Get shared scope key by uuid.
      *
      * @param uuid UUID of shared scope
-     * @return Shared scope object with UUID and scope key
+     * @return Shared scope key
      * @throws APIManagementException if an error occurs while getting shared scope
      */
-    public Scope getSharedScope(String uuid) throws APIManagementException {
+    public String getSharedScopeKeyByUUID(String uuid) throws APIManagementException {
 
-        Scope scope = null;
+        String scopeKey = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_SHARED_SCOPE_BY_UUID)) {
             statement.setString(1, uuid);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    scope = new Scope();
-                    scope.setKey(rs.getString("NAME"));
-                    scope.setId(uuid);
+                    scopeKey = rs.getString("NAME");
                 }
             }
         } catch (SQLException e) {
             handleException("Failed to get Shared Scope : " + uuid, e);
         }
-        return scope;
+        return scopeKey;
     }
 
     /**

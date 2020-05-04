@@ -3445,7 +3445,7 @@ public class SQLConstants {
     //Shared Scopes related constants
     public static final String ADD_SHARED_SCOPE = "INSERT INTO AM_SHARED_SCOPE (NAME, UUID, TENANT_ID) VALUES (?,?,?)";
     public static final String DELETE_SHARED_SCOPE = "DELETE FROM AM_SHARED_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
-    public static final String GET_SHARED_SCOPE_BY_UUID = "SELECT * FROM AM_SHARED_SCOPE WHERE UUID = ?";
+    public static final String GET_SHARED_SCOPE_BY_UUID = "SELECT NAME FROM AM_SHARED_SCOPE WHERE UUID = ?";
     public static final String GET_ALL_SHARED_SCOPE_KEYS_BY_TENANT =
             "SELECT NAME FROM AM_SHARED_SCOPE WHERE TENANT_ID = ?";
     public static final String IS_SHARED_SCOPE_NAME_EXISTS =
@@ -3513,7 +3513,7 @@ public class SQLConstants {
                 "INSERT INTO AM_KM_MGT_APPLICATION (CONSUMER_KEY,CONSUMER_SECRET,TENANT_ID) VALUES (?,?,?)";
 
         public static final String GET_KM_APPLICATION_FOR_TENANT =
-                "SELECT * FROM AM_KM_MGT_APPLICATION WHERE TENANT_ID = ?";
+                "SELECT CONSUMER_KEY, CONSUMER_SECRET FROM AM_KM_MGT_APPLICATION WHERE TENANT_ID = ?";
     }
 
     //TODO: Need remove after KM seperation

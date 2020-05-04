@@ -8233,18 +8233,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public Scope getSharedScopeByUUID(String sharedScopeId, String tenantDomain) throws APIManagementException {
 
+        Scope sharedScope;
         if (log.isDebugEnabled()) {
             log.debug("Retrieving shared scope: " + sharedScopeId);
         }
-        Scope scope = ApiMgtDAO.getInstance().getSharedScope(sharedScopeId);
-        if (scope != null) {
-            scope = KeyManagerHolder.getKeyManagerInstance().getScopeByName(scope.getKey(), tenantDomain);
-            scope.setId(sharedScopeId);
+        String scopeKey = ApiMgtDAO.getInstance().getSharedScopeKeyByUUID(sharedScopeId);
+        if (scopeKey != null) {
+            sharedScope = KeyManagerHolder.getKeyManagerInstance().getScopeByName(scopeKey, tenantDomain);
+            sharedScope.setId(sharedScopeId);
         } else {
             throw new APIMgtResourceNotFoundException("Shared Scope not found for scope ID: " + sharedScopeId,
                     ExceptionCodes.from(ExceptionCodes.SHARED_SCOPE_NOT_FOUND, sharedScopeId));
         }
-        return scope;
+        return sharedScope;
     }
 
     /**
