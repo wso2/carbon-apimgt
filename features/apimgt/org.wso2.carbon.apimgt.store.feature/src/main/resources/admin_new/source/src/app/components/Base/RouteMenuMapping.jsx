@@ -29,7 +29,8 @@ import HomeIcon from '@material-ui/icons/Home';
 import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
 import DemoTable from 'AppComponents/AdminPages/Microgateways/List';
 import APICategories from 'AppComponents/AdminOperations/APICategories';
-import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/ApplicationThrottlingPolicies';
+// import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/ApplicationThrottlingPolicies';
+import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
 
 
 const RouteMenuMapping = (intl) => [
