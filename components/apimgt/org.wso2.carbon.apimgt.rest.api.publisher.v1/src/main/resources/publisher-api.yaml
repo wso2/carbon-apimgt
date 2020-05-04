@@ -8792,6 +8792,11 @@ definitions:
         description: |
           name of Scope
         example: apim:api_view
+      displayName:
+        type: string
+        description: |
+          display name of Scope
+        example: api_view
       description:
         type: string
         description: |

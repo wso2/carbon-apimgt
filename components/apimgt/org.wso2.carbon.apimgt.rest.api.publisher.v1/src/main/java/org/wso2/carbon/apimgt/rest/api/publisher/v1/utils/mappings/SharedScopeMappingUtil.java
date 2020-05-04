@@ -57,7 +57,7 @@ public class SharedScopeMappingUtil {
         scope.setId(scopeDTO.getId());
         scope.setDescription(scopeDTO.getDescription());
         scope.setKey(scopeDTO.getName());
-        scope.setName(scopeDTO.getName());
+        scope.setName(scopeDTO.getDisplayName());
         if (scopeDTO.getBindings() != null) {
             scope.setRoles(String.join(",", scopeDTO.getBindings()));
         }

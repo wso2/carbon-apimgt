@@ -8174,7 +8174,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         KeyManagerHolder.getKeyManagerInstance().registerScope(scope, tenantDomain);
         if (log.isDebugEnabled()) {
-            log.debug("Adding shared scope mapping: " + scope.getName());
+            log.debug("Adding shared scope mapping: " + scope.getKey());
         }
         return ApiMgtDAO.getInstance().addSharedScope(scope, tenantDomain);
     }

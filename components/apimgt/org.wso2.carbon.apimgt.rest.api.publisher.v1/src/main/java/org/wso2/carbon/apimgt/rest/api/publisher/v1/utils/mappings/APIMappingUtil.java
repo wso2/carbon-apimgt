@@ -1320,7 +1320,7 @@ public class APIMappingUtil {
             Scope scope = new Scope();
             ScopeDTO scopeDTO = apiScopeDTO.getScope();
             scope.setKey(scopeDTO.getName());
-            scope.setName(scopeDTO.getName());
+            scope.setName(scopeDTO.getDisplayName());
             scope.setDescription(scopeDTO.getDescription());
             scope.setRoles(String.join(",", scopeDTO.getBindings()));
             scopeSet.add(scope);
@@ -1340,7 +1340,7 @@ public class APIMappingUtil {
         for (ScopeDTO scopeDTO : apiProductDTO.getScopes()) {
             Scope scope = new Scope();
             scope.setKey(scopeDTO.getName());
-            scope.setName(scopeDTO.getName());
+            scope.setName(scopeDTO.getDisplayName());
             scope.setDescription(scopeDTO.getDescription());
             scope.setRoles(String.join(",", scopeDTO.getBindings()));
             scopeSet.add(scope);
@@ -1729,7 +1729,7 @@ public class APIMappingUtil {
         }
         operationsDTO.setVerb(uriTemplate.getHTTPVerb());
         operationsDTO.setTarget(uriTemplate.getUriTemplate());
-        operationsDTO.setScopes(uriTemplate.retrieveAllScopes().stream().map(Scope::getName).collect(
+        operationsDTO.setScopes(uriTemplate.retrieveAllScopes().stream().map(Scope::getKey).collect(
                 Collectors.toList()));
         operationsDTO.setThrottlingPolicy(uriTemplate.getThrottlingTier());
         Set<APIProductIdentifier> usedByProducts = uriTemplate.retrieveUsedByProducts();
@@ -2365,8 +2365,8 @@ public class APIMappingUtil {
         List<ScopeDTO> scopeDTOS = new ArrayList<>();
         for (Scope aScope : scopes) {
             ScopeDTO scopeDTO = new ScopeDTO();
-            String scopeName = aScope.getName();
-            scopeDTO.setName(scopeName);
+            scopeDTO.setName(aScope.getKey());
+            scopeDTO.setDisplayName(aScope.getName());
             scopeDTO.setDescription(aScope.getDescription());
             String roles = aScope.getRoles();
             if (roles == null || roles.isEmpty()) {

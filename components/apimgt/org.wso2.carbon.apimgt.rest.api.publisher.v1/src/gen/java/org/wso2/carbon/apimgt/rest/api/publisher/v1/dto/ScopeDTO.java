@@ -19,6 +19,7 @@ public class ScopeDTO   {
   
     private String id = null;
     private String name = null;
+    private String displayName = null;
     private String description = null;
     private List<String> bindings = new ArrayList<>();
 
@@ -57,6 +58,24 @@ public class ScopeDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * display name of Scope 
+   **/
+  public ScopeDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "api_view", value = "display name of Scope ")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -107,13 +126,14 @@ public class ScopeDTO   {
     ScopeDTO scope = (ScopeDTO) o;
     return Objects.equals(id, scope.id) &&
         Objects.equals(name, scope.name) &&
+        Objects.equals(displayName, scope.displayName) &&
         Objects.equals(description, scope.description) &&
         Objects.equals(bindings, scope.bindings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, bindings);
+    return Objects.hash(id, name, displayName, description, bindings);
   }
 
   @Override
@@ -123,6 +143,7 @@ public class ScopeDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    bindings: ").append(toIndentedString(bindings)).append("\n");
     sb.append("}");

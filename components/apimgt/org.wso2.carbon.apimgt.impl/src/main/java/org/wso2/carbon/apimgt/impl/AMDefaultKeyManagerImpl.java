@@ -1123,10 +1123,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         // Get access token
         AccessTokenInfo accessToken = getAccessTokenForScopeMgt(tenantDomain);
-        String scopeName = scope.getKey();
+        String scopeKey = scope.getKey();
         String scopeEndpoint = getScopeManagementServiceEndpoint(tenantDomain)
                 + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
-                .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, scopeName));
+                .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, scopeKey));
         try {
             HttpPut httpPut = new HttpPut(scopeEndpoint);
             httpPut.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
@@ -1141,18 +1141,18 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             httpPut.setEntity(payload);
             if (log.isDebugEnabled()) {
                 log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to update scope "
-                        + scopeName);
+                        + scopeKey);
             }
             try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpPut)) {
                 int statusCode = httpResponse.getStatusLine().getStatusCode();
                 if (statusCode != HttpStatus.SC_OK) {
                     String responseString = readHttpResponseAsString(httpResponse);
-                    throw new APIManagementException("Error occurred while updating scope: " + scopeName + " via: "
+                    throw new APIManagementException("Error occurred while updating scope: " + scopeKey + " via: "
                             + scopeEndpoint + ". Error Status: " + statusCode + " . Error Response: " + responseString);
                 }
             }
         } catch (IOException e) {
-            String errorMessage = "Error occurred while updating scope: " + scopeName + " via " + scopeEndpoint;
+            String errorMessage = "Error occurred while updating scope: " + scopeKey + " via " + scopeEndpoint;
             throw new APIManagementException(errorMessage, e);
         }
     }
@@ -1218,7 +1218,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public void validateScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException {
 
         for (Scope scope : scopes) {
-            Scope sharedScope = getScopeByName(scope.getName(), tenantDomain);
+            Scope sharedScope = getScopeByName(scope.getKey(), tenantDomain);
+            scope.setName(sharedScope.getName());
             scope.setDescription(sharedScope.getDescription());
             scope.setRoles(sharedScope.getRoles());
         }
