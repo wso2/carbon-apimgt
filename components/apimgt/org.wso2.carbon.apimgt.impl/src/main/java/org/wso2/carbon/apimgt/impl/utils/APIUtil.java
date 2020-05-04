@@ -472,7 +472,8 @@ public final class APIUtil {
             api.setEnableSchemaValidation(Boolean.parseBoolean(
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
-            Map<String, Scope> scopeToKeyMapping = ApiMgtDAO.getInstance().getAPIScopes(api.getId(), tenantDomainName);
+
+            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
@@ -657,7 +658,7 @@ public final class APIUtil {
             api.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
-            Map<String, Scope> scopeToKeyMapping = ApiMgtDAO.getInstance().getAPIScopes(api.getId(), tenantDomainName);
+            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
@@ -3443,7 +3444,7 @@ public final class APIUtil {
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
             ArrayList<URITemplate> urlPatternsList;
 
-            Map<String, Scope> scopeToKeyMapping = ApiMgtDAO.getInstance().getAPIScopes(oldId, tenantDomainName);
+            Map<String, Scope> scopeToKeyMapping = getAPIScopes(oldId, tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             urlPatternsList = ApiMgtDAO.getInstance().getAllURITemplates(oldContext, oldId.getVersion());
@@ -5748,7 +5749,6 @@ public final class APIUtil {
      * Return the sequence extension name.
      * eg: admin--testAPi--v1.00
      *
-     * @param api
      * @return
      */
     public static String getSequenceExtensionName(String provider, String name, String version) {
@@ -10636,5 +10636,24 @@ public final class APIUtil {
 
         }
         return temp;
+    }
+    /**
+     * Get scopes attached to the API.
+     *
+     * @param identifier   API Identifier
+     * @param tenantDomain Tenant Domain
+     * @return Scope key to Scope object mapping
+     * @throws APIManagementException if an error occurs while getting scope attached to API
+     */
+    public static Map<String, Scope> getAPIScopes(APIIdentifier identifier, String tenantDomain)
+            throws APIManagementException {
+
+        Map<String, Scope> scopeToKeyMap = new HashMap<>();
+        Set<String> scopeKeys = ApiMgtDAO.getInstance().getAPIScopeKeys(identifier);
+        for (String scopeKey : scopeKeys) {
+            Scope scope = KeyManagerHolder.getKeyManagerInstance().getScopeByName(scopeKey, tenantDomain);
+            scopeToKeyMap.put(scopeKey, scope);
+        }
+        return scopeToKeyMap;
     }
 }
