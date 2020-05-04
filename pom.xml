@@ -78,11 +78,11 @@
                         </dependency>
                     </dependencies>
                 </plugin>
-                <plugin>
-                    <groupId>io.swagger.codegen.v3</groupId>
-                    <artifactId>swagger-codegen-maven-plugin</artifactId>
-                    <version>${swagger3-codegen-maven-plugin.version}</version>
-                </plugin>
+                <!--<plugin>-->
+                    <!--<groupId>io.swagger.codegen.v3</groupId>-->
+                    <!--<artifactId>swagger-codegen-maven-plugin</artifactId>-->
+                    <!--<version>${swagger3-codegen-maven-plugin.version}</version>-->
+                <!--</plugin>-->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
@@ -1292,11 +1292,11 @@
                 <artifactId>swagger-codegen</artifactId>
                 <version>${swagger.codegen.version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.swagger.codegen.v3</groupId>
-                <artifactId>swagger-codegen-maven-plugin</artifactId>
-                <version>${swagger3-codegen-maven-plugin.version}</version>
-            </dependency>
+            <!--<dependency>-->
+                <!--<groupId>io.swagger.codegen.v3</groupId>-->
+                <!--<artifactId>swagger-codegen-maven-plugin</artifactId>-->
+                <!--<version>${swagger3-codegen-maven-plugin.version}</version>-->
+            <!--</dependency>-->
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-yaml</artifactId>
