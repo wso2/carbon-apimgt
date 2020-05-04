@@ -1933,7 +1933,7 @@ public final class APIConstants {
      * */
     public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
     public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
-    public static final String UTILITY_WEB_APP_EP = "/throttle/data/v1";
+    public static final String UTILITY_WEB_APP_EP = "/internal/data/v1";
     public static final String API_KEY_REVOKE_PATH = "/apikey/revoke";
 
     public static final String SKIP_ROLES_BY_REGEX = "skipRolesByRegex";
