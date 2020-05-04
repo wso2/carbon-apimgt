@@ -28,8 +28,8 @@ import PhonelinkSetupIcon from '@material-ui/icons/PhonelinkSetup';
 import HomeIcon from '@material-ui/icons/Home';
 import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
 import DemoTable from 'AppComponents/AdminPages/Microgateways/List';
-import APICategories from 'AppComponents/AdminOperations/APICategories';
 import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
+import APICategories from 'AppComponents/APICategories/ListApiCategories';
 
 
 const RouteMenuMapping = (intl) => [
