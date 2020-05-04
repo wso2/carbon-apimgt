@@ -52,10 +52,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-let initialState = {
-    name: '',
-    description: '',
-};
+// const initialState = {
+//     name: '',
+//     description: '',
+// };
 
 
 /**
@@ -63,12 +63,12 @@ let initialState = {
  * @param {JSON} state The second number.
  * @returns {Promise}.
  */
-function reducer(state, { field, value }) {
-    return {
-        ...state,
-        [field]: value,
-    };
-}
+// function reducer(state, { field, value }) {
+//     return {
+//         ...state,
+//         [field]: value,
+//     };
+// }
 
 /**
  * Render a list
@@ -77,12 +77,14 @@ function reducer(state, { field, value }) {
 function AddEdit(props) {
     const classes = useStyles();
     const {
-        updateList, icon, triggerButtonText, title, applicationThrottlingPolicyList, selectedRow,
+        updateList, icon, triggerButtonText, title, applicationThrottlingPolicyList, dataRow,
     } = props;
     const [quotaPolicyType, setQuotaPolicyType] = useState('RequestCountLimit');
     const [unitTime, setUnitTime] = useState('min');
     const [dataBandwithUnit, setDataBandwithUnit] = useState('KB');
     const applicationThrottlingPolicy = { defaultLimit: {} };
+    const [policy, setPolicy] = useState({});
+    const [validationError, setValidationError] = useState([]);
     const restApi = new API();
 
     // useEffect(() => {
@@ -92,47 +94,41 @@ function AddEdit(props) {
     //     };
     // }, [title]);
 
-    if (selectedRow) {
-        const selectedPolicy = applicationThrottlingPolicyList.filter(
-            (policy) => policy.policyName === selectedRow[0],
-        );
-        const policyId = selectedPolicy.length !== 0 && selectedPolicy[0].policyId;
-        restApi.applicationThrottlingPolicyGet(policyId).then((result) => {
-            console.log('result', result);
-            applicationThrottlingPolicy.policyName = result.body.policyName;
-            applicationThrottlingPolicy.description = result.body.description;
-            applicationThrottlingPolicy.defaultLimit.requestCount = result.body.defaultLimit.requestCount;
-            applicationThrottlingPolicy.defaultLimit.timeUnit = result.body.defaultLimit.timeUnit;
-            applicationThrottlingPolicy.defaultLimit.type = result.body.defaultLimit.type;
-            applicationThrottlingPolicy.defaultLimit.unitTime = result.body.defaultLimit.unitTime;
-
-            return applicationThrottlingPolicy;
-        });
-    }
-
-    // useEffect(() => {
-    //     applicationThrottlingPolicy = {
-    //         defaultLimit: {},
-    //     };
-    // }, [title]);
-
     // const [state, dispatch] = useReducer(reducer, initialState);
     // const { label, description } = state;
 
     // const onChange = (e) => {
     //     dispatch({ field: e.target.name, value: e.target.value });
     // };
-    // const hasErrors = (fieldName, value) => {
+    // const validate = (fieldName, value) => {
     //     let error = false;
-    //     switch (fieldName) {
-    //         case 'label':
-    //             error = value === '' ? fieldName + ' is Empty' : false;
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    //     return error;
+    //     error = value === '' ? fieldName + ' is Empty' : false;
+    //     setValidationError({ [fieldName]: error });
     // };
+    const validate = (fieldName, value) => {
+        let error = false;
+        const isNumeric = (value !== '') && !Number.isNaN(Number(value));
+        switch (fieldName) {
+            case 'policyName':
+                error = value === '' ? fieldName + ' is Empty' : false;
+                setValidationError({ policyName: error });
+                break;
+            case 'requestCountValue' || 'dataBandWithValue' || 'unitTime':
+                if (value !== '') {
+                    error = isNumeric ? setValidationError({ isNumeric: true })
+                        : (setValidationError({ isNumeric: false }) && fieldName + ' incorrect value');
+                } else {
+                    error = fieldName + ' is Empty';
+                }
+                break;
+            default:
+                error = value === '' ? fieldName + ' is Empty' : false;
+                setValidationError({ [fieldName]: error });
+                break;
+        }
+    };
+
+
     // const getAllFormErrors = () => {
     //     let errorText = '';
     //     const labelErrors = hasErrors('label', label);
@@ -143,11 +139,10 @@ function AddEdit(props) {
     // };
 
     const formSaveCallback = () => {
-        // const formErrors = getAllFormErrors();
-        // if (formErrors !== '') {
-        //     Alert.error(formErrors);
-        //     return (false);
-        // }
+        if (validationError.length !== 0) {
+            Alert.error('Error while adding Application Throttling Policy. Mandatory values have not been filled');
+            return (false);
+        }
         applicationThrottlingPolicy.defaultLimit.type = quotaPolicyType;
         applicationThrottlingPolicy.defaultLimit.timeUnit = unitTime;
         if (quotaPolicyType === 'BandwidthLimit') {
@@ -201,7 +196,22 @@ function AddEdit(props) {
         }
     };
 
-    console.log('applicationThrottlingPolicy', JSON.stringify(applicationThrottlingPolicy));
+    const dialogOpenCallback = () => {
+        // We can do an API call when we are in the editing mode
+        if (dataRow) {
+            const selectedPolicy = applicationThrottlingPolicyList.filter(
+                (policyy) => policyy.policyName === dataRow[0],
+            );
+            const policyId = selectedPolicy.length !== 0 && selectedPolicy[0].policyId;
+            restApi.applicationThrottlingPolicyGet(policyId).then((result) => {
+                setPolicy(result.body);
+                setQuotaPolicyType(result.body.defaultLimit.type);
+                setDataBandwithUnit(result.body.defaultLimit.dataUnit);
+                setUnitTime(result.body.defaultLimit.timeUnit);
+            });
+        }
+    };
+
 
     return (
         <FormDialogBase
@@ -210,6 +220,7 @@ function AddEdit(props) {
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
+            dialogOpenCallback={dialogOpenCallback}
         >
             <DialogContentText>
                 <Typography variant='h6'>
@@ -219,15 +230,25 @@ function AddEdit(props) {
                     />
                 </Typography>
             </DialogContentText>
+            {console.log('hello', policy)}
             <TextField
                 autoFocus
                 margin='dense'
                 id='policyName'
                 label='Name'
                 fullWidth
-                onChange={handleThrottlingApplicationInput}
                 required
-                value={applicationThrottlingPolicy.policyName}
+                variant='outlined'
+                value={policy.policyName || ''}
+                onChange={handleThrottlingApplicationInput}
+                InputProps={{
+                    id: 'itest-id-policyName-input',
+                    onBlur: ({ target: { value } }) => {
+                        validate('policyName', value);
+                    },
+                }}
+                error={validationError.policyName}
+                helperText={validationError.policyName && 'Application Policy Name is empty'}
             />
             <TextField
                 autoFocus
@@ -235,6 +256,8 @@ function AddEdit(props) {
                 id='description'
                 label='Description'
                 fullWidth
+                variant='outlined'
+                value={policy.description || ''}
                 onChange={handleThrottlingApplicationInput}
             />
             <DialogContentText>
@@ -274,8 +297,16 @@ function AddEdit(props) {
                         id='requestCountValue'
                         label='Request Count'
                         fullWidth
+                        value={(policy.defaultLimit && policy.defaultLimit.requestCount) || ''}
                         onChange={handleThrottlingApplicationInput}
                         required
+                        InputProps={{
+                            id: 'itest-id-requestCountValue-input',
+                            onBlur: ({ target: { value } }) => {
+                                validate('requestCountValue', value);
+                            },
+                        }}
+                        error={validationError.requestCountValue || !validationError.isNumeric}
                     />
                 ) : (
                     <Grid className={classes.unitTime}>
@@ -285,7 +316,16 @@ function AddEdit(props) {
                             id='dataBandWithValue'
                             label='Data Bandwith'
                             fullWidth
+                            required
+                            value={(policy.defaultLimit && policy.defaultLimit.dataAmount) || ''}
                             onChange={handleThrottlingApplicationInput}
+                            InputProps={{
+                                id: 'itest-id-dataBandWithValue-input',
+                                onBlur: ({ target: { value } }) => {
+                                    validate('dataBandWithValue', value);
+                                },
+                            }}
+                            error={validationError.dataBandWithValue || !validationError.isNumeric}
                         />
                         <FormControl className={classes.unitTimeSelection}>
                             <Select
@@ -311,7 +351,16 @@ function AddEdit(props) {
                         label='Unit Time'
                         type='number'
                         fullWidth
+                        value={(policy.defaultLimit && policy.defaultLimit.unitTime) || ''}
                         onChange={handleThrottlingApplicationInput}
+                        InputProps={{
+                            id: 'itest-id-unitTime-input',
+                            onBlur: ({ target: { value } }) => {
+                                validate('unitTime', value);
+                            },
+                        }}
+                        error={validationError.unitTime}
+                        helperText={validationError.unitTime && 'Unit Time is empty'}
                     />
                     <FormControl className={classes.unitTimeSelection}>
                         <Select
@@ -329,7 +378,6 @@ function AddEdit(props) {
                             <MenuItem value='year'>Year(s)</MenuItem>
                         </Select>
                     </FormControl>
-
                 </Grid>
             </FormControl>
         </FormDialogBase>
