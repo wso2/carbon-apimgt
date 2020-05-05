@@ -2416,52 +2416,25 @@ public class SQLConstants {
             " WHERE " +
             "   ES.API_ID = ? ";
 
-    public static final String ADD_SCOPE_ENTRY_SQL =
-            " INSERT INTO IDN_OAUTH2_SCOPE (NAME, DISPLAY_NAME , DESCRIPTION, TENANT_ID, SCOPE_TYPE) " +
-            " VALUES(?,?,?,?,?)";
-
-    public static final String ADD_SCOPE_LINK_SQL =
-            " INSERT INTO AM_API_SCOPES (API_ID, SCOPE_ID) VALUES (?,?)";
-
     public static final String ADD_PRODUCT_RESOURCE_MAPPING_SQL = "INSERT INTO AM_API_PRODUCT_MAPPING "
             + "(API_ID,URL_MAPPING_ID) " + "VALUES (?, ?)";
 
     public static final String DELETE_FROM_AM_API_PRODUCT_MAPPING_SQL = "DELETE FROM AM_API_PRODUCT_MAPPING WHERE "
             + "API_ID = ? ";
 
-    public static final String GET_SCOPES_SQL =
-            " SELECT SCOPE_ID  " +
-                    " FROM  IDN_OAUTH2_SCOPE  " +
-                    " WHERE NAME = ? " +
-                    " AND TENANT_ID = ?";
-
-    public static final String ADD_SCOPE_ROLE_SQL =
-            "INSERT INTO IDN_OAUTH2_SCOPE_BINDING (SCOPE_ID, SCOPE_BINDING, BINDING_TYPE) values (?,?,?)";
-
     public static final String GET_SCOPE_BY_SUBSCRIBED_API_PREFIX =
-            "SELECT " +
-            "   DISTINCT A.NAME, " +
-            "   A.DISPLAY_NAME," +
-            "   A.DESCRIPTION," +
-            "   C.SCOPE_BINDING " +
-            " FROM  " +
-            " ((IDN_OAUTH2_SCOPE AS A  INNER JOIN  AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) " +
-            " LEFT JOIN  IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) " +
-            " WHERE " +
-            "   B.API_ID IN (";
+            "SELECT DISTINCT ARSM.SCOPE_NAME " +
+                    "FROM AM_API_RESOURCE_SCOPE_MAPPING AS ARSM INNER JOIN AM_API_URL_MAPPING AS AUM " +
+                    "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
+                    "WHERE AUM.API_ID IN (";
 
     public static final char GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX = ')';
 
     public static final String GET_SCOPE_BY_SUBSCRIBED_ID_ORACLE_SQL =
-            " SELECT " +
-            "   DISTINCT A.NAME, " +
-            "   A.DISPLAY_NAME, " +
-            "   A.DESCRIPTION, " +
-            "   C.SCOPE_BINDING " +
-            " FROM  " +
-            " ((IDN_OAUTH2_SCOPE A  INNER JOIN  AM_API_SCOPES B ON A.SCOPE_ID = B.SCOPE_ID) " +
-            " LEFT JOIN  IDN_OAUTH2_SCOPE_BINDING C ON B.SCOPE_ID = C.SCOPE_ID ) " +
-            " WHERE B.API_ID IN (";
+            "SELECT DISTINCT ARSM.SCOPE_NAME " +
+                    "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM INNER JOIN AM_API_URL_MAPPING AUM " +
+                    "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
+                    "WHERE AUM.API_ID IN (";
 
     public static final String GET_SCOPES_BY_SCOPE_KEY_SQL =
             "SELECT " +
@@ -2507,40 +2480,6 @@ public class SQLConstants {
 
     public static final String GET_SCOPES_BY_SCOPE_KEYS_SUFFIX = ") AND TENANT_ID = ?";
 
-    public static final String REMOVE_RESOURCE_SCOPE_SQL =
-            " DELETE " +
-                    " FROM " +
-                    "   IDN_OAUTH2_RESOURCE_SCOPE " +
-                    " WHERE " +
-                    "   SCOPE_ID IN ( " +
-                    "       SELECT SCOPE_ID FROM AM_API_SCOPES " + "WHERE API_ID = ? )";
-
-
-    public static final String REMOVE_SCOPE_SQL =
-            " DELETE " +
-            " FROM " +
-            "   IDN_OAUTH2_SCOPE " +
-            " WHERE " +
-            "   SCOPE_ID IN ( " +
-            "       SELECT SCOPE_ID FROM AM_API_SCOPES " + "WHERE API_ID = ? )";
-
-    public static final String GET_RESOURCE_TO_SCOPE_MAPPING_SQL =
-            "SELECT " +
-                    "   RS.RESOURCE_PATH, " +
-                    "   S.NAME " +
-                    " FROM " +
-                    "   IDN_OAUTH2_RESOURCE_SCOPE RS " +
-                    " INNER JOIN " +
-                    "   IDN_OAUTH2_SCOPE S " +
-                    " ON " +
-                    "   S.SCOPE_ID = RS.SCOPE_ID " +
-                    " INNER JOIN " +
-                    "   AM_API_SCOPES A " +
-                    " ON " +
-                    "   A.SCOPE_ID = RS.SCOPE_ID " +
-                    " WHERE" +
-                    "   A.API_ID = ? ";
-
     public static final String GET_SUBSCRIBED_APIS_FROM_CONSUMER_KEY =
         "SELECT SUB.API_ID "
                 + "FROM AM_SUBSCRIPTION SUB, AM_APPLICATION_KEY_MAPPING AKM "
@@ -2567,16 +2506,18 @@ public class SQLConstants {
     public static final String CLOSING_BRACE = ")";
 
     public static final String GET_SCOPES_FOR_API_LIST = "SELECT "
-            + "B.API_ID,A.SCOPE_ID, A.NAME, A.DESCRIPTION "
-            + "FROM IDN_OAUTH2_SCOPE AS A "
-            + "INNER JOIN AM_API_SCOPES AS B "
-            + "ON A.SCOPE_ID = B.SCOPE_ID WHERE B.API_ID IN ( $paramList )";
+            + "ARSM.SCOPE_NAME, AUM.API_ID "
+            + "FROM AM_API_RESOURCE_SCOPE_MAPPING AS ARSM "
+            + "INNER JOIN AM_API_URL_MAPPING AS AUM "
+            + "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID "
+            + "WHERE AUM.API_ID IN ( $paramList )";
 
     public static final String GET_SCOPES_FOR_API_LIST_ORACLE = "SELECT "
-            + "B.API_ID, A.SCOPE_ID, A.NAME, A.DESCRIPTION "
-            + "FROM IDN_OAUTH2_SCOPE A "
-            + "INNER JOIN AM_API_SCOPES B "
-            + "ON A.SCOPE_ID = B.SCOPE_ID WHERE B.API_ID IN ( $paramList )";
+            + "ARSM.SCOPE_NAME, AUM.API_ID "
+            + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM "
+            + "INNER JOIN AM_API_URL_MAPPING AUM "
+            + "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID "
+            + "WHERE AUM.API_ID IN ( $paramList )";
 
     public static final String GET_USERS_FROM_OAUTH_TOKEN_SQL =
             "SELECT " +
@@ -2590,18 +2531,6 @@ public class SQLConstants {
             "   AKM.CONSUMER_KEY = ? " +
             "   AND AKM.APPLICATION_ID = AA.APPLICATION_ID " +
             "   AND AA.SUBSCRIBER_ID = AMS.SUBSCRIBER_ID";
-
-    public static final String REMOVE_FROM_API_SCOPES_SQL =
-            "DELETE FROM AM_API_SCOPES WHERE API_ID = ?";
-
-    public static final String REMOVE_FROM_API_SCOPES_BY_SCOPE_ID_SQL =
-            "DELETE FROM AM_API_SCOPES WHERE SCOPE_ID = ?";
-
-    public static final String REMOVE_FROM_OAUTH_SCOPE_SQL =
-            "DELETE FROM IDN_OAUTH2_SCOPE  WHERE SCOPE_ID = ?";
-
-    public static final String REMOVE_FROM_OAUTH_RESOURCE_SQL =
-            "DELETE FROM IDN_OAUTH2_RESOURCE_SCOPE  WHERE SCOPE_ID = ?";
 
     public static final String REMOVE_SUBSCRIPTION_BY_APPLICATION_ID_SQL =
             "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ? ";
@@ -2630,24 +2559,6 @@ public class SQLConstants {
             " WHERE" +
             "   IOCA.CONSUMER_KEY = ?" +
             "   AND IOAT.TOKEN_STATE = 'ACTIVE'";
-
-    public static final String GET_SCOPE_KEY_SQL =
-            "SELECT COUNT(SCOPE_ID) AS SCOPE_COUNT FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID" + " = ?";
-
-    public static final String GET_API_SCOPE_SQL =
-            "SELECT " +
-            "   API.API_ID, " +
-            "   API.API_NAME, " +
-            "   API.API_PROVIDER " +
-            " FROM " +
-            "   AM_API API, " +
-            "   IDN_OAUTH2_SCOPE IDN, " +
-            "   AM_API_SCOPES AMS " +
-            " WHERE " +
-            "   IDN.SCOPE_ID=AMS.SCOPE_ID " +
-            "   AND AMS.API_ID=API.API_ID " +
-            "   AND IDN.NAME = ? " +
-            "   AND IDN.TENANT_ID = ?";
 
     public static final String GET_CONTEXT_TEMPLATE_COUNT_SQL =
             "SELECT COUNT(CONTEXT_TEMPLATE) AS CTX_COUNT FROM AM_API WHERE LOWER(CONTEXT_TEMPLATE) = ?";

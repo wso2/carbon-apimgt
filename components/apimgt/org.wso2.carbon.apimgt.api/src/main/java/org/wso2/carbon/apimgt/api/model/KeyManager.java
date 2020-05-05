@@ -238,10 +238,11 @@ public interface KeyManager {
      * Get Scopes of the APIs by API Ids
      *
      * @param apiIdsString String of API Ids
+     * @param tenantDomain tenant domain
      * @return {@link java.util.Map} having scopes of each API
      * @throws APIManagementException
      */
-    Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException;
+    Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString, String tenantDomain) throws APIManagementException;
 
     /**
      * This method will be used to register a Scope in the authorization server.

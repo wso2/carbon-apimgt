@@ -1621,13 +1621,15 @@ public abstract class AbstractAPIManager implements APIManager {
         return true;
     }
 
+    @Deprecated
     public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid)
             throws APIManagementException {
+
         if (System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES) != null && Boolean
                 .parseBoolean(System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES))) {
             return false;
         }
-        return apiMgtDAO.isScopeKeyAssigned(identifier, scopeKey, tenantid);
+        return isScopeKeyAssignedLocally(identifier, scopeKey, tenantid);
     }
 
     /**
@@ -2289,7 +2291,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else if (searchQuery != null && searchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
                 result = searchPaginatedAPIsByContent(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad);
             } else {
-                result = searchPaginatedAPIs(userRegistry, searchQuery, start, end, isLazyLoad);
+                result = searchPaginatedAPIs(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad);
             }
 
         } catch (Exception e) {
@@ -2684,13 +2686,15 @@ public abstract class AbstractAPIManager implements APIManager {
      * search in multiple fields.
      *
      * @param registry
+     * @param tenantId
      * @param searchQuery Ex: provider=*admin*&version=*1*
      * @return API result
      * @throws APIManagementException
      */
 
-    public Map<String, Object> searchPaginatedAPIs(Registry registry, String searchQuery, int start, int end,
-                                                   boolean limitAttributes) throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIs(Registry registry, int tenantId, String searchQuery, int start,
+                                                   int end, boolean limitAttributes) throws APIManagementException {
+
         SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
         List<Object> apiList = new ArrayList<>();
         Map<String, Object> result = new HashMap<String, Object>();
@@ -2806,10 +2810,11 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             }
 
+            String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
             // setting scope
             if (!apiIdsString.isEmpty()) {
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-                Map<String, Set<Scope>> apiScopeSet = keyManager.getScopesForAPIS(apiIdsString);
+                Map<String, Set<Scope>> apiScopeSet = keyManager.getScopesForAPIS(apiIdsString, tenantDomain);
                 if (apiScopeSet.size() > 0) {
                     for (int i = 0; i < apiCount; i++) {
                         Object api = apiList.get(i);

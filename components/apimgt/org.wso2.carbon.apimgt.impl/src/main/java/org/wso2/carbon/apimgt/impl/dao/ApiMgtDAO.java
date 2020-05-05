@@ -1503,13 +1503,13 @@ public class ApiMgtDAO {
         return subscribedAPIs;
     }
 
-    public Set<Scope> getScopesForApplicationSubscription(Subscriber subscriber, int applicationId)
+    public Set<String> getScopesForApplicationSubscription(Subscriber subscriber, int applicationId)
             throws APIManagementException {
         PreparedStatement getIncludedApisInProduct = null;
         PreparedStatement getSubscribedApisAndProducts = null;
         ResultSet resultSet = null;
         ResultSet resultSet1 = null;
-        HashMap<String, Scope> scopeHashMap = new HashMap<>();
+        Set<String> scopeKeysSet = new HashSet<>();
         Set<Integer> apiIdSet = new HashSet<>();
         int tenantId = APIUtil.getTenantId(subscriber.getName());
 
@@ -1543,20 +1543,7 @@ public class ApiMgtDAO {
                 try (PreparedStatement statement = conn.prepareStatement(sqlQuery)) {
                     try (ResultSet finalResultSet = statement.executeQuery()) {
                         while (finalResultSet.next()) {
-                            Scope scope;
-                            String scopeKey = finalResultSet.getString(1);
-                            if (scopeHashMap.containsKey(scopeKey)) {
-                                // scope already exists append roles.
-                                scope = scopeHashMap.get(scopeKey);
-                                scope.setRoles(scope.getRoles().concat("," + finalResultSet.getString(4)).trim());
-                            } else {
-                                scope = new Scope();
-                                scope.setKey(scopeKey);
-                                scope.setName(finalResultSet.getString(2));
-                                scope.setDescription(finalResultSet.getString(3));
-                                scope.setRoles(finalResultSet.getString(4).trim());
-                            }
-                            scopeHashMap.put(scopeKey, scope);
+                            scopeKeysSet.add(finalResultSet.getString(1));
                         }
                     }
                 }
@@ -1567,7 +1554,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(getSubscribedApisAndProducts, null, resultSet);
             APIMgtDBUtil.closeAllConnections(getIncludedApisInProduct, null, resultSet1);
         }
-        return populateScopeSet(scopeHashMap);
+        return scopeKeysSet;
     }
 
     private Set<APIKey> getAPIKeysBySubscription(int subscriptionId) throws APIManagementException {
@@ -9121,162 +9108,6 @@ public class ApiMgtDAO {
         return storesSet;
     }
 
-    //TODO:remove
-    public void addScopes(Set<?> objects, APIIdentifier apiIdentifier, int apiID, int tenantID)
-            throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement ps = null, ps2 = null, ps3 = null;
-        ResultSet rs = null;
-
-        String scopeEntry = SQLConstants.ADD_SCOPE_ENTRY_SQL;
-        String scopeRoleEntry = SQLConstants.ADD_SCOPE_ROLE_SQL;
-        String scopeLink = SQLConstants.ADD_SCOPE_LINK_SQL;
-        Boolean scopeSharingEnabled = false;
-        if (!StringUtils.isEmpty(System.getProperty(APIConstants.ENABLE_API_SCOPES_SHARING))) {
-            scopeSharingEnabled = Boolean.parseBoolean(System.getProperty(APIConstants.ENABLE_API_SCOPES_SHARING));
-        }
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-
-            String scopeId = "SCOPE_ID";
-            if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
-                scopeId = "scope_id";
-            }
-
-            if (objects != null) {
-                for (Object object : objects) {
-                    ps = conn.prepareStatement(scopeEntry, new String[]{scopeId});
-                    ps2 = conn.prepareStatement(scopeLink);
-                    ps3 = conn.prepareStatement(scopeRoleEntry);
-                    if (object instanceof URITemplate) {
-                        URITemplate uriTemplate = (URITemplate) object;
-
-                        if (uriTemplate.getScope() == null) {
-                            continue;
-                        }
-
-                        if (!scopeSharingEnabled && isScopeKeyAssigned(apiIdentifier, uriTemplate.getScope().getKey(),
-                                tenantID)) {
-                            throw new APIManagementException("Scope '" + uriTemplate.getScope().getKey() + "' "
-                                    + "is already used by another API.");
-                        }
-
-                        ps.setString(1, uriTemplate.getScope().getKey());
-                        ps.setString(2, uriTemplate.getScope().getName());
-                        ps.setString(3, uriTemplate.getScope().getDescription());
-                        ps.setInt(4, tenantID);
-                        ps.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
-                        ps.execute();
-                        rs = ps.getGeneratedKeys();
-                        if (rs.next()) {
-                            uriTemplate.getScope().setId(String.valueOf(rs.getInt(1)));
-                        }
-
-                        String roles = uriTemplate.getScope().getRoles();
-                        //Adding scope bindings
-                        List<String> roleList = Lists.newArrayList(Splitter.on(",").trimResults().split(roles));
-                        for (String role : roleList) {
-                            ps3.setInt(1, Integer.parseInt(uriTemplate.getScope().getId()));
-                            ps3.setString(2, role);
-                            ps3.setString(3, APIConstants.DEFAULT_BINDING_TYPE);
-                            ps3.addBatch();
-                        }
-                        ps3.executeBatch();
-
-                        ps2.setInt(1, apiID);
-                        ps2.setInt(2, Integer.parseInt(uriTemplate.getScope().getId()));
-                        ps2.execute();
-                        conn.commit();
-                    } else if (object instanceof Scope) {
-                        Scope scope = (Scope) object;
-                        if (!scopeSharingEnabled && isScopeKeyAssigned(apiIdentifier, scope.getKey(), tenantID)) {
-                            throw new APIManagementException("Scope '" + scope.getKey() + "' is already used " +
-                                    "by another API.");
-                        }
-                        ps.setString(1, scope.getKey());
-                        ps.setString(2, scope.getName());
-                        ps.setString(3, scope.getDescription());
-                        ps.setInt(4, tenantID);
-                        ps.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
-                        ps.execute();
-                        rs = ps.getGeneratedKeys();
-                        if (rs.next()) {
-                            scope.setId(String.valueOf(rs.getInt(1)));
-                        }
-
-                        String roles = scope.getRoles();
-                        //Adding scope bindings
-                        List<String> roleList;
-                        if (roles != null) {
-                            roleList = Lists.newArrayList(Splitter.on(",").trimResults().split(roles));
-                        } else {
-                            roleList = Arrays.asList("");
-                        }
-
-                        for (String role : roleList) {
-                            ps3.setInt(1, Integer.parseInt(scope.getId()));
-                            ps3.setString(2, role);
-                            ps3.setString(3, APIConstants.DEFAULT_BINDING_TYPE);
-                            ps3.addBatch();
-                        }
-                        ps3.executeBatch();
-                        ps2.setInt(1, apiID);
-                        ps2.setInt(2, Integer.parseInt(scope.getId()));
-                        ps2.execute();
-                        conn.commit();
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            try {
-                if (conn != null) {
-                    conn.rollback();
-                }
-            } catch (SQLException e1) {
-                handleException("Error occurred while Rolling back changes done on Scopes Creation", e1);
-            }
-            handleException("Error occurred while creating scopes ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-            APIMgtDBUtil.closeAllConnections(ps2, null, null);
-        }
-    }
-
-    /**
-     * Check a given scope key already exist for a tenant
-     *
-     * @param scopeKey Scope Key
-     * @param tenantId Tenant ID
-     * @return true if scope already exists
-     * @throws APIManagementException if an error occurs while executing db query
-     */
-    private boolean isScopeExists(String scopeKey, int tenantId) throws APIManagementException {
-        Connection conn = null;
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-
-            String sqlQuery = SQLConstants.GET_SCOPES_SQL;
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, scopeKey);
-            ps.setInt(2, tenantId);
-            resultSet = ps.executeQuery();
-            if (resultSet.next()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Scope key " + scopeKey + " for tenant " + tenantId + " exists.");
-                }
-                return true;
-            }
-        } catch (SQLException e) {
-            handleException("Failed to check scope exists for scope " + scopeKey, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-        }
-        return false;
-    }
-
     /**
      * Get Scope keys attached to the given API.
      *
@@ -9311,82 +9142,6 @@ public class ApiMgtDAO {
         return scopeKeySet;
     }
 
-    public void addScopes(Connection conn, Set<?> objects, int api_id, int tenantID)
-            throws APIManagementException {
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<String> scopeIds = new ArrayList<>();
-        String scopeEntry = SQLConstants.ADD_SCOPE_ENTRY_SQL;
-        try {
-            String scopeId = "SCOPE_ID";
-            if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
-                scopeId = "scope_id";
-            }
-            if (objects != null) {
-                for (Object object : objects) {
-                    ps = conn.prepareStatement(scopeEntry, new String[]{scopeId});
-                    if (object instanceof URITemplate) {
-                        URITemplate uriTemplate = (URITemplate) object;
-                        if (uriTemplate.getScope() == null) {
-                            continue;
-                        }
-                        ps.setString(1, uriTemplate.getScope().getKey());
-                        ps.setString(2, uriTemplate.getScope().getName());
-                        ps.setString(3, uriTemplate.getScope().getDescription());
-                        ps.setInt(4, tenantID);
-                        ps.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
-                        ps.execute();
-                        rs = ps.getGeneratedKeys();
-                        if (rs.next()) {
-                            String scopeIdValue = String.valueOf(rs.getInt(1));
-                            uriTemplate.getScope().setId(scopeIdValue);
-                            scopeIds.add(scopeIdValue);
-                        }
-                    } else if (object instanceof Scope) {
-                        Scope scope = (Scope) object;
-                        ps.setString(1, scope.getKey());
-                        ps.setString(2, scope.getName());
-                        ps.setString(3, scope.getDescription());
-                        ps.setInt(4, tenantID);
-                        ps.setString(5, APIConstants.DEFAULT_SCOPE_TYPE);
-                        ps.execute();
-                        rs = ps.getGeneratedKeys();
-                        if (rs.next()) {
-                            String scopeIdValue = String.valueOf(rs.getInt(1));
-                            scope.setId(scopeIdValue);
-                            scopeIds.add(scopeIdValue);
-                        }
-                    }
-                }
-                addScopeLinks(conn, scopeIds, api_id);
-            }
-        } catch (SQLException e) {
-            handleException("Error occurred while creating scopes ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, null, rs);
-        }
-    }
-
-    private void addScopeLinks(Connection connection, List<String> scopeIds, int apiId) throws APIManagementException {
-        String scopeLink = SQLConstants.ADD_SCOPE_LINK_SQL;
-        PreparedStatement ps = null;
-        try {
-            if (scopeIds != null) {
-                ps = connection.prepareStatement(scopeLink);
-                for (String scopeId : scopeIds) {
-                    ps.setInt(1, apiId);
-                    ps.setInt(2, Integer.parseInt(scopeId));
-                    ps.addBatch();
-                }
-                ps.executeBatch();
-            }
-        } catch (SQLException e) {
-            handleException("Error occurred while creating scope links ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, null, null);
-        }
-    }
-
     /**
      * Generate Set<Scope> from HashMap
      *
@@ -9404,12 +9159,12 @@ public class ApiMgtDAO {
      * Returns all the scopes assigned for given apis
      *
      * @param apiIdsString list of api ids separated by commas
-     * @return Map<String, Set<Scope>> set of scopes for each apiId
+     * @return Map<String, Set<String>> set of scope keys for each apiId
      * @throws APIManagementException
      */
-    public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
+    public Map<String, Set<String>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
 
-        Map<String, Set<Scope>> apiScopeSet = new HashMap<String, Set<Scope>>();
+        Map<String, Set<String>> apiScopeSet = new HashMap();
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
 
@@ -9426,17 +9181,14 @@ public class ApiMgtDAO {
                  ResultSet resultSet = ps.executeQuery()) {
                 while (resultSet.next()) {
                     String apiId = resultSet.getString(1);
-                    Scope scope = new Scope();
-                    scope.setId(String.valueOf(resultSet.getInt(2)));
-                    scope.setKey(resultSet.getString(3));
-                    scope.setDescription(resultSet.getString(4));
-                    Set<Scope> scopeList = apiScopeSet.get(apiId);
+                    String scopeKey = resultSet.getString(2);
+                    Set<String> scopeList = apiScopeSet.get(apiId);
                     if (scopeList == null) {
-                        scopeList = new LinkedHashSet<Scope>();
-                        scopeList.add(scope);
+                        scopeList = new LinkedHashSet<>();
+                        scopeList.add(scopeKey);
                         apiScopeSet.put(apiId, scopeList);
                     } else {
-                        scopeList.add(scope);
+                        scopeList.add(scopeKey);
                         apiScopeSet.put(apiId, scopeList);
                     }
                 }
@@ -9606,56 +9358,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * update URI templates define for an API
-     * TODO: remove
-     *
-     * @param api
-     * @throws APIManagementException
-     */
-    public void updateScopesold(API api, int tenantId) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        int apiId = -1;
-
-        String deleteResourceScopes = SQLConstants.REMOVE_RESOURCE_SCOPE_SQL;
-        String deleteScopes = SQLConstants.REMOVE_SCOPE_SQL;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-
-            apiId = getAPIID(api.getId(), connection);
-            if (apiId == -1) {
-                //application addition has failed
-                return;
-            }
-
-            prepStmt = connection.prepareStatement(deleteResourceScopes);
-            prepStmt.setInt(1, apiId);
-            prepStmt.execute();
-
-            prepStmt = connection.prepareStatement(deleteScopes);
-            prepStmt.setInt(1, apiId);
-            prepStmt.execute();
-
-            connection.commit();
-        } catch (SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                }
-            } catch (SQLException e1) {
-                handleException("Error occurred while Rolling back changes done on Scopes updating", e1);
-            }
-            handleException("Error while updating Scopes for API : " + api.getId(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
-        }
-        addScopes(api.getUriTemplates(), api.getId(), apiId, tenantId);
-    }
-
-    /**
      * Get the unversioned local scope keys set of the API.
      *
      * @param apiIdentifier API Identifier
@@ -9720,32 +9422,6 @@ public class ApiMgtDAO {
         return localScopes;
     }
 
-    //TODO:remove
-    public HashMap<String, String> getResourceToScopeMapping(APIIdentifier identifier) throws APIManagementException {
-        Connection conn = null;
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
-        HashMap<String, String> map = new HashMap<String, String>();
-        int apiId;
-        try {
-            String sqlQuery = SQLConstants.GET_RESOURCE_TO_SCOPE_MAPPING_SQL;
-            apiId = getAPIID(identifier, conn);
-
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, apiId);
-            resultSet = ps.executeQuery();
-            while (resultSet.next()) {
-                map.put(resultSet.getString(1), resultSet.getString(2));
-            }
-        } catch (SQLException e) {
-            handleException("Failed to retrieve api scopes ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-        }
-        return map;
-    }
-
     public Map<String, String> getScopeRolesOfApplication(String consumerKey) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
@@ -9806,61 +9482,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(getIncludedApisInProduct, null, resultSet2);
         }
         return null;
-    }
-
-    /**
-     * Remove scope entries from DB, when delete APIs
-     * //TODO: remove
-     *
-     * @param apiIdentifier The {@link APIIdentifier} of the API
-     */
-    private void removeAPIScope(APIIdentifier apiIdentifier) throws APIManagementException {
-
-        Set<Scope> scopes = new HashSet<>();
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        PreparedStatement deleteOauth2ResourceScopePrepStmt = null;
-        PreparedStatement deleteOauth2ScopePrepStmt = null;
-        String scopeId;
-        int apiId = -1;
-
-        String deleteAPIScopeQuery = SQLConstants.REMOVE_FROM_API_SCOPES_SQL;
-        String deleteOauth2ScopeQuery = SQLConstants.REMOVE_FROM_OAUTH_SCOPE_SQL;
-        String deleteOauth2ResourceScopeQuery = SQLConstants.REMOVE_FROM_OAUTH_RESOURCE_SQL;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-
-            prepStmt = connection.prepareStatement(deleteAPIScopeQuery);
-            prepStmt.setInt(1, apiId);
-            prepStmt.execute();
-
-            if (!scopes.isEmpty()) {
-                deleteOauth2ResourceScopePrepStmt = connection.prepareStatement(deleteOauth2ResourceScopeQuery);
-                deleteOauth2ScopePrepStmt = connection.prepareStatement(deleteOauth2ScopeQuery);
-                for (Scope scope : scopes) {
-                    scopeId = scope.getId();
-
-                    deleteOauth2ResourceScopePrepStmt.setInt(1, Integer.parseInt(scopeId));
-                    deleteOauth2ResourceScopePrepStmt.addBatch();
-
-                    deleteOauth2ScopePrepStmt.setInt(1, Integer.parseInt(scopeId));
-                    deleteOauth2ScopePrepStmt.addBatch();
-                }
-                deleteOauth2ResourceScopePrepStmt.executeBatch();
-                deleteOauth2ScopePrepStmt.executeBatch();
-            }
-
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Error while removing the scopes for the API: " +
-                    apiIdentifier.getApiName() + " from the database", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(deleteOauth2ResourceScopePrepStmt, null, null);
-            APIMgtDBUtil.closeAllConnections(deleteOauth2ScopePrepStmt, null, null);
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
-        }
     }
 
     /**
@@ -10004,45 +9625,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Check the given scope key is already available under given tenant
-     *
-     * @param scopeKey candidate scope key
-     * @param tenantId tenant id
-     * @return true if the scope key is already available
-     * @throws APIManagementException
-     */
-    public boolean isScopeKeyExist(String scopeKey, int tenantId) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet resultSet = null;
-
-        String query = SQLConstants.GET_SCOPE_KEY_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-
-            prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, scopeKey);
-            prepStmt.setInt(2, tenantId);
-            resultSet = prepStmt.executeQuery();
-
-            int scopeCount = 0;
-            if (resultSet != null) {
-                while (resultSet.next()) {
-                    scopeCount = resultSet.getInt("SCOPE_COUNT");
-                }
-            }
-            if (scopeCount > 0) {
-                return true;
-            }
-        } catch (SQLException e) {
-            handleException("Failed to check Scope Key availability : " + scopeKey, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
-        }
-        return false;
-    }
-
-    /**
      * Check whether the given scope key is already assigned locally to another API than given under given tenant.
      * This will skip and return false, if no such APIs are available and even if such APIs are available, only when
      * those are different versions of the same API which we are trying to attach the scope for.
@@ -10098,74 +9680,6 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to check scope key to API assignment for scope: " + scopeKey, e);
-        }
-        return false;
-    }
-
-    /**
-     * Check whether the given scope key is already assigned to another API than given under given tenant
-     *
-     * @param identifier API Identifier
-     * @param scopeKey   candidate scope key
-     * @param tenantId   tenant id
-     * @return true if the scope key is already available
-     * @throws APIManagementException if failed to check the context availability
-     */
-    public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantId)
-            throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        PreparedStatement prepStmt2 = null;
-        ResultSet resultSet = null;
-        ResultSet resultSet2 = null;
-
-        String apiScopeQuery = SQLConstants.GET_API_SCOPE_SQL;
-        String getApiQuery = SQLConstants.GET_API_ID_SQL;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-
-            prepStmt = connection.prepareStatement(apiScopeQuery);
-            prepStmt.setString(1, scopeKey);
-            prepStmt.setInt(2, tenantId);
-            resultSet = prepStmt.executeQuery();
-
-            if (resultSet != null && resultSet.next()) {
-                int apiID = resultSet.getInt("API_ID");
-                String provider = resultSet.getString("API_PROVIDER");
-                String apiName = resultSet.getString("API_NAME");
-
-                prepStmt2 = connection.prepareStatement(getApiQuery);
-                prepStmt2.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-                prepStmt2.setString(2, identifier.getApiName());
-                prepStmt2.setString(3, identifier.getVersion());
-                resultSet2 = prepStmt2.executeQuery();
-
-                if (resultSet2 != null && resultSet2.next()) {
-                    //If the API ID is different from the one being saved
-                    if (apiID != resultSet2.getInt("API_ID")) {
-                        //Check if the provider name and api name is same.
-                        if (provider.equals(APIUtil.replaceEmailDomainBack(identifier.getProviderName())) && apiName
-                                .equals(identifier.getApiName())) {
-
-                            //Return false since this means we're attaching the scope to another version of the API.
-                            return false;
-                        }
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    //If the API which is being saved is not available in the DB, but if the scope is key already
-                    //available in the DB, return true since this means the scope is already assigned to another API.
-                    return true;
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to check Scope Key availability : " + scopeKey, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt2, null, resultSet2);
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
         return false;
     }
@@ -14577,7 +14091,7 @@ public class ApiMgtDAO {
 
     /**
      * get resource mapping of the api product
-     *
+     * TODO://Get resource scopes from AM_API_RESOURCE_SCOPE table and retrieve scope meta data and bindings from KM.
      * @param productIdentifier api product identifier
      * @throws APIManagementException
      */
