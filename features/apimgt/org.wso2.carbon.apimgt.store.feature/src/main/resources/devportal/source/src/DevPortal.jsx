@@ -218,11 +218,22 @@ class DevPortal extends React.Component {
             cssUrlWithTenant = tenantCustomCss.replace('<tenant-domain>', tenantDomain);
         }
         if (cssUrlWithTenant) {
+            let url = cssUrlWithTenant;
+            
+            if(Settings.app.context === ''){
+                if(/^\//.test(cssUrlWithTenant)){
+                    url = cssUrlWithTenant.substr(1);
+                } else {
+                    url = cssUrlWithTenant;
+                }
+            } else {
+                url = Settings.app.context + '/' + cssUrlWithTenant;
+            }
             return (
                 <link
                     rel='stylesheet'
                     type='text/css'
-                    href={`${Settings.app.context}/${cssUrlWithTenant}`}
+                    href={url}
                 />
             );
         } else {

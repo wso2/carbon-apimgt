@@ -45,9 +45,15 @@ import Progress from '../Progress';
 const styles = (theme) => ({
     root: {
         padding: theme.spacing(3),
+        '& span, & h5, & label, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
     },
     button: {
         marginLeft: 0,
+        '& span': {
+            color: theme.palette.getContrastText(theme.palette.primary.main),
+        }
     },
     cleanUpButton: {
         marginLeft: 15,

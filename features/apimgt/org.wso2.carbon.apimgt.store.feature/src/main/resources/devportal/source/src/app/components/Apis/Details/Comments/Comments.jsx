@@ -43,10 +43,16 @@ const styles = theme => ({
         marginRight: theme.spacing(3),
         paddingBottom: theme.spacing(3),
         paddingRight: theme.spacing(2),
+        '& span, & h5, & label, & td, & li, & div, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
     },
     contentWrapper: {
         paddingLeft: theme.spacing(3),
         marginTop: theme.spacing(1),
+        '& span, & h5, & label, & td, & li, & div, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
     },
     contentWrapperOverview: {
         padding: 0,
@@ -55,6 +61,7 @@ const styles = theme => ({
     },
     titleSub: {
         cursor: 'pointer',
+        color: theme.palette.getContrastText(theme.palette.background.default),
     },
     link: {
         color: theme.palette.getContrastText(theme.palette.background.default),

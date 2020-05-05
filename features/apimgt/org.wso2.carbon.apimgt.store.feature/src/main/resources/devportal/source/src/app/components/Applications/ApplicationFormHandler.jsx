@@ -32,6 +32,20 @@ import { Link } from 'react-router-dom';
 import AuthManager from 'AppData/AuthManager';
 import Progress from 'AppComponents/Shared/Progress';
 import ApplicationCreateBase from './Create/ApplicationCreateBase';
+import { withStyles } from '@material-ui/core/styles';
+
+/**
+ * Main style object
+ *
+ * @param {*} theme
+ */
+const styles = theme => ({
+    button: {
+        '& span': {
+            color: theme.palette.getContrastText(theme.palette.primary.main),
+        }
+    }
+});
 
 /**
  * Component used to handle application creation
@@ -379,7 +393,7 @@ class ApplicationFormHandler extends React.Component {
             throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled,
             isEdit, applicationOwner,
         } = this.state;
-        const { match: { params } } = this.props;
+        const { match: { params }, classes } = this.props;
 
         const CreatePageTitle = (
             <>
@@ -448,6 +462,7 @@ class ApplicationFormHandler extends React.Component {
                                             color='primary'
                                             onClick={isEdit ? this.saveEdit : this.saveApplication}
                                             disabled={isEdit && AuthManager.getUser().name !== applicationOwner}
+                                            className={classes.button}
                                         >
                                             <FormattedMessage
                                                 id='Applications.Create.ApplicationFormHandler.save'
@@ -494,4 +509,4 @@ ApplicationFormHandler.propTypes = {
     }).isRequired,
 };
 
-export default injectIntl(ApplicationFormHandler);
+export default injectIntl(withStyles(styles)(ApplicationFormHandler));

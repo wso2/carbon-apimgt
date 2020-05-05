@@ -114,6 +114,29 @@ const styles = theme => ({
     container: {
         height: '100%',
     },
+    appTablePaper: {
+        '& table tr td':{
+            paddingLeft: theme.spacing(1),
+        },
+        '& table tr:nth-child(even)': {
+            backgroundColor: theme.custom.listView.tableBodyEvenBackgrund,
+            '& td, & a, & .material-icons': {
+                color: theme.palette.getContrastText(theme.custom.listView.tableBodyEvenBackgrund),
+            },
+        },
+        '& table tr:nth-child(odd)': {
+            backgroundColor: theme.custom.listView.tableBodyOddBackgrund,
+            '& td, & a, & .material-icons': {
+                color: theme.palette.getContrastText(theme.custom.listView.tableBodyOddBackgrund),
+            },
+        },
+        '& table th': {
+            backgroundColor: theme.custom.listView.tableHeadBackground,
+            color: theme.palette.getContrastText(theme.custom.listView.tableHeadBackground),
+            paddingLeft: theme.spacing(1),
+        },
+
+    },
 });
 
 /**

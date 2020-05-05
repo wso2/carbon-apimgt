@@ -3,16 +3,30 @@ import PropTypes from 'prop-types';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
+import { withStyles } from '@material-ui/core/styles';
 
-
+/**
+ * @inheritdoc
+ * @param {*} theme theme object
+ */
+const styles = (theme) => ({
+    createTitle: {
+        color: theme.palette.getContrastText(theme.palette.background.default),
+    },
+    applicationContent: {
+        '& span, & div, & p, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        }
+    }
+});
 /**
  * Base component for all API create forms
  *
  * @param {Object} props title and children components are expected
  * @returns {React.Component} Base element
  */
-export default function ApplicationCreateBase(props) {
-    const { title, children } = props;
+function ApplicationCreateBase(props) {
+    const { title, children, classes } = props;
     return (
         <Box mt={5}>
             <Grid container spacing={3}>
@@ -23,10 +37,10 @@ export default function ApplicationCreateBase(props) {
                 <Grid item sm={12} md={3} />
                 <Grid item sm={12} md={6}>
                     <Grid container spacing={5}>
-                        <Grid item md={12}>
+                        <Grid item md={12} className={classes.createTitle}>
                             {title}
                         </Grid>
-                        <Grid item md={12}>
+                        <Grid item md={12} className={classes.applicationContent}>
                             <Paper elevation={0}>{children}</Paper>
                         </Grid>
                     </Grid>
@@ -40,3 +54,4 @@ ApplicationCreateBase.propTypes = {
     title: PropTypes.element.isRequired,
     children: PropTypes.element.isRequired,
 };
+export default withStyles(styles)(ApplicationCreateBase);

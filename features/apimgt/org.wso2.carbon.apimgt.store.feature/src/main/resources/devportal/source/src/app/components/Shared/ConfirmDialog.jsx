@@ -22,6 +22,15 @@ import {
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { withStyles } from '@material-ui/core/styles';
+
+const styles = (theme) => ({
+    dialogWrapper: {
+        '& span, & h5, & label, & td, & li, & div, & p': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
+    },
+});
 
 /**
  * React component for handling confirmation dialog box
@@ -50,11 +59,11 @@ class ConfirmDialog extends React.Component {
      */
     render() {
         const {
-            title, message, labelCancel, labelOk, open,
+            title, message, labelCancel, labelOk, open, classes,
         } = this.props;
 
         return (
-            <Dialog open={open} onClose={this.handleRequestClose}>
+            <Dialog open={open} onClose={this.handleRequestClose} className={classes.dialogWrapper}>
                 <DialogTitle>{title || <FormattedMessage id='Shared.ConfirmDialog.please.confirm' defaultMessage='Please Confirm' />}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>{message || <FormattedMessage id='Shared.ConfirmDialog.please.confirm.sure' defaultMessage='Are you sure?' />}</DialogContentText>
@@ -63,7 +72,7 @@ class ConfirmDialog extends React.Component {
                     <Button onClick={() => this.handleRequestClose(ConfirmDialog.Action.CANCEL)} color='primary'>
                         {labelCancel || <FormattedMessage id='Shared.ConfirmDialog.cancel' defaultMessage='Cancel' />}
                     </Button>
-                    <Button onClick={() => this.handleRequestClose(ConfirmDialog.Action.OK)} color='primary'>
+                    <Button onClick={() => this.handleRequestClose(ConfirmDialog.Action.OK)} color='primary' variant='contained'>
                         {labelOk || <FormattedMessage id='Shared.ConfirmDialog.ok' defaultMessage='OK' />}
                     </Button>
                 </DialogActions>
@@ -85,4 +94,4 @@ ConfirmDialog.Action = {
     CANCEL: 'cancel',
 };
 
-export default ConfirmDialog;
+export default withStyles(styles)(ConfirmDialog);

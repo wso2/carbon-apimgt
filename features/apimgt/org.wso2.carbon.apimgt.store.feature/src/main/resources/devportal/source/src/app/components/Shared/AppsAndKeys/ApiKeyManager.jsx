@@ -41,10 +41,19 @@ import ListItem from "@material-ui/core/ListItem";
 const styles = (theme) => ({
     root: {
         padding: theme.spacing(3),
+        '& span, & h5, & label, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
+    },
+    dialog: {
+        '& span, & h2, & label': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
     },
     button: {
-        marginLeft: theme.spacing(5),
-        padding: '10px',
+        '& span': {
+            color: theme.palette.getContrastText(theme.palette.primary.main),
+        }
     },
     tokenSection: {
         marginTop: theme.spacing(2),
@@ -226,6 +235,7 @@ class ApiKeyManager extends React.Component {
                     open={open}
                     onClose={this.handleClose}
                     aria-labelledby="form-dialog-title"
+                    className={classes.dialog}
                   >
                     <DialogTitle id="responsive-dialog-title" className={classes.dialogTitle}>
                       {"Generate API Key"}
@@ -247,6 +257,8 @@ class ApiKeyManager extends React.Component {
                           onClick={this.generateKeys}
                           disabled={!accessTokenRequest.timeout}
                           color="primary"
+                          variant='contained'
+                          className={classes.button}
                         >
                           <FormattedMessage
                             id="Shared.AppsAndKeys.ViewKeys.consumer.generate.btn"
