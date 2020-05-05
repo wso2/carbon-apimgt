@@ -33,6 +33,7 @@
         "tags" : [ "Registries" ],
         "summary" : "Create a new Registry",
         "description" : "This operation can be used to create a new Registry specifying the details of the Registry in the payload.\n",
+        "operationId" : "addRegistry",
         "requestBody" : {
           "content" : {
             "application/json" : {

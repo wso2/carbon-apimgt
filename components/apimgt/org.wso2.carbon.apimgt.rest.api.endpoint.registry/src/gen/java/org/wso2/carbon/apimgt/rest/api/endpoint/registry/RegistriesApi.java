@@ -42,13 +42,29 @@ import java.util.List;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-03T15:59:22.999+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-05T11:04:42.113+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
     @Context MessageContext securityContext;
 
     RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
+        @POST
+        
+        @Consumes({ "application/json" })
+        @Produces({ "application/json" })
+            @Operation(summary = "Create a new Registry", description = "This operation can be used to create a new Registry specifying the details of the Registry in the payload. ", tags={ "Registries" })
+            @ApiResponses(value = { 
+                @ApiResponse(responseCode = "201", description = "Created. Successful response with the newly created Registry object as entity in the body. ", content = @Content(schema = @Schema(implementation = RegistryDTO.class))),
+                @ApiResponse(responseCode = "405", description = "Bad Request. Invalid request or validation error. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                @ApiResponse(responseCode = "415", description = "Unsupported Media Type. The entity of the request was in a not supported format. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))) })
+        public Response addRegistry(    
+    @Parameter(description = "" ) RegistryDTO body
+
+
+) throws APIManagementException{
+        return delegate.addRegistry(body, securityContext);
+        }
         @GET
         @Path("/{registryId}/entries")
         
@@ -92,22 +108,6 @@ public class RegistriesApi  {
                 @ApiResponse(responseCode = "200", description = "OK. Array of Registries is returned. ", content = @Content(schema = @Schema(implementation = RegistryArrayDTO.class))) })
         public Response registriesGet() throws APIManagementException{
         return delegate.registriesGet(securityContext);
-        }
-        @POST
-        
-        @Consumes({ "application/json" })
-        @Produces({ "application/json" })
-            @Operation(summary = "Create a new Registry", description = "This operation can be used to create a new Registry specifying the details of the Registry in the payload. ", tags={ "Registries" })
-            @ApiResponses(value = { 
-                @ApiResponse(responseCode = "201", description = "Created. Successful response with the newly created Registry object as entity in the body. ", content = @Content(schema = @Schema(implementation = RegistryDTO.class))),
-                @ApiResponse(responseCode = "405", description = "Bad Request. Invalid request or validation error. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
-                @ApiResponse(responseCode = "415", description = "Unsupported Media Type. The entity of the request was in a not supported format. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))) })
-        public Response registriesPost(    
-    @Parameter(description = "" ) RegistryDTO body
-
-
-) throws APIManagementException{
-        return delegate.registriesPost(body, securityContext);
         }
         @POST
         @Path("/{registryId}/entry")

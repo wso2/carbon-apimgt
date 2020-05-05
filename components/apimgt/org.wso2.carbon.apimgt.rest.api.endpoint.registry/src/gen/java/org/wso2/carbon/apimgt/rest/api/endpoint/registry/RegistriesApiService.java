@@ -23,10 +23,10 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-03T15:59:22.999+05:30[Asia/Colombo]")public interface RegistriesApiService {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-05T11:04:42.113+05:30[Asia/Colombo]")public interface RegistriesApiService {
+        public Response addRegistry(RegistryDTO body, MessageContext messageContext) throws APIManagementException;
         public Response getAllEntriesInRegistry(String registryId, MessageContext messageContext) throws APIManagementException;
         public Response getRegistryByUUID(String registryId, MessageContext messageContext) throws APIManagementException;
         public Response registriesGet(MessageContext messageContext) throws APIManagementException;
-        public Response registriesPost(RegistryDTO body, MessageContext messageContext) throws APIManagementException;
         public Response registriesRegistryIdEntryPost(String registryId, RegistryEntryDTO registryEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
 }

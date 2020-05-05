@@ -73,6 +73,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
@@ -1941,6 +1942,11 @@ public final class APIUtil {
     public static void handleInternalException(String msg, Throwable t) throws APIMgtInternalException {
         log.error(msg, t);
         throw new APIMgtInternalException(msg, t);
+    }
+
+    public static void handleResourceAlreadyExistsException(String msg) throws APIMgtResourceAlreadyExistsException {
+        log.error(msg);
+        throw new APIMgtResourceAlreadyExistsException(msg);
     }
 
     public static void handleAuthFailureException(String msg) throws APIMgtAuthorizationFailedException {
@@ -8535,8 +8541,8 @@ public final class APIUtil {
                                  final long accessExp) {
 
         Iterable<Cache<?, ?>> availableCaches = Caching.getCacheManager(cacheManagerName).getCaches();
-        for (Cache cache:availableCaches) {
-            if(cache.getName().equalsIgnoreCase(getCacheName(cacheName))){
+        for (Cache cache : availableCaches) {
+            if (cache.getName().equalsIgnoreCase(getCacheName(cacheName))) {
                 return Caching.getCacheManager(cacheManagerName).getCache(cacheName);
             }
         }
@@ -8561,8 +8567,8 @@ public final class APIUtil {
     }
 
     private static String getCacheName(String cacheName) {
-        return Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("Cache.ForceLocalCache"))
-                && !cacheName.startsWith("$__local__$.") ? "$__local__$." + cacheName : cacheName;
+        return (Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("Cache.ForceLocalCache"))
+                && !cacheName.startsWith("$__local__$.")) ? "$__local__$." + cacheName : cacheName;
     }
 
     /**
