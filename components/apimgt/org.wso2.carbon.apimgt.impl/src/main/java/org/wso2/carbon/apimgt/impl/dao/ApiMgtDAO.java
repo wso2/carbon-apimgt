@@ -14737,15 +14737,18 @@ public class ApiMgtDAO {
         String uuid = UUID.randomUUID().toString();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
             ps.setString(1, uuid);
             ps.setString(2, endpointRegistry.getName());
             ps.setString(3, endpointRegistry.getType());
             ps.setString(4, endpointRegistry.getMode());
             ps.setInt(5, tenantID);
             ps.setString(6, endpointRegistry.getOwner());
+            // Need to update the role names
             ps.setString(7, "");
             ps.setString(8, "");
             ps.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
             handleException("Error while adding new endpoint registry: " + endpointRegistry.getName(), e);
         }
@@ -14761,25 +14764,26 @@ public class ApiMgtDAO {
      */
     public EndpointRegistry getEndpointRegistryByUUID(String regsitryId) throws APIManagementException {
         String query = SQLConstants.GET_ENDPOINT_REGISTRY_BY_UUID;
-        EndpointRegistry endpointRegistry = new EndpointRegistry();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, regsitryId);
             ps.executeQuery();
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
+                    EndpointRegistry endpointRegistry = new EndpointRegistry();
                     endpointRegistry.setUuid(rs.getString("UUID"));
                     endpointRegistry.setName(rs.getString("REG_NAME"));
                     endpointRegistry.setType(rs.getString("REG_TYPE"));
                     endpointRegistry.setMode(rs.getString("MODE"));
                     endpointRegistry.setOwner(rs.getString("REG_OWNER"));
+                    return endpointRegistry;
                 }
             }
         } catch (SQLException e) {
             handleException("Error while retrieving details of endpoint registry with Id: "
                     + regsitryId, e);
         }
-        return endpointRegistry;
+        return null;
     }
 
     /**

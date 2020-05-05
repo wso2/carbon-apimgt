@@ -36,7 +36,7 @@ public class EndpointRegistryMappingUtils {
         registry.setName(registryDTO.getName());
         registry.setOwner(owner);
         registry.setType(registryDTO.getType().toString());
-        registry.setMode(registryDTO.getType().toString());
+        registry.setMode(registryDTO.getMode().toString());
         return registry;
     }
 
