@@ -489,12 +489,15 @@ public abstract class AbstractAPIManager implements APIManager {
      * @throws APIManagementException
      */
     public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+        boolean tenantFlowStarted = false;
         try {
             Registry registry;
             if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
                     (requestedTenantDomain)) {
                 int id = getTenantManager()
                         .getTenantId(requestedTenantDomain);
+                startTenantFlow(requestedTenantDomain);
+                tenantFlowStarted = true;
                 registry = getRegistryService().getGovernanceSystemRegistry(id);
             } else {
                 if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
@@ -532,6 +535,10 @@ public abstract class AbstractAPIManager implements APIManager {
             String msg = "Failed to get API";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
+        } finally {
+            if (tenantFlowStarted) {
+                endTenantFlow();
+            }
         }
     }
 

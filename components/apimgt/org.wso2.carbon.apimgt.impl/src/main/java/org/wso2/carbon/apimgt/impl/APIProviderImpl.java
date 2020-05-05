@@ -3490,7 +3490,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.isEndpointSecured() && StringUtils.isEmpty(api.getEndpointUTPassword())) {
             String errorMessage = "Empty password is given for endpointSecurity when creating API "
                     + api.getId().getApiName();
-            log.error(errorMessage);
             throw new APIManagementException(errorMessage);
         }
 
