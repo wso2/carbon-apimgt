@@ -7299,12 +7299,13 @@ public class ApiMgtDAO {
         return conditionGroupDTO;
     }
 
+    public void updateAPI(API api) throws APIManagementException {
 
-    public void updateAPI(API api, int tenantId) throws APIManagementException {
-        updateAPI(api, tenantId, null);
+        updateAPI(api, null);
     }
 
-    public void updateAPI(API api, int tenantId, String username) throws APIManagementException {
+    public void updateAPI(API api, String username) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
 
