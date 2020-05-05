@@ -404,6 +404,8 @@ public final class APIImportUtil {
                     throw new APIImportExportException("Cannot remove following resource paths " +
                             resourcesToRemove.toString() + " because they are used by one or more API Products");
                 }
+                //preProcess swagger definition
+                swaggerContent = OASParserUtil.preProcess(swaggerContent);
 
                 addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
                 //If graphQL API, import graphQL schema definition to registry
