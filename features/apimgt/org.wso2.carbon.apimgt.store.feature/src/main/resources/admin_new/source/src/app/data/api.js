@@ -246,9 +246,10 @@ class API extends Resource {
      /**
      * Update an Application Throttling Policy
      */
-    updateApplicationThrottlingPolicy(body) {
+    updateApplicationThrottlingPolicy(policyId, body) {
         return this.client.then((client) => {
             const payload = {
+                policyId: policyId,
                 body,
                 'Content-Type': 'application/json',
             };
