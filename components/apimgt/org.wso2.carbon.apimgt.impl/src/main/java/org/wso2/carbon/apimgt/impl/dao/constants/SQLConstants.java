@@ -1406,6 +1406,17 @@ public class SQLConstants {
             " GROUP BY " +
             "   API_ID ";
 
+    public static final String ADD_ENDPOINT_REGISTRY_SQL =
+            "INSERT INTO ENDPOINT_REG (UUID, REG_NAME, REG_TYPE, MODE, TENANT_ID, REG_OWNER, READ_ROLE," +
+                    " WRITE_ROLE) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+    public static final String GET_ENDPOINT_REGISTRY_BY_UUID =
+            " SELECT UUID, REG_NAME, REG_TYPE, MODE, TENANT_ID, REG_OWNER, READ_ROLE, WRITE_ROLE FROM " +
+                    "ENDPOINT_REG WHERE UUID = ?";
+
+    public static final String IS_ENDPOINT_REGISTRY_NAME_EXISTS = "SELECT COUNT(UUID) AS ENDPOINT_REGISTRY_COUNT" +
+            " FROM ENDPOINT_REG WHERE LOWER(REG_NAME) = LOWER(?) AND TENANT_ID = ?";
+
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
             "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME, " +

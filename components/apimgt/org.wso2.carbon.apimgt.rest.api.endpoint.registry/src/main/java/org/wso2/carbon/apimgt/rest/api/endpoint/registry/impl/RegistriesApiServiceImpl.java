@@ -18,7 +18,13 @@
 
 package org.wso2.carbon.apimgt.rest.api.endpoint.registry.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.EndpointRegistry;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApiService;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -27,6 +33,8 @@ import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryArrayDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryArrayDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryDTO;
+import org.wso2.carbon.apimgt.rest.api.endpoint.registry.util.EndpointRegistryMappingUtils;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.InputStream;
 
@@ -35,6 +43,8 @@ import javax.ws.rs.core.Response;
 
 @RequestScoped
 public class RegistriesApiServiceImpl implements RegistriesApiService {
+
+    private static final Log log = LogFactory.getLog(RegistriesApiServiceImpl.class);
 
     @Override
     public Response getAllEntriesInRegistry(String registryId, MessageContext messageContext) {
@@ -73,8 +83,22 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     }
 
     @Override
-    public Response registriesPost(RegistryDTO body, MessageContext messageContext) {
-        return Response.ok().entity(body).build();
+    public Response addRegistry(RegistryDTO body, MessageContext messageContext) {
+        String user = RestApiUtil.getLoggedInUsername();
+        EndpointRegistry registry = EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(body, user);
+        EndpointRegistry createdRegistry = new EndpointRegistry();
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String registryId = apiProvider.addEndpointRegistry(registry);
+            createdRegistry = apiProvider.getEndpointRegistryByUUID(registryId);
+        } catch (APIMgtResourceAlreadyExistsException e) {
+            RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry with name '" + body.getName()
+                    + "' already exists", e, log);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while adding new endpoint registry: "
+                    + registry.getName(), e, log);
+        }
+        return Response.ok().entity(createdRegistry).build();
     }
 
     @Override

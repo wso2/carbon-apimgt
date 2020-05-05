@@ -54,6 +54,7 @@ paths:
         This operation can be used to create a new Registry specifying the details of the Registry in the payload.
       tags:
         - Registries
+      operationId: addRegistry
       requestBody:
         content:
           application/json:
