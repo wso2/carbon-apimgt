@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -14722,5 +14723,92 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return list;
+    }
+
+    /**
+     * Add a new endpoint registry
+     *
+     * @param endpointRegistry EndpointRegistryInfo
+     * @param tenantID  ID of the owner's tenant
+     * @return registryId
+     */
+    public String addEndpointRegistry(EndpointRegistryInfo endpointRegistry, int tenantID) throws APIManagementException {
+        String query = SQLConstants.ADD_ENDPOINT_REGISTRY_SQL;
+        String uuid = UUID.randomUUID().toString();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            ps.setString(1, uuid);
+            ps.setString(2, endpointRegistry.getName());
+            ps.setString(3, endpointRegistry.getType());
+            ps.setString(4, endpointRegistry.getMode());
+            ps.setInt(5, tenantID);
+            ps.setString(6, endpointRegistry.getOwner());
+            // Need to update the role names
+            ps.setString(7, "");
+            ps.setString(8, "");
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding new endpoint registry: " + endpointRegistry.getName(), e);
+        }
+        return uuid;
+    }
+
+    /**
+     * Return the details of an Endpoint Registry
+     *
+     * @param regsitryId Endpoint Registry Identifier
+     * @return Endpoint Registry Object
+     * @throws APIManagementException
+     */
+    public EndpointRegistryInfo getEndpointRegistryByUUID(String regsitryId) throws APIManagementException {
+        String query = SQLConstants.GET_ENDPOINT_REGISTRY_BY_UUID;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, regsitryId);
+            ps.executeQuery();
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    EndpointRegistryInfo endpointRegistry = new EndpointRegistryInfo();
+                    endpointRegistry.setUuid(rs.getString("UUID"));
+                    endpointRegistry.setName(rs.getString("REG_NAME"));
+                    endpointRegistry.setType(rs.getString("REG_TYPE"));
+                    endpointRegistry.setMode(rs.getString("MODE"));
+                    endpointRegistry.setOwner(rs.getString("REG_OWNER"));
+                    return endpointRegistry;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving details of endpoint registry with Id: "
+                    + regsitryId, e);
+        }
+        return null;
+    }
+
+    /**
+     * Checks whether the given endpoint registry name is already available under given tenant domain
+     *
+     * @param registryName
+     * @param tenantID
+     * @return boolean
+     */
+    public boolean isEndpointRegistryNameExists(String registryName, int tenantID) throws APIManagementException {
+        String sql = SQLConstants.IS_ENDPOINT_REGISTRY_NAME_EXISTS;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, registryName);
+            statement.setInt(2, tenantID);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt("ENDPOINT_REGISTRY_COUNT");
+                if (count > 0) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check the existence of Endpoint Registry: " + registryName + " exists", e);
+        }
+        return false;
     }
 }
