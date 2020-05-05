@@ -144,7 +144,9 @@ public class FakeKeyManagerForTest implements KeyManager {
     }
 
     @Override
-    public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
+    public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString, String tenantDomain)
+            throws APIManagementException {
+
         return null;
     }
 

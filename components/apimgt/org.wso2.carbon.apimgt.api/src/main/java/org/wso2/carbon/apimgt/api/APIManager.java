@@ -453,7 +453,9 @@ public interface APIManager {
      * @param tenantid   tenant id
      * @return true if the scope key is already available
      * @throws APIManagementException if failed to check the context availability
+     * @deprecated Use isScopeKeyAssignedLocally() instead.
      */
+    @Deprecated
     boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid) throws APIManagementException;
 
     /**

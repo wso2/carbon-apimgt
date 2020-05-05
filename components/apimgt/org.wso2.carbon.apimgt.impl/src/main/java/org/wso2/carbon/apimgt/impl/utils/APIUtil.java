@@ -10648,8 +10648,22 @@ public final class APIUtil {
     public static Map<String, Scope> getAPIScopes(APIIdentifier identifier, String tenantDomain)
             throws APIManagementException {
 
-        Map<String, Scope> scopeToKeyMap = new HashMap<>();
         Set<String> scopeKeys = ApiMgtDAO.getInstance().getAPIScopeKeys(identifier);
+        return getScopes(scopeKeys, tenantDomain);
+    }
+
+    /**
+     * Get scopes for the given scope keys from authorization server.
+     *
+     * @param scopeKeys    Scope Keys
+     * @param tenantDomain Tenant Domain
+     * @return Scope key to Scope object mapping
+     * @throws APIManagementException if an error occurs while getting scopes using scope keys
+     */
+    public static Map<String, Scope> getScopes(Set<String> scopeKeys, String tenantDomain)
+            throws APIManagementException {
+
+        Map<String, Scope> scopeToKeyMap = new HashMap<>();
         for (String scopeKey : scopeKeys) {
             Scope scope = KeyManagerHolder.getKeyManagerInstance().getScopeByName(scopeKey, tenantDomain);
             scopeToKeyMap.put(scopeKey, scope);

@@ -421,10 +421,11 @@ public final class APIImportUtil {
                     Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
                     for (URITemplate uriTemplate : uriTemplates) {
                         Scope scope = uriTemplate.getScope();
-                        if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))
-                                && apiProvider.isScopeKeyAssigned(importedApi.getId(), scope.getKey(), tenantId)) {
+                        if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey())) &&
+                                apiProvider.isScopeKeyAssignedLocally(importedApi.getId(), scope.getKey(), tenantId)) {
                             String errorMessage =
-                                    "Error in adding API. Scope " + scope.getKey() + " is already assigned by another API.";
+                                    "Error in adding API. Scope " + scope.getKey() +
+                                            " is already assigned by another API.";
                             log.error(errorMessage);
                             throw new APIImportExportException(errorMessage);
                         }
