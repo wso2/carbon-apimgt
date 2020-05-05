@@ -218,7 +218,7 @@ class ProtectedApp extends Component {
             userResolved, tenantList, notEnoughPermission, tenantResolved, clientId,
         } = this.state;
         const checkSessionURL = Settings.idp.checkSessionEndpoint + '?client_id='
-            + clientId + '&redirect_uri='+ window.location.origin
+            + clientId + '&redirect_uri=' + window.location.origin
             + Settings.app.context + '/services/auth/callback/login';
         const { tenantDomain, settings } = this.context;
         if (!userResolved) {
@@ -255,7 +255,7 @@ class ProtectedApp extends Component {
         // check for widget=true in the query params. If it's present we render without <Base> component.
         const pageUrl = new URL(window.location);
         const isWidget = pageUrl.searchParams.get('widget');
-        if(isWidget) {
+        if (isWidget) {
             return (
                 <>
                     <iframe
