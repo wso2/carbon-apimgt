@@ -57,7 +57,6 @@ public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecut
             log.debug("Executing Subscription Creation Webservice Workflow.. ");
         }
         SubscriptionWorkflowDTO subsWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
-        String callBackURL = subsWorkflowDTO.getCallbackUrl();
         String message = "Approve API [" + subsWorkflowDTO.getApiName() + " - " + subsWorkflowDTO.getApiVersion() +
                 "] subscription creation request from subscriber - " + subsWorkflowDTO.getSubscriber() +
                 " for the application - " + subsWorkflowDTO.getApplicationName();

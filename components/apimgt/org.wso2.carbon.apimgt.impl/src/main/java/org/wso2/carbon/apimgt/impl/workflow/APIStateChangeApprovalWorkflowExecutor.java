@@ -135,7 +135,6 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
             String invoker = workflow.getMetadata("Invoker");
             String currentStatus = workflow.getMetadata("CurrentState");
             int tenantId = workflowDTO.getTenantId();
-            //ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             try {
                 //tenant flow is already started from the rest api service impl. no need to start from here
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(invoker);
