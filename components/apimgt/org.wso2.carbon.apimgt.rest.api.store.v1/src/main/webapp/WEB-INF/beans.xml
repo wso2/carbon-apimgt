@@ -47,7 +47,7 @@
     <bean id="ValidationInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor"/>
     <bean id="ETagInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.eTag.ETagInInterceptor"/>
     <bean id="ETagOutInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.eTag.ETagOutInterceptor"/>
-    <bean id="TokenMergeInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor" />
+    <bean id="TokenMergeInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor"/>
     <bean id="cors-filter" class="org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter">
         <property name="allowHeaders">
             <list>

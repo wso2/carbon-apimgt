@@ -8996,6 +8996,13 @@ definitions:
           openAPIVersion:
             type: string
             example: "3.0.0"
+          endpoints:
+            type: array
+            description: |
+              contains host/servers specified in the OpenAPI file/URL
+            items:
+              type: string
+              example: "https://localhost:9443/am/sample/pizzashack/v1/api/"
       errors:
         type: array
         description: |

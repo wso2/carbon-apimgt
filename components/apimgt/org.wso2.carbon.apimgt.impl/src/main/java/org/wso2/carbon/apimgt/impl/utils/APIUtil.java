@@ -73,6 +73,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
@@ -1943,6 +1944,11 @@ public final class APIUtil {
         throw new APIMgtInternalException(msg, t);
     }
 
+    public static void handleResourceAlreadyExistsException(String msg) throws APIMgtResourceAlreadyExistsException {
+        log.error(msg);
+        throw new APIMgtResourceAlreadyExistsException(msg);
+    }
+
     public static void handleAuthFailureException(String msg) throws APIMgtAuthorizationFailedException {
         log.error(msg);
         throw new APIMgtAuthorizationFailedException(msg);
@@ -2197,6 +2203,44 @@ public final class APIUtil {
         String wsdl2NameSpace = "http://www.w3.org/ns/wsdl";
         String wsdlContent = new String(wsdl);
         return wsdlContent.indexOf(wsdl2NameSpace) > 0;
+    }
+
+    /**
+     * Get the External IDP host name when UIs use an external IDP for SSO or other purpose
+     * By default this is equal to $ref{server.base_path} (i:e https://localhost:9443)
+     *
+     * @return Origin string of the external IDP
+     */
+
+    public static String getExternalIDPOrigin() throws APIManagementException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String idpEndpoint = config.getFirstProperty(APIConstants.IDENTITY_PROVIDER_SERVER_URL);
+        if (idpEndpoint == null) {
+            return getServerURL();
+        } else {
+            return idpEndpoint;
+        }
+    }
+
+    /**
+     * Get the check session URL to load in the session management iframe
+     *
+     * @return URL to be used in iframe source for the check session with IDP
+     */
+
+    public static String getExternalIDPCheckSessionEndpoint() throws APIManagementException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String oidcCheckSessionEndpoint = config.getFirstProperty(
+                APIConstants.IDENTITY_PROVIDER_OIDC_CHECK_SESSION_ENDPOINT);
+        if (oidcCheckSessionEndpoint == null) {
+            return getServerURL() + "/oidc/checksession";
+        } else {
+            return oidcCheckSessionEndpoint;
+        }
     }
 
     /**
@@ -8497,8 +8541,8 @@ public final class APIUtil {
                                  final long accessExp) {
 
         Iterable<Cache<?, ?>> availableCaches = Caching.getCacheManager(cacheManagerName).getCaches();
-        for (Cache cache:availableCaches) {
-            if(cache.getName().equalsIgnoreCase(getCacheName(cacheName))){
+        for (Cache cache : availableCaches) {
+            if (cache.getName().equalsIgnoreCase(getCacheName(cacheName))) {
                 return Caching.getCacheManager(cacheManagerName).getCache(cacheName);
             }
         }
@@ -8523,8 +8567,8 @@ public final class APIUtil {
     }
 
     private static String getCacheName(String cacheName) {
-        return Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("Cache.ForceLocalCache"))
-                && !cacheName.startsWith("$__local__$.") ? "$__local__$." + cacheName : cacheName;
+        return (Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("Cache.ForceLocalCache"))
+                && !cacheName.startsWith("$__local__$.")) ? "$__local__$." + cacheName : cacheName;
     }
 
     /**
@@ -10387,6 +10431,16 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    public static boolean isDevPortalAnonymous() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String anonymousMode = config.getFirstProperty(APIConstants.API_DEVPORTAL_ANONYMOUS_MODE);
+        if (anonymousMode == null) {
+            return true;
+        }
+        return Boolean.parseBoolean(anonymousMode);
     }
 
     public static Map<String, EndpointSecurity> setEndpointSecurityForAPIProduct(API api) throws APIManagementException {

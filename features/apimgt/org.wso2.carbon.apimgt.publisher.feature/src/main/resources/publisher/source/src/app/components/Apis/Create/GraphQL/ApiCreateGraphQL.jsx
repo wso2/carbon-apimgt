@@ -277,7 +277,10 @@ export default function ApiCreateGraphQL(props) {
                                     () => setWizardStep((step) => step - 1)
                                 }
                                 >
-                                    Back
+                                    <FormattedMessage
+                                        id='Apis.Create.GraphQL.ApiCreateGraphQL.back'
+                                        defaultMessage='Back'
+                                    />
                                 </Button>
                             )}
                         </Grid>
@@ -289,7 +292,10 @@ export default function ApiCreateGraphQL(props) {
                                     color='primary'
                                     disabled={!apiInputs.isFormValid}
                                 >
-                                    Next
+                                    <FormattedMessage
+                                        id='Apis.Create.GraphQL.ApiCreateGraphQL.next'
+                                        defaultMessage='Next'
+                                    />
                                 </Button>
                             )}
                             {wizardStep === 1 && (
@@ -299,7 +305,10 @@ export default function ApiCreateGraphQL(props) {
                                     disabled={!apiInputs.isFormValid || isCreating}
                                     onClick={createAPI}
                                 >
-                                    Create
+                                    <FormattedMessage
+                                        id='Apis.Create.GraphQL.ApiCreateGraphQL.create'
+                                        defaultMessage='Create'
+                                    />
                                     {' '}
                                     {isCreating && <CircularProgress size={24} />}
                                 </Button>

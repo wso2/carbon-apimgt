@@ -77,6 +77,11 @@ const styles = theme => ({
     iconStyle: {
         cursor: 'grab',
     },
+    envRoot: {
+        '& span, & h5, & label, & td, & li': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        }
+    },
 });
 
 /**
@@ -160,7 +165,7 @@ class Environments extends React.Component {
 
 
         return (
-            <Grid container spacing={2} item xs={12}>
+            <Grid container spacing={2} item xs={12} className={classes.envRoot}>
                 {api.endpointURLs.map((endpoint) => {
                     return (
                         <Grid key={endpoint} item xs={12} key={endpoint.environmentName}>

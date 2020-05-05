@@ -1020,4 +1020,12 @@ public interface APIConsumer extends APIManager {
      *
      */
     String getRequestedTenant();
+
+    /**
+     * Checks whether the DevPortal Anonymous Mode is enabled.
+     *
+     * @param tenantDomain       tenant domain
+     * @throws APIManagementException if an error occurs while reading configs
+     */
+    boolean isDevPortalAnonymousEnabled(String tenantDomain) throws APIManagementException;
 }

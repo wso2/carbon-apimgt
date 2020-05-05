@@ -29,6 +29,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
+import { app } from 'Settings';
 import ImageGenerator from './ImageGenerator';
 import Api from '../../../data/api';
 import { ApiContext } from '../Details/ApiContext';
@@ -54,6 +55,8 @@ const styles = theme => ({
         '& a': {
             color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
         },
+        position: theme.custom.thumbnail.contentPictureOverlap ? 'absolute' : 'relative',
+        top: 0,
     },
     suppressLinkStyles: {
         textDecoration: 'none',
@@ -87,7 +90,9 @@ const styles = theme => ({
         'padding-right': '10px',
     },
     thumbRight: {
-        alignSelf: 'flex-end',
+        display: 'flex',
+        alignItems: 'flex-start',
+        flexDirection: 'column',
     },
     thumbInfo: {
         display: 'flex',
@@ -114,6 +119,9 @@ const styles = theme => ({
         'padding-right': 5,
         'padding-bottom': 1.5,
         textAlign: 'left',
+    },
+    context: {
+        marginTop: 5,
     },
     thumbWrapper: {
         position: 'relative',
@@ -302,7 +310,7 @@ class ApiThumb extends React.Component {
                     api={api}
                     fixedIcon={{
                         key: selectedIcon,
-                        color,
+                        color: color || thumbnail.iconColor,
                         backgroundIndex,
                         category,
                         api,
@@ -325,7 +333,7 @@ class ApiThumb extends React.Component {
                 <CardMedia>
                     <Link to={detailsLink} className={classes.suppressLinkStyles}>
                         {!defaultImage && ImageView}
-                        {defaultImage && <img src={defaultImage} alt='img' />}
+                        {defaultImage && <img src={app.context + defaultImage} alt='img' />}
                     </Link>
                 </CardMedia>
                 {showInfo && (
@@ -367,6 +375,7 @@ class ApiThumb extends React.Component {
                                         gutterBottom
                                         align='right'
                                         className={classes.context}
+                                        Component='div'
                                     >
                                         <FormattedMessage defaultMessage='Context' id='Apis.Listing.ApiThumb.context' />
                                     </Typography>

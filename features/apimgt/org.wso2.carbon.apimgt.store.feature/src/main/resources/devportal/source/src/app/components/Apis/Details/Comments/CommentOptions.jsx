@@ -27,7 +27,10 @@ import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
     link: {
-        color: theme.palette.getContrastText(theme.palette.background.default),
+        color: theme.palette.getContrastText(theme.palette.primary.main),
+        '& span.MuiButton-label span': {
+            color: theme.palette.getContrastText(theme.palette.primary.main),
+        },
         cursor: 'pointer',
     },
     time: {
@@ -154,6 +157,8 @@ class CommentOptions extends React.Component {
                                 variant="outlined" size="small"
                                 className={editIndex === -1 ? classes.link : classes.disable}
                                 onClick={() => this.handleClickOpen(comment)}
+                                variant='contained'
+                                color='primary'
                             >
                                 <FormattedMessage
                                     id='Apis.Details.Comments.CommentOptions.delete'

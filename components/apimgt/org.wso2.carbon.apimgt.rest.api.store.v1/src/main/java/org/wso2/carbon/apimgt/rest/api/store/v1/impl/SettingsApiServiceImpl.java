@@ -46,20 +46,21 @@ public class SettingsApiServiceImpl implements SettingsApiService {
     private static final Log log = LogFactory.getLog(SettingsApiServiceImpl.class);
 
     @Override
-    public Response settingsGet(MessageContext messageContext) {
+    public Response settingsGet(String xWSO2Tenant, MessageContext messageContext)
+            throws APIManagementException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = MultitenantUtils.getTenantDomain(username);
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            String requestedTenantDomain = apiConsumer.getRequestedTenant();
-            boolean monetizationEnabled = apiConsumer.isMonetizationEnabled(tenantDomain);
+            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+            boolean monetizationEnabled = apiConsumer.isMonetizationEnabled(requestedTenantDomain);
             boolean recommendationEnabled = apiConsumer.isRecommendationEnabled(requestedTenantDomain);
+            boolean anonymousEnabled = apiConsumer.isDevPortalAnonymousEnabled(requestedTenantDomain);
             boolean isUserAvailable = false;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
                 isUserAvailable = true;
             }
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO( isUserAvailable, monetizationEnabled, recommendationEnabled );
+            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO( isUserAvailable, monetizationEnabled, recommendationEnabled, anonymousEnabled );
             return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Store Settings";

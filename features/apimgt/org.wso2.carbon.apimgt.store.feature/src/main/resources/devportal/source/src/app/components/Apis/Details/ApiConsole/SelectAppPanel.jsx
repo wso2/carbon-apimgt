@@ -15,7 +15,9 @@ const styles = (theme) => ({
         marginTop: theme.spacing(1),
         fontWeight: 400,
     },
-
+    menuItem: {
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+    },
 });
 
 const SelectAppPanel = (props) => {
@@ -49,7 +51,11 @@ const SelectAppPanel = (props) => {
                     variant='outlined'
                 >
                     {subscriptions.map((sub) => (
-                        <MenuItem value={sub.applicationInfo.applicationId} key={sub.applicationInfo.applicationId}>
+                        <MenuItem
+                            value={sub.applicationInfo.applicationId}
+                            key={sub.applicationInfo.applicationId}
+                            className={classes.menuItem}
+                        >
                             {sub.applicationInfo.name}
                         </MenuItem>
                     ))}

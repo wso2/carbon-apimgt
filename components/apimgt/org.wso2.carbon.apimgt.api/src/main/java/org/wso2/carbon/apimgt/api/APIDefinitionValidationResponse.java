@@ -20,6 +20,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The model containing API Definition (OpenAPI/Swagger) Validation Information
@@ -78,6 +79,7 @@ public class APIDefinitionValidationResponse {
         private String version;
         private String context;
         private String description;
+        private List<String> endpoints;
 
         public String getOpenAPIVersion() {
             return openAPIVersion;
@@ -118,6 +120,10 @@ public class APIDefinitionValidationResponse {
         public void setContext(String context) {
             this.context = context;
         }
+
+        public List<String> getEndpoints() { return endpoints; }
+
+        public void setEndpoints(List<String> endpoints) { this.endpoints = endpoints; }
     }
 
     public APIDefinition getParser() {

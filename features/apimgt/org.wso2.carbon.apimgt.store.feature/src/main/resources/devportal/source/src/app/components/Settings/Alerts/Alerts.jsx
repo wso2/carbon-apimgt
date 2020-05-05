@@ -50,6 +50,9 @@ import AlertConfiguration from './AlertConfiguration';
 const styles = theme => ({
     alertsWrapper: {
         padding: theme.spacing(2),
+        '& span, & h5, & label, & input, & td, & li': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
     },
     manageAlertHeading: {
         marginBottom: theme.spacing(),
@@ -302,7 +305,7 @@ const Alerts = (props) => {
     // }
     return (
         <React.Fragment>
-            <Paper className={classes.alertsWrapper}>
+            <div className={classes.alertsWrapper}>
                 {!isAnalyticsEnabled ?
                     <React.Fragment>
                         <InlineMessage type='info' height={100}>
@@ -423,7 +426,7 @@ const Alerts = (props) => {
                                 </Grid>
                             </React.Fragment>}
                     </React.Fragment>}
-            </Paper>
+            </div>
             <Dialog open={openDialog.open}>
                 <DialogTitle>
                     <FormattedMessage

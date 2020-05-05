@@ -347,7 +347,7 @@
   "Login.RedirectToLogin.you.will.be.redirected.to": "You will be redirected to {page}",
   "LoginDenied.anonymousview": "Go To Public Portal",
   "LoginDenied.logout": "Logout",
-  "LoginDenied.message": "The server could not verify that you are authorized to access the requested resource.",
+  "LoginDenied.message": "You don't have sufficient privileges to access the Developer Portal.",
   "LoginDenied.retry": "Retry",
   "LoginDenied.title": "Error 403 : Forbidden",
   "Settings.Alert.AlertConfiguration.add": "New Configuration",

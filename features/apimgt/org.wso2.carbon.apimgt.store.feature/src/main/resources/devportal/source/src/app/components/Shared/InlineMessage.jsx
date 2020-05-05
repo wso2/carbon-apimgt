@@ -19,8 +19,11 @@ const styles = theme => ({
         border: 'none',
         '& span.material-icons': {
             fontSize: 60,
-            color: theme.palette.primary.main,
-        }
+            color: theme.custom.info.color,
+        },
+        '& span, & h5, & label, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
     },
     iconItem: {
         paddingRight: theme.spacing(2),

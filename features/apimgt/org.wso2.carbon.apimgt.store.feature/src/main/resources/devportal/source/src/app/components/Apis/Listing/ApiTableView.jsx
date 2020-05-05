@@ -22,6 +22,7 @@ import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/
 import MUIDataTable from 'mui-datatables';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import merge from 'lodash.merge';
+import cloneDeep from 'lodash.clonedeep';
 import queryString from 'query-string';
 import API from 'AppData/api';
 import { withTheme } from '@material-ui/styles';
@@ -133,6 +134,24 @@ class ApiTableView extends React.Component {
                         width: '100%',
                     },
                 },
+                MUIDataTablePagination: {
+                    root: {
+                        color: theme.palette.getContrastText(theme.palette.background.default),
+                        
+                    },
+                },
+                MuiMenuItem: {
+                    root: {
+                        color: theme.palette.getContrastText(theme.palette.background.default),
+                    }
+                },
+                MUIDataTableToolbar: {
+                    root: {
+                        '& svg': {
+                            color: theme.palette.getContrastText(theme.palette.background.default),
+                        }
+                    }
+                }
             },
         };
         if (gridView) {
@@ -141,6 +160,7 @@ class ApiTableView extends React.Component {
                     MUIDataTable: {
                         tableRoot: {
                             display: 'block',
+                            border: 'none',
                             '& tbody': {
                                 display: 'flex',
                                 flexWrap: 'wrap',
@@ -148,6 +168,16 @@ class ApiTableView extends React.Component {
                             },
                             '& thead': {
                                 display: 'none',
+                            },
+                            '& tr:nth-child(odd),& tr:nth-child(even)': {
+                                display: 'block',
+                                marginRight: 5,
+                                marginBottom: 5,
+                                backgroundColor: 'transparent',
+                            },
+                            '& td': {
+                                display: 'block',
+                                backgroundColor: 'transparent',
                             },
                         },
                         paper: {
@@ -158,9 +188,9 @@ class ApiTableView extends React.Component {
                 },
             };
         }
-        const systemTheme = merge(DefaultConfigurations, Configurations);
-        muiTheme = Object.assign(muiTheme, themeAdditions, systemTheme);
-        return createMuiTheme(muiTheme);
+        const systemTheme = merge({}, DefaultConfigurations, Configurations, {custom: cloneDeep(theme.custom)});
+        const dataTableTheme = merge({}, muiTheme, systemTheme, themeAdditions);
+        return createMuiTheme(dataTableTheme);
     };
 
     componentDidMount() {
@@ -322,13 +352,14 @@ class ApiTableView extends React.Component {
                                         </Link>
                                     );
                                 }
+                                const strokeColor = theme.palette.getContrastText(theme.custom.listView.tableBodyEvenBackgrund);
                                 return (
                                     <Link
                                         to={'/apis/' + apiId + '/overview'}
                                         className={classes.rowImageOverride}
                                         className={classes.apiNameLink}
                                     >
-                                        <CustomIcon width={16} height={16} icon='api' strokeColor='#444444' />
+                                        <CustomIcon width={16} height={16} icon='api' strokeColor={strokeColor} />
 
                                         <span>{apiName}</span>
                                     </Link>

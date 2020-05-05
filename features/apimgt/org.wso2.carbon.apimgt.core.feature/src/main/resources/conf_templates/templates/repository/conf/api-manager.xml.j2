@@ -31,9 +31,11 @@
 
     {% if apim.idp is defined %}
     <IdentityProvider>
+        <ServerURL>{{apim.idp.server_url}}</ServerURL>
         <!-- Server URL of the Identity Provider used for login/logout operations in API Publisher and API Developer Portal -->
         <AuthorizeEndpoint>{{apim.idp.authorize_endpoint}}</AuthorizeEndpoint>
         <OIDCLogoutEndpoint>{{apim.idp.oidc_logout_endpoint}}</OIDCLogoutEndpoint>
+        <CheckSessionEndpoint>{{apim.idp.oidc_check_session_endpoint}}</CheckSessionEndpoint>
     </IdentityProvider>
     {% endif %}
 
@@ -504,6 +506,9 @@
 
         <!--This parameter specifies the alias value of the Api Key which will be used for Api Key Authentication-->
         <ApiKeyAlias>{{apim.devportal.api_key_alias}}</ApiKeyAlias>
+
+        <!--This parameter specifies whether Anonymous Mode is enabled. By default it is true.-->
+        <EnableAnonymousMode>{{apim.devportal.enable_anonymous_mode}}</EnableAnonymousMode>
     </APIStore>
 
     <APIPublisher>

@@ -44,6 +44,7 @@ const styles = theme => ({
         marginLeft: theme.spacing(3),
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
+        color: theme.palette.getContrastText(theme.palette.background.default),
     },
     gridRoot: {
         marginLeft: theme.spacing(2),
@@ -58,6 +59,9 @@ const styles = theme => ({
     cardTitle: {
         background: theme.palette.grey[50],
     },
+    cardRoot: {
+        background: theme.custom.apiDetailPages.sdkBackground,
+    }
 });
 
 /**
@@ -258,7 +262,7 @@ class Sdk extends React.Component {
                                 {filteredLanguageList.map((language, index) => (
                                     <Grid key={index} item key={index}>
                                         <div style={{ width: 'auto', textAlign: 'center', margin: '10px' }}>
-                                            <Card>
+                                            <Card className={classes.cardRoot}>
                                                 <div>{language.toString().toUpperCase()}</div>
                                                 <Divider />
                                                 <CardMedia

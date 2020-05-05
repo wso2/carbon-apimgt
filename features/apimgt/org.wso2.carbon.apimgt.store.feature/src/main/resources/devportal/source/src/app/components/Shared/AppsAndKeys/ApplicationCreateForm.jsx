@@ -53,6 +53,11 @@ const styles = (theme) => ({
             color: 'red',
         },
     },
+    applicationForm: {
+        '& span, & div, & p, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        }
+    }
 });
 
 const ApplicationCreate = (props) => {
@@ -110,7 +115,7 @@ const ApplicationCreate = (props) => {
         handleDeleteChip,
     } = props;
     return (
-        <form noValidate autoComplete='off'>
+        <form noValidate autoComplete='off' className={classes.applicationForm}>
             <TextField
                 classes={{
                     root: classes.mandatoryStarText,
