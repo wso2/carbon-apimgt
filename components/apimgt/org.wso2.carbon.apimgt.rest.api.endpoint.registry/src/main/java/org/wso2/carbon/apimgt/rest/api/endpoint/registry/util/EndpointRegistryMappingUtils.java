@@ -49,8 +49,8 @@ public class EndpointRegistryMappingUtils {
     public static RegistryDTO fromEndpointRegistrytoDTO(EndpointRegistryInfo registry) {
         RegistryDTO registryDTO = new RegistryDTO();
         registryDTO.setName(registry.getName());
-        registryDTO.setType(RegistryDTO.TypeEnum.valueOf(registry.getType()));
-        registryDTO.setMode(RegistryDTO.ModeEnum.valueOf(registry.getMode()));
+        registryDTO.setType(RegistryDTO.TypeEnum.fromValue(registry.getType()));
+        registryDTO.setMode(RegistryDTO.ModeEnum.fromValue(registry.getMode()));
         return registryDTO;
     }
 
