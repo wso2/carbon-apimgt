@@ -23,8 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.EndpointRegistry;
+import org.wso2.carbon.apimgt.api.EndpointRegistry;
+import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.impl.EndpointRegistryImpl;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApiService;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -85,12 +86,12 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     @Override
     public Response addRegistry(RegistryDTO body, MessageContext messageContext) {
         String user = RestApiUtil.getLoggedInUsername();
-        EndpointRegistry registry = EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(body, user);
-        EndpointRegistry createdRegistry = new EndpointRegistry();
+        EndpointRegistryInfo registry = EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(body, user);
+        EndpointRegistryInfo createdRegistry = new EndpointRegistryInfo();
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String registryId = apiProvider.addEndpointRegistry(registry);
-            createdRegistry = apiProvider.getEndpointRegistryByUUID(registryId);
+            EndpointRegistry registryProvider = new EndpointRegistryImpl();
+            String registryId = registryProvider.addEndpointRegistry(registry);
+            createdRegistry = registryProvider.getEndpointRegistryByUUID(registryId);
         } catch (APIMgtResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry with name '" + body.getName()
                     + "' already exists", e, log);
@@ -98,7 +99,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             RestApiUtil.handleInternalServerError("Error while adding new endpoint registry: "
                     + registry.getName(), e, log);
         }
-        return Response.ok().entity(createdRegistry).build();
+        return Response.ok().entity(EndpointRegistryMappingUtils.fromEndpointRegistrytoDTO(createdRegistry)).build();
     }
 
     @Override

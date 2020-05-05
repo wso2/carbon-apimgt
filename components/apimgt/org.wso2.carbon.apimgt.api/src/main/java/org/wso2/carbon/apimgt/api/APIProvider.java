@@ -1328,22 +1328,4 @@ public interface APIProvider extends APIManager {
      * @return List of removed resources that are reused among API Products
      */
     List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI);
-
-    /**
-     * Adds a new Endpoint Registry
-     *
-     * @param endpointRegistry EndpointRegistry
-     * @return registryId UUID of the created Endpoint Registry ID
-     * @throws APIManagementException if failed to add EndpointRegistry
-     */
-    String addEndpointRegistry(EndpointRegistry endpointRegistry) throws APIManagementException;
-
-    /**
-     * Returns details of an Endpoint Registry
-     *
-     * @param registryId Registry Identifier
-     * @return An EndpointRegistry object related to the given identifier or null
-     * @throws APIManagementException if failed get details of an Endpoint Registry
-     */
-    EndpointRegistry getEndpointRegistryByUUID(String registryId) throws APIManagementException;
 }

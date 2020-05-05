@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.endpoint.registry.util;
 
-import org.wso2.carbon.apimgt.api.model.EndpointRegistry;
+import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
 
 /**
@@ -26,13 +26,13 @@ import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
 public class EndpointRegistryMappingUtils {
 
     /**
-     * Converts a RegistryDTO object into EndpointRegistry object
+     * Converts a RegistryDTO object into EndpointRegistryInfo object
      *
      * @param registryDTO RegistryDTO object
-     * @return EndpointRegistry corresponds to RegistryDTO object
+     * @return EndpointRegistryInfo corresponds to RegistryDTO object
      */
-    public static EndpointRegistry fromDTOtoEndpointRegistry(RegistryDTO registryDTO, String owner) {
-        EndpointRegistry registry = new EndpointRegistry();
+    public static EndpointRegistryInfo fromDTOtoEndpointRegistry(RegistryDTO registryDTO, String owner) {
+        EndpointRegistryInfo registry = new EndpointRegistryInfo();
         registry.setName(registryDTO.getName());
         registry.setOwner(owner);
         registry.setType(registryDTO.getType().toString());
@@ -41,12 +41,12 @@ public class EndpointRegistryMappingUtils {
     }
 
     /**
-     * Converts a EndpointRegistry object into RegistryDTO object
+     * Converts a EndpointRegistryInfo object into RegistryDTO object
      *
-     * @param registry EndpointRegistry object
-     * @return RegistryDTO corresponds to EndpointRegistry object
+     * @param registry EndpointRegistryInfo object
+     * @return RegistryDTO corresponds to EndpointRegistryInfo object
      */
-    public static RegistryDTO fromEndpointRegistrytoDTO(EndpointRegistry registry) {
+    public static RegistryDTO fromEndpointRegistrytoDTO(EndpointRegistryInfo registry) {
         RegistryDTO registryDTO = new RegistryDTO();
         registryDTO.setName(registry.getName());
         registryDTO.setType(RegistryDTO.TypeEnum.valueOf(registry.getType()));

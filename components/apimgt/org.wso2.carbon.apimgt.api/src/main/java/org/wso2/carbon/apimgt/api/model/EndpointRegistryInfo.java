@@ -19,9 +19,9 @@
 package org.wso2.carbon.apimgt.api.model;
 
 /**
- * Endpoint Registry.
+ * Endpoint Registry Info Object.
  */
-public class EndpointRegistry {
+public class EndpointRegistryInfo {
 
     private String uuid = null;
 

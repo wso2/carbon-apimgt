@@ -48,7 +48,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.EndpointRegistry;
+import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -14728,11 +14728,11 @@ public class ApiMgtDAO {
     /**
      * Add a new endpoint registry
      *
-     * @param endpointRegistry EndpointRegistry
+     * @param endpointRegistry EndpointRegistryInfo
      * @param tenantID  ID of the owner's tenant
      * @return registryId
      */
-    public String addEndpointRegistry(EndpointRegistry endpointRegistry, int tenantID) throws APIManagementException {
+    public String addEndpointRegistry(EndpointRegistryInfo endpointRegistry, int tenantID) throws APIManagementException {
         String query = SQLConstants.ADD_ENDPOINT_REGISTRY_SQL;
         String uuid = UUID.randomUUID().toString();
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -14762,7 +14762,7 @@ public class ApiMgtDAO {
      * @return Endpoint Registry Object
      * @throws APIManagementException
      */
-    public EndpointRegistry getEndpointRegistryByUUID(String regsitryId) throws APIManagementException {
+    public EndpointRegistryInfo getEndpointRegistryByUUID(String regsitryId) throws APIManagementException {
         String query = SQLConstants.GET_ENDPOINT_REGISTRY_BY_UUID;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
@@ -14770,7 +14770,7 @@ public class ApiMgtDAO {
             ps.executeQuery();
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    EndpointRegistry endpointRegistry = new EndpointRegistry();
+                    EndpointRegistryInfo endpointRegistry = new EndpointRegistryInfo();
                     endpointRegistry.setUuid(rs.getString("UUID"));
                     endpointRegistry.setName(rs.getString("REG_NAME"));
                     endpointRegistry.setType(rs.getString("REG_TYPE"));

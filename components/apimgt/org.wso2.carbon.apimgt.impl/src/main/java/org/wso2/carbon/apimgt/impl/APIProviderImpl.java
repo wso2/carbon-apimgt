@@ -71,7 +71,6 @@ import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
-import org.wso2.carbon.apimgt.api.model.EndpointRegistry;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -136,7 +135,6 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -8078,29 +8076,5 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return removedReusedResources;
-    }
-
-    @Override
-    public String addEndpointRegistry(EndpointRegistry endpointRegistry) throws APIManagementException {
-        String tenantDomain = MultitenantUtils
-                .getTenantDomain(APIUtil.replaceEmailDomainBack(endpointRegistry.getOwner()));
-        int tenantId;
-        try {
-            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-            if (apiMgtDAO.isEndpointRegistryNameExists(endpointRegistry.getName(), tenantId)) {
-                handleResourceAlreadyExistsException("Endpoint Registry with name '" + endpointRegistry.getName()
-                        + "' already exists");
-            }
-            return apiMgtDAO.addEndpointRegistry(endpointRegistry, tenantId);
-        } catch (UserStoreException e) {
-            throw new APIManagementException("Error in retrieving Tenant Information while adding endpoint" +
-                    " registry :" + endpointRegistry.getName(), e);
-        }
-    }
-
-    @Override
-    public EndpointRegistry getEndpointRegistryByUUID(String registryId) throws APIManagementException {
-        return apiMgtDAO.getEndpointRegistryByUUID(registryId);
     }
 }

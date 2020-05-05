@@ -73,6 +73,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
@@ -1941,6 +1942,11 @@ public final class APIUtil {
     public static void handleInternalException(String msg, Throwable t) throws APIMgtInternalException {
         log.error(msg, t);
         throw new APIMgtInternalException(msg, t);
+    }
+
+    public static void handleResourceAlreadyExistsException(String msg) throws APIMgtResourceAlreadyExistsException {
+        log.error(msg);
+        throw new APIMgtResourceAlreadyExistsException(msg);
     }
 
     public static void handleAuthFailureException(String msg) throws APIMgtAuthorizationFailedException {
