@@ -135,14 +135,6 @@ public class APIMgtDAOTest {
         keyManager = Mockito.mock(KeyManager.class);
         PowerMockito.mockStatic(KeyManagerHolder.class);
         BDDMockito.given(KeyManagerHolder.getKeyManagerInstance()).willReturn(keyManager);
-        Mockito.doNothing().when(keyManager)
-                .attachScopeToResource(Mockito.any(API.class), Mockito.any(URITemplate.class), Mockito.any(Scope.class),
-                        Mockito.anyString());
-        Mockito.doNothing().when(keyManager)
-                .detachScopeToResource(Mockito.any(APIIdentifier.class), Mockito.anyString(),
-                        Mockito.any(URITemplate.class),
-                        Mockito.any(Scope.class),
-                        Mockito.anyString());
     }
 
     private static void initializeDatabase(String configFilePath) {
@@ -1238,17 +1230,19 @@ public class APIMgtDAOTest {
 
     @Test
     public void testAddAndGetApi() throws Exception{
-        APIIdentifier apiId = new APIIdentifier("testAddAndGetApi",
+        APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi",
                 "testAddAndGetApi", "1.0.0");
-        API api = new API(apiId);
+        API api = new API(apiIdentifier);
         api.setContext("/testAddAndGetApi");
         api.setContextTemplate("/testAddAndGetApi/{version}");
         api.setUriTemplates(getUriTemplateSet());
         api.setScopes(getScopes());
         api.setStatus(APIConstants.PUBLISHED);
         api.setAsDefaultVersion(true);
-        apiMgtDAO.addAPI(api, -1234);
-        apiMgtDAO.updateAPI(api, -1234);
+        int apiID = apiMgtDAO.addAPI(api, -1234);
+        apiMgtDAO.addURITemplates(apiID, api, -1234);
+        apiMgtDAO.updateAPI(api);
+        apiMgtDAO.updateURITemplates(api, -1234);
         Set<APIStore> apiStoreSet = new HashSet<APIStore>();
         APIStore apiStore = new APIStore();
         apiStore.setDisplayName("wso2");
@@ -1256,20 +1250,20 @@ public class APIMgtDAOTest {
         apiStore.setName("wso2");
         apiStore.setType("wso2");
         apiStoreSet.add(apiStore);
-        apiMgtDAO.addExternalAPIStoresDetails(apiId,apiStoreSet);
-        assertTrue(apiMgtDAO.getExternalAPIStoresDetails(apiId).size()>0);
-        apiMgtDAO.deleteExternalAPIStoresDetails(apiId, apiStoreSet);
-        apiMgtDAO.updateExternalAPIStoresDetails(apiId, Collections.<APIStore>emptySet());
-        assertTrue(apiMgtDAO.getExternalAPIStoresDetails(apiId).size()==0);
-        apiMgtDAO.deleteAPI(apiId);
+        apiMgtDAO.addExternalAPIStoresDetails(apiIdentifier,apiStoreSet);
+        assertTrue(apiMgtDAO.getExternalAPIStoresDetails(apiIdentifier).size()>0);
+        apiMgtDAO.deleteExternalAPIStoresDetails(apiIdentifier, apiStoreSet);
+        apiMgtDAO.updateExternalAPIStoresDetails(apiIdentifier, Collections.<APIStore>emptySet());
+        assertTrue(apiMgtDAO.getExternalAPIStoresDetails(apiIdentifier).size()==0);
+        apiMgtDAO.deleteAPI(apiIdentifier);
     }
 
     @Test
     public void testAddAndConvertNullThrottlingTiers() throws APIManagementException {
 
         //Adding an API with a null THROTTLING_TIER should automatically convert it to Unlimited
-        APIIdentifier apiId = new APIIdentifier("testAddAndGetApi", "testAddAndGetApi", "1.0.0");
-        API api = new API(apiId);
+        APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi", "testAddAndGetApi", "1.0.0");
+        API api = new API(apiIdentifier);
         api.setContext("/testAddAndGetApi");
         api.setContextTemplate("/testAddAndGetApi/{version}");
         Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
@@ -1278,14 +1272,15 @@ public class APIMgtDAOTest {
         api.setScopes(getScopes());
         api.setStatus(APIConstants.PUBLISHED);
         api.setAsDefaultVersion(true);
-        apiMgtDAO.addAPI(api, -1234);
-        HashMap<String, String> result1 = apiMgtDAO.getURITemplatesPerAPIAsString(apiId);
+        int apiId = apiMgtDAO.addAPI(api, -1234);
+        apiMgtDAO.addURITemplates(apiId, api, -1234);
+        HashMap<String, String> result1 = apiMgtDAO.getURITemplatesPerAPIAsString(apiIdentifier);
         Assert.assertTrue(result1.containsKey("/abc::GET::Any::Unlimited::abcd defgh fff"));
 
         //Change the inserted throttling tier back to Null and test the convertNullThrottlingTier method
         updateThrottlingTierToNull();
         apiMgtDAO.convertNullThrottlingTiers();
-        HashMap<String, String> result2 = apiMgtDAO.getURITemplatesPerAPIAsString(apiId);
+        HashMap<String, String> result2 = apiMgtDAO.getURITemplatesPerAPIAsString(apiIdentifier);
         Assert.assertTrue(result2.containsKey("/abc::GET::Any::Unlimited::abcd defgh fff"));
    }
 
