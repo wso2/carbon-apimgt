@@ -74,6 +74,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
@@ -125,6 +126,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.xml.namespace.QName;
@@ -1629,15 +1631,21 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Subscriber subscriber = new Subscriber(username);
         subscriber.setSubscribedDate(new Date());
-        //TODO : need to set the proper email
-        subscriber.setEmail("");
         try {
             int tenantId = getTenantManager()
                     .getTenantId(getTenantDomain(username));
+            SortedMap<String, String> claims = APIUtil.getClaims(username, tenantId, ClaimsRetriever
+                    .DEFAULT_DIALECT_URI);
+            String email = claims.get(APIConstants.EMAIL_CLAIM);
+            if (StringUtils.isNotEmpty(email)) {
+                subscriber.setEmail(email);
+            } else {
+                subscriber.setEmail(StringUtils.EMPTY);
+            }
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
             //Add a default application once subscriber is added
-            if (!APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)){
+            if (!APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)) {
                 addDefaultApplicationForSubscriber(subscriber);
             }
         } catch (APIManagementException e) {

@@ -174,7 +174,7 @@ class ProtectedApp extends Component {
         setInterval(() => {
             const { clientId, sessionStateCookie } = this.state;
             const msg = clientId + ' ' + sessionStateCookie;
-            document.getElementById('iframeOP').contentWindow.postMessage(msg, 'https://' + window.location.host);
+            document.getElementById('iframeOP').contentWindow.postMessage(msg, Settings.idp.origin);
         }, 2000);
     }
 
@@ -217,8 +217,8 @@ class ProtectedApp extends Component {
         const {
             userResolved, tenantList, notEnoughPermission, tenantResolved, clientId,
         } = this.state;
-        const checkSessionURL = window.location.origin + '/oidc/checksession?client_id='
-            + clientId + '&redirect_uri=' + window.location.origin
+        const checkSessionURL = Settings.idp.checkSessionEndpoint + '?client_id='
+            + clientId + '&redirect_uri='+ window.location.origin
             + Settings.app.context + '/services/auth/callback/login';
         const { tenantDomain, settings } = this.context;
         if (!userResolved) {
@@ -251,6 +251,23 @@ class ProtectedApp extends Component {
 
         if (settings.IsAnonymousModeEnabled && sessionStorage.getItem(CONSTS.ISLOGINPERMITTED)) {
             sessionStorage.removeItem(CONSTS.ISLOGINPERMITTED);
+        }
+        // check for widget=true in the query params. If it's present we render without <Base> component.
+        const pageUrl = new URL(window.location);
+        const isWidget = pageUrl.searchParams.get('widget');
+        if(isWidget) {
+            return (
+                <>
+                    <iframe
+                        title='iframeOP'
+                        id='iframeOP'
+                        src={checkSessionURL}
+                        width='0px'
+                        height='0px'
+                    />
+                    <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
+                </>
+            );
         }
         /**
          * Note: AuthManager.getUser() method is a passive check, which simply

@@ -24,6 +24,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.io.FileUtils;
@@ -43,6 +44,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -76,6 +78,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -388,6 +391,17 @@ public final class APIImportUtil {
             //Swagger definition will only be available of API type HTTP. Web socket API does not have it.
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(importedApi.getType())) {
                 String swaggerContent = loadSwaggerFile(pathToArchive);
+
+                // Check whether any of the resources should be removed from the API when updating,
+                // that has already been used in API Products
+                List<APIResource> resourcesToRemove = apiProvider.getResourcesToBeRemovedFromAPIProducts(importedApi.getId(),
+                        swaggerContent);
+                // Do not allow to remove resources from API Products, hence throw an exception
+                if (!resourcesToRemove.isEmpty()) {
+                    throw new APIImportExportException("Cannot remove following resource paths " +
+                            resourcesToRemove.toString() + " because they are used by one or more API Products");
+                }
+
                 addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
                 //If graphQL API, import graphQL schema definition to registry
                 if (StringUtils.equals(importedApi.getType(), APIConstants.APITransportType.GRAPHQL.toString())) {
@@ -523,7 +537,22 @@ public final class APIImportUtil {
     private static void updateAPIWithThumbnail(File imageFile, API importedApi, APIProvider apiProvider) {
 
         APIIdentifier apiIdentifier = importedApi.getId();
-        String mimeType = URLConnection.guessContentTypeFromName(imageFile.getName());
+        String fileName = imageFile.getName();
+        String mimeType = URLConnection.guessContentTypeFromName(fileName);
+        if (StringUtils.isBlank(mimeType)) {
+            try {
+                // Check whether the icon is in .json format (UI icons are stored as .json)
+                new JsonParser().parse(new FileReader(imageFile));
+                mimeType = APIConstants.APPLICATION_JSON_MEDIA_TYPE;
+            } catch (JsonParseException e) {
+                // Here the exceptions were handled and logged that may arise when parsing the .json file,
+                // and this will not break the flow of importing the API.
+                // If the .json is wrong or cannot be found the API import process will still be carried out.
+                log.error("Failed to read the thumbnail file. ", e);
+            } catch (FileNotFoundException e) {
+                log.error("Failed to find the thumbnail file. ", e);
+            }
+        }
         try (FileInputStream inputStream = new FileInputStream(imageFile.getAbsolutePath())) {
             ResourceFile apiImage = new ResourceFile(inputStream, mimeType);
             String thumbPath = APIUtil.getIconPath(apiIdentifier);

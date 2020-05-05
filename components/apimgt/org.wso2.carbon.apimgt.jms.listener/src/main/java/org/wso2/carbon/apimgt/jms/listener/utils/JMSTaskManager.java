@@ -22,10 +22,11 @@ import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.threads.WorkerPool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottlingRunTimeException;
+import org.wso2.carbon.apimgt.jms.listener.ThrottlingRunTimeException;
 
 import javax.jms.*;
 import javax.jms.IllegalStateException;
+import javax.jms.MessageListener;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -202,7 +203,7 @@ public class JMSTaskManager {
     /**
      * The per-service JMS message receiver to be invoked after receipt of messages
      */
-    private JMSMessageListener jmsMessageListener = null;
+    private MessageListener messageListener = null;
 
     /**
      * State of this Task Manager
@@ -641,7 +642,7 @@ public class JMSTaskManager {
             try {
 
 
-                jmsMessageListener.onMessage(message);
+                messageListener.onMessage(message);
 
             } finally {
 
@@ -1368,8 +1369,8 @@ public class JMSTaskManager {
         return pollingTasks;
     }
 
-    public void setJmsMessageListener(JMSMessageListener jmsMessageListener) {
-        this.jmsMessageListener = jmsMessageListener;
+    public void setMessageListener(MessageListener messageListener) {
+        this.messageListener = messageListener;
     }
 
     public void setWorkerPool(WorkerPool workerPool) {

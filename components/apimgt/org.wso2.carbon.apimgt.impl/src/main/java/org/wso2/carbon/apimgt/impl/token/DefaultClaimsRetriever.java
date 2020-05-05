@@ -87,39 +87,27 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
             enabledJWTClaimCache = Boolean.valueOf(strEnabledJWTClaimCache);
         }
         SortedMap<String, String> claimValues;
-        try {
-            if (endUserName != null) {
-                int tenantId = APIUtil.getTenantId(endUserName);
-                String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
-                //check in local cache
-                String key = endUserName + ':' + tenantId;
-                ClaimCacheKey cacheKey = new ClaimCacheKey(key);
-                Object result = null;
-                if (enabledJWTClaimCache) {
-                    result = getClaimsLocalCache().get(cacheKey);
-                }
-                if (result != null) {
-                    return ((UserClaims) result).getClaimValues();
-                } else {
-                    ClaimManager claimManager = ServiceReferenceHolder.getInstance().getRealmService().
-                            getTenantUserRealm(tenantId).getClaimManager();
-                    //Claim[] claims = claimManager.getAllClaims(dialectURI);
-                    ClaimMapping[] claims = claimManager.getAllClaimMappings(dialectURI);
-                    String[] claimURIs = claimMappingtoClaimURIString(claims);
-                    UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance().getRealmService().
-                            getTenantUserRealm(tenantId).getUserStoreManager();
-
-                    claimValues = new TreeMap(userStoreManager.getUserClaimValues(tenantAwareUserName, claimURIs,null));
-                    UserClaims userClaims = new UserClaims(claimValues);
-                    //add to cache
-                    if (enabledJWTClaimCache) {
-                        getClaimsLocalCache().put(cacheKey, userClaims);
-                    }
-                    return claimValues;
-                }
+        if (endUserName != null) {
+            int tenantId = APIUtil.getTenantId(endUserName);
+            String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
+            //check in local cache
+            String key = endUserName + ':' + tenantId;
+            ClaimCacheKey cacheKey = new ClaimCacheKey(key);
+            Object result = null;
+            if (enabledJWTClaimCache) {
+                result = getClaimsLocalCache().get(cacheKey);
             }
-        } catch (UserStoreException e) {
-            throw new APIManagementException("Error while retrieving user claim values from " + "user store", e);
+            if (result != null) {
+                return ((UserClaims) result).getClaimValues();
+            } else {
+                claimValues = APIUtil.getClaims(endUserName, tenantId, dialectURI);
+                UserClaims userClaims = new UserClaims(claimValues);
+                //add to cache
+                if (enabledJWTClaimCache) {
+                    getClaimsLocalCache().put(cacheKey, userClaims);
+                }
+                return claimValues;
+            }
         }
         return null;
     }
@@ -129,18 +117,5 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
      */
     public String getDialectURI(String endUserName) {
         return dialectURI;
-    }
-
-    /**
-     * Helper method to convert array of <code>Claim</code> object to
-     * array of <code>String</code> objects corresponding to the ClaimURI values.
-     */
-    private String[] claimMappingtoClaimURIString(ClaimMapping[] claims) {
-        String[] temp = new String[claims.length];
-        for (int i = 0; i < claims.length; i++) {
-            temp[i] = claims[i].getClaim().getClaimUri();
-       
-        }
-        return temp;
     }
 }

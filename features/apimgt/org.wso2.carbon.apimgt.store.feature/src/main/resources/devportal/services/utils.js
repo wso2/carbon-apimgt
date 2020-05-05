@@ -28,6 +28,14 @@ var getLoopbackOrigin = function() {
     return origin;
 };
 
+function getIDPOrigin(){
+    return utils.getExternalIDPOrigin();
+}
+
+function getIDPCheckSessionEndpoint(){
+    return utils.getExternalIDPCheckSessionEndpoint();
+}
+
 var getTenantBaseStoreContext = function() {
     var tenantDomain = getTenantDomain();
     var tenantContext = utils.getTenantBasedDevPortalContext(tenantDomain);
@@ -86,6 +94,16 @@ var getTenantDomain = function(){
 var getCustomUrlEnabledDomain = function() {
     var tenantDomain = request.getHeader("X-WSO2-Tenant");
     return tenantDomain;
+};
+
+var getTenantBasedCustomUrl = function() {
+    var tenantDomain = getTenantDomain();
+    var storeDomainMapping = utils.getTenantBasedStoreDomainMapping(tenantDomain);
+    if (storeDomainMapping != null) {
+        return "https://" + storeDomainMapping.get('customUrl');
+    } else {
+        return null;
+    }
 };
 
 var getServiceProviderTenantDomain = function(){

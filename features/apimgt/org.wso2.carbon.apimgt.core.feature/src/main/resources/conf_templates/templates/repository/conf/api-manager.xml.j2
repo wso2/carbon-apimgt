@@ -31,9 +31,11 @@
 
     {% if apim.idp is defined %}
     <IdentityProvider>
+        <ServerURL>{{apim.idp.server_url}}</ServerURL>
         <!-- Server URL of the Identity Provider used for login/logout operations in API Publisher and API Developer Portal -->
         <AuthorizeEndpoint>{{apim.idp.authorize_endpoint}}</AuthorizeEndpoint>
         <OIDCLogoutEndpoint>{{apim.idp.oidc_logout_endpoint}}</OIDCLogoutEndpoint>
+        <CheckSessionEndpoint>{{apim.idp.oidc_check_session_endpoint}}</CheckSessionEndpoint>
     </IdentityProvider>
     {% endif %}
 
@@ -59,6 +61,9 @@
              same value is used in the keys for appending the default properties to the
              JWT. -->
         <ConsumerDialectURI>{{apim.jwt.claim_dialect}}</ConsumerDialectURI>
+
+        <!-- Whether to convert claims retrieved from AuthorizationGrantCache to the dialect defined in ConsumerDialectURI -->
+        <ConvertClaimsToConsumerDialect>{{apim.jwt.convert_dialect}}</ConvertClaimsToConsumerDialect>
 
         <!-- Signature algorithm. Accepts "SHA256withRSA" or "NONE". To disable signing explicitly specify "NONE". -->
         <SignatureAlgorithm>{{apim.jwt.signing_algorithm}}</SignatureAlgorithm>
@@ -518,6 +523,8 @@
         <!--APIsPerPage>30</APIsPerPage-->
         <!-- This property need to be enabled to enable the publisher access control support -->
         <EnableAccessControl>true</EnableAccessControl>
+        <!-- This property is to add the claims that needs to be displayed in Publisher -->
+        <SubscriberClaims>{{apim.publisher.subscriber_claims}}</SubscriberClaims>
     </APIPublisher>
 
     <!-- Status observers can be registered against the API Publisher to listen for

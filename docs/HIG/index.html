@@ -27,14 +27,48 @@
 <header>
     <div class="wrapper">
         <h1>APIM &bullet; Human Interface Guidelines</h1>
-        <small>Updated: 23 Sep 2019</small>
+        <small>Updated: 31 Mar 2020</small>
     </div>
 </header>
 <div class="wrapper">
     <nav role="navigator">
         <h4>Table of Contents</h4>
         <ol>
-            <li><a href="#intro" id="toc-intro">Introduction</a></li>
+            <li><a href="#intro" id="toc-intro">Introduction</a>
+                <ol>
+                    <li><a href="#roles" id="toc-roles">User Roles</a></li>
+                    <li><a href="#customers" id="toc-customers">Customer Distribution</a></li>
+                </ol>
+            </li>
+            <li><a href="#ux" id="toc-ux">UX Best Practices</a>
+                <ol>
+                    <li><a href="#rules" id="toc-rules">Immutable Rules</a></li>
+                    <li><a href="#heuristics" id="toc-heuristics">Usability Heuristics</a></li>
+                    <li><a href="#fittsLaw" id="toc-fittsLaw">Fitts's Law</a></li>
+                    <li><a href="#hicksLaw" id="toc-hicksLaw">Hick's Law</a></li>
+                    <li><a href="#dohertyThreshol" id="toc-dohertyThreshol">Doherty Threshold</a></li>
+                    <li><a href="#jakobsLaw" id="toc-jakobsLaw">Jakob’s Laww</a></li>
+                    <li><a href="#commonRegion" id="toc-commonRegion">Law of Common Region</a></li>
+                    <li><a href="#proximity" id="toc-proximity">Law of Proximity</a></li>
+                    <li><a href="#similarity" id="toc-similarity">Law of Similarity</a></li>
+                    <li><a href="#connectedness" id="toc-connectedness">Law of Uniform Connectedness</a></li>
+                    <li><a href="#continuation" id="toc-continuation">Law of Continuation</a></li>
+                    <li><a href="#millersLaw" id="toc-millersLaw">Miller’s Law</a></li>
+                    <li><a href="#razor" id="toc-razor">Occam’s Razor</a></li>
+                    <li><a href="#pareto" id="toc-pareto">Pareto Principle</a></li>
+                    <li><a href="#parkinsonsLaw" id="toc-parkinsonsLaw">Parkinson’s Law</a></li>
+                    <li><a href="#peakEndRule" id="toc-peakEndRule">Peak-End Rule</a></li>
+                    <li><a href="#serialPosition" id="toc-serialPosition">Serial Position Effect</a></li>
+                    <li><a href="#tesler" id="toc-tesler">Tesler’s Law</a></li>
+                    <li><a href="#vonRestorff" id="toc-vonRestorff">Von Restorff Effect</a></li>
+                    <li><a href="#zeigarnik" id="toc-zeigarnik">Zeigarnik Effect</a></li>
+                    <li><a href="#halo" id="toc-halo">The Halo Effect</a></li>
+                    <li><a href="#fPattern" id="toc-fPattern">F-Pattern</a></li>
+                    <li><a href="#pragnanz" id="toc-pragnanz">Law of Prägnanz</a></li>
+                    <li><a href="#aesthetic" id="toc-aesthetic">Aesthetic Usability Effect</a></li>
+                    <li><a href="#selection" id="toc-selection">Selection Options</a></li>
+                </ol>
+            </li>
             <li><a href="#ui_elements" id="toc-ui_elements">UI Elements</a>
                 <ol>
                     <li><a href="#buttons" id="toc-buttons">Buttons</a></li>
@@ -53,11 +87,509 @@
             experience for end users of the API Manager app. </p>
         <p>API Manager 3.x.x is designed to <a href="https://material.io/design/" target="blank">
             material design</a> visual langauage concepts and uses <a href="https://material-ui.com/" target="blank">
-            MATERIAL-UI</a> for UI components. You can use <a href="https://material-ui.com/components/box/"
+            MATERIAL-UI</a> (V 4.4.2) for UI components. You can use <a href="https://material-ui.com/components/box/"
                                                               target="blank">MUI component library</a> for your user
             interface developments.</p>
         <p>We will define set of guidelines so that user interfaces will be consistent throughout the
             application.</p>
+
+        <section id="roles" class="waypoint">
+            <h3>User Roles</h3>
+            <h4>API Publisher</h4>
+            <p>
+                An API publisher (API provider) is an API product manager. He/she manages a set of APIs and API
+                products across the enterprise or business unit and controls the API lifecycle, subscriptions,
+                and monetization aspects of an API or API product. The API Publisher can also analyze usage patterns
+                for APIs and access all APIs statistics.
+            </p>
+            <h4>API Creator</h4>
+            <p>
+                An API Creator is a person in a technical role who understands the technical aspects of the API
+                (interfaces, documentation, versions, etc.) and uses the API Publisher portal for the design and
+                development of APIs. APIs created by an API creator are managed (lifecycle managed and productized)
+                by an API product manager.
+            </p>
+            <h4>API Subscriber</h4>
+            <p>
+                A subscriber is a consumer of an API. He/she intends to develop one or more applications that consume
+                APIs on the developer portal. A subscriber uses the API developer portal to discover APIs, read the
+                documentation and forums, rate/comment on the APIs, subscribe, obtain keys, and finally use APIs
+                from their applications.
+            </p>
+
+            <h4>Admin</h4>
+            <p>
+                The admin user is responsible for managing the admin portal, which includes tasks such as approving
+                workflows, managing rate limiting policies, configuring emails for bot detection/alerts, viewing the
+                state and health of APIs, etc. In addition, the admin user is also capable of carrying out general
+                administrative tasks such as managing users, roles, databases, security, etc.
+            </p>
+        </section>
+
+        <section id="customers" class="waypoint">
+            <h3>Customer Distribution by Region</h3>
+            <p>
+                Customer Distribution by Region as of January 2020
+            </p>
+            <img width="600" src="assets/images/customers.png" alt="Customer Distribution by Region"/>
+            <p> Find more on
+                <a href="https://docs.google.com/spreadsheets/d/1gXqP4NHhqfnzZnjTI_8rh-Y8XGyj0qpCz3FegMMzL0A/"
+                   target="blank">APIM Customers - Region & Country</a>
+            </p>
+        </section>
+
+        <hr>
+
+        <h2 id="ux" class="waypoint">User eXperience Best Practices and Rules</h2>
+
+        <p>We have listed the UX laws/best practices that you need to follow when you are designing the UI.</p>
+
+        <section id="rules" class="waypoint">
+            <h3>The Immutable Rules of UX</h3>
+            <ol>
+                <li>
+                    <b>Field study</b>
+                    <ul>
+                        <li>Early focus on users and tasks</li>
+                        <li>Find out the users' characteristics</li>
+                        <li>Observe users doing their normal tasks</li>
+                    </ul>
+                    <p>Study personas and write user stories, so that you’ll have a better understanding of the
+                        requirements</p>
+                    <a href="https://docs.google.com/document/d/1rRM-pjBDFbhZau4YLQO9NoaejvoXa05kzpXipHEZgOs/edit"
+                       target="blank">User story template - version 1.4</a>
+                    <p> Read more on
+                        <a href="https://medium.com/@erangatl/getting-started-with-user-stories-f55b1f5341b2"
+                           target="blank"> User Stories</a>
+                    </p>
+                </li>
+                <li>
+                    <b>Paper Prototyping</b>
+                    <p>
+                        Paper prototyping is the process of creating rough, often hand-sketched, drawings of a user
+                        interface, and using them in a usability test to gather feedback.
+                        Participants point to locations on the page that they would click, and screens are manually
+                        presented to the user based on the interactions they indicate.
+                    </p>
+                    <p> Find more on <a href="https://www.nngroup.com/videos/paper-prototyping-101/" target="blank">
+                        Paper Prototyping</a> 
+                    </p>
+                </li>
+                <li>
+                    <b>Iterative Design</b>
+                    <p>Cyclic process of prototyping, testing, analyzing, and refine the product or process</p>
+                </li>
+            </ol>
+            <p> Find more on <a href="https://www.nngroup.com/videos/rules-ux/" target="blank">
+                The Immutable Rules of UX</a> 
+            </p>
+        </section>
+
+        <section id="heuristics" class="waypoint">
+            <h3>10 Usability Heuristics for User Interface Design</h3>
+            <p>A heuristic evaluation is a usability inspection method mainly used to identify any design issues
+                associated with the user interface.</p>
+            <p>Jakob Nielsen’s heuristics are probably the most-used usability heuristics for user interface design.</p>
+            <ol>
+                <li>
+                    <b>Visibility of system status</b>
+                    <p>
+                        The system should always keep users informed about what is going on, through appropriate
+                        feedback within reasonable time.
+                    </p>
+                </li>
+                <li>
+                    <b>Match between system and the real world</b>
+                    <p>
+                        The system should speak the users' language, with words, phrases and concepts familiar to the
+                        user, rather than system-oriented terms.
+                        Follow real-world conventions, making information appear in a natural and logical order.
+                    </p>
+                </li>
+                <li>
+                    <b>User control and freedom</b>
+                    <p>
+                        Users often choose system functions by mistake and will need a clearly marked
+                        "emergency exit" to leave the unwanted state without having to go through an extended dialogue.
+                        Support undo and redo.
+                    </p>
+                </li>
+                <li>
+                    <b>Consistency and standards</b>
+                    <p>Users should not have to wonder whether different words, situations, or actions mean the same
+                        thing. Follow platform conventions.</p>
+                </li>
+                <li>
+                    <b>Error prevention</b>
+                    <p>
+                        Even better than good error messages is a careful design which prevents a problem from occurring
+                        in the first place. Either eliminate error-prone conditions or check for them and present users
+                        with a confirmation option before they commit to the action.
+                    </p>
+                </li>
+                <li>
+                    <b>Recognition rather than recall</b>
+                    <p>
+                        Minimize the user's memory load by making objects, actions, and options visible. The user should
+                        not have to remember information from one part of the dialogue to another.
+                        Instructions for use of the system should be visible or easily retrievable whenever appropriate.
+                    </p>
+                </li>
+                <li>
+                    <b>Flexibility and efficiency of use</b>
+                    <p>Accelerators — unseen by the novice user — may often speed up the interaction for the expert
+                        user such that the system can cater to both inexperienced and experienced users. Allow users to
+                        tailor frequent actions.
+                    </p>
+                </li>
+                <li>
+                    <b>Aesthetic and minimalist design</b>
+                    <p>
+                        Dialogues should not contain information which is irrelevant or rarely needed. Every extra unit
+                        of information in a dialogue competes with the relevant units of information and diminishes
+                        their relative visibility.
+                    </p>
+                </li>
+                <li>
+                    <b>Help users recognize, diagnose, and recover from errors</b>
+                    <p>
+                        Error messages should be expressed in plain language (no codes), precisely indicate the problem,
+                        and constructively suggest a solution.
+                    </p>
+                </li>
+                <li>
+                    <b>Help and documentation</b>
+                    <p>
+                        Even though it is better if the system can be used without documentation, it may be necessary
+                        to provide help and documentation. Any such information should be easy to search, focused on
+                        the user's task, list concrete steps to be carried out, and not be too large.
+                    </p>
+                </li>
+            </ol>
+            <p> Find more on <a href="https://medium.com/@erangatl/10-usability-heuristics-explained-caa5903faba2"
+                target="blank"> Usability Heuristics</a>
+            </p>
+        </section>
+
+        <section id="fittsLaw" class="waypoint">
+            <h3>Fitts's Law</h3>
+            <p>The time required to rapidly move to a target area is a function of the ratio between the distance to
+                the target and the size of the target
+            </p>
+            <img width="600" src="assets/images/fittsLaw.png" alt="Fitts Law"/>
+            <p>Eg. Buttons to complete an action should be close beside active elements. Important actions should be
+                larger so they’re easier to select.
+            </p>
+        </section>
+
+        <section id="hicksLaw" class="waypoint">
+            <h3>Hick’s Law</h3>
+            <p>The time it takes to make a decision increases as the number of options increases.
+            </p>
+            <p>Simplify choices for the user by breaking down complex tasks into smaller steps.
+                Avoid overwhelming users by highlighting the recommended options.
+                Use progressive onboarding to minimize cognitive load for new users.
+            </p>
+            <img width="600" src="assets/images/hicksLaw.png" alt="Fitts Law"/>
+            <p>
+                Eg. If there are too many options in a dropdown, users will most likely go through all the options and
+                the decision time increases.
+                Also if there is too much information to gather, it's better to use a stepper and collect the
+                information step by step.
+            </p>
+        </section>
+
+        <section id="dohertyThreshol" class="waypoint">
+            <h3>Doherty Threshold</h3>
+            <p>
+                Productivity soars when a computer and its users interact at a pace (<400ms) that ensures that neither
+                has to wait on the other.
+            </p>
+            <p>
+                Provide system feedback within 400ms to keep users' attention and increase productivity.
+                Use perceived performance to increase response time and reduce the perception of waiting.
+            </p>
+        </section>
+
+        <section id="jakobsLaw" class="waypoint">
+            <h3>Jakob’s Law</h3>
+            <p>
+                Users spend most of their time on other sites. This means that users prefer your site to work the same
+                way as all the other sites they already know.
+            </p>
+            <p>
+                Users will transfer expectations they have built around one familiar product to another that appears
+                similar. By leveraging existing mental models, we can create superior user experiences in which the
+                user can focus on their task rather than learning new models.
+                Minimize discordance by empowering users to continue using a familiar version for a limited time.
+            </p>
+        </section>
+
+        <section id="commonRegion" class="waypoint">
+            <h3>Law of Common Region</h3>
+            <p>
+                Elements tend to be perceived into groups if they are sharing an area with a clearly defined boundary.
+            </p>
+            <p>
+                Adding a border around an element or group of elements is an easy way to create a common region.
+                The common region can be created by defining a background behind an element or group of elements.
+            </p>
+            <img width="600" src="assets/images/commonRegion.png" alt="Fitts Law"/>
+        </section>
+
+        <section id="proximity" class="waypoint">
+            <h3>Law of Proximity</h3>
+            <p>
+                Objects that are near, or proximate to each other, tend to be grouped together.
+            </p>
+            <p>
+                Proximity helps to establish a relationship with nearby objects.
+                Proximity helps users understand and organize information faster and more efficiently.
+            </p>
+            <img width="600" src="assets/images/proximity.png" alt="Fitts Law"/>
+        </section>
+
+        <section id="similarity" class="waypoint">
+            <h3>Law of Similarity</h3>
+            <p>
+                The human eye tends to perceive similar elements in a design as a complete picture, shape, or group,
+                even if those elements are separated.
+            </p>
+            <p>Elements that have similar visual appearances seem to be more related.</p>
+            <p>
+                Similarity helps us organize objects by their relatedness to other objects within a group and can be
+                affected by the attributes of
+                <b>color</b>, <b>size</b>, <b>shape</b>, and <b>orientation</b>.
+            </p>
+            <img width="600" src="assets/images/similarity.png" alt="Fitts Law"/>
+            <p> Find more on
+                <a href="https://www.smashingmagazine.com/2016/05/improve-your-designs-with-principles-similarity-proximity-part-1/"
+                   target="blank">Law of Similarity</a>
+            </p>
+        </section>
+
+        <section id="connectedness" class="waypoint">
+            <h3>Law of Uniform Connectedness</h3>
+            <p>
+                Elements that are visually connected are perceived as more related than elements with no connection.
+            </p>
+            <p>
+                Group functions of a similar nature so they are visually connected via colors, lines, frames, or other
+                shapes.
+            </p>
+            <ul>
+                <li>Connecting related links or buttons by adding them to the same drop-down menu.</li>
+                <li>Using the same bullet shapes, colors, or numbering system (such as Roman numerals, Arabic numbers,
+                    etc.) on list items to group them with each other.
+                </li>
+                <li>Displaying functions of a similar nature, such as login, sign up, and forgotten password, so that
+                    they are related, inside a frame or colored rectangle.
+                </li>
+            </ul>
+            
+        </section>
+
+        <section id="continuation" class="waypoint">
+            <h3>Law of Continuation</h3>
+            <p>
+                The human eye follows the paths, lines, and curves of the design, and prefers to see a continuous flow
+                of visual elements rather than separated objects.
+            </p>
+            <img width="600" src="assets/images/continuation.jpg" alt="Fitts Law"/>
+            <p>
+                When designing, we can use continuation to guide the eye through our designs, establishing relationships
+                between elements as well as directing attention to specific groups or elements.
+            </p>
+        </section>
+
+        <section id="millersLaw" class="waypoint">
+            <h3>Miller’s Law</h3>
+            <p>
+                The average person can only keep 7 (plus or minus 2) items in their working memory.
+            </p>
+            <p>
+                Organize content into smaller chunks to help users process, understand, and memorize easily.
+            </p>
+            <img width="600" src="assets/images/millersLaw.png" alt="Miller’s Law"/>
+        </section>
+
+        <section id="razor" class="waypoint">
+            <h3>Occam’s Razor</h3>
+            <p>
+                Among competing hypotheses that predict equally well, the one with the fewest assumptions should be
+                selected.
+            </p>
+            <p>
+                Minimalist design or “Keep It Simple”
+                “What is the minimum amount of UI that will allow the content to be found and effectively communicate
+                to the user?”
+            </p>
+            <p>“Perfection is achieved not when there is nothing more to add, but when there is nothing left to take
+                away”. — Antoine de Saint-Exupéry</p>
+            <img width="600" src="assets/images/razor.png" alt="Occam’s Razor"/>
+        </section>
+
+        <section id="pareto" class="waypoint">
+            <h3>Pareto Principle (80/20 Rule)</h3>
+            <p>
+                The Pareto principle states that, for many events, roughly 80% of the effects come from 20% of the causes.
+            </p>
+            <p>
+                only a few main variables affect the outcomes, and most other factors will return little impact
+            </p>
+            <p>*Focus the majority of the effort on the areas that will bring the largest benefits to the most users.
+            </p>
+            
+            <p> Find more on
+                <a href="https://www.interaction-design.org/literature/article/the-pareto-principle-and-your-user-experience-work"
+                   target="blank">Pareto Principle (80/20 Rule)</a>
+            </p>
+        </section>
+
+        <section id="parkinsonsLaw" class="waypoint">
+            <h3>Parkinson’s Law </h3>
+            <p>
+                Any task will inflate until all of the available time is spent.
+            </p>
+            <p>
+                The amount of work required adjusts (usually increasing) to the time available for its completion.
+            </p>
+        </section>
+
+        <section id="peakEndRule" class="waypoint">
+            <h3>Peak-End Rule</h3>
+            <p>
+                People judge an experience largely based on how they felt at its peak and at its end, rather than the
+                total sum or average of every moment of the experience.
+            </p>
+            <p>
+                *Pay close attention to the most intense points and the final moments (the “end”) of the user journey.
+                Identify the moments when your product is most helpful, valuable, or entertaining and design to make
+                those moments even better. Remember that people recall negative experiences more vividly than positive
+                ones.
+            </p>
+            <img width="400" src="assets/images/peakEndRule.png" alt="Peak-End Rule"/>
+
+            <p> Find more on
+                <a href="https://www.nngroup.com/articles/peak-end-rule/"
+                   target="blank">Peak-End Rule</a>
+            </p>
+        </section>
+
+        <section id="serialPosition" class="waypoint">
+            <h3>Serial Position Effect</h3>
+            <p>
+                Users have a propensity to best remember the first and last items in a series.
+            </p>
+            <p>
+                *Placing the least important items in the middle of lists can be helpful because these items tend to be
+                stored less frequently in long-term and working memory. Positioning key actions on the far left and
+                right within elements such as navigation can increase memorization.
+            </p>
+        </section>
+
+        <section id="tesler" class="waypoint">
+            <h3>Tesler’s Law</h3>
+            <p>
+                Tesler's Law, also known as The Law of Conservation of Complexity, states that for any system there is
+                a certain amount of complexity that cannot be reduced.
+            </p>
+        </section>
+
+        <section id="vonRestorff" class="waypoint">
+            <h3>Von Restorff Effect</h3>
+            <p>
+                The Von Restorff effect, also known as The Isolation Effect, predicts that when multiple similar objects
+                are present, the one that differs from the rest is most likely to be remembered.
+            </p>
+            <p>
+                *Make important information or key actions visually distinctive.
+            </p>
+        </section>
+
+        <section id="zeigarnik" class="waypoint">
+            <h3>Zeigarnik Effect</h3>
+            <p>
+                People remember uncompleted or interrupted tasks better than completed tasks.
+            </p>
+            <p>
+                Use progress bars for complex tasks to visually indicate when a task is incomplete, and thus increase
+                the likelihood it will be completed.
+            </p>
+        </section>
+
+        <section id="halo" class="waypoint">
+            <h3>The Halo Effect</h3>
+            <p>
+                The Halo Effect says that any one element in a user's experience with a company will rub off on their
+                interpretation of other elements and their feelings about the company as a whole. Good design in one
+                part of a website will make people like other parts better (and like the company better), but the
+                opposite is also true.
+            </p>
+            <p> Find more on
+                <a href="https://www.nngroup.com/articles/halo-effect/"
+                   target="blank">The Halo Effect</a>
+            </p>
+        </section>
+
+        <section id="fPattern" class="waypoint">
+            <h3>F-Pattern in Reading Digital Content</h3>
+            <p>
+                Eyetracking research shows that people scan webpages and phone screens in various patterns, one of them
+                being the shape of the letter F. We can do things to avoid F-pattern and make it much easier for people
+                to scan text.
+            </p>
+            <p>
+                For example, use chunking of text, use bullets, and more important than anything, use headings
+                and sub-headings within the text. And make those headings look different from the normal text: larger,
+                a different color, bolder, a different typeface, any of these things can work.
+            </p>
+            <p>And with that, users can scan to the headings and decide if those words are things that they're
+                interested in. And if they are, they'll read the normal text below it.
+                And if not, they'll read to the next heading, and that's a different pattern than we see
+            </p>
+            <p> Find more on
+                <a href="https://www.nngroup.com/articles/f-shaped-pattern-reading-web-content/"
+                   target="blank">F-Pattern in Reading Digital Content</a>
+            </p>
+        </section>
+
+        <section id="pragnanz" class="waypoint">
+            <h3>Law of Prägnanz</h3>
+            <p>
+                People will perceive and interpret ambiguous or complex images as the simplest form possible because
+                it is the interpretation that requires the least cognitive effort of us.
+            </p>
+            <p>
+                The human eye likes to find simplicity and order in complex shapes because it prevents us from becoming
+                overwhelmed with information. Research confirms that people are better able to visually process and
+                remember simple figures than complex figures.
+            </p>
+
+            <p> Find more on
+                <a href="https://www.smashingmagazine.com/2014/03/design-principles-visual-perception-and-the-principles-of-gestalt/"
+                   target="blank">Law of Prägnanz</a>
+            </p>
+        </section>
+
+        <section id="aesthetic" class="waypoint">
+            <h3>Aesthetic Usability Effect</h3>
+            <p>
+                Users often perceive aesthetically pleasing design as a more usable design.
+            </p>
+        </section>
+
+        <section id="selection" class="waypoint">
+            <h3>Selection Options</h3>
+            <p>
+                Show all selection options if under 6, use radio buttons or any suitable element instead of dropdown.
+            </p>
+            <img width="600" src="assets/images/selection.jpeg" alt="selection options"/>
+            <p>
+                Placing options in a selector drop-down requires two clicks, and hides the options. Use an input
+                selector if there are
+            </p>
+        </section>
 
         <hr>
 

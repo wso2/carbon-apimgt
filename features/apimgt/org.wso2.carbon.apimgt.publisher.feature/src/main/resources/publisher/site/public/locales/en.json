@@ -472,6 +472,7 @@
   "Apis.Details.GoTo.GoTo.btn": "Go To",
   "Apis.Details.LifeCycle.CheckboxLabels.business.plans.selected": "Business Plan(s) selected",
   "Apis.Details.LifeCycle.CheckboxLabels.endpoints.provided": "Endpoint provided",
+  "Apis.Details.LifeCycle.CheckboxLabels.gateway.environments.selected": "Gateway Environment(s) selected",
   "Apis.Details.LifeCycle.LifeCycle.change.not.allowed": "* You are not authorized to change the life cycle state of the API due to insufficient permissions",
   "Apis.Details.LifeCycle.LifeCycle.history": "History",
   "Apis.Details.LifeCycle.LifeCycle.lifecycle": "Lifecycle",

@@ -1,2 +1,2 @@
 instructions.configure = \
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.keymanager_${feature.version}/throttle#data#v1.war,target:${installFolder}/../../deployment/server/webapps/throttle#data#v1.war,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.keymanager_${feature.version}/internal#data#v1.war,target:${installFolder}/../../deployment/server/webapps/internal#data#v1.war,overwrite:true);\

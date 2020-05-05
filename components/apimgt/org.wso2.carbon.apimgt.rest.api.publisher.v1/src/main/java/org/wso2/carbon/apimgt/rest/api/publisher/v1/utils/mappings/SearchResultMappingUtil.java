@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductSearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentSearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
@@ -54,7 +55,7 @@ public class SearchResultMappingUtil {
         APIIdentifier apiId = api.getId();
         apiResultDTO.setName(apiId.getApiName());
         apiResultDTO.setVersion(apiId.getVersion());
-        apiResultDTO.setProvider(apiId.getProviderName());
+        apiResultDTO.setProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         String context = api.getContextTemplate();
         if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
@@ -80,7 +81,8 @@ public class SearchResultMappingUtil {
         apiProductResultDTO.setId(apiProduct.getUuid());
         APIProductIdentifier apiproductId = apiProduct.getId();
         apiProductResultDTO.setName(apiproductId.getName());
-        apiProductResultDTO.setProvider(apiproductId.getProviderName());
+        apiProductResultDTO.setVersion(apiproductId.getVersion());
+        apiProductResultDTO.setProvider(APIUtil.replaceEmailDomainBack(apiproductId.getProviderName()));
         String context = apiProduct.getContextTemplate();
         if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
@@ -88,6 +90,7 @@ public class SearchResultMappingUtil {
         apiProductResultDTO.setContext(context);
         apiProductResultDTO.setType(SearchResultDTO.TypeEnum.APIPRODUCT);
         apiProductResultDTO.setDescription(apiProduct.getDescription());
+        apiProductResultDTO.setStatus(apiProduct.getState());
         apiProductResultDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
         return apiProductResultDTO;
     }
@@ -112,7 +115,7 @@ public class SearchResultMappingUtil {
         APIIdentifier apiId = api.getId();
         docResultDTO.setApiName(apiId.getApiName());
         docResultDTO.setApiVersion(apiId.getVersion());
-        docResultDTO.setApiProvider(apiId.getProviderName());
+        docResultDTO.setApiProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         docResultDTO.setApiUUID(api.getUUID());
         return docResultDTO;
     }
@@ -133,7 +136,7 @@ public class SearchResultMappingUtil {
         APIProductIdentifier apiId = apiProduct.getId();
         docResultDTO.setApiName(apiId.getName());
         docResultDTO.setApiVersion(apiId.getVersion());
-        docResultDTO.setApiProvider(apiId.getProviderName());
+        docResultDTO.setApiProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         docResultDTO.setApiUUID(apiProduct.getUuid());
         return docResultDTO;
     }

@@ -28,7 +28,9 @@ import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
  */
 function EndpointSecurity(props) {
     const { api } = useContext(APIContext);
-    const { intl, securityInfo, onChangeEndpointAuth } = props;
+    const {
+        intl, securityInfo, onChangeEndpointAuth, isProduction,
+    } = props;
     const [endpointSecurityInfo, setEndpointSecurityInfo] = useState({
         type: 'BASIC',
         username: '',
@@ -53,8 +55,9 @@ function EndpointSecurity(props) {
         },
     ];
     useEffect(() => {
-        const tmpSecurity = {};
+        let tmpSecurity = {};
         if (securityInfo !== null) {
+            tmpSecurity = { ...securityInfo };
             const { type, username, password } = securityInfo;
             tmpSecurity.type = type;
             tmpSecurity.username = username;
@@ -69,7 +72,8 @@ function EndpointSecurity(props) {
         } else {
             setSecurityValidity({ ...securityValidity, [field]: true });
         }
-        onChangeEndpointAuth(endpointSecurityInfo[field], field);
+        const type = isProduction ? 'production' : 'sandbox';
+        onChangeEndpointAuth(endpointSecurityInfo, type);
     };
     return (
         <Grid container direction='row' spacing={2}>
@@ -78,15 +82,19 @@ function EndpointSecurity(props) {
                     disabled={isRestricted(['apim:api_create'], api)}
                     fullWidth
                     select
-                    value={endpointSecurityInfo.type}
+                    value={endpointSecurityInfo && endpointSecurityInfo.type}
                     variant='outlined'
                     onChange={(event) => {
-                        onChangeEndpointAuth(event.target.value, 'type');
+                        setEndpointSecurityInfo({
+                            ...endpointSecurityInfo,
+                            type: event.target.value,
+                        });
                     }}
                     inputProps={{
                         name: 'key',
                         id: 'auth-type-select',
                     }}
+                    onBlur={() => validateAndUpdateSecurityInfo(isProduction)}
                 >
                     {authTypes.map((type) => (
                         <MenuItem value={type.key}>{type.value}</MenuItem>

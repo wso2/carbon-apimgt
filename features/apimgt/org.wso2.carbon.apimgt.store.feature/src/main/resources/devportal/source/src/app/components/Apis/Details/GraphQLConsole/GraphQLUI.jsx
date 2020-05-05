@@ -40,12 +40,11 @@ const { buildSchema } = require('graphql');
  */
 export default function GraphQLUI(props) {
     const {
-        accessToken,
         authorizationHeader,
         URLs,
         securitySchemeType,
-        username,
-        password,
+        accessTokenProvider,
+
     } = props;
     const { api } = useContext(ApiContext);
     const [schema, setSchema] = useState(null);
@@ -79,12 +78,11 @@ export default function GraphQLUI(props) {
     function graphQLFetcher(graphQLParams) {
         let token;
         if (authorizationHeader === 'apikey') {
-            token = accessToken;
+            token = accessTokenProvider();
         } else if (securitySchemeType === 'BASIC') {
-            const credentials = username + ':' + password;
-            token = 'Basic ' + btoa(credentials);
+            token = 'Basic ' + accessTokenProvider();
         } else {
-            token = 'Bearer ' + accessToken;
+            token = 'Bearer ' + accessTokenProvider();
         }
         return fetch((URLs.https), {
             method: 'post',
@@ -116,6 +114,7 @@ export default function GraphQLUI(props) {
                         margin='normal'
                         variant='outlined'
                         InputProps={URLs.https}
+                        disabled
                     />
                 </Box>
                 <div styles={{ width: '100%' }}>

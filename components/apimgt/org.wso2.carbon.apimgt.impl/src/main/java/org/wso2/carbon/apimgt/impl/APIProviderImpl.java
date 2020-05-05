@@ -40,6 +40,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -50,6 +52,7 @@ import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
@@ -116,6 +119,7 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
+import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
@@ -181,6 +185,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
@@ -2006,6 +2011,49 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * Returns the subscriber name for the given subscription id.
+     *
+     * @param subscriptionId The subscription id of the subscriber to be returned
+     * @return The subscriber or null if the requested subscriber does not exist
+     * @throws APIManagementException if failed to get Subscriber
+     */
+    @Override
+    public String getSubscriber(String subscriptionId) throws APIManagementException {
+        return apiMgtDAO.getSubscriberName(subscriptionId);
+    }
+
+    /**
+     * Returns the claims of subscriber for the given subscriber.
+     *
+     * @param subscriber The name of the subscriber to be returned
+     * @return The looked up claims of the subscriber or null if the requested subscriber does not exist
+     * @throws APIManagementException if failed to get Subscriber
+     */
+    @Override
+    public Map<String, String> getSubscriberClaims(String subscriber) throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(subscriber);
+        int tenantId = 0;
+        Map<String, String> claimMap = new HashMap<>();
+        try {
+            tenantId = getTenantId(tenantDomain);
+        SortedMap<String, String> subscriberClaims =
+                APIUtil.getClaims(subscriber, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
+        APIManagerConfiguration configuration = getAPIManagerConfiguration();
+        String configuredClaims = configuration
+                .getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS);
+        if (subscriberClaims != null) {
+            for (String claimURI : configuredClaims.split(",")) {
+                claimMap.put(claimURI, subscriberClaims.get(claimURI));
+            }
+        }
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while retrieving tenant id for tenant domain "
+                    + tenantDomain, e);
+        }
+        return claimMap;
+    }
+
     private Map<String, String> publishToGateway(API api) throws APIManagementException {
         Map<String, String> failedEnvironment;
         String tenantDomain = null;
@@ -2535,7 +2583,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     , Collections.<String, String>emptyMap());
 
             properties = new HashMap<String, String>();
-            properties.put("configKey", "gov:" + APIConstants.GA_CONFIGURATION_LOCATION);
+            properties.put("configKey", APIConstants.GA_CONF_KEY);
             vtb.addHandler(
                     "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
                     , properties);
@@ -2696,7 +2744,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 , Collections.<String, String>emptyMap());
 
         properties = new HashMap<String, String>();
-        properties.put("configKey", "gov:" + APIConstants.GA_CONFIGURATION_LOCATION);
+        properties.put("configKey", APIConstants.GA_CONF_KEY);
         vtb.addHandler(
                 "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
                 , properties);
@@ -7971,5 +8019,63 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<APIResource> getResourcesToBeRemovedFromAPIProducts(APIIdentifier apiId, String swaggerContent)
+            throws APIManagementException {
+        API existingAPI = getAPI(apiId);
+        APIDefinitionValidationResponse response = OASParserUtil
+                .validateAPIDefinition(swaggerContent, true);
+        APIDefinition oasParser = response.getParser();
+        String apiDefinition = response.getJsonContent();
+        Set<URITemplate> uriTemplates = null;
+        try {
+            uriTemplates = oasParser.getURITemplates(apiDefinition);
+        } catch (APIManagementException e) {
+            // catch APIManagementException inside again to capture validation error
+            log.error("Swagger validation error");
+        }
+        if(uriTemplates == null || uriTemplates.isEmpty()) {
+            log.error("No resources found");
+        }
+
+        List<APIResource> removedProductResources = getRemovedProductResources(uriTemplates, existingAPI);
+        return removedProductResources;
+    }
+
+    @Override
+    public List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI) {
+        Set<URITemplate> existingUriTemplates = existingAPI.getUriTemplates();
+        List<APIResource> removedReusedResources = new ArrayList<>();
+
+        for (URITemplate existingUriTemplate : existingUriTemplates) {
+
+            // If existing URITemplate is used by any API Products
+            if (!existingUriTemplate.retrieveUsedByProducts().isEmpty()) {
+                String existingVerb = existingUriTemplate.getHTTPVerb();
+                String existingPath = existingUriTemplate.getUriTemplate();
+                boolean isReusedResourceRemoved = true;
+
+                for (URITemplate updatedUriTemplate : updatedUriTemplates) {
+                    String updatedVerb = updatedUriTemplate.getHTTPVerb();
+                    String updatedPath = updatedUriTemplate.getUriTemplate();
+
+                    //Check if existing reused resource is among updated resources
+                    if (existingVerb.equalsIgnoreCase(updatedVerb) &&
+                            existingPath.equalsIgnoreCase(updatedPath)) {
+                        isReusedResourceRemoved = false;
+                        break;
+                    }
+                }
+
+                // Existing reused resource is not among updated resources
+                if (isReusedResourceRemoved) {
+                    APIResource removedResource = new APIResource(existingVerb, existingPath);
+                    removedReusedResources.add(removedResource);
+                }
+            }
+        }
+        return removedReusedResources;
     }
 }

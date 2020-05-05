@@ -99,12 +99,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.UUID;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.TestUtils.mockRegistryAndUserRealm;
+import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_URI;
 import static org.wso2.carbon.utils.ServerConstants.CARBON_HOME;
 
 @RunWith (PowerMockRunner.class)
@@ -1129,6 +1132,10 @@ public class AbstractAPIManagerTestCase {
                 apiMgtDAO);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenThrow(UserStoreException.class)
                 .thenReturn(tenantId);
+        PowerMockito.mockStatic(APIUtil.class);
+        SortedMap<String, String> claimValues = new TreeMap<String, String>();
+        claimValues.put("admin@wso2.om", APIConstants.EMAIL_CLAIM);
+        PowerMockito.when(APIUtil.getClaims(API_PROVIDER, tenantId, DEFAULT_DIALECT_URI)).thenReturn(claimValues);
         try {
             abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID);
             Assert.fail("User store exception not thrown for error scenario");

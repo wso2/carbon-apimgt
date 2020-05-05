@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
@@ -176,6 +177,24 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to get APISubscriptionCountByAPI
      */
     long getAPISubscriptionCountByAPI(APIIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Returns the subscriber name for the given subscription id.
+     *
+     * @param subscriptionId The subscription id of the subscriber to be returned
+     * @return The subscriber or null if the requested subscriber does not exist
+     * @throws APIManagementException if failed to get Subscriber
+     */
+    String getSubscriber(String subscriptionId) throws APIManagementException;
+
+    /**
+     * Returns the claims of subscriber for the given subscriber.
+     *
+     * @param subscriber The name of the subscriber to be returned
+     * @return The looked up claims of the subscriber or null if the requested subscriber does not exist
+     * @throws APIManagementException if failed to get Subscriber
+     */
+    Map getSubscriberClaims(String subscriber) throws APIManagementException;
 
     void addTier(Tier tier) throws APIManagementException;
 
@@ -1287,4 +1306,26 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException;
+
+    /**
+     * Find the resources that should be removed from API Products,
+     * because those have been already removed from the swagger definition of the updating API.
+     *
+     * @param apiId API Identifier
+     * @param apiDefinition swagger definition
+     * @return  List of resources to be removed that are reused among API Products
+     * @throws APIManagementException when error updating resources
+     */
+    List<APIResource> getResourcesToBeRemovedFromAPIProducts(APIIdentifier apiId, String apiDefinition)
+            throws APIManagementException;
+
+    /**
+     * Finds resources that have been removed in the updated API URITemplates,
+     * that are currently reused by API Products.
+     *
+     * @param updatedUriTemplates Updated URITemplates
+     * @param existingAPI         Existing API
+     * @return List of removed resources that are reused among API Products
+     */
+    List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI);
 }
