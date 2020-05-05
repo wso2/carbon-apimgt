@@ -103,8 +103,12 @@ x-wso2-security:
         key: apim:monetization_usage_publish
       - description: ""
         roles: admin
-        name: apim:api_workflow
-        key: apim:api_workflow
+        name: apim:api_workflow_approve
+        key: apim:api_workflow_approve
+      - description: ""
+        roles: admin
+        name: apim:api_workflow_view
+        key: apim:api_workflow_view
       - description: ""
         roles: admin
         name: apim:bot_data
@@ -2529,7 +2533,7 @@ paths:
 # Retrieve a list of all workflow pending processes
 #---------------------------------------------------
     get:
-      x-scope: apim:api_workflow
+      x-scope: apim:api_workflow_view
       x-wso2-request: |
         GET https://localhost:9443/api/am/admin/v0.16/workflows
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -2608,7 +2612,7 @@ paths:
     # Retrieve the Details of a workflow pendding process
     #-----------------------------------------------------
     get:
-      x-scope: apim:api_workflow
+      x-scope: apim:api_workflow_view
       x-wso2-curl: "curl https://localhost:9443/api/am/admin/v0.16/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"
       x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/admin/v0.16/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"
       x-wso2-request: |
@@ -2663,7 +2667,7 @@ paths:
 # Resume the workflow by approving or rejecting the workflow request
 #-------------------------------------------------------------------
     post:
-      x-scope: apim:api_workflow
+      x-scope: apim:api_workflow_approve
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/admin/v0.16/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\""
       x-wso2-request: "POST https://localhost:9443/api/am/admin/v0.16/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"status\" : \"APPROVED\",\n   \"attributes\" : {\n      \"apiCurrentState\": \"Created\",\n      \"apiLCAction\": \"Publish\",\n      \"apiName\":\"APIname\",\n      \"apiVersion\" : \"1.0.0\",\n      \"apiProvider\" : \"admin\",\n      \"invoker\": \"admin\"\n   }\n}"
       x-wso2-response: "HTTP/1.1 200 OK"

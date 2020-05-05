@@ -103,8 +103,14 @@
         {
           "description": "",
           "roles": "admin",
-          "name": "apim:api_workflow",
-          "key": "apim:api_workflow"
+          "name": "apim:api_workflow_approve",
+          "key": "apim:api_workflow_approve"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:api_workflow_view",
+          "key": "apim:api_workflow_view"
         },
         {
           "description": "",
@@ -2562,7 +2568,7 @@
     },
     "/workflows": {
       "get": {
-        "x-scope": "apim:api_workflow",
+        "x-scope": "apim:api_workflow_view",
         "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.16/workflows\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v0.16/workflows\"",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n    \"WF_TYPE\": \"AM_APPLICATION_CREATION\",\n         \"WF_STATUS\": \"APPROVED\",\n         \"WF_CREATED_TIME\": \"  2020-02-10 09:33:34.476\"\n    \"WF_UPDATED_TIME\": \"  2020-02-10 09:33:34.476\"\n    \"WF_STATUS_DESC\": \"  Approve workflow request\"\n   \"TENANT_ID\": \"-1234\",\n  \"TENANT_DOMAIN\": \"carbon.super\",\n  \"WF_EXTERNAL_REFERENCE\": \"5871244b-d6f3-466e-8995-8accd1e64303\",\n  \"PAYLOAD\": \"7b2263616c6c4261636b55524c22\",\n },\n  {\n         \"WF_ID\": \"\",\n         \"WF_REFERENCE\": \"ABBA\",\n           \"WF_TYPE\": \"AM_APPLICATION_CREATION\",\n         \"WF_STATUS\": \"APPROVED\",\n         \"WF_CREATED_TIME\": \"  2020-01-10 09:32:34.476\"\n    \"WF_UPDATED_TIME\": \"  2020-03-12 09:34:34.476\"\n    \"WF_STATUS_DESC\": \"  Approve workflow request\"\n   \"TENANT_ID\": \"-1234\",\n  \"TENANT_DOMAIN\": \"carbon.super\",\n  \"WF_EXTERNAL_REFERENCE\": \"5871244b-d6f3-466e-8922-8accd1e64303\",\n  \"PAYLOAD\": \"7b226170694e616d65223a2253616\",\n }          ",
@@ -2641,7 +2647,7 @@
     },
     "/workflows/{externalWorkflowRef}": {
       "get": {
-        "x-scope": "apim:api_workflow",
+        "x-scope": "apim:api_workflow_view",
         "x-wso2-curl": "curl https://localhost:9443/api/am/admin/v0.16/workflows/c43a325c-260b-4302-81cb-768eafaa3aed",
         "x-wso2-curl-tenant": "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/admin/v0.16/workflows/c43a325c-260b-4302-81cb-768eafaa3aed",
         "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.16/workflows/c43a325c-260b-4302-81cb-768eafaa3aed\n",
@@ -2690,7 +2696,7 @@
     },
     "/workflows/update-workflow-status": {
       "post": {
-        "x-scope": "apim:api_workflow",
+        "x-scope": "apim:api_workflow_approve",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/admin/v0.16/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\"",
         "x-wso2-request": "POST https://localhost:9443/api/am/admin/v0.16/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"status\" : \"APPROVED\",\n   \"attributes\" : {\n      \"apiCurrentState\": \"Created\",\n      \"apiLCAction\": \"Publish\",\n      \"apiName\":\"APIname\",\n      \"apiVersion\" : \"1.0.0\",\n      \"apiProvider\" : \"admin\",\n      \"invoker\": \"admin\"\n   }\n}",
         "x-wso2-response": "HTTP/1.1 200 OK",
