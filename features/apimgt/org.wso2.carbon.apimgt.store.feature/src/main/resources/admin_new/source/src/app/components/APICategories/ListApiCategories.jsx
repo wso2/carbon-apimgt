@@ -29,6 +29,9 @@ import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
 import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
+import Delete from 'AppComponents/APICategories/DeleteAPICategory';
+import AddEdit from 'AppComponents/APICategories/AddEditAPICategory';
+import EditIcon from '@material-ui/icons/Edit';
 
 /**
  * API call to get api category list
@@ -177,6 +180,12 @@ export default function ListApiCategories() {
             searchProps={searchProps}
             emptyBoxProps={emptyBoxProps}
             apiCall={apiCall}
+            EditComponent={AddEdit}
+            editComponentProps={{
+                icon: <EditIcon />,
+                title: 'Edit API Category',
+            }}
+            DeleteComponent={Delete}
         />
     );
 }
