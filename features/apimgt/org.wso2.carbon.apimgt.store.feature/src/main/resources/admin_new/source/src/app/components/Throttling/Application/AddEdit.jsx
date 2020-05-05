@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import DialogContentText from '@material-ui/core/DialogContentText';
@@ -52,10 +52,18 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-// const initialState = {
-//     name: '',
-//     description: '',
-// };
+let initialState = {
+    policyName: '',
+    description: '',
+    defaultLimit: {
+        requestCount: '',
+        timeUnit: 'min',
+        unitTime: '',
+        type: 'RequestCountLimit',
+        dataAmount: '',
+        dataUnit: 'KB',
+    },
+};
 
 
 /**
@@ -63,12 +71,47 @@ const useStyles = makeStyles((theme) => ({
  * @param {JSON} state The second number.
  * @returns {Promise}.
  */
-// function reducer(state, { field, value }) {
-//     return {
-//         ...state,
-//         [field]: value,
-//     };
-// }
+function reducer(state, newValue) {
+    const { field, value } = newValue;
+    switch (field) {
+        case 'policyName':
+            return { ...state, [field]: value };
+        case 'description':
+            return { ...state, [field]: value };
+        case 'requestCount':
+            return {
+                ...state,
+                defaultLimit: { ...state.defaultLimit, [field]: value },
+            };
+        case 'timeUnit':
+            return {
+                ...state,
+                defaultLimit: { ...state.defaultLimit, [field]: value },
+            };
+        case 'unitTime':
+            return {
+                ...state,
+                defaultLimit: { ...state.defaultLimit, [field]: value },
+            };
+        case 'type':
+            return {
+                ...state,
+                defaultLimit: { ...state.defaultLimit, [field]: value },
+            };
+        case 'dataAmount':
+            return {
+                ...state,
+                defaultLimit: { ...state.defaultLimit, [field]: value },
+            };
+        case 'dataUnit':
+            return {
+                ...state,
+                defaultLimit: { ...state.defaultLimit, [field]: value },
+            };
+        default:
+            return newValue;
+    }
+}
 
 /**
  * Render a list
@@ -79,32 +122,19 @@ function AddEdit(props) {
     const {
         updateList, icon, triggerButtonText, title, applicationThrottlingPolicyList, dataRow,
     } = props;
-    const [quotaPolicyType, setQuotaPolicyType] = useState('RequestCountLimit');
-    const [unitTime, setUnitTime] = useState('min');
-    const [dataBandwithUnit, setDataBandwithUnit] = useState('KB');
-    const applicationThrottlingPolicy = { defaultLimit: {} };
-    const [policy, setPolicy] = useState({});
+    const [state, dispatch] = useReducer(reducer, initialState);
+    const {
+        policyName, description, defaultLimit: {
+            requestCount, timeUnit, unitTime, type, dataAmount, dataUnit,
+        },
+    } = state;
     const [validationError, setValidationError] = useState([]);
     const restApi = new API();
 
-    // useEffect(() => {
-    //     initialState = {
-    //         label: '',
-    //         description: '',
-    //     };
-    // }, [title]);
+    const onChange = (e) => {
+        dispatch({ field: e.target.name, value: e.target.value });
+    };
 
-    // const [state, dispatch] = useReducer(reducer, initialState);
-    // const { label, description } = state;
-
-    // const onChange = (e) => {
-    //     dispatch({ field: e.target.name, value: e.target.value });
-    // };
-    // const validate = (fieldName, value) => {
-    //     let error = false;
-    //     error = value === '' ? fieldName + ' is Empty' : false;
-    //     setValidationError({ [fieldName]: error });
-    // };
     const validate = (fieldName, value) => {
         let error = false;
         const isNumeric = (value !== '') && !Number.isNaN(Number(value));
@@ -128,90 +158,97 @@ function AddEdit(props) {
         }
     };
 
-
-    // const getAllFormErrors = () => {
-    //     let errorText = '';
-    //     const labelErrors = hasErrors('label', label);
-    //     if (labelErrors) {
-    //         errorText += labelErrors + '\n';
-    //     }
-    //     return errorText;
-    // };
-
     const formSaveCallback = () => {
-        if (validationError.length !== 0) {
+        if (Object.keys(validationError).length !== 0) {
             Alert.error('Error while adding Application Throttling Policy. Mandatory values have not been filled');
             return (false);
         }
-        applicationThrottlingPolicy.defaultLimit.type = quotaPolicyType;
-        applicationThrottlingPolicy.defaultLimit.timeUnit = unitTime;
-        if (quotaPolicyType === 'BandwidthLimit') {
-            applicationThrottlingPolicy.defaultLimit.dataUnit = dataBandwithUnit;
-        }
-        const promisedAddApplicationPolicy = restApi.addApplicationThrottlingPolicy(
-            applicationThrottlingPolicy,
-        );
-        promisedAddApplicationPolicy
-            .then(() => {
-                updateList();
-                return (
-                    <FormattedMessage
-                        id='Throttling.Application.Policy.policy.add.success'
-                        defaultMessage='Application Throttling Policy added successfully.'
-                    />
-                );
-            })
-            .catch((error) => {
-                const { response } = error;
-                let errorDescription;
-                if (response.body) {
-                    errorDescription = response.body;
-                }
-                return (errorDescription);
-            });
-        return (promisedAddApplicationPolicy);
-    };
+        let applicationThrottlingPolicy;
+        let promisedAddApplicationPolicy;
 
-    const handleChangeQuotyPolicyType = (event) => {
-        setQuotaPolicyType(event.target.value);
-    };
-
-    const handleChangeUnitTime = (event) => {
-        setUnitTime(event.target.value);
-    };
-
-    const handleDataBandwithUnit = (event) => {
-        setDataBandwithUnit(event.target.value);
-    };
-
-    const handleThrottlingApplicationInput = ({ target: { id, value } }) => {
-        if (id === 'dataBandWithValue') {
-            applicationThrottlingPolicy.defaultLimit.dataAmount = value;
-        } else if (id === 'requestCountValue') {
-            applicationThrottlingPolicy.defaultLimit.requestCount = value;
-        } else if (id === 'unitTime') {
-            applicationThrottlingPolicy.defaultLimit.unitTime = value;
+        if (type === 'BandwidthLimit') {
+            delete (state.defaultLimit.requestCount);
+            applicationThrottlingPolicy = state;
         } else {
-            applicationThrottlingPolicy[id] = value;
+            applicationThrottlingPolicy = delete (state.defaultLimit.dataUnit);
+            applicationThrottlingPolicy = delete (state.defaultLimit.dataAmount);
+            applicationThrottlingPolicy = state;
         }
-    };
 
-    const dialogOpenCallback = () => {
-        // We can do an API call when we are in the editing mode
         if (dataRow) {
             const selectedPolicy = applicationThrottlingPolicyList.filter(
                 (policyy) => policyy.policyName === dataRow[0],
             );
             const policyId = selectedPolicy.length !== 0 && selectedPolicy[0].policyId;
+            promisedAddApplicationPolicy = restApi.updateApplicationThrottlingPolicy(policyId,
+                applicationThrottlingPolicy);
+            promisedAddApplicationPolicy
+                .then(() => {
+                    // updateList();
+                    return (
+                        <FormattedMessage
+                            id='Throttling.Application.Policy.policy.add.success'
+                            defaultMessage='Application Throttling Policy added successfully.'
+                        />
+                    );
+                })
+                .catch((error) => {
+                    const { response } = error;
+                    let errorDescription;
+                    if (response.body) {
+                        errorDescription = response.body;
+                    }
+                    return (errorDescription);
+                });
+        } else {
+            promisedAddApplicationPolicy = restApi.addApplicationThrottlingPolicy(
+                applicationThrottlingPolicy,
+            );
+            promisedAddApplicationPolicy
+                .then(() => {
+                    // updateList();
+                    return (
+                        <FormattedMessage
+                            id='Throttling.Application.Policy.policy.add.success'
+                            defaultMessage='Application Throttling Policy added successfully.'
+                        />
+                    );
+                })
+                .catch((error) => {
+                    const { response } = error;
+                    let errorDescription;
+                    if (response.body) {
+                        errorDescription = response.body;
+                    }
+                    return (errorDescription);
+                });
+        }
+        return (promisedAddApplicationPolicy);
+    };
+
+    const dialogOpenCallback = () => {
+        if (dataRow) {
+            const selectedPolicy = applicationThrottlingPolicyList.filter(
+                (policy) => policy.policyName === dataRow[0],
+            );
+            const policyId = selectedPolicy.length !== 0 && selectedPolicy[0].policyId;
             restApi.applicationThrottlingPolicyGet(policyId).then((result) => {
-                setPolicy(result.body);
-                setQuotaPolicyType(result.body.defaultLimit.type);
-                setDataBandwithUnit(result.body.defaultLimit.dataUnit);
-                setUnitTime(result.body.defaultLimit.timeUnit);
+                initialState = {
+                    policyName: result.body.policyName,
+                    description: result.body.description,
+                    defaultLimit: {
+                        requestCount: result.body.defaultLimit.requestCount,
+                        timeUnit: result.body.defaultLimit.timeUnit,
+                        unitTime: result.body.defaultLimit.unitTime,
+                        type: result.body.defaultLimit.type,
+                        dataAmount: result.body.defaultLimit.dataAmount,
+                        dataUnit: result.body.defaultLimit.dataUnit,
+                    },
+                };
+                dispatch(initialState);
             });
         }
     };
-
 
     return (
         <FormDialogBase
@@ -230,19 +267,18 @@ function AddEdit(props) {
                     />
                 </Typography>
             </DialogContentText>
-            {console.log('hello', policy)}
             <TextField
                 autoFocus
                 margin='dense'
-                id='policyName'
+                name='policyName'
                 label='Name'
                 fullWidth
                 required
                 variant='outlined'
-                value={policy.policyName || ''}
-                onChange={handleThrottlingApplicationInput}
+                value={policyName}
+                onChange={onChange}
                 InputProps={{
-                    id: 'itest-id-policyName-input',
+                    id: 'policyName',
                     onBlur: ({ target: { value } }) => {
                         validate('policyName', value);
                     },
@@ -253,12 +289,12 @@ function AddEdit(props) {
             <TextField
                 autoFocus
                 margin='dense'
-                id='description'
+                name='description'
                 label='Description'
                 fullWidth
                 variant='outlined'
-                value={policy.description || ''}
-                onChange={handleThrottlingApplicationInput}
+                value={description}
+                onChange={onChange}
             />
             <DialogContentText>
                 <Typography variant='h6' className={classes.quotaHeading}>
@@ -272,10 +308,10 @@ function AddEdit(props) {
                 <RadioGroup
                     row
                     aria-label='position'
-                    name='position'
                     defaultValue='top'
-                    onChange={handleChangeQuotyPolicyType}
-                    value={quotaPolicyType}
+                    name='type'
+                    onChange={onChange}
+                    value={type}
                 >
                     <FormControlLabel
                         value='RequestCountLimit'
@@ -290,18 +326,19 @@ function AddEdit(props) {
                         labelPlacement='end'
                     />
                 </RadioGroup>
-                {quotaPolicyType === 'RequestCountLimit' ? (
+                {type === 'RequestCountLimit' ? (
                     <TextField
                         autoFocus
                         margin='dense'
-                        id='requestCountValue'
+                        name='requestCount'
                         label='Request Count'
                         fullWidth
-                        value={(policy.defaultLimit && policy.defaultLimit.requestCount) || ''}
-                        onChange={handleThrottlingApplicationInput}
+                        value={requestCount}
+                        onChange={onChange}
+                        variant='outlined'
                         required
                         InputProps={{
-                            id: 'itest-id-requestCountValue-input',
+                            id: 'requestCount',
                             onBlur: ({ target: { value } }) => {
                                 validate('requestCountValue', value);
                             },
@@ -313,14 +350,15 @@ function AddEdit(props) {
                         <TextField
                             autoFocus
                             margin='dense'
-                            id='dataBandWithValue'
+                            name='dataAmount'
                             label='Data Bandwith'
                             fullWidth
                             required
-                            value={(policy.defaultLimit && policy.defaultLimit.dataAmount) || ''}
-                            onChange={handleThrottlingApplicationInput}
+                            variant='outlined'
+                            value={dataAmount}
+                            onChange={onChange}
                             InputProps={{
-                                id: 'itest-id-dataBandWithValue-input',
+                                id: 'dataBandWithValue',
                                 onBlur: ({ target: { value } }) => {
                                     validate('dataBandWithValue', value);
                                 },
@@ -330,9 +368,9 @@ function AddEdit(props) {
                         <FormControl className={classes.unitTimeSelection}>
                             <Select
                                 labelId='demo-simple-select-label'
-                                id='demo-simple-select'
-                                value={dataBandwithUnit}
-                                onChange={handleDataBandwithUnit}
+                                name='dataUnit'
+                                value={dataUnit}
+                                onChange={onChange}
                                 fullWidth
                             >
                                 <MenuItem value='KB'>KB</MenuItem>
@@ -347,14 +385,15 @@ function AddEdit(props) {
                     <TextField
                         autoFocus
                         margin='dense'
-                        id='unitTime'
+                        name='unitTime'
                         label='Unit Time'
                         type='number'
                         fullWidth
-                        value={(policy.defaultLimit && policy.defaultLimit.unitTime) || ''}
-                        onChange={handleThrottlingApplicationInput}
+                        variant='outlined'
+                        value={unitTime}
+                        onChange={onChange}
                         InputProps={{
-                            id: 'itest-id-unitTime-input',
+                            id: 'unitTime',
                             onBlur: ({ target: { value } }) => {
                                 validate('unitTime', value);
                             },
@@ -365,9 +404,9 @@ function AddEdit(props) {
                     <FormControl className={classes.unitTimeSelection}>
                         <Select
                             labelId='demo-simple-select-label'
-                            id='demo-simple-select'
-                            value={unitTime}
-                            onChange={handleChangeUnitTime}
+                            name='timeUnit'
+                            value={timeUnit}
+                            onChange={onChange}
                             fullWidth
                         >
                             <MenuItem value='min'>Minute(s)</MenuItem>
@@ -400,6 +439,5 @@ AddEdit.propTypes = {
     triggerButtonText: PropTypes.shape({}).isRequired,
     title: PropTypes.shape({}).isRequired,
 };
-
 
 export default injectIntl(AddEdit);
