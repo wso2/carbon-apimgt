@@ -31,9 +31,11 @@
 
     {% if apim.idp is defined %}
     <IdentityProvider>
+        <ServerURL>{{apim.idp.server_url}}</ServerURL>
         <!-- Server URL of the Identity Provider used for login/logout operations in API Publisher and API Developer Portal -->
         <AuthorizeEndpoint>{{apim.idp.authorize_endpoint}}</AuthorizeEndpoint>
         <OIDCLogoutEndpoint>{{apim.idp.oidc_logout_endpoint}}</OIDCLogoutEndpoint>
+        <CheckSessionEndpoint>{{apim.idp.oidc_check_session_endpoint}}</CheckSessionEndpoint>
     </IdentityProvider>
     {% endif %}
 
