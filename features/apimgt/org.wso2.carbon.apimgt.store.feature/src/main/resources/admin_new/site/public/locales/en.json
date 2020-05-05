@@ -187,5 +187,7 @@
   "AdminPages.ApiCategories.List.search.default": "Search by API Category name",
   "AdminPages.ApiCategories.List.help.link.one": "API Category based Grouping",
   "AdminPages.ApiCategories.List.title.apicategories": "API Categories",
-  "AdminPages.ApiCategories.List.empty.title.apicategories": "API Categories"
+  "AdminPages.ApiCategories.List.empty.title.apicategories": "API Categories",
+  "AdminPages.ApiCategories.AddEdit.form.info": "Provide a name and a short description to create a new API category",
+  "AdminPages.ApiCategories.AddEdit.form.name": "Name"
 }

@@ -32,15 +32,6 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-/**
- * API call to create api category
- * @returns {Promise}.
- */
-function apiCall(name, description) {
-    const restApi = new API();
-    return restApi.createAPICategory(name, description);
-}
-
 let initialState = {
     name: '',
     description: '',
@@ -48,7 +39,7 @@ let initialState = {
 
 /**
  * Reducer
- * @param {JSON} state The second number.
+ * @param {JSON} state
  * @returns {Promise}.
  */
 function reducer(state, { field, value }) {
@@ -59,8 +50,8 @@ function reducer(state, { field, value }) {
 }
 
 /**
- * Render a list
- * @returns {JSX} Header AppBar components.
+ * Render a pop-up dialog to add/edit an API category
+ * @returns {JSX}.
  */
 function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
     const classes = useStyles();
@@ -87,16 +78,24 @@ function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
         };
     }
     const [state, dispatch] = useReducer(reducer, initialState);
-    const { name: name, description } = state;
+    const { name, description } = state;
 
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
     };
     const hasErrors = (fieldName, value) => {
-        let error = false;
+        let error;
         switch (fieldName) {
             case 'name':
-                error = value === '' ? fieldName + ' is Empty' : false;
+                if (value === '') {
+                    error = 'Name is Empty';
+                } else if (/\s/.test(value)) {
+                    error = 'Name contains spaces';
+                } else if (/[!@#$%^&*(),?"{}[\]|<>\t\n]/i.test(value)) {
+                    error = 'Name field contains special characters';
+                } else {
+                    error = false;
+                }
                 break;
             default:
                 break;
@@ -105,22 +104,11 @@ function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
     };
     const getAllFormErrors = () => {
         let errorText = '';
-        const labelErrors = hasErrors('name', name);
-        if (labelErrors) {
-            errorText += labelErrors + '\n';
+        const NameErrors = hasErrors('name', name);
+        if (NameErrors) {
+            errorText += NameErrors + '\n';
         }
         return errorText;
-    };
-    const dialogOpenCallback = () => {
-        // We can do an API call when we are in the editing mode
-        if (id) {
-            // eslint-disable-next-line no-alert
-            alert(
-                'use id=' +
-                    id +
-                    ' or what ever you got to make a backend call if you want.'
-            );
-        }
     };
     const formSaveCallback = () => {
         const formErrors = getAllFormErrors();
@@ -128,10 +116,14 @@ function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
             Alert.error(formErrors);
             return false;
         }
-        // Do the API call
-        const promiseAPICall = apiCall(name, description);
+        const restApi = new API();
+        let promiseAPICall;
         if (id) {
             // assign the update promise to the promiseAPICall
+            promiseAPICall = restApi.updateAPICategory(id, name, description);
+        } else {
+            // assign the create promise to the promiseAPICall
+            promiseAPICall = restApi.createAPICategory(name, description);
         }
         promiseAPICall
             .then((data) => {
@@ -140,6 +132,9 @@ function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
             })
             .catch((e) => {
                 return e;
+            })
+            .finally(() => {
+                dispatch('', '');
             });
         return promiseAPICall;
     };
@@ -151,15 +146,12 @@ function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
-            dialogOpenCallback={dialogOpenCallback}
         >
             <DialogContentText>
                 <FormattedMessage
-                    id='AdminPages.Microgateways.AddEdit.form.info'
+                    id='AdminPages.ApiCategories.AddEdit.form.info'
                     defaultMessage={
-                        'To subscribe to this website, please enter your' +
-                        'email address here. We will send updates' +
-                        'occasionally.'
+                        'Provide a name and a short description to create a new API category'
                     }
                 />
             </DialogContentText>
@@ -172,8 +164,8 @@ function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
                 label={
                     <span>
                         <FormattedMessage
-                            id='AdminPages.Microgateways.AddEdit.form.name'
-                            defaultMessage='Label'
+                            id='AdminPages.ApiCategories.AddEdit.form.name'
+                            defaultMessage='Name'
                         />
 
                         <span className={classes.error}>*</span>
@@ -181,8 +173,11 @@ function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
                 }
                 fullWidth
                 error={hasErrors('name', name)}
-                helperText={hasErrors('name', name) || 'Enter gateway name'}
+                helperText={
+                    hasErrors('name', name) || 'Enter API category name'
+                }
                 variant='outlined'
+                disabled={id}
             />
             <TextField
                 margin='dense'
