@@ -1242,13 +1242,8 @@ public class APIMappingUtil {
                 for (String scopeKey : scopeList) {
                     for (Scope definedScope : model.getScopes()) {
                         if (definedScope.getKey().equalsIgnoreCase(scopeKey)) {
-                            Scope scope = new Scope();
-                            scope.setKey(scopeKey);
-                            scope.setName(definedScope.getName());
-                            scope.setDescription(definedScope.getDescription());
-                            scope.setRoles(definedScope.getRoles());
-                            template.setScopes(scope);
-                            template.setScope(scope);
+                            template.setScopes(definedScope);
+                            template.setScope(definedScope);
                         }
                     }
                 }

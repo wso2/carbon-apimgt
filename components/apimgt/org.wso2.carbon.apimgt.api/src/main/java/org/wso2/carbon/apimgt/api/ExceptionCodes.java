@@ -265,6 +265,8 @@ public enum ExceptionCodes implements ErrorHandler {
     SHARED_SCOPE_ALREADY_ATTACHED(900985, "Shared Scope already attached", 409,
             "Shared Scope %s is already used by one or more APIs"),
     SCOPE_VALIDATION_FAILED(900986, "Scope validation failed", 412, "Scope validation failed"),
+    SHARED_SCOPE_DISPLAY_NAME_NOT_SPECIFIED(900987, "Shared Scope display name not specified", 400,
+            "Shared Scope display name not specified"),
 
     //Dedicated container based gateway related Codes
     NO_RESOURCE_LOADED_FROM_DEFINITION(900990, "Container based resource Not Found", 404, "No resource loaded from " +

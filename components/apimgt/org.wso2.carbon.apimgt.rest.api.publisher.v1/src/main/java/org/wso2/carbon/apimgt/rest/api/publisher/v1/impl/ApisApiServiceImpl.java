@@ -4156,6 +4156,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                     continue;
                 }
             }
+
+            //set display name as empty if it is not provided
+            if (StringUtils.isBlank(scope.getName())) {
+                scope.setName(scopeName);
+            }
+
             //set description as empty if it is not provided
             if (StringUtils.isBlank(scope.getDescription())) {
                 scope.setDescription("");
