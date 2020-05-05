@@ -34,6 +34,7 @@ public class SharedScopeMappingUtil {
 
         ScopeDTO scopeDTO = new ScopeDTO();
         scopeDTO.setName(scope.getKey());
+        scopeDTO.setDisplayName(scope.getName());
         scopeDTO.setDescription(scope.getDescription());
         scopeDTO.setId(scope.getId());
         String roles = scope.getRoles();

@@ -97,6 +97,10 @@ public class ScopesApiServiceImpl implements ScopesApiService {
                 throw new APIManagementException("Shared Scope Name cannot be null or empty",
                         ExceptionCodes.SHARED_SCOPE_NAME_NOT_SPECIFIED);
             }
+            if (StringUtils.isEmpty(body.getDisplayName())) {
+                throw new APIManagementException("Shared scope Display Name cannot be null or empty",
+                        ExceptionCodes.SHARED_SCOPE_DISPLAY_NAME_NOT_SPECIFIED);
+            }
             if (apiProvider.isScopeKeyExist(scopeName, APIUtil.getTenantIdFromTenantDomain(tenantDomain))) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.SCOPE_ALREADY_REGISTERED,
                         scopeName));
@@ -206,6 +210,10 @@ public class ScopesApiServiceImpl implements ScopesApiService {
         if (StringUtils.isEmpty(scopeId)) {
             throw new APIManagementException("Shared Scope Id cannot be null or empty",
                     ExceptionCodes.SHARED_SCOPE_ID_NOT_SPECIFIED);
+        }
+        if (StringUtils.isEmpty(body.getDisplayName())) {
+            throw new APIManagementException("Shared scope Display Name cannot be null or empty",
+                    ExceptionCodes.SHARED_SCOPE_DISPLAY_NAME_NOT_SPECIFIED);
         }
         Scope existingScope = apiProvider.getSharedScopeByUUID(scopeId, tenantDomain);
         //Override scope Id and name in request body from existing scope
