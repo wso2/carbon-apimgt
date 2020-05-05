@@ -20,8 +20,6 @@ source/src/app/data/*
 /source/src/app/components/Base/*
 /source/src/app/AppRouts.jsx
 /source/src/app/LoginDenied.jsx
-/source/src/app/ProtectedApp.jsx
-/source/src/app/TenantListing.jsx
 /source/src/DevPortal.jsx
 /source/src/defaultTheme.js
 /source/Tests/*

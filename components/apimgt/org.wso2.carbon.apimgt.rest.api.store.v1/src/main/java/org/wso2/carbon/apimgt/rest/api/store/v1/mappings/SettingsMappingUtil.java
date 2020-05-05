@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsIdentityProviderDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
@@ -41,14 +42,19 @@ public class SettingsMappingUtil {
     private static final Log log = LogFactory.getLog(SettingsMappingUtil.class);
 
     public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable, Boolean moneatizationEnabled,
-                                         boolean recommendationEnabled) throws APIManagementException {
+                                         boolean recommendationEnabled, boolean anonymousEnabled) throws APIManagementException {
         SettingsDTO settingsDTO = new SettingsDTO();
+        settingsDTO.setScopes(GetScopeList());
+        settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
+        settingsDTO.setRecommendationEnabled(recommendationEnabled);
+        settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
+        settingsDTO.setMonetizationEnabled(moneatizationEnabled);
+        SettingsIdentityProviderDTO identityProviderDTO = new SettingsIdentityProviderDTO();
+        identityProviderDTO.setExternal(APIUtil.getIdentityProviderConfig() != null);
+        settingsDTO.setIdentityProvider(identityProviderDTO);
+        settingsDTO.setIsAnonymousModeEnabled(anonymousEnabled);
         if (isUserAvailable) {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());
-            settingsDTO.setScopes(GetScopeList());
-            settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
-            settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
-            settingsDTO.setRecommendationEnabled(recommendationEnabled);
             Map<String, Environment> environments = APIUtil.getEnvironments();
             if (environments.isEmpty()) {
                 settingsDTO.apiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
@@ -66,12 +72,6 @@ public class SettingsMappingUtil {
                     settingsDTO.apiGatewayEndpoint(environment.getApiGatewayEndpoint());
                 }
             }
-        } else {
-            settingsDTO.setScopes(GetScopeList());
-            settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
-            settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
-            settingsDTO.setMonetizationEnabled(moneatizationEnabled);
-            settingsDTO.setRecommendationEnabled(recommendationEnabled);
         }
         return settingsDTO;
     }

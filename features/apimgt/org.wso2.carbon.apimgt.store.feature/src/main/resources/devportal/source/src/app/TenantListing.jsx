@@ -25,8 +25,9 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
+import API from './data/api';
 
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         flexGrow: 1,
         display: 'flex',
@@ -69,6 +70,24 @@ const tenantListing = (props) => {
     const settingContext = useContext(Settings);
     const { tenantList, classes, theme } = props;
     const orderedList = tenantList.sort((a, b) => ((a.domain > b.domain) ? 1 : -1));
+    /**
+     * call the setting API.
+     * @param {string} domain
+     */
+    function getSettings(domain) {
+        const api = new API();
+        const promisedSettings = api.getSettings();
+        promisedSettings
+            .then((response) => {
+                settingContext.setSettings(response.body);
+                settingContext.setTenantDomain(domain);
+            }).catch((error) => {
+                console.error(
+                    'Error while receiving settings : ',
+                    error,
+                );
+            });
+    }
 
     return (
         <div className={classes.root}>
@@ -85,7 +104,7 @@ const tenantListing = (props) => {
                                         textDecoration: 'none',
                                     }}
                                     to={`/apis?tenant=${domain}`}
-                                    onClick={() => settingContext.setTenantDomain(domain)}
+                                    onClick={() => getSettings(domain)}
                                 >
                                     <Paper elevation={0} square className={classes.paper}>
                                         <Typography
