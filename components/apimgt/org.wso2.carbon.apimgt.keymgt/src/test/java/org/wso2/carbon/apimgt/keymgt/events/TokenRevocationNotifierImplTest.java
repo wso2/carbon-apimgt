@@ -67,7 +67,6 @@ public class TokenRevocationNotifierImplTest {
         HttpClient etcdEPClient;
         String etcdUrl = "https://localhost:2379/v2/keys/jti/";
 
-
         serviceReferenceHolder = PowerMockito.mock(ServiceReferenceHolder.class);
         outputEventAdapterService = Mockito.mock(OutputEventAdapterService.class);
         privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
@@ -108,7 +107,6 @@ public class TokenRevocationNotifierImplTest {
 
     @Test
     public void testSendMessageToPersistentStorage() {
-
         log.info("Running the test case to check SendMessageToPersistentStorage method.");
         Properties properties = new Properties();
         String DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME = "https://localhost:2379/v2/keys/jti/";
@@ -121,7 +119,7 @@ public class TokenRevocationNotifierImplTest {
         try {
             PowerMockito.whenNew(HttpPut.class).withAnyArguments().thenReturn(httpETCDPut);
             tokenRevocationNotifierImpl = new TokenRevocationNotifierImpl();
-            tokenRevocationNotifierImpl.sendMessageToPersistentStorage("1234",properties);
+            tokenRevocationNotifierImpl.sendMessageToPersistentStorage("1234", properties);
         } catch (Exception e) {
             Assert.fail("Should not throw any exceptions");
         }
@@ -134,10 +132,10 @@ public class TokenRevocationNotifierImplTest {
         properties.setProperty("ttl", DEFAULT_TTL);
         properties.setProperty("expiryTime", "1571063344");
         log.info("Running the test case to check the sendMessageOnRealTime method.");
-        try{
+        try {
             tokenRevocationNotifierImpl = new TokenRevocationNotifierImpl();
-            tokenRevocationNotifierImpl.sendMessageOnRealtime("1234",properties);
-        }catch (Exception e) {
+            tokenRevocationNotifierImpl.sendMessageOnRealtime("1234", properties);
+        } catch (Exception e) {
             Assert.fail("Should not throw any exceptions");
         }
         log.info("Finished the test case to check the sendMessageOnRealTime method.");

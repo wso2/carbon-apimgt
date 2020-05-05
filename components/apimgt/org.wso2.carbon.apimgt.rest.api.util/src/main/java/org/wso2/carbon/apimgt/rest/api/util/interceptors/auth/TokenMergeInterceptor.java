@@ -29,6 +29,10 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+/**
+ * TokenMergeInterceptor class merge the token parts received from the request and from the cookies,
+ * and then re-create the bearer authentication header in the request.
+ */
 public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
 
     private static final Log logger = LogFactory.getLog(TokenMergeInterceptor.class);
@@ -40,7 +44,6 @@ public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
 
     public void handleMessage(Message message) throws Fault {
         //If Authorization headers are present anonymous URI check will be skipped
-
         String accessToken = RestApiUtil
                 .extractOAuthAccessTokenFromMessage(message, RestApiConstants.REGEX_BEARER_PATTERN,
                         RestApiConstants.AUTH_HEADER_NAME);
@@ -67,9 +70,7 @@ public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
         if (tokenParts.length == 2) {
             accessToken += tokenParts[1]; // Append the token section from cookie to token part from Auth header
         }
-
         TreeMap headers = (TreeMap) message.get(Message.PROTOCOL_HEADERS);
-
         ArrayList authorizationHeader = new ArrayList<>();
         authorizationHeader.add(0, String.format("Bearer %s", accessToken));
         headers.put(RestApiConstants.AUTH_HEADER_NAME, authorizationHeader);

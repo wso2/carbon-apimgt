@@ -26,8 +26,8 @@ var saveGlobalPolicy = function (action, policyName, description, siddhiQuery, k
 
         if (errorMessage.indexOf("Invalid Execution Plan") > -1) {
             errorMessage = i18n.localize("Siddhi Query deployment failed due to Siddhi syntax errors")
-        } else if (errorMessage.indexOf("Policy Name Already Exist") > -1){
-            errorMessage = i18n.localize("Policy Name Already Exists. Add a new Policy Name");
+        } else if (errorMessage.indexOf("Policy name already exists") > -1){
+            errorMessage = i18n.localize("Policy name already exists. Add a new policy name");
         }
 
         return {
