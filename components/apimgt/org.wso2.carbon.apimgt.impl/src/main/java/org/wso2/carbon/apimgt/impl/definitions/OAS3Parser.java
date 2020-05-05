@@ -1270,28 +1270,30 @@ public class OAS3Parser extends APIDefinition {
      */
     @Override
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
-        OpenAPI openAPI = getOpenAPI(swaggerContent);
         boolean isDefaultAvailable = isDefaultGiven(swaggerContent);
-        openAPI = injectOtherScopesToDefaultScheme(openAPI, isDefaultAvailable);
-        openAPI = injectOtherResourceScopesToDefaultScheme(openAPI, isDefaultAvailable);
-        return Json.pretty(openAPI);
+
+        if (!isDefaultAvailable) {
+            OpenAPI openAPI = getOpenAPI(swaggerContent);
+            openAPI = injectOtherScopesToDefaultScheme(openAPI);
+            openAPI = injectOtherResourceScopesToDefaultScheme(openAPI);
+            return Json.pretty(openAPI);
+        }
+        return swaggerContent;
     }
 
     /**
      * This method returns the oauth scopes according to the given swagger(version 3)
      *
-     * @param openAPI            - OpenApi object
-     * @param isDefaultAvailable - boolean
+     * @param openAPI - OpenApi object
      * @return scope set as all defaults
      * @throws APIManagementException
      */
-    private OpenAPI injectOtherScopesToDefaultScheme(OpenAPI openAPI, boolean isDefaultAvailable) throws APIManagementException {
+    private OpenAPI injectOtherScopesToDefaultScheme(OpenAPI openAPI) throws APIManagementException {
         Map<String, SecurityScheme> securitySchemes = null;
         Components component = openAPI.getComponents();
         List<String> otherSetOfSchemes = new ArrayList<>();
 
-        if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes()) != null
-                && !isDefaultAvailable) {
+        if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes()) != null) {
             //If there is no default type schemes set a one
             SecurityScheme newDefault = new SecurityScheme();
             securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, newDefault);
@@ -1399,54 +1401,52 @@ public class OAS3Parser extends APIDefinition {
      * @return URI Templates
      * @throws APIManagementException
      */
-    private OpenAPI injectOtherResourceScopesToDefaultScheme(OpenAPI openAPI, boolean isDefaultAvailable) throws APIManagementException {
+    private OpenAPI injectOtherResourceScopesToDefaultScheme(OpenAPI openAPI) throws APIManagementException {
         List<String> schemes = getOtherSchemes();
 
         Paths paths = openAPI.getPaths();
-        if (!isDefaultAvailable) {
-            for (String pathKey : paths.keySet()) {
-                PathItem pathItem = paths.get(pathKey);
-                Map<PathItem.HttpMethod, Operation> operationsMap = pathItem.readOperationsMap();
-                SecurityRequirement updatedDefaultSecurityRequirement = new SecurityRequirement();
-                for (Map.Entry<PathItem.HttpMethod, Operation> entry : operationsMap.entrySet()) {
-                    PathItem.HttpMethod httpMethod = entry.getKey();
-                    Operation operation = entry.getValue();
-                    List<SecurityRequirement> securityRequirements = operation.getSecurity();
-                    if (securityRequirements == null) {
-                        securityRequirements = new ArrayList<>();
+        for (String pathKey : paths.keySet()) {
+            PathItem pathItem = paths.get(pathKey);
+            Map<PathItem.HttpMethod, Operation> operationsMap = pathItem.readOperationsMap();
+            SecurityRequirement updatedDefaultSecurityRequirement = new SecurityRequirement();
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                PathItem.HttpMethod httpMethod = entry.getKey();
+                Operation operation = entry.getValue();
+                List<SecurityRequirement> securityRequirements = operation.getSecurity();
+                if (securityRequirements == null) {
+                    securityRequirements = new ArrayList<>();
+                }
+                if (APIConstants.SUPPORTED_METHODS.contains(httpMethod.name().toLowerCase())) {
+                    List<String> opScopesDefault = new ArrayList<>();
+                    List<String> opScopesDefaultInstance = getScopeOfOperations(OPENAPI_SECURITY_SCHEMA_KEY, operation);
+                    if (opScopesDefaultInstance != null) {
+                        opScopesDefault.addAll(opScopesDefaultInstance);
                     }
-                    if (APIConstants.SUPPORTED_METHODS.contains(httpMethod.name().toLowerCase())) {
-                        List<String> opScopesDefault = new ArrayList<>();
-                        List<String> opScopesDefaultInstance = getScopeOfOperations(OPENAPI_SECURITY_SCHEMA_KEY, operation);
-                        if (opScopesDefaultInstance != null) {
-                            opScopesDefault.addAll(opScopesDefaultInstance);
-                        }
-                        updatedDefaultSecurityRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, opScopesDefault);
-                        for (Map<String, List<String>> input : securityRequirements) {
-                            for (String scheme : schemes) {
-                                if (!OPENAPI_SECURITY_SCHEMA_KEY.equals(scheme)) {
-                                    List<String> opScopesOthers = getScopeOfOperations(scheme, operation);
-                                    if (opScopesOthers != null) {
-                                        for (String scope : opScopesOthers) {
-                                            if (!opScopesDefault.contains(scope)) {
-                                                opScopesDefault.add(scope);
-                                            }
+                    updatedDefaultSecurityRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, opScopesDefault);
+                    for (Map<String, List<String>> input : securityRequirements) {
+                        for (String scheme : schemes) {
+                            if (!OPENAPI_SECURITY_SCHEMA_KEY.equals(scheme)) {
+                                List<String> opScopesOthers = getScopeOfOperations(scheme, operation);
+                                if (opScopesOthers != null) {
+                                    for (String scope : opScopesOthers) {
+                                        if (!opScopesDefault.contains(scope)) {
+                                            opScopesDefault.add(scope);
                                         }
                                     }
                                 }
-                                updatedDefaultSecurityRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, opScopesDefault);
                             }
+                            updatedDefaultSecurityRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, opScopesDefault);
                         }
-                        securityRequirements.add(updatedDefaultSecurityRequirement);
                     }
-                    operation.setSecurity(securityRequirements);
-                    entry.setValue(operation);
-                    operationsMap.put(httpMethod, operation);
+                    securityRequirements.add(updatedDefaultSecurityRequirement);
                 }
-                paths.put(pathKey, pathItem);
+                operation.setSecurity(securityRequirements);
+                entry.setValue(operation);
+                operationsMap.put(httpMethod, operation);
             }
-            openAPI.setPaths(paths);
+            paths.put(pathKey, pathItem);
         }
+        openAPI.setPaths(paths);
         return openAPI;
     }
 
