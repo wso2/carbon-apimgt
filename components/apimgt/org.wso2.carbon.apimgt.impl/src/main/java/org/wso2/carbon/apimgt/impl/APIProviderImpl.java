@@ -1480,7 +1480,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void updateAPI(API api, int tenantId, String username) throws APIManagementException {
 
-        apiMgtDAO.updateAPI(api, tenantId, username);
+        apiMgtDAO.updateAPI(api, username);
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
         }
