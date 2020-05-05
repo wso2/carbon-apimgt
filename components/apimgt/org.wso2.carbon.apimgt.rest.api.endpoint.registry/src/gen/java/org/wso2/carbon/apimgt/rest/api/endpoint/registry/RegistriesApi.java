@@ -42,7 +42,7 @@ import java.util.List;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-05T11:04:42.113+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-05T16:15:55.172+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
     @Context MessageContext securityContext;
@@ -83,6 +83,16 @@ public class RegistriesApi  {
         return delegate.getAllEntriesInRegistry(registryId, securityContext);
         }
         @GET
+        
+        
+        @Produces({ "application/json" })
+            @Operation(summary = "Retrieve/Search APIs ", description = "This operation provides you an array of available Registries. ", tags={ "Registries" })
+            @ApiResponses(value = { 
+                @ApiResponse(responseCode = "200", description = "OK. Array of Registries is returned. ", content = @Content(schema = @Schema(implementation = RegistryArrayDTO.class))) })
+        public Response getRegistries() throws APIManagementException{
+        return delegate.getRegistries(securityContext);
+        }
+        @GET
         @Path("/{registryId}")
         
         @Produces({ "application/json" })
@@ -98,16 +108,6 @@ public class RegistriesApi  {
 
 ) throws APIManagementException{
         return delegate.getRegistryByUUID(registryId, securityContext);
-        }
-        @GET
-        
-        
-        @Produces({ "application/json" })
-            @Operation(summary = "Retrieve/Search APIs ", description = "This operation provides you an array of available Registries. ", tags={ "Registries" })
-            @ApiResponses(value = { 
-                @ApiResponse(responseCode = "200", description = "OK. Array of Registries is returned. ", content = @Content(schema = @Schema(implementation = RegistryArrayDTO.class))) })
-        public Response registriesGet() throws APIManagementException{
-        return delegate.registriesGet(securityContext);
         }
         @POST
         @Path("/{registryId}/entry")

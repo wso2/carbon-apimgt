@@ -29,6 +29,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.List;
+
 /**
  * This class provides the core functionality related to Endpoint Registry
  */
@@ -73,5 +75,26 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      */
     public EndpointRegistryInfo getEndpointRegistryByUUID(String registryId) throws APIManagementException {
         return apiMgtDAO.getEndpointRegistryByUUID(registryId);
+    }
+
+    /**
+     * Returns details of all Endpoint Registries belong to a given tenant
+     *
+     * @param tenantDomain
+     * @return A list of EndpointRegistryInfo object
+     * @throws APIManagementException if failed get details of an Endpoint Registries
+     */
+    public List<EndpointRegistryInfo> getEndpointRegistries(String tenantDomain) throws APIManagementException {
+        int tenantId;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            return apiMgtDAO.getEndpointRegistries(tenantId);
+        } catch (UserStoreException e) {
+            String msg = "Error while retrieving tenant information";
+            log.error(msg, e);
+            throw new APIManagementException("Error in retrieving Tenant Information while retrieving details of " +
+                    "endpoint registries", e);
+        }
     }
 }

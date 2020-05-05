@@ -14758,15 +14758,15 @@ public class ApiMgtDAO {
     /**
      * Return the details of an Endpoint Registry
      *
-     * @param regsitryId Endpoint Registry Identifier
+     * @param registryId Endpoint Registry Identifier
      * @return Endpoint Registry Object
      * @throws APIManagementException
      */
-    public EndpointRegistryInfo getEndpointRegistryByUUID(String regsitryId) throws APIManagementException {
+    public EndpointRegistryInfo getEndpointRegistryByUUID(String registryId) throws APIManagementException {
         String query = SQLConstants.GET_ENDPOINT_REGISTRY_BY_UUID;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setString(1, regsitryId);
+            ps.setString(1, registryId);
             ps.executeQuery();
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -14781,7 +14781,7 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Error while retrieving details of endpoint registry with Id: "
-                    + regsitryId, e);
+                    + registryId, e);
         }
         return null;
     }
@@ -14810,5 +14810,36 @@ public class ApiMgtDAO {
             handleException("Failed to check the existence of Endpoint Registry: " + registryName + " exists", e);
         }
         return false;
+    }
+
+    /**
+     * Returns details of all Endpoint Registries belong to a given tenant
+     *
+     * @param tenantID
+     * @return A list of EndpointRegistryInfo object
+     * @throws APIManagementException if failed get details of an Endpoint Registries
+     */
+    public List<EndpointRegistryInfo> getEndpointRegistries(int tenantID) throws APIManagementException {
+        List<EndpointRegistryInfo> endpointRegistryInfoList = new ArrayList<>();
+        String query = SQLConstants.GET_ALL_ENDPOINT_REGISTRIES_OF_TENANT;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, tenantID);
+            ps.executeQuery();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    EndpointRegistryInfo endpointRegistry = new EndpointRegistryInfo();
+                    endpointRegistry.setUuid(rs.getString("UUID"));
+                    endpointRegistry.setName(rs.getString("REG_NAME"));
+                    endpointRegistry.setType(rs.getString("REG_TYPE"));
+                    endpointRegistry.setMode(rs.getString("MODE"));
+                    endpointRegistry.setOwner(rs.getString("REG_OWNER"));
+                    endpointRegistryInfoList.add(endpointRegistry);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving details of endpoint registries", e);
+        }
+        return endpointRegistryInfoList;
     }
 }
