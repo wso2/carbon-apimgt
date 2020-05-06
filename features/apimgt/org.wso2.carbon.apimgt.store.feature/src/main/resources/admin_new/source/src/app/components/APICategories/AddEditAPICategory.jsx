@@ -66,10 +66,7 @@ function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
 
     if (dataRow) {
         // eslint-disable-next-line react/prop-types
-        const {
-            name: originalName,
-            description: originalDescription,
-        } = dataRow;
+        const { name: originalName, description: originalDescription } = dataRow;
         id = dataRow.id;
 
         initialState = {
@@ -125,17 +122,28 @@ function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
             // assign the create promise to the promiseAPICall
             promiseAPICall = restApi.createAPICategory(name, description);
         }
-        promiseAPICall
-            .then((data) => {
-                updateList();
-                return data;
-            })
-            .catch((e) => {
-                return e;
-            })
-            .finally(() => {
-                dispatch('', '');
-            });
+        promiseAPICall = new Promise((resolve, reject) => {
+            promiseAPICall
+                .then(() => {
+                    resolve(
+                        <FormattedMessage
+                            id='AdminPages.ApiCategories.AddEdit.form.add.successful'
+                            defaultMessage='API Category added successfully'
+                        />
+                    );
+                })
+                .catch((error) => {
+                    const { response } = error;
+                    if (response.body) {
+                        const { description } = response.body;
+                        reject(description);
+                    }
+                })
+                .finally(() => {
+                    dispatch('', '');
+                    updateList();
+                });
+        });
         return promiseAPICall;
     };
 
@@ -150,9 +158,7 @@ function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
             <DialogContentText>
                 <FormattedMessage
                     id='AdminPages.ApiCategories.AddEdit.form.info'
-                    defaultMessage={
-                        'Provide a name and a short description to create a new API category'
-                    }
+                    defaultMessage='Provide a name and a short description to create a new API category'
                 />
             </DialogContentText>
             <TextField
@@ -163,19 +169,14 @@ function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
                 onChange={onChange}
                 label={
                     <span>
-                        <FormattedMessage
-                            id='AdminPages.ApiCategories.AddEdit.form.name'
-                            defaultMessage='Name'
-                        />
+                        <FormattedMessage id='AdminPages.ApiCategories.AddEdit.form.name' defaultMessage='Name' />
 
                         <span className={classes.error}>*</span>
                     </span>
                 }
                 fullWidth
                 error={hasErrors('name', name)}
-                helperText={
-                    hasErrors('name', name) || 'Enter API category name'
-                }
+                helperText={hasErrors('name', name) || 'Enter API category name'}
                 variant='outlined'
                 disabled={id}
             />
