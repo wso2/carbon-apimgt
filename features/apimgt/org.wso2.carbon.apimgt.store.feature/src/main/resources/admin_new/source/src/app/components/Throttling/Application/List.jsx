@@ -39,8 +39,6 @@ import EditIcon from '@material-ui/icons/Edit';
  */
 export default function ListApplicationThrottlingPolicies() {
     const intl = useIntl();
-    // const { classes } = props;
-    const [data, setData] = useState(null);
     const restApi = new API();
     const [
         applicationThrottlingPolicyList,
@@ -184,37 +182,6 @@ export default function ListApplicationThrottlingPolicies() {
                 sort: false,
             },
         },
-        // Remove after Chanaka aiyas fix
-        {
-            name: '',
-            label: 'Actions',
-            options: {
-                filter: false,
-                sort: false,
-                customBodyRender: (value, tableMeta) => {
-                    const dataRow = data[tableMeta.rowIndex];
-                    return (
-                        <>
-                            <AddEdit
-                                dataRow={dataRow}
-                                icon={<EditIcon />}
-                                title='Edit Policy'
-                                applicationThrottlingPolicyList={applicationThrottlingPolicyList}
-                            />
-                            <Delete
-                                selectedPolicyName={dataRow[0]}
-                                applicationThrottlingPolicyList={applicationThrottlingPolicyList}
-                            />
-                        </>
-                    );
-                },
-                setCellProps: () => {
-                    return {
-                        style: { width: 200 },
-                    };
-                },
-            },
-        },
     ];
 
     const emptyBoxProps = {
@@ -279,30 +246,6 @@ export default function ListApplicationThrottlingPolicies() {
         deleteIconShow: false,
     }; */
 
-    const actionColumnProps = {
-        editIconShow: true,
-        deleteIconShow: true,
-        addNewEntry: (
-            <AddEdit
-                triggerButtonText={intl.formatMessage({
-                    id: 'Throttling.Application.Policy.List.addButtonProps.triggerButtonText',
-                    defaultMessage: 'Add Policy',
-                })}
-                title={intl.formatMessage({
-                    id: 'Throttling.Application.Policy.List.addButtonProps.title',
-                    defaultMessage: 'Add Policy',
-                })}
-            />
-        ),
-        // Add after Chanaka aiyas fix
-        // deleteEntry: (
-        //     <Delete
-        //         selectedPolicyName={dataRow[0]}
-        //         applicationThrottlingPolicyList={applicationThrottlingPolicyList}
-        //     />
-        // ),
-    };
-
     /**
  * Mock API call
  * @returns {Promise}.
@@ -327,8 +270,6 @@ export default function ListApplicationThrottlingPolicies() {
                     .map((obj) => {
                         return Object.values(obj);
                     });
-                // remove after chanaka aiyas fix
-                setData(applicationThrottlingvalues);
             });
 
             setTimeout(() => {
@@ -345,7 +286,16 @@ export default function ListApplicationThrottlingPolicies() {
             searchProps={searchProps}
             emptyBoxProps={emptyBoxProps}
             apiCall={apiCall}
-            actionColumnProps={actionColumnProps}
+            editComponentProps={{
+                icon: <EditIcon />,
+                title: 'Edit Microgateway',
+                applicationThrottlingPolicyList,
+            }}
+            deleteComponentProps={{
+                applicationThrottlingPolicyList,
+            }}
+            DeleteComponent={Delete}
+            EditComponent={AddEdit}
         />
     );
 }
