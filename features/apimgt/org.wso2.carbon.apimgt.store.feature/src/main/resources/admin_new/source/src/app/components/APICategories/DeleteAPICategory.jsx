@@ -19,19 +19,11 @@
 import React from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
-
-/**
- * API call to delete api category with uuid: id
- * @param {number} id uuid of the api category to delete.
- * @returns {Promise}.
- */
-function apiCall(id) {
-    const restApi = new API();
-    return restApi.deleteAPICategory(id);
-}
+import Alert from 'AppComponents/Shared/Alert';
 
 /**
  * Render delete dialog box.
@@ -39,19 +31,42 @@ function apiCall(id) {
  * @returns {JSX} Loading animation.
  */
 function Delete({ updateList, dataRow }) {
-    const { id } = dataRow;
+    const { id, noOfApis } = dataRow;
+    const getValidationErrors = () => {
+        let errorText = '';
+        if (noOfApis > 0) {
+            errorText += 'Unable to delete the category. It is attached to API(s)';
+        }
+        return errorText;
+    };
 
     const formSaveCallback = () => {
-        const promiseAPICall = apiCall(id);
+        const validationErrors = getValidationErrors();
+        if (validationErrors !== '') {
+            Alert.error(validationErrors);
+            return false;
+        }
 
-        promiseAPICall
-            .then((data) => {
-                updateList();
-                return data;
-            })
-            .catch((e) => {
-                return e;
-            });
+        const promiseAPICall = new Promise((resolve, reject) => {
+            const restApi = new API();
+            restApi
+                .deleteAPICategory(id)
+                .then(() => {
+                    resolve(
+                        <FormattedMessage
+                            id='AdminPages.ApiCategories.Delete.form.delete.successful'
+                            defaultMessage='API Category deleted successfully'
+                        />
+                    );
+                })
+                .catch((error) => {
+                    reject(error.response.body.description);
+                })
+                .finally(() => {
+                    updateList();
+                });
+        });
+
         return promiseAPICall;
     };
 
@@ -62,9 +77,7 @@ function Delete({ updateList, dataRow }) {
             icon={<DeleteForeverIcon />}
             formSaveCallback={formSaveCallback}
         >
-            <DialogContentText>
-                Are you sure you want to delete this API Category?
-            </DialogContentText>
+            <DialogContentText>Are you sure you want to delete this API Category?</DialogContentText>
         </FormDialogBase>
     );
 }
