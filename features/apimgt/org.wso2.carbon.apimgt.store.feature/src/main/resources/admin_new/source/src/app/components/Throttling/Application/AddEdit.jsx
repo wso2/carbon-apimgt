@@ -129,6 +129,7 @@ function AddEdit(props) {
         },
     } = state;
     const [validationError, setValidationError] = useState([]);
+    const [editMode, setIsEditMode] = useState(false);
     const restApi = new API();
 
     const onChange = (e) => {
@@ -168,9 +169,9 @@ function AddEdit(props) {
         const unitTimeErrors = validate('unitTime', unitTime);
 
         if (type === 'BandwidthLimit') {
-            errorText += policyNameErrors + '\n' + dataAmounttErrors + '\n' + unitTimeErrors;
+            errorText += policyNameErrors + ' ' + dataAmounttErrors + ' ' + unitTimeErrors;
         } else {
-            errorText += policyNameErrors + '\n' + requestCountErrors + '\n' + unitTimeErrors;
+            errorText += policyNameErrors + ' ' + requestCountErrors + ' ' + unitTimeErrors;
         }
         return errorText;
     };
@@ -246,6 +247,7 @@ function AddEdit(props) {
 
     const dialogOpenCallback = () => {
         if (dataRow) {
+            setIsEditMode(true);
             const selectedPolicy = applicationThrottlingPolicyList.filter(
                 (policy) => policy.policyName === dataRow[0],
             );
@@ -294,6 +296,7 @@ function AddEdit(props) {
                 required
                 variant='outlined'
                 value={policyName}
+                disabled={editMode}
                 onChange={onChange}
                 InputProps={{
                     id: 'policyName',
