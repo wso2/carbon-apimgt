@@ -191,6 +191,75 @@ class API extends Resource {
             return promise_create_api_category;
         }
     }
+
+    /**
+     * Get Application Throttling Policies
+     */
+    applicationThrottlingPoliciesGet() {
+        return this.client.then((client) => {
+            return client.apis['Application Policy (Collection)'].get_throttling_policies_application(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Delete an Application Throttling Policy
+     */
+    deleteApplicationThrottlingPolicy(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Application Policy (Individual)'].delete_throttling_policies_application__policyId_(
+                { policyId: policyId },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Add an Application Throttling Policy
+     */
+    addApplicationThrottlingPolicy(body) {
+        return this.client.then((client) => {
+            const payload = {
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Application Policy (Collection)'].post_throttling_policies_application(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get details of an Application Throttling Policy 
+     */
+    applicationThrottlingPolicyGet(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Application Policy (Individual)'].get_throttling_policies_application__policyId_(
+                { policyId: policyId },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+     /**
+     * Update an Application Throttling Policy
+     */
+    updateApplicationThrottlingPolicy(policyId, body) {
+        return this.client.then((client) => {
+            const payload = {
+                policyId: policyId,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Application Policy (Individual)'].put_throttling_policies_application__policyId_(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+
 }
 
 API.CONSTS = {
