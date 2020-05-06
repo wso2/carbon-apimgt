@@ -62,7 +62,7 @@ export default function ListApiCategories() {
         {
             name: 'name',
             label: intl.formatMessage({
-                id: 'api.categories.table.header.category.name',
+                id: 'AdminPages.ApiCategories.table.header.category.name',
                 defaultMessage: 'Category Name',
             }),
             options: {
@@ -73,7 +73,7 @@ export default function ListApiCategories() {
         {
             name: 'description',
             label: intl.formatMessage({
-                id: 'api.categories.table.header.category.description',
+                id: 'AdminPages.ApiCategories.table.header.category.description',
                 defaultMessage: 'Description',
             }),
             options: {
@@ -84,7 +84,7 @@ export default function ListApiCategories() {
         {
             name: 'noOfApis',
             label: intl.formatMessage({
-                id: 'api.categories.table.header.category.number.of.apis',
+                id: 'AdminPages.ApiCategories.table.header.category.number.of.apis',
                 defaultMessage: 'Number of APIs',
             }),
             options: {
@@ -95,8 +95,7 @@ export default function ListApiCategories() {
     ];
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
-            id:
-                'AdminPages.ApiCategories.List.addButtonProps.triggerButtonText',
+            id: 'AdminPages.ApiCategories.List.addButtonProps.triggerButtonText',
             defaultMessage: 'Add API Category',
         }),
         /* This title is what as the title of the popup dialog box */
