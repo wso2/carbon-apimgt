@@ -169,9 +169,9 @@ function AddEdit(props) {
         const unitTimeErrors = validate('unitTime', unitTime);
 
         if (type === 'BandwidthLimit') {
-            errorText += policyNameErrors + ' ' + dataAmounttErrors + ' ' + unitTimeErrors;
+            errorText += policyNameErrors + dataAmounttErrors + unitTimeErrors;
         } else {
-            errorText += policyNameErrors + ' ' + requestCountErrors + ' ' + unitTimeErrors;
+            errorText += policyNameErrors + requestCountErrors + unitTimeErrors;
         }
         return errorText;
     };
