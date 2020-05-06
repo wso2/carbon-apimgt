@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 
+import java.util.List;
+
 /**
  * EndpointRegistry Interface
  */
@@ -42,4 +44,13 @@ public interface EndpointRegistry {
      * @throws APIManagementException if failed get details of an Endpoint Registry
      */
     EndpointRegistryInfo getEndpointRegistryByUUID(String registryId) throws APIManagementException;
+
+    /**
+     * Returns details of all Endpoint Registries belong to a given tenant
+     *
+     * @param tenantDomain
+     * @return A list of EndpointRegistryInfo object
+     * @throws APIManagementException if failed get details of an Endpoint Registries
+     */
+    List<EndpointRegistryInfo> getEndpointRegistries(String tenantDomain) throws APIManagementException;
 }

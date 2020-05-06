@@ -35,6 +35,7 @@ paths:
         This operation provides you an array of available Registries.
       tags:
         - Registries
+      operationId: getRegistries
       responses:
         200:
           description: |

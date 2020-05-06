@@ -16,6 +16,7 @@
         "tags" : [ "Registries" ],
         "summary" : "Retrieve/Search APIs\n",
         "description" : "This operation provides you an array of available Registries.\n",
+        "operationId" : "getRegistries",
         "responses" : {
           "200" : {
             "description" : "OK.\nArray of Registries is returned.\n",

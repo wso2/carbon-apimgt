@@ -38,6 +38,8 @@ import org.wso2.carbon.apimgt.rest.api.endpoint.registry.util.EndpointRegistryMa
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.core.Response;
@@ -63,24 +65,37 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
     @Override
     public Response getRegistryByUUID(String registryId, MessageContext messageContext) {
-        RegistryDTO registry = new RegistryDTO();
-        registry.setId("01234567-0123-0123-0123-012345678901");
-        registry.setMode(RegistryDTO.ModeEnum.WRITE);
-        registry.setType(RegistryDTO.TypeEnum.WSO2);
-        registry.setName("Dev Registry");
-        return Response.ok().entity(registry).build();
+        RegistryDTO registryDTO = null;
+        EndpointRegistry registryProvider = new EndpointRegistryImpl();
+        try {
+            EndpointRegistryInfo endpointRegistryInfo = registryProvider.getEndpointRegistryByUUID(registryId);
+            if (endpointRegistryInfo != null) {
+                registryDTO = EndpointRegistryMappingUtils.fromEndpointRegistrytoDTO(endpointRegistryInfo);
+            } else {
+                RestApiUtil.handleResourceNotFoundError("Endpoint Registry with the id: " + registryId +
+                        " is not found", log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving details of endpoint registry by id: "
+                    + registryId, e, log);
+        }
+        return Response.ok().entity(registryDTO).build();
     }
 
     @Override
-    public Response registriesGet(MessageContext messageContext) {
-        RegistryArrayDTO registryArray = new RegistryArrayDTO();
-        RegistryDTO registry = new RegistryDTO();
-        registry.setId("01234567-0123-0123-0123-012345678901");
-        registry.setMode(RegistryDTO.ModeEnum.WRITE);
-        registry.setType(RegistryDTO.TypeEnum.WSO2);
-        registry.setName("Dev Registry");
-        registryArray.add(registry);
-        return Response.ok().entity(registry).build();
+    public Response getRegistries(MessageContext messageContext) {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        EndpointRegistry registryProvider = new EndpointRegistryImpl();
+        List<RegistryDTO> registryDTOList = new ArrayList<>();
+        try {
+            List<EndpointRegistryInfo> endpointRegistryInfoList = registryProvider.getEndpointRegistries(tenantDomain);
+            for (EndpointRegistryInfo endpointRegistryInfo: endpointRegistryInfoList) {
+                registryDTOList.add(EndpointRegistryMappingUtils.fromEndpointRegistrytoDTO(endpointRegistryInfo));
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving details of endpoint registries", e, log);
+        }
+        return Response.ok().entity(registryDTOList).build();
     }
 
     @Override
