@@ -8187,20 +8187,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<Scope> getAllSharedScopes(String tenantDomain) throws APIManagementException {
 
-        List<Scope> allSharedScopes = new ArrayList<>();
         if (log.isDebugEnabled()) {
             log.debug("Retrieving all the shared scopes for tenant: " + tenantDomain);
         }
         //Get all shared scopes
-        Set<String> allSharedScopeKeys = ApiMgtDAO.getInstance().getAllSharedScopeKeys(tenantDomain);
+        List<Scope> allSharedScopes = ApiMgtDAO.getInstance().getAllSharedScopes(tenantDomain);
         //Get all scopes from KM
         Map<String, Scope> allScopes = KeyManagerHolder.getKeyManagerInstance().getAllScopes(tenantDomain);
         //Set name, roles and description to shared scopes
-        for (String scopeKey : allSharedScopeKeys) {
-            if (!allScopes.containsKey(scopeKey)) {
-                log.error("No matching scope found in authorization server for shared scope name: " + scopeKey);
+        for (Scope scope : allSharedScopes) {
+            if (!allScopes.containsKey(scope.getKey())) {
+                log.error("No matching scope found in authorization server for shared scope name: " + scope.getKey());
             } else {
-                allSharedScopes.add(allScopes.get(scopeKey));
+                Scope kmScope = allScopes.get(scope.getKey());
+                scope.setName(kmScope.getName());
+                scope.setRoles(kmScope.getRoles());
+                scope.setDescription(kmScope.getDescription());
             }
         }
         return allSharedScopes;
