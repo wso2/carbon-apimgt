@@ -123,6 +123,10 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE = "SubscriberRole";
     public static final String ANALYTICS_ROLE = "Internal/analytics";
 
+    public static final String ENDPOINT_REGISTRY_ADMIN_ROLE = "Internal/registry_admin";
+    public static final String ENDPOINT_REGISTRY_USER_ROLE = "Internal/registry_user";
+    public static final String ENDPOINT_REGISTRY_BROWSER_ROLE = "Internal/registry_browser";
+
     public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
 
     public static final String API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD = "ExposeEndpointPassword";
