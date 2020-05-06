@@ -9180,8 +9180,8 @@ public class ApiMgtDAO {
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery);
                  ResultSet resultSet = ps.executeQuery()) {
                 while (resultSet.next()) {
-                    String apiId = resultSet.getString(1);
-                    String scopeKey = resultSet.getString(2);
+                    String scopeKey = resultSet.getString(1);
+                    String apiId = resultSet.getString(2);
                     Set<String> scopeList = apiScopeSet.get(apiId);
                     if (scopeList == null) {
                         scopeList = new LinkedHashSet<>();
@@ -14871,6 +14871,35 @@ public class ApiMgtDAO {
             handleException("Failed to get all Shared Scope Keys for tenant: " + tenantDomain, e);
         }
         return scopeKeys;
+    }
+
+    /**
+     * Get all shared scopes for tenant.
+     *
+     * @param tenantDomain Tenant Domain
+     * @return shared scope list
+     * @throws APIManagementException if an error occurs while getting all shared scopes for tenant
+     */
+    public List<Scope> getAllSharedScopes(String tenantDomain) throws APIManagementException {
+
+        List<Scope> scopeList = null;
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_ALL_SHARED_SCOPES_BY_TENANT)) {
+            statement.setInt(1, tenantId);
+            try (ResultSet rs = statement.executeQuery()) {
+                scopeList = new ArrayList<>();
+                while (rs.next()) {
+                    Scope scope = new Scope();
+                    scope.setId(rs.getString("UUID"));
+                    scope.setKey(rs.getString("NAME"));
+                    scopeList.add(scope);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get all Shared Scopes for tenant: " + tenantDomain, e);
+        }
+        return scopeList;
     }
 
     /**
