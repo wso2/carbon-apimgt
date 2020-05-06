@@ -42,7 +42,7 @@ import java.util.List;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-05T16:15:55.172+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-06T14:43:58.894+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
     @Context MessageContext securityContext;
@@ -53,7 +53,9 @@ public class RegistriesApi  {
         
         @Consumes({ "application/json" })
         @Produces({ "application/json" })
-            @Operation(summary = "Create a new Registry", description = "This operation can be used to create a new Registry specifying the details of the Registry in the payload. ", tags={ "Registries" })
+            @Operation(summary = "Create a new Registry", description = "This operation can be used to create a new Registry specifying the details of the Registry in the payload. ", security = {
+            @SecurityRequirement(name = "OAuth2", scopes = {
+            ""            })            }, tags={ "Registries" })
             @ApiResponses(value = { 
                 @ApiResponse(responseCode = "201", description = "Created. Successful response with the newly created Registry object as entity in the body. ", content = @Content(schema = @Schema(implementation = RegistryDTO.class))),
                 @ApiResponse(responseCode = "405", description = "Bad Request. Invalid request or validation error. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
@@ -65,11 +67,79 @@ public class RegistriesApi  {
 ) throws APIManagementException{
         return delegate.addRegistry(body, securityContext);
         }
+        @POST
+        @Path("/{registryId}/entry")
+        @Consumes({ "multipart/form-data" })
+        @Produces({ "application/json" })
+            @Operation(summary = "Create a new Registry Entry", description = "This operation can be used to create a new Registry Entry specifying the details of the Entry in the payload. ", security = {
+            @SecurityRequirement(name = "OAuth2", scopes = {
+            ""            })            }, tags={  })
+            @ApiResponses(value = { 
+                @ApiResponse(responseCode = "201", description = "Created. Successful response with the newly created Registry Entry as entity in the body. ", content = @Content(schema = @Schema(implementation = RegistryEntryDTO.class))),
+                @ApiResponse(responseCode = "405", description = "Bad Request. Invalid request or validation error. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                @ApiResponse(responseCode = "415", description = "Unsupported Media Type. The entity of the request was in a not supported format. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))) })
+        public Response createRegistryEntry(
+
+@Parameter(description = "uuid of the registry",required=true) @PathParam("registryId") String registryId
+
+
+, @Multipart(value = "registryEntry", required = false)  RegistryEntryDTO registryEntry
+
+,  @Multipart(value = "definitionFile", required = false) InputStream definitionFileInputStream, @Multipart(value = "definitionFile" , required = false) Attachment definitionFileDetail
+
+) throws APIManagementException{
+        return delegate.createRegistryEntry(registryId, registryEntry, definitionFileInputStream, definitionFileDetail, securityContext);
+        }
+        @DELETE
+        @Path("/{registryId}")
+        
+        @Produces({ "application/json" })
+            @Operation(summary = "Delete an Endpoint Registry", description = "This operation can be used to delete an existing Registry proving the Id of the Registry. ", security = {
+            @SecurityRequirement(name = "OAuth2", scopes = {
+            ""            })            }, tags={ "Registries" })
+            @ApiResponses(value = { 
+                @ApiResponse(responseCode = "200", description = "Successfully deleted. "),
+                @ApiResponse(responseCode = "400", description = "Invalid Request ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                @ApiResponse(responseCode = "404", description = "Not Found. Requested Registry does not exist. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))) })
+        public Response deleteRegistry(
+
+@Parameter(description = "uuid of the Registry",required=true) @PathParam("registryId") String registryId
+
+
+) throws APIManagementException{
+        return delegate.deleteRegistry(registryId, securityContext);
+        }
+        @DELETE
+        @Path("/{registryId}/entries/{entryId}")
+        
+        @Produces({ "application/json" })
+            @Operation(summary = "Delete an Entry in a Registry", description = "This operation can be used to delete an existing Entry in Registry by specifying the registryId and entryId. ", security = {
+            @SecurityRequirement(name = "OAuth2", scopes = {
+            ""            })            }, tags={ "Registry Entries" })
+            @ApiResponses(value = { 
+                @ApiResponse(responseCode = "200", description = "Successfully deleted the registry entry. "),
+                @ApiResponse(responseCode = "400", description = "Invalid Request ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                @ApiResponse(responseCode = "404", description = "Not Found. Requested Registry or Entry does not exist. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))) })
+        public Response deleteRegistryEntry(
+
+@Parameter(description = "uuid of the registry",required=true) @PathParam("registryId") String registryId
+
+
+, 
+
+@Parameter(description = "uuid of the registry entry",required=true) @PathParam("entryId") String entryId
+
+
+) throws APIManagementException{
+        return delegate.deleteRegistryEntry(registryId, entryId, securityContext);
+        }
         @GET
         @Path("/{registryId}/entries")
         
         @Produces({ "application/json" })
-            @Operation(summary = "Get All entries in the registry", description = "", tags={ "Registries" })
+            @Operation(summary = "Get All entries in the registry", description = "", security = {
+            @SecurityRequirement(name = "OAuth2", scopes = {
+            ""            })            }, tags={ "Registries" })
             @ApiResponses(value = { 
                 @ApiResponse(responseCode = "200", description = "Array of entries in Registry is returned. ", content = @Content(schema = @Schema(implementation = RegistryEntryArrayDTO.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid Request ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
@@ -79,8 +149,22 @@ public class RegistriesApi  {
 @Parameter(description = "uuid of the Registry",required=true) @PathParam("registryId") String registryId
 
 
+, 
+@Parameter(description = "**Search condition**.  You can search for a registry entry by specifying the entry name as \"query\" attribute.  Eg. \"pizzaServer\" will match a registry entry if the name is exactly \"pizzaServer\". ")  @QueryParam("query") String query
+
+
+, 
+@Parameter(description = "",     schema=@Schema(allowableValues={ "definitionType", "serviceType" })
+)  @QueryParam("sortBy") String sortBy
+
+
+, 
+@Parameter(description = "",     schema=@Schema(allowableValues={ "asc", "desc" })
+)  @QueryParam("sortOrder") String sortOrder
+
+
 ) throws APIManagementException{
-        return delegate.getAllEntriesInRegistry(registryId, securityContext);
+        return delegate.getAllEntriesInRegistry(registryId, query, sortBy, sortOrder, securityContext);
         }
         @GET
         
@@ -89,14 +173,30 @@ public class RegistriesApi  {
             @Operation(summary = "Retrieve/Search APIs ", description = "This operation provides you an array of available Registries. ", tags={ "Registries" })
             @ApiResponses(value = { 
                 @ApiResponse(responseCode = "200", description = "OK. Array of Registries is returned. ", content = @Content(schema = @Schema(implementation = RegistryArrayDTO.class))) })
-        public Response getRegistries() throws APIManagementException{
-        return delegate.getRegistries(securityContext);
+        public Response getRegistries(
+@Parameter(description = "**Search condition**. You can search for a registry by specifying the registry name as \"query\" attribute.  Eg. \"prodServer\" will match a registry entry if the name is exactly \"prodServer\". ")  @QueryParam("query") String query
+
+
+, 
+@Parameter(description = "",     schema=@Schema(allowableValues={ "registryName" })
+)  @QueryParam("sortBy") String sortBy
+
+
+, 
+@Parameter(description = "",     schema=@Schema(allowableValues={ "asc", "desc" })
+)  @QueryParam("sortOrder") String sortOrder
+
+
+) throws APIManagementException{
+        return delegate.getRegistries(query, sortBy, sortOrder, securityContext);
         }
         @GET
         @Path("/{registryId}")
         
         @Produces({ "application/json" })
-            @Operation(summary = "Get details of a Registry", description = "Using this operation, you can retrieve complete details of a single Registry using the RegistryId. ", tags={ "Registries" })
+            @Operation(summary = "Get details of a Registry", description = "Using this operation, you can retrieve complete details of a single Registry using the RegistryId. ", security = {
+            @SecurityRequirement(name = "OAuth2", scopes = {
+            ""            })            }, tags={ "Registries" })
             @ApiResponses(value = { 
                 @ApiResponse(responseCode = "200", description = "OK. Requested Registry is returned ", content = @Content(schema = @Schema(implementation = RegistryDTO.class))),
                 @ApiResponse(responseCode = "400", description = "Invalid Request", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
@@ -109,18 +209,72 @@ public class RegistriesApi  {
 ) throws APIManagementException{
         return delegate.getRegistryByUUID(registryId, securityContext);
         }
-        @POST
-        @Path("/{registryId}/entry")
-        @Consumes({ "multipart/form-data" })
+        @GET
+        @Path("/{registryId}/entries/{entryId}")
+        
         @Produces({ "application/json" })
-            @Operation(summary = "", description = "", tags={  })
+            @Operation(summary = "Retrieve a specific Entry in a Registry", description = "Using this operation, you can retrieve a specific entry in a single Registry using the EntryId and RegistryId. ", security = {
+            @SecurityRequirement(name = "OAuth2", scopes = {
+            ""            })            }, tags={ "Registry Entries" })
             @ApiResponses(value = { 
-                @ApiResponse(responseCode = "201", description = "Created. Successful response with the newly created Registry Entry as entity in the body. ", content = @Content(schema = @Schema(implementation = RegistryEntryDTO.class))),
-                @ApiResponse(responseCode = "405", description = "Bad Request. Invalid request or validation error. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
-                @ApiResponse(responseCode = "415", description = "Unsupported Media Type. The entity of the request was in a not supported format. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))) })
-        public Response registriesRegistryIdEntryPost(
+                @ApiResponse(responseCode = "200", description = "Requested Entry in Registry is returned. ", content = @Content(schema = @Schema(implementation = RegistryEntryArrayDTO.class))),
+                @ApiResponse(responseCode = "400", description = "Invalid Request ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                @ApiResponse(responseCode = "404", description = "Not Found. Requested Registry or Entry does not exist. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))) })
+        public Response getRegistryEntryByUuid(
 
 @Parameter(description = "uuid of the registry",required=true) @PathParam("registryId") String registryId
+
+
+, 
+
+@Parameter(description = "uuid of the registry entry",required=true) @PathParam("entryId") String entryId
+
+
+) throws APIManagementException{
+        return delegate.getRegistryEntryByUuid(registryId, entryId, securityContext);
+        }
+        @PUT
+        @Path("/{registryId}")
+        @Consumes({ "application/json" })
+        @Produces({ "application/json" })
+            @Operation(summary = "Update an existing Registry", description = "This operation can be used to update an existing Endpoint Registry ", security = {
+            @SecurityRequirement(name = "OAuth2", scopes = {
+            ""            })            }, tags={ "Registries" })
+            @ApiResponses(value = { 
+                @ApiResponse(responseCode = "200", description = "OK. Updated Registry is returned ", content = @Content(schema = @Schema(implementation = RegistryDTO.class))),
+                @ApiResponse(responseCode = "400", description = "Invalid Request", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                @ApiResponse(responseCode = "404", description = "Not Found. Requested Registry does not exist. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))) })
+        public Response updateRegistry(
+
+@Parameter(description = "ID of the Registry",required=true) @PathParam("registryId") String registryId
+
+
+,     
+    @Parameter(description = "" ) RegistryDTO body
+
+
+) throws APIManagementException{
+        return delegate.updateRegistry(registryId, body, securityContext);
+        }
+        @PUT
+        @Path("/{registryId}/entries/{entryId}")
+        @Consumes({ "multipart/form-data" })
+        @Produces({ "application/json" })
+            @Operation(summary = "Update an existing Entry in a Registry", description = "This operation can be used to update an existing Entry in Registry with the details of the Entry in the payload. ", security = {
+            @SecurityRequirement(name = "OAuth2", scopes = {
+            ""            })            }, tags={ "Registry Entries" })
+            @ApiResponses(value = { 
+                @ApiResponse(responseCode = "200", description = "Updated. Successful response with the newly updated Registry Entry as entity in the body. ", content = @Content(schema = @Schema(implementation = RegistryEntryDTO.class))),
+                @ApiResponse(responseCode = "400", description = "Invalid Request ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))),
+                @ApiResponse(responseCode = "404", description = "Not Found. Requested Registry or Entry does not exist. ", content = @Content(schema = @Schema(implementation = ErrorDTO.class))) })
+        public Response updateRegistryEntry(
+
+@Parameter(description = "uuid of the registry",required=true) @PathParam("registryId") String registryId
+
+
+, 
+
+@Parameter(description = "uuid of the registry entry",required=true) @PathParam("entryId") String entryId
 
 
 , @Multipart(value = "registryEntry", required = false)  RegistryEntryDTO registryEntry
@@ -128,6 +282,6 @@ public class RegistriesApi  {
 ,  @Multipart(value = "definitionFile", required = false) InputStream definitionFileInputStream, @Multipart(value = "definitionFile" , required = false) Attachment definitionFileDetail
 
 ) throws APIManagementException{
-        return delegate.registriesRegistryIdEntryPost(registryId, registryEntry, definitionFileInputStream, definitionFileDetail, securityContext);
+        return delegate.updateRegistryEntry(registryId, entryId, registryEntry, definitionFileInputStream, definitionFileDetail, securityContext);
         }
     }

@@ -50,7 +50,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     private static final Log log = LogFactory.getLog(RegistriesApiServiceImpl.class);
 
     @Override
-    public Response getAllEntriesInRegistry(String registryId, MessageContext messageContext) {
+    public Response getAllEntriesInRegistry(String registryId, String query, String sortBy, String sortOrder, MessageContext messageContext) {
         RegistryEntryArrayDTO registryEntryArray = new RegistryEntryArrayDTO();
         RegistryEntryDTO registryEntry = new RegistryEntryDTO();
         registryEntry.setEntryName("Pizzashack-endpoint");
@@ -83,7 +83,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     }
 
     @Override
-    public Response getRegistries(MessageContext messageContext) {
+    public Response getRegistries(String query, String sortBy, String sortOrder, MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         List<RegistryDTO> registryDTOList = new ArrayList<>();
@@ -118,8 +118,45 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     }
 
     @Override
-    public Response registriesRegistryIdEntryPost(String registryId, RegistryEntryDTO registryEntry, InputStream
+    public Response createRegistryEntry(String registryId, RegistryEntryDTO registryEntry, InputStream
             definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
         return Response.ok().entity(registryEntry).build();
+    }
+
+    @Override
+    public Response updateRegistry(String registryId, RegistryDTO body, MessageContext messageContext) {
+
+        return Response.ok().entity(body).build();
+    }
+
+    @Override
+    public Response deleteRegistry(String registryId, MessageContext messageContext) {
+
+        return Response.ok().entity("Successfully deleted the registry").build();
+    }
+
+    @Override
+    public Response getRegistryEntryByUuid(String registryId, String entryId, MessageContext messageContext) {
+        RegistryEntryDTO registryEntry = new RegistryEntryDTO();
+        registryEntry.setEntryName("Pizzashack-endpoint");
+        registryEntry.setMetadata("{ \"mutualTLS\" : true }");
+        registryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
+        registryEntry.setDefinitionUrl("http://localhost/pizzashack?swagger.json");
+        registryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
+        registryEntry.setServiceUrl("http://localhost/pizzashack");
+        return Response.ok().entity(registryEntry).build();
+    }
+
+    @Override
+    public Response updateRegistryEntry(String registryId, String entryId, RegistryEntryDTO registryEntry, InputStream
+            definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
+
+        return Response.ok().entity(registryEntry).build();
+    }
+
+    @Override
+    public Response deleteRegistryEntry(String registryId, String entryId, MessageContext messageContext) {
+
+        return Response.ok().entity("Successfully deleted the registry entry").build();
     }
 }
