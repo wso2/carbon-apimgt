@@ -122,17 +122,18 @@ export default function ListApiCategories() {
                         <Link
                             target='_blank'
                             href={
-                                Configurations.app.docUrl +
-                                'develop/customizations/customizing-the-developer-portal/customize-api-listing/categorizing-and-grouping-apis/api-category-based-grouping/'
+                                Configurations.app.docUrl
+                                + 'develop/customizations/customizing-the-developer-portal/customize-api-listing/'
+                                + 'categorizing-and-grouping-apis/api-category-based-grouping/'
                             }
                         >
                             <ListItemText
-                                primary={
+                                primary={(
                                     <FormattedMessage
                                         id='AdminPages.ApiCategories.List.help.link.one'
                                         defaultMessage='API Category based Grouping'
                                     />
-                                }
+                                )}
                             />
                         </Link>
                     </ListItem>
@@ -152,11 +153,11 @@ export default function ListApiCategories() {
                 <FormattedMessage
                     id='AdminPages.ApiCategories.List.empty.content.apicategories'
                     defaultMessage={
-                        'You can use API categories to group APIs. In previous versions of WSO2 API Manager, ' +
-                        'the process of grouping APIs was carried out by using tag wise groups.' +
-                        ' Unlike tag wise grouping API categories do not use a naming convention.' +
-                        ' Therefore, the admin does not need to take into consideration any naming' +
-                        ' conventions when using API category based grouping.'
+                        'You can use API categories to group APIs. In previous versions of WSO2 API Manager, '
+                        + 'the process of grouping APIs was carried out by using tag wise groups.'
+                        + ' Unlike tag wise grouping API categories do not use a naming convention.'
+                        + ' Therefore, the admin does not need to take into consideration any naming'
+                        + ' conventions when using API category based grouping.'
                     }
                 />
             </Typography>

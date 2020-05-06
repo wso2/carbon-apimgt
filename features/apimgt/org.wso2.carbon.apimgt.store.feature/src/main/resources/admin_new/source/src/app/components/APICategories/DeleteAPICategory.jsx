@@ -56,7 +56,7 @@ function Delete({ updateList, dataRow }) {
                         <FormattedMessage
                             id='AdminPages.ApiCategories.Delete.form.delete.successful'
                             defaultMessage='API Category deleted successfully'
-                        />
+                        />,
                     );
                 })
                 .catch((error) => {
@@ -85,6 +85,7 @@ Delete.propTypes = {
     updateList: PropTypes.number.isRequired,
     dataRow: PropTypes.shape({
         id: PropTypes.number.isRequired,
+        noOfApis: PropTypes.number,
     }).isRequired,
 };
 export default Delete;

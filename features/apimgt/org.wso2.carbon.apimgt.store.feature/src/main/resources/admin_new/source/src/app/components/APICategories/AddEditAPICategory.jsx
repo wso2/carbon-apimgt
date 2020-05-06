@@ -39,7 +39,7 @@ let initialState = {
 
 /**
  * Reducer
- * @param {JSON} state
+ * @param {JSON} state State
  * @returns {Promise}.
  */
 function reducer(state, { field, value }) {
@@ -53,7 +53,9 @@ function reducer(state, { field, value }) {
  * Render a pop-up dialog to add/edit an API category
  * @returns {JSX}.
  */
-function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
+function AddEdit({
+    updateList, dataRow, icon, triggerButtonText, title,
+}) {
     const classes = useStyles();
     let id = null;
     // If the dataRow is there ( form is in edit mode ) else it's a new creation
@@ -129,14 +131,14 @@ function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
                         <FormattedMessage
                             id='AdminPages.ApiCategories.AddEdit.form.add.successful'
                             defaultMessage='API Category added successfully'
-                        />
+                        />,
                     );
                 })
                 .catch((error) => {
                     const { response } = error;
                     if (response.body) {
-                        const { description } = response.body;
-                        reject(description);
+                        const { errorBody } = response.body;
+                        reject(errorBody);
                     }
                 })
                 .finally(() => {
@@ -167,13 +169,13 @@ function AddEdit({ updateList, dataRow, icon, triggerButtonText, title }) {
                 name='name'
                 value={name}
                 onChange={onChange}
-                label={
+                label={(
                     <span>
                         <FormattedMessage id='AdminPages.ApiCategories.AddEdit.form.name' defaultMessage='Name' />
 
                         <span className={classes.error}>*</span>
                     </span>
-                }
+                )}
                 fullWidth
                 error={hasErrors('name', name)}
                 helperText={hasErrors('name', name) || 'Enter API category name'}
