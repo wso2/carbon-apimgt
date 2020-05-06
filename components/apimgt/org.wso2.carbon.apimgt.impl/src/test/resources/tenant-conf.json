@@ -154,12 +154,16 @@
         "Roles": "admin,Internal/subscriber"
       },
       {
+        "Name": "apim_analytics:admin",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim_analytics:monitoring_dashboard:own",
-        "Roles": "admin,Internal/analytics"
+        "Roles": "admin"
       },
       {
         "Name": "apim_analytics:monitoring_dashboard:edit",
-        "Roles": "admin,Internal/analytics"
+        "Roles": "admin"
       },
       {
         "Name": "apim_analytics:monitoring_dashboard:view",
@@ -167,43 +171,39 @@
       },
       {
         "Name": "apim_analytics:manager_dashboard:own",
-        "Roles": "admin,Internal/analytics"
+        "Roles": "admin"
       },
       {
         "Name": "apim_analytics:manager_dashboard:edit",
-        "Roles": "admin,Internal/analytics"
+        "Roles": "admin"
       },
       {
         "Name": "apim_analytics:manager_dashboard:view",
         "Roles": "admin,Internal/analytics"
       },
       {
-        "Name": "apim_analytics:admin",
+        "Name": "apim_analytics:publisher_dashboard:own",
         "Roles": "admin"
       },
       {
-        "Name": "apim_analytics:publisher_dashboard:own",
-        "Roles": "Internal/creator,Internal/publisher"
-      },
-      {
         "Name": "apim_analytics:publisher_dashboard:edit",
-        "Roles": "Internal/creator,Internal/publisher"
+        "Roles": "admin"
       },
       {
         "Name": "apim_analytics:publisher_dashboard:view",
-        "Roles": "Internal/creator,Internal/publisher"
+        "Roles": "admin,Internal/creator,Internal/publisher"
       },
       {
         "Name": "apim_analytics:subscriber_dashboard:own",
-        "Roles": "Internal/subscriber"
+        "Roles": "admin"
       },
       {
         "Name": "apim_analytics:subscriber_dashboard:edit",
-        "Roles": "Internal/subscriber"
+        "Roles": "admin"
       },
       {
         "Name": "apim_analytics:subscriber_dashboard:view",
-        "Roles": "Internal/subscriber"
+        "Roles": "admin,Internal/subscriber"
       },
       {
         "Name": "apim:pub_alert_manage",
