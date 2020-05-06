@@ -69,7 +69,7 @@ let initialState = {
 /**
  * Reducer
  * @param {JSON} state The second number.
- * @returns {Promise}.
+ * @returns {Promise}
  */
 function reducer(state, newValue) {
     const { field, value } = newValue;
@@ -136,31 +136,49 @@ function AddEdit(props) {
     };
 
     const validate = (fieldName, value) => {
-        let error = false;
-        const isNumeric = (value !== '') && !Number.isNaN(Number(value));
+        let error = '';
         switch (fieldName) {
             case 'policyName':
-                error = value === '' ? fieldName + ' is Empty' : false;
+                error = value === '' ? (fieldName + ' is Empty') : '';
                 setValidationError({ policyName: error });
                 break;
-            case 'requestCountValue' || 'dataBandWithValue' || 'unitTime':
-                if (value !== '') {
-                    error = isNumeric ? setValidationError({ isNumeric: true })
-                        : (setValidationError({ isNumeric: false }) && fieldName + ' incorrect value');
-                } else {
-                    error = fieldName + ' is Empty';
-                }
+            case 'requestCount':
+                error = value === '' ? (fieldName + ' is Empty') : '';
+                setValidationError({ requestCount: error });
+                break;
+            case 'dataAmount':
+                error = value === '' ? (fieldName + ' is Empty') : '';
+                setValidationError({ dataAmount: error });
+                break;
+            case 'unitTime':
+                error = value === '' ? (fieldName + ' is Empty') : '';
+                setValidationError({ unitTime: error });
                 break;
             default:
-                error = value === '' ? fieldName + ' is Empty' : false;
-                setValidationError({ [fieldName]: error });
                 break;
         }
+        return error;
+    };
+
+    const getAllFormErrors = () => {
+        let errorText = '';
+        const policyNameErrors = validate('policyName', policyName);
+        const requestCountErrors = validate('requestCount', requestCount);
+        const dataAmounttErrors = validate('dataAmount', dataAmount);
+        const unitTimeErrors = validate('unitTime', unitTime);
+
+        if (type === 'BandwidthLimit') {
+            errorText += policyNameErrors + '\n' + dataAmounttErrors + '\n' + unitTimeErrors;
+        } else {
+            errorText += policyNameErrors + '\n' + requestCountErrors + '\n' + unitTimeErrors;
+        }
+        return errorText;
     };
 
     const formSaveCallback = () => {
-        if (Object.keys(validationError).length !== 0) {
-            Alert.error('Error while adding Application Throttling Policy. Mandatory values have not been filled');
+        const formErrors = getAllFormErrors();
+        if (formErrors !== '') {
+            Alert.error(formErrors);
             return (false);
         }
         let applicationThrottlingPolicy;
@@ -184,7 +202,7 @@ function AddEdit(props) {
                 applicationThrottlingPolicy);
             promisedAddApplicationPolicy
                 .then(() => {
-                    // updateList();
+                    updateList();
                     return (
                         <FormattedMessage
                             id='Throttling.Application.Policy.policy.add.success'
@@ -206,7 +224,7 @@ function AddEdit(props) {
             );
             promisedAddApplicationPolicy
                 .then(() => {
-                    // updateList();
+                    updateList();
                     return (
                         <FormattedMessage
                             id='Throttling.Application.Policy.policy.add.success'
@@ -299,7 +317,7 @@ function AddEdit(props) {
             <DialogContentText>
                 <Typography variant='h6' className={classes.quotaHeading}>
                     <FormattedMessage
-                        id='Admin.Throttling.Application.Throttling.Policy.add.general.details'
+                        id='Admin.Throttling.Application.Throttling.Policy.add.quota.limits.details'
                         defaultMessage='Quota Limits'
                     />
                 </Typography>
@@ -334,16 +352,17 @@ function AddEdit(props) {
                         label='Request Count'
                         fullWidth
                         value={requestCount}
+                        type='number'
                         onChange={onChange}
                         variant='outlined'
                         required
                         InputProps={{
                             id: 'requestCount',
                             onBlur: ({ target: { value } }) => {
-                                validate('requestCountValue', value);
+                                validate('requestCount', value);
                             },
                         }}
-                        error={validationError.requestCountValue || !validationError.isNumeric}
+                        error={validationError.requestCountValue}
                     />
                 ) : (
                     <Grid className={classes.unitTime}>
@@ -354,16 +373,17 @@ function AddEdit(props) {
                             label='Data Bandwith'
                             fullWidth
                             required
+                            type='number'
                             variant='outlined'
                             value={dataAmount}
                             onChange={onChange}
                             InputProps={{
-                                id: 'dataBandWithValue',
+                                id: 'dataAmount',
                                 onBlur: ({ target: { value } }) => {
-                                    validate('dataBandWithValue', value);
+                                    validate('dataAmount', value);
                                 },
                             }}
-                            error={validationError.dataBandWithValue || !validationError.isNumeric}
+                            error={validationError.dataAmount}
                         />
                         <FormControl className={classes.unitTimeSelection}>
                             <Select

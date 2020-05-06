@@ -64,14 +64,11 @@ const useStyles = makeStyles((theme) => ({
  */
 function ListLabels(props) {
     const {
-        EditComponent, editComponentProps, DeleteComponent, showActionColumn,
+        EditComponent, editComponentProps, DeleteComponent, showActionColumn, deleteComponentProps,
         columProps, pageProps, addButtonProps, addButtonOverride,
         searchProps: { active: searchActive, searchPlaceholder }, apiCall, emptyBoxProps: {
             title: emptyBoxTitle,
             content: emptyBoxContent,
-        },
-        actionColumnProps: {
-            editIconShow, editIconOverride, deleteIconShow, addNewEntry,
         },
         noDataMessage,
     } = props;
@@ -119,7 +116,7 @@ function ListLabels(props) {
                                     updateList={fetchData}
                                     {...editComponentProps}
                                 />
-                                <DeleteComponent dataRow={dataRow} updateList={fetchData} />
+                                <DeleteComponent dataRow={dataRow} updateList={fetchData} {...deleteComponentProps} />
                             </>
                         );
                     },

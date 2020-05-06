@@ -32,21 +32,20 @@ import API from 'AppData/api';
 function Delete(props) {
     const restApi = new API();
     const {
-        selectedPolicyName, applicationThrottlingPolicyList,
-        // updateList,
+        dataRow, applicationThrottlingPolicyList, updateList,
     } = props;
 
     const formSaveCallback = () => {
+        console.log(applicationThrottlingPolicyList);
         const selectedPolicy = applicationThrottlingPolicyList.filter(
-            (policy) => policy.policyName === selectedPolicyName,
+            (policy) => policy.policyName === dataRow[0],
         );
         const policyId = selectedPolicy.length !== 0 && selectedPolicy[0].policyId;
 
         const promiseAPICall = restApi
             .deleteApplicationThrottlingPolicy(policyId)
             .then(() => {
-                // add after chanaka aiyas fix
-                // updateList();
+                updateList();
                 return (
                     <FormattedMessage
                         id='Throttling.Application.Policy.policy.delete.success'
@@ -75,8 +74,8 @@ function Delete(props) {
         >
             <DialogContentText>
                 <FormattedMessage
-                    id='Throttling.Application.Policy.policy.delete.error'
-                    defaultMessage={selectedPolicyName + ' Application Throttling Policy will be deleted.'}
+                    id='Throttling.Application.Policy.policy.dialog.delete.error'
+                    defaultMessage='Application Throttling Policy will be deleted.'
                 />
             </DialogContentText>
         </FormDialogBase>
