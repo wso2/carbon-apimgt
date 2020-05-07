@@ -7944,7 +7944,7 @@ definitions:
       scopes:
         type: array
         items:
-          $ref: '#/definitions/Scope'
+          $ref: '#/definitions/APIScope'
       categories:
         description: |
           API categories
