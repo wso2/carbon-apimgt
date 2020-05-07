@@ -9392,6 +9392,40 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get the versioned local scope keys set of the API.
+     *
+     * @param apiIdentifier API Identifier
+     * @param tenantId      Tenant Id
+     * @return Local Scope keys set
+     * @throws APIManagementException if fails to get local scope keys for API
+     */
+    public Set<String> getVersionedLocalScopeKeysForAPI(APIIdentifier apiIdentifier, int tenantId)
+            throws APIManagementException {
+
+        int apiId;
+        Set<String> localScopes = new HashSet<>();
+        String getUnVersionedLocalScopes = SQLConstants.GET_VERSIONED_LOCAL_SCOPES_FOR_API_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(getUnVersionedLocalScopes)) {
+            apiId = getAPIID(apiIdentifier, connection);
+            preparedStatement.setInt(1, apiId);
+            preparedStatement.setInt(2, tenantId);
+            preparedStatement.setInt(3, tenantId);
+            preparedStatement.setInt(4, apiId);
+            preparedStatement.setInt(5, tenantId);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                while (rs.next()) {
+                    localScopes.add(rs.getString("SCOPE_NAME"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed while getting versioned local scopes for API:" + apiIdentifier + " tenant: "
+                    + tenantId, e);
+        }
+        return localScopes;
+    }
+
+    /**
      * Get the local scope keys set of the API.
      *
      * @param apiIdentifier API Identifier
