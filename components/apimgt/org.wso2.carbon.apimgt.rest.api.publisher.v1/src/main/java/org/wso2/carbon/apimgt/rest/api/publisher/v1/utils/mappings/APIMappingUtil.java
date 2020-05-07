@@ -1333,8 +1333,9 @@ public class APIMappingUtil {
     private static Set<Scope> getScopes(APIProductDTO apiProductDTO) {
 
         Set<Scope> scopeSet = new LinkedHashSet<>();
-        for (ScopeDTO scopeDTO : apiProductDTO.getScopes()) {
+        for (APIScopeDTO apiScopeDTO : apiProductDTO.getScopes()) {
             Scope scope = new Scope();
+            ScopeDTO scopeDTO = apiScopeDTO.getScope();
             scope.setKey(scopeDTO.getName());
             scope.setName(scopeDTO.getDisplayName());
             scope.setDescription(scopeDTO.getDescription());
@@ -1872,7 +1873,7 @@ public class APIMappingUtil {
         productDto.setApis(new ArrayList<>(aggregatedAPIs.values()));
         String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getId());
         List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
-        productDto.setScopes(scopeDTOS);
+        productDto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS));
 
         String subscriptionAvailability = product.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
@@ -2128,7 +2129,8 @@ public class APIMappingUtil {
         }
 
         // scopes
-        for (ScopeDTO scope : dto.getScopes()) {
+        for (APIScopeDTO apiScopeDTO : dto.getScopes()) {
+            ScopeDTO scope = apiScopeDTO.getScope();
             for (String aRole : scope.getBindings()) {
                 boolean isValidRole = APIUtil.isRoleNameExist(provider, aRole);
                 if (!isValidRole) {
