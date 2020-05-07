@@ -14,7 +14,7 @@
     "/registries" : {
       "get" : {
         "tags" : [ "Registries" ],
-        "summary" : "Retrieve/Search APIs\n",
+        "summary" : "Retrieve all Registries\n",
         "description" : "This operation provides you an array of available Registries.\n",
         "operationId" : "getRegistries",
         "parameters" : [ {
@@ -59,7 +59,10 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "ReadRegistry" : [ "registry:view" ]
+        } ]
       },
       "post" : {
         "tags" : [ "Registries" ],
@@ -108,7 +111,7 @@
           }
         },
         "security" : [ {
-          "OAuth2" : [ "registry:write" ]
+          "WriteRegistry" : [ "registry:write" ]
         } ]
       }
     },
@@ -162,7 +165,7 @@
           }
         },
         "security" : [ {
-          "OAuth2" : [ "registry:view" ]
+          "ReadRegistry" : [ "registry:view" ]
         } ]
       },
       "put" : {
@@ -223,7 +226,7 @@
           }
         },
         "security" : [ {
-          "OAuth2" : [ "registry:write" ]
+          "WriteRegistry" : [ "registry:write" ]
         } ]
       },
       "delete" : {
@@ -268,7 +271,7 @@
           }
         },
         "security" : [ {
-          "OAuth2" : [ "registry:write" ]
+          "WriteRegistry" : [ "registry:write" ]
         } ]
       }
     },
@@ -351,7 +354,7 @@
           }
         },
         "security" : [ {
-          "OAuth2" : [ "registry:entry_view" ]
+          "ReadRegistryEntry" : [ "registry:entry_view" ]
         } ]
       }
     },
@@ -413,7 +416,7 @@
           }
         },
         "security" : [ {
-          "OAuth2" : [ "registry:entry_write" ]
+          "WriteRegistryEntry" : [ "registry:entry_write" ]
         } ]
       }
     },
@@ -477,7 +480,7 @@
           }
         },
         "security" : [ {
-          "OAuth2" : [ "registry:entry_view" ]
+          "ReadRegistryEntry" : [ "registry:entry_view" ]
         } ]
       },
       "put" : {
@@ -548,7 +551,7 @@
           }
         },
         "security" : [ {
-          "OAuth2" : [ "registry:entry_write" ]
+          "WriteRegistryEntry" : [ "registry:entry_write" ]
         } ]
       },
       "delete" : {
@@ -603,7 +606,7 @@
           }
         },
         "security" : [ {
-          "OAuth2" : [ "registry:entry_write" ]
+          "WriteRegistryEntry" : [ "registry:entry_write" ]
         } ]
       }
     }
@@ -756,17 +759,50 @@
       }
     },
     "securitySchemes" : {
-      "OAuth2" : {
+      "ReadRegistry" : {
         "type" : "oauth2",
         "flows" : {
           "authorizationCode" : {
             "authorizationUrl" : "https://example.com/oauth/authorize",
             "tokenUrl" : "https://example.com/oauth/token",
             "scopes" : {
-              "registry:view" : "Permission to view a Registry",
-              "registry:write" : "Permission to Create a Registry",
-              "registry:entry_view" : "Permission to show an individual Entry",
-              "registry:entry_write" : "Permssion to writes an indvidual Entry"
+              "scope" : "registry:view"
+            }
+          }
+        }
+      },
+      "WriteRegistry" : {
+        "type" : "oauth2",
+        "flows" : {
+          "authorizationCode" : {
+            "authorizationUrl" : "https://example.com/oauth/authorize",
+            "tokenUrl" : "https://example.com/oauth/token",
+            "scopes" : {
+              "scope" : "registry:write"
+            }
+          }
+        }
+      },
+      "ReadRegistryEntry" : {
+        "type" : "oauth2",
+        "flows" : {
+          "authorizationCode" : {
+            "authorizationUrl" : "https://example.com/oauth/authorize",
+            "tokenUrl" : "https://example.com/oauth/token",
+            "scopes" : {
+              "scope" : "registry:entry_view"
+            }
+          }
+        }
+      },
+      "WriteRegistryEntry" : {
+        "type" : "oauth2",
+        "flows" : {
+          "authorizationCode" : {
+            "authorizationUrl" : "https://example.com/oauth/authorize",
+            "tokenUrl" : "https://example.com/oauth/token",
+            "scopes" : {
+              "scope" : "registry:entry_write"
             }
           }
         }

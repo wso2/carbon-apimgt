@@ -30,11 +30,13 @@ paths:
     #-----------------------------------------------------
     get:
       summary: |
-        Retrieve/Search APIs
+        Retrieve all Registries
       description: |
         This operation provides you an array of available Registries.
       tags:
         - Registries
+      security:
+      - ReadRegistry: [registry:view]
       operationId: getRegistries
       parameters:
       - name: query
@@ -80,8 +82,7 @@ paths:
       description: |
         This operation can be used to create a new Registry specifying the details of the Registry in the payload.
       security:
-      - OAuth2:
-        - registry:write
+      - WriteRegistry: [registry:write]
       tags:
         - Registries
       operationId: addRegistry
@@ -125,8 +126,7 @@ paths:
       description: |
         Using this operation, you can retrieve complete details of a single Registry using the RegistryId.
       security:
-      - OAuth2:
-        - registry:view
+      - ReadRegistry: [registry:view]
       tags:
         - Registries
       operationId: getRegistryByUUID
@@ -171,8 +171,7 @@ paths:
       description: |
         This operation can be used to update an existing Endpoint Registry
       security:
-      - OAuth2:
-        - registry:write
+      - WriteRegistry: [registry:write]
       tags:
         - Registries
       operationId: updateRegistry
@@ -222,8 +221,7 @@ paths:
       description: |
         This operation can be used to delete an existing Registry proving the Id of the Registry.
       security:
-      - OAuth2:
-        - registry:write
+      - WriteRegistry: [registry:write]
       tags:
        - Registries
       operationId: deleteRegistry
@@ -264,8 +262,7 @@ paths:
       summary: Get All entries in the registry
       operationId: getAllEntriesInRegistry
       security:
-      - OAuth2:
-        - registry:entry_view
+      - ReadRegistryEntry: [registry:entry_view]
       tags:
         - Registries
       parameters:
@@ -335,8 +332,7 @@ paths:
       description: |
         This operation can be used to create a new Registry Entry specifying the details of the Entry in the payload.
       security:
-        - OAuth2:
-          - registry:entry_write
+        - WriteRegistryEntry: [registry:entry_write]
       operationId: createRegistryEntry
       parameters:
       - name: registryId
@@ -387,8 +383,7 @@ paths:
       description: |
         Using this operation, you can retrieve a specific entry in a single Registry using the EntryId and RegistryId.
       security:
-      - OAuth2:
-        - registry:entry_view
+      - ReadRegistryEntry: [registry:entry_view]
       operationId: getRegistryEntryByUuid
       tags:
         - Registry Entries
@@ -441,8 +436,7 @@ paths:
       description: |
         This operation can be used to update an existing Entry in Registry with the details of the Entry in the payload.
       security:
-        - OAuth2:
-          - registry:entry_write
+        - WriteRegistryEntry: [registry:entry_write]
       operationId: updateRegistryEntry
       tags:
         - Registry Entries
@@ -500,8 +494,7 @@ paths:
       description: |
         This operation can be used to delete an existing Entry in Registry by specifying the registryId and entryId.
       security:
-        - OAuth2:
-          - registry:entry_write
+        - WriteRegistryEntry: [registry:entry_write]
       operationId: deleteRegistryEntry
       tags:
         - Registry Entries
@@ -547,17 +540,38 @@ components:
   # The security schemes of resources used by some of the APIs
   #-------------------------------------------------------
   securitySchemes:
-    OAuth2:
+    ReadRegistry:
       type: oauth2
       flows:
         authorizationCode:
           authorizationUrl: https://example.com/oauth/authorize
           tokenUrl: https://example.com/oauth/token
           scopes:
-            registry:view: Permission to view a Registry
-            registry:write: Permission to Create a Registry
-            registry:entry_view: Permission to show an individual Entry
-            registry:entry_write: Permssion to writes an indvidual Entry
+            scope: registry:view
+    WriteRegistry:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            scope: registry:write
+    ReadRegistryEntry:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            scope: registry:entry_view
+    WriteRegistryEntry:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            scope: registry:entry_write
 
   #-------------------------------------------------------
   # The definitions of resources used by some of the APIs
