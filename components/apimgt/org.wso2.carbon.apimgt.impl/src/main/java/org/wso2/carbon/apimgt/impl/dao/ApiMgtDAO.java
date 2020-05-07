@@ -14168,6 +14168,7 @@ public class ApiMgtDAO {
                                     scope.setName(scopesResult.getString("DISPLAY_NAME"));
                                     scope.setRoles(scopesResult.getString("SCOPE_BINDING"));
                                     uriTemplate.setScope(scope);
+                                    uriTemplate.setScopes(scope);
                                 }
                             }
                         }
