@@ -193,6 +193,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
@@ -1497,20 +1499,42 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void updateAPIResources(API api, int tenantId) throws APIManagementException {
 
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-        Set<String> oldLocalScopeKeys = apiMgtDAO.getAllLocalScopeKeysForAPI(api.getId(), tenantId);
-        Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(api.getId());
-        Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(api.getId(), tenantId, api.getUriTemplates());
+        APIIdentifier apiIdentifier = api.getId();
+        // Get the new URI templates for the API
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        // Get the existing local scope keys attached for the API
+        Set<String> oldLocalScopeKeys = apiMgtDAO.getAllLocalScopeKeysForAPI(apiIdentifier, tenantId);
+        // Get the existing URI templates for the API
+        Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier);
+        // Get the new local scope keys from URI templates
+        Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(apiIdentifier, tenantId, uriTemplates);
+        Set<String> newLocalScopeKeys = newLocalScopes.stream().map(Scope::getKey).collect(Collectors.toSet());
+        // Get the existing versioned local scope keys attached for the API
+        Set<String> oldVersionedLocalScopeKeys = apiMgtDAO.getVersionedLocalScopeKeysForAPI(apiIdentifier, tenantId);
+        // Get the existing versioned local scope keys which needs to be removed (not updated) from the current updating
+        // API and remove them from the oldLocalScopeKeys set before sending to KM, so that they will not be removed
+        // from KM and can be still used by other versioned APIs.
+        Iterator oldLocalScopesItr = oldLocalScopeKeys.iterator();
+        while (oldLocalScopesItr.hasNext()) {
+            String oldLocalScopeKey = (String) oldLocalScopesItr.next();
+            // if the scope is used in versioned APIs and it is not in new local scope key set
+            if (oldVersionedLocalScopeKeys.contains(oldLocalScopeKey)
+                    && !newLocalScopeKeys.contains(oldLocalScopeKey)) {
+                //remove from old local scope key set which will be send to KM
+                oldLocalScopesItr.remove();
+            }
+        }
         apiMgtDAO.updateURITemplates(api, tenantId);
         if (log.isDebugEnabled()) {
-            log.debug("Successfully updated the URI templates of API: " + api.getId() + " in the database");
+            log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
         }
         // Update the resource scopes of the API in KM.
         // Need to remove the old local scopes and register new local scopes and, update the resource scope mappings
         // using the updated URI templates of the API.
         KeyManagerHolder.getKeyManagerInstance().updateResourceScopes(api, oldLocalScopeKeys, newLocalScopes,
-                oldURITemplates, api.getUriTemplates(), tenantDomain);
+                oldURITemplates, uriTemplates, tenantDomain);
         if (log.isDebugEnabled()) {
-            log.debug("Successfully updated the resource scopes of API: " + api.getId() + " in Key Manager");
+            log.debug("Successfully updated the resource scopes of API: " + apiIdentifier + " in Key Manager");
         }
     }
 

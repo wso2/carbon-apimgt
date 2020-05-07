@@ -1037,7 +1037,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * authorization server.
      *
      * @param api               API
-     * @param oldLocalScopeKeys Old local scopes of the API before update
+     * @param oldLocalScopeKeys Old local scopes of the API before update (excluding the versioned local scopes
      * @param newLocalScopes    New local scopes of the API after update
      * @param oldURITemplates   Old URI templates of the API before update
      * @param newURITemplates   New URI templates of the API after update
