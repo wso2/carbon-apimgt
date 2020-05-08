@@ -870,7 +870,7 @@ public class APIConsumerImplTest {
     public void testGetScopesBySubscribedAPIs() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         List<APIIdentifier> identifiers = new ArrayList<>();
-        Set<Scope> scopes = new HashSet<>();
+        Set<String> scopes = new HashSet<>();
         when(apiMgtDAO.getScopesBySubscribedAPIs(identifiers)).thenReturn(scopes);
         assertEquals(scopes, apiConsumer.getScopesBySubscribedAPIs(identifiers));
     }
