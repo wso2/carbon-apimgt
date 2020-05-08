@@ -2052,20 +2052,20 @@ public class SQLConstants {
 
     public static final String GET_ALL_URL_TEMPLATES_SQL =
             " SELECT    " +
-            "   AUM.HTTP_METHOD," +
-            "   AUM.AUTH_SCHEME," +
-            "   AUM.URL_PATTERN," +
-            "   AUM.THROTTLING_TIER," +
-            "   AUM.MEDIATION_SCRIPT," +
-            "   ARSM.SCOPE_NAME " +
-            " FROM " +
-            "   AM_API_URL_MAPPING AUM " +
-            " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID  " +
-            " LEFT OUTER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID" +
-            " WHERE" +
-            "   API.CONTEXT= ? " +
-            "   AND API.API_VERSION = ? " +
-            " ORDER BY AUM.URL_MAPPING_ID";
+                    "   AUM.HTTP_METHOD," +
+                    "   AUM.AUTH_SCHEME," +
+                    "   AUM.URL_PATTERN," +
+                    "   AUM.THROTTLING_TIER," +
+                    "   AUM.MEDIATION_SCRIPT, " +
+                    "   AUM.URL_MAPPING_ID " +
+                    " FROM " +
+                    "   AM_API_URL_MAPPING AUM, " +
+                    "   AM_API API " +
+                    " WHERE" +
+                    "   API.CONTEXT= ? " +
+                    "   AND API.API_VERSION = ? " +
+                    "   AND AUM.API_ID = API.API_ID " +
+                    " ORDER BY URL_MAPPING_ID";
 
     public static final String UPDATE_API_SQL =
             "UPDATE AM_API " +
@@ -2479,6 +2479,11 @@ public class SQLConstants {
             "   NAME IN (";
 
     public static final String GET_SCOPES_BY_SCOPE_KEYS_SUFFIX = ") AND TENANT_ID = ?";
+
+    public static final String GET_RESOURCE_TO_SCOPE_MAPPING_SQL =
+            "SELECT AUM.URL_MAPPING_ID, ARSM.SCOPE_NAME FROM AM_API_URL_MAPPING AUM " +
+                    "LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
+                    "WHERE AUM.API_ID = ?";
 
     public static final String GET_SUBSCRIBED_APIS_FROM_CONSUMER_KEY =
         "SELECT SUB.API_ID "
@@ -3228,18 +3233,15 @@ public class SQLConstants {
 				+ " (SELECT count(*) as c FROM AM_POLICY_APPLICATION APPPOLICY where APPPOLICY.NAME = ? AND APPPOLICY.TENANT_ID = ? AND APPPOLICY.QUOTA_TYPE = 'bandwidthVolume')"
 				+ " ) x";
 
-		public static final String GET_CONDITION_GROUPS_FOR_POLICIES_SQL =
-                "SELECT grp.CONDITION_GROUP_ID ,AUM.HTTP_METHOD,AUM.AUTH_SCHEME, pol.APPLICABLE_LEVEL, "
-				+ " AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, AUM.URL_MAPPING_ID, "
-                + " pol.DEFAULT_QUOTA_TYPE, ARSM.SCOPE_NAME "
-				+ " FROM AM_API_URL_MAPPING AUM"
-				+ " INNER JOIN  AM_API API ON AUM.API_ID = API.API_ID"
-				+ " LEFT OUTER JOIN AM_API_THROTTLE_POLICY pol ON AUM.THROTTLING_TIER = pol.NAME "
-				+ " LEFT OUTER JOIN AM_CONDITION_GROUP grp ON pol.POLICY_ID  = grp.POLICY_ID"
-                + " LEFT OUTER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID"
-				+ " where API.CONTEXT= ? AND API.API_VERSION = ? AND pol.TENANT_ID = ?"
-				/*+ " GROUP BY AUM.HTTP_METHOD,AUM.URL_PATTERN, AUM.URL_MAPPING_ID"*/
-				+ " ORDER BY AUM.URL_MAPPING_ID";
+        public static final String GET_CONDITION_GROUPS_FOR_POLICIES_SQL = "SELECT grp.CONDITION_GROUP_ID ,AUM.HTTP_METHOD,AUM.AUTH_SCHEME, pol.APPLICABLE_LEVEL, "
+                + " AUM.URL_PATTERN,AUM.THROTTLING_TIER,AUM.MEDIATION_SCRIPT,AUM.URL_MAPPING_ID, pol.DEFAULT_QUOTA_TYPE  "
+                + " FROM AM_API_URL_MAPPING AUM"
+                + " INNER JOIN  AM_API API ON AUM.API_ID = API.API_ID"
+                + " LEFT OUTER JOIN AM_API_THROTTLE_POLICY pol ON AUM.THROTTLING_TIER = pol.NAME "
+                + " LEFT OUTER JOIN AM_CONDITION_GROUP grp ON pol.POLICY_ID  = grp.POLICY_ID"
+                + " where API.CONTEXT= ? AND API.API_VERSION = ? AND pol.TENANT_ID = ?"
+                /*+ " GROUP BY AUM.HTTP_METHOD,AUM.URL_PATTERN, AUM.URL_MAPPING_ID"*/
+                + " ORDER BY AUM.URL_MAPPING_ID";
 
         public static final String GET_CONDITION_GROUPS_FOR_POLICIES_IN_PRODUCTS_SQL = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, AUM.URL_PATTERN, AUM.THROTTLING_TIER, " +
                 "AUM.MEDIATION_SCRIPT, AUM.URL_MAPPING_ID, POL.APPLICABLE_LEVEL, GRP.CONDITION_GROUP_ID " +

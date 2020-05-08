@@ -6934,6 +6934,52 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get resource (URI Template) to scope mappings of the given API.
+     *
+     * @param identifier API Identifier
+     * @return Map of URI template ID to Scope Keys
+     * @throws APIManagementException if an error occurs while getting resource to scope mapping of the API
+     */
+    public HashMap<Integer, Set<String>> getResourceToScopeMapping(APIIdentifier identifier)
+            throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        HashMap<Integer, Set<String>> scopeToResourceMap = new HashMap<>();
+        int apiId;
+        try {
+            String sqlQuery = SQLConstants.GET_RESOURCE_TO_SCOPE_MAPPING_SQL;
+            apiId = getAPIID(identifier, conn);
+
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, apiId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                int urlMappingId = resultSet.getInt(1);
+                String scopeKey = resultSet.getString(2);
+                if (scopeToResourceMap.containsKey(urlMappingId)) {
+                    if (!StringUtils.isEmpty(scopeKey)) {
+                        scopeToResourceMap.get(urlMappingId).add(scopeKey);
+                    }
+                } else {
+                    Set<String> scopeSet = new HashSet<>();
+                    if (!StringUtils.isEmpty(scopeKey)) {
+                        scopeSet.add(scopeKey);
+                    }
+                    scopeToResourceMap.put(urlMappingId, scopeSet);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve api resource scope mappings ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return scopeToResourceMap;
+    }
+
+    /**
      * returns all URL templates define for all active(PUBLISHED) APIs.
      */
     public ArrayList<URITemplate> getAllURITemplates(String apiContext, String version) throws APIManagementException {
@@ -6953,8 +6999,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
-        Map<String, Set<String>> scopeToURL = new HashMap<>();
-        Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+        ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
 
         //TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
         String query = SQLConstants.GET_ALL_URL_TEMPLATES_SQL;
@@ -6967,25 +7012,13 @@ public class ApiMgtDAO {
             rs = prepStmt.executeQuery();
 
             URITemplate uriTemplate;
-            Scope scope;
             while (rs.next()) {
-                String script = null;
-                String httpVerb = rs.getString("HTTP_METHOD");
-                String urlPattern = rs.getString("URL_PATTERN");
-                String key = httpVerb + ":" + urlPattern;
-                String scopeName = rs.getString("SCOPE_NAME");
-                if (scopeToURL.containsKey(key) && !StringUtils.isEmpty(scopeName) &&
-                        !scopeToURL.get(key).contains(scopeName) && uriTemplateMap.containsKey(key)) {
-                    scope = new Scope();
-                    scope.setKey(scopeName);
-                    uriTemplateMap.get(key).setScopes(scope);
-                    scopeToURL.get(key).add(scopeName);
-                    continue;
-                }
                 uriTemplate = new URITemplate();
-                uriTemplate.setHTTPVerb(httpVerb);
+                String script = null;
+                uriTemplate.setId(rs.getInt("URL_MAPPING_ID"));
+                uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
                 uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
-                uriTemplate.setUriTemplate(urlPattern);
+                uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
                 uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
                 InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
                 if (mediationScriptBlob != null) {
@@ -6993,23 +7026,14 @@ public class ApiMgtDAO {
                 }
                 uriTemplate.setMediationScript(script);
                 uriTemplate.getThrottlingConditions().add("_default");
-                if (StringUtils.isNotEmpty(scopeName)) {
-                    scope = new Scope();
-                    scope.setKey(scopeName);
-                    uriTemplate.setScope(scope);
-                    uriTemplate.setScopes(scope);
-                    Set<String> templateScopes = new HashSet<>();
-                    templateScopes.add(scopeName);
-                    scopeToURL.put(key, templateScopes);
-                }
-                uriTemplateMap.put(key, uriTemplate);
+                uriTemplates.add(uriTemplate);
             }
         } catch (SQLException e) {
             handleException("Error while fetching all URL Templates", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
-        return new ArrayList<>(uriTemplateMap.values());
+        return uriTemplates;
     }
 
     public ArrayList<URITemplate> getAllURITemplatesAdvancedThrottle(String apiContext, String version) throws APIManagementException {
@@ -7080,46 +7104,35 @@ public class ApiMgtDAO {
 
     private ArrayList<URITemplate> extractURITemplates(ResultSet rs) throws SQLException, APIManagementException {
         Map<String, Set<ConditionGroupDTO>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<ConditionGroupDTO>>();
-        ArrayList<URITemplate> uriTemplates;
-        Map<String, Set<String>> conditionGroupToURL = new HashMap<>();
-        Map<String, Set<String>> scopeToURL = new HashMap<>();
-        Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+        ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
 
         while (rs != null && rs.next()) {
+            int uriTemplateId = rs.getInt("URL_MAPPING_ID");
             String httpVerb = rs.getString("HTTP_METHOD");
             String authType = rs.getString("AUTH_SCHEME");
             String urlPattern = rs.getString("URL_PATTERN");
             String policyName = rs.getString("THROTTLING_TIER");
             String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
             String applicableLevel = rs.getString("APPLICABLE_LEVEL");
-            String scopeName = rs.getString("SCOPE_NAME");
             String policyConditionGroupId = "_condition_" + conditionGroupId;
             boolean isContentAware = PolicyConstants.BANDWIDTH_TYPE.equals(
                     rs.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE));
 
             String key = httpVerb + ":" + urlPattern;
+            if (mapByHttpVerbURLPatternToId.containsKey(key)) {
 
-            if (conditionGroupToURL.containsKey(key) || scopeToURL.containsKey(key)) {
-                //If it is the same URI template and if it has multiple conditions group Ids attached
-                if (mapByHttpVerbURLPatternToId.containsKey(key) && conditionGroupToURL.containsKey(key)
-                        && !StringUtils.isEmpty(conditionGroupId)
-                        && !conditionGroupToURL.get(key).contains(conditionGroupId)) {
-                    // Converting ConditionGroup to a lightweight ConditionGroupDTO.
-                    ConditionGroupDTO groupDTO = createConditionGroupDTO(Integer.parseInt(conditionGroupId));
-                    groupDTO.setConditionGroupId(policyConditionGroupId);
-                    mapByHttpVerbURLPatternToId.get(key).add(groupDTO);
-                    conditionGroupToURL.get(key).add(conditionGroupId);
-                } //If it is the same URI template and if it has multiple scopes attached
-                if (scopeToURL.containsKey(key) && !StringUtils.isEmpty(scopeName)
-                        && !scopeToURL.get(key).contains(scopeName) && uriTemplateMap.containsKey(key)) {
-                    Scope scope = new Scope();
-                    scope.setKey(scopeName);
-                    uriTemplateMap.get(key).setScopes(scope);
-                    scopeToURL.get(key).add(scopeName);
+                if (StringUtils.isEmpty(conditionGroupId)) {
+                    continue;
                 }
+
+                // Converting ConditionGroup to a lightweight ConditionGroupDTO.
+                ConditionGroupDTO groupDTO = createConditionGroupDTO(Integer.parseInt(conditionGroupId));
+                groupDTO.setConditionGroupId(policyConditionGroupId);
+                mapByHttpVerbURLPatternToId.get(key).add(groupDTO);
             } else {
                 String script = null;
                 URITemplate uriTemplate = new URITemplate();
+                uriTemplate.setId(uriTemplateId);
                 uriTemplate.setThrottlingTier(policyName);
                 uriTemplate.setThrottlingTiers(
                         policyName + PolicyConstants.THROTTLING_TIER_CONTENT_AWARE_SEPERATOR + isContentAware);
@@ -7127,15 +7140,6 @@ public class ApiMgtDAO {
                 uriTemplate.setHTTPVerb(httpVerb);
                 uriTemplate.setUriTemplate(urlPattern);
                 uriTemplate.setApplicableLevel(applicableLevel);
-                if (StringUtils.isNotEmpty(scopeName)) {
-                    Scope scope = new Scope();
-                    scope.setKey(scopeName);
-                    uriTemplate.setScope(scope);
-                    uriTemplate.setScopes(scope);
-                    Set<String> templateScopes = new HashSet<>();
-                    templateScopes.add(scopeName);
-                    scopeToURL.put(key, templateScopes);
-                }
                 InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
 
                 if (mediationScriptBlob != null) {
@@ -7145,7 +7149,7 @@ public class ApiMgtDAO {
                 uriTemplate.setMediationScript(script);
                 Set<ConditionGroupDTO> conditionGroupIdSet = new HashSet<ConditionGroupDTO>();
                 mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
-                uriTemplateMap.put(key, uriTemplate);
+                uriTemplates.add(uriTemplate);
 
                 if (StringUtils.isEmpty(conditionGroupId)) {
                     continue;
@@ -7154,14 +7158,9 @@ public class ApiMgtDAO {
                 ConditionGroupDTO groupDTO = createConditionGroupDTO(Integer.parseInt(conditionGroupId));
                 groupDTO.setConditionGroupId(policyConditionGroupId);
                 conditionGroupIdSet.add(groupDTO);
-
-                Set<String> templateConditionGroups = new HashSet<>();
-                templateConditionGroups.add(conditionGroupId);
-                conditionGroupToURL.put(key, templateConditionGroups);
             }
         }
 
-        uriTemplates = new ArrayList<>(uriTemplateMap.values());
         for (URITemplate uriTemplate : uriTemplates) {
             String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
             if (mapByHttpVerbURLPatternToId.containsKey(key)) {
@@ -9199,13 +9198,14 @@ public class ApiMgtDAO {
         return apiScopeSet;
     }
 
+    public Set<String> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers) throws APIManagementException {
 
-    public Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         List<Integer> apiIds = new ArrayList<Integer>();
-        HashMap<String, Scope> scopeHashMap = new HashMap<>();
+        Set<String> scopes = new HashSet<>();
+
         try {
             conn = APIMgtDBUtil.getConnection();
             for (APIIdentifier identifier : identifiers) {
@@ -9224,33 +9224,14 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sqlQuery);
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
-                Scope scope;
-                String scopeKey = resultSet.getString(1);
-                if (scopeHashMap.containsKey(scopeKey)) {
-                    // scope already exists append roles.
-                    scope = scopeHashMap.get(scopeKey);
-                    String roles = resultSet.getString(4);
-                    if (StringUtils.isNotEmpty(roles)) {
-                        scope.setRoles(scope.getRoles().concat("," + roles.trim()));
-                    }
-                } else {
-                    scope = new Scope();
-                    scope.setKey(scopeKey);
-                    scope.setName(resultSet.getString(2));
-                    scope.setDescription(resultSet.getString(3));
-                    String roles = resultSet.getString(4);
-                    if (StringUtils.isNotEmpty(roles)) {
-                        scope.setRoles(resultSet.getString(4).trim());
-                    }
-                }
-                scopeHashMap.put(scopeKey, scope);
+                scopes.add(resultSet.getString(1));
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve api scopes ", e);
+            handleException("Failed to retrieve api scope keys ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
-        return populateScopeSet(scopeHashMap);
+        return scopes;
     }
 
     public Set<Scope> getAPIScopesByScopeKey(String scopeKey, int tenantId) throws APIManagementException {

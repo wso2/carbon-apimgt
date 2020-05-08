@@ -3447,20 +3447,21 @@ public final class APIUtil {
             Map<String, Scope> scopeToKeyMapping = getAPIScopes(oldId, tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
+            HashMap<Integer, Set<String>> resourceScopes;
+            resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(oldId);
+
             urlPatternsList = ApiMgtDAO.getInstance().getAllURITemplates(oldContext, oldId.getVersion());
             Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
 
             for (URITemplate uriTemplate : uriTemplates) {
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-                List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
+                List<String> templateScopeKeys = new ArrayList<>(resourceScopes.get(uriTemplate.getId()));
                 List<Scope> newTemplateScopes = new ArrayList<>();
-                if (!oldTemplateScopes.isEmpty()) {
-                    for (Scope templateScope : oldTemplateScopes) {
-                        if (templateScope != null) {
-                            Scope scope = scopeToKeyMapping.get(templateScope.getKey());
-                            newTemplateScopes.add(scope);
-                        }
+                if (!templateScopeKeys.isEmpty()) {
+                    for (String templateScope : templateScopeKeys) {
+                        Scope scope = scopeToKeyMapping.get(templateScope);
+                        newTemplateScopes.add(scope);
                     }
                 }
                 uriTemplate.addAllScopes(newTemplateScopes);
