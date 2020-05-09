@@ -144,4 +144,13 @@ public class KeyManagerHolder {
             tenantKeyManager.remove(tenantDomain);
         }
     }
+
+    public static KeyManager getKeyManagerInstance(String tenantDomain, String keyManagerName) {
+
+        Map<String, KeyManager> tenantKeyManagerMap = keyManagerMap.get(tenantDomain);
+        if (tenantKeyManagerMap != null){
+         return tenantKeyManagerMap.get(keyManagerName);
+        }
+        return null;
+    }
 }

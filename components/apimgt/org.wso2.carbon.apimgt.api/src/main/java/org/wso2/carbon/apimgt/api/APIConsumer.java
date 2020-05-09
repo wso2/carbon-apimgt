@@ -226,11 +226,13 @@ public interface APIConsumer extends APIManager {
      * @param applicationName this is the APIM appication name.
      * @param keyType
      * @param tokenType this is theApplication Token Type. This can be either default or jwt.
+     * @param keyManagerName
      * @return
      * @throws APIManagementException
      */
     Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
-            String applicationName, String keyType, String tokenType) throws APIManagementException;
+                                               String applicationName, String keyType, String tokenType,
+                                               String keyManagerName) throws APIManagementException;
 
     /**
      *This method will delete from application key mapping table and application registration table.
@@ -251,7 +253,7 @@ public interface APIConsumer extends APIManager {
      *@return
      *@throws APIManagementException
      */
-    void cleanUpApplicationRegistrationByApplicationId(String applicationId, String tokenType) throws APIManagementException;
+    void cleanUpApplicationRegistrationByApplicationId(int applicationId, String tokenType) throws APIManagementException;
 
     /**
      * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
@@ -514,32 +516,22 @@ public interface APIConsumer extends APIManager {
      * @param callbackUrl callback URL
      * @param allowedDomains allowedDomains for token.
      * @param validityTime validity time period.
-     * @param groupingId APIM application id.
-     * @param jsonString Callback URL for the Application.
      * @param tokenScope Scopes for the requested tokens.
      *
+     * @param groupingId APIM application id.
+     * @param jsonString Callback URL for the Application.
+     * @param keyManagerName
      * @throws APIManagementException if failed to applications for given subscriber
      */
     Map<String,Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
-                                                                        String tokenType,
-                                                                        String callbackUrl, String[] allowedDomains,
-                                                                        String validityTime,
-                                                                        String tokenScope, String groupingId, String jsonString)
+                                                                 String tokenType,
+                                                                 String callbackUrl, String[] allowedDomains,
+                                                                 String validityTime,
+                                                                 String tokenScope, String groupingId,
+                                                                 String jsonString, String keyManagerName)
         throws APIManagementException;
 
     /**
-     * Creates a request for getting Approval for Application Registration.
-     * application is referred by the application id.
-     *
-     * @param appInfo contains userId, applicationName, tokenType, callbackUrl, allowedDomains, validityTime, groupingId,
-     *                jsonString, tokenScope
-     *
-     * @throws APIManagementException if failed to applications for given subscriber
-     */
-    Map<String,Object> requestApprovalForApplicationRegistrationByApplicationId(Map<String, Object> appInfo)
-            throws APIManagementException;
-
-    /**
      * Creates a request for application update.
      *
      * @param userId Subsriber name.
@@ -548,50 +540,20 @@ public interface APIConsumer extends APIManager {
      * @param callbackUrl callback URL
      * @param allowedDomains allowedDomains for token.
      * @param validityTime validity time period.
+     * @param tokenScope Scopes for the requested tokens.
      * @param groupingId APIM application id.
      * @param jsonString Callback URL for the Application.
-     * @param tokenScope Scopes for the requested tokens.
+     * @param keyManagerName
      * @throws APIManagementException if failed to applications for given subscriber
      */
     OAuthApplicationInfo updateAuthClient(String userId, String applicationName,
-                                               String tokenType,
-                                               String callbackUrl, String[] allowedDomains,
-                                               String validityTime,
-                                               String tokenScope,
-                                               String groupingId,
-                                               String jsonString)
+                                          String tokenType,
+                                          String callbackUrl, String[] allowedDomains,
+                                          String validityTime,
+                                          String tokenScope,
+                                          String groupingId,
+                                          String jsonString, String keyManagerName)
             throws APIManagementException;
-
-    /**
-     * Creates a request for application update.
-     *
-     * @param userId Subsriber name.
-     * @param applicationName of the Application.
-     * @param applicationId of the Application.
-     * @param tokenType Token type (PRODUCTION | SANDBOX)
-     * @param callbackUrl callback URL
-     * @param allowedDomains allowedDomains for token.
-     * @param validityTime validity time period.
-     * @param groupingId APIM application id.
-     * @param jsonString Callback URL for the Application.
-     * @param tokenScope Scopes for the requested tokens.
-     * @throws APIManagementException if failed to applications for given subscriber
-     */
-    OAuthApplicationInfo updateAuthClientByAppId(String userId, String applicationName, int applicationId,
-            String tokenType,
-            String callbackUrl, String[] allowedDomains,
-            String validityTime,
-            String tokenScope,
-            String groupingId,
-            String jsonString)
-            throws APIManagementException;
-
-    /**
-     * Delete oAuth application from Key manager and remove key manager mapping from APIM.
-     * @param consumerKey Client id of oAuthApplication.
-     * @throws APIManagementException
-     */
-    void deleteOAuthApplication(String consumerKey) throws APIManagementException;
 
     /**
      * Returns a list of applications created by the given user
@@ -610,16 +572,6 @@ public interface APIConsumer extends APIManager {
      */
     boolean updateApplicationOwner(String newUserId , Application application ) throws APIManagementException;
 
-    /**
-     * Returns a list of applications for a given subscriber
-     *
-     * @param subscriber Subscriber
-     * @param groupingId the groupId to which the applications must belong.
-     * @return Applications
-     * @throws APIManagementException if failed to applications for given subscriber
-     */
-
-    Application[] getApplications(Subscriber subscriber, String groupingId) throws APIManagementException;
 
     /**
      * Returns a list of applications for a given subscriber without application keys for the Rest API.
@@ -684,8 +636,6 @@ public interface APIConsumer extends APIManager {
      */
     Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
                                                 Identifier identifier, String groupingId) throws APIManagementException;
-    
-    Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException;
 
     Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
 
@@ -752,40 +702,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get the tiers
      */
     boolean isTierDeneid(String tierName)throws APIManagementException;
-
-
-    /**
-     * Complete Application Registration process.If the Application registration fails before
-     * generating the Access Tokens, this method should be used to resume registration.
-     * @param userId Tenant Aware userID
-     * @param applicationName Name of the Application
-     * @param tokenType Type of the Token (PRODUCTION | SANDBOX)
-     * @param tokenScope scope of the token
-     * @param groupingId the application belongs to.
-     * @return a Map containing the details of the OAuth application.
-     * @throws APIManagementException if failed to get the tiers
-     */
-    Map<String, String> completeApplicationRegistration(String userId,
-                                                               String applicationName,
-                                                               String tokenType, String tokenScope,
-															   String groupingId)
-		    throws APIManagementException;
-
-    /**
-     * Complete Application Registration process.If the Application registration fails before
-     * generating the Access Tokens, this method should be used to resume registration.
-     *
-     * @param applicationId Id of the Application
-     * @param tokenType     Type of the Token (PRODUCTION | SANDBOX)
-     * @param tokenScope    scope of the token
-     * @param groupingId    the application belongs to.
-     * @return a Map containing the details of the OAuth application.
-     * @throws APIManagementException if failed to get the tiers
-     */
-    Map<String, String> completeApplicationRegistration(String userId, int applicationId, String tokenType, String tokenScope,
-            String groupingId)
-            throws APIManagementException;
-
 
     /**
      * Returns details of an API information in low profile
@@ -872,7 +788,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     AccessTokenInfo renewAccessToken(String oldAccessToken, String clientId, String clientSecret, String validityTime,
-                                     String[] requestedScopes, String jsonInput) throws
+                                     String[] requestedScopes, String jsonInput,String keyManagerName) throws
             APIManagementException;
 
     /**
@@ -894,10 +810,11 @@ public interface APIConsumer extends APIManager {
      * Regenerate new consumer secret.
      *
      * @param clientId For which consumer key we need to regenerate consumer secret.
+     * @param keyManagerName
      * @return New consumer secret.
      * @throws APIManagementException This is the custom exception class for API management.
      */
-    String renewConsumerSecret(String clientId) throws APIManagementException;
+    String renewConsumerSecret(String clientId, String keyManagerName) throws APIManagementException;
 
 	/**
 	 * Returns a set of scopes associated with a list of API identifiers.
@@ -920,15 +837,6 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
-	 * Returns the scopes of an access token as a string
-	 *
-	 * @param accessToken access token you want to receive scopes for
-	 * @return scopes of the access token as a string
-	 * @throws APIManagementException
-	 */
-	String getScopesByToken(String accessToken) throws APIManagementException;
-
-	/**
 	 * Returns a set of scopes for a given space seperated scope key string
 	 *
 	 * @param scopeKeys a space seperated string of scope keys
@@ -1050,4 +958,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if an error occurs while reading configs
      */
     boolean isDevPortalAnonymousEnabled(String tenantDomain) throws APIManagementException;
+
+    void cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
+            throws APIManagementException;
 }

@@ -69,7 +69,7 @@ public class KeyManagersApiServiceImpl extends KeyManagersApiService {
             if (keyManagerConfigurationDTO != null) {
                 KeyManagerDTO keyManagerDTO = KeyManagerMappingUtil.toKeyManagerDTO(keyManagerConfigurationDTO);
                 return Response.ok(keyManagerDTO).build();
-            }
+            }   
             RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_KEY_MANAGER, keyManagerId, log);
         } catch (APIManagementException e) {
             String error =

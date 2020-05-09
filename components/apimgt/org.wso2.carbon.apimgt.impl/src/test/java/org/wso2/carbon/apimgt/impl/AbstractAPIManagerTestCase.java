@@ -1385,15 +1385,6 @@ public class AbstractAPIManagerTestCase {
 
 
 
-    @Test
-    public void testGetAccessTokenData() throws APIManagementException {
-        APIKey apiKey = new APIKey();
-        apiKey.setAccessToken(SAMPLE_RESOURCE_ID);
-        Mockito.when(apiMgtDAO.getAccessTokenData(Mockito.anyString())).thenReturn(apiKey);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Assert.assertEquals(abstractAPIManager.getAccessTokenData(SAMPLE_RESOURCE_ID).getAccessToken(),
-                SAMPLE_RESOURCE_ID);
-    }
 
 
     @Test

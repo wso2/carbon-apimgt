@@ -344,14 +344,6 @@ public interface APIManager {
      */
     Application getLightweightApplicationByUUID(String uuid) throws APIManagementException;
 
-    /**
-     * Return information related to a specific access token
-     *
-     * @param accessToken AccessToken
-     * @return
-     * @throws APIManagementException
-     */
-    APIKey getAccessTokenData(String accessToken) throws APIManagementException;
 
     /**
      * Return subscribed APIs per access token

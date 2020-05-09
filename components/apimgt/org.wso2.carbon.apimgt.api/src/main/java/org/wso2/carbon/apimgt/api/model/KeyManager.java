@@ -369,4 +369,5 @@ public interface KeyManager {
         // implementation.
     }
 
+    public String getType();
 }

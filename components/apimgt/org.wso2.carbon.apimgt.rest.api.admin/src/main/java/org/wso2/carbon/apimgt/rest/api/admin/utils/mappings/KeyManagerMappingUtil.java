@@ -108,7 +108,7 @@ public class KeyManagerMappingUtil {
         }
         JsonElement enableOauthAppCreation = jsonObject.get(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
         if (enableOauthAppCreation != null) {
-            keyManagerDTO.setEnableMapOauthConsumerApps(enableOauthAppCreation.getAsBoolean());
+            keyManagerDTO.setEnableMapOauthConsumerApps(!enableOauthAppCreation.getAsBoolean());
             jsonObject.remove(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
         }
         JsonElement enableTokenEncryption = jsonObject.get(APIConstants.KeyManager.ENABLE_TOKEN_ENCRYPTION);
@@ -215,7 +215,7 @@ public class KeyManagerMappingUtil {
             additionalProperties.put(APIConstants.KeyManager.AUTHORIZE_ENDPOINT, keyManagerDTO.getAuthorizeEndpoint());
         }
         additionalProperties
-                .put(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, keyManagerDTO.getEnableMapOauthConsumerApps());
+                .put(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, !keyManagerDTO.getEnableMapOauthConsumerApps());
         additionalProperties
                 .put(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION, keyManagerDTO.getEnableTokenGneration());
 

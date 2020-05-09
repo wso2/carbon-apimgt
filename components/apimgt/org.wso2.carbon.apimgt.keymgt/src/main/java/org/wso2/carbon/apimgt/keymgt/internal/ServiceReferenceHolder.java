@@ -31,7 +31,6 @@ public class ServiceReferenceHolder {
     private APIManagerConfigurationService amConfigurationService;
     private OutputEventAdapterService outputEventAdapterService;
     private Map<String, KeyValidationHandler> keyValidationHandlerMap = new ConcurrentHashMap<>();
-    private static final KeyValidationHandler defaultKeyValidationHandlerInstance = new DefaultKeyValidationHandler();
     private ServiceReferenceHolder() {
 
     }
@@ -71,6 +70,8 @@ public class ServiceReferenceHolder {
         if (keyValidationHandlerMap.containsKey(tenantDomain)) {
             return keyValidationHandlerMap.get(tenantDomain);
         }
-        return defaultKeyValidationHandlerInstance;
+        DefaultKeyValidationHandler defaultKeyValidationHandler = new DefaultKeyValidationHandler();
+        keyValidationHandlerMap.put(tenantDomain, defaultKeyValidationHandler);
+        return defaultKeyValidationHandler;
     }
 }

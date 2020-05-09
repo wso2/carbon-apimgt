@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -99,7 +98,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             dao.populateAppRegistrationWorkflowDTO(regWorkFlowDTO);
 
             dao.updateApplicationRegistration(status, regWorkFlowDTO.getKeyType(),
-                    regWorkFlowDTO.getApplication().getId());
+                    regWorkFlowDTO.getApplication().getId(),regWorkFlowDTO.getKeyManager());
 
         } catch (APIManagementException e) {
             log.error("Error while completing Application Registration entry.", e);
@@ -134,8 +133,11 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
         try {
             //get new key manager
             String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
-
+            String keyManagerName = workflowDTO.getKeyManager();
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+            if (keyManager == null){
+                throw new APIManagementException("Key Manager " + keyManagerName + " not configured");
+            }
             workflowDTO.getAppInfoDTO().getOAuthApplicationInfo()
                        .setClientName(application.getName());
 
@@ -147,27 +149,30 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             OAuthApplicationInfo oAuthApplication = keyManager.createApplication(workflowDTO.getAppInfoDTO());
 
             //update associateApplication
-            ApplicationUtils.updateOAuthAppAssociation(application,workflowDTO.getKeyType(),oAuthApplication);
+            ApplicationUtils
+                    .updateOAuthAppAssociation(application, workflowDTO.getKeyType(), oAuthApplication, keyManagerName);
 
             //change create application status in to completed.
             dao.updateApplicationRegistration(APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED,
-                    workflowDTO.getKeyType(),workflowDTO.getApplication().getId());
+                    workflowDTO.getKeyType(), workflowDTO.getApplication().getId(), keyManagerName);
 
             workflowDTO.setApplicationInfo(oAuthApplication);
-
             AccessTokenInfo tokenInfo;
-            if (oAuthApplication.getJsonString().contains(APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS)) {
-                AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(keyManager,
-                        oAuthApplication, null);
-                tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
-            } else {
-                tokenInfo = new AccessTokenInfo();
-                tokenInfo.setAccessToken("");
-                tokenInfo.setValidityPeriod(0L);
-                String[] noScopes = new String[] {"N/A"};
-                tokenInfo.setScope(noScopes);
-                oAuthApplication.addParameter("tokenScope", Arrays.toString(noScopes));
-            }
+            Object enableTokenGeneration = keyManager.getKeyManagerConfiguration()
+                    .getParameter(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
+                if (enableTokenGeneration != null && (Boolean) enableTokenGeneration &&
+                        oAuthApplication.getJsonString().contains(APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS)) {
+                    AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(keyManager,
+                            oAuthApplication, null);
+                    tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
+                } else {
+                    tokenInfo = new AccessTokenInfo();
+                    tokenInfo.setAccessToken("");
+                    tokenInfo.setValidityPeriod(0L);
+                    String[] noScopes = new String[] {"N/A"};
+                    tokenInfo.setScope(noScopes);
+                    oAuthApplication.addParameter("tokenScope", Arrays.toString(noScopes));
+                }
             workflowDTO.setAccessTokenInfo(tokenInfo);
         } catch (Exception e) {
             APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);
