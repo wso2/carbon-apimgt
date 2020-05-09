@@ -1687,7 +1687,7 @@ paths:
             - apim:api_create
       summary: Import API Definition
       description: |
-        This operation can be used to create api from api definition.
+        This operation can be used to create api from api definition.APIMgtDAOTest
 
         API definition is GraphQL Schema
       parameters:

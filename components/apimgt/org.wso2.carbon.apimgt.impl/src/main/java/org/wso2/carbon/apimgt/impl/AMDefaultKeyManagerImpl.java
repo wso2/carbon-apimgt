@@ -1257,6 +1257,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         return oAuthApplicationInfo;
     }
 
+    @Override
+    public String getType() {
+
+        return APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE;
+    }
+
     protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo createOAuthApplicationbyApplicationInfo(
             org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate) throws Exception {
 

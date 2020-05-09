@@ -159,7 +159,8 @@ public class APIKeyValidationServiceTest {
         try {
             APIKeyValidationService apiKeyValidationService = new APIKeyValidationService();
             apiKeyValidationService
-                    .validateKeyforHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN,keymanagers);
+                    .validateKeyforHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN,
+                            keymanagers.toArray(new String[keymanagers.size()]));
             Assert.fail("NullPointerException expected");
         } catch (Exception e) {
             Assert.assertEquals(e.getMessage(), e.getMessage());
@@ -168,7 +169,8 @@ public class APIKeyValidationServiceTest {
         try {
             APIKeyValidationService apiKeyValidationService = new APIKeyValidationService();
             apiKeyValidationService
-                    .validateKeyforHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN,keymanagers);
+                    .validateKeyforHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN,
+                            keymanagers.toArray(new String[keymanagers.size()]));
             Assert.fail("NullPointerException expected");
         } catch (Exception e) {
             Assert.assertEquals(e.getMessage(), e.getMessage());
@@ -177,7 +179,8 @@ public class APIKeyValidationServiceTest {
         try {
             APIKeyValidationService apiKeyValidationService = new APIKeyValidationService();
             apiKeyValidationService
-                    .validateKeyforHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN, keymanagers);
+                    .validateKeyforHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN,
+                            keymanagers.toArray(new String[keymanagers.size()]));
             Assert.fail("NullPointerException expected");
         } catch (Exception e) {
             Assert.assertEquals(e.getMessage(), e.getMessage());

@@ -134,7 +134,7 @@ public class ApplicationUtilsTestCase {
         PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super")).thenReturn(keyManager);
         OAuthAppRequest oAuthAppRequest = ApplicationUtils
                 .createOauthAppRequest("client1", "clientId", "http://foo.com", "subscribe", "details", "DEFAULT",
-                        "carbon.super");
+                        "carbon.super", "default");
         Assert.assertNotNull(oAuthAppRequest);
     }
 

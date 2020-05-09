@@ -30,6 +30,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
@@ -238,10 +239,12 @@ public class ApiMgtDAO {
             queryPs.setInt(1, subscriber.getId());
             queryPs.setInt(2, application.getId());
             queryPs.setString(3, dto.getKeyType());
+            queryPs.setString(4, dto.getKeyManager());
             resultSet = queryPs.executeQuery();
 
             if (resultSet.next()) {
-                throw new APIManagementException("Application '" + application.getName() + "' is already registered.");
+                throw new APIManagementException("Application '" + application.getName() + "' is already registered."
+                        , ExceptionCodes.KEY_MAPPING_ALREADY_EXIST);
             }
 
             if (!onlyKeyMappingEntry) {
@@ -254,6 +257,7 @@ public class ApiMgtDAO {
                 appRegPs.setLong(6, dto.getValidityTime());
                 appRegPs.setString(7, (String) dto.getAppInfoDTO().getOAuthApplicationInfo().getParameter("tokenScope"));
                 appRegPs.setString(8, jsonString);
+                appRegPs.setString(9, dto.getKeyManager());
                 appRegPs.execute();
             }
 
@@ -261,6 +265,8 @@ public class ApiMgtDAO {
             ps.setInt(1, application.getId());
             ps.setString(2, dto.getKeyType());
             ps.setString(3, dto.getStatus().toString());
+            ps.setString(4, dto.getKeyManager());
+            ps.setString(5,UUID.randomUUID().toString());
             ps.execute();
 
             conn.commit();
@@ -2118,50 +2124,6 @@ public class ApiMgtDAO {
 
 
 
-    public APIKey getAccessTokenData(String accessToken) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
-        APIKey apiKey = new APIKey();
-
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        accessTokenStoreTable = getAccessTokenStoreTableFromAccessToken(accessToken, accessTokenStoreTable);
-
-        String getTokenSql = SQLConstants.GET_ACCESS_TOKEN_DATA_PREFIX + accessTokenStoreTable + SQLConstants
-                .GET_ACCESS_TOKEN_DATA_SUFFIX;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            ps = connection.prepareStatement(getTokenSql);
-            ps.setString(1, APIUtil.encryptToken(accessToken));
-            result = ps.executeQuery();
-            if (result.next()) {
-                String decryptedAccessToken = APIUtil.decryptToken(result.getString("ACCESS_TOKEN")); // todo - check
-
-                String endUserName = result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_AUTHORIZED_USER);
-                String domainName = result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_USER_DOMAIN);
-                String endUsernameWithDomain = UserCoreUtil.addDomainToName(endUserName, domainName);
-                apiKey.setAuthUser(endUsernameWithDomain);
-
-                apiKey.setAccessToken(decryptedAccessToken);
-                apiKey.setCreatedDate(result.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
-                String consumerKey = result.getString("CONSUMER_KEY");
-                apiKey.setConsumerKey(consumerKey);
-                apiKey.setValidityPeriod(result.getLong("VALIDITY_PERIOD"));
-                List<String> scopes = new ArrayList<String>();
-                do {
-                    scopes.add(result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_TOKEN_SCOPE));
-                } while (result.next());
-                apiKey.setTokenScope(getScopeString(scopes));
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get the access token data. ", e);
-        } catch (CryptoException e) {
-            handleException("Failed to get the access token data. ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
-        }
-        return apiKey;
-    }
 
     public Map<Integer, APIKey> getAccessTokens(String query) throws APIManagementException {
         Map<Integer, APIKey> tokenDataMap = new HashMap<Integer, APIKey>();
@@ -2309,32 +2271,26 @@ public class ApiMgtDAO {
     }
 
 
-    private Map<String, OAuthApplicationInfo> getOAuthApplications(
-            KeyManager keyManager, int applicationId) throws APIManagementException {
-        Map<String, OAuthApplicationInfo> map = new HashMap<String, OAuthApplicationInfo>();
-        OAuthApplicationInfo prodApp = getClientOfApplication(keyManager,applicationId, "PRODUCTION");
-        if (prodApp != null) {
-            map.put("PRODUCTION", prodApp);
-        }
+    private Map<String, Map<String, OAuthApplicationInfo>> getOAuthApplications(
+            String tenantDomain, int applicationId) throws APIManagementException {
+        Map<String, Map<String, OAuthApplicationInfo>> map = new HashMap<>();
+        Map<String, OAuthApplicationInfo> prodApp = getClientOfApplication(tenantDomain, applicationId, "PRODUCTION");
+        map.put("PRODUCTION", prodApp);
 
-        OAuthApplicationInfo sandboxApp = getClientOfApplication(keyManager,applicationId, "SANDBOX");
-        if (sandboxApp != null) {
-            map.put("SANDBOX", sandboxApp);
-        }
+        Map<String, OAuthApplicationInfo> sandboxApp = getClientOfApplication(tenantDomain, applicationId, "SANDBOX");
+        map.put("SANDBOX", sandboxApp);
 
         return map;
     }
 
-    public OAuthApplicationInfo getClientOfApplication(KeyManager keyManager,
-                                                       int applicationID, String keyType)
+    private Map<String, OAuthApplicationInfo> getClientOfApplication(String tenntDomain,
+                                                                     int applicationID, String keyType)
             throws APIManagementException {
         String sqlQuery = SQLConstants.GET_CLIENT_OF_APPLICATION_SQL;
-
-        OAuthApplicationInfo oAuthApplication = null;
+        Map<String,OAuthApplicationInfo> keyTypeWiseOAuthApps = new HashMap<>();
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        String consumerKey = null;
         try {
             connection = APIMgtDBUtil.getConnection();
             ps = connection.prepareStatement(sqlQuery);
@@ -2343,45 +2299,25 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                consumerKey = rs.getString(1);
+                String consumerKey = rs.getString("CONSUMER_KEY");
+                String keyManagerName = rs.getString("KEY_MANAGER");
+                if (consumerKey != null) {
+                    KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenntDomain,keyManagerName);
+                    if (keyManager != null){
+                        OAuthApplicationInfo oAuthApplication = keyManager.retrieveApplication(consumerKey);
+                        keyTypeWiseOAuthApps.put(keyManagerName,oAuthApplication);
+                    }
+                }
             }
 
-            if (consumerKey != null) {
-                oAuthApplication = keyManager.retrieveApplication(consumerKey);
-            }
+
         } catch (SQLException e) {
             handleException("Failed to get  client of application. SQL error", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
         }
 
-        return oAuthApplication;
-    }
-
-    public APIKey getKeyStatusOfApplication(String keyType, int applicationId) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        APIKey key = null;
-
-        String sqlQuery = SQLConstants.GET_KEY_STATUS_OF_APPLICATION_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            preparedStatement = connection.prepareStatement(sqlQuery);
-            preparedStatement.setInt(1, applicationId);
-            preparedStatement.setString(2, keyType);
-
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                key = new APIKey();
-                key.setState(resultSet.getString("STATE"));
-            }
-        } catch (SQLException e) {
-            handleException("Error occurred while getting the State of Access Token", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
-        }
-        return key;
+        return keyTypeWiseOAuthApps;
     }
 
     /**
@@ -3047,11 +2983,11 @@ public class ApiMgtDAO {
     }
 
 
-    public String getRegistrationApprovalState(int appId, String keyType) throws APIManagementException {
+    public Map<String, String> getRegistrationApprovalState(int appId, String keyType) throws APIManagementException {
+        Map<String,String> keyManagerWiseApprovalState = new HashMap<>();
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        String state = null;
 
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -3063,24 +2999,27 @@ public class ApiMgtDAO {
             resultSet = ps.executeQuery();
 
             while (resultSet.next()) {
-                state = resultSet.getString("STATE");
+                String state = resultSet.getString("STATE");
+                String keyManagerName = resultSet.getString("KEY_MANAGER");
+                keyManagerWiseApprovalState.put(keyManagerName, state);
             }
         } catch (SQLException e) {
             handleException("Error while getting Application Registration State.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
-        return state;
+        return keyManagerWiseApprovalState;
     }
 
     /**
      * Update the consumer key and application status for the given key type and application.
-     *
-     * @param application
+     *  @param application
      * @param keyType
+     * @param keyManagerName
      */
-    public void updateApplicationKeyTypeMapping(Application application, String keyType) throws APIManagementException {
-        OAuthApplicationInfo app = application.getOAuthApp(keyType);
+    public void updateApplicationKeyTypeMapping(Application application, String keyType,
+                                                String keyManagerName) throws APIManagementException {
+        OAuthApplicationInfo app = application.getOAuthApp(keyType,keyManagerName);
         String consumerKey = null;
         if (app != null) {
             consumerKey = app.getClientId();
@@ -3098,6 +3037,7 @@ public class ApiMgtDAO {
                 ps.setString(1, consumerKey);
                 ps.setInt(2, application.getId());
                 ps.setString(3, keyType);
+                ps.setString(4, keyManagerName);
                 ps.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -3120,7 +3060,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void createApplicationKeyTypeMappingForManualClients(String keyType, String applicationName, String userName,
-                                                                String clientId) throws APIManagementException {
+                                                                String clientId,String keyManagerName) throws APIManagementException {
         String consumerKey = null;
         if (clientId != null) {
             consumerKey = clientId;
@@ -3143,6 +3083,7 @@ public class ApiMgtDAO {
                 ps.setString(4, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
                 // If the CK/CS pair is pasted on the screen set this to MAPPED
                 ps.setString(5, "MAPPED");
+                ps.setString(6,keyManagerName);
                 ps.execute();
                 connection.commit();
 
@@ -3164,7 +3105,8 @@ public class ApiMgtDAO {
      * @param appId   ID of the Application.
      * @throws APIManagementException if updating fails.
      */
-    public void updateApplicationRegistration(String state, String keyType, int appId) throws APIManagementException {
+    public void updateApplicationRegistration(String state, String keyType, int appId, String keyManager)
+            throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
 
@@ -3177,6 +3119,7 @@ public class ApiMgtDAO {
             ps.setString(1, state);
             ps.setInt(2, appId);
             ps.setString(3, keyType);
+            ps.setString(4, keyManager);
             ps.execute();
 
             conn.commit();
@@ -3441,18 +3384,6 @@ public class ApiMgtDAO {
         return subscriptions;
     }
 
-    private void updateOAuthConsumerApp(Connection connection, String appName, String callbackUrl)
-            throws APIManagementException {
-
-        String sqlStmt = SQLConstants.UPDATE_OAUTH_CONSUMER_SQL;
-        try (PreparedStatement prepStmt = connection.prepareStatement(sqlStmt)) {
-            prepStmt.setString(1, callbackUrl);
-            prepStmt.setString(2, appName);
-            prepStmt.execute();
-        } catch (SQLException e) {
-            handleException("Error when updating OAuth consumer App for " + appName, e);
-        }
-    }
 
     private boolean isDuplicateConsumer(String consumerKey) throws APIManagementException {
         Connection connection = null;
@@ -4156,7 +4087,6 @@ public class ApiMgtDAO {
             if (application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
                 addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), tenantId);
             }
-            updateOAuthConsumerApp(conn,application.getName(), application.getCallbackUrl());
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
@@ -4752,31 +4682,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Returns all the applications associated with given subscriber and group id.
-     *
-     * @param subscriber The subscriber.
-     * @param groupingId The groupId to which the applications must belong.
-     * @return Application[] Array of applications.
-     * @throws APIManagementException
-     */
-    public Application[] getApplications(Subscriber subscriber, String groupingId) throws APIManagementException {
-
-        Application[] applications = getLightWeightApplications(subscriber, groupingId);
-        String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-
-        for (Application application : applications) {
-            KeyManager keyManager  = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
-            Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(keyManager,application.getId());
-
-            for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
-                application.addOAuthApp(entry.getKey(), entry.getValue());
-            }
-
-        }
-        return applications;
-    }
-
-    /**
      * Returns all the applications associated with given subscriber and group id, without their keys.
      *
      * @param subscriber The subscriber.
@@ -5138,7 +5043,7 @@ public class ApiMgtDAO {
                     }
                     // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
                     // call delete.
-                    if (!APIConstants.OAuthAppMode.MAPPED.equals(mode)) {
+                    if (!APIConstants.OAuthAppMode.MAPPED.name().equals(mode)) {
                         // Adding clients to be deleted.
                         consumerKeys.add(consumerKey);
                     }
@@ -5471,11 +5376,10 @@ public class ApiMgtDAO {
 
     /**
      * This method will delete a record from AM_APPLICATION_REGISTRATION
-     *
-     * @param applicationId
+     *  @param applicationId
      * @param tokenType
      */
-    public void deleteApplicationKeyMappingByApplicationIdAndType(String applicationId, String tokenType)
+    public void deleteApplicationKeyMappingByApplicationIdAndType(int applicationId, String tokenType)
             throws APIManagementException {
 
         Connection connection = null;
@@ -5490,7 +5394,7 @@ public class ApiMgtDAO {
                         applicationId + " and Token type" + tokenType);
             }
             ps = connection.prepareStatement(deleteRegistrationEntry);
-            ps.setInt(1, Integer.parseInt(applicationId));
+            ps.setInt(1, applicationId);
             ps.setString(2, tokenType);
             ps.executeUpdate();
             connection.commit();
@@ -5506,9 +5410,10 @@ public class ApiMgtDAO {
      *
      * @param applicationId APIM application ID.
      * @param tokenType     Token type (PRODUCTION || SANDBOX)
+     * @param keyManagerName
      * @throws APIManagementException if failed to delete the record.
      */
-    public void deleteApplicationRegistration(String applicationId, String tokenType) throws APIManagementException {
+    public void deleteApplicationRegistration(int applicationId, String tokenType, String keyManagerName) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement ps = null;
@@ -5522,8 +5427,9 @@ public class ApiMgtDAO {
                         applicationId + " and Token type" + tokenType);
             }
             ps = connection.prepareStatement(deleteRegistrationEntry);
-            ps.setInt(1, Integer.parseInt(applicationId));
+            ps.setInt(1, applicationId);
             ps.setString(2, tokenType);
+            ps.setString(3,keyManagerName);
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -6404,32 +6310,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Fetches an Application with OAuth Apps, by name.
-     *
-     * @param applicationName Name of the Application
-     * @param userId          Name of the User.
-     * @param groupId         Group ID
-     * @throws APIManagementException
-     */
-    public Application getApplicationWithOAuthApps(String applicationName, String userId, String groupId)
-            throws APIManagementException {
-
-        Application application = getApplicationByName(applicationName, userId, groupId);
-        String tenantDomain = MultitenantUtils.getTenantDomain(application.getSubscriber().getName());
-        KeyManager keyManager  = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
-
-        if (application != null) {
-            Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(keyManager, application.getId());
-
-            for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
-                application.addOAuthApp(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return application;
-    }
-
-    /**
      * Checks whether application is accessible to the specified user
      *
      * @param applicationID ID of the Application
@@ -6676,11 +6556,9 @@ public class ApiMgtDAO {
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
 
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
-                KeyManager keyManager  = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
-                Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(keyManager, application.getId());
-                for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
-                    application.addOAuthApp(entry.getKey(), entry.getValue());
-                }
+                Map<String, Map<String, OAuthApplicationInfo>>
+                        keyMap = getOAuthApplications(tenantDomain, application.getId());
+                application.getKeyManagerWiseOAuthApp().putAll(keyMap);
 
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
@@ -6829,11 +6707,9 @@ public class ApiMgtDAO {
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
 
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
-                KeyManager keyManager  = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
-                Map<String, OAuthApplicationInfo> keyMap = getOAuthApplications(keyManager, application.getId());
-                for (Map.Entry<String, OAuthApplicationInfo> entry : keyMap.entrySet()) {
-                    application.addOAuthApp(entry.getKey(), entry.getValue());
-                }
+                Map<String, Map<String, OAuthApplicationInfo>>
+                        keyMap = getOAuthApplications(tenantDomain, application.getId());
+                application.getKeyManagerWiseOAuthApp().putAll(keyMap);
 
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
@@ -8245,10 +8121,12 @@ public class ApiMgtDAO {
                 workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
                 workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                String keyManagerName = rs.getString("KEY_MANAGER");
+                workflowDTO.setKeyManager(keyManagerName);
                 OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
                         application.getCallbackUrl(), rs
                                 .getString("TOKEN_SCOPE"),
-                        rs.getString("INPUTS"), application.getTokenType(),tenantDomain);
+                        rs.getString("INPUTS"), application.getTokenType(),tenantDomain, keyManagerName);
                 workflowDTO.setAppInfoDTO(request);
             }
         } catch (SQLException e) {
@@ -8607,10 +8485,11 @@ public class ApiMgtDAO {
      *
      * @param applicationId id of the application with registration
      * @param keyType       key type of the registration
+     * @param keyManagerName
      * @return workflow reference of the registration
      * @throws APIManagementException
      */
-    public String getRegistrationWFReference(int applicationId, String keyType) throws APIManagementException {
+    public String getRegistrationWFReference(int applicationId, String keyType, String keyManagerName) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -8622,10 +8501,11 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, applicationId);
             ps.setString(2, keyType);
+            ps.setString(3,keyManagerName);
             rs = ps.executeQuery();
 
             // returns only one row
-            while (rs.next()) {
+            if (rs.next()) {
                 reference = rs.getString("WF_REF");
             }
         } catch (SQLException e) {
@@ -8979,6 +8859,99 @@ public class ApiMgtDAO {
         }
         return false;
     }
+
+    public Set<APIKey> getKeyMappingsFromApplicationId(int applicationId) throws APIManagementException{
+        final String query = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE,STATE FROM AM_APPLICATION_KEY_MAPPING " +
+                "WHERE APPLICATION_ID=?";
+        Set<APIKey> apiKeyList  = new HashSet<>();
+        try(Connection connection = APIMgtDBUtil.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            preparedStatement.setInt(1,applicationId);
+            try(ResultSet resultSet = preparedStatement.executeQuery()){
+             while (resultSet.next()){
+                 APIKey apiKey = new APIKey() ;
+                 apiKey.setMappingId(resultSet.getString("UUID"));
+                 apiKey.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
+                 apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
+                 apiKey.setType(resultSet.getString("KEY_TYPE"));
+                 apiKey.setState(resultSet.getString("STATE"));
+                 apiKeyList.add(apiKey);
+             }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while Retriving Key Mappings ",e);
+        }
+        return apiKeyList;
+    }
+
+    public APIKey getKeyMappingFromApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
+            throws APIManagementException {
+
+        final String query = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE,STATE FROM AM_APPLICATION_KEY_MAPPING " +
+                "WHERE APPLICATION_ID=? AND UUID = ?";
+        Set<APIKey> apiKeyList  = new HashSet<>();
+        try(Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            preparedStatement.setInt(1,applicationId);
+            preparedStatement.setString(2,keyMappingId);
+            try(ResultSet resultSet = preparedStatement.executeQuery()){
+                if (resultSet.next()){
+                    APIKey apiKey = new APIKey() ;
+                    apiKey.setMappingId(resultSet.getString("UUID"));
+                    apiKey.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
+                    apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
+                    apiKey.setType(resultSet.getString("KEY_TYPE"));
+                    apiKey.setState(resultSet.getString("STATE"));
+                    return  apiKey;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while Retrieving Key Mapping ",e);
+        }
+        return null;
+    }
+
+    public void deleteApplicationKeyMappingByMappingId(String keyMappingId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            String deleteKeyMappingQuery = SQLConstants.DELETE_APPLICATION_KEY_MAPPING_BY_UUID_SQL;
+            if (log.isDebugEnabled()) {
+                log.debug("trying to delete key mapping for UUID " + keyMappingId);
+            }
+            ps = connection.prepareStatement(deleteKeyMappingQuery);
+            ps.setString(1, keyMappingId);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while removing application mapping table", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, null);
+        }
+    }
+
+    public String getKeyMappingIdFromApplicationIdKeyTypeAndKeyManager(int applicationId, String tokenType,
+                                                                       String keyManagerName)
+            throws APIManagementException {
+        try(Connection connection = APIMgtDBUtil.getConnection();
+        PreparedStatement preparedStatement =
+                connection.prepareStatement(SQLConstants.GET_KEY_MAPPING_ID_FROM_APPLICATION)) {
+            preparedStatement.setInt(1,applicationId);
+            preparedStatement.setString(2,tokenType);
+            preparedStatement.setString(3,keyManagerName);
+            try(ResultSet resultSet = preparedStatement.executeQuery()){
+                if (resultSet.next()){
+                    return resultSet.getString("UUID");
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving the Key Mapping id", e);
+        }
+        return null;
+    }
+
     private class SubscriptionInfo {
         private int subscriptionId;
         private String tierId;
@@ -10025,24 +9998,26 @@ public class ApiMgtDAO {
      * @param keyType
      * @return
      */
-    public String getConsumerkeyByApplicationIdAndKeyType(String applicationId, String keyType)
+    public Map<String,String> getConsumerkeyByApplicationIdAndKeyType(int applicationId, String keyType)
             throws APIManagementException {
+        Map<String,String> keyManagerConsumerKeyMap = new HashMap<>();
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        String consumerKey = null;
         try {
             conn = APIMgtDBUtil.getConnection();
 
             String sqlQuery = SQLConstants.GET_CONSUMER_KEY_BY_APPLICATION_AND_KEY_SQL;
 
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, Integer.parseInt(applicationId));
+            ps.setInt(1, applicationId);
             ps.setString(2, keyType);
             resultSet = ps.executeQuery();
 
             while (resultSet.next()) {
-                consumerKey = resultSet.getString("CONSUMER_KEY");
+                String consumerKey = resultSet.getString("CONSUMER_KEY");
+                String keyManager = resultSet.getString("KEY_MANAGER");
+                keyManagerConsumerKeyMap.put(keyManager, consumerKey);
             }
         } catch (SQLException e) {
             handleException("Failed to get consumer key by applicationId " + applicationId + "and keyType " +
@@ -10050,7 +10025,7 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
-        return consumerKey;
+        return keyManagerConsumerKeyMap;
     }
 
     /**

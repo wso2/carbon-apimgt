@@ -17,6 +17,7 @@ public class ApplicationKeyMappingRequestDTO   {
   
     private String consumerKey = null;
     private String consumerSecret = null;
+    private String keyManager = null;
 
 @XmlType(name="KeyTypeEnum")
 @XmlEnum(String.class)
@@ -91,6 +92,24 @@ public enum KeyTypeEnum {
   }
 
   /**
+   * Key Manager Name
+   **/
+  public ApplicationKeyMappingRequestDTO keyManager(String keyManager) {
+    this.keyManager = keyManager;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Key Manager Name")
+  @JsonProperty("keyManager")
+  public String getKeyManager() {
+    return keyManager;
+  }
+  public void setKeyManager(String keyManager) {
+    this.keyManager = keyManager;
+  }
+
+  /**
    **/
   public ApplicationKeyMappingRequestDTO keyType(KeyTypeEnum keyType) {
     this.keyType = keyType;
@@ -120,12 +139,13 @@ public enum KeyTypeEnum {
     ApplicationKeyMappingRequestDTO applicationKeyMappingRequest = (ApplicationKeyMappingRequestDTO) o;
     return Objects.equals(consumerKey, applicationKeyMappingRequest.consumerKey) &&
         Objects.equals(consumerSecret, applicationKeyMappingRequest.consumerSecret) &&
+        Objects.equals(keyManager, applicationKeyMappingRequest.keyManager) &&
         Objects.equals(keyType, applicationKeyMappingRequest.keyType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(consumerKey, consumerSecret, keyType);
+    return Objects.hash(consumerKey, consumerSecret, keyManager, keyType);
   }
 
   @Override
@@ -135,6 +155,7 @@ public enum KeyTypeEnum {
     
     sb.append("    consumerKey: ").append(toIndentedString(consumerKey)).append("\n");
     sb.append("    consumerSecret: ").append(toIndentedString(consumerSecret)).append("\n");
+    sb.append("    keyManager: ").append(toIndentedString(keyManager)).append("\n");
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
     sb.append("}");
     return sb.toString();

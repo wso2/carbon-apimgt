@@ -98,8 +98,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -623,9 +625,10 @@ public class APIMgtDAOTest {
 
         APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_PRODUCTION, "APP-10",
-                "sub_user1", "clientId1");
-        assertTrue(apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(String.valueOf(applicationId), APIConstants
-                .API_KEY_TYPE_PRODUCTION).equals("clientId1"));
+                "sub_user1", "clientId1","default");
+        Map<String, String> consumerkeyByApplicationIdAndKeyType =
+                apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
+        assertEquals(consumerkeyByApplicationIdAndKeyType.get("default"), "clientId1");
         assertTrue(apiMgtDAO.isMappingExistsforConsumerKey("clientId1"));
         boolean validation = apiMgtDAO.validateSubscriptionDetails("/wso2utils", "V1.0.0", "clientId1", infoDTO);
         APIKeyValidationInfoDTO infoDTO1 = new APIKeyValidationInfoDTO();
@@ -883,6 +886,7 @@ public class APIMgtDAOTest {
         applicationRegistrationWorkflowDTO.setValidityTime(100L);
         applicationRegistrationWorkflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
         applicationRegistrationWorkflowDTO.setStatus(WorkflowStatus.CREATED);
+        applicationRegistrationWorkflowDTO.setKeyManager("default");
         apiMgtDAO.addWorkflowEntry(applicationRegistrationWorkflowDTO);
         OAuthAppRequest oAuthAppRequest = new OAuthAppRequest();
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
@@ -928,9 +932,9 @@ public class APIMgtDAOTest {
                 .getWorkflowReference(), applicationRegistrationWorkflowDTO.getWorkflowType()));
         apiMgtDAO.removeWorkflowEntry(applicationRegistrationWorkflowDTO.getExternalWorkflowReference(),
                 applicationRegistrationWorkflowDTO.getWorkflowType());
-        apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(String.valueOf(application.getId()),
-                "PRODUCTION");
-        apiMgtDAO.deleteApplicationRegistration(String.valueOf(application.getId()), "PRODUCTION");
+        apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(application.getId(),"PRODUCTION");
+        apiMgtDAO.deleteApplicationRegistration(application.getId(), "PRODUCTION",
+                APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
         apiMgtDAO.deleteApplication(application);
         apiMgtDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_APP, "testCreateApplicationRegistrationEntry",
                 -1234);
@@ -991,9 +995,9 @@ public class APIMgtDAOTest {
         String clientIdProduction = UUID.randomUUID().toString();
         String clientIdSandbox = UUID.randomUUID().toString();
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_PRODUCTION, application
-                .getName(), subscriber.getName(), clientIdProduction);
+                .getName(), subscriber.getName(), clientIdProduction,"default");
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_SANDBOX, application
-                .getName(), subscriber.getName(), clientIdSandbox);
+                .getName(), subscriber.getName(), clientIdSandbox,"default");
         int appIdProduction = insertConsumerApp(clientIdProduction, application.getName(), subscriber.getName());
         int appIdSandBox = insertConsumerApp(clientIdSandbox, application.getName(), subscriber.getName());
         String tokenProduction = UUID.randomUUID().toString();

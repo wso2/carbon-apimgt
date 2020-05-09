@@ -2992,8 +2992,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void addFileToDocumentation(APIIdentifier apiId, Documentation documentation, String filename,
                                        InputStream content, String contentType) throws APIManagementException {
         if (Documentation.DocumentSourceType.FILE.equals(documentation.getSourceType())) {
-            contentType = "application/force-download";
-            ResourceFile icon = new ResourceFile(content, contentType);
+            ResourceFile icon = new ResourceFile(content, "application/force-download");
             String filePath = APIUtil.getDocumentationFilePath(apiId, filename);
             API api;
             try {

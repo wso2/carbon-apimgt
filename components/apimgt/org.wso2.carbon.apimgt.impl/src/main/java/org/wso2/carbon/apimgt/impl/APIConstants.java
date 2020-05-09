@@ -1091,6 +1091,7 @@ public final class APIConstants {
         public static final String CLIENT_DETAILS = "appDetails";
         public static final String CALLBACK_URL = "callbackUrl";
         public static final String KEY_STATE = "keyState";
+        public static final String KEY_MAPPING_UD = "keyMappingId";
     }
 
     public static class AccessTokenConstants {
@@ -2159,8 +2160,7 @@ public final class APIConstants {
         public static final String PASSWORD = "Password";
         public static final String TOPIC_NAME = "Topic";
         public static final String EXCLUDED_CACHES = "ExcludedCaches";
-
-        public static String ReceiverConnectionDetails  = "ReceiverConnectionDetails";
+        public static final String ReceiverConnectionDetails = "ReceiverConnectionDetails";
     }
 
     // Supported Notifier Types

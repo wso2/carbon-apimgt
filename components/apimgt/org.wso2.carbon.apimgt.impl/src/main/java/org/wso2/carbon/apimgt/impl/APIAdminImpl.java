@@ -288,9 +288,8 @@ public class APIAdminImpl implements APIAdmin {
     public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByTenant(String tenantDomain)
             throws APIManagementException {
 
-        ApiMgtDAO instance = ApiMgtDAO.getInstance();
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
-                instance.getKeyManagerConfigurationsByTenant(tenantDomain);
+                apiMgtDAO.getKeyManagerConfigurationsByTenant(tenantDomain);
         Iterator<KeyManagerConfigurationDTO> iterator = keyManagerConfigurationsByTenant.iterator();
         KeyManagerConfigurationDTO defaultKeyManagerConfiguration = null;
         while (iterator.hasNext()) {
@@ -312,8 +311,7 @@ public class APIAdminImpl implements APIAdmin {
     public Map<String, List<KeyManagerConfigurationDTO>> getAllKeyManagerConfigurations()
             throws APIManagementException {
 
-        ApiMgtDAO instance = ApiMgtDAO.getInstance();
-        List<KeyManagerConfigurationDTO> keyManagerConfigurations = instance.getKeyManagerConfigurations();
+        List<KeyManagerConfigurationDTO> keyManagerConfigurations = apiMgtDAO.getKeyManagerConfigurations();
         Map<String, List<KeyManagerConfigurationDTO>> keyManagerConfigurationsByTenant = new HashMap<>();
         for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
             List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS;
@@ -337,9 +335,8 @@ public class APIAdminImpl implements APIAdmin {
     public KeyManagerConfigurationDTO getKeyManagerConfigurationById(String tenantDomain, String id)
             throws APIManagementException {
 
-        ApiMgtDAO instance = ApiMgtDAO.getInstance();
         KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                instance.getKeyManagerConfigurationByID(tenantDomain, id);
+                apiMgtDAO.getKeyManagerConfigurationByID(tenantDomain, id);
         if (keyManagerConfigurationDTO != null &&
                 APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
             APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfigurationDTO);
@@ -351,16 +348,14 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public boolean isKeyManagerConfigurationExistById(String tenantDomain, String id) throws APIManagementException {
 
-        ApiMgtDAO instance = ApiMgtDAO.getInstance();
-        return instance.isKeyManagerConfigurationExistById(tenantDomain, id);
+        return apiMgtDAO.isKeyManagerConfigurationExistById(tenantDomain, id);
     }
 
     @Override
     public KeyManagerConfigurationDTO addKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
 
-        ApiMgtDAO instance = ApiMgtDAO.getInstance();
-        if (instance.isKeyManagerConfigurationExistByName(keyManagerConfigurationDTO.getName(),
+        if (apiMgtDAO.isKeyManagerConfigurationExistByName(keyManagerConfigurationDTO.getName(),
                 keyManagerConfigurationDTO.getTenantDomain())) {
             throw new APIManagementException(
                     "Key manager Already Exist by Name " + keyManagerConfigurationDTO.getName() + " in tenant " +
@@ -368,7 +363,7 @@ public class APIAdminImpl implements APIAdmin {
         }
         validateKeyManagerConfiguration(keyManagerConfigurationDTO);
         keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
-        instance.addKeyManagerConfiguration(keyManagerConfigurationDTO);
+        apiMgtDAO.addKeyManagerConfiguration(keyManagerConfigurationDTO);
         new KeyMgtNotificationSender()
                 .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD);
         return keyManagerConfigurationDTO;
@@ -378,10 +373,8 @@ public class APIAdminImpl implements APIAdmin {
     public KeyManagerConfigurationDTO updateKeyManagerConfiguration(
             KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
-
         validateKeyManagerConfiguration(keyManagerConfigurationDTO);
-        ApiMgtDAO instance = ApiMgtDAO.getInstance();
-        instance.updateKeyManagerConfiguration(keyManagerConfigurationDTO);
+        apiMgtDAO.updateKeyManagerConfiguration(keyManagerConfigurationDTO);
         new KeyMgtNotificationSender()
                 .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE);
         return keyManagerConfigurationDTO;
@@ -390,11 +383,10 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public void deleteKeyManagerConfigurationById(String tenantDomain, String id) throws APIManagementException {
 
-        ApiMgtDAO instance = ApiMgtDAO.getInstance();
         KeyManagerConfigurationDTO keyManagerConfigurationDTO =
-                instance.getKeyManagerConfigurationByID(tenantDomain, id);
+                apiMgtDAO.getKeyManagerConfigurationByID(tenantDomain, id);
         if (keyManagerConfigurationDTO != null) {
-            instance.deleteKeyManagerConfigurationById(id, tenantDomain);
+            apiMgtDAO.deleteKeyManagerConfigurationById(id, tenantDomain);
             new KeyMgtNotificationSender()
                     .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
         }
@@ -404,9 +396,8 @@ public class APIAdminImpl implements APIAdmin {
     public KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String tenantDomain, String name)
             throws APIManagementException {
 
-        ApiMgtDAO instance = ApiMgtDAO.getInstance();
         KeyManagerConfigurationDTO keyManagerConfiguration =
-                instance.getKeyManagerConfigurationByName(tenantDomain, name);
+                apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, name);
         if (keyManagerConfiguration != null &&
                 APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
             APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
@@ -425,10 +416,10 @@ public class APIAdminImpl implements APIAdmin {
     /**
      * retrieve the configured email list
      */
-    public static List<BotDetectionData> retrieveSavedBotDataEmailList() throws APIManagementException {
+    public List<BotDetectionData> retrieveSavedBotDataEmailList() throws APIManagementException {
 
         List<BotDetectionData> list;
-        list = ApiMgtDAO.getInstance().retrieveSavedBotDataEmailList();
+        list = apiMgtDAO.retrieveSavedBotDataEmailList();
         return list;
     }
 
@@ -495,12 +486,12 @@ public class APIAdminImpl implements APIAdmin {
 
     public boolean isCategoryNameExists(String categoryName, String uuid, int tenantID) throws APIManagementException {
 
-        return ApiMgtDAO.getInstance().isAPICategoryNameExists(categoryName, uuid, tenantID);
+        return apiMgtDAO.isAPICategoryNameExists(categoryName, uuid, tenantID);
     }
 
     public APICategory getAPICategoryByID(String apiCategoryId) throws APIManagementException {
 
-        APICategory apiCategory = ApiMgtDAO.getInstance().getAPICategoryByID(apiCategoryId);
+        APICategory apiCategory = apiMgtDAO.getAPICategoryByID(apiCategoryId);
         if (apiCategory != null) {
             return apiCategory;
         } else {
@@ -524,7 +515,9 @@ public class APIAdminImpl implements APIAdmin {
 
     private void validateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
-
+        if (StringUtils.isEmpty(keyManagerConfigurationDTO.getName())){
+            throw new APIManagementException("Key Manager Name can't be empty",ExceptionCodes.KEY_MANAGER_NAME_EMPTY);
+        }
         APIManagerConfigurationService apiManagerConfigurationService =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
         if (apiManagerConfigurationService != null) {
@@ -540,8 +533,8 @@ public class APIAdminImpl implements APIAdmin {
                             keyManagerConfigurationDtoMap.get(keyManagerConfigurationDTO.getType());
                     if (keyManagerDeploymentConfiguration == null) {
                         throw new APIManagementException(
-                                "Key Manager Type " + keyManagerConfigurationDTO.getType() + "is" +
-                                        " invalid", ExceptionCodes.INVALID_KEY_MANAGER_TYPE);
+                                "Key Manager Type " + keyManagerConfigurationDTO.getType() + " is invalid.",
+                                ExceptionCodes.INVALID_KEY_MANAGER_TYPE);
                     }
                     List<String> missingRequiredConfigurations = new ArrayList<>();
                     for (KeyManagerConfigurationsDto.ConfigurationDto configurationDto :

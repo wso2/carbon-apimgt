@@ -20,6 +20,9 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.lang3.StringUtils;
@@ -29,13 +32,18 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -121,6 +129,7 @@ public abstract class AbstractKeyManager implements KeyManager {
                 }
                 //copy all params map in to OAuthApplicationInfo's Map object.
                 oAuthApplicationInfo.putAll(params);
+                validateOAuthAppCreationProperties(oAuthApplicationInfo);
                 return oAuthApplicationInfo;
             }
         } catch (ParseException e) {
@@ -216,5 +225,46 @@ public abstract class AbstractKeyManager implements KeyManager {
     protected void handleException(String msg, Exception e) throws APIManagementException {
         log.error(msg, e);
         throw new APIManagementException(msg, e);
+    }
+
+    protected void validateOAuthAppCreationProperties(OAuthApplicationInfo oAuthApplicationInfo)
+            throws APIManagementException {
+        String type = getType();
+        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(type)) {
+            APIManagerConfiguration apiManagerConfiguration =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration();
+            if (apiManagerConfiguration != null) {
+                List<String> missedRequiredValues = new ArrayList<>();
+                KeyManagerConfigurationsDto keyManagerConfigurationsDto =
+                        apiManagerConfiguration.getKeyManagerConfigurationsDto();
+                if (keyManagerConfigurationsDto != null) {
+                    Map<String, KeyManagerConfigurationsDto.KeyManagerConfigurationDto> keyManagerConfiguration =
+                            keyManagerConfigurationsDto.getKeyManagerConfiguration();
+                    KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerConfigurationDto =
+                            keyManagerConfiguration.get(type);
+                    List<KeyManagerConfigurationsDto.ConfigurationDto> applicationConfigurationDtoList =
+                            keyManagerConfigurationDto.getApplicationConfigurationDtoList();
+                    Object additionalProperties = oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+                    if (additionalProperties != null) {
+                        JsonObject additionalPropertiesJson = (JsonObject) new JsonParser().parse((String) additionalProperties);
+                        for (KeyManagerConfigurationsDto.ConfigurationDto configurationDto :
+                                applicationConfigurationDtoList) {
+                            JsonElement value = additionalPropertiesJson.get(configurationDto.getName());
+                            if (value == null) {
+                                if (configurationDto.isRequired()) {
+                                    missedRequiredValues.add(configurationDto.getName());
+                                }
+                            }
+                        }
+                        if (!missedRequiredValues.isEmpty()) {
+                            throw new APIManagementException("Missing required properties to create/update oauth " +
+                                    "application",
+                                    ExceptionCodes.KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -163,6 +163,18 @@ public class FakeKeyManagerForTest implements KeyManager {
     }
 
     @Override
+    public boolean canHandleToken(String accessToken) throws APIManagementException {
+
+        return false;
+    }
+
+    @Override
+    public String getType() {
+
+        return "";
+    }
+
+    @Override
     public void updateScope(Scope scope, String tenantDomain) throws APIManagementException {
 
     }
