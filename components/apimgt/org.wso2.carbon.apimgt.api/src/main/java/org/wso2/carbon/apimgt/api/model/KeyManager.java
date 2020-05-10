@@ -164,13 +164,6 @@ public interface KeyManager {
     void loadConfiguration(KeyManagerConfiguration configuration) throws APIManagementException;
 
     /**
-     * This method will initialize a HTTP Client and a connection manager for each authorization server instance.
-     *
-     * @throws APIManagementException If an error occurs while initializing HTTP client
-     */
-    void initializeHttpClient() throws APIManagementException;
-
-    /**
      * This Method will talk to APIResource registration end point  of  authorization server and creates a new resource
      *
      * @param api                this is a API object which contains all details about a API.
