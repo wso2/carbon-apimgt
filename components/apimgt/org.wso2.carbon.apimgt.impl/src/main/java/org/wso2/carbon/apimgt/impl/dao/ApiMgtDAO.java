@@ -9640,9 +9640,8 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Check whether the given scope key is already assigned locally to another API than given under given tenant.
-     * This will skip and return false, if no such APIs are available and even if such APIs are available, only when
-     * those are different versions of the same API which we are trying to attach the scope for.
+     * Check whether the given scope key is already assigned locally to another API which are different from the given
+     * API or its versioned APIs under given tenant.
      *
      * @param apiIdentifier API Identifier
      * @param scopeKey      candidate scope key
