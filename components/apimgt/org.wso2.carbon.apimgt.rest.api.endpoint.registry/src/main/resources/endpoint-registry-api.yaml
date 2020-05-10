@@ -30,12 +30,40 @@ paths:
     #-----------------------------------------------------
     get:
       summary: |
-        Retrieve/Search APIs
+        Retrieve all Registries
       description: |
         This operation provides you an array of available Registries.
       tags:
         - Registries
+      security:
+      - ReadRegistry: [registry:view]
       operationId: getRegistries
+      parameters:
+      - name: query
+        in: query
+        description: |
+          **Search condition**.
+          You can search for a registry by specifying the registry name as "query" attribute.
+
+          Eg.
+          "prodServer" will match a registry entry if the name is exactly "prodServer".
+        schema:
+          type: string
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+          enum:
+            - registryName
+      - name: sortOrder
+        in: query
+        schema:
+          type: string
+          enum:
+            - asc
+            - desc
+      - $ref: '#/components/schemas/limit'
+      - $ref: '#/components/schemas/offset'
       responses:
         200:
           description: |
@@ -53,6 +81,8 @@ paths:
       summary: Create a new Registry
       description: |
         This operation can be used to create a new Registry specifying the details of the Registry in the payload.
+      security:
+      - WriteRegistry: [registry:write]
       tags:
         - Registries
       operationId: addRegistry
@@ -62,7 +92,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Registry'
       responses:
-        201:
+        "201":
           description: |
             Created.
             Successful response with the newly created Registry object as entity in the body.
@@ -70,7 +100,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Registry'
-        405:
+        "405":
           description: |
             Bad Request.
             Invalid request or validation error.
@@ -78,7 +108,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        415:
+        "415":
           description: |
             Unsupported Media Type.
             The entity of the request was in a not supported format.
@@ -87,14 +117,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  #-----------------------------------------------------
-  # Retrieve the details of a Registry
-  #-----------------------------------------------------
   /registries/{registryId}:
+    #-----------------------------------------------------
+    # Retrieve the details of a Registry
+    #-----------------------------------------------------
     get:
       summary: Get details of a Registry
       description: |
         Using this operation, you can retrieve complete details of a single Registry using the RegistryId.
+      security:
+      - ReadRegistry: [registry:view]
       tags:
         - Registries
       operationId: getRegistryByUUID
@@ -108,7 +140,7 @@ paths:
         schema:
           type: string
       responses:
-        200:
+        "200":
           description: |
             OK.
             Requested Registry is returned
@@ -116,13 +148,104 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Registry'
-        400:
+        "400":
           description: Invalid Request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        404:
+        "404":
+          description: |
+            Not Found.
+            Requested Registry does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    #-----------------------------------------------------
+    # Update an existing Endpoint Registry
+    #-----------------------------------------------------
+    put:
+      summary: Update an existing Registry
+      description: |
+        This operation can be used to update an existing Endpoint Registry
+      security:
+      - WriteRegistry: [registry:write]
+      tags:
+        - Registries
+      operationId: updateRegistry
+      parameters:
+      - name: registryId
+        in: path
+        description: ID of the Registry
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Registry'
+      responses:
+        "200":
+          description: |
+            OK.
+            Updated Registry is returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Registry'
+        "400":
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: |
+            Not Found.
+            Requested Registry does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    #-----------------------------------------------------
+    # Delete an Endpoint Registry
+    #-----------------------------------------------------
+    delete:
+      summary: Delete an Endpoint Registry
+      description: |
+        This operation can be used to delete an existing Registry proving the Id of the Registry.
+      security:
+      - WriteRegistry: [registry:write]
+      tags:
+       - Registries
+      operationId: deleteRegistry
+      parameters:
+      - name: registryId
+        in: path
+        description: uuid of the Registry
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: |
+            Successfully deleted.
+        "400":
+          description: |
+            Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
           description: |
             Not Found.
             Requested Registry does not exist.
@@ -138,6 +261,8 @@ paths:
     get:
       summary: Get All entries in the registry
       operationId: getAllEntriesInRegistry
+      security:
+      - ReadRegistryEntry: [registry:entry_view]
       tags:
         - Registries
       parameters:
@@ -149,22 +274,47 @@ paths:
         explode: false
         schema:
           type: string
+      - name: query
+        in: query
+        description: |
+          **Search condition**.
+
+          You can search for a registry entry by specifying the entry name as "query" attribute.
+
+          Eg.
+          "pizzaServer" will match a registry entry if the name is exactly "pizzaServer".
+        schema:
+          type: string
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+          enum:
+            - definitionType
+            - serviceType
+      - name: sortOrder
+        in: query
+        schema:
+          type: string
+          enum:
+            - asc
+            - desc
       responses:
-        200:
+        "200":
           description: |
              Array of entries in Registry is returned.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RegistryEntryArray'
-        400:
+        "400":
           description: |
             Invalid Request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        404:
+        "404":
           description: |
             Not Found.
             Requested Registry does not exist.
@@ -178,6 +328,12 @@ paths:
   #-----------------------------------------------------
   /registries/{registryId}/entry:
     post:
+      summary: Create a new Registry Entry
+      description: |
+        This operation can be used to create a new Registry Entry specifying the details of the Entry in the payload.
+      security:
+        - WriteRegistryEntry: [registry:entry_write]
+      operationId: createRegistryEntry
       parameters:
       - name: registryId
         in: path
@@ -218,10 +374,208 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-#-------------------------------------------------------
-# The definitions of resources used by some of the APIs
-#-------------------------------------------------------
+  /registries/{registryId}/entries/{entryId}:
+    #-----------------------------------------------------
+    # Retrieve an entry in a Registry
+    #-----------------------------------------------------
+    get:
+      summary: Retrieve a specific Entry in a Registry
+      description: |
+        Using this operation, you can retrieve a specific entry in a single Registry using the EntryId and RegistryId.
+      security:
+      - ReadRegistryEntry: [registry:entry_view]
+      operationId: getRegistryEntryByUuid
+      tags:
+        - Registry Entries
+      parameters:
+      - name: registryId
+        in: path
+        description: uuid of the registry
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: entryId
+        in: path
+        description: uuid of the registry entry
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: |
+            Requested Entry in Registry is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistryEntryArray'
+        "400":
+          description: |
+            Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: |
+            Not Found.
+            Requested Registry or Entry does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    #-----------------------------------------------------
+    # Update an entry in a Registry
+    #-----------------------------------------------------
+    put:
+      summary: Update an existing Entry in a Registry
+      description: |
+        This operation can be used to update an existing Entry in Registry with the details of the Entry in the payload.
+      security:
+        - WriteRegistryEntry: [registry:entry_write]
+      operationId: updateRegistryEntry
+      tags:
+        - Registry Entries
+      parameters:
+      - name: registryId
+        in: path
+        description: uuid of the registry
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: entryId
+        in: path
+        description: uuid of the registry entry
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegistryEntrySchema'
+      responses:
+        "200":
+          description: |
+            Updated.
+            Successful response with the newly updated Registry Entry as entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistryEntry'
+        "400":
+          description: |
+            Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: |
+            Not Found.
+            Requested Registry or Entry does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    #-----------------------------------------------------
+    # Delete an entry in a Registry
+    #-----------------------------------------------------
+    delete:
+      summary: Delete an Entry in a Registry
+      description: |
+        This operation can be used to delete an existing Entry in Registry by specifying the registryId and entryId.
+      security:
+        - WriteRegistryEntry: [registry:entry_write]
+      operationId: deleteRegistryEntry
+      tags:
+        - Registry Entries
+      parameters:
+      - name: registryId
+        in: path
+        description: uuid of the registry
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: entryId
+        in: path
+        description: uuid of the registry entry
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: |
+            Successfully deleted the registry entry.
+        "400":
+          description: |
+            Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: |
+            Not Found.
+            Requested Registry or Entry does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
+  #-------------------------------------------------------
+  # The security schemes of resources used by some of the APIs
+  #-------------------------------------------------------
+  securitySchemes:
+    ReadRegistry:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            scope: registry:view
+    WriteRegistry:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            scope: registry:write
+    ReadRegistryEntry:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            scope: registry:entry_view
+    WriteRegistryEntry:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            scope: registry:entry_write
+
+  #-------------------------------------------------------
+  # The definitions of resources used by some of the APIs
+  #-------------------------------------------------------
   schemas:
 
     #-----------------------------------------------------
@@ -375,3 +729,26 @@ components:
           type: string
           description: |
             A detail description about the error message.
+
+  #-----------------------------------------------------
+  # The resources used in pagination
+  #-----------------------------------------------------
+
+    #-----------------------------------------------------
+    # The limit resource - The maximum number of resources to be returned by a GET
+    #-----------------------------------------------------
+    limit:
+      description: |
+        Maximum limit of items to return.
+      default: 25
+      type: integer
+
+    #-----------------------------------------------------
+    # The offset resource - The order number of an instance in a qualified set of
+    # resources at which to start to return the next batch of qualified resources
+    #-----------------------------------------------------
+    offset:
+      description: |
+        Starting point within the complete list of items qualified.
+      default: 0
+      type: integer

@@ -14,9 +14,40 @@
     "/registries" : {
       "get" : {
         "tags" : [ "Registries" ],
-        "summary" : "Retrieve/Search APIs\n",
+        "summary" : "Retrieve all Registries\n",
         "description" : "This operation provides you an array of available Registries.\n",
         "operationId" : "getRegistries",
+        "parameters" : [ {
+          "name" : "query",
+          "in" : "query",
+          "description" : "**Search condition**.\nYou can search for a registry by specifying the registry name as \"query\" attribute.\n\nEg.\n\"prodServer\" will match a registry entry if the name is exactly \"prodServer\".\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "sortBy",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "registryName" ]
+          }
+        }, {
+          "name" : "sortOrder",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "asc", "desc" ]
+          }
+        } ],
         "responses" : {
           "200" : {
             "description" : "OK.\nArray of Registries is returned.\n",
@@ -28,7 +59,10 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "ReadRegistry" : [ "registry:view" ]
+        } ]
       },
       "post" : {
         "tags" : [ "Registries" ],
@@ -75,7 +109,10 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "WriteRegistry" : [ "registry:write" ]
+        } ]
       }
     },
     "/registries/{registryId}" : {
@@ -126,7 +163,116 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "ReadRegistry" : [ "registry:view" ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Registries" ],
+        "summary" : "Update an existing Registry",
+        "description" : "This operation can be used to update an existing Endpoint Registry\n",
+        "operationId" : "updateRegistry",
+        "parameters" : [ {
+          "name" : "registryId",
+          "in" : "path",
+          "description" : "ID of the Registry",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Registry"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nUpdated Registry is returned\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Registry"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested Registry does not exist.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "WriteRegistry" : [ "registry:write" ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Registries" ],
+        "summary" : "Delete an Endpoint Registry",
+        "description" : "This operation can be used to delete an existing Registry proving the Id of the Registry.\n",
+        "operationId" : "deleteRegistry",
+        "parameters" : [ {
+          "name" : "registryId",
+          "in" : "path",
+          "description" : "uuid of the Registry",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully deleted.\n"
+          },
+          "400" : {
+            "description" : "Invalid Request\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested Registry does not exist.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "WriteRegistry" : [ "registry:write" ]
+        } ]
       }
     },
     "/registries/{registryId}/entries" : {
@@ -143,6 +289,36 @@
           "explode" : false,
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name" : "query",
+          "in" : "query",
+          "description" : "**Search condition**.\n\nYou can search for a registry entry by specifying the entry name as \"query\" attribute.\n\nEg.\n\"pizzaServer\" will match a registry entry if the name is exactly \"pizzaServer\".\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "sortBy",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "definitionType", "serviceType" ]
+          }
+        }, {
+          "name" : "sortOrder",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "asc", "desc" ]
           }
         } ],
         "responses" : {
@@ -176,11 +352,17 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "ReadRegistryEntry" : [ "registry:entry_view" ]
+        } ]
       }
     },
     "/registries/{registryId}/entry" : {
       "post" : {
+        "summary" : "Create a new Registry Entry",
+        "description" : "This operation can be used to create a new Registry Entry specifying the details of the Entry in the payload.\n",
+        "operationId" : "createRegistryEntry",
         "parameters" : [ {
           "name" : "registryId",
           "in" : "path",
@@ -232,7 +414,200 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "WriteRegistryEntry" : [ "registry:entry_write" ]
+        } ]
+      }
+    },
+    "/registries/{registryId}/entries/{entryId}" : {
+      "get" : {
+        "tags" : [ "Registry Entries" ],
+        "summary" : "Retrieve a specific Entry in a Registry",
+        "description" : "Using this operation, you can retrieve a specific entry in a single Registry using the EntryId and RegistryId.\n",
+        "operationId" : "getRegistryEntryByUuid",
+        "parameters" : [ {
+          "name" : "registryId",
+          "in" : "path",
+          "description" : "uuid of the registry",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "entryId",
+          "in" : "path",
+          "description" : "uuid of the registry entry",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Requested Entry in Registry is returned.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RegistryEntryArray"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid Request\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested Registry or Entry does not exist.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "ReadRegistryEntry" : [ "registry:entry_view" ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Registry Entries" ],
+        "summary" : "Update an existing Entry in a Registry",
+        "description" : "This operation can be used to update an existing Entry in Registry with the details of the Entry in the payload.\n",
+        "operationId" : "updateRegistryEntry",
+        "parameters" : [ {
+          "name" : "registryId",
+          "in" : "path",
+          "description" : "uuid of the registry",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "entryId",
+          "in" : "path",
+          "description" : "uuid of the registry entry",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RegistryEntrySchema"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Updated.\nSuccessful response with the newly updated Registry Entry as entity in the body.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RegistryEntry"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid Request\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested Registry or Entry does not exist.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "WriteRegistryEntry" : [ "registry:entry_write" ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Registry Entries" ],
+        "summary" : "Delete an Entry in a Registry",
+        "description" : "This operation can be used to delete an existing Entry in Registry by specifying the registryId and entryId.\n",
+        "operationId" : "deleteRegistryEntry",
+        "parameters" : [ {
+          "name" : "registryId",
+          "in" : "path",
+          "description" : "uuid of the registry",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "entryId",
+          "in" : "path",
+          "description" : "uuid of the registry entry",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully deleted the registry entry.\n"
+          },
+          "400" : {
+            "description" : "Invalid Request\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested Registry or Entry does not exist.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "WriteRegistryEntry" : [ "registry:entry_write" ]
+        } ]
       }
     }
   },
@@ -369,6 +744,66 @@
           "description" : {
             "type" : "string",
             "description" : "A detail description about the error message.\n"
+          }
+        }
+      },
+      "limit" : {
+        "type" : "integer",
+        "description" : "Maximum limit of items to return.\n",
+        "default" : 25
+      },
+      "offset" : {
+        "type" : "integer",
+        "description" : "Starting point within the complete list of items qualified.\n",
+        "default" : 0
+      }
+    },
+    "securitySchemes" : {
+      "ReadRegistry" : {
+        "type" : "oauth2",
+        "flows" : {
+          "authorizationCode" : {
+            "authorizationUrl" : "https://example.com/oauth/authorize",
+            "tokenUrl" : "https://example.com/oauth/token",
+            "scopes" : {
+              "scope" : "registry:view"
+            }
+          }
+        }
+      },
+      "WriteRegistry" : {
+        "type" : "oauth2",
+        "flows" : {
+          "authorizationCode" : {
+            "authorizationUrl" : "https://example.com/oauth/authorize",
+            "tokenUrl" : "https://example.com/oauth/token",
+            "scopes" : {
+              "scope" : "registry:write"
+            }
+          }
+        }
+      },
+      "ReadRegistryEntry" : {
+        "type" : "oauth2",
+        "flows" : {
+          "authorizationCode" : {
+            "authorizationUrl" : "https://example.com/oauth/authorize",
+            "tokenUrl" : "https://example.com/oauth/token",
+            "scopes" : {
+              "scope" : "registry:entry_view"
+            }
+          }
+        }
+      },
+      "WriteRegistryEntry" : {
+        "type" : "oauth2",
+        "flows" : {
+          "authorizationCode" : {
+            "authorizationUrl" : "https://example.com/oauth/authorize",
+            "tokenUrl" : "https://example.com/oauth/token",
+            "scopes" : {
+              "scope" : "registry:entry_write"
+            }
           }
         }
       }
