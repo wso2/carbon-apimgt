@@ -122,7 +122,12 @@ public class AMDefaultKeyManagerImplWrapper extends AMDefaultKeyManagerImpl {
         }
         return "";
     }
-    
+
+    @Override
+    protected void initializeHttpClient() {
+
+    }
+
     @Override
     protected String getConfigurationParamValue(String parameter) {
         if (APIConstants.TOKEN_URL.equals(parameter) || APIConstants.REVOKE_URL.equals(parameter)) {

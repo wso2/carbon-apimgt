@@ -110,11 +110,6 @@ public class FakeKeyManagerForTest implements KeyManager {
 
     }
 
-    @Override
-    public void initializeHttpClient() throws APIManagementException {
-
-    }
-
     @Override public boolean registerNewResource(API api, Map map) throws APIManagementException {
         return false;
     }

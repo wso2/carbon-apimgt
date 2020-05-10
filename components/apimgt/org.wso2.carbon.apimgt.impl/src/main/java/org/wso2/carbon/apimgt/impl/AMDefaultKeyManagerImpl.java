@@ -611,7 +611,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      *
      * @throws APIManagementException if an error occurs while initializing HttpClient
      */
-    public void initializeHttpClient() throws APIManagementException {
+    protected void initializeHttpClient() throws APIManagementException {
 
         try {
             String authServerURL = configuration.getParameter(APIConstants.AUTHSERVER_URL);
@@ -675,7 +675,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         SubscriberKeyMgtClientPool.getInstance().setConfiguration(this.configuration);
-
+        //Initialize a Http Client and Connection Manager using the ServerURL of KM
+        initializeHttpClient();
     }
 
     private QName getQNameWithIdentityNS(String localPart) {

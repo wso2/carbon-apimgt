@@ -92,8 +92,6 @@ public class KeyManagerHolder {
                     // Set the created configuration in the KeyManager instance.
                     keyManager.loadConfiguration(keyManagerConfiguration);
                 }
-                //Initialize a Http Client and Connection Manager using the ServerURL of KM
-                keyManager.initializeHttpClient();
             } catch (ClassNotFoundException e) {
                 log.error("Error occurred while instantiating KeyManager implementation");
                 throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
