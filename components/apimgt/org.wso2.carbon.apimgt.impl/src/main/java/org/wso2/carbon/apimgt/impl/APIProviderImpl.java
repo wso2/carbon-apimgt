@@ -940,7 +940,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //Check if it an existing shared scope, if so skip adding scope
             if (!isSharedScopeNameExists(scopeKey, tenantDomain)) {
                 // Check if scope key is already assigned locally to a different API (Other than different versions of
-                // the same API.
+                // the same API).
                 if (!isScopeKeyAssignedLocally(apiIdentifier, scope.getKey(), tenantId)) {
                     scopesToRegister.add(scope);
                 } else {
