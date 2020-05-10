@@ -1,16 +1,26 @@
 package org.wso2.carbon.apimgt.gateway.handlers.policies;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -23,13 +33,18 @@ import org.json.simple.parser.ParseException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.tracing.Util;
 //import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 
 import java.io.*;
+import java.rmi.RemoteException;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class OPAHandler extends AbstractHandler {
@@ -113,7 +128,7 @@ public class OPAHandler extends AbstractHandler {
                     return true;
                 }
                 else if("false".equals(finalAnswer)){
-                    handleOPAPolicyFailure(messageContext, HttpStatus.SC_UNAUTHORIZED );
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,"OPA Failure");
                 }
             }
 
@@ -130,10 +145,11 @@ public class OPAHandler extends AbstractHandler {
         }
         catch (ParseException e) {
             log.error("Error while evaluating HTTP response",e);
+        } catch (APISecurityException e) {
+            handleOPAPolicyFailure(messageContext,e);
         } finally {
             httpClient.getConnectionManager().shutdown();
         }
-
         return false;
     }
 
@@ -167,10 +183,66 @@ public class OPAHandler extends AbstractHandler {
         return object.toString();
     }
 
-    private boolean handleOPAPolicyFailure(MessageContext messageContext, int status)  {
-        log.error("wrong credentials: Request breaks provided policies");
+    private void handleOPAPolicyFailure(MessageContext messageContext, APISecurityException e) {
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, e.getErrorCode());
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
+                APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
+        messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION,e);
+
+        String errorDetail = APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(),e.getMessage());
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDetail);
+
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
+        try {
+            RelayUtils.consumeAndDiscardMessage(axis2MC);
+        } catch (AxisFault axisFault) {
+            //In case of an error it is logged and the process is continued because we're setting a fault message in the payload.
+            log.error("Error occurred while consuming and discarding the message", axisFault);
+        }
+        axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
+
+        int status = HttpStatus.SC_UNAUTHORIZED;
+        Map<String, String> headers =
+                (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        if (headers != null) {
+            headers.put(HttpHeaders.WWW_AUTHENTICATE,
+                    ", error=\"invalid_token\"" +
+                    ", error_description=\"The access token expired\"");
+            axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+        }
+        messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE,status);
+
+
+        log.error("wrong credentials: Request breaks provided policies",e);
+        Utils.setFaultPayload(messageContext, getFaultPayload(e));
+
         Utils.sendFault(messageContext, status);
-        return false;
+    }
+
+    protected OMElement getFaultPayload(APISecurityException e) {
+        OMFactory fac = OMAbstractFactory.getOMFactory();
+        OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
+                APISecurityConstants.API_SECURITY_NS_PREFIX);
+        OMElement payload = fac.createOMElement("fault", ns);
+
+        OMElement errorCode = fac.createOMElement("code", ns);
+        errorCode.setText(String.valueOf(e.getErrorCode()));
+        OMElement errorMessage = fac.createOMElement("message", ns);
+        errorMessage.setText(APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
+        OMElement errorDetail = fac.createOMElement("description", ns);
+        errorDetail.setText(APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
+
+        if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) {
+            String errorDescription = " Unauthenticated at backend level";
+            errorDetail.setText(errorDescription);
+        }
+
+        payload.addChild(errorCode);
+        payload.addChild(errorMessage);
+        payload.addChild(errorDetail);
+        return payload;
     }
 
     @Override
