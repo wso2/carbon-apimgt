@@ -2,6 +2,7 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import RouteMenuMapping from 'AppComponents/Base/RouteMenuMapping';
+import { withRouter } from 'react-router-dom';
 import { Breadcrumbs as MUIBreadcrumbs } from '@material-ui/core';
 
 /**
@@ -32,18 +33,14 @@ function getPageIDs(routeMenuMapping, currentPath, pageIDs = []) {
 
 /**
  * Render breadcrumb component
+ * * @param {JSON} props .
  * @returns {JSX} breadcrumbs.
  */
-export default function Breadcrumbs() {
+function Breadcrumbs(props) {
     const intl = useIntl();
     const routeMenuMapping = RouteMenuMapping(intl);
-    // eslint-disable-next-line no-restricted-globals
-    let pathnames = location.pathname.split('/').filter((x) => x);
-    pathnames = pathnames.slice(1);
-
-    const stringPath = '/' + pathnames.join('/');
-    const pageIDs = getPageIDs(routeMenuMapping, stringPath);
-
+    const { history: { location: { pathname: currentPath } } } = props;
+    const pageIDs = getPageIDs(routeMenuMapping, currentPath);
 
     return (
         <MUIBreadcrumbs aria-label='breadcrumb'>
@@ -53,3 +50,5 @@ export default function Breadcrumbs() {
         </MUIBreadcrumbs>
     );
 }
+
+export default withRouter(Breadcrumbs);
