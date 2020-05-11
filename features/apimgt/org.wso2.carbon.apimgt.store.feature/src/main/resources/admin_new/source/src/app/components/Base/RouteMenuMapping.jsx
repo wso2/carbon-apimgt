@@ -161,7 +161,7 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.advanced.throttling.policies',
-                    defaultMessage: 'Advanced Rate Limiting Policies',
+                    defaultMessage: 'Advanced Policies',
                 }),
                 path: '/throttling/advanced',
                 component: () => <DemoTable />,
@@ -170,7 +170,7 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.application.throttling.policies',
-                    defaultMessage: 'Application Rate Limiting Policies',
+                    defaultMessage: 'Application Policies',
                 }),
                 path: '/throttling/application',
                 component: () => <ApplicationThrottlingPolicies />,
@@ -179,7 +179,7 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.subscription.throttling.policies',
-                    defaultMessage: 'Subscription Rate Limiting Policies',
+                    defaultMessage: 'Subscription Policies',
                 }),
                 path: '/throttling/subscription',
                 component: () => <DemoTable />,
@@ -188,7 +188,7 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.custom.throttling.policies',
-                    defaultMessage: 'Custom Rate Limiting Policies',
+                    defaultMessage: 'Custom Policies',
                 }),
                 path: '/throttling/custom',
                 component: () => <DemoTable />,
