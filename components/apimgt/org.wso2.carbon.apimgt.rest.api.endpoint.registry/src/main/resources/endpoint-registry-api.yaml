@@ -333,6 +333,8 @@ paths:
         This operation can be used to create a new Registry Entry specifying the details of the Entry in the payload.
       security:
         - WriteRegistryEntry: [registry:entry_write]
+      tags:
+        - Registry Entries
       operationId: createRegistryEntry
       parameters:
       - name: registryId
@@ -630,6 +632,9 @@ components:
       type: object
       title: The Registry Entry object
       properties:
+        id:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
         entryName:
           type: string
           example: Pizzashack-Endpoint

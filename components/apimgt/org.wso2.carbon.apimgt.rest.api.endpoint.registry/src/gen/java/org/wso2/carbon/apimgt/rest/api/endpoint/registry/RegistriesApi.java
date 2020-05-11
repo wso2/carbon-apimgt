@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-07T18:08:01.688+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-11T11:27:37.048+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -86,7 +86,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     @Produces({ "application/json" })
     @Operation(summary = "Create a new Registry Entry", description = "This operation can be used to create a new Registry Entry specifying the details of the Entry in the payload. ",
         security = {  @SecurityRequirement(name = "WriteRegistryEntry" , scopes = { "registry:entry_write" })
-                 }, tags={  })
+                 }, tags={ "Registry Entries" })
 
     @ApiResponses(value = { 
         @ApiResponse(responseCode = "201",
