@@ -100,6 +100,18 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryId, String registryEntryUuid)
+            throws APIManagementException {
+
+        if (apiMgtDAO.getEndpointRegistryByUUID(registryId) == null) {
+            APIUtil.handleResourceNotFoundException("Endpoint Registry with id: " + registryId + " does not exist");
+        }
+        return apiMgtDAO.getEndpointRegistryEntryByUUID(registryEntryUuid);
+    }
+
+    /**
      * Returns all entries belong to a given endpoint registry
      *
      * @param registryId UUID of the endpoint registry
