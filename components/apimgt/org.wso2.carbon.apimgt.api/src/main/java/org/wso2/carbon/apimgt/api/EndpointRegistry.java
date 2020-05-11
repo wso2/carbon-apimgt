@@ -71,4 +71,4 @@ public interface EndpointRegistry {
      */
     EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryEntryUuid) throws APIManagementException;
 }
-}
+
