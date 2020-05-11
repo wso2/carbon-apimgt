@@ -49,7 +49,7 @@ function Delete(props) {
                 return (
                     <FormattedMessage
                         id='Throttling.Application.Policy.policy.delete.success'
-                        defaultMessage='Application Throttling Policy successfully deleted.'
+                        defaultMessage='Application Rate Limiting Policy successfully deleted.'
                     />
                 );
             })
@@ -57,7 +57,7 @@ function Delete(props) {
                 return (
                     <FormattedMessage
                         id='Throttling.Application.Policy.policy.delete.error'
-                        defaultMessage='Application Throttling Policy could not be deleted.'
+                        defaultMessage='Application Rate Limiting Policy could not be deleted.'
                     />
                 );
             });
@@ -75,7 +75,7 @@ function Delete(props) {
             <DialogContentText>
                 <FormattedMessage
                     id='Throttling.Application.Policy.policy.dialog.delete.error'
-                    defaultMessage='Application Throttling Policy will be deleted.'
+                    defaultMessage='Application Rate Limiting Policy will be deleted.'
                 />
             </DialogContentText>
         </FormDialogBase>
