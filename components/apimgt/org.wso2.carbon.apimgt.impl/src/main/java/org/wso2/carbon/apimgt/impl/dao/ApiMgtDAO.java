@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -14816,8 +14817,8 @@ public class ApiMgtDAO {
      * Returns details of all Endpoint Registries belong to a given tenant
      *
      * @param tenantID
-     * @return A list of EndpointRegistryInfo object
-     * @throws APIManagementException if failed get details of an Endpoint Registries
+     * @return A list of EndpointRegistryInfo objects
+     * @throws APIManagementException if failed to get details of Endpoint Registries
      */
     public List<EndpointRegistryInfo> getEndpointRegistries(int tenantID) throws APIManagementException {
         List<EndpointRegistryInfo> endpointRegistryInfoList = new ArrayList<>();
@@ -14841,5 +14842,38 @@ public class ApiMgtDAO {
             handleException("Error while retrieving details of endpoint registries", e);
         }
         return endpointRegistryInfoList;
+    }
+
+    /**
+     * Returns all entries belong to a given endpoint registry
+     *
+     * @param registryId UUID of the endpoint registry
+     * @return A list of EndpointRegistryEntry objects
+     * @throws APIManagementException if failed to get entries of an Endpoint Registry
+     */
+    public List<EndpointRegistryEntry> getEndpointRegistryEntries(String registryId) throws APIManagementException {
+        List<EndpointRegistryEntry> endpointRegistryEntryList = new ArrayList<>();
+        String query = SQLConstants.GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, registryId);
+            ps.executeQuery();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
+                    endpointRegistryEntry.setEntryId(rs.getString("UUID"));
+                    endpointRegistryEntry.setName(rs.getString("ENTRY_NAME"));
+                    endpointRegistryEntry.setServiceURL(rs.getString("SERVICE_URL"));
+                    endpointRegistryEntry.setDefinitionType(rs.getString("DEFINITION_TYPE"));
+                    endpointRegistryEntry.setDefinitionURL(rs.getString("DEFINITION_URL"));
+                    endpointRegistryEntry.setServiceType(rs.getString("SERVICE_TYPE"));
+                    endpointRegistryEntry.setMetaData(rs.getString("METADATA"));
+                    endpointRegistryEntryList.add(endpointRegistryEntry);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving entries of endpoint registry", e);
+        }
+        return endpointRegistryEntryList;
     }
 }

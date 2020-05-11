@@ -39,7 +39,7 @@ public class EndpointRegistryEntry {
 
     private ResourceFile endpointDefinition = null;
 
-    private ResourceFile metaData = null;
+    private String metaData = null;
 
     public String getEntryId() {
 
@@ -81,7 +81,7 @@ public class EndpointRegistryEntry {
         return endpointDefinition;
     }
 
-    public ResourceFile getMetaData() {
+    public String getMetaData() {
 
         return metaData;
     }
@@ -126,7 +126,7 @@ public class EndpointRegistryEntry {
         this.endpointDefinition = endpointDefinition;
     }
 
-    public void setMetaData(ResourceFile metaData) {
+    public void setMetaData(String metaData) {
 
         this.metaData = metaData;
     }
