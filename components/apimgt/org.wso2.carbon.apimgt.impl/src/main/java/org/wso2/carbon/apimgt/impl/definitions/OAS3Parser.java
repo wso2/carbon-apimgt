@@ -1522,10 +1522,10 @@ public class OAS3Parser extends APIDefinition {
         }
         //Setup Basepath
         String basePath = getBasePath(extensions);
-//        if (basePath != null && !isPublisherPortalUsed) {
-//            api.setContextTemplate(basePath);
-//            api.setContext(basePath);
-//        }
+        if (basePath != null && !isPublisherPortalUsed) {
+            api.setContextTemplate(basePath);
+            api.setContext(basePath);
+        }
         return api;
     }
 
