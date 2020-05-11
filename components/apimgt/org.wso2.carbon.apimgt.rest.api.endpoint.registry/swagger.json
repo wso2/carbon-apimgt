@@ -360,6 +360,7 @@
     },
     "/registries/{registryId}/entry" : {
       "post" : {
+        "tags" : [ "Registry Entries" ],
         "summary" : "Create a new Registry Entry",
         "description" : "This operation can be used to create a new Registry Entry specifying the details of the Entry in the payload.\n",
         "operationId" : "createRegistryEntry",
@@ -655,6 +656,10 @@
         "title" : "The Registry Entry object",
         "type" : "object",
         "properties" : {
+          "id" : {
+            "type" : "string",
+            "example" : "01234567-0123-0123-0123-012345678901"
+          },
           "entryName" : {
             "type" : "string",
             "example" : "Pizzashack-Endpoint"

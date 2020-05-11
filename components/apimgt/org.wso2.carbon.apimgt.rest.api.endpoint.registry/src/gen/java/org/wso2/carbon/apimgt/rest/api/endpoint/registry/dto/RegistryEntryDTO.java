@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.*;
 
 
 public class RegistryEntryDTO   {
+    private String id = null;
     private String entryName = null;
     private String serviceUrl = null;
             @XmlType(name="ServiceTypeEnum")
@@ -78,6 +79,24 @@ public class RegistryEntryDTO   {
             }    private DefinitionTypeEnum definitionType = null;
     private String definitionUrl = null;
     private String metadata = null;
+
+    /**
+    **/
+    public RegistryEntryDTO id(String id) {
+    this.id = id;
+    return this;
+    }
+
+    
+    
+    @Schema(example = "01234567-0123-0123-0123-012345678901", description = "")
+    @JsonProperty("id")
+          public String getId() {
+    return id;
+    }
+    public void setId(String id) {
+    this.id = id;
+    }
 
     /**
     **/
@@ -199,7 +218,8 @@ if (o == null || getClass() != o.getClass()) {
 return false;
 }
 RegistryEntryDTO registryEntry = (RegistryEntryDTO) o;
-    return Objects.equals(entryName, registryEntry.entryName) &&
+    return Objects.equals(id, registryEntry.id) &&
+    Objects.equals(entryName, registryEntry.entryName) &&
     Objects.equals(serviceUrl, registryEntry.serviceUrl) &&
     Objects.equals(serviceType, registryEntry.serviceType) &&
     Objects.equals(definitionType, registryEntry.definitionType) &&
@@ -209,7 +229,7 @@ RegistryEntryDTO registryEntry = (RegistryEntryDTO) o;
 
 @Override
 public int hashCode() {
-return Objects.hash(entryName, serviceUrl, serviceType, definitionType, definitionUrl, metadata);
+return Objects.hash(id, entryName, serviceUrl, serviceType, definitionType, definitionUrl, metadata);
 }
 
 @Override
@@ -217,6 +237,7 @@ public String toString() {
 StringBuilder sb = new StringBuilder();
 sb.append("class RegistryEntryDTO {\n");
 
+sb.append("    id: ").append(toIndentedString(id)).append("\n");
 sb.append("    entryName: ").append(toIndentedString(entryName)).append("\n");
 sb.append("    serviceUrl: ").append(toIndentedString(serviceUrl)).append("\n");
 sb.append("    serviceType: ").append(toIndentedString(serviceType)).append("\n");
