@@ -129,11 +129,11 @@ export default function ListApplicationThrottlingPolicies() {
         pageStyle: 'half',
         title: intl.formatMessage({
             id: 'Throttling.Application.Policy.search.default',
-            defaultMessage: 'Application Throttling Policies',
+            defaultMessage: 'Application Rate Limiting Policies',
         }),
         EditTitle: intl.formatMessage({
             id: 'Throttling.Application.Policy.search.default',
-            defaultMessage: 'Application Throttling Policies',
+            defaultMessage: 'Application Rate Limiting Policies',
         }),
     };
 
