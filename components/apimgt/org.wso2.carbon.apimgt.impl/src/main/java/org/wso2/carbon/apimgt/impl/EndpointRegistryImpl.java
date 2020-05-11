@@ -100,6 +100,14 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryEntryUuid) throws APIManagementException {
+
+        return apiMgtDAO.getEndpointRegistryEntryByUUID(registryEntryUuid);
+    }
+
+    /**
      * Returns all entries belong to a given endpoint registry
      *
      * @param registryId UUID of the endpoint registry

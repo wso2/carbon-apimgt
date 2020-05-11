@@ -108,7 +108,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     public Response addRegistry(RegistryDTO body, MessageContext messageContext) {
         String user = RestApiUtil.getLoggedInUsername();
         EndpointRegistryInfo registry = EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(body, user);
-        EndpointRegistryInfo createdRegistry = new EndpointRegistryInfo();
+        EndpointRegistryInfo createdRegistry = null;
         try {
             EndpointRegistry registryProvider = new EndpointRegistryImpl();
             String registryId = registryProvider.addEndpointRegistry(registry);
@@ -143,14 +143,20 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
     @Override
     public Response getRegistryEntryByUuid(String registryId, String entryId, MessageContext messageContext) {
-        RegistryEntryDTO registryEntry = new RegistryEntryDTO();
-        registryEntry.setEntryName("Pizzashack-endpoint");
-        registryEntry.setMetadata("{ \"mutualTLS\" : true }");
-        registryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
-        registryEntry.setDefinitionUrl("http://localhost/pizzashack?swagger.json");
-        registryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
-        registryEntry.setServiceUrl("http://localhost/pizzashack");
-        return Response.ok().entity(registryEntry).build();
+        EndpointRegistry registryProvider = new EndpointRegistryImpl();
+        EndpointRegistryEntry endpointRegistryEntry = null;
+        try {
+            endpointRegistryEntry = registryProvider.getEndpointRegistryEntryByUUID(entryId);
+            if (endpointRegistryEntry == null) {
+                RestApiUtil.handleResourceNotFoundError("Endpoint registry entry with the id: " + entryId +
+                        " is not found", log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while fetching endpoint registry entry: "
+                    + registryId, e, log);
+        }
+        return Response.ok().entity(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry))
+                .build();
     }
 
     @Override

@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -14842,6 +14843,43 @@ public class ApiMgtDAO {
             handleException("Error while retrieving details of endpoint registries", e);
         }
         return endpointRegistryInfoList;
+    }
+
+    /**
+     * Returns the details of an endpoint registry entry.
+     * @param registryEntryUuid endpoint registry entry identifier.
+     * @return EndpointRegistryEntry object.
+     * @throws APIManagementException
+     */
+    public EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryEntryUuid) throws APIManagementException
+    {
+
+        String query = SQLConstants.GET_ENDPOINT_REGISTRY_ENTRY_BY_UUID;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, registryEntryUuid);
+            ps.executeQuery();
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
+                    endpointRegistryEntry.setEntryId(rs.getString("UUID"));
+                    endpointRegistryEntry.setName(rs.getString("ENTRY_NAME"));
+                    endpointRegistryEntry.setDefinitionType(rs.getString("DEFINITION_TYPE"));
+                    endpointRegistryEntry.setDefinitionURL(rs.getString("DEFINITION_URL"));
+                    endpointRegistryEntry.setServiceType(rs.getString("SERVICE_TYPE"));
+                    endpointRegistryEntry.setServiceURL(rs.getString("SERVICE_URL"));
+                    endpointRegistryEntry.setMetaData(rs.getString("METADATA"));
+                    ResourceFile resourceFile = new ResourceFile(rs.getBinaryStream("ENDPOINT_DEFINITION"),"");
+                    endpointRegistryEntry.setEndpointDefinition(resourceFile);
+                    return endpointRegistryEntry;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving details of endpoint registry with Id: "
+                    + registryEntryUuid, e);
+        }
+        return null;
+
     }
 
     /**
