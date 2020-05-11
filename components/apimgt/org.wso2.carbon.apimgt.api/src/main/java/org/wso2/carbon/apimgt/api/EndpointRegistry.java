@@ -69,6 +69,6 @@ public interface EndpointRegistry {
      * @return an EndpointRegistryEntry object
      * @throws APIManagementException if failed get details of an Endpoint Registry Entry
      */
-    EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryEntryUuid) throws APIManagementException;
+    EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryId, String registryEntryUuid) throws APIManagementException;
 }
 
