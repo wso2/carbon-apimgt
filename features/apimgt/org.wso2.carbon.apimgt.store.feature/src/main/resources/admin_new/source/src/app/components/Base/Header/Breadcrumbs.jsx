@@ -33,7 +33,7 @@ function getPageIDs(routeMenuMapping, currentPath, pageIDs = []) {
 
 /**
  * Render breadcrumb component
- * * @param {JSON} props .
+ * @param {JSON} props .
  * @returns {JSX} breadcrumbs.
  */
 function Breadcrumbs(props) {
