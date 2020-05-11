@@ -74,12 +74,12 @@ export default function ListApplicationThrottlingPolicies() {
                         <Link
                             target='_blank'
                             href={Configurations.app.docUrl
-                        + 'learn/api-microgateway/grouping-apis-with-labels/#grouping-apis-with-microgateway-labels'}
+            + 'learn/rate-limiting/adding-new-throttling-policies/#adding-a-new-application-level-throttling-tier'}
                         >
                             <ListItemText primary={(
                                 <FormattedMessage
-                                    id='AdminPages.Microgateways.List.help.link.one'
-                                    defaultMessage='Create a Microgateway label'
+                                    id='Throttling.Application.Policy.List.help.link.one'
+                                    defaultMessage='Create an Application Rate Limiting Policy'
                                 />
                             )}
                             />
@@ -93,31 +93,12 @@ export default function ListApplicationThrottlingPolicies() {
                         <Link
                             target='_blank'
                             href={Configurations.app.docUrl
-                        + 'learn/api-microgateway/grouping-apis-with-labels/#grouping-apis-with-microgateway-labels'}
+                + 'learn/rate-limiting/setting-throttling-limits/#application-level-throttling-application-developer'}
                         >
                             <ListItemText primary={(
                                 <FormattedMessage
-                                    id='AdminPages.Microgateways.List.help.link.two'
-                                    defaultMessage='Assign the Microgateway label to an API'
-                                />
-                            )}
-                            />
-
-                        </Link>
-                    </ListItem>
-                    <ListItem button>
-                        <ListItemIcon>
-                            <DescriptionIcon />
-                        </ListItemIcon>
-                        <Link
-                            target='_blank'
-                            href={Configurations.app.docUrl
-                        + 'learn/api-microgateway/grouping-apis-with-labels/#grouping-apis-with-microgateway-labels'}
-                        >
-                            <ListItemText primary={(
-                                <FormattedMessage
-                                    id='AdminPages.Microgateways.List.help.link.three'
-                                    defaultMessage='View the Microgateway labels'
+                                    id='Throttling.Application.Policy.List.help.link.two'
+                                    defaultMessage='Setting an Application Rate Limiting Policy'
                                 />
                             )}
                             />
@@ -188,17 +169,16 @@ export default function ListApplicationThrottlingPolicies() {
         content: (
             <Typography variant='body2' color='textSecondary' component='p'>
                 <FormattedMessage
-                    id='AdminPages.Microgateways.List.empty.content.microgateways'
-                    defaultMessage={'It is possible to create a Microgateway distribution '
-                    + 'for a group of APIs. In order to group APIs, a label needs to be created'
-                    + ' and attached to the APIs that need to be in a single group.'}
+                    id='Throttling.Application.Policy.List.empty.content.application.policies'
+                    defaultMessage={'Application-level throttling policies are applicable per access '
+                    + 'token generated for an application.'}
                 />
             </Typography>),
         title: (
             <Typography gutterBottom variant='h5' component='h2'>
                 <FormattedMessage
-                    id='AdminPages.Microgateways.List.empty.title.microgateways'
-                    defaultMessage='Microgateways'
+                    id='Throttling.Application.Policy.List.empty.title.application.policies'
+                    defaultMessage='Application Policies'
                 />
 
             </Typography>),
@@ -288,7 +268,7 @@ export default function ListApplicationThrottlingPolicies() {
             apiCall={apiCall}
             editComponentProps={{
                 icon: <EditIcon />,
-                title: 'Edit Microgateway',
+                title: 'Edit Application Policies',
                 applicationThrottlingPolicyList,
             }}
             deleteComponentProps={{
