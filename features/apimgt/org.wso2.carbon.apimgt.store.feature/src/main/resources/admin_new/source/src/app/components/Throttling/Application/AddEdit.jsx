@@ -207,7 +207,7 @@ function AddEdit(props) {
                     return (
                         <FormattedMessage
                             id='Throttling.Application.Policy.policy.add.success'
-                            defaultMessage='Application Throttling Policy added successfully.'
+                            defaultMessage='Application Rate Limiting Policy added successfully.'
                         />
                     );
                 })
@@ -229,7 +229,7 @@ function AddEdit(props) {
                     return (
                         <FormattedMessage
                             id='Throttling.Application.Policy.policy.add.success'
-                            defaultMessage='Application Throttling Policy added successfully.'
+                            defaultMessage='Application Rate Limiting Policy added successfully.'
                         />
                     );
                 })

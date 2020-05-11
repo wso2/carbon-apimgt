@@ -155,13 +155,13 @@ const RouteMenuMapping = (intl) => [
     {
         id: intl.formatMessage({
             id: 'Base.RouteMenuMapping.throttling.policies',
-            defaultMessage: 'Throttling Policies',
+            defaultMessage: 'Rate Limiting Policies',
         }),
         children: [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.advanced.throttling.policies',
-                    defaultMessage: 'Advanced Throttling Policies',
+                    defaultMessage: 'Advanced Rate Limiting Policies',
                 }),
                 path: '/throttling/advanced',
                 component: () => <DemoTable />,
@@ -170,7 +170,7 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.application.throttling.policies',
-                    defaultMessage: 'Application Throttling Policies',
+                    defaultMessage: 'Application Rate Limiting Policies',
                 }),
                 path: '/throttling/application',
                 component: () => <ApplicationThrottlingPolicies />,
@@ -179,7 +179,7 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.subscription.throttling.policies',
-                    defaultMessage: 'Subscription Throttling Policies',
+                    defaultMessage: 'Subscription Rate Limiting Policies',
                 }),
                 path: '/throttling/subscription',
                 component: () => <DemoTable />,
@@ -188,7 +188,7 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.custom.throttling.policies',
-                    defaultMessage: 'Custom Throttling Policies',
+                    defaultMessage: 'Custom Rate Limiting Policies',
                 }),
                 path: '/throttling/custom',
                 component: () => <DemoTable />,
@@ -197,7 +197,7 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.blacklisted.items',
-                    defaultMessage: 'Blacklisted Items',
+                    defaultMessage: 'Blacklist Rate Limiting Policies',
                 }),
                 path: '/throttling/blacklisted',
                 component: () => <DemoTable />,
