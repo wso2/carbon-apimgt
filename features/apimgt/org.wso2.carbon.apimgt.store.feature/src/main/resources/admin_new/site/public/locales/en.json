@@ -44,7 +44,7 @@
   "Base.RouteMenuMapping.application.creation": "Application Creation",
   "Base.RouteMenuMapping.application.throttling.policies": "Application Rate Limiting Policies",
   "Base.RouteMenuMapping.applications": "Applications",
-  "Base.RouteMenuMapping.blacklisted.items": "Blacklist Rate Limiting Policies",
+  "Base.RouteMenuMapping.blacklisted.items": "Blacklist Policies",
   "Base.RouteMenuMapping.bot.detection": "Bot Detection",
   "Base.RouteMenuMapping.custom.throttling.policies": "Custom Rate Limiting Policies",
   "Base.RouteMenuMapping.dashboard": "Admin Dashboard",
