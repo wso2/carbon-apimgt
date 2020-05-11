@@ -1226,4 +1226,18 @@ public class OASParserUtil {
         String swaggerContentUpdated = apiDefinition.processOtherSchemeScopes(swaggerContent);
         return swaggerContentUpdated;
     }
+
+    /**
+     * This method returns api that is attched with api extensions related to micro-gw
+     *
+     * @param swaggerContent String
+     * @param api            API
+     * @return URITemplate
+     */
+    public static API setExtensionsToAPI(String swaggerContent, API api, boolean isPublisherPortalUsed) throws APIManagementException {
+        APIDefinition apiDefinition = getOASParser(swaggerContent);
+        api = apiDefinition.setExtenstionsToAPI(swaggerContent,api,isPublisherPortalUsed);
+        return api;
+    }
+
 }
