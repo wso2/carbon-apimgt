@@ -71,11 +71,33 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      * Returns details of an Endpoint Registry
      *
      * @param registryId Registry Identifier
+     * @param tenantDomain
      * @return An EndpointRegistryInfo object related to the given identifier or null
      * @throws APIManagementException if failed to get details of an Endpoint Registry
      */
-    public EndpointRegistryInfo getEndpointRegistryByUUID(String registryId) throws APIManagementException {
-        return apiMgtDAO.getEndpointRegistryByUUID(registryId);
+    public EndpointRegistryInfo getEndpointRegistryByUUID(String registryId, String tenantDomain)
+            throws APIManagementException {
+        int tenantId;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            return apiMgtDAO.getEndpointRegistryByUUID(registryId, tenantId);
+        } catch (UserStoreException e) {
+            String msg = "Error while retrieving tenant information";
+            log.error(msg, e);
+            throw new APIManagementException("Error in retrieving Tenant Information while retrieving endpoint" +
+                    " registry given by id: " + registryId, e);
+        }
+    }
+
+    /**
+     * Deletes an Endpoint Registry
+     *
+     * @param registryUUID Registry Identifier(UUID)
+     * @throws APIManagementException if failed to delete the Endpoint Registry
+     */
+    public void deleteEndpointRegistry(String registryUUID) throws APIManagementException {
+        apiMgtDAO.deleteEndpointRegistry(registryUUID );
     }
 
     /**
@@ -104,10 +126,6 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      */
     public EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryId, String registryEntryUuid)
             throws APIManagementException {
-
-        if (apiMgtDAO.getEndpointRegistryByUUID(registryId) == null) {
-            APIUtil.handleResourceNotFoundException("Endpoint Registry with id: " + registryId + " does not exist");
-        }
         return apiMgtDAO.getEndpointRegistryEntryByUUID(registryEntryUuid);
     }
 
@@ -119,9 +137,6 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      * @throws APIManagementException if failed to get entries of an Endpoint Registry
      */
     public List<EndpointRegistryEntry> getEndpointRegistryEntries(String registryId) throws APIManagementException {
-        if (apiMgtDAO.getEndpointRegistryByUUID(registryId) == null) {
-            APIUtil.handleResourceNotFoundException("Endpoint Registry with id: " + registryId + " does not exist");
-        }
         return apiMgtDAO.getEndpointRegistryEntries(registryId);
     }
 
