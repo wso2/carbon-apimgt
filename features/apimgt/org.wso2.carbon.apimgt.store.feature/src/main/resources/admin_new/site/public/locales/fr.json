@@ -121,5 +121,15 @@
   "UnexpectedError.logout": "",
   "UnexpectedError.message": "",
   "UnexpectedError.title": "",
-  "app.components.Shared.Banner.back": ""
+  "app.components.Shared.Banner.back": "",
+  "AdminPages.ApplicationSettings.table.header.application.name": "",
+  "AdminPages.ApplicationSettings.table.header.application.owner": "",
+  "AdminPages.ApplicationSettings.List.search.default": "",
+  "AdminPages.ApplicationSettings.List.help.link.one": "",
+  "AdminPages.ApplicationSettings.List.title.application.settings": "",
+  "AdminPages.ApplicationSettings.List.empty.content.application.settings": "",
+  "AdminPages.ApplicationSettings.List.empty.title.change.application.ownership": "",
+  "AdminPages.ApplicationSettings.Edit.form.edit.successful": "",
+  "AdminPages.ApplicationSettings.Edit.form.info": "",
+  "AdminPages.ApplicationSettings.Edit.form.name": ""
 }
