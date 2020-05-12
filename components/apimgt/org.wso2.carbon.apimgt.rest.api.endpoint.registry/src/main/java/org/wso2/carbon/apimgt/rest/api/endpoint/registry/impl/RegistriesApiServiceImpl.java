@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.EndpointRegistry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.EndpointRegistryImpl;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApiService;
 
@@ -126,7 +127,28 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     @Override
     public Response createRegistryEntry(String registryId, RegistryEntryDTO registryEntry, InputStream
             definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
-        return Response.ok().entity(registryEntry).build();
+        EndpointRegistry registryProvider = new EndpointRegistryImpl();
+        EndpointRegistryEntry createdEntry = null;
+        try {
+            EndpointRegistryInfo endpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId);
+            if (endpointRegistry == null) {
+                RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
+                        " is not found", log);
+            }
+            ResourceFile definitionFile = new ResourceFile(definitionFileInputStream, definitionFileDetail
+                    .getContentType().getType());
+            EndpointRegistryEntry entryToAdd = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
+                    definitionFile, endpointRegistry.getRegistryId());
+            String entryId = registryProvider.addEndpointRegistryEntry(entryToAdd);
+            createdEntry = registryProvider.getEndpointRegistryEntryByUUID(registryId, entryId);
+        } catch (APIMgtResourceAlreadyExistsException e) {
+            RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry Entry with name '"
+                    + registryEntry.getEntryName() + "' already exists", e, log);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving details of endpoint registry by id: "
+                    + registryId, e, log);
+        }
+        return Response.ok().entity(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(createdEntry)).build();
     }
 
     @Override

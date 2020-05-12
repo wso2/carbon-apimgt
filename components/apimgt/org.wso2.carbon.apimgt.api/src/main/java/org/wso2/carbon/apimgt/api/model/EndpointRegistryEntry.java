@@ -23,9 +23,9 @@ package org.wso2.carbon.apimgt.api.model;
  */
 public class EndpointRegistryEntry {
 
-    private String entryId = null;
+    private String entryUUID = null;
 
-    private String registryId = null;
+    private int registryId;
 
     private String name = null;
 
@@ -43,10 +43,10 @@ public class EndpointRegistryEntry {
 
     public String getEntryId() {
 
-        return entryId;
+        return entryUUID;
     }
 
-    public String getRegistryId() {
+    public int getRegistryId() {
 
         return registryId;
     }
@@ -86,12 +86,12 @@ public class EndpointRegistryEntry {
         return metaData;
     }
 
-    public void setEntryId(String entryId) {
+    public void setEntryId(String entryUUID) {
 
-        this.entryId = entryId;
+        this.entryUUID = entryUUID;
     }
 
-    public void setRegistryId(String registryId) {
+    public void setRegistryId(int registryId) {
 
         this.registryId = registryId;
     }

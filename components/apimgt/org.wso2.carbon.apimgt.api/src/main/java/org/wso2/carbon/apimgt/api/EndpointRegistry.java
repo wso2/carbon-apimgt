@@ -70,5 +70,13 @@ public interface EndpointRegistry {
      * @throws APIManagementException if failed get details of an Endpoint Registry Entry
      */
     EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryId, String registryEntryUuid) throws APIManagementException;
-}
 
+    /**
+     * Adds a new Registry Entry
+     *
+     * @param registryEntry EndpointRegistryEntry
+     * @return entryID UUID of the created Registry Entry
+     * @throws APIManagementException if failed to add EndpointRegistryEntry
+     */
+    String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException;
+}

@@ -124,4 +124,19 @@ public class EndpointRegistryImpl implements EndpointRegistry {
         }
         return apiMgtDAO.getEndpointRegistryEntries(registryId);
     }
+
+    /**
+     * Adds a new Registry Entry
+     *
+     * @param registryEntry EndpointRegistryEntry
+     * @return entryID UUID of the created Registry Entry
+     * @throws APIManagementException if failed to add EndpointRegistryEntry
+     */
+    public String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException {
+        if (apiMgtDAO.isRegistryEntryNameExists(registryEntry)) {
+            APIUtil.handleResourceAlreadyExistsException("Endpoint Registry with name '" + registryEntry.getName()
+                    + "' already exists");
+        }
+        return apiMgtDAO.addEndpointRegistryEntry(registryEntry);
+    }
 }

@@ -264,7 +264,7 @@ paths:
       security:
       - ReadRegistryEntry: [registry:entry_view]
       tags:
-        - Registries
+        - Registries Entries
       parameters:
       - name: registryId
         in: path
