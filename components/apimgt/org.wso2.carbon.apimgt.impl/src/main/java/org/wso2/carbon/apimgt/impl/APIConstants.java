@@ -178,6 +178,11 @@ public final class APIConstants {
     public static final String GOVERNANCE_COMPONENT_REGISTRY_LOCATION = "/repository/components/org.wso2.carbon" +
             ".governance";
 
+    // registry location for OpenAPI files
+    public static final String OPENAPI_ARCHIVES_TEMP_FOLDER =   "OPENAPI-archives";
+    public static final String OPENAPI_EXTRACTED_DIRECTORY =  "extracted";
+    public static final String OPENAPI_ARCHIVE_ZIP_FILE = "openapi-archive.zip";
+
     // registry location for wsdl files
     public static final String API_WSDL_RESOURCE_LOCATION = API_APPLICATION_DATA_LOCATION + "/wsdls/";
     public static final String API_WSDL_RESOURCE = API_APPLICATION_DATA_LOCATION+"/wsdls";

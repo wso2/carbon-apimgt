@@ -34,6 +34,8 @@ import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.parser.SwaggerParser;
+import io.swagger.util.Yaml;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
@@ -54,8 +56,11 @@ import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ObjectMapperFactory;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.converter.SwaggerConverter;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import org.apache.axis2.Constants;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,6 +73,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.openapitools.codegen.serializer.SerializerUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -82,25 +88,20 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
@@ -653,6 +654,52 @@ public class OASParserUtil {
         }
 
         return "";
+    }
+
+
+    public static  APIDefinitionValidationResponse  extractAndValidateOpenAPIArchive(InputStream inputStream,
+                                                                                     boolean returnContent)
+            throws APIManagementException, IOException {
+
+        String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
+                + APIConstants.OPENAPI_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
+        String archivePath = path + File.separator + APIConstants.OPENAPI_ARCHIVE_ZIP_FILE;
+        String extractedLocation = APIFileUtil
+                .extractUploadedArchive(inputStream, APIConstants.OPENAPI_EXTRACTED_DIRECTORY, archivePath, path);
+
+        String openAPIContent = "";
+        List<File> files = (List<File>) FileUtils.listFiles(new File(extractedLocation), new String[]{"yaml", "json"}, true);
+        for (File file : files) {
+            FileInputStream fis = new FileInputStream(file);
+            byte[] data = new byte[(int) file.length()];
+            fis.read(data);
+            fis.close();
+            String content= new String(data, "UTF-8");
+            SwaggerVersion version;
+            try {
+                version = getSwaggerVersion(content);
+            } catch (APIManagementException e) {
+                continue;
+            }
+            if (version == SwaggerVersion.OPEN_API){
+                String filePath = file.getAbsolutePath();
+                OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+                ParseOptions options = new ParseOptions();
+                options.setResolve(true);
+                OpenAPI openAPI = openAPIV3Parser.read(filePath, null, options);
+                openAPIContent= SerializerUtils.toYamlString(openAPI);
+                break;
+            } else if (version == SwaggerVersion.SWAGGER) {
+                String filePath = file.getAbsolutePath();
+                SwaggerParser parser = new SwaggerParser();
+                Swagger swagger = parser.read(filePath,null,true);
+                openAPIContent  = Yaml.pretty().writeValueAsString(swagger);
+                break;
+            }
+        }
+        APIDefinitionValidationResponse  apiDefinitionValidationResponse  = new APIDefinitionValidationResponse ();
+        apiDefinitionValidationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
+        return apiDefinitionValidationResponse ;
     }
 
     /**
