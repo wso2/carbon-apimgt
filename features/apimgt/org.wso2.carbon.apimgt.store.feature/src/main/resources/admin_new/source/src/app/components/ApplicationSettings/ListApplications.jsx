@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import API from 'AppData/api';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
@@ -26,28 +26,11 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 import HelpBase from 'AppComponents/AdminPages/Addons/HelpBase';
 import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
+import EditApplication from 'AppComponents/ApplicationSettings/EditApplication';
 import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
 import EditIcon from '@material-ui/icons/Edit';
-
-/**
- * API call to get application list
- * @returns {Promise}.
- */
-function apiCall() {
-    return new Promise((resolve, reject) => {
-        const restApi = new API();
-        restApi
-            .getApplicationList()
-            .then((result) => {
-                resolve(result.body.list);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
-}
 
 /**
  * Render a list
@@ -55,6 +38,25 @@ function apiCall() {
  */
 export default function ListApplications() {
     const intl = useIntl();
+    const [applicationList, setApplicationList] = useState([]);
+    /**
+    * API call to get application list
+    * @returns {Promise}.
+    */
+    function apiCall() {
+        return new Promise((resolve, reject) => {
+            const restApi = new API();
+            restApi
+                .getApplicationList()
+                .then((result) => {
+                    setApplicationList(result.body.list);
+                    resolve(result.body.list);
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        });
+    }
     const columProps = [
         { name: 'applicationId', options: { display: false } },
         {
@@ -159,10 +161,11 @@ export default function ListApplications() {
             searchProps={searchProps}
             emptyBoxProps={emptyBoxProps}
             apiCall={apiCall}
-            EditComponent={() => <span />}
+            EditComponent={EditApplication}
             editComponentProps={{
                 icon: <EditIcon />,
                 title: 'Change Application Owner',
+                applicationList,
             }}
             DeleteComponent={() => <span />}
         />
