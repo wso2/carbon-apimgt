@@ -1414,7 +1414,7 @@ public class SQLConstants {
 
     public static final String GET_ENDPOINT_REGISTRY_BY_UUID =
             " SELECT UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, REG_OWNER, READ_ROLE, WRITE_ROLE, ID FROM " +
-                    "ENDPOINT_REG WHERE UUID = ?";
+                    "ENDPOINT_REG WHERE UUID = ? AND TENANT_ID = ?";
 
     public static final String GET_ENDPOINT_REGISTRY_ENTRY_BY_UUID =
             " SELECT UUID, ENTRY_NAME, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, SERVICE_URL, METADATA FROM " +

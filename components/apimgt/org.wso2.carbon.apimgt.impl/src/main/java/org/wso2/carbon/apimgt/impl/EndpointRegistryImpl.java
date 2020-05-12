@@ -71,11 +71,23 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      * Returns details of an Endpoint Registry
      *
      * @param registryId Registry Identifier
+     * @param tenantDomain
      * @return An EndpointRegistryInfo object related to the given identifier or null
      * @throws APIManagementException if failed to get details of an Endpoint Registry
      */
-    public EndpointRegistryInfo getEndpointRegistryByUUID(String registryId) throws APIManagementException {
-        return apiMgtDAO.getEndpointRegistryByUUID(registryId);
+    public EndpointRegistryInfo getEndpointRegistryByUUID(String registryId, String tenantDomain)
+            throws APIManagementException {
+        int tenantId;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            return apiMgtDAO.getEndpointRegistryByUUID(registryId, tenantId);
+        } catch (UserStoreException e) {
+            String msg = "Error while retrieving tenant information";
+            log.error(msg, e);
+            throw new APIManagementException("Error in retrieving Tenant Information while retrieving endpoint" +
+                    " registry given by id: " + registryId, e);
+        }
     }
 
     /**

@@ -14761,14 +14761,17 @@ public class ApiMgtDAO {
      * Return the details of an Endpoint Registry
      *
      * @param registryId Endpoint Registry Identifier
+     * @param tenantID  ID of the owner's tenant
      * @return Endpoint Registry Object
      * @throws APIManagementException
      */
-    public EndpointRegistryInfo getEndpointRegistryByUUID(String registryId) throws APIManagementException {
+    public EndpointRegistryInfo getEndpointRegistryByUUID(String registryId, int tenantID)
+            throws APIManagementException {
         String query = SQLConstants.GET_ENDPOINT_REGISTRY_BY_UUID;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, registryId);
+            ps.setInt(2, tenantID);
             ps.executeQuery();
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

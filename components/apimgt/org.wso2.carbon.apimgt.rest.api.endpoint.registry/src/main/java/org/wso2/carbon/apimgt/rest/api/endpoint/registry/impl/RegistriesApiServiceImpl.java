@@ -53,10 +53,12 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
     @Override
     public Response getAllEntriesInRegistry(String registryId, String query, String sortBy, String sortOrder, MessageContext messageContext) {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         RegistryEntryArrayDTO registryEntryArray = new RegistryEntryArrayDTO();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         try {
-            EndpointRegistryInfo endpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId);
+            EndpointRegistryInfo endpointRegistry =
+                    registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
             if (endpointRegistry == null) {
                 RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
                         " is not found", log);
@@ -74,10 +76,12 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
     @Override
     public Response getRegistryByUUID(String registryId, MessageContext messageContext) {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         RegistryDTO registryDTO = null;
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         try {
-            EndpointRegistryInfo endpointRegistryInfo = registryProvider.getEndpointRegistryByUUID(registryId);
+            EndpointRegistryInfo endpointRegistryInfo =
+                    registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
             if (endpointRegistryInfo != null) {
                 registryDTO = EndpointRegistryMappingUtils.fromEndpointRegistrytoDTO(endpointRegistryInfo);
             } else {
@@ -109,13 +113,14 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
     @Override
     public Response addRegistry(RegistryDTO body, MessageContext messageContext) {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         String user = RestApiUtil.getLoggedInUsername();
         EndpointRegistryInfo registry = EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(body, user);
         EndpointRegistryInfo createdRegistry = null;
         try {
             EndpointRegistry registryProvider = new EndpointRegistryImpl();
             String registryId = registryProvider.addEndpointRegistry(registry);
-            createdRegistry = registryProvider.getEndpointRegistryByUUID(registryId);
+            createdRegistry = registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
         } catch (APIMgtResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry with name '" + body.getName()
                     + "' already exists", e, log);
@@ -129,10 +134,12 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     @Override
     public Response createRegistryEntry(String registryId, RegistryEntryDTO registryEntry, InputStream
             definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         EndpointRegistryEntry createdEntry = null;
         try {
-            EndpointRegistryInfo endpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId);
+            EndpointRegistryInfo endpointRegistry =
+                    registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
             if (endpointRegistry == null) {
                 RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
                         " is not found", log);
@@ -161,9 +168,11 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
     @Override
     public Response deleteRegistry(String registryId, MessageContext messageContext) {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         try {
-            EndpointRegistryInfo endpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId);
+            EndpointRegistryInfo endpointRegistry =
+                    registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
             if (endpointRegistry == null) {
                 RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
                         " is not found", log);
@@ -179,10 +188,12 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
     @Override
     public Response getRegistryEntryByUuid(String registryId, String entryId, MessageContext messageContext) {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         EndpointRegistryEntry endpointRegistryEntry = null;
         try {
-            EndpointRegistryInfo endpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId);
+            EndpointRegistryInfo endpointRegistry =
+                    registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
             if (endpointRegistry == null) {
                 RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
                         " is not found", log);
