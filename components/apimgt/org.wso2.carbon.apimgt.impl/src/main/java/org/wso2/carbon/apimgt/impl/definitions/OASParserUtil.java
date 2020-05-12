@@ -656,7 +656,14 @@ public class OASParserUtil {
         return "";
     }
 
-
+    /**
+     * Extract the archive file and validates the openAPI definition
+     *
+     * @param inputStream   file as input stream
+     * @param returnContent whether to return the content of the definition in the response DTO
+     * @return APIDefinitionValidationResponse
+     * @throws APIManagementException if error occurred while parsing definition
+     */
     public static  APIDefinitionValidationResponse  extractAndValidateOpenAPIArchive(InputStream inputStream,
                                                                                      boolean returnContent)
             throws APIManagementException, IOException {
