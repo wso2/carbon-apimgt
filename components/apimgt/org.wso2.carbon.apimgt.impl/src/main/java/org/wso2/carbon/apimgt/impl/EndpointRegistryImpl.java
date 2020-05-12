@@ -81,16 +81,12 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * Deletes an Endpoint Registry
      *
-     * @param registryId Registry Identifier(UUID)
+     * @param registryUUID Registry Identifier(UUID)
+     * @param registryId Registry Identifier
      * @throws APIManagementException if failed to delete the Endpoint Registry
      */
-    public void deleteEndpointRegistry(String registryId) throws APIManagementException {
-        EndpointRegistryInfo endpointRegistryInfo = apiMgtDAO.getEndpointRegistryByUUID(registryId);
-        if (endpointRegistryInfo == null) {
-            APIUtil.handleResourceNotFoundException("Endpoint Registry with id: " + registryId + " does not exist");
-        } else {
-            apiMgtDAO.deleteEndpointRegistry(registryId, endpointRegistryInfo.getRegistryId());
-        }
+    public void deleteEndpointRegistry(String registryUUID, int registryId) throws APIManagementException {
+        apiMgtDAO.deleteEndpointRegistry(registryUUID, registryId);
     }
 
     /**
@@ -119,10 +115,6 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      */
     public EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryId, String registryEntryUuid)
             throws APIManagementException {
-
-        if (apiMgtDAO.getEndpointRegistryByUUID(registryId) == null) {
-            APIUtil.handleResourceNotFoundException("Endpoint Registry with id: " + registryId + " does not exist");
-        }
         return apiMgtDAO.getEndpointRegistryEntryByUUID(registryEntryUuid);
     }
 
@@ -134,9 +126,6 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      * @throws APIManagementException if failed to get entries of an Endpoint Registry
      */
     public List<EndpointRegistryEntry> getEndpointRegistryEntries(String registryId) throws APIManagementException {
-        if (apiMgtDAO.getEndpointRegistryByUUID(registryId) == null) {
-            APIUtil.handleResourceNotFoundException("Endpoint Registry with id: " + registryId + " does not exist");
-        }
         return apiMgtDAO.getEndpointRegistryEntries(registryId);
     }
 

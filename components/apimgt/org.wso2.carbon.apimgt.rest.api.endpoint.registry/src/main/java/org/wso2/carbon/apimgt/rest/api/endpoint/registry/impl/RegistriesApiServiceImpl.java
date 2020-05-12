@@ -56,13 +56,15 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
         RegistryEntryArrayDTO registryEntryArray = new RegistryEntryArrayDTO();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         try {
+            EndpointRegistryInfo endpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId);
+            if (endpointRegistry == null) {
+                RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
+                        " is not found", log);
+            }
             List<EndpointRegistryEntry> endpointRegistryEntryList = registryProvider.getEndpointRegistryEntries(registryId);
             for (EndpointRegistryEntry endpointRegistryEntry: endpointRegistryEntryList) {
                 registryEntryArray.add(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry));
             }
-        } catch (APIMgtResourceNotFoundException e) {
-            RestApiUtil.handleResourceNotFoundError("Endpoint Registry with id: " + registryId +
-                    " does not exist", e, log);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving entries of endpoint registry " +
                     "given by id: " + registryId, e, log);
@@ -161,10 +163,13 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     public Response deleteRegistry(String registryId, MessageContext messageContext) {
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         try {
-            registryProvider.deleteEndpointRegistry(registryId);
-        } catch (APIMgtResourceNotFoundException e) {
-            RestApiUtil.handleResourceNotFoundError("Endpoint Registry with id: " + registryId +
-                    " does not exist", e, log);
+            EndpointRegistryInfo endpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId);
+            if (endpointRegistry == null) {
+                RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
+                        " is not found", log);
+            } else {
+                registryProvider.deleteEndpointRegistry(registryId, endpointRegistry.getRegistryId());
+            }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while deleting the endpoint registry " +
                     "given by id: " + registryId, e, log);
@@ -177,6 +182,11 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         EndpointRegistryEntry endpointRegistryEntry = null;
         try {
+            EndpointRegistryInfo endpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId);
+            if (endpointRegistry == null) {
+                RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
+                        " is not found", log);
+            }
             endpointRegistryEntry = registryProvider.getEndpointRegistryEntryByUUID(registryId, entryId);
             if (endpointRegistryEntry == null) {
                 RestApiUtil.handleResourceNotFoundError("Endpoint registry entry with the id: " + entryId +
