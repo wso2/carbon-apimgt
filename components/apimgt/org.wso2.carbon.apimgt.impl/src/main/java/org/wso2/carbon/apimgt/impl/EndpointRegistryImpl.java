@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EndpointRegistry;
+import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -97,4 +98,27 @@ public class EndpointRegistryImpl implements EndpointRegistry {
                     "endpoint registries", e);
         }
     }
+
+    /**
+     * Adds a new Registry Entry
+     *
+     * @param registryEntry EndpointRegistryEntry
+     * @return entryID UUID of the created Registry Entry
+     * @throws APIManagementException if failed to add EndpointRegistryEntry
+     */
+    public EndpointRegistryEntry addEndpointRegistryEntry(EndpointRegistryEntry registryEntry, String provider)
+            throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+        int tenantId;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+//            return apiMgtDAO.addEndpointRegistry(endpointRegistry, tenantId);
+        } catch (UserStoreException e) {
+            String msg = "Error while retrieving tenant information";
+            log.error(msg, e);
+            throw new APIManagementException("Error in retrieving Tenant Information while adding registry entry: "
+                    + registryEntry.getName(), e);
+        }
+    };
 }

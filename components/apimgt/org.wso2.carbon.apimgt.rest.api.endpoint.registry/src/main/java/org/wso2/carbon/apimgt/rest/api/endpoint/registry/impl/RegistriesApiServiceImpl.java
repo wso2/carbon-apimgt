@@ -24,7 +24,9 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.EndpointRegistry;
+import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.EndpointRegistryImpl;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApiService;
 
@@ -120,6 +122,9 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     @Override
     public Response createRegistryEntry(String registryId, RegistryEntryDTO registryEntry, InputStream
             definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
+        String user = RestApiUtil.getLoggedInUsername();
+        ResourceFile definitionFile = new ResourceFile(definitionFileInputStream,
+                definitionFileDetail.getContentType().getType());
         return Response.ok().entity(registryEntry).build();
     }
 

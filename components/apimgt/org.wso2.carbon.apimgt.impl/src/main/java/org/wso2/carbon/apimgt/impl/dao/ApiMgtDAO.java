@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -14841,5 +14842,34 @@ public class ApiMgtDAO {
             handleException("Error while retrieving details of endpoint registries", e);
         }
         return endpointRegistryInfoList;
+    }
+
+    /**
+     * Add a new endpoint registry entry
+     *
+     * @param registryEntry EndpointRegistryEntry
+     * @param tenantID  ID of the owner's tenant
+     * @return registryId
+     */
+    public String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry, int tenantID) throws
+            APIManagementException {
+        String query = SQLConstants.ADD_ENDPOINT_REGISTRY_SQL;
+        String uuid = UUID.randomUUID().toString();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            ps.setString(1, uuid);
+            ps.setString(2, registryEntry.getName());
+            ps.setString(3, registryEntry.getServiceURL());
+            ps.setString(4, registryEntry.getDefinitionType());
+            ps.setString(5, registryEntry.getDefinitionURL());
+            ps.setString(6, registryEntry.getMetaData());
+            ps.setString(7, registryEntry.getServiceType());
+            ps.setBlob(8, registryEntry.getEndpointDefinition().getContent());
+            ps.setInt(9, registryEntry.getRegistryId());
+        } catch (SQLException e) {
+            handleException("Error while adding new endpoint registry entry: " + registryEntry.getName(), e);
+        }
+        return uuid;
     }
 }
