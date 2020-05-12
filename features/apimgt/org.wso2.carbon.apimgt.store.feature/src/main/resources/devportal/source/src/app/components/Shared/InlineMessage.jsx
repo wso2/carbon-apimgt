@@ -12,11 +12,11 @@ import VerticalDivider from './VerticalDivider';
 const styles = theme => ({
     root: {
         display: 'flex',
-        height: 100,
+        minHeight: 100,
         alignItems: 'center',
         paddingLeft: theme.spacing(2),
         borderRadius: theme.shape.borderRadius,
-        border: 'none',
+        border: 'solid 1px #ddd',
         '& span.material-icons': {
             fontSize: 60,
             color: theme.custom.info.color,
