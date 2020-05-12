@@ -47,6 +47,14 @@ public interface EndpointRegistry {
     EndpointRegistryInfo getEndpointRegistryByUUID(String registryId) throws APIManagementException;
 
     /**
+     * Deletes an Endpoint Registry
+     *
+     * @param registryId Registry Identifier(UUID)
+     * @throws APIManagementException if failed to delete the Endpoint Registry
+     */
+    void deleteEndpointRegistry(String registryId) throws APIManagementException;
+
+    /**
      * Returns details of all Endpoint Registries belong to a given tenant
      *
      * @param tenantDomain

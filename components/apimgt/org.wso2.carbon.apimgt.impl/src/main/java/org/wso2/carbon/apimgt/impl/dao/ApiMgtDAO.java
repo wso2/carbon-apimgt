@@ -14776,7 +14776,7 @@ public class ApiMgtDAO {
                     endpointRegistry.setUuid(rs.getString("UUID"));
                     endpointRegistry.setName(rs.getString("REG_NAME"));
                     endpointRegistry.setType(rs.getString("REG_TYPE"));
-                    endpointRegistry.setMode(rs.getString("MODE"));
+                    endpointRegistry.setMode(rs.getString("REG_MODE"));
                     endpointRegistry.setOwner(rs.getString("REG_OWNER"));
                     endpointRegistry.setRegistryId(rs.getInt("ID"));
                     return endpointRegistry;
@@ -14787,6 +14787,32 @@ public class ApiMgtDAO {
                     + registryId, e);
         }
         return null;
+    }
+
+    /**
+     * Deletes an Endpoint Registry
+     *
+     * @param registryUUID Registry Identifier(UUID)
+     * @param registryId Registry Identifier
+     * @throws APIManagementException if failed to delete the Endpoint Registry
+     */
+    public void deleteEndpointRegistry(String registryUUID, int registryId) throws APIManagementException {
+        String deleteRegQuery = SQLConstants.DELETE_ENDPOINT_REGISTRY_SQL;
+        String deleteRegEntryQuery = SQLConstants.DELETE_ENDPOINT_REGISTRY_ENTRY_BY_REGISTRY_ID_SQL;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statementDeleteRegistryEntries = connection.prepareStatement(deleteRegEntryQuery);
+             PreparedStatement statementDeleteRegistry = connection.prepareStatement(deleteRegQuery)
+             ) {
+            connection.setAutoCommit(false);
+            statementDeleteRegistryEntries.setInt(1, registryId);
+            statementDeleteRegistryEntries.execute();
+            statementDeleteRegistry.setInt(1, registryId);
+            statementDeleteRegistry.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Failed to delete Endpoint Registry with the id: " + registryUUID, e);
+        }
     }
 
     /**
@@ -14835,7 +14861,7 @@ public class ApiMgtDAO {
                     endpointRegistry.setUuid(rs.getString("UUID"));
                     endpointRegistry.setName(rs.getString("REG_NAME"));
                     endpointRegistry.setType(rs.getString("REG_TYPE"));
-                    endpointRegistry.setMode(rs.getString("MODE"));
+                    endpointRegistry.setMode(rs.getString("REG_MODE"));
                     endpointRegistry.setOwner(rs.getString("REG_OWNER"));
                     endpointRegistryInfoList.add(endpointRegistry);
                 }

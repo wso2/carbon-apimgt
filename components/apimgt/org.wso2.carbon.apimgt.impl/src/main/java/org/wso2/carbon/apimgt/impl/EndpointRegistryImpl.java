@@ -79,6 +79,21 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     }
 
     /**
+     * Deletes an Endpoint Registry
+     *
+     * @param registryId Registry Identifier(UUID)
+     * @throws APIManagementException if failed to delete the Endpoint Registry
+     */
+    public void deleteEndpointRegistry(String registryId) throws APIManagementException {
+        EndpointRegistryInfo endpointRegistryInfo = apiMgtDAO.getEndpointRegistryByUUID(registryId);
+        if (endpointRegistryInfo == null) {
+            APIUtil.handleResourceNotFoundException("Endpoint Registry with id: " + registryId + " does not exist");
+        } else {
+            apiMgtDAO.deleteEndpointRegistry(registryId, endpointRegistryInfo.getRegistryId());
+        }
+    }
+
+    /**
      * Returns details of all Endpoint Registries belong to a given tenant
      *
      * @param tenantDomain

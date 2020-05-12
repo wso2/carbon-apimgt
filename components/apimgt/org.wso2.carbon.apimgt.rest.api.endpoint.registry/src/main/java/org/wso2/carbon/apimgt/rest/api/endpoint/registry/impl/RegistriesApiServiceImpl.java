@@ -159,7 +159,16 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
     @Override
     public Response deleteRegistry(String registryId, MessageContext messageContext) {
-
+        EndpointRegistry registryProvider = new EndpointRegistryImpl();
+        try {
+            registryProvider.deleteEndpointRegistry(registryId);
+        } catch (APIMgtResourceNotFoundException e) {
+            RestApiUtil.handleResourceNotFoundError("Endpoint Registry with id: " + registryId +
+                    " does not exist", e, log);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while deleting the endpoint registry " +
+                    "given by id: " + registryId, e, log);
+        }
         return Response.ok().entity("Successfully deleted the registry").build();
     }
 
