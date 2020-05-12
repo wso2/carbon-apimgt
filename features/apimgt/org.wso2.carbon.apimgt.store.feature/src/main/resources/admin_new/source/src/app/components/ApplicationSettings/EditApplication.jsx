@@ -109,10 +109,9 @@ function Edit(props) {
             return false;
         }
         const restApi = new API();
-        let promiseAPICall = restApi.updateApplicationOwner(id, owner);
 
-        promiseAPICall = new Promise((resolve, reject) => {
-            promiseAPICall
+        const promiseAPICall = new Promise((resolve, reject) => {
+            restApi.updateApplicationOwner(id, owner)
                 .then(() => {
                     resolve(
                         <FormattedMessage
