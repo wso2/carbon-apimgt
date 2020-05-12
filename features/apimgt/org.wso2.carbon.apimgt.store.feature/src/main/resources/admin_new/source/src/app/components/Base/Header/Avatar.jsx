@@ -18,7 +18,6 @@ const styles = (theme) => ({
         paddingTop: '5px',
     },
     userLink: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar),
         fontSize: theme.typography.fontSize,
         textTransform: 'uppercase',
         fontWeight: 'bold',

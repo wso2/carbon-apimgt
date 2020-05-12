@@ -17,7 +17,6 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import AppBar from '@material-ui/core/AppBar';
 import { Avatar as AvatarComponent } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
@@ -52,6 +51,10 @@ const styles = (theme) => ({
     button: {
         borderColor: lightColor,
     },
+    headerToolbar: {
+        boxShadow: '0 -1px 0 #dddddd inset',
+        height: 50,
+    },
 });
 /**
  * Render header component
@@ -63,44 +66,42 @@ function Header(props) {
 
     return (
         <>
-            <AppBar color='primary' position='sticky' elevation={0}>
-                <Toolbar>
-                    <Grid container spacing={1} alignItems='center'>
-                        <Hidden smUp>
-                            <Grid item>
-                                <IconButton
-                                    color='inherit'
-                                    aria-label='open drawer'
-                                    onClick={() => handleDrawerToggle()}
-                                    className={classes.menuButton}
-                                >
-                                    <MenuIcon />
-                                </IconButton>
-                            </Grid>
-                        </Hidden>
-                        <Breadcrumbs />
-                        <Grid item xs />
+            <Toolbar className={classes.headerToolbar}>
+                <Grid container spacing={1} alignItems='center'>
+                    <Hidden smUp>
                         <Grid item>
-                            <Link className={classes.link} href='#' variant='body2'>
+                            <IconButton
+                                color='inherit'
+                                aria-label='open drawer'
+                                onClick={() => handleDrawerToggle()}
+                                className={classes.menuButton}
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                        </Grid>
+                    </Hidden>
+                    <Breadcrumbs />
+                    <Grid item xs />
+                    <Grid item>
+                        <Link className={classes.link} href='#' variant='body2'>
                                 Go to docs
-                            </Link>
-                        </Grid>
-                        <Grid item>
-                            <Tooltip title='Alerts • No alerts'>
-                                <IconButton color='inherit'>
-                                    <NotificationsIcon />
-                                </IconButton>
-                            </Tooltip>
-                        </Grid>
-                        <Grid item>
-                            {avatar}
-                            {/* <IconButton color="inherit" className={classes.iconButtonAvatar}>
+                        </Link>
+                    </Grid>
+                    <Grid item>
+                        <Tooltip title='Alerts • No alerts'>
+                            <IconButton color='inherit'>
+                                <NotificationsIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </Grid>
+                    <Grid item>
+                        {avatar}
+                        {/* <IconButton color="inherit" className={classes.iconButtonAvatar}>
                 <Avatar src="/static/images/avatar/1.jpg" alt="My Avatar" />
               </IconButton> */}
-                        </Grid>
                     </Grid>
-                </Toolbar>
-            </AppBar>
+                </Grid>
+            </Toolbar>
         </>
     );
 }
