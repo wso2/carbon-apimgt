@@ -48,8 +48,8 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
+import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -14778,6 +14778,7 @@ public class ApiMgtDAO {
                     endpointRegistry.setType(rs.getString("REG_TYPE"));
                     endpointRegistry.setMode(rs.getString("MODE"));
                     endpointRegistry.setOwner(rs.getString("REG_OWNER"));
+                    endpointRegistry.setRegistryId(rs.getInt("ID"));
                     return endpointRegistry;
                 }
             }
@@ -14809,7 +14810,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to check the existence of Endpoint Registry: " + registryName + " exists", e);
+            handleException("Failed to check the existence of Endpoint Registry: " + registryName, e);
         }
         return false;
     }
@@ -14869,8 +14870,6 @@ public class ApiMgtDAO {
                     endpointRegistryEntry.setServiceType(rs.getString("SERVICE_TYPE"));
                     endpointRegistryEntry.setServiceURL(rs.getString("SERVICE_URL"));
                     endpointRegistryEntry.setMetaData(rs.getString("METADATA"));
-                    ResourceFile resourceFile = new ResourceFile(rs.getBinaryStream("ENDPOINT_DEFINITION"),"");
-                    endpointRegistryEntry.setEndpointDefinition(resourceFile);
                     return endpointRegistryEntry;
                 }
             }
@@ -14913,5 +14912,59 @@ public class ApiMgtDAO {
             handleException("Error while retrieving entries of endpoint registry", e);
         }
         return endpointRegistryEntryList;
+    }
+
+    /**
+     * Add a new endpoint registry entry
+     *
+     * @param registryEntry EndpointRegistryEntry
+     * @return registryId
+     */
+    public String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException {
+        String query = SQLConstants.ADD_ENDPOINT_REGISTRY_ENTRY_SQL;
+        String uuid = UUID.randomUUID().toString();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            ps.setString(1, uuid);
+            ps.setString(2, registryEntry.getName());
+            ps.setString(3, registryEntry.getServiceURL());
+            ps.setString(4, registryEntry.getDefinitionType());
+            ps.setString(5, registryEntry.getDefinitionURL());
+            ps.setString(6, registryEntry.getMetaData());
+            ps.setString(7, registryEntry.getServiceType());
+            ps.setBlob(8, registryEntry.getEndpointDefinition().getContent());
+            ps.setInt(9, registryEntry.getRegistryId());
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding new endpoint registry entry: " + registryEntry.getName(), e);
+        }
+        return uuid;
+    }
+
+    /**
+     * Checks whether the given endpoint registry entry name is already available under given registry
+     *
+     * @param registryEntry
+     * @return boolean
+     */
+    public boolean isRegistryEntryNameExists(EndpointRegistryEntry registryEntry) throws APIManagementException {
+        String sql = SQLConstants.IS_ENDPOINT_REGISTRY_ENTRY_NAME_EXISTS;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, registryEntry.getName());
+            statement.setInt(2, registryEntry.getRegistryId());
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt("REGISTRY_ENTRY_COUNT");
+                if (count > 0) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check the existence of Registry Entry: " + registryEntry.getName(), e);
+        }
+        return false;
     }
 }

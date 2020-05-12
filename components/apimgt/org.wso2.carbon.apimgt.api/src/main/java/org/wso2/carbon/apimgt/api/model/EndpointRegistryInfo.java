@@ -33,6 +33,8 @@ public class EndpointRegistryInfo {
 
     private String owner = null;
 
+    private int registryId = 0;
+
     public String getUuid() {
 
         return uuid;
@@ -58,6 +60,11 @@ public class EndpointRegistryInfo {
         return owner;
     }
 
+    public int getRegistryId() {
+
+        return registryId;
+    }
+
     public void setUuid(String uuid) {
 
         this.uuid = uuid;
@@ -81,5 +88,10 @@ public class EndpointRegistryInfo {
     public void setOwner(String owner) {
 
         this.owner = owner;
+    }
+
+    public void setRegistryId(int registryId) {
+
+        this.registryId = registryId;
     }
 }

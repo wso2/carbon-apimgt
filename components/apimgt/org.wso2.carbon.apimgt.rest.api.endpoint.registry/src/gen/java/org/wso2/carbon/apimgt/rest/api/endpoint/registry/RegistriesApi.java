@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-11T11:27:37.048+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-12T10:58:45.332+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -187,7 +187,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     @Produces({ "application/json" })
     @Operation(summary = "Get All entries in the registry", description = "",
         security = {  @SecurityRequirement(name = "ReadRegistryEntry" , scopes = { "registry:entry_view" })
-                 }, tags={ "Registries" })
+                 }, tags={ "Registries Entries" })
 
     @ApiResponses(value = { 
         @ApiResponse(responseCode = "200",
