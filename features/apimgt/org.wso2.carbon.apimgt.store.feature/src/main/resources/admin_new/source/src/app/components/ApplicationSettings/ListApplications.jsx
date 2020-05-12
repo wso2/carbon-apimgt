@@ -32,14 +32,14 @@ import Configurations from 'Config';
 import EditIcon from '@material-ui/icons/Edit';
 
 /**
- * API call to get api category list
+ * API call to get application list
  * @returns {Promise}.
  */
 function apiCall() {
     return new Promise((resolve, reject) => {
         const restApi = new API();
         restApi
-            .apiCategoriesListGet()
+            .getApplicationList()
             .then((result) => {
                 resolve(result.body.list);
             })
@@ -83,7 +83,7 @@ export default function ListApplications() {
     const searchProps = {
         searchPlaceholder: intl.formatMessage({
             id: 'AdminPages.ApplicationSettings.List.search.default',
-            defaultMessage: 'Search by API Category name',
+            defaultMessage: 'Search by Application Name or Owner',
         }),
         active: true,
     };
@@ -99,15 +99,15 @@ export default function ListApplications() {
                             target='_blank'
                             href={
                                 Configurations.app.docUrl
-                                + 'develop/customizations/customizing-the-developer-portal/customize-api-listing/'
-                                + 'categorizing-and-grouping-apis/api-category-based-grouping/'
+                                + 'learn/consume-api/manage-application/advanced-topics/'
+                                + 'changing-the-owner-of-an-application/'
                             }
                         >
                             <ListItemText
                                 primary={(
                                     <FormattedMessage
                                         id='AdminPages.ApplicationSettings.List.help.link.one'
-                                        defaultMessage='API Category based Grouping'
+                                        defaultMessage='Changing the Owner of an Application'
                                     />
                                 )}
                             />
@@ -118,8 +118,8 @@ export default function ListApplications() {
         ),
         pageStyle: 'half',
         title: intl.formatMessage({
-            id: 'AdminPages.ApplicationSettings.List.title.apicategories',
-            defaultMessage: 'API Categories',
+            id: 'AdminPages.ApplicationSettings.List.title.application.settings',
+            defaultMessage: 'Application Settings',
         }),
     };
 
@@ -127,13 +127,16 @@ export default function ListApplications() {
         content: (
             <Typography variant='body2' color='textSecondary' component='p'>
                 <FormattedMessage
-                    id='AdminPages.ApplicationSettings.List.empty.content.apicategories'
+                    id='AdminPages.ApplicationSettings.List.empty.content.application.settings'
+                    values={{
+                        breakingLine: <br />,
+                    }}
                     defaultMessage={
-                        'You can use API categories to group APIs. In previous versions of WSO2 API Manager, '
-                        + 'the process of grouping APIs was carried out by using tag wise groups.'
-                        + ' Unlike tag wise grouping API categories do not use a naming convention.'
-                        + ' Therefore, the admin does not need to take into consideration any naming'
-                        + ' conventions when using API category based grouping.'
+                        'If required, you can transfer the ownership of your application to another user '
+                        + 'in your organization. Thereby, when transferring ownership, the new owner '
+                        + 'will have the required permission to delete or edit the respective application.'
+                        + '{breakingLine}{breakingLine}'
+                        + 'Create an application with Devportal to change ownership.'
                     }
                 />
             </Typography>
@@ -141,8 +144,8 @@ export default function ListApplications() {
         title: (
             <Typography gutterBottom variant='h5' component='h2'>
                 <FormattedMessage
-                    id='AdminPages.ApplicationSettings.List.empty.title.apicategories'
-                    defaultMessage='API Categories'
+                    id='AdminPages.ApplicationSettings.List.empty.title.change.application.ownership'
+                    defaultMessage='Application Ownership Change'
                 />
             </Typography>
         ),
@@ -159,7 +162,7 @@ export default function ListApplications() {
             EditComponent={() => <span />}
             editComponentProps={{
                 icon: <EditIcon />,
-                title: 'Edit API Category',
+                title: 'Change Application Owner',
             }}
             DeleteComponent={() => <span />}
         />
