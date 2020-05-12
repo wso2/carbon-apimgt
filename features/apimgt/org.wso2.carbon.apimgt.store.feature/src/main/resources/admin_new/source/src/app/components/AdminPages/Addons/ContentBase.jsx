@@ -15,10 +15,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import React from 'react';
 import PropTypes from 'prop-types';
-import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
@@ -26,6 +24,9 @@ import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = (theme) => ({
+    root: {
+        minHeight: 43,
+    },
     paper: {
         maxWidth: 936,
         margin: 'auto',
@@ -75,6 +76,9 @@ const styles = (theme) => ({
         padding: theme.spacing(6, 4),
         background: '#eaeff1',
     },
+    gridRoot: {
+        paddingLeft: 0,
+    },
 });
 
 /**
@@ -89,28 +93,20 @@ function ContentBase(props) {
 
     return (
         <>
-            <AppBar
-                component='div'
-                className={classes.secondaryBar}
-                color='primary'
-                position='static'
-                elevation={0}
-            >
-                <Toolbar>
-                    <Grid container alignItems='center' spacing={1}>
-                        <Grid item xs>
-                            <Typography color='inherit' variant='h5' component='h1'>
-                                {title}
-                            </Typography>
-                        </Grid>
-                        {help && (
-                            <Grid item>
-                                {help}
-                            </Grid>
-                        )}
+            <Toolbar className={classes.root}>
+                <Grid container alignItems='center' spacing={1} classes={{ root: classes.gridRoot }}>
+                    <Grid item xs>
+                        <Typography color='inherit' variant='h5' component='h1'>
+                            {title}
+                        </Typography>
                     </Grid>
-                </Toolbar>
-            </AppBar>
+                    {help && (
+                        <Grid item>
+                            {help}
+                        </Grid>
+                    )}
+                </Grid>
+            </Toolbar>
             <main className={classes.main}>
                 {pageStyle && (pageStyle === 'half') && (
                     <Paper className={classes.paper}>
