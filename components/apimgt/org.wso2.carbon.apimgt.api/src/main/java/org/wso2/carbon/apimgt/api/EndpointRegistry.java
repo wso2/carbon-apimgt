@@ -91,11 +91,11 @@ public interface EndpointRegistry {
     String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException;
 
     /**
-     *
-     * @param registryId
-     * @param endpointRegistryInfo
-     * @return
-     * @throws APIManagementException
+     * Updates an existing endpoint registry
+     * @param registryId uuid of the endpoint registry which needs to be updated
+     * @param endpointRegistryInfo EndpointRegistryInfo object with details to be updated
+     * @return uuid of the endpoint registry
+     * @throws APIManagementException if failed to update the endpoint registry
      */
     String updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistryInfo) throws APIManagementException;
 }
