@@ -280,7 +280,6 @@ ListLabels.defaultProps = {
 ListLabels.propTypes = {
     EditComponent: PropTypes.element.isRequired,
     editComponentProps: PropTypes.shape({}).isRequired,
-    deleteComponentProps: PropTypes.shape({}).isRequired,
     DeleteComponent: PropTypes.element.isRequired,
     showActionColumn: PropTypes.bool,
     columProps: PropTypes.element.isRequired,
