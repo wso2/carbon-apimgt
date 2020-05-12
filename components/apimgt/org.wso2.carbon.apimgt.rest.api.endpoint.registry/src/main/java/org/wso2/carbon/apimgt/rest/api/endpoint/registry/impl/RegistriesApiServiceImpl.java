@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.EndpointRegistry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
@@ -40,7 +41,6 @@ import org.wso2.carbon.apimgt.rest.api.endpoint.registry.util.EndpointRegistryMa
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.RequestScoped;
@@ -54,14 +54,19 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     @Override
     public Response getAllEntriesInRegistry(String registryId, String query, String sortBy, String sortOrder, MessageContext messageContext) {
         RegistryEntryArrayDTO registryEntryArray = new RegistryEntryArrayDTO();
-        RegistryEntryDTO registryEntry = new RegistryEntryDTO();
-        registryEntry.setEntryName("Pizzashack-endpoint");
-        registryEntry.setMetadata("{ \"mutualTLS\" : true }");
-        registryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
-        registryEntry.setDefinitionUrl("http://localhost/pizzashack?swagger.json");
-        registryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
-        registryEntry.setServiceUrl("http://localhost/pizzashack");
-        registryEntryArray.add(registryEntry);
+        EndpointRegistry registryProvider = new EndpointRegistryImpl();
+        try {
+            List<EndpointRegistryEntry> endpointRegistryEntryList = registryProvider.getEndpointRegistryEntries(registryId);
+            for (EndpointRegistryEntry endpointRegistryEntry: endpointRegistryEntryList) {
+                registryEntryArray.add(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry));
+            }
+        } catch (APIMgtResourceNotFoundException e) {
+            RestApiUtil.handleResourceNotFoundError("Endpoint Registry with id: " + registryId +
+                    " does not exist", e, log);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving entries of endpoint registry " +
+                    "given by id: " + registryId, e, log);
+        }
         return Response.ok().entity(registryEntryArray).build();
     }
 
@@ -88,7 +93,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     public Response getRegistries(String query, String sortBy, String sortOrder, MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
-        List<RegistryDTO> registryDTOList = new ArrayList<>();
+        RegistryArrayDTO registryDTOList = new RegistryArrayDTO();
         try {
             List<EndpointRegistryInfo> endpointRegistryInfoList = registryProvider.getEndpointRegistries(tenantDomain);
             for (EndpointRegistryInfo endpointRegistryInfo: endpointRegistryInfoList) {
@@ -104,7 +109,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     public Response addRegistry(RegistryDTO body, MessageContext messageContext) {
         String user = RestApiUtil.getLoggedInUsername();
         EndpointRegistryInfo registry = EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(body, user);
-        EndpointRegistryInfo createdRegistry = new EndpointRegistryInfo();
+        EndpointRegistryInfo createdRegistry = null;
         try {
             EndpointRegistry registryProvider = new EndpointRegistryImpl();
             String registryId = registryProvider.addEndpointRegistry(registry);
@@ -142,14 +147,20 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
     @Override
     public Response getRegistryEntryByUuid(String registryId, String entryId, MessageContext messageContext) {
-        RegistryEntryDTO registryEntry = new RegistryEntryDTO();
-        registryEntry.setEntryName("Pizzashack-endpoint");
-        registryEntry.setMetadata("{ \"mutualTLS\" : true }");
-        registryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
-        registryEntry.setDefinitionUrl("http://localhost/pizzashack?swagger.json");
-        registryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
-        registryEntry.setServiceUrl("http://localhost/pizzashack");
-        return Response.ok().entity(registryEntry).build();
+        EndpointRegistry registryProvider = new EndpointRegistryImpl();
+        EndpointRegistryEntry endpointRegistryEntry = null;
+        try {
+            endpointRegistryEntry = registryProvider.getEndpointRegistryEntryByUUID(registryId, entryId);
+            if (endpointRegistryEntry == null) {
+                RestApiUtil.handleResourceNotFoundError("Endpoint registry entry with the id: " + entryId +
+                        " is not found", log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while fetching endpoint registry entry: "
+                    + entryId, e, log);
+        }
+        return Response.ok().entity(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry))
+                .build();
     }
 
     @Override

@@ -16,8 +16,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.endpoint.registry.util;
 
+import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
+import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryDTO;
 
 /**
  * This class is responsible for mapping APIM core Endpoint Registry related objects into REST API
@@ -55,4 +58,42 @@ public class EndpointRegistryMappingUtils {
         return registryDTO;
     }
 
+    /**
+     * Converts a EndpointRegistryEntry object into RegistryEntryDTO object
+     *
+     * @param registryEntry EndpointRegistryEntry object
+     * @return RegistryEntryDTO corresponds to EndpointRegistryEntry object
+     */
+    public static RegistryEntryDTO fromRegistryEntryToDTO(EndpointRegistryEntry registryEntry) {
+        RegistryEntryDTO registryEntryDTO = new RegistryEntryDTO();
+        registryEntryDTO.setId(registryEntry.getEntryId());
+        registryEntryDTO.setEntryName(registryEntry.getName());
+        registryEntryDTO.setDefinitionType(
+                RegistryEntryDTO.DefinitionTypeEnum.fromValue(registryEntry.getDefinitionType()));
+        registryEntryDTO.setDefinitionUrl(registryEntry.getDefinitionURL());
+        registryEntryDTO.setMetadata(registryEntry.getMetaData());
+        registryEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.fromValue(registryEntry.getServiceType()));
+        registryEntryDTO.setServiceUrl(registryEntry.getServiceURL());
+        return registryEntryDTO;
+    }
+
+    /**
+     * Converts a RegistryEntryDTO object with endpointDefinition file into EndpointRegistryEntry object
+     *
+     * @param registryEntryDTO RegistryEntryDTO object
+     * @param endpointDefinition endpointDefinition file
+     * @return EndpointRegistryEntry corresponds to RegistryEntryDTO object
+     */
+    public static EndpointRegistryEntry fromDTOToRegistryEntry(RegistryEntryDTO registryEntryDTO,
+                                                               ResourceFile endpointDefinition) {
+        EndpointRegistryEntry registryEntry = new EndpointRegistryEntry();
+        registryEntry.setName(registryEntryDTO.getEntryName());
+        registryEntry.setDefinitionType(registryEntryDTO.getDefinitionType().toString());
+        registryEntry.setDefinitionURL(registryEntryDTO.getDefinitionUrl());
+        registryEntry.setEndpointDefinition(endpointDefinition);
+        registryEntry.setMetaData(registryEntryDTO.getMetadata());
+        registryEntry.setServiceType(registryEntryDTO.getServiceType().toString());
+        registryEntry.setServiceURL(registryEntryDTO.getServiceUrl());
+        return registryEntry;
+    }
 }

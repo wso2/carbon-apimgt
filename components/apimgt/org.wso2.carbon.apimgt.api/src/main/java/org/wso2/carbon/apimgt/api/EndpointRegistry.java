@@ -42,7 +42,7 @@ public interface EndpointRegistry {
      *
      * @param registryId Registry Identifier
      * @return An EndpointRegistryInfo object related to the given identifier or null
-     * @throws APIManagementException if failed get details of an Endpoint Registry
+     * @throws APIManagementException if failed to get details of an Endpoint Registry
      */
     EndpointRegistryInfo getEndpointRegistryByUUID(String registryId) throws APIManagementException;
 
@@ -50,10 +50,26 @@ public interface EndpointRegistry {
      * Returns details of all Endpoint Registries belong to a given tenant
      *
      * @param tenantDomain
-     * @return A list of EndpointRegistryInfo object
-     * @throws APIManagementException if failed get details of an Endpoint Registries
+     * @return A list of EndpointRegistryInfo objects
+     * @throws APIManagementException if failed to get details of Endpoint Registries
      */
     List<EndpointRegistryInfo> getEndpointRegistries(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Returns all entries belong to a given endpoint registry
+     *
+     * @param registryId UUID of the endpoint registry
+     * @return A list of EndpointRegistryEntry objects
+     * @throws APIManagementException if failed to get entries of an Endpoint Registry
+     */
+    List<EndpointRegistryEntry> getEndpointRegistryEntries(String registryId) throws APIManagementException;
+
+    /**
+     * Returns details of a specific Endpoint Registry Entry
+     * @return an EndpointRegistryEntry object
+     * @throws APIManagementException if failed get details of an Endpoint Registry Entry
+     */
+    EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryId, String registryEntryUuid) throws APIManagementException;
 
     /**
      * Adds a new Registry Entry
