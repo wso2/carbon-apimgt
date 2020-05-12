@@ -49,12 +49,13 @@ public class EndpointRegistryMappingUtils {
      * @param registry EndpointRegistryInfo object
      * @return RegistryDTO corresponds to EndpointRegistryInfo object
      */
-    public static RegistryDTO fromEndpointRegistrytoDTO(EndpointRegistryInfo registry) {
+    public static RegistryDTO fromEndpointRegistryToDTO(EndpointRegistryInfo registry) {
         RegistryDTO registryDTO = new RegistryDTO();
         registryDTO.setId(registry.getUuid());
         registryDTO.setName(registry.getName());
         registryDTO.setType(RegistryDTO.TypeEnum.fromValue(registry.getType()));
         registryDTO.setMode(RegistryDTO.ModeEnum.fromValue(registry.getMode()));
+        registryDTO.setOwner(registry.getOwner());
         return registryDTO;
     }
 

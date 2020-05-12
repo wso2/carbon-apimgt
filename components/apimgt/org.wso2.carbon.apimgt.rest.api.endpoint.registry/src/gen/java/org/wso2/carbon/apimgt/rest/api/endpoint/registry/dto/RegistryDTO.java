@@ -49,7 +49,7 @@ public class RegistryDTO   {
             @XmlEnum(String.class)
             public enum ModeEnum {
             
-                @XmlEnumValue("Read_Only") ONLY(String.valueOf("Read_Only")), @XmlEnumValue("Read_Write") WRITE(String.valueOf("Read_Write"));
+                @XmlEnumValue("ReadOnly") READONLY(String.valueOf("ReadOnly")), @XmlEnumValue("ReadWrite") READWRITE(String.valueOf("ReadWrite"));
             
             
             private String value;
@@ -76,6 +76,7 @@ public class RegistryDTO   {
             return null;
             }
             }    private ModeEnum mode = null;
+    private String owner = null;
 
     /**
     **/
@@ -140,13 +141,31 @@ public class RegistryDTO   {
 
     
     
-    @Schema(example = "Read_Only", description = "")
+    @Schema(example = "ReadOnly", description = "")
     @JsonProperty("mode")
           public ModeEnum getMode() {
     return mode;
     }
     public void setMode(ModeEnum mode) {
     this.mode = mode;
+    }
+
+    /**
+    **/
+    public RegistryDTO owner(String owner) {
+    this.owner = owner;
+    return this;
+    }
+
+    
+    
+    @Schema(example = "admin", description = "")
+    @JsonProperty("owner")
+          public String getOwner() {
+    return owner;
+    }
+    public void setOwner(String owner) {
+    this.owner = owner;
     }
 
 
@@ -162,12 +181,13 @@ RegistryDTO registry = (RegistryDTO) o;
     return Objects.equals(name, registry.name) &&
     Objects.equals(id, registry.id) &&
     Objects.equals(type, registry.type) &&
-    Objects.equals(mode, registry.mode);
+    Objects.equals(mode, registry.mode) &&
+    Objects.equals(owner, registry.owner);
 }
 
 @Override
 public int hashCode() {
-return Objects.hash(name, id, type, mode);
+return Objects.hash(name, id, type, mode, owner);
 }
 
 @Override
@@ -179,6 +199,7 @@ sb.append("    name: ").append(toIndentedString(name)).append("\n");
 sb.append("    id: ").append(toIndentedString(id)).append("\n");
 sb.append("    type: ").append(toIndentedString(type)).append("\n");
 sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
+sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
 sb.append("}");
 return sb.toString();
 }

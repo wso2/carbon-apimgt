@@ -62,8 +62,8 @@ paths:
           enum:
             - asc
             - desc
-      - $ref: '#/components/schemas/limit'
-      - $ref: '#/components/schemas/offset'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
       responses:
         200:
           description: |
@@ -602,10 +602,13 @@ components:
           - etcd
         mode:
           type: string
-          example: Read_Only
+          example: ReadOnly
           enum:
-          - Read_Only
-          - Read_Write
+          - ReadOnly
+          - ReadWrite
+        owner:
+          type: string
+          example: admin
 
     #-----------------------------------------------------
     # The Registry Array resource
@@ -638,7 +641,7 @@ components:
         entryName:
           type: string
           example: Pizzashack-Endpoint
-        service-url:
+        serviceUrl:
           type: string
           example: http://localhost/pizzashack
         serviceType:
@@ -735,25 +738,34 @@ components:
           description: |
             A detail description about the error message.
 
-  #-----------------------------------------------------
-  # The resources used in pagination
-  #-----------------------------------------------------
+######################################################
+# Parameters - required by some of the APIs above
+######################################################
+  parameters:
 
     #-----------------------------------------------------
     # The limit resource - The maximum number of resources to be returned by a GET
     #-----------------------------------------------------
     limit:
+      name: limit
+      in: query
       description: |
         Maximum limit of items to return.
-      default: 25
-      type: integer
+      required: false
+      schema:
+        type: integer
+        default: 25
 
     #-----------------------------------------------------
     # The offset resource - The order number of an instance in a qualified set of
     # resources at which to start to return the next batch of qualified resources
     #-----------------------------------------------------
     offset:
+      name: offset
+      in: query
       description: |
         Starting point within the complete list of items qualified.
-      default: 0
-      type: integer
+      required: false
+      schema:
+        type: integer
+        default: 0

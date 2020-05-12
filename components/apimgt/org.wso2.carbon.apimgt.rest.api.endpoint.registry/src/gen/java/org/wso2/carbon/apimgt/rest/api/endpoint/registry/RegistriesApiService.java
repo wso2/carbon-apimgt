@@ -23,13 +23,13 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-12T10:58:45.332+05:30[Asia/Colombo]")public interface RegistriesApiService {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-12T18:17:23.918+05:30[Asia/Colombo]")public interface RegistriesApiService {
         public Response addRegistry(RegistryDTO body, MessageContext messageContext) throws APIManagementException;
         public Response createRegistryEntry(String registryId, RegistryEntryDTO registryEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
         public Response deleteRegistry(String registryId, MessageContext messageContext) throws APIManagementException;
         public Response deleteRegistryEntry(String registryId, String entryId, MessageContext messageContext) throws APIManagementException;
         public Response getAllEntriesInRegistry(String registryId, String query, String sortBy, String sortOrder, MessageContext messageContext) throws APIManagementException;
-        public Response getRegistries(String query, String sortBy, String sortOrder, MessageContext messageContext) throws APIManagementException;
+        public Response getRegistries(String query, String sortBy, String sortOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
         public Response getRegistryByUUID(String registryId, MessageContext messageContext) throws APIManagementException;
         public Response getRegistryEntryByUuid(String registryId, String entryId, MessageContext messageContext) throws APIManagementException;
         public Response updateRegistry(String registryId, RegistryDTO body, MessageContext messageContext) throws APIManagementException;
