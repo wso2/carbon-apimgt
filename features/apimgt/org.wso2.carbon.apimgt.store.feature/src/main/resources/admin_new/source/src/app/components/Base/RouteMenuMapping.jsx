@@ -32,6 +32,7 @@ import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/
 import APICategories from 'AppComponents/APICategories/ListApiCategories';
 import BlacklistThrottlingPolicies from 'AppComponents/Throttling/Blacklist/List';
 import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom/List';
+import ListApplications from 'AppComponents/ApplicationSettings/ListApplications';
 
 
 const RouteMenuMapping = (intl) => [
@@ -131,7 +132,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Applications',
                 }),
                 path: '/settings/applications',
-                component: () => <DemoTable />,
+                component: () => <ListApplications />,
                 icon: <SettingsIcon />,
             },
             {
