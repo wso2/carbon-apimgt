@@ -14751,12 +14751,13 @@ public class ApiMgtDAO {
      */
     public void deleteSharedScope(String scopeName, String tenantDomain) throws APIManagementException {
 
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_SHARED_SCOPE)) {
             try {
                 connection.setAutoCommit(false);
                 statement.setString(1, scopeName);
-                statement.setString(2, tenantDomain);
+                statement.setInt(2, tenantId);
                 statement.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
