@@ -126,7 +126,7 @@ public class RegistryEntryDTO   {
     
     
     @Schema(example = "http://localhost/pizzashack", description = "")
-    @JsonProperty("service-url")
+    @JsonProperty("serviceUrl")
           public String getServiceUrl() {
     return serviceUrl;
     }

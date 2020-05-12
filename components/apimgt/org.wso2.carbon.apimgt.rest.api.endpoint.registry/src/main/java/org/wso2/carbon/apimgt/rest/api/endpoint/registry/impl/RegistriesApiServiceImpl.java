@@ -77,7 +77,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
         try {
             EndpointRegistryInfo endpointRegistryInfo = registryProvider.getEndpointRegistryByUUID(registryId);
             if (endpointRegistryInfo != null) {
-                registryDTO = EndpointRegistryMappingUtils.fromEndpointRegistrytoDTO(endpointRegistryInfo);
+                registryDTO = EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfo);
             } else {
                 RestApiUtil.handleResourceNotFoundError("Endpoint Registry with the id: " + registryId +
                         " is not found", log);
@@ -90,14 +90,15 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     }
 
     @Override
-    public Response getRegistries(String query, String sortBy, String sortOrder, MessageContext messageContext) {
+    public Response getRegistries(String query, String sortBy, String sortOrder, Integer limit, Integer offset,
+                                  MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         RegistryArrayDTO registryDTOList = new RegistryArrayDTO();
         try {
             List<EndpointRegistryInfo> endpointRegistryInfoList = registryProvider.getEndpointRegistries(tenantDomain);
             for (EndpointRegistryInfo endpointRegistryInfo: endpointRegistryInfoList) {
-                registryDTOList.add(EndpointRegistryMappingUtils.fromEndpointRegistrytoDTO(endpointRegistryInfo));
+                registryDTOList.add(EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfo));
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving details of endpoint registries", e, log);
@@ -121,7 +122,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             RestApiUtil.handleInternalServerError("Error while adding new endpoint registry: "
                     + registry.getName(), e, log);
         }
-        return Response.ok().entity(EndpointRegistryMappingUtils.fromEndpointRegistrytoDTO(createdRegistry)).build();
+        return Response.ok().entity(EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(createdRegistry)).build();
     }
 
     @Override
