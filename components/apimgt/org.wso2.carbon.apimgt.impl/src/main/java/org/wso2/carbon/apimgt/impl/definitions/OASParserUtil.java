@@ -55,7 +55,6 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.converter.SwaggerConverter;
-import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1234,9 +1233,9 @@ public class OASParserUtil {
      * @param api            API
      * @return URITemplate
      */
-    public static API setExtensionsToAPI(String swaggerContent, API api, boolean isPublisherPortalUsed) throws APIManagementException {
+    public static API setExtensionsToAPI(String swaggerContent, API api, boolean isBasepathExtractedFromSwagger) throws APIManagementException {
         APIDefinition apiDefinition = getOASParser(swaggerContent);
-        api = apiDefinition.setExtenstionsToAPI(swaggerContent,api,isPublisherPortalUsed);
+        api = apiDefinition.setExtensionsToAPI(swaggerContent,api,isBasepathExtractedFromSwagger);
         return api;
     }
 

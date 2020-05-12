@@ -429,9 +429,9 @@ public final class APIImportUtil {
                     importedApi.setUriTemplates(uriTemplates);
                     Set<Scope> scopes = apiDefinition.getScopes(swaggerContent);
                     importedApi.setScopes(scopes);
-                    boolean isPublisherPortalUsed = false;
+                    boolean isBasepathExtractedFromSwagger = true;
                     //Setup vendor extensions to API when importing through CTL tool
-                    importedApi = OASParserUtil.setExtensionsToAPI(swaggerContent, importedApi, isPublisherPortalUsed);
+                    importedApi = OASParserUtil.setExtensionsToAPI(swaggerContent, importedApi, isBasepathExtractedFromSwagger);
                 }
             }
             // This is required to make url templates and scopes get effected
