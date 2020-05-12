@@ -277,7 +277,7 @@
     },
     "/registries/{registryId}/entries" : {
       "get" : {
-        "tags" : [ "Registries" ],
+        "tags" : [ "Registries Entries" ],
         "summary" : "Get All entries in the registry",
         "operationId" : "getAllEntriesInRegistry",
         "parameters" : [ {

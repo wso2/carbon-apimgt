@@ -132,19 +132,11 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      * @return entryID UUID of the created Registry Entry
      * @throws APIManagementException if failed to add EndpointRegistryEntry
      */
-    public EndpointRegistryEntry addEndpointRegistryEntry(EndpointRegistryEntry registryEntry, String provider)
-            throws APIManagementException {
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
-        int tenantId;
-        try {
-            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-//            return apiMgtDAO.addEndpointRegistry(endpointRegistry, tenantId);
-        } catch (UserStoreException e) {
-            String msg = "Error while retrieving tenant information";
-            log.error(msg, e);
-            throw new APIManagementException("Error in retrieving Tenant Information while adding registry entry: "
-                    + registryEntry.getName(), e);
+    public String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException {
+        if (apiMgtDAO.isRegistryEntryNameExists(registryEntry)) {
+            APIUtil.handleResourceAlreadyExistsException("Endpoint Registry with name '" + registryEntry.getName()
+                    + "' already exists");
         }
-    };
+        return apiMgtDAO.addEndpointRegistryEntry(registryEntry);
+    }
 }

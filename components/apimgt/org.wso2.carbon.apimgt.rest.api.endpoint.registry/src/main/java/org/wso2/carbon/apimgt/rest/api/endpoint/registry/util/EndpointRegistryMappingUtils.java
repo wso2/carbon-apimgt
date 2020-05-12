@@ -85,7 +85,7 @@ public class EndpointRegistryMappingUtils {
      * @return EndpointRegistryEntry corresponds to RegistryEntryDTO object
      */
     public static EndpointRegistryEntry fromDTOToRegistryEntry(RegistryEntryDTO registryEntryDTO,
-                                                               ResourceFile endpointDefinition) {
+                                                               ResourceFile endpointDefinition, int registryId) {
         EndpointRegistryEntry registryEntry = new EndpointRegistryEntry();
         registryEntry.setName(registryEntryDTO.getEntryName());
         registryEntry.setDefinitionType(registryEntryDTO.getDefinitionType().toString());
@@ -94,6 +94,7 @@ public class EndpointRegistryMappingUtils {
         registryEntry.setMetaData(registryEntryDTO.getMetadata());
         registryEntry.setServiceType(registryEntryDTO.getServiceType().toString());
         registryEntry.setServiceURL(registryEntryDTO.getServiceUrl());
+        registryEntry.setRegistryId(registryId);
         return registryEntry;
     }
 }
