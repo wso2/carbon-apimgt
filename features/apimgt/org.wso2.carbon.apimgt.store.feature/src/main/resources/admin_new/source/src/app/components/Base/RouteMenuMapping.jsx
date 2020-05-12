@@ -30,6 +30,7 @@ import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
 import DemoTable from 'AppComponents/AdminPages/Microgateways/List';
 import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
 import APICategories from 'AppComponents/APICategories/ListApiCategories';
+import BlacklistThrottlingPolicies from 'AppComponents/Throttling/Blacklist/List';
 
 
 const RouteMenuMapping = (intl) => [
@@ -200,7 +201,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Blacklist Policies',
                 }),
                 path: '/throttling/blacklisted',
-                component: () => <DemoTable />,
+                component: () => <BlacklistThrottlingPolicies />,
                 icon: <PhonelinkSetupIcon />,
             },
         ],
