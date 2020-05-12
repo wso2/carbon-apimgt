@@ -89,4 +89,13 @@ public interface EndpointRegistry {
      * @throws APIManagementException if failed to add EndpointRegistryEntry
      */
     String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException;
+
+    /**
+     *
+     * @param registryId
+     * @param endpointRegistryInfo
+     * @return
+     * @throws APIManagementException
+     */
+    String updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistryInfo) throws APIManagementException;
 }
