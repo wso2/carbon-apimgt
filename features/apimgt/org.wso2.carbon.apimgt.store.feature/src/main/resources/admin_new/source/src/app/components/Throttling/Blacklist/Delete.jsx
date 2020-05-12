@@ -36,23 +36,23 @@ function Delete(props) {
     } = props;
 
     const formSaveCallback = () => {
-        const policyId = dataRow[4];
+        const policyId = dataRow.conditionUUID;
         const promiseAPICall = restApi
-            .deleteApplicationThrottlingPolicy(policyId)
+            .deleteBlacklistPolicy(policyId)
             .then(() => {
                 updateList();
                 return (
                     <FormattedMessage
-                        id='Throttling.Application.Policy.policy.delete.success'
-                        defaultMessage='Application Rate Limiting Policy successfully deleted.'
+                        id='Throttling.Blacklist.Policy.policy.delete.success'
+                        defaultMessage='Blacklist Policy successfully deleted.'
                     />
                 );
             })
             .catch(() => {
                 return (
                     <FormattedMessage
-                        id='Throttling.Application.Policy.policy.delete.error'
-                        defaultMessage='Application Rate Limiting Policy could not be deleted.'
+                        id='Throttling.Blacklist.Policy.policy.delete.error'
+                        defaultMessage='Blacklist Policy could not be deleted.'
                     />
                 );
             });
@@ -62,15 +62,15 @@ function Delete(props) {
 
     return (
         <FormDialogBase
-            title='Delete Application Policy?'
+            title='Delete Blacklist Policy?'
             saveButtonText='Delete'
             icon={<DeleteForeverIcon />}
             formSaveCallback={formSaveCallback}
         >
             <DialogContentText>
                 <FormattedMessage
-                    id='Throttling.Application.Policy.policy.dialog.delete.error'
-                    defaultMessage='Application Rate Limiting Policy will be deleted.'
+                    id='Throttling.Blacklist.Policy.policy.dialog.delete.error'
+                    defaultMessage='Blacklist Policy will be deleted.'
                 />
             </DialogContentText>
         </FormDialogBase>
@@ -83,6 +83,9 @@ Delete.propTypes = {
     }).isRequired,
     applicationThrottlingPolicyList: PropTypes.shape({
         applicationThrottlingPolicyList: PropTypes.array.isRequired,
+    }).isRequired,
+    dataRow: PropTypes.shape({
+        conditionUUID: PropTypes.number.isRequired,
     }).isRequired,
 };
 export default injectIntl(Delete);

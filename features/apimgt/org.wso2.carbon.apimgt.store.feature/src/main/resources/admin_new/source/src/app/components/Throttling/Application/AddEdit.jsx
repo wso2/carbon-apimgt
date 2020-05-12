@@ -120,7 +120,7 @@ function reducer(state, newValue) {
 function AddEdit(props) {
     const classes = useStyles();
     const {
-        updateList, icon, triggerButtonText, title, applicationThrottlingPolicyList, dataRow,
+        updateList, icon, triggerButtonText, title, dataRow,
     } = props;
     const [state, dispatch] = useReducer(reducer, initialState);
     const {
@@ -195,10 +195,7 @@ function AddEdit(props) {
         }
 
         if (dataRow) {
-            const selectedPolicy = applicationThrottlingPolicyList.filter(
-                (policyy) => policyy.policyName === dataRow[0],
-            );
-            const policyId = selectedPolicy.length !== 0 && selectedPolicy[0].policyId;
+            const policyId = dataRow[4];
             promisedAddApplicationPolicy = restApi.updateApplicationThrottlingPolicy(policyId,
                 applicationThrottlingPolicy);
             promisedAddApplicationPolicy
@@ -248,10 +245,7 @@ function AddEdit(props) {
     const dialogOpenCallback = () => {
         if (dataRow) {
             setIsEditMode(true);
-            const selectedPolicy = applicationThrottlingPolicyList.filter(
-                (policy) => policy.policyName === dataRow[0],
-            );
-            const policyId = selectedPolicy.length !== 0 && selectedPolicy[0].policyId;
+            const policyId = dataRow[4];
             restApi.applicationThrottlingPolicyGet(policyId).then((result) => {
                 initialState = {
                     policyName: result.body.policyName,
