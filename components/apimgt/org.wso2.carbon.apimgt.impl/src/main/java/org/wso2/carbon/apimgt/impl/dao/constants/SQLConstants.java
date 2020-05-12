@@ -1410,7 +1410,7 @@ public class SQLConstants {
             "INSERT INTO ENDPOINT_REG (UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, REG_OWNER, READ_ROLE," +
                     " WRITE_ROLE) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-    public static final String DELETE_ENDPOINT_REGISTRY_SQL = "DELETE FROM ENDPOINT_REG WHERE ID = ?";
+    public static final String DELETE_ENDPOINT_REGISTRY_SQL = "DELETE FROM ENDPOINT_REG WHERE UUID = ?";
 
     public static final String GET_ENDPOINT_REGISTRY_BY_UUID =
             " SELECT UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, REG_OWNER, READ_ROLE, WRITE_ROLE, ID FROM " +
@@ -1439,9 +1439,6 @@ public class SQLConstants {
 
     public static final String IS_ENDPOINT_REGISTRY_ENTRY_NAME_EXISTS = "SELECT COUNT(UUID) AS REGISTRY_ENTRY_COUNT" +
             " FROM ENDPOINT_REG_ENTRY WHERE LOWER(ENTRY_NAME) = LOWER(?) AND REG_ID = ?";
-
-    public static final String DELETE_ENDPOINT_REGISTRY_ENTRY_BY_REGISTRY_ID_SQL = "DELETE FROM ENDPOINT_REG_ENTRY " +
-            "WHERE REG_ID = ?";
 
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +

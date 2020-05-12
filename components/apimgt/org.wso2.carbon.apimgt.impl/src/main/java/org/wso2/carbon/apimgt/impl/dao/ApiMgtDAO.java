@@ -14796,21 +14796,16 @@ public class ApiMgtDAO {
      * Deletes an Endpoint Registry
      *
      * @param registryUUID Registry Identifier(UUID)
-     * @param registryId Registry Identifier
      * @throws APIManagementException if failed to delete the Endpoint Registry
      */
-    public void deleteEndpointRegistry(String registryUUID, int registryId) throws APIManagementException {
+    public void deleteEndpointRegistry(String registryUUID) throws APIManagementException {
         String deleteRegQuery = SQLConstants.DELETE_ENDPOINT_REGISTRY_SQL;
-        String deleteRegEntryQuery = SQLConstants.DELETE_ENDPOINT_REGISTRY_ENTRY_BY_REGISTRY_ID_SQL;
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statementDeleteRegistryEntries = connection.prepareStatement(deleteRegEntryQuery);
              PreparedStatement statementDeleteRegistry = connection.prepareStatement(deleteRegQuery)
              ) {
             connection.setAutoCommit(false);
-            statementDeleteRegistryEntries.setInt(1, registryId);
-            statementDeleteRegistryEntries.execute();
-            statementDeleteRegistry.setInt(1, registryId);
+            statementDeleteRegistry.setString(1, registryUUID);
             statementDeleteRegistry.execute();
             connection.commit();
         } catch (SQLException e) {

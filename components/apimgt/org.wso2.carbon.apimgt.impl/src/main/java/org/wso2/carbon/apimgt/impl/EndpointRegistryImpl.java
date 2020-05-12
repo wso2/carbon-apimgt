@@ -94,11 +94,10 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      * Deletes an Endpoint Registry
      *
      * @param registryUUID Registry Identifier(UUID)
-     * @param registryId Registry Identifier
      * @throws APIManagementException if failed to delete the Endpoint Registry
      */
-    public void deleteEndpointRegistry(String registryUUID, int registryId) throws APIManagementException {
-        apiMgtDAO.deleteEndpointRegistry(registryUUID, registryId);
+    public void deleteEndpointRegistry(String registryUUID) throws APIManagementException {
+        apiMgtDAO.deleteEndpointRegistry(registryUUID );
     }
 
     /**

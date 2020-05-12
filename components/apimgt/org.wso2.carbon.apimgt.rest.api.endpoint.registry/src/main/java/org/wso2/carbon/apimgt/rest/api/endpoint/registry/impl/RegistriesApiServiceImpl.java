@@ -176,9 +176,8 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             if (endpointRegistry == null) {
                 RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
                         " is not found", log);
-            } else {
-                registryProvider.deleteEndpointRegistry(registryId, endpointRegistry.getRegistryId());
             }
+            registryProvider.deleteEndpointRegistry(registryId);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while deleting the endpoint registry " +
                     "given by id: " + registryId, e, log);
