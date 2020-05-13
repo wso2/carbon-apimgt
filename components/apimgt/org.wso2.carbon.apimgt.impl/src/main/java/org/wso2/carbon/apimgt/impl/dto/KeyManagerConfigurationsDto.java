@@ -156,7 +156,7 @@ public class KeyManagerConfigurationsDto {
         private String defaultValue;
         private boolean required;
         private boolean mask;
-        private List<String> values = new ArrayList<>();
+        private List values = new ArrayList<>();
         private boolean multiple;
         public String getName() {
 
@@ -228,7 +228,7 @@ public class KeyManagerConfigurationsDto {
             this.mask = mask;
         }
 
-        public List<String> getValues() {
+        public List<Object> getValues() {
 
             return values;
         }
