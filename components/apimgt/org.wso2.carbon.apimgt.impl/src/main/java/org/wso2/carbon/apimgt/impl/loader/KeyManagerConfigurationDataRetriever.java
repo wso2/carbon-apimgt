@@ -23,8 +23,6 @@ import java.util.TimerTask;
 
 public class KeyManagerConfigurationDataRetriever extends TimerTask {
 
-    private int maxRetries = 15;
-    private long retryTimeout = 15l;
     private Log log = LogFactory.getLog(KeyManagerConfigurationDataRetriever.class);
 
     @Override
@@ -56,8 +54,10 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                             retry = false;
                         } catch (IOException ex) {
                             retryCount++;
+                            int maxRetries = 15;
                             if (retryCount < maxRetries) {
                                 retry = true;
+                                long retryTimeout = 15l;
                                 log.warn("Failed retrieving Key Manager Configurations from remote " +
                                         "endpoint: " + ex.getMessage()
                                         + ". Retrying after " + retryTimeout + " seconds...");
@@ -74,14 +74,19 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                     }
                     for (KeyManagerConfiguration keyManagerConfiguration : keyManagerConfigurations) {
                         if (keyManagerConfiguration.isEnabled()){
-                            ServiceReferenceHolder.getInstance().getKeyManagerConfigurationService()
-                                    .addKeyManagerConfiguration(keyManagerConfiguration.getTenantDomain(),
-                                            keyManagerConfiguration.getName(), keyManagerConfiguration.getType(),
-                                            keyManagerConfiguration);
+                            try {
+                                ServiceReferenceHolder.getInstance().getKeyManagerConfigurationService()
+                                        .addKeyManagerConfiguration(keyManagerConfiguration.getTenantDomain(),
+                                                keyManagerConfiguration.getName(), keyManagerConfiguration.getType(),
+                                                keyManagerConfiguration);
+                            } catch (APIManagementException e) {
+                                log.error("Error while configuring Key Manager "+ keyManagerConfiguration.getName() +
+                                        " in tenant " + keyManagerConfiguration.getTenantDomain(), e);
+                            }
                         }
                     }
 
-                } catch (InterruptedException | IOException | APIManagementException e) {
+                } catch (InterruptedException | IOException  e) {
                     log.error("Error while retrieving key manager configurations", e);
                 }
             }

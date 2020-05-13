@@ -59,7 +59,6 @@ public class ApplicationUtilsTestCase {
 
         PowerMockito.mockStatic(KeyManagerHolder.class);
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super")).thenReturn(keyManager);
         ApplicationUtils.createAccessTokenRequest(keyManager, oAuthApplicationInfo, null);
         Mockito.verify(keyManager, Mockito.times(1))
                 .buildAccessTokenRequestFromOAuthApp(Matchers.any(OAuthApplicationInfo.class),
@@ -72,7 +71,6 @@ public class ApplicationUtilsTestCase {
         PowerMockito.mockStatic(KeyManagerHolder.class);
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super")).thenReturn(keyManager);
         ApplicationUtils.createAccessTokenRequest(keyManager, oAuthApplicationInfo, accessTokenRequest);
         Mockito.verify(keyManager, Mockito.times(1))
                 .buildAccessTokenRequestFromOAuthApp(Matchers.any(OAuthApplicationInfo.class),
@@ -85,7 +83,6 @@ public class ApplicationUtilsTestCase {
         PowerMockito.mockStatic(KeyManagerHolder.class);
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super")).thenReturn(null);
         AccessTokenRequest result = ApplicationUtils.createAccessTokenRequest(null, oAuthApplicationInfo,
                 accessTokenRequest);
         Assert.assertNull(result);
@@ -98,7 +95,6 @@ public class ApplicationUtilsTestCase {
     public void testPopulateTokenRequestWhenAccessTokenIsNull() throws APIManagementException {
 
         PowerMockito.mockStatic(KeyManagerHolder.class);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super")).thenReturn(keyManager);
         ApplicationUtils.populateTokenRequest(keyManager, "", null);
         Mockito.verify(keyManager, Mockito.times(1))
                 .buildAccessTokenRequestFromJSON(Matchers.anyString(),
@@ -110,7 +106,6 @@ public class ApplicationUtilsTestCase {
 
         PowerMockito.mockStatic(KeyManagerHolder.class);
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super")).thenReturn(keyManager);
         ApplicationUtils.populateTokenRequest(keyManager, "", accessTokenRequest);
         Mockito.verify(keyManager, Mockito.times(1))
                 .buildAccessTokenRequestFromJSON(Matchers.anyString(),
@@ -131,7 +126,7 @@ public class ApplicationUtilsTestCase {
     public void testCrateOauthAppRequest() throws APIManagementException {
 
         PowerMockito.mockStatic(KeyManagerHolder.class);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super")).thenReturn(keyManager);
+        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super", "default")).thenReturn(keyManager);
         OAuthAppRequest oAuthAppRequest = ApplicationUtils
                 .createOauthAppRequest("client1", "clientId", "http://foo.com", "subscribe", "details", "DEFAULT",
                         "carbon.super", "default");

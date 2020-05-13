@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.security.jwt.transformer;
+package org.wso2.carbon.apimgt.impl.jwt.transformer;
 
 import com.nimbusds.jwt.JWTClaimsSet;
+import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
 
 /**
  * This Class will be used to transform JWT claims to local claims
@@ -37,4 +38,6 @@ public interface JWTTransformer {
      * @return issuer url.
      */
     public String getIssuer();
+
+    public void loadConfiguration(TokenIssuerDto tokenIssuerConfiguration);
 }

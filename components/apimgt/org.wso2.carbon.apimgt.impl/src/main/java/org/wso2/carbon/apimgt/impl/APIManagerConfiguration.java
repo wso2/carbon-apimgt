@@ -1532,6 +1532,14 @@ public class APIManagerConfiguration {
                             StringUtils.isNotEmpty(keyManagerImplementation.getText())) {
                         keyManagerConfigurationDto.setImplementationClass(keyManagerImplementation.getText());
                     }
+                    OMElement jwtValidatorImplementation =
+                            keyManagerElement.getFirstChildWithName(
+                                    new QName(APIConstants.KeyManager.JWT_VALIDATOR_IMPLEMENTATION));
+                    if (jwtValidatorImplementation != null &&
+                            StringUtils.isNotEmpty(jwtValidatorImplementation.getText())) {
+                        keyManagerConfigurationDto
+                                .setJwtValidatorImplementationClass(jwtValidatorImplementation.getText());
+                    }
                     OMElement additionalConfigurationElement =
                             keyManagerElement
                                     .getFirstChildWithName(new QName(APIConstants.KeyManager.ADDITIONAL_CONFIGURATION));

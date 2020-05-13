@@ -933,11 +933,7 @@ public final class APIConstants {
     public static class KeyValidationStatus {
         public static final int API_AUTH_GENERAL_ERROR = 900900;
         public static final int API_AUTH_INVALID_CREDENTIALS = 900901;
-        public static final int API_AUTH_MISSING_CREDENTIALS = 900902;
-        public static final int API_AUTH_ACCESS_TOKEN_EXPIRED = 900903;
-        public static final int API_AUTH_ACCESS_TOKEN_INACTIVE = 900904;
         public static final int API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE = 900905;
-        public static final int API_AUTH_INCORRECT_API_RESOURCE = 900906;
         public static final int API_BLOCKED = 900907;
         public static final int API_AUTH_RESOURCE_FORBIDDEN = 900908;
         public static final int SUBSCRIPTION_INACTIVE = 900909;
@@ -2099,6 +2095,7 @@ public final class APIConstants {
         public static final String KEY_MANAGER_CONFIGURATIONS = "KeyManagerConfigurations";
         public static final String KEY_MANAGER = "KeyManager";
         public static final String IMPLEMENTATION = "Implementation";
+        public static final String JWT_VALIDATOR_IMPLEMENTATION = "JWTValidatorImplementation";
         public static final String ADDITIONAL_CONFIGURATION = "AdditionalConfigurations";
         public static final String CONNECTION_CONFIGURATIONS = "ConnectionConfigurations";
         public static final String CONNECTION_CONFIGURATION = "ConnectionConfiguration";
@@ -2128,7 +2125,6 @@ public final class APIConstants {
         public static final String VALIDATION_VALUE = "validation_value";
         public static final String ENABLE_TOKEN_VALIDATION = "validation_enable";
         public static final String VALIDATION_ENTRY_JWT_BODY = "body";
-        public static final String API_LEVEL_KEY_MANAGERS = "api_level_key_managers";
         public static final String API_LEVEL_ALL_KEY_MANAGERS = "all";
         public static final String REGISTERED_TENANT_DOMAIN = "tenantDomain";
         public static class KeyManagerEvent {

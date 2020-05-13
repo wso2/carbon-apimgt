@@ -241,8 +241,11 @@ public class KeyManagerMappingUtil {
             }
             additionalProperties.put(APIConstants.KeyManager.VALIDATION_VALUE,tokenValidation.getValue());
         }
-        additionalProperties
-                .put(APIConstants.KeyManager.CLAIM_MAPPING, keyManagerDTO.getClaimMapping());
+        List<ClaimMappingEntryDTO> claimMapping = keyManagerDTO.getClaimMapping();
+        if (claimMapping != null){
+            additionalProperties
+                    .put(APIConstants.KeyManager.CLAIM_MAPPING, new Gson().toJsonTree(claimMapping));
+        }
         keyManagerConfigurationDTO.setAdditionalProperties(additionalProperties);
         return keyManagerConfigurationDTO;
     }

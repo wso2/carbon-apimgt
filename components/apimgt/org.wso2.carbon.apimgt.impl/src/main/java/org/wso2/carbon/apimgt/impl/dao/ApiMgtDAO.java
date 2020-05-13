@@ -4984,7 +4984,6 @@ public class ApiMgtDAO {
      */
     public void deleteApplication(Application application) throws APIManagementException {
         String tenantDomain = MultitenantUtils.getTenantDomain(application.getSubscriber().getName());
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
         Connection connection = null;
         PreparedStatement deleteMappingQuery = null;
         PreparedStatement prepStmt = null;
@@ -5027,36 +5026,31 @@ public class ApiMgtDAO {
             prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
             prepStmtGetConsumerKey.setInt(1, application.getId());
             rs = prepStmtGetConsumerKey.executeQuery();
-            List<String> consumerKeys = new ArrayList<>();
 
             deleteDomainApp = connection.prepareStatement(deleteDomainAppQuery);
             while (rs.next()) {
                 String consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
-
+                String keyManagerName = rs.getString("KEY_MANAGER");
                 // This is true when OAuth app has been created by pasting consumer key/secret in the screen.
                 String mode = rs.getString("CREATE_MODE");
                 if (consumerKey != null) {
                     deleteDomainApp.setString(1, consumerKey);
                     deleteDomainApp.addBatch();
+                    KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
                     if (keyManager != null){
                         keyManager.deleteMappedApplication(consumerKey);
                     }
                     // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
                     // call delete.
                     if (!APIConstants.OAuthAppMode.MAPPED.name().equals(mode)) {
-                        // Adding clients to be deleted.
-                        consumerKeys.add(consumerKey);
+                        //delete on oAuthorization server.
+                        if (log.isDebugEnabled()) {
+                            log.debug("Deleting Oauth application with consumer key " + consumerKey + " from the Oauth server");
+                        }
+                        if (keyManager != null){
+                            keyManager.deleteApplication(consumerKey);
+                        }
                     }
-                }
-            }
-
-            for (String consumerKey : consumerKeys) {
-                //delete on oAuthorization server.
-                if (log.isDebugEnabled()) {
-                    log.debug("Deleting Oauth application with consumer key " + consumerKey + " from the Oauth server");
-                }
-                if (keyManager != null){
-                    keyManager.deleteApplication(consumerKey);
                 }
             }
 
