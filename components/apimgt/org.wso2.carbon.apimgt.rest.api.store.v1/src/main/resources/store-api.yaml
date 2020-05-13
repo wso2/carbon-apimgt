@@ -5691,11 +5691,46 @@ definitions:
       applicationConfiguration:
         type: array
         items:
-          type: object
+          $ref: '#/definitions/KeyManagerApplicationConfiguration'
       additionalProperties:
         type: array
         items:
           type: object
+  #-----------------------------------------------------
+  # The KeyManager Configuration
+  #-----------------------------------------------------
+  KeyManagerApplicationConfiguration:
+    title: Key Manager application Configuration
+    properties:
+      name:
+        type: string
+        example: "consumer_key"
+      label:
+        type: string
+        example: "Consumer Key"
+      type:
+        type: string
+        example: "select"
+      required:
+        type: boolean
+        example: true
+      mask:
+        type: boolean
+        example: true
+      multiple:
+        type: boolean
+        example: true
+      tooltip:
+        type: string
+        example: "Enter username to connect to key manager"
+      default:
+        type: object
+        example: "admin"
+      values:
+        type: array
+        items:
+          type: object
+
   #-----------------------------------------------------
   # The KeyManager List resource
   #-----------------------------------------------------

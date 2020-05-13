@@ -7,6 +7,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerApplicationConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerListDTO;
 
@@ -50,6 +53,8 @@ public class KeyManagerMappingUtil {
             keyManagerInfoDTO.setRevokeEndpoint(
                     jsonObject.get(APIConstants.KeyManager.REVOKE_ENDPOINT).getAsString());
         }
+        keyManagerInfoDTO
+                .setApplicationConfiguration(fromKeyManagerConfigurationDto(keyManagerConfigurationDTO.getType()));
         return keyManagerInfoDTO;
     }
 
@@ -69,5 +74,31 @@ public class KeyManagerMappingUtil {
         keyManagerListDTO.setList(keyManagerInfoDTOList);
         keyManagerListDTO.setCount(keyManagerInfoDTOList.size());
         return keyManagerListDTO;
+    }
+
+    private static List<KeyManagerApplicationConfigurationDTO> fromKeyManagerConfigurationDto(String type) {
+
+        List<KeyManagerApplicationConfigurationDTO> keyManagerApplicationConfigurationDTOS = new ArrayList<>();
+        KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerConfigurationsByConnectorType =
+                APIUtil.getKeyManagerConfigurationsByConnectorType(type);
+        if (keyManagerConfigurationsByConnectorType != null &&
+                keyManagerConfigurationsByConnectorType.getApplicationConfigurationDtoList() != null) {
+            for (KeyManagerConfigurationsDto.ConfigurationDto configurationDto : keyManagerConfigurationsByConnectorType
+                    .getApplicationConfigurationDtoList()) {
+                KeyManagerApplicationConfigurationDTO keyManagerApplicationConfigurationDTO =
+                        new KeyManagerApplicationConfigurationDTO();
+                keyManagerApplicationConfigurationDTO.setName(configurationDto.getName());
+                keyManagerApplicationConfigurationDTO.setLabel(configurationDto.getLabel());
+                keyManagerApplicationConfigurationDTO.setType(configurationDto.getType());
+                keyManagerApplicationConfigurationDTO.setRequired(configurationDto.isRequired());
+                keyManagerApplicationConfigurationDTO.setMask(configurationDto.isMask());
+                keyManagerApplicationConfigurationDTO.setMultiple(configurationDto.isMultiple());
+                keyManagerApplicationConfigurationDTO.setTooltip(configurationDto.getTooltip());
+                keyManagerApplicationConfigurationDTO.setDefault(configurationDto.getDefaultValue());
+                keyManagerApplicationConfigurationDTO.setValues(configurationDto.getValues());
+                keyManagerApplicationConfigurationDTOS.add(keyManagerApplicationConfigurationDTO);
+            }
+        }
+        return keyManagerApplicationConfigurationDTOS;
     }
 }
