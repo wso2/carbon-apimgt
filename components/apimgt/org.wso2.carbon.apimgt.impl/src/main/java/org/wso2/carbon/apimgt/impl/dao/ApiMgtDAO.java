@@ -14758,6 +14758,35 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Update an existing endpoint registry.
+     *
+     * @param registryId uuid of the endpoint registry
+     * @param endpointRegistry EndpointRegistryInfo object with updated details
+     * @throws APIManagementException if unable to update the endpoint registry
+     */
+    public void updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistry) throws
+            APIManagementException {
+
+        String query = SQLConstants.UPDATE_ENDPOINT_REGISTRY_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            ps.setString(1, endpointRegistry.getName());
+            ps.setString(2, endpointRegistry.getType());
+            ps.setString(3, endpointRegistry.getMode());
+            // Need to update the role names
+            ps.setString(4, "");
+            ps.setString(5, "");
+            ps.setString(6, registryId);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while updating endpoint registry: " + endpointRegistry.getName(), e);
+        }
+        return;
+    }
+
+    /**
      * Return the details of an Endpoint Registry
      *
      * @param registryId Endpoint Registry Identifier

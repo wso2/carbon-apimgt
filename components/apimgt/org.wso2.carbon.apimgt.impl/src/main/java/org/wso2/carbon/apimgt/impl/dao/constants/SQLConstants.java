@@ -1410,6 +1410,15 @@ public class SQLConstants {
             "INSERT INTO ENDPOINT_REG (UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, REG_OWNER, READ_ROLE," +
                     " WRITE_ROLE) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
+    public static final String UPDATE_ENDPOINT_REGISTRY_SQL =
+            "UPDATE ENDPOINT_REG " +
+                    "SET REG_NAME = ?, " +
+                    "REG_TYPE = ?, " +
+                    "REG_MODE = ?, " +
+                    "READ_ROLE = ? ," +
+                    "WRITE_ROLE = ? " +
+                    "WHERE UUID = ?";
+
     public static final String DELETE_ENDPOINT_REGISTRY_SQL = "DELETE FROM ENDPOINT_REG WHERE UUID = ?";
 
     public static final String GET_ENDPOINT_REGISTRY_BY_UUID =

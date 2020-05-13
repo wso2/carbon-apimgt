@@ -154,4 +154,14 @@ public class EndpointRegistryImpl implements EndpointRegistry {
         }
         return apiMgtDAO.addEndpointRegistryEntry(registryEntry);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistryInfo) throws
+            APIManagementException {
+
+        apiMgtDAO.updateEndpointRegistry(registryId, endpointRegistryInfo);
+    }
+
 }

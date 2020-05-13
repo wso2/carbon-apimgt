@@ -164,7 +164,26 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     @Override
     public Response updateRegistry(String registryId, RegistryDTO body, MessageContext messageContext) {
 
-        return Response.ok().entity(body).build();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String user = RestApiUtil.getLoggedInUsername();
+        EndpointRegistry registryProvider = new EndpointRegistryImpl();
+        EndpointRegistryInfo registryToUpdate = EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(body, user);
+        EndpointRegistryInfo updatedEndpointRegistry = null;
+        try {
+            EndpointRegistryInfo endpointRegistry =
+                    registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
+            if (endpointRegistry == null) {
+                RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
+                        " is not found", log);
+            }
+            registryProvider.updateEndpointRegistry(registryId, registryToUpdate);
+            updatedEndpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId,
+                    tenantDomain);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while updating the endpoint registry " +
+                    "with id: " + registryId, e, log);
+        }
+        return Response.ok().entity(updatedEndpointRegistry).build();
     }
 
     @Override
@@ -181,9 +200,9 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             registryProvider.deleteEndpointRegistry(registryId);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while deleting the endpoint registry " +
-                    "given by id: " + registryId, e, log);
+                    "with id: " + registryId, e, log);
         }
-        return Response.ok().entity("Successfully deleted the registry").build();
+        return Response.ok().entity("Successfully deleted the endpoint registry").build();
     }
 
     @Override
