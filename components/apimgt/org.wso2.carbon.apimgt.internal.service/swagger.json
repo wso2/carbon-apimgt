@@ -139,6 +139,30 @@
         }
       }
     },
+    "/keymanagers" : {
+      "get" : {
+        "summary" : "An Array of key managers configured",
+        "description" : "this will provide key managers configured\n",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of key managers",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/KeyManager"
+              }
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/revokedjwt" : {
       "get" : {
         "summary" : "JTIs of revoked jwt tokens",
@@ -319,6 +343,26 @@
         },
         "id" : {
           "type" : "integer"
+        }
+      }
+    },
+    "KeyManager" : {
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string"
+        },
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "tenantDomain" : {
+          "type" : "string"
+        },
+        "configuration" : {
+          "type" : "object",
+          "properties" : { }
         }
       }
     }
