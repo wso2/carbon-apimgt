@@ -146,6 +146,8 @@ public final class RestApiConstants {
     public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_0;
     public static final String REST_API_ADMIN_CONTEXT_FULL_1 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_1;
     public static final String REST_API_PROVIDER = "admin";
+    public static final String REST_API_ENDPOINT_REGISTRY_CONTEXT = "/api/am/endpoint-registry";
+    public static final String REST_API_ENDPOINT_REGISTRY_VERSION = "v1";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
     public static final Pattern REGEX_BEARER_PATTERN = Pattern.compile("Bearer\\s");

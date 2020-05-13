@@ -3,7 +3,7 @@
   "info" : {
     "title" : "WSO2 API Manager - Endpoint Registry",
     "description" : "This specifies a **RESTful API** for Enpoint Registry.\n",
-    "version" : "0.1"
+    "version" : "1.0"
   },
   "servers" : [ {
     "url" : "https://apis.wso2.com/api/am/endpoint-registry/v1"
@@ -83,7 +83,7 @@
           }
         },
         "security" : [ {
-          "ReadRegistry" : [ "registry:view" ]
+          "default" : [ "registry:view" ]
         } ]
       },
       "post" : {
@@ -133,7 +133,7 @@
           }
         },
         "security" : [ {
-          "WriteRegistry" : [ "registry:write" ]
+          "default" : [ "registry:write" ]
         } ]
       }
     },
@@ -187,7 +187,7 @@
           }
         },
         "security" : [ {
-          "ReadRegistry" : [ "registry:view" ]
+          "default" : [ "registry:view" ]
         } ]
       },
       "put" : {
@@ -248,7 +248,7 @@
           }
         },
         "security" : [ {
-          "WriteRegistry" : [ "registry:write" ]
+          "default" : [ "registry:write" ]
         } ]
       },
       "delete" : {
@@ -293,7 +293,7 @@
           }
         },
         "security" : [ {
-          "WriteRegistry" : [ "registry:write" ]
+          "default" : [ "registry:write" ]
         } ]
       }
     },
@@ -342,6 +342,28 @@
             "type" : "string",
             "enum" : [ "asc", "desc" ]
           }
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "Maximum limit of items to return.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer",
+            "default" : 25
+          }
+        }, {
+          "name" : "offset",
+          "in" : "query",
+          "description" : "Starting point within the complete list of items qualified.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer",
+            "default" : 0
+          }
         } ],
         "responses" : {
           "200" : {
@@ -376,7 +398,7 @@
           }
         },
         "security" : [ {
-          "ReadRegistryEntry" : [ "registry:entry_view" ]
+          "default" : [ "registry:entry_view" ]
         } ]
       }
     },
@@ -439,7 +461,7 @@
           }
         },
         "security" : [ {
-          "WriteRegistryEntry" : [ "registry:entry_write" ]
+          "default" : [ "registry:entry_write" ]
         } ]
       }
     },
@@ -503,7 +525,7 @@
           }
         },
         "security" : [ {
-          "ReadRegistryEntry" : [ "registry:entry_view" ]
+          "default" : [ "registry:entry_view" ]
         } ]
       },
       "put" : {
@@ -574,7 +596,7 @@
           }
         },
         "security" : [ {
-          "WriteRegistryEntry" : [ "registry:entry_write" ]
+          "default" : [ "registry:entry_write" ]
         } ]
       },
       "delete" : {
@@ -629,7 +651,7 @@
           }
         },
         "security" : [ {
-          "WriteRegistryEntry" : [ "registry:entry_write" ]
+          "default" : [ "registry:entry_write" ]
         } ]
       }
     }
@@ -806,50 +828,17 @@
       }
     },
     "securitySchemes" : {
-      "ReadRegistry" : {
+      "default" : {
         "type" : "oauth2",
         "flows" : {
-          "authorizationCode" : {
+          "implicit" : {
             "authorizationUrl" : "https://example.com/oauth/authorize",
             "tokenUrl" : "https://example.com/oauth/token",
             "scopes" : {
-              "scope" : "registry:view"
-            }
-          }
-        }
-      },
-      "WriteRegistry" : {
-        "type" : "oauth2",
-        "flows" : {
-          "authorizationCode" : {
-            "authorizationUrl" : "https://example.com/oauth/authorize",
-            "tokenUrl" : "https://example.com/oauth/token",
-            "scopes" : {
-              "scope" : "registry:write"
-            }
-          }
-        }
-      },
-      "ReadRegistryEntry" : {
-        "type" : "oauth2",
-        "flows" : {
-          "authorizationCode" : {
-            "authorizationUrl" : "https://example.com/oauth/authorize",
-            "tokenUrl" : "https://example.com/oauth/token",
-            "scopes" : {
-              "scope" : "registry:entry_view"
-            }
-          }
-        }
-      },
-      "WriteRegistryEntry" : {
-        "type" : "oauth2",
-        "flows" : {
-          "authorizationCode" : {
-            "authorizationUrl" : "https://example.com/oauth/authorize",
-            "tokenUrl" : "https://example.com/oauth/token",
-            "scopes" : {
-              "scope" : "registry:entry_write"
+              "registry:view" : "view registry",
+              "registry:write" : "write registry",
+              "registry:entry_view" : "view reg entry",
+              "registry:entry_write" : "write reg entry"
             }
           }
         }

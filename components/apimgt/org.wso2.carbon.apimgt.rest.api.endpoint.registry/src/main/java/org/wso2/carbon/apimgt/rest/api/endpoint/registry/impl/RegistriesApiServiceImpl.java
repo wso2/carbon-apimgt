@@ -56,7 +56,8 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
 
     @Override
-    public Response getAllEntriesInRegistry(String registryId, String query, String sortBy, String sortOrder, MessageContext messageContext) {
+    public Response getAllEntriesInRegistry(String registryId, String query, String sortBy, String sortOrder,
+                                            Integer limit, Integer offset, MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         RegistryEntryArrayDTO registryEntryArray = new RegistryEntryArrayDTO();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();

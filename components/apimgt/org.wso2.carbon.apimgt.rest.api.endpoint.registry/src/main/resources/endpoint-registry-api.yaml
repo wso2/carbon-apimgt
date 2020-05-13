@@ -1,4 +1,4 @@
-#   Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#   Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ info:
   title: WSO2 API Manager - Endpoint Registry
   description: |
     This specifies a **RESTful API** for Enpoint Registry.
-  version: "0.1"
+  version: "1.0"
 servers:
   - url: 'https://apis.wso2.com/api/am/endpoint-registry/v1'
   - url: 'http://apis.wso2.com/api/am/endpoint-registry/v1'
@@ -36,7 +36,8 @@ paths:
       tags:
         - Registries
       security:
-      - ReadRegistry: [registry:view]
+        - default:
+          - registry:view
       operationId: getRegistries
       parameters:
       - name: query
@@ -82,7 +83,8 @@ paths:
       description: |
         This operation can be used to create a new Registry specifying the details of the Registry in the payload.
       security:
-      - WriteRegistry: [registry:write]
+        - default:
+          - registry:write
       tags:
         - Registries
       operationId: addRegistry
@@ -126,7 +128,8 @@ paths:
       description: |
         Using this operation, you can retrieve complete details of a single Registry using the RegistryId.
       security:
-      - ReadRegistry: [registry:view]
+        - default:
+          - registry:view
       tags:
         - Registries
       operationId: getRegistryByUUID
@@ -171,7 +174,8 @@ paths:
       description: |
         This operation can be used to update an existing Endpoint Registry
       security:
-      - WriteRegistry: [registry:write]
+        - default:
+          - registry:write
       tags:
         - Registries
       operationId: updateRegistry
@@ -221,7 +225,8 @@ paths:
       description: |
         This operation can be used to delete an existing Registry proving the Id of the Registry.
       security:
-      - WriteRegistry: [registry:write]
+        - default:
+          - registry:write
       tags:
        - Registries
       operationId: deleteRegistry
@@ -262,7 +267,8 @@ paths:
       summary: Get All entries in the registry
       operationId: getAllEntriesInRegistry
       security:
-      - ReadRegistryEntry: [registry:entry_view]
+        - default:
+          - registry:entry_view
       tags:
         - Registries Entries
       parameters:
@@ -299,6 +305,8 @@ paths:
           enum:
             - asc
             - desc
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
       responses:
         "200":
           description: |
@@ -332,7 +340,8 @@ paths:
       description: |
         This operation can be used to create a new Registry Entry specifying the details of the Entry in the payload.
       security:
-        - WriteRegistryEntry: [registry:entry_write]
+        - default:
+          - registry:entry_write
       tags:
         - Registry Entries
       operationId: createRegistryEntry
@@ -385,7 +394,8 @@ paths:
       description: |
         Using this operation, you can retrieve a specific entry in a single Registry using the EntryId and RegistryId.
       security:
-      - ReadRegistryEntry: [registry:entry_view]
+        - default:
+          - registry:entry_view
       operationId: getRegistryEntryByUuid
       tags:
         - Registry Entries
@@ -438,7 +448,8 @@ paths:
       description: |
         This operation can be used to update an existing Entry in Registry with the details of the Entry in the payload.
       security:
-        - WriteRegistryEntry: [registry:entry_write]
+        - default:
+          - registry:entry_write
       operationId: updateRegistryEntry
       tags:
         - Registry Entries
@@ -496,7 +507,8 @@ paths:
       description: |
         This operation can be used to delete an existing Entry in Registry by specifying the registryId and entryId.
       security:
-        - WriteRegistryEntry: [registry:entry_write]
+        - default:
+          - registry:entry_write
       operationId: deleteRegistryEntry
       tags:
         - Registry Entries
@@ -542,38 +554,17 @@ components:
   # The security schemes of resources used by some of the APIs
   #-------------------------------------------------------
   securitySchemes:
-    ReadRegistry:
+    default:
       type: oauth2
       flows:
-        authorizationCode:
+        implicit:
           authorizationUrl: https://example.com/oauth/authorize
           tokenUrl: https://example.com/oauth/token
           scopes:
-            scope: registry:view
-    WriteRegistry:
-      type: oauth2
-      flows:
-        authorizationCode:
-          authorizationUrl: https://example.com/oauth/authorize
-          tokenUrl: https://example.com/oauth/token
-          scopes:
-            scope: registry:write
-    ReadRegistryEntry:
-      type: oauth2
-      flows:
-        authorizationCode:
-          authorizationUrl: https://example.com/oauth/authorize
-          tokenUrl: https://example.com/oauth/token
-          scopes:
-            scope: registry:entry_view
-    WriteRegistryEntry:
-      type: oauth2
-      flows:
-        authorizationCode:
-          authorizationUrl: https://example.com/oauth/authorize
-          tokenUrl: https://example.com/oauth/token
-          scopes:
-            scope: registry:entry_write
+            registry:view: view registry
+            registry:write: write registry
+            registry:entry_view: view reg entry
+            registry:entry_write: write reg entry
 
   #-------------------------------------------------------
   # The definitions of resources used by some of the APIs
