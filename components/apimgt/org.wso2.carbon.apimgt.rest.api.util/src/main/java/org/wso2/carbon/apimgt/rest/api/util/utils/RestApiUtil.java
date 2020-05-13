@@ -1412,17 +1412,23 @@ public class RestApiUtil {
      *
      * @return URITemplate set associated with API Manager Admin REST API
      */
-    public static Set<URITemplate> getAdminAPIAppResourceMapping() {
+    public static Set<URITemplate> getAdminAPIAppResourceMapping(String version) {
 
         API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants.REST_API_ADMIN_CONTEXT,
-                RestApiConstants.REST_API_ADMIN_VERSION));
+                RestApiConstants.REST_API_ADMIN_VERSION_0));
 
         if (adminAPIResourceMappings != null) {
             return adminAPIResourceMappings;
         } else {
             try {
-                String definition = IOUtils
-                        .toString(RestApiUtil.class.getResourceAsStream("/admin-api.json"), "UTF-8");
+                String definition;
+                if (RestApiConstants.REST_API_ADMIN_VERSION_0.equals(version)) {
+                    definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/admin-api.json"), "UTF-8");
+                } else {
+                    definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/admin-api.yaml"), "UTF-8");
+                }
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
                 adminAPIResourceMappings = oasParser.getURITemplates(definition);
@@ -1667,8 +1673,10 @@ public class RestApiUtil {
             uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_0);
         } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_1)) {
             uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_1);
-        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
-            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping();
+        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT_FULL_1)) {
+            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION_1);
         }
         return uriTemplates;
     }

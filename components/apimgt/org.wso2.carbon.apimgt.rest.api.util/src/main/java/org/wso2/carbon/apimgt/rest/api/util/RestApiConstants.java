@@ -141,7 +141,10 @@ public final class RestApiConstants {
     public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
             REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_1;
     public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin";
-    public static final String REST_API_ADMIN_VERSION = "v0.16";
+    public static final String REST_API_ADMIN_VERSION_0 = "v0.16";
+    public static final String REST_API_ADMIN_VERSION_1 = "v1";
+    public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_0;
+    public static final String REST_API_ADMIN_CONTEXT_FULL_1 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_1;
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
