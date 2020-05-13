@@ -14768,7 +14768,6 @@ public class ApiMgtDAO {
             APIManagementException {
 
         String query = SQLConstants.UPDATE_ENDPOINT_REGISTRY_SQL;
-        String uuid = UUID.randomUUID().toString();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
