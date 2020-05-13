@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -40,10 +40,6 @@ import EditIcon from '@material-ui/icons/Edit';
 export default function ListApplicationThrottlingPolicies() {
     const intl = useIntl();
     const restApi = new API();
-    const [
-        applicationThrottlingPolicyList,
-        setApplicationThrottlingPolicyList,
-    ] = useState(null);
 
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
@@ -183,48 +179,6 @@ export default function ListApplicationThrottlingPolicies() {
 
             </Typography>),
     };
-    /*
-    If the add button wants to route to a new page, we need to override the Button component completely.
-    Send the following prop to ListBase component.
-    import { Link as RouterLink } from 'react-router-dom';
-    import Button from '@material-ui/core/Button';
-
-    const addButtonOverride = (
-        <RouterLink to='/'>
-            <Button variant='contained' color='primary'>
-                <FormattedMessage
-                    id='AdminPages.Microgateways.List.help.link.one'
-                    defaultMessage='Create a Microgateway label'
-                />
-            </Button>
-        </RouterLink>
-    );
-    */
-    /* *************************************************************** */
-    /* To override the no data message send the following with the props to ListBase
-    const noDataMessage = (
-        <FormattedMessage
-            id='AdminPages.Addons.ListBase.nodata.message'
-            defaultMessage='No items yet'
-        />
-    )
-    /* **************************************************************** */
-    /*
-    Send the following props to ListBase to override the action column.
-
-    Following imports needs to go to the header.
-    import { Link as RouterLink } from 'react-router-dom';
-    import EditIcon from '@material-ui/icons/Edit';
-
-    const actionColumnProps = {
-        editIconShow: true,
-        editIconOverride: (
-            <RouterLink to='/'>
-                <EditIcon />
-            </RouterLink>
-        ),
-        deleteIconShow: false,
-    }; */
 
     /**
  * Mock API call
@@ -232,9 +186,8 @@ export default function ListApplicationThrottlingPolicies() {
  */
     function apiCall() {
         let applicationThrottlingvalues;
-        return new Promise(((resolve) => {
+        return new Promise(((resolve, reject) => {
             restApi.applicationThrottlingPoliciesGet().then((result) => {
-                setApplicationThrottlingPolicyList(result.body.list);
                 const applicationPolicies = result.body.list.map((obj) => {
                     return {
                         policyName: obj.policyName,
@@ -242,6 +195,7 @@ export default function ListApplicationThrottlingPolicies() {
                         quota: obj.defaultLimit.requestCount
                 || obj.defaultLimit.dataAmount + ' ' + obj.defaultLimit.dataUnit,
                         unitTime: obj.defaultLimit.unitTime + ' ' + obj.defaultLimit.timeUnit,
+                        policyId: obj.policyId,
                     };
                 });
 
@@ -250,11 +204,10 @@ export default function ListApplicationThrottlingPolicies() {
                     .map((obj) => {
                         return Object.values(obj);
                     });
-            });
-
-            setTimeout(() => {
                 resolve(applicationThrottlingvalues);
-            }, 1000);
+            }).catch((error) => {
+                reject(error);
+            });
         }));
     }
 
@@ -269,10 +222,6 @@ export default function ListApplicationThrottlingPolicies() {
             editComponentProps={{
                 icon: <EditIcon />,
                 title: 'Edit Application Policies',
-                applicationThrottlingPolicyList,
-            }}
-            deleteComponentProps={{
-                applicationThrottlingPolicyList,
             }}
             DeleteComponent={Delete}
             EditComponent={AddEdit}

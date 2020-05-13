@@ -311,6 +311,57 @@ class API extends Resource {
     createMgLabel(name, description, callback = null) {
         // todo: impl this
     }
+    /**
+     * Get Blacklist Policies
+     */
+    blacklistPoliciesGet() {
+        return this.client.then((client) => {
+            return client.apis['Blacklist (Collection)'].get_throttling_blacklist(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Delete an Blacklist Policy
+     */
+    deleteBlacklistPolicy(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Blacklist (Individual)'].delete_throttling_blacklist__conditionId_(
+                { conditionId: policyId },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Add a Blacklist Policy
+     */
+    addBlacklistPolicy(body) {
+        return this.client.then((client) => {
+            const payload = {
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Blacklist (Collection)'].post_throttling_blacklist(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get details of a Blacklist Policy
+     */
+    blacklistPolicyGet(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Blacklist (Individual)'].get_throttling_blacklist__conditionId_(
+                { policyId: policyId },
+                this._requestMetaData(),
+            );
+        });
+    }
+
 }
 
 API.CONSTS = {

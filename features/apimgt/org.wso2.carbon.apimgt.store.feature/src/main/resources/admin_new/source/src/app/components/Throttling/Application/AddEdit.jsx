@@ -120,7 +120,7 @@ function reducer(state, newValue) {
 function AddEdit(props) {
     const classes = useStyles();
     const {
-        updateList, icon, triggerButtonText, title, applicationThrottlingPolicyList, dataRow,
+        updateList, icon, triggerButtonText, title, dataRow,
     } = props;
     const [state, dispatch] = useReducer(reducer, initialState);
     const {
@@ -195,52 +195,53 @@ function AddEdit(props) {
         }
 
         if (dataRow) {
-            const selectedPolicy = applicationThrottlingPolicyList.filter(
-                (policyy) => policyy.policyName === dataRow[0],
-            );
-            const policyId = selectedPolicy.length !== 0 && selectedPolicy[0].policyId;
+            const policyId = dataRow[4];
             promisedAddApplicationPolicy = restApi.updateApplicationThrottlingPolicy(policyId,
                 applicationThrottlingPolicy);
-            promisedAddApplicationPolicy
-                .then(() => {
-                    updateList();
-                    return (
-                        <FormattedMessage
-                            id='Throttling.Application.Policy.policy.add.success'
-                            defaultMessage='Application Rate Limiting Policy added successfully.'
-                        />
-                    );
-                })
-                .catch((error) => {
-                    const { response } = error;
-                    let errorDescription;
-                    if (response.body) {
-                        errorDescription = response.body;
-                    }
-                    return (errorDescription);
-                });
+            promisedAddApplicationPolicy = new Promise((resolve, reject) => {
+                promisedAddApplicationPolicy
+                    .then(() => {
+                        resolve(
+                            <FormattedMessage
+                                id='Throttling.Application.Policy.policy.edit.success'
+                                defaultMessage='Application Rate Limiting Policy edited successfully.'
+                            />,
+                        );
+                    })
+                    .catch((error) => {
+                        const { response } = error;
+                        if (response.body) {
+                            reject(response.body.description);
+                        }
+                    })
+                    .finally(() => {
+                        updateList();
+                    });
+            });
         } else {
             promisedAddApplicationPolicy = restApi.addApplicationThrottlingPolicy(
                 applicationThrottlingPolicy,
             );
-            promisedAddApplicationPolicy
-                .then(() => {
-                    updateList();
-                    return (
-                        <FormattedMessage
-                            id='Throttling.Application.Policy.policy.add.success'
-                            defaultMessage='Application Rate Limiting Policy added successfully.'
-                        />
-                    );
-                })
-                .catch((error) => {
-                    const { response } = error;
-                    let errorDescription;
-                    if (response.body) {
-                        errorDescription = response.body;
-                    }
-                    return (errorDescription);
-                });
+            promisedAddApplicationPolicy = new Promise((resolve, reject) => {
+                promisedAddApplicationPolicy
+                    .then(() => {
+                        resolve(
+                            <FormattedMessage
+                                id='Throttling.Application.Policy.policy.add.success'
+                                defaultMessage='Application Rate Limiting Policy added successfully.'
+                            />,
+                        );
+                    })
+                    .catch((error) => {
+                        const { response } = error;
+                        if (response.body) {
+                            reject(response.body.description);
+                        }
+                    })
+                    .finally(() => {
+                        updateList();
+                    });
+            });
         }
         return (promisedAddApplicationPolicy);
     };
@@ -248,10 +249,7 @@ function AddEdit(props) {
     const dialogOpenCallback = () => {
         if (dataRow) {
             setIsEditMode(true);
-            const selectedPolicy = applicationThrottlingPolicyList.filter(
-                (policy) => policy.policyName === dataRow[0],
-            );
-            const policyId = selectedPolicy.length !== 0 && selectedPolicy[0].policyId;
+            const policyId = dataRow[4];
             restApi.applicationThrottlingPolicyGet(policyId).then((result) => {
                 initialState = {
                     policyName: result.body.policyName,
