@@ -131,29 +131,7 @@ export default function ListBlacklistThrottlingPolicies() {
                 sort: false,
             },
         },
-        // {
-        //     name: 'conditionStatus',
-        //     label: intl.formatMessage({
-        //         id: 'Admin.Throttling.Blacklist.Throttling.policy.table.header.condition.status',
-        //         defaultMessage: 'Condition Status',
-        //     }),
-        //     customBodyRender: (value, tableMeta) => {
-        //         // const dataRow = applicationThrottlingPolicyList[tableMeta.rowIndex];
-        //         return (
-        //             <Switch
-        //                 checked={state.checkedB}
-        //                 onChange={handleChange}
-        //                 color='primary'
-        //                 name='checkedB'
-        //                 inputProps={{ 'aria-label': 'primary checkbox' }}
-        //             />
-        //         );
-        //     },
-        //     options: {
-        //         filter: true,
-        //         sort: false,
-        //     },
-        // },
+        // TODO : Condition Status
     ];
 
     const emptyBoxProps = {
@@ -185,7 +163,6 @@ export default function ListBlacklistThrottlingPolicies() {
         return new Promise(((resolve) => {
             restApi.blacklistPoliciesGet().then((result) => {
                 policyList = result.body.list;
-                console.log('policyList', policyList);
                 blacklistPolicyList = policyList.map((obj) => {
                     let array = [];
                     a++;

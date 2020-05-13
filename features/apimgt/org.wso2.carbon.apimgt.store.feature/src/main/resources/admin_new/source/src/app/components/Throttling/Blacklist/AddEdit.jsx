@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer, useState } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import DialogContentText from '@material-ui/core/DialogContentText';
@@ -61,9 +61,12 @@ const useStyles = makeStyles((theme) => ({
         marginRight: theme.spacing(3),
         marginTop: theme.spacing(1.2),
     },
+    addForm: {
+        minHeight: theme.spacing(24),
+    },
 }));
 
-const initialState = {
+let initialState = {
     conditionType: 'API',
     conditionValue: {
         endingIp: '',
@@ -72,7 +75,6 @@ const initialState = {
         fixedIp: '',
     },
 };
-
 
 /**
  * Reducer
@@ -95,13 +97,11 @@ function reducer(state, newValue) {
                 conditionValue: { ...state.conditionValue, [field]: value },
             };
         case 'invert':
-            console.log('invert', value);
             return {
                 ...state,
                 conditionValue: { ...state.conditionValue, [field]: value },
             };
         case 'fixedIp':
-            console.log('fixedIp', value);
             return {
                 ...state,
                 conditionValue: { ...state.conditionValue, [field]: value },
@@ -118,16 +118,14 @@ function reducer(state, newValue) {
 function AddEdit(props) {
     const classes = useStyles();
     const {
-        updateList, icon, triggerButtonText, title, applicationThrottlingPolicyList, dataRow,
+        updateList, icon, triggerButtonText, title,
     } = props;
     const [state, dispatch] = useReducer(reducer, initialState);
     const {
-        conditionType, conditionValue: {
+        conditionType, conditionValue, conditionValue: {
             endingIp, startingIp, invert, fixedIp,
         },
     } = state;
-    const [validationError, setValidationError] = useState([]);
-    const [editMode, setIsEditMode] = useState(false);
     const restApi = new API();
 
     const onChange = (e) => {
@@ -138,113 +136,102 @@ function AddEdit(props) {
         }
     };
 
-    // const validate = (fieldName, value) => {
-    //     let error = '';
-    //     switch (fieldName) {
-    //         case 'policyName':
-    //             error = value === '' ? (fieldName + ' is Empty') : '';
-    //             setValidationError({ policyName: error });
-    //             break;
-    //         case 'requestCount':
-    //             error = value === '' ? (fieldName + ' is Empty') : '';
-    //             setValidationError({ requestCount: error });
-    //             break;
-    //         case 'dataAmount':
-    //             error = value === '' ? (fieldName + ' is Empty') : '';
-    //             setValidationError({ dataAmount: error });
-    //             break;
-    //         case 'unitTime':
-    //             error = value === '' ? (fieldName + ' is Empty') : '';
-    //             setValidationError({ unitTime: error });
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    //     return error;
-    // };
+    useEffect(() => {
+        initialState = {
+            conditionType: 'API',
+            conditionValue: {
+                endingIp: '',
+                startingIp: '',
+                invert: false,
+                fixedIp: '',
+            },
+        };
+    }, [conditionType]);
 
-    // const getAllFormErrors = () => {
-    //     let errorText = '';
-    //     const policyNameErrors = validate('policyName', policyName);
-    //     const requestCountErrors = validate('requestCount', requestCount);
-    //     const dataAmounttErrors = validate('dataAmount', dataAmount);
-    //     const unitTimeErrors = validate('unitTime', unitTime);
-
-    //     if (type === 'BandwidthLimit') {
-    //         errorText += policyNameErrors + dataAmounttErrors + unitTimeErrors;
-    //     } else {
-    //         errorText += policyNameErrors + requestCountErrors + unitTimeErrors;
-    //     }
-    //     return errorText;
-    // };
+    const hasErrors = (fieldName, value) => {
+        let error = false;
+        switch (fieldName) {
+            case 'startingIp':
+                error = value === '' ? fieldName + ' is Empty' : false;
+                break;
+            case 'endingIp':
+                error = value === '' ? fieldName + ' is Empty' : false;
+                break;
+            case 'fixedIp':
+                error = value === '' ? fieldName + ' is Empty' : false;
+                break;
+            case 'conditionValue':
+                if (value.startingIp === '' && value.endingIp === ''
+                && value.fixedIp === '' && value.invert === false) {
+                    error = fieldName + ' is Empty';
+                } else {
+                    error = false;
+                }
+                break;
+            default:
+                break;
+        }
+        return error;
+    };
+    const getAllFormErrors = () => {
+        let errorText = '';
+        if (conditionType === 'IPRANGE') {
+            const startingIPErrors = hasErrors('startingIp', startingIp);
+            const endingIpErrors = hasErrors('endingIp', endingIp);
+            errorText += startingIPErrors + endingIpErrors;
+        } else if (conditionType === 'IP') {
+            const fixedIpErrors = hasErrors('fixedIp', fixedIp);
+            errorText += fixedIpErrors;
+        } else {
+            const conditionValueErrors = hasErrors('conditionValue', conditionValue);
+            errorText += conditionValueErrors;
+        }
+        return errorText;
+    };
 
     const formSaveCallback = () => {
-        // const formErrors = getAllFormErrors();
-        // if (formErrors !== '') {
-        //     Alert.error(formErrors);
-        //     return (false);
-        // }
-        let applicationThrottlingPolicy;
-        let promisedAddApplicationPolicy;
-
-        if (type === 'BandwidthLimit') {
-            delete (state.defaultLimit.requestCount);
-            applicationThrottlingPolicy = state;
+        const formErrors = getAllFormErrors();
+        if (formErrors !== '' && formErrors !== 'false' && formErrors !== '0') {
+            Alert.error(formErrors);
+            return (false);
+        }
+        let blacklistThrottlingPolicy;
+        if (conditionType === 'IPRANGE') {
+            blacklistThrottlingPolicy = delete (state.conditionValue.fixedIp);
+            blacklistThrottlingPolicy = state;
+        } else if (conditionType === 'IP') {
+            blacklistThrottlingPolicy = delete (state.conditionValue.startingIp);
+            blacklistThrottlingPolicy = delete (state.conditionValue.endingIp);
+            blacklistThrottlingPolicy = state;
         } else {
-            applicationThrottlingPolicy = delete (state.defaultLimit.dataUnit);
-            applicationThrottlingPolicy = delete (state.defaultLimit.dataAmount);
-            applicationThrottlingPolicy = state;
+            blacklistThrottlingPolicy = state;
         }
 
-        if (dataRow) {
-            const selectedPolicy = applicationThrottlingPolicyList.filter(
-                (policyy) => policyy.policyName === dataRow[0],
-            );
-            const policyId = selectedPolicy.length !== 0 && selectedPolicy[0].policyId;
-            promisedAddApplicationPolicy = restApi.updateApplicationThrottlingPolicy(policyId,
-                applicationThrottlingPolicy);
-            promisedAddApplicationPolicy
+        let promisedAddBlacklistPolicy = restApi.addBlacklistPolicy(
+            blacklistThrottlingPolicy,
+        );
+
+        promisedAddBlacklistPolicy = new Promise((resolve, reject) => {
+            promisedAddBlacklistPolicy
                 .then(() => {
-                    updateList();
-                    return (
+                    resolve(
                         <FormattedMessage
-                            id='Throttling.Application.Policy.policy.add.success'
-                            defaultMessage='Application Rate Limiting Policy added successfully.'
-                        />
+                            id='Throttling.Blacklist.Policy.policy.add.success'
+                            defaultMessage='Blacklist Policy added successfully.'
+                        />,
                     );
                 })
                 .catch((error) => {
                     const { response } = error;
-                    let errorDescription;
                     if (response.body) {
-                        errorDescription = response.body;
+                        reject(response.body.description);
                     }
-                    return (errorDescription);
-                });
-        } else {
-            promisedAddApplicationPolicy = restApi.addApplicationThrottlingPolicy(
-                applicationThrottlingPolicy,
-            );
-            promisedAddApplicationPolicy
-                .then(() => {
-                    updateList();
-                    return (
-                        <FormattedMessage
-                            id='Throttling.Application.Policy.policy.add.success'
-                            defaultMessage='Application Rate Limiting Policy added successfully.'
-                        />
-                    );
                 })
-                .catch((error) => {
-                    const { response } = error;
-                    let errorDescription;
-                    if (response.body) {
-                        errorDescription = response.body;
-                    }
-                    return (errorDescription);
+                .finally(() => {
+                    updateList();
                 });
-        }
-        return (promisedAddApplicationPolicy);
+        });
+        return (promisedAddBlacklistPolicy);
     };
 
     const dialogOpenCallback = () => {
@@ -258,6 +245,7 @@ function AddEdit(props) {
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
             dialogOpenCallback={dialogOpenCallback}
+            className={classes.addForm}
         >
             <DialogContentText>
                 <Typography variant='h6'>
@@ -267,7 +255,7 @@ function AddEdit(props) {
                     />
                 </Typography>
             </DialogContentText>
-            <FormControl component='fieldset'>
+            <FormControl component='fieldset' className={classes.addForm}>
                 <RadioGroup
                     row
                     aria-label='position'
@@ -319,6 +307,7 @@ function AddEdit(props) {
                         required
                         helperText={(
                             <>
+                                {/* eslint-disable-next-line no-template-curly-in-string */ }
                                 <FormHelperText className={classes.helperText}>{'Format : ${context}'}</FormHelperText>
                                 <FormHelperText className={classes.helperText}>Eg : /test/1.0.0</FormHelperText>
                             </>
@@ -338,6 +327,7 @@ function AddEdit(props) {
                         helperText={(
                             <>
                                 <FormHelperText className={classes.helperText}>
+                                    {/* eslint-disable-next-line no-template-curly-in-string */}
                                     {'Format : ${userName}:${applicationName}'}
                                 </FormHelperText>
                                 <FormHelperText className={classes.helperText}>
@@ -360,6 +350,7 @@ function AddEdit(props) {
                         helperText={(
                             <>
                                 <FormHelperText className={classes.helperText}>
+                                    {/* eslint-disable-next-line no-template-curly-in-string */}
                                     {'Format : ${ip}'}
                                 </FormHelperText>
                                 <FormHelperText className={classes.helperText}>
@@ -422,6 +413,7 @@ function AddEdit(props) {
                         helperText={(
                             <>
                                 <FormHelperText className={classes.helperText}>
+                                    {/* eslint-disable-next-line no-template-curly-in-string */}
                                     {'Format : ${userName}'}
                                 </FormHelperText>
                                 <FormHelperText className={classes.helperText}>
