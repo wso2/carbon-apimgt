@@ -84,12 +84,14 @@ public class EndpointRegistryMappingUtils {
      * Converts a RegistryEntryDTO object with endpointDefinition file into EndpointRegistryEntry object
      *
      * @param registryEntryDTO   RegistryEntryDTO object
+     * @param entryUUID   Registry Entry Identifier(UUID)
      * @param endpointDefinition endpointDefinition file
      * @return EndpointRegistryEntry corresponds to RegistryEntryDTO object
      */
-    public static EndpointRegistryEntry fromDTOToRegistryEntry(RegistryEntryDTO registryEntryDTO,
+    public static EndpointRegistryEntry fromDTOToRegistryEntry(RegistryEntryDTO registryEntryDTO, String entryUUID,
                                                                ResourceFile endpointDefinition, int registryId) {
         EndpointRegistryEntry registryEntry = new EndpointRegistryEntry();
+        registryEntry.setEntryId(entryUUID);
         registryEntry.setName(registryEntryDTO.getEntryName());
         registryEntry.setDefinitionType(registryEntryDTO.getDefinitionType().toString());
         registryEntry.setDefinitionURL(registryEntryDTO.getDefinitionUrl());

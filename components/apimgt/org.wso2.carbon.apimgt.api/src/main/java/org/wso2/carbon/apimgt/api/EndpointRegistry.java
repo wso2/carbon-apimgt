@@ -97,6 +97,22 @@ public interface EndpointRegistry {
     String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException;
 
     /**
+     * Updates Registry Entry
+     *
+     * @param registryEntry EndpointRegistryEntry
+     * @throws APIManagementException if failed to update EndpointRegistryEntry
+     */
+    void updateEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException;
+
+    /**
+     * Deletes an Endpoint Registry Entry
+     *
+     * @param entryId Registry Entry Identifier(UUID)
+     * @throws APIManagementException if failed to delete the Endpoint Registry Entry
+     */
+    void deleteEndpointRegistryEntry(String entryId) throws APIManagementException;
+
+    /**
      * Updates an existing endpoint registry
      *
      * @param registryId           uuid of the endpoint registry which needs to be updated
