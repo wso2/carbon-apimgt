@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.endpoint.registry.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -50,6 +51,8 @@ import javax.ws.rs.core.Response;
 public class RegistriesApiServiceImpl implements RegistriesApiService {
 
     private static final Log log = LogFactory.getLog(RegistriesApiServiceImpl.class);
+    private static final Log audit = CarbonConstants.AUDIT_LOG;
+
 
     @Override
     public Response getAllEntriesInRegistry(String registryId, String query, String sortBy, String sortOrder, MessageContext messageContext) {
@@ -129,6 +132,8 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             RestApiUtil.handleInternalServerError("Error while adding new endpoint registry: "
                     + registry.getName(), e, log);
         }
+        audit.info("Successfully created endpoint registry " + createdRegistry.getName() + " with id :"
+                + createdRegistry.getUuid() + " by :" + user);
         return Response.ok().entity(EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(createdRegistry)).build();
     }
 
@@ -136,6 +141,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     public Response createRegistryEntry(String registryId, RegistryEntryDTO registryEntry, InputStream
             definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String user = RestApiUtil.getLoggedInUsername();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         EndpointRegistryEntry createdEntry = null;
         try {
@@ -158,6 +164,8 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             RestApiUtil.handleInternalServerError("Error while retrieving details of endpoint registry by id: "
                     + registryId, e, log);
         }
+        audit.info("Successfully created endpoint registry entry with id :" + createdEntry.getEntryId() +
+                 " in :" + registryId + " by:" + user);
         return Response.ok().entity(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(createdEntry)).build();
     }
 
@@ -177,18 +185,21 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                         " is not found", log);
             }
             registryProvider.updateEndpointRegistry(registryId, registryToUpdate);
-            updatedEndpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId,
-                    tenantDomain);
+            updatedEndpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while updating the endpoint registry " +
                     "with id: " + registryId, e, log);
         }
-        return Response.ok().entity(updatedEndpointRegistry).build();
+        audit.info("Successfully updated endpoint registry of id :" + updatedEndpointRegistry.getUuid()
+                + " by :" + user);
+        return Response.ok().entity(EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(updatedEndpointRegistry)).
+                build();
     }
 
     @Override
     public Response deleteRegistry(String registryId, MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String user = RestApiUtil.getLoggedInUsername();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         try {
             EndpointRegistryInfo endpointRegistry =
@@ -202,6 +213,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             RestApiUtil.handleInternalServerError("Error while deleting the endpoint registry " +
                     "with id: " + registryId, e, log);
         }
+        audit.info("Successfully deleted endpoint registry of id :" + registryId + " by :" + user);
         return Response.ok().entity("Successfully deleted the endpoint registry").build();
     }
 
