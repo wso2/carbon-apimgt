@@ -5335,7 +5335,7 @@ definitions:
       IsUnlimitedTierPaid:
         type: boolean
         default: false
-  identityProvider:
+      identityProvider:
         properties:
           external:
             type: boolean
