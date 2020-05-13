@@ -1,4 +1,4 @@
-#   Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#   Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ info:
   title: WSO2 API Manager - Endpoint Registry
   description: |
     This specifies a **RESTful API** for Enpoint Registry.
-  version: "0.1"
+  version: "1.0"
 servers:
   - url: 'https://apis.wso2.com/api/am/endpoint-registry/v1'
   - url: 'http://apis.wso2.com/api/am/endpoint-registry/v1'
@@ -305,6 +305,8 @@ paths:
           enum:
             - asc
             - desc
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
       responses:
         "200":
           description: |

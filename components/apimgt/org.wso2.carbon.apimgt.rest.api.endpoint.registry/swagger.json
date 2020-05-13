@@ -3,7 +3,7 @@
   "info" : {
     "title" : "WSO2 API Manager - Endpoint Registry",
     "description" : "This specifies a **RESTful API** for Enpoint Registry.\n",
-    "version" : "0.1"
+    "version" : "1.0"
   },
   "servers" : [ {
     "url" : "https://apis.wso2.com/api/am/endpoint-registry/v1"
@@ -341,6 +341,28 @@
           "schema" : {
             "type" : "string",
             "enum" : [ "asc", "desc" ]
+          }
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "Maximum limit of items to return.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer",
+            "default" : 25
+          }
+        }, {
+          "name" : "offset",
+          "in" : "query",
+          "description" : "Starting point within the complete list of items qualified.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer",
+            "default" : 0
           }
         } ],
         "responses" : {

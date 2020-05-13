@@ -1701,9 +1701,7 @@ public class RestApiUtil {
             uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION_0);
         } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT_FULL_1)) {
             uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION_1);
-        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
-            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping();
-        } else if (basePath.contains("/api/am/endpoint-registry")) {
+        } else if (basePath.contains(RestApiConstants.REST_API_ENDPOINT_REGISTRY_CONTEXT)) {
             uriTemplates = RestApiUtil.getEndpointRegistryAPIAppResourceMapping();
         }
         return uriTemplates;

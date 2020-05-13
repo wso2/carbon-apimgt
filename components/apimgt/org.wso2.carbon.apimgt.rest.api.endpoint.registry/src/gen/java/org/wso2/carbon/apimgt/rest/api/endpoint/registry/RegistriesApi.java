@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-13T14:48:55.940+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-13T15:48:21.897+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -224,8 +224,16 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 )  @QueryParam("sortOrder") String sortOrder
 
 
+, 
+@Parameter(description = "Maximum limit of items to return. ") @DefaultValue("25") @QueryParam("limit") Integer limit
+
+
+, 
+@Parameter(description = "Starting point within the complete list of items qualified. ") @DefaultValue("0") @QueryParam("offset") Integer offset
+
+
 ) throws APIManagementException{
-        return delegate.getAllEntriesInRegistry(registryId, query, sortBy, sortOrder, securityContext);
+        return delegate.getAllEntriesInRegistry(registryId, query, sortBy, sortOrder, limit, offset, securityContext);
         }
     @GET
     
