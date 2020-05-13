@@ -81,8 +81,5 @@ Delete.propTypes = {
     selectedPolicyName: PropTypes.shape({
         name: PropTypes.number.isRequired,
     }).isRequired,
-    applicationThrottlingPolicyList: PropTypes.shape({
-        applicationThrottlingPolicyList: PropTypes.array.isRequired,
-    }).isRequired,
 };
 export default injectIntl(Delete);
