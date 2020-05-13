@@ -23,7 +23,7 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-12T18:17:23.918+05:30[Asia/Colombo]")public interface RegistriesApiService {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-13T14:48:55.940+05:30[Asia/Colombo]")public interface RegistriesApiService {
         public Response addRegistry(RegistryDTO body, MessageContext messageContext) throws APIManagementException;
         public Response createRegistryEntry(String registryId, RegistryEntryDTO registryEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
         public Response deleteRegistry(String registryId, MessageContext messageContext) throws APIManagementException;

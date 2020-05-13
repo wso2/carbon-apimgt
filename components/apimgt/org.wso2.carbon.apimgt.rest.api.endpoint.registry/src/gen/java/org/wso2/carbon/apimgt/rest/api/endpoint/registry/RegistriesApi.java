@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-12T18:17:23.918+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-13T14:48:55.940+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -54,7 +54,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Operation(summary = "Create a new Registry", description = "This operation can be used to create a new Registry specifying the details of the Registry in the payload. ",
-        security = {  @SecurityRequirement(name = "WriteRegistry" , scopes = { "registry:write" })
+        security = {  @SecurityRequirement(name = "default" , scopes = { "" })
                  }, tags={ "Registries" })
 
     @ApiResponses(value = { 
@@ -85,7 +85,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @Operation(summary = "Create a new Registry Entry", description = "This operation can be used to create a new Registry Entry specifying the details of the Entry in the payload. ",
-        security = {  @SecurityRequirement(name = "WriteRegistryEntry" , scopes = { "registry:entry_write" })
+        security = {  @SecurityRequirement(name = "default" , scopes = { "" })
                  }, tags={ "Registry Entries" })
 
     @ApiResponses(value = { 
@@ -121,7 +121,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     
     @Produces({ "application/json" })
     @Operation(summary = "Delete an Endpoint Registry", description = "This operation can be used to delete an existing Registry proving the Id of the Registry. ",
-        security = {  @SecurityRequirement(name = "WriteRegistry" , scopes = { "registry:write" })
+        security = {  @SecurityRequirement(name = "default" , scopes = { "" })
                  }, tags={ "Registries" })
 
     @ApiResponses(value = { 
@@ -151,7 +151,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     
     @Produces({ "application/json" })
     @Operation(summary = "Delete an Entry in a Registry", description = "This operation can be used to delete an existing Entry in Registry by specifying the registryId and entryId. ",
-        security = {  @SecurityRequirement(name = "WriteRegistryEntry" , scopes = { "registry:entry_write" })
+        security = {  @SecurityRequirement(name = "default" , scopes = { "" })
                  }, tags={ "Registry Entries" })
 
     @ApiResponses(value = { 
@@ -186,7 +186,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     
     @Produces({ "application/json" })
     @Operation(summary = "Get All entries in the registry", description = "",
-        security = {  @SecurityRequirement(name = "ReadRegistryEntry" , scopes = { "registry:entry_view" })
+        security = {  @SecurityRequirement(name = "default" , scopes = { "" })
                  }, tags={ "Registries Entries" })
 
     @ApiResponses(value = { 
@@ -232,7 +232,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     
     @Produces({ "application/json" })
     @Operation(summary = "Retrieve all Registries ", description = "This operation provides you an array of available Registries. ",
-        security = {  @SecurityRequirement(name = "ReadRegistry" , scopes = { "registry:view" })
+        security = {  @SecurityRequirement(name = "default" , scopes = { "" })
                  }, tags={ "Registries" })
 
     @ApiResponses(value = { 
@@ -271,7 +271,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     
     @Produces({ "application/json" })
     @Operation(summary = "Get details of a Registry", description = "Using this operation, you can retrieve complete details of a single Registry using the RegistryId. ",
-        security = {  @SecurityRequirement(name = "ReadRegistry" , scopes = { "registry:view" })
+        security = {  @SecurityRequirement(name = "default" , scopes = { "" })
                  }, tags={ "Registries" })
 
     @ApiResponses(value = { 
@@ -303,7 +303,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     
     @Produces({ "application/json" })
     @Operation(summary = "Retrieve a specific Entry in a Registry", description = "Using this operation, you can retrieve a specific entry in a single Registry using the EntryId and RegistryId. ",
-        security = {  @SecurityRequirement(name = "ReadRegistryEntry" , scopes = { "registry:entry_view" })
+        security = {  @SecurityRequirement(name = "default" , scopes = { "" })
                  }, tags={ "Registry Entries" })
 
     @ApiResponses(value = { 
@@ -340,7 +340,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Operation(summary = "Update an existing Registry", description = "This operation can be used to update an existing Endpoint Registry ",
-        security = {  @SecurityRequirement(name = "WriteRegistry" , scopes = { "registry:write" })
+        security = {  @SecurityRequirement(name = "default" , scopes = { "" })
                  }, tags={ "Registries" })
 
     @ApiResponses(value = { 
@@ -376,7 +376,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @Operation(summary = "Update an existing Entry in a Registry", description = "This operation can be used to update an existing Entry in Registry with the details of the Entry in the payload. ",
-        security = {  @SecurityRequirement(name = "WriteRegistryEntry" , scopes = { "registry:entry_write" })
+        security = {  @SecurityRequirement(name = "default" , scopes = { "" })
                  }, tags={ "Registry Entries" })
 
     @ApiResponses(value = { 
