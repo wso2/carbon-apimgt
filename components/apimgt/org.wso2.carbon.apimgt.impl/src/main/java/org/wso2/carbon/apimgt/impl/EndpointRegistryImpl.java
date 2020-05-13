@@ -98,7 +98,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      * @throws APIManagementException if failed to delete the Endpoint Registry
      */
     public void deleteEndpointRegistry(String registryUUID) throws APIManagementException {
-        apiMgtDAO.deleteEndpointRegistry(registryUUID );
+        apiMgtDAO.deleteEndpointRegistry(registryUUID);
     }
 
     /**
@@ -176,6 +176,16 @@ public class EndpointRegistryImpl implements EndpointRegistry {
                     + registryEntry.getName() + "' already exists");
         }
         apiMgtDAO.updateEndpointRegistryEntry(registryEntry);
+    }
+
+    /**
+     * Deletes an Endpoint Registry Entry
+     *
+     * @param entryId Registry Entry Identifier(UUID)
+     * @throws APIManagementException if failed to delete the Endpoint Registry Entry
+     */
+    public void deleteEndpointRegistryEntry(String entryId) throws APIManagementException {
+        apiMgtDAO.deleteEndpointRegistryEntry(entryId);
     }
 
     /**

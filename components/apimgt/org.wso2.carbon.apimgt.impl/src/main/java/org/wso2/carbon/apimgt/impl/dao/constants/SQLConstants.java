@@ -1450,6 +1450,8 @@ public class SQLConstants {
                     "ENDPOINT_DEFINITION = ? " +
                     "WHERE UUID = ?";
 
+    public static final String DELETE_ENDPOINT_REGISTRY_ENTRY_SQL = "DELETE FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
+
     public static final String IS_ENDPOINT_REGISTRY_NAME_EXISTS = "SELECT COUNT(UUID) AS ENDPOINT_REGISTRY_COUNT" +
             " FROM ENDPOINT_REG WHERE LOWER(REG_NAME) = LOWER(?) AND TENANT_ID = ?";
 

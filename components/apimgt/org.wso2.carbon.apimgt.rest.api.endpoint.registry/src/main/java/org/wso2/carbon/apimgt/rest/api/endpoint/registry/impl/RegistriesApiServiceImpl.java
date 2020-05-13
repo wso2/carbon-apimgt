@@ -160,8 +160,13 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
                         " is not found", log);
             }
-            ResourceFile definitionFile = new ResourceFile(definitionFileInputStream, definitionFileDetail
-                    .getContentType().getType());
+            ResourceFile definitionFile;
+            if (definitionFileInputStream == null || definitionFileDetail == null) {
+                definitionFile = new ResourceFile(null, null);
+            } else {
+                definitionFile = new ResourceFile(definitionFileInputStream, definitionFileDetail
+                        .getContentType().getType());
+            }
             EndpointRegistryEntry entryToAdd = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
                     null, definitionFile, endpointRegistry.getRegistryId());
             String entryId = registryProvider.addEndpointRegistryEntry(entryToAdd);
@@ -255,6 +260,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     public Response updateRegistryEntry(String registryId, String entryId, RegistryEntryDTO registryEntry, InputStream
             definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String user = RestApiUtil.getLoggedInUsername();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         EndpointRegistryEntry updatedEntry = null;
 
@@ -271,9 +277,13 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 RestApiUtil.handleResourceNotFoundError("Endpoint registry entry with the id: " + entryId +
                         " is not found", log);
             }
-
-            ResourceFile definitionFile = new ResourceFile(definitionFileInputStream, definitionFileDetail
-                    .getContentType().getType());
+            ResourceFile definitionFile;
+            if (definitionFileInputStream == null || definitionFileDetail == null) {
+                definitionFile = new ResourceFile(null, null);
+            } else {
+                definitionFile = new ResourceFile(definitionFileInputStream, definitionFileDetail
+                        .getContentType().getType());
+            }
             EndpointRegistryEntry entryToUpdate = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
                     entryId, definitionFile, endpointRegistry.getRegistryId());
             registryProvider.updateEndpointRegistryEntry(entryToUpdate);
@@ -286,13 +296,35 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             RestApiUtil.handleInternalServerError("Error while updating the endpoint registry entry " +
                     "with id: " + entryId, e, log);
         }
-
+        audit.info("Successfully updated endpoint registry entry with id :" + entryId +
+                " in :" + registryId + " by:" + user);
         return Response.ok().entity(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(updatedEntry)).build();
     }
 
     @Override
     public Response deleteRegistryEntry(String registryId, String entryId, MessageContext messageContext) {
-
-        return Response.ok().entity("Successfully deleted the registry entry").build();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String user = RestApiUtil.getLoggedInUsername();
+        EndpointRegistry registryProvider = new EndpointRegistryImpl();
+        try {
+            EndpointRegistryInfo endpointRegistry =
+                    registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
+            if (endpointRegistry == null) {
+                RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
+                        " is not found", log);
+            }
+            EndpointRegistryEntry endpointRegistryEntry = registryProvider.getEndpointRegistryEntryByUUID(registryId, entryId);
+            if (endpointRegistryEntry == null) {
+                RestApiUtil.handleResourceNotFoundError("Endpoint registry entry with the id: " + entryId +
+                        " is not found", log);
+            }
+            registryProvider.deleteEndpointRegistryEntry(entryId);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while deleting the endpoint registry entry " +
+                    "with id: " + registryId, e, log);
+        }
+        audit.info("Successfully deleted endpoint registry entry with id :" + entryId +
+                " in :" + registryId + " by:" + user);
+        return Response.ok().entity("Successfully deleted the endpoint registry entry").build();
     }
 }

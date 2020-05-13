@@ -15039,6 +15039,27 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Deletes an Endpoint Registry Entry
+     *
+     * @param entryId Registry Entry Identifier(UUID)
+     * @throws APIManagementException if failed to delete the Endpoint Registry Entry
+     */
+    public void deleteEndpointRegistryEntry(String entryId) throws APIManagementException {
+        String query = SQLConstants.DELETE_ENDPOINT_REGISTRY_ENTRY_SQL;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)
+        ) {
+            connection.setAutoCommit(false);
+            statement.setString(1, entryId);
+            statement.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Failed to delete Endpoint Registry Entry with the id: " + entryId, e);
+        }
+    }
+
+    /**
      * Checks whether the given endpoint registry entry name is already available under given registry
      *
      * @param registryEntry
