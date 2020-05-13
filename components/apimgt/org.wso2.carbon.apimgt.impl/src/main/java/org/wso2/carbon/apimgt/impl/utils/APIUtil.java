@@ -133,6 +133,7 @@ import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
 import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -10750,6 +10751,18 @@ public final class APIUtil {
         }
     }
 
+    public static Map<String, KeyManagerConfigurationsDto.KeyManagerConfigurationDto> getKeyManagerConfigurations() {
+
+        APIManagerConfigurationService apiManagerConfigurationService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+        if (apiManagerConfigurationService != null &&
+                apiManagerConfigurationService.getAPIManagerConfiguration() != null &&
+                apiManagerConfigurationService.getAPIManagerConfiguration().getKeyManagerConfigurationsDto() != null) {
+            return apiManagerConfigurationService.getAPIManagerConfiguration().getKeyManagerConfigurationsDto()
+                    .getKeyManagerConfiguration();
+        }
+        return Collections.emptyMap();
+    }
 
     /**
      * Get scopes attached to the API.

@@ -4573,6 +4573,17 @@ definitions:
         type: array
         items:
           type: string
+      keyManagerConfiguration:
+        type: array
+        items:
+          properties:
+            type:
+              type: string
+              example: 'wso2is'
+            configurations:
+              type: array
+              items:
+                $ref: '#/definitions/KeyManagerConfiguration'
       analyticsEnabled:
         type: boolean
         description: To determine whether analytics is enabled or not
@@ -4687,7 +4698,40 @@ definitions:
         type: boolean
         example: true
 
-
+  #-----------------------------------------------------
+  # The KeyManager resource
+  #-----------------------------------------------------
+  KeyManagerConfiguration:
+    title: Key Manager Configuration
+    properties:
+      name:
+        type: string
+        example: "consumer_key"
+      label:
+        type: string
+        example: "Consumer Key"
+      type:
+        type: string
+        example: "select"
+      required:
+        type: boolean
+        example: true
+      mask:
+        type: boolean
+        example: true
+      multiple:
+        type: boolean
+        example: true
+      tooltip:
+        type: string
+        example: "Entet username to connect to key manager"
+      default:
+        type: object
+        example: "admin"
+      values:
+        type: array
+        items:
+          type: object
 
   #-----------------------------------------------------
   # The KeyManager List resource
