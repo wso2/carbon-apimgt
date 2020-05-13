@@ -23,7 +23,7 @@ function getPageIDs(routeMenuMapping, currentPath, pageIDs = []) {
                     return result;
                 }
             }
-            if (routeDetail.path === currentPath) {
+            if (routeDetail.path && currentPath.match(routeDetail.path)) {
                 return [routeDetail.id];
             }
         }
@@ -41,14 +41,17 @@ function Breadcrumbs(props) {
     const routeMenuMapping = RouteMenuMapping(intl);
     const { history: { location: { pathname: currentPath } } } = props;
     const pageIDs = getPageIDs(routeMenuMapping, currentPath);
-
-    return (
-        <MUIBreadcrumbs aria-label='breadcrumb'>
-            {pageIDs.map((page) => {
-                return <Typography color='textPrimary'>{page}</Typography>;
-            })}
-        </MUIBreadcrumbs>
-    );
+    if (pageIDs) {
+        return (
+            <MUIBreadcrumbs aria-label='breadcrumb'>
+                {pageIDs.map((page) => {
+                    return <Typography color='textPrimary'>{page}</Typography>;
+                })}
+            </MUIBreadcrumbs>
+        );
+    } else {
+        return <div />;
+    }
 }
 
 export default withRouter(Breadcrumbs);
