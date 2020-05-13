@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -40,10 +40,6 @@ import EditIcon from '@material-ui/icons/Edit';
 export default function ListApplicationThrottlingPolicies() {
     const intl = useIntl();
     const restApi = new API();
-    const [
-        applicationThrottlingPolicyList,
-        setApplicationThrottlingPolicyList,
-    ] = useState(null);
 
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
@@ -208,7 +204,6 @@ export default function ListApplicationThrottlingPolicies() {
                     .map((obj) => {
                         return Object.values(obj);
                     });
-                setApplicationThrottlingPolicyList(applicationThrottlingvalues);
             });
 
             setTimeout(() => {

@@ -81,9 +81,6 @@ Delete.propTypes = {
     selectedPolicyName: PropTypes.shape({
         name: PropTypes.number.isRequired,
     }).isRequired,
-    applicationThrottlingPolicyList: PropTypes.shape({
-        applicationThrottlingPolicyList: PropTypes.array.isRequired,
-    }).isRequired,
     dataRow: PropTypes.shape({
         conditionUUID: PropTypes.number.isRequired,
     }).isRequired,
