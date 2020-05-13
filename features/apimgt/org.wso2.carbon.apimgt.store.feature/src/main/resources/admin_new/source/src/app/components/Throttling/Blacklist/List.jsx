@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -40,19 +40,6 @@ export default function ListBlacklistThrottlingPolicies() {
     const intl = useIntl();
     const restApi = new API();
     let blacklistPolicyList;
-    const [
-        blacklistPoliciesList,
-        setBlacklistPoliciesList,
-    ] = useState([]);
-
-    // const [state, setState] = React.useState({
-    //     checkedA: true,
-    //     checkedB: true,
-    // });
-
-    // const handleChange = (event) => {
-    //     setState({ ...state, [event.target.name]: event.target.checked });
-    // };
 
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
@@ -160,7 +147,7 @@ export default function ListBlacklistThrottlingPolicies() {
     function apiCall() {
         let policyList;
         let incrementId = 0;
-        return new Promise(((resolve) => {
+        return new Promise(((resolve, reject) => {
             restApi.blacklistPoliciesGet().then((result) => {
                 policyList = result.body.list;
                 blacklistPolicyList = policyList.map((obj) => {
@@ -180,11 +167,10 @@ export default function ListBlacklistThrottlingPolicies() {
                         conditionValue: array,
                     };
                 });
-                setBlacklistPoliciesList(blacklistPolicyList);
-            });
-            setTimeout(() => {
                 resolve(blacklistPolicyList);
-            }, 1000);
+            }).catch((error) => {
+                reject(error);
+            });
         }));
     }
 
@@ -196,9 +182,6 @@ export default function ListBlacklistThrottlingPolicies() {
             searchProps={searchProps}
             emptyBoxProps={emptyBoxProps}
             apiCall={apiCall}
-            deleteComponentProps={{
-                blacklistPoliciesList,
-            }}
             DeleteComponent={Delete}
             EditComponent={AddEdit}
             isBlacklist
