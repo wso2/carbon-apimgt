@@ -20,19 +20,30 @@ import React from 'react';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import { Typography } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
+import { makeStyles } from '@material-ui/core/styles';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
+
+const useStyles = makeStyles((theme) => ({
+    appContent: {
+        margin: theme.spacing(2),
+    },
+    button: {
+        color: theme.palette.getContrastText(theme.palette.primary.main),
+    },
+  }));
 
 const genericDisplayDialog = (props) => {
     const {
-        classes, handleClick, heading, caption, buttonText,
+        handleClick, heading, caption, buttonText,
     } = props;
+    const classes = useStyles();
     return (
         <div className={classes.appContent}>
             <InlineMessage type='info' className={classes.dialogContainer}>
-                <Typography variant='h5' component='h3'>
+                <Typography variant='h5' component='h2'>
                     {heading}
                 </Typography>
-                <Typography component='p'>
+                <Typography variant="body2" gutterBottom>
                     {caption}
                 </Typography>
                 <ScopeValidation resourcePath={resourcePaths.APPLICATIONS} resourceMethod={resourceMethods.POST}>

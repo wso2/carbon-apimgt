@@ -14758,17 +14758,49 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Update an existing endpoint registry.
+     *
+     * @param registryId uuid of the endpoint registry
+     * @param endpointRegistry EndpointRegistryInfo object with updated details
+     * @throws APIManagementException if unable to update the endpoint registry
+     */
+    public void updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistry) throws
+            APIManagementException {
+
+        String query = SQLConstants.UPDATE_ENDPOINT_REGISTRY_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            ps.setString(1, endpointRegistry.getName());
+            ps.setString(2, endpointRegistry.getType());
+            ps.setString(3, endpointRegistry.getMode());
+            // Need to update the role names
+            ps.setString(4, "");
+            ps.setString(5, "");
+            ps.setString(6, registryId);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while updating endpoint registry: " + endpointRegistry.getName(), e);
+        }
+        return;
+    }
+
+    /**
      * Return the details of an Endpoint Registry
      *
      * @param registryId Endpoint Registry Identifier
+     * @param tenantID  ID of the owner's tenant
      * @return Endpoint Registry Object
      * @throws APIManagementException
      */
-    public EndpointRegistryInfo getEndpointRegistryByUUID(String registryId) throws APIManagementException {
+    public EndpointRegistryInfo getEndpointRegistryByUUID(String registryId, int tenantID)
+            throws APIManagementException {
         String query = SQLConstants.GET_ENDPOINT_REGISTRY_BY_UUID;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, registryId);
+            ps.setInt(2, tenantID);
             ps.executeQuery();
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -14776,7 +14808,7 @@ public class ApiMgtDAO {
                     endpointRegistry.setUuid(rs.getString("UUID"));
                     endpointRegistry.setName(rs.getString("REG_NAME"));
                     endpointRegistry.setType(rs.getString("REG_TYPE"));
-                    endpointRegistry.setMode(rs.getString("MODE"));
+                    endpointRegistry.setMode(rs.getString("REG_MODE"));
                     endpointRegistry.setOwner(rs.getString("REG_OWNER"));
                     endpointRegistry.setRegistryId(rs.getInt("ID"));
                     return endpointRegistry;
@@ -14787,6 +14819,27 @@ public class ApiMgtDAO {
                     + registryId, e);
         }
         return null;
+    }
+
+    /**
+     * Deletes an Endpoint Registry
+     *
+     * @param registryUUID Registry Identifier(UUID)
+     * @throws APIManagementException if failed to delete the Endpoint Registry
+     */
+    public void deleteEndpointRegistry(String registryUUID) throws APIManagementException {
+        String deleteRegQuery = SQLConstants.DELETE_ENDPOINT_REGISTRY_SQL;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statementDeleteRegistry = connection.prepareStatement(deleteRegQuery)
+             ) {
+            connection.setAutoCommit(false);
+            statementDeleteRegistry.setString(1, registryUUID);
+            statementDeleteRegistry.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Failed to delete Endpoint Registry with the id: " + registryUUID, e);
+        }
     }
 
     /**
@@ -14835,7 +14888,7 @@ public class ApiMgtDAO {
                     endpointRegistry.setUuid(rs.getString("UUID"));
                     endpointRegistry.setName(rs.getString("REG_NAME"));
                     endpointRegistry.setType(rs.getString("REG_TYPE"));
-                    endpointRegistry.setMode(rs.getString("MODE"));
+                    endpointRegistry.setMode(rs.getString("REG_MODE"));
                     endpointRegistry.setOwner(rs.getString("REG_OWNER"));
                     endpointRegistryInfoList.add(endpointRegistry);
                 }
