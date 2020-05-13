@@ -70,7 +70,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * Returns details of an Endpoint Registry
      *
-     * @param registryId Registry Identifier
+     * @param registryId   Registry Identifier
      * @param tenantDomain
      * @return An EndpointRegistryInfo object related to the given identifier or null
      * @throws APIManagementException if failed to get details of an Endpoint Registry
@@ -103,10 +103,10 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * Returns details of all Endpoint Registries belong to a given tenant
      *
-     * @param sortBy Name of the sorting field
-     * @param sortOrder Order of sorting (asc or desc)
-     * @param limit Limit
-     * @param offset Offset
+     * @param sortBy       Name of the sorting field
+     * @param sortOrder    Order of sorting (asc or desc)
+     * @param limit        Limit
+     * @param offset       Offset
      * @param tenantDomain
      * @return A list of EndpointRegistryInfo objects
      * @throws APIManagementException if failed to get details of an Endpoint Registries

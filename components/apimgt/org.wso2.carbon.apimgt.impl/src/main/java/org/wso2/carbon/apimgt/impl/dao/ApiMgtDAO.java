@@ -14732,7 +14732,7 @@ public class ApiMgtDAO {
      * Add a new endpoint registry
      *
      * @param endpointRegistry EndpointRegistryInfo
-     * @param tenantID  ID of the owner's tenant
+     * @param tenantID         ID of the owner's tenant
      * @return registryId
      */
     public String addEndpointRegistry(EndpointRegistryInfo endpointRegistry, int tenantID) throws APIManagementException {
@@ -14761,7 +14761,7 @@ public class ApiMgtDAO {
     /**
      * Update an existing endpoint registry.
      *
-     * @param registryId uuid of the endpoint registry
+     * @param registryId       uuid of the endpoint registry
      * @param endpointRegistry EndpointRegistryInfo object with updated details
      * @throws APIManagementException if unable to update the endpoint registry
      */
@@ -14791,7 +14791,7 @@ public class ApiMgtDAO {
      * Return the details of an Endpoint Registry
      *
      * @param registryId Endpoint Registry Identifier
-     * @param tenantID  ID of the owner's tenant
+     * @param tenantID   ID of the owner's tenant
      * @return Endpoint Registry Object
      * @throws APIManagementException
      */
@@ -14872,10 +14872,10 @@ public class ApiMgtDAO {
     /**
      * Returns details of all Endpoint Registries belong to a given tenant
      *
-     * @param sortBy Name of the sorting field
+     * @param sortBy    Name of the sorting field
      * @param sortOrder Order of sorting (asc or desc)
-     * @param limit Limit
-     * @param offset Offset
+     * @param limit     Limit
+     * @param offset    Offset
      * @param tenantID
      * @return A list of EndpointRegistryInfo objects
      * @throws APIManagementException if failed to get details of Endpoint Registries
@@ -14914,6 +14914,7 @@ public class ApiMgtDAO {
 
     /**
      * Returns the details of an endpoint registry entry.
+     *
      * @param registryEntryUuid endpoint registry entry identifier.
      * @return EndpointRegistryEntry object.
      * @throws APIManagementException

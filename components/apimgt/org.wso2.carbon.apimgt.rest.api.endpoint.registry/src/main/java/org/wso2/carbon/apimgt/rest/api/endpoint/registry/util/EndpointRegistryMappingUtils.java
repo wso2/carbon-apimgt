@@ -83,7 +83,7 @@ public class EndpointRegistryMappingUtils {
     /**
      * Converts a RegistryEntryDTO object with endpointDefinition file into EndpointRegistryEntry object
      *
-     * @param registryEntryDTO RegistryEntryDTO object
+     * @param registryEntryDTO   RegistryEntryDTO object
      * @param endpointDefinition endpointDefinition file
      * @return EndpointRegistryEntry corresponds to RegistryEntryDTO object
      */
@@ -107,7 +107,7 @@ public class EndpointRegistryMappingUtils {
      * @param sortBy
      * @return Updated sort by field
      */
-    public static String getRegistriesSortByField (String sortBy) {
+    public static String getRegistriesSortByField(String sortBy) {
         String updatedSortBy = EndpointRegistryConstants.COLUMN_ID; // default sortBy field
         if (RestApiConstants.ENDPOINT_REG_NAME.equals(sortBy)) {
             updatedSortBy = EndpointRegistryConstants.COLUMN_REG_NAME;
