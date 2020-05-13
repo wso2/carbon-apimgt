@@ -103,16 +103,21 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * Returns details of all Endpoint Registries belong to a given tenant
      *
+     * @param sortBy Name of the sorting field
+     * @param sortOrder Order of sorting (asc or desc)
+     * @param limit Limit
+     * @param offset Offset
      * @param tenantDomain
      * @return A list of EndpointRegistryInfo objects
      * @throws APIManagementException if failed to get details of an Endpoint Registries
      */
-    public List<EndpointRegistryInfo> getEndpointRegistries(String tenantDomain) throws APIManagementException {
+    public List<EndpointRegistryInfo> getEndpointRegistries(String sortBy, String sortOrder, int limit, int offset,
+                                                            String tenantDomain) throws APIManagementException {
         int tenantId;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
-            return apiMgtDAO.getEndpointRegistries(tenantId);
+            return apiMgtDAO.getEndpointRegistries(sortBy, sortOrder, limit, offset, tenantId);
         } catch (UserStoreException e) {
             String msg = "Error while retrieving tenant information";
             log.error(msg, e);

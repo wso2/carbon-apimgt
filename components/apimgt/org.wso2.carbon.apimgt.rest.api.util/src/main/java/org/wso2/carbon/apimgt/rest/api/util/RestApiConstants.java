@@ -206,6 +206,9 @@ public final class RestApiConstants {
     public static final String SORT_BY_THROTTLING_TIER = "throttlingTier";
     public static final String SORT_BY_STATUS = "status";
 
+    //Constants for endpoint registry sortBy
+    public static final String ENDPOINT_REG_NAME = "registryName";
+
     //default error messages
     public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";
     public static final String STATUS_NOT_FOUND_MESSAGE_DEFAULT = "Not Found";

@@ -59,11 +59,16 @@ public interface EndpointRegistry {
     /**
      * Returns details of all Endpoint Registries belong to a given tenant
      *
+     * @param sortBy Name of the sorting field
+     * @param sortOrder Order of sorting (asc or desc)
+     * @param limit Limit
+     * @param offset Offset
      * @param tenantDomain
      * @return A list of EndpointRegistryInfo objects
      * @throws APIManagementException if failed to get details of Endpoint Registries
      */
-    List<EndpointRegistryInfo> getEndpointRegistries(String tenantDomain) throws APIManagementException;
+    List<EndpointRegistryInfo> getEndpointRegistries(String sortBy, String sortOrder, int limit, int offset,
+                                                     String tenantDomain) throws APIManagementException;
 
     /**
      * Returns all entries belong to a given endpoint registry

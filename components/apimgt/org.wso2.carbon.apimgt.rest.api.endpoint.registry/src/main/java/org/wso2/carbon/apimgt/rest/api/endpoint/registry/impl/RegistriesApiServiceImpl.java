@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryArrayDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.util.EndpointRegistryMappingUtils;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.InputStream;
@@ -101,8 +102,15 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         RegistryArrayDTO registryDTOList = new RegistryArrayDTO();
+
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DEFAULT_SORT_ORDER;
+        sortBy = EndpointRegistryMappingUtils.getRegistriesSortByField(sortBy);
+
         try {
-            List<EndpointRegistryInfo> endpointRegistryInfoList = registryProvider.getEndpointRegistries(tenantDomain);
+            List<EndpointRegistryInfo> endpointRegistryInfoList =
+                    registryProvider.getEndpointRegistries(sortBy, sortOrder, limit, offset, tenantDomain);
             for (EndpointRegistryInfo endpointRegistryInfo: endpointRegistryInfoList) {
                 registryDTOList.add(EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfo));
             }

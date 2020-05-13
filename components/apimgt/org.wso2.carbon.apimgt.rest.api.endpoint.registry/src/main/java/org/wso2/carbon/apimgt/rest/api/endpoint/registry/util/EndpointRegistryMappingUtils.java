@@ -19,8 +19,10 @@ package org.wso2.carbon.apimgt.rest.api.endpoint.registry.util;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.impl.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryDTO;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 
 /**
  * This class is responsible for mapping APIM core Endpoint Registry related objects into REST API
@@ -97,5 +99,19 @@ public class EndpointRegistryMappingUtils {
         registryEntry.setServiceURL(registryEntryDTO.getServiceUrl());
         registryEntry.setRegistryId(registryId);
         return registryEntry;
+    }
+
+    /***
+     * Converts the sort by object according to the input
+     *
+     * @param sortBy
+     * @return Updated sort by field
+     */
+    public static String getRegistriesSortByField (String sortBy) {
+        String updatedSortBy = EndpointRegistryConstants.COLUMN_ID; // default sortBy field
+        if (RestApiConstants.ENDPOINT_REG_NAME.equals(sortBy)) {
+            updatedSortBy = EndpointRegistryConstants.COLUMN_REG_NAME;
+        }
+        return updatedSortBy;
     }
 }
