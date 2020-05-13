@@ -40,7 +40,7 @@ public interface EndpointRegistry {
     /**
      * Returns details of an Endpoint Registry
      *
-     * @param registryId Registry Identifier
+     * @param registryId   Registry Identifier
      * @param tenantDomain
      * @return An EndpointRegistryInfo object related to the given identifier or null
      * @throws APIManagementException if failed to get details of an Endpoint Registry
@@ -59,11 +59,16 @@ public interface EndpointRegistry {
     /**
      * Returns details of all Endpoint Registries belong to a given tenant
      *
+     * @param sortBy       Name of the sorting field
+     * @param sortOrder    Order of sorting (asc or desc)
+     * @param limit        Limit
+     * @param offset       Offset
      * @param tenantDomain
      * @return A list of EndpointRegistryInfo objects
      * @throws APIManagementException if failed to get details of Endpoint Registries
      */
-    List<EndpointRegistryInfo> getEndpointRegistries(String tenantDomain) throws APIManagementException;
+    List<EndpointRegistryInfo> getEndpointRegistries(String sortBy, String sortOrder, int limit, int offset,
+                                                     String tenantDomain) throws APIManagementException;
 
     /**
      * Returns all entries belong to a given endpoint registry
@@ -76,6 +81,7 @@ public interface EndpointRegistry {
 
     /**
      * Returns details of a specific Endpoint Registry Entry
+     *
      * @return an EndpointRegistryEntry object
      * @throws APIManagementException if failed get details of an Endpoint Registry Entry
      */
@@ -92,7 +98,8 @@ public interface EndpointRegistry {
 
     /**
      * Updates an existing endpoint registry
-     * @param registryId uuid of the endpoint registry which needs to be updated
+     *
+     * @param registryId           uuid of the endpoint registry which needs to be updated
      * @param endpointRegistryInfo EndpointRegistryInfo object with details to be updated
      * @return uuid of the endpoint registry
      * @throws APIManagementException if failed to update the endpoint registry
