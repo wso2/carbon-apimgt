@@ -10797,4 +10797,18 @@ public final class APIUtil {
         }
         return scopeToKeyMap;
     }
+    public static KeyManagerConfigurationsDto.KeyManagerConfigurationDto getKeyManagerConfigurationsByConnectorType(
+            String type) {
+
+        APIManagerConfigurationService apiManagerConfigurationService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+        if (apiManagerConfigurationService != null &&
+                apiManagerConfigurationService.getAPIManagerConfiguration() != null &&
+                apiManagerConfigurationService.getAPIManagerConfiguration().getKeyManagerConfigurationsDto() != null) {
+            return apiManagerConfigurationService.getAPIManagerConfiguration().getKeyManagerConfigurationsDto()
+                    .getKeyManagerConfiguration().get(type);
+        }
+        return null;
+    }
+
 }

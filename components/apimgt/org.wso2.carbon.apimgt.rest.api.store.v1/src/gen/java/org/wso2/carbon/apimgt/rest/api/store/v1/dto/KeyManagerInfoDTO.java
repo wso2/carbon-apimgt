@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerApplicationConfigurationDTO;
 import javax.validation.constraints.*;
 
 
@@ -31,7 +32,7 @@ public class KeyManagerInfoDTO   {
     private Boolean enableTokenHashing = false;
     private Boolean enableOAuthAppCreation = true;
     private Boolean enableMapOAuthConsumerApps = false;
-    private List<Object> applicationConfiguration = new ArrayList<>();
+    private List<KeyManagerApplicationConfigurationDTO> applicationConfiguration = new ArrayList<>();
     private List<Object> additionalProperties = new ArrayList<>();
 
   /**
@@ -276,7 +277,7 @@ public class KeyManagerInfoDTO   {
 
   /**
    **/
-  public KeyManagerInfoDTO applicationConfiguration(List<Object> applicationConfiguration) {
+  public KeyManagerInfoDTO applicationConfiguration(List<KeyManagerApplicationConfigurationDTO> applicationConfiguration) {
     this.applicationConfiguration = applicationConfiguration;
     return this;
   }
@@ -284,10 +285,10 @@ public class KeyManagerInfoDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("applicationConfiguration")
-  public List<Object> getApplicationConfiguration() {
+  public List<KeyManagerApplicationConfigurationDTO> getApplicationConfiguration() {
     return applicationConfiguration;
   }
-  public void setApplicationConfiguration(List<Object> applicationConfiguration) {
+  public void setApplicationConfiguration(List<KeyManagerApplicationConfigurationDTO> applicationConfiguration) {
     this.applicationConfiguration = applicationConfiguration;
   }
 
