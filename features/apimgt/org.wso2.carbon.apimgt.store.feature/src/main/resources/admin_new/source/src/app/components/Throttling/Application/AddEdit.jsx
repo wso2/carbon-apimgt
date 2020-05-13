@@ -198,46 +198,50 @@ function AddEdit(props) {
             const policyId = dataRow[4];
             promisedAddApplicationPolicy = restApi.updateApplicationThrottlingPolicy(policyId,
                 applicationThrottlingPolicy);
-            promisedAddApplicationPolicy
-                .then(() => {
-                    updateList();
-                    return (
-                        <FormattedMessage
-                            id='Throttling.Application.Policy.policy.add.success'
-                            defaultMessage='Application Rate Limiting Policy added successfully.'
-                        />
-                    );
-                })
-                .catch((error) => {
-                    const { response } = error;
-                    let errorDescription;
-                    if (response.body) {
-                        errorDescription = response.body;
-                    }
-                    return (errorDescription);
-                });
+            promisedAddApplicationPolicy = new Promise((resolve, reject) => {
+                promisedAddApplicationPolicy
+                    .then(() => {
+                        resolve(
+                            <FormattedMessage
+                                id='Throttling.Application.Policy.policy.edit.success'
+                                defaultMessage='Application Rate Limiting Policy edited successfully.'
+                            />,
+                        );
+                    })
+                    .catch((error) => {
+                        const { response } = error;
+                        if (response.body) {
+                            reject(response.body.description);
+                        }
+                    })
+                    .finally(() => {
+                        updateList();
+                    });
+            });
         } else {
             promisedAddApplicationPolicy = restApi.addApplicationThrottlingPolicy(
                 applicationThrottlingPolicy,
             );
-            promisedAddApplicationPolicy
-                .then(() => {
-                    updateList();
-                    return (
-                        <FormattedMessage
-                            id='Throttling.Application.Policy.policy.add.success'
-                            defaultMessage='Application Rate Limiting Policy added successfully.'
-                        />
-                    );
-                })
-                .catch((error) => {
-                    const { response } = error;
-                    let errorDescription;
-                    if (response.body) {
-                        errorDescription = response.body;
-                    }
-                    return (errorDescription);
-                });
+            promisedAddApplicationPolicy = new Promise((resolve, reject) => {
+                promisedAddApplicationPolicy
+                    .then(() => {
+                        resolve(
+                            <FormattedMessage
+                                id='Throttling.Application.Policy.policy.add.success'
+                                defaultMessage='Application Rate Limiting Policy added successfully.'
+                            />,
+                        );
+                    })
+                    .catch((error) => {
+                        const { response } = error;
+                        if (response.body) {
+                            reject(response.body.description);
+                        }
+                    })
+                    .finally(() => {
+                        updateList();
+                    });
+            });
         }
         return (promisedAddApplicationPolicy);
     };
