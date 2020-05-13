@@ -88,9 +88,19 @@ public class KeyManagerConfigurationsDto {
 
     public static class KeyManagerConfigurationDto {
         private String implementationClass;
-
+        private String jwtValidatorImplementationClass;
         private List<ConfigurationDto> connectionConfigurationDtoList = new ArrayList<>();
         private List<ConfigurationDto> applicationConfigurationDtoList = new ArrayList<>();
+
+        public String getJwtValidatorImplementationClass() {
+
+            return jwtValidatorImplementationClass;
+        }
+
+        public void setJwtValidatorImplementationClass(String jwtValidatorImplementationClass) {
+
+            this.jwtValidatorImplementationClass = jwtValidatorImplementationClass;
+        }
 
         public String getImplementationClass() {
 

@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
+import org.wso2.carbon.apimgt.impl.internal.JWTValidatorHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.util.HashMap;
@@ -42,7 +43,7 @@ public class KeyManagerHolder {
 
     private static Log log = LogFactory.getLog(KeyManagerHolder.class);
     private static Map<String, Map<String, KeyManager>> keyManagerMap = new HashMap<>();
-    private static Map<String,KeyManager> tenantKeyManager = new HashMap<>();
+    private static Map<String, KeyManager> tenantKeyManager = new HashMap<>();
 
     public static void addKeyManagerConfiguration(String tenantDomain, String name, String type,
                                                   KeyManagerConfiguration keyManagerConfiguration)
@@ -50,38 +51,42 @@ public class KeyManagerHolder {
 
         Map<String, KeyManager> tenantWiseKeyManagerMap = keyManagerMap.getOrDefault(tenantDomain, new HashMap<>());
         KeyManager keyManager = tenantWiseKeyManagerMap.get(name);
-        if (keyManager == null) {
-            APIManagerConfiguration apiManagerConfiguration =
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                            .getAPIManagerConfiguration();
-            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(type)) {
-                keyManager = new AMDefaultKeyManagerImpl();
-                keyManager.loadConfiguration(keyManagerConfiguration);
-                tenantWiseKeyManagerMap.put(APIConstants.KeyManager.DEFAULT_KEY_MANAGER, keyManager);
-            }
-            KeyManagerConfigurationsDto keyManagerConfigurationsDto =
-                    apiManagerConfiguration.getKeyManagerConfigurationsDto();
-            if (keyManagerConfigurationsDto != null) {
-                KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerConfigurationDto =
-                        keyManagerConfigurationsDto.getKeyManagerConfiguration().get(type);
-                if (keyManagerConfigurationDto != null &&
-                        StringUtils.isNotEmpty(keyManagerConfigurationDto.getImplementationClass())) {
-                    try {
-                        keyManager =
-                                (KeyManager) Class.forName(keyManagerConfigurationDto.getImplementationClass())
-                                        .newInstance();
-                        keyManager.loadConfiguration(keyManagerConfiguration);
-                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-                        throw new APIManagementException("Error while loading keymanager configuration", e);
+        if (keyManagerConfiguration.isEnabled()){
+            if (keyManager == null) {
+                APIManagerConfiguration apiManagerConfiguration =
+                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                .getAPIManagerConfiguration();
+                if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(type)) {
+                    keyManager = new AMDefaultKeyManagerImpl();
+                    keyManager.loadConfiguration(keyManagerConfiguration);
+                } else {
+                    KeyManagerConfigurationsDto keyManagerConfigurationsDto =
+                            apiManagerConfiguration.getKeyManagerConfigurationsDto();
+                    if (keyManagerConfigurationsDto != null) {
+                        KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerConfigurationDto =
+                                keyManagerConfigurationsDto.getKeyManagerConfiguration().get(type);
+                        if (keyManagerConfigurationDto != null &&
+                                StringUtils.isNotEmpty(keyManagerConfigurationDto.getImplementationClass())) {
+                            try {
+                                keyManager =
+                                        (KeyManager) Class.forName(keyManagerConfigurationDto.getImplementationClass())
+                                                .newInstance();
+                                keyManager.loadConfiguration(keyManagerConfiguration);
+                            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                                throw new APIManagementException("Error while loading keymanager configuration", e);
+                            }
+                        }
                     }
-
                 }
+                JWTValidatorHolder.addJWTValidator(tenantDomain, name, type, keyManagerConfiguration);
+                tenantWiseKeyManagerMap.put(name, keyManager);
+                keyManagerMap.put(tenantDomain, tenantWiseKeyManagerMap);
+            } else {
+                throw new APIManagementException("Key Manager " + keyManagerConfiguration.getName() + " already " +
+                        "initialized in tenant " + keyManagerConfiguration.getTenantDomain());
             }
-            tenantWiseKeyManagerMap.put(name, keyManager);
         }
-        keyManagerMap.put(tenantDomain, tenantWiseKeyManagerMap);
     }
-
 
     /**
      * This method will take hardcoded class name from api-manager.xml file and will return that class's instance.
@@ -111,8 +116,6 @@ public class KeyManagerHolder {
         return tenantWiseKeyManger;
     }
 
-
-
     private KeyManagerHolder() {
 
     }
@@ -121,35 +124,28 @@ public class KeyManagerHolder {
                                                      KeyManagerConfiguration keyManagerConfiguration, boolean enabled)
             throws APIManagementException {
 
-        Map<String, KeyManager> tenantWiseKeyManagerMap = keyManagerMap.get(tenantDomain);
-        if (tenantWiseKeyManagerMap == null) {
-            throw new APIManagementException("KeyManager didn't configured for tenant" + tenantDomain);
-        }
-
+        removeKeyManagerConfiguration(tenantDomain, name);
         if (enabled) {
             addKeyManagerConfiguration(tenantDomain, name, type, keyManagerConfiguration);
-        } else {
-            tenantWiseKeyManagerMap.remove(name);
         }
-        keyManagerMap.put(tenantDomain, tenantWiseKeyManagerMap);
-        tenantKeyManager.remove(tenantDomain);
     }
 
     public static void removeKeyManagerConfiguration(String tenantDomain, String name) {
 
         Map<String, KeyManager> tenantWiseKeyManagerMap = keyManagerMap.get(tenantDomain);
-        if (tenantWiseKeyManagerMap != null){
+        if (tenantWiseKeyManagerMap != null) {
             tenantWiseKeyManagerMap.remove(name);
-            keyManagerMap.put(tenantDomain,tenantWiseKeyManagerMap);
+            keyManagerMap.put(tenantDomain, tenantWiseKeyManagerMap);
             tenantKeyManager.remove(tenantDomain);
+            JWTValidatorHolder.deleteJWTValidator(tenantDomain, name);
         }
     }
 
     public static KeyManager getKeyManagerInstance(String tenantDomain, String keyManagerName) {
 
         Map<String, KeyManager> tenantKeyManagerMap = keyManagerMap.get(tenantDomain);
-        if (tenantKeyManagerMap != null){
-         return tenantKeyManagerMap.get(keyManagerName);
+        if (tenantKeyManagerMap != null) {
+            return tenantKeyManagerMap.get(keyManagerName);
         }
         return null;
     }

@@ -296,7 +296,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
         if (isOAuthProtected) {
             authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory,
-                    removeOAuthHeadersFromOutMessage, apiLevelPolicy);
+                    removeOAuthHeadersFromOutMessage, apiLevelPolicy,keyManagersList);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
@@ -345,7 +345,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 long currentTime = System.currentTimeMillis();
                 messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
             }
-            messageContext.setProperty(APIConstants.KeyManager.API_LEVEL_KEY_MANAGERS, keyManagersList);
 
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
 

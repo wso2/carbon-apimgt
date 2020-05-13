@@ -9150,15 +9150,10 @@ public final class APIUtil {
             throws APIManagementException {
         KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
         String decodedString = new String(Base64.decodeBase64(base64EncodedString));
-        try {
-
-
-            Map configuration = (Map) new JSONParser().parse(decodedString);
-            keyManagerConfiguration.setConfiguration(configuration);
-        } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing keymanger configuration",e);
-        }
-            return keyManagerConfiguration;
+        new Gson().fromJson(decodedString,Map.class);
+        Map configuration = new Gson().fromJson(decodedString, Map.class);
+        keyManagerConfiguration.setConfiguration(configuration);
+        return keyManagerConfiguration;
     }
     /**
      * Get if there any tenant-specific application configurations from the tenant

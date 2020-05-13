@@ -142,7 +142,7 @@ ExceptionCodes implements ErrorHandler {
     IDP_INITIALIZATION_FAILED(900605, "Identity Provider initialization failed", 500,
             "Identity provider initialization failed"),
     KEY_MANAGER_INITIALIZATION_FAILED(900606, "Key Manager initialization failed", 500,
-            "Key Manager initialization failed"),
+            "Key Manager initialization failed",true),
     ROLE_DOES_NOT_EXIST(900607, "Role does not exist in the system", 404, "Role does not exist in the system"),
     MULTIPLE_ROLES_EXIST(900608, "Multiple roles with the same display name exist in the system", 500, "Multiple " +
             "roles with the same display name exist in the system"),
@@ -332,6 +332,22 @@ ExceptionCodes implements ErrorHandler {
     private final String errorMessage;
     private final int httpStatusCode;
     private final String errorDescription;
+    private boolean stackTrace = false;
+
+    /**
+     * @param errorCode        This is unique error code that pass to upper level.
+     * @param msg              The error message that you need to pass along with the error code.
+     * @param httpErrorCode    This HTTP status code which should return from REST API layer. If you don't want to pass
+     *                         a http status code keep it blank.
+     * @param errorDescription The error description.
+     */
+    ExceptionCodes(long errorCode, String msg, int httpErrorCode, String errorDescription, boolean stackTrace) {
+        this.errorCode = errorCode;
+        this.errorMessage = msg;
+        this.httpStatusCode = httpErrorCode;
+        this.errorDescription = errorDescription;
+        this.stackTrace = stackTrace;
+    }
 
     /**
      * @param errorCode        This is unique error code that pass to upper level.
@@ -346,7 +362,6 @@ ExceptionCodes implements ErrorHandler {
         this.httpStatusCode = httpErrorCode;
         this.errorDescription = errorDescription;
     }
-
     @Override
     public long getErrorCode() {
         return this.errorCode;
@@ -365,6 +380,11 @@ ExceptionCodes implements ErrorHandler {
     @Override
     public String getErrorDescription() {
         return this.errorDescription;
+    }
+
+    public boolean isStackTrace() {
+
+        return stackTrace;
     }
 
     /**
@@ -393,6 +413,7 @@ ExceptionCodes implements ErrorHandler {
                 description = String.format(description, part2);
             }
         }
-        return new ErrorItem(message, description, errorHandler.getErrorCode(), errorHandler.getHttpStatusCode());
+        return new ErrorItem(message, description, errorHandler.getErrorCode(), errorHandler.getHttpStatusCode(),
+                errorHandler.isStackTrace());
     }
 }

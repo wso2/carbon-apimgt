@@ -35,7 +35,6 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
-import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -47,9 +46,11 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
+import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
@@ -79,7 +80,6 @@ import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterExc
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.identity.oauth2.Oauth2ScopeConstants;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -119,7 +119,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.cache.Cache;
 
@@ -131,7 +130,7 @@ public class APIManagerComponent {
     // TODO refactor caching implementation
     private static final Log log = LogFactory.getLog(APIManagerComponent.class);
 
-    private ServiceRegistration registration;
+    ServiceRegistration registration;
 
     private static TenantRegistryLoader tenantRegistryLoader;
 
@@ -196,6 +195,9 @@ public class APIManagerComponent {
             KeyManagerConfigurationServiceImpl keyManagerConfigurationService = new KeyManagerConfigurationServiceImpl();
             registration = componentContext.getBundleContext().registerService(KeyManagerConfigurationService.class,
                     keyManagerConfigurationService,null);
+            JWTValidationService jwtValidationService = new JWTValidationServiceImpl();
+            registration = componentContext.getBundleContext().registerService(JWTValidationService.class,
+                    jwtValidationService, null);
             ServiceReferenceHolder.getInstance().setKeyManagerConfigurationService(keyManagerConfigurationService);
             APIStatusObserverList.getInstance().init(configuration);
             log.debug("Reading Analytics Configuration from file...");
@@ -770,6 +772,32 @@ public class APIManagerComponent {
     protected void unsetOauthServerConfiguration(OAuthServerConfiguration oAuthServerConfiguration) {
         ServiceReferenceHolder.getInstance().setOauthServerConfiguration(null);
     }
+
+    /**
+     * Initialize the JWTTransformer Server configuration Service Service dependency
+     *
+     * @param jwtTransformer {@link JWTTransformer} service reference.
+     */
+    @Reference(
+            name = "jwt.transformer.service",
+            service = JWTTransformer.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeJWTTransformer")
+    protected void addJWTTransformer(JWTTransformer jwtTransformer) {
+
+        ServiceReferenceHolder.getInstance().addJWTTransformer(jwtTransformer.getIssuer(), jwtTransformer);
+    }
+
+    /**
+     * De-reference the JWTTransformer service
+     *
+     * @param jwtTransformer
+     */
+    protected void removeJWTTransformer(JWTTransformer jwtTransformer) {
+        ServiceReferenceHolder.getInstance().removeJWTTransformer(jwtTransformer.getIssuer());
+    }
+
 
     private void setupAccessTokenGenerator(){
 

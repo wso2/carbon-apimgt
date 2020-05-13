@@ -16,7 +16,10 @@
 
 package org.wso2.carbon.apimgt.impl.internal;
 
+import org.osgi.framework.BundleContext;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
+import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
@@ -30,6 +33,8 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.security.KeyStore;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +54,7 @@ public class ServiceReferenceHolder {
     private AccessTokenGenerator accessTokenGenerator;
     private KeyManagerConfigurationService keyManagerConfigurationService;
     private OAuthServerConfiguration oauthServerConfiguration;
+    private Map<String,JWTTransformer> jwtTransformerMap = new HashMap<>();
     private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
 
     public static ConfigurationContextService getContextService() {
@@ -160,6 +166,20 @@ public class ServiceReferenceHolder {
 
         return oauthServerConfiguration;
     }
+
+    public void addJWTTransformer(String issuer, JWTTransformer jwtTransformer) {
+
+        jwtTransformerMap.put(issuer, jwtTransformer);
+    }
+
+    public void removeJWTTransformer(String issuer) {
+
+        jwtTransformerMap.remove(issuer);
+    }
+    public JWTTransformer getJWTTransformer(String issuer){
+        return jwtTransformerMap.get(issuer);
+    }
+
 
     public Map<String, List<Notifier>> getNotifiersMap() {
 

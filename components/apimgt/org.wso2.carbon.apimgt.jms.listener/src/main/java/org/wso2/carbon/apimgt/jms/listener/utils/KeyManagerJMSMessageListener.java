@@ -67,18 +67,19 @@ public class KeyManagerJMSMessageListener implements MessageListener {
                             String type = (String) map.get(APIConstants.KeyManager.KeyManagerEvent.TYPE);
                             boolean enabled = (Boolean) map.get(APIConstants.KeyManager.KeyManagerEvent.ENABLED);
                             Object value = map.get(APIConstants.KeyManager.KeyManagerEvent.VALUE);
-                            KeyManagerConfiguration keyManagerConfiguration = null;
                             if (value != null && StringUtils.isNotEmpty((String) value)){
-                                keyManagerConfiguration = APIUtil.toKeyManagerConfiguration((String) value);
-                            }
-                            if (APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD.equals(action)) {
-                                ServiceReferenceHolder.getInstance().getKeyManagerService()
-                                        .addKeyManagerConfiguration(tenantDomain, name, type, keyManagerConfiguration);
-                            }
-                            if (APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE.equals(action)) {
-                                ServiceReferenceHolder.getInstance().getKeyManagerService()
-                                        .updateKeyManagerConfiguration(tenantDomain, name, type,
-                                                keyManagerConfiguration, enabled);
+                                KeyManagerConfiguration keyManagerConfiguration =
+                                        APIUtil.toKeyManagerConfiguration((String) value);
+                                keyManagerConfiguration.setEnabled(enabled);
+                                if (APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD.equals(action)) {
+                                    ServiceReferenceHolder.getInstance().getKeyManagerService()
+                                            .addKeyManagerConfiguration(tenantDomain, name, type, keyManagerConfiguration);
+                                }
+                                if (APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE.equals(action)) {
+                                    ServiceReferenceHolder.getInstance().getKeyManagerService()
+                                            .updateKeyManagerConfiguration(tenantDomain, name, type,
+                                                    keyManagerConfiguration, enabled);
+                                }
                             }
                             if (APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE.equals(action)) {
                                 ServiceReferenceHolder.getInstance().getKeyManagerService()
@@ -92,8 +93,10 @@ public class KeyManagerJMSMessageListener implements MessageListener {
             } else {
                 log.warn("Dropping the empty/null event received through jms receiver");
             }
-        } catch (JMSException | APIManagementException e) {
+        } catch (JMSException e) {
             log.error("JMSException occurred when processing the received message ", e);
+        } catch (APIManagementException e) {
+            log.error("Error occurred while registering Key Manager", e);
         }
     }
 

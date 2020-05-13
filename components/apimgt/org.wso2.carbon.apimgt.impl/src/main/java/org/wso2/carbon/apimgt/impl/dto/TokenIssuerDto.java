@@ -44,6 +44,9 @@ public class TokenIssuerDto {
 
         return claimConfigurations;
     }
+    public void addClaimMapping(ClaimMappingDto claimMappingDto) {
+        claimConfigurations.put(claimMappingDto.getRemoteClaim(),claimMappingDto);
+    }
 
     public JWKSConfigurationDTO getJwksConfigurationDTO() {
 
@@ -58,5 +61,17 @@ public class TokenIssuerDto {
     public void setDisableDefaultClaimMapping(boolean disableDefaultClaimMapping) {
 
         this.disableDefaultClaimMapping = disableDefaultClaimMapping;
+    }
+
+    public void setJwksConfigurationDTO(JWKSConfigurationDTO jwksConfigurationDTO) {
+
+        this.jwksConfigurationDTO = jwksConfigurationDTO;
+    }
+
+    public void addClaimMappings(ClaimMappingDto[] claimMappingDto) {
+
+        for (ClaimMappingDto mappingDto : claimMappingDto) {
+            addClaimMapping(mappingDto);
+        }
     }
 }

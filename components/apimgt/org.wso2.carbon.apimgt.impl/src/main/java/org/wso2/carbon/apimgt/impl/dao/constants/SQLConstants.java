@@ -1704,8 +1704,9 @@ public class SQLConstants {
     public static final String GET_CONSUMER_KEY_OF_APPLICATION_SQL =
             " SELECT" +
             "   CONSUMER_KEY," +
-            "   CREATE_MODE" +
-            " FROM" +
+            "   CREATE_MODE," +
+            "   KEY_MANAGER" +
+                    " FROM" +
             "   AM_APPLICATION_KEY_MAPPING " +
             " WHERE" +
             "   APPLICATION_ID = ?";

@@ -1114,6 +1114,9 @@
      {% for key_manager in apim.key_manager.connector %}
         <KeyManager type = "{{key_manager.type}}">
         <Implementation>{{key_manager.implementation}}</Implementation>
+        {% if key_manager.jwt_validator is defined %}
+        <JWTValidatorImplementation>{{key_manager.jwt_validator}}</JWTValidatorImplementation>
+        {% endif %}
         <AdditionalConfigurations>
         <ConnectionConfigurations>
         {% for connection_configuration in key_manager.configuration%}

@@ -18,12 +18,12 @@ package org.wso2.carbon.apimgt.gateway.internal;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.base.api.ServerConfigurationService;
@@ -55,8 +55,8 @@ public class ServiceReferenceHolder {
     private MediationSecurityAdminService mediationSecurityAdminService;
     private ThrottleDataPublisher throttleDataPublisher;
     private Map<String,AbstractAPIMgtGatewayJWTGenerator> apiMgtGatewayJWTGenerators  = new HashMap<>();
-    private Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
     private TracingTracer tracer;
+    private JWTValidationService jwtValidationService;
     public void setThrottleDataHolder(ThrottleDataHolder throttleDataHolder) {
         this.throttleDataHolder = throttleDataHolder;
     }
@@ -206,11 +206,6 @@ public class ServiceReferenceHolder {
         return apiMgtGatewayJWTGenerators;
     }
 
-    public Map<String, JWTTransformer> getJwtTransformerMap() {
-
-        return jwtTransformerMap;
-    }
-
     public TracingTracer getTracer() {
 
         return tracer;
@@ -219,5 +214,15 @@ public class ServiceReferenceHolder {
     public void setTracer(TracingTracer tracer) {
 
         this.tracer = tracer;
+    }
+
+    public JWTValidationService getJwtValidationService() {
+
+        return jwtValidationService;
+    }
+
+    public void setJwtValidationService(JWTValidationService jwtValidationService) {
+
+        this.jwtValidationService = jwtValidationService;
     }
 }

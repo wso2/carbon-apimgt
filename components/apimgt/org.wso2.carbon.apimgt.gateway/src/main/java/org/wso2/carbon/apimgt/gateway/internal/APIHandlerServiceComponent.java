@@ -33,8 +33,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.transformer.DefaultJWTTransformer;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
@@ -50,7 +48,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
@@ -67,8 +65,6 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 @Component(
          name = "org.wso2.carbon.apimgt.handlers", 
@@ -134,15 +130,7 @@ public class APIHandlerServiceComponent {
 
                 // Set APIM Gateway JWT Generator
 
-                JWTConfigurationDto jwtConfigurationDto = apiManagerConfiguration.getJwtConfigurationDto();
-                Properties defaultClaimMappings = new Properties();
-                InputStream resourceAsStream =
-                        this.getClass().getClassLoader().getResourceAsStream("default-claim-mapping.properties");
-                defaultClaimMappings.load(resourceAsStream);
 
-                JWTTransformer jwtTransformer = new DefaultJWTTransformer(jwtConfigurationDto, defaultClaimMappings);
-                registration = context.getBundleContext()
-                        .registerService(JWTTransformer.class.getName(), jwtTransformer, null);
                 registration =
                         context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
                                 new APIMgtGatewayJWTGeneratorImpl(), null);
@@ -259,6 +247,25 @@ public class APIHandlerServiceComponent {
         }
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
+    @Reference(
+            name = "api.manager.jwt.validation.service",
+            service = org.wso2.carbon.apimgt.impl.jwt.JWTValidationService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetJWTValidationService")
+    protected void setJWTValidationService(JWTValidationService jwtValidationService) {
+        if (log.isDebugEnabled()) {
+            log.debug("JWT Validation service bound to the API handlers");
+        }
+        ServiceReferenceHolder.getInstance().setJwtValidationService(jwtValidationService);
+    }
+
+    protected void unsetJWTValidationService(JWTValidationService jwtValidationService) {
+        if (log.isDebugEnabled()) {
+            log.debug("JWT Validation service unbound to the API handlers");
+        }
+        ServiceReferenceHolder.getInstance().setJwtValidationService(null);
+    }
 
     protected String getFilePath() {
         return CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
@@ -369,21 +376,7 @@ public class APIHandlerServiceComponent {
         ServiceReferenceHolder.getInstance().setMediationSecurityAdminService(null);
     }
 
-    @Reference(
-            name = "jwt.transformer.service.component",
-            service = JWTTransformer.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetJWTTransformer")
-    protected void setJWTTransformer(JWTTransformer jwtTransformer) {
 
-        ServiceReferenceHolder.getInstance().getJwtTransformerMap().put(jwtTransformer.getIssuer(), jwtTransformer);
-    }
-
-    protected void unsetJWTTransformer(JWTTransformer jwtTransformer) {
-
-        ServiceReferenceHolder.getInstance().getJwtTransformerMap().remove(jwtTransformer.getIssuer());
-    }
 
 
     @Reference(
