@@ -168,6 +168,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
         String user = RestApiUtil.getLoggedInUsername();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         EndpointRegistryInfo registryToUpdate = EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(body, user);
+        EndpointRegistryInfo updatedEndpointRegistry = null;
         try {
             EndpointRegistryInfo endpointRegistry =
                     registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
@@ -176,11 +177,13 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                         " is not found", log);
             }
             registryProvider.updateEndpointRegistry(registryId, registryToUpdate);
+            updatedEndpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId,
+                    tenantDomain);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while updating the endpoint registry " +
                     "with id: " + registryId, e, log);
         }
-        return Response.ok().entity("Successfully updated the endpoint registry").build();
+        return Response.ok().entity(updatedEndpointRegistry).build();
     }
 
     @Override

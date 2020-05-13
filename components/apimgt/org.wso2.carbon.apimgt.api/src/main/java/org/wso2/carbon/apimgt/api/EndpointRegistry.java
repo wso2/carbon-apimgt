@@ -97,5 +97,5 @@ public interface EndpointRegistry {
      * @return uuid of the endpoint registry
      * @throws APIManagementException if failed to update the endpoint registry
      */
-    String updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistryInfo) throws APIManagementException;
+    void updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistryInfo) throws APIManagementException;
 }

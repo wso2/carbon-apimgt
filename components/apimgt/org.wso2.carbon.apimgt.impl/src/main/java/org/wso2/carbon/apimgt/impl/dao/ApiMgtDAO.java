@@ -14762,10 +14762,9 @@ public class ApiMgtDAO {
      *
      * @param registryId uuid of the endpoint registry
      * @param endpointRegistry EndpointRegistryInfo object with updated details
-     * @return uuid of the updated endpoint registry
      * @throws APIManagementException if unable to update the endpoint registry
      */
-    public String updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistry) throws
+    public void updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistry) throws
             APIManagementException {
 
         String query = SQLConstants.UPDATE_ENDPOINT_REGISTRY_SQL;
@@ -14785,7 +14784,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while updating endpoint registry: " + endpointRegistry.getName(), e);
         }
-        return uuid;
+        return;
     }
 
     /**

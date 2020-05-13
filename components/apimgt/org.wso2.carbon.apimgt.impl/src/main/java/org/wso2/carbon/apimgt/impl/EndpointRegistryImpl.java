@@ -158,10 +158,10 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * {@inheritDoc}
      */
-    public String updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistryInfo) throws
+    public void updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistryInfo) throws
             APIManagementException {
 
-        return apiMgtDAO.updateEndpointRegistry(registryId, endpointRegistryInfo);
+        apiMgtDAO.updateEndpointRegistry(registryId, endpointRegistryInfo);
     }
 
 }
