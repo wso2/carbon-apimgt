@@ -1361,12 +1361,12 @@ public class OAS2Parser extends APIDefinition {
         }
 
         //Setup Custom auth header for API
-        String authHeader = getAuthorizationHeader(extensions);
+        String authHeader = OASParserUtil.getAuthorizationHeaderFromSwagger(extensions);
         if (authHeader != null) {
             api.setAuthorizationHeader(authHeader);
         }
         //Setup mutualSSL configuration
-        String mutualSSL = getMutualSSLEnabled(extensions);
+        String mutualSSL = OASParserUtil.getMutualSSLEnabledFromSwagger(extensions);
         if (mutualSSL != null) {
             String securityList = api.getApiSecurity();
             if ("".equals(securityList)) {
@@ -1381,32 +1381,32 @@ public class OAS2Parser extends APIDefinition {
             api.setApiSecurity(securityList);
         }
         //Setup CORSConfigurations
-        CORSConfiguration corsConfiguration = getCorsConfig(extensions);
+        CORSConfiguration corsConfiguration = OASParserUtil.getCorsConfigFromSwagger(extensions);
         if (corsConfiguration != null) {
             api.setCorsConfiguration(corsConfiguration);
         }
         //Setup Response cache enabling
-        boolean responseCacheEnable = getResponseCache(extensions);
+        boolean responseCacheEnable = OASParserUtil.getResponseCacheFromSwagger(extensions);
         if (responseCacheEnable) {
             api.setResponseCache(APIConstants.ENABLED);
         }
         //Setup cache timeOut
-        int cacheTimeOut = getCacheTimeOut(extensions);
+        int cacheTimeOut = OASParserUtil.getCacheTimeOutFromSwagger(extensions);
         if (cacheTimeOut != 0) {
             api.setCacheTimeout(cacheTimeOut);
         }
         //Setup Transports
-        String transports = getTransports(extensions);
+        String transports = OASParserUtil.getTransportsFromSwagger(extensions);
         if (transports != null) {
             api.setTransports(transports);
         }
         //Setup Trottlingtiers
-        String throttleTier = getTrottleTier(extensions);
+        String throttleTier = OASParserUtil.getTrottleTierFromSwagger(extensions);
         if (throttleTier != null) {
             api.setApiLevelPolicy(throttleTier);
         }
         //Setup Basepath
-        String basePath = getBasePath(extensions);
+        String basePath = OASParserUtil.getBasePathFromSwagger(extensions);
         if (basePath != null && isBasepathExtractedFromSwagger) {
             basePath = basePath.replace("{version}",api.getId().getVersion());
             api.setContextTemplate(basePath);
