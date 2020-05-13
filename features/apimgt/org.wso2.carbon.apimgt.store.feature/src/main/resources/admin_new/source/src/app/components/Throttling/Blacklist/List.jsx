@@ -159,13 +159,13 @@ export default function ListBlacklistThrottlingPolicies() {
  */
     function apiCall() {
         let policyList;
-        let a = 0;
+        let incrementId = 0;
         return new Promise(((resolve) => {
             restApi.blacklistPoliciesGet().then((result) => {
                 policyList = result.body.list;
                 blacklistPolicyList = policyList.map((obj) => {
                     let array = [];
-                    a++;
+                    incrementId++;
                     if (obj.conditionValue === Object(obj.conditionValue)) {
                         Object.keys(obj.conditionValue);
                         Object.values(obj.conditionValue);
@@ -174,7 +174,7 @@ export default function ListBlacklistThrottlingPolicies() {
                         array.push(obj.conditionValue);
                     }
                     return {
-                        conditionId: a,
+                        conditionId: incrementId,
                         conditionUUID: obj.conditionId,
                         conditionType: obj.conditionType,
                         conditionValue: array,
