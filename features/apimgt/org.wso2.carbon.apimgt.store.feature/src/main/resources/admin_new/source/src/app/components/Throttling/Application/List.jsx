@@ -186,7 +186,7 @@ export default function ListApplicationThrottlingPolicies() {
  */
     function apiCall() {
         let applicationThrottlingvalues;
-        return new Promise(((resolve) => {
+        return new Promise(((resolve, reject) => {
             restApi.applicationThrottlingPoliciesGet().then((result) => {
                 const applicationPolicies = result.body.list.map((obj) => {
                     return {
@@ -204,11 +204,10 @@ export default function ListApplicationThrottlingPolicies() {
                     .map((obj) => {
                         return Object.values(obj);
                     });
-            });
-
-            setTimeout(() => {
                 resolve(applicationThrottlingvalues);
-            }, 1000);
+            }).catch((error) => {
+                reject(error);
+            });
         }));
     }
 
