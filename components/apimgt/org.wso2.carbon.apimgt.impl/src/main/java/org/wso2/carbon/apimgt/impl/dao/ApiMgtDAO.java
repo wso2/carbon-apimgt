@@ -82,6 +82,7 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
@@ -14805,12 +14806,12 @@ public class ApiMgtDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     EndpointRegistryInfo endpointRegistry = new EndpointRegistryInfo();
-                    endpointRegistry.setUuid(rs.getString("UUID"));
-                    endpointRegistry.setName(rs.getString("REG_NAME"));
-                    endpointRegistry.setType(rs.getString("REG_TYPE"));
-                    endpointRegistry.setMode(rs.getString("REG_MODE"));
-                    endpointRegistry.setOwner(rs.getString("REG_OWNER"));
-                    endpointRegistry.setRegistryId(rs.getInt("ID"));
+                    endpointRegistry.setUuid(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
+                    endpointRegistry.setName(rs.getString(EndpointRegistryConstants.COLUMN_REG_NAME));
+                    endpointRegistry.setType(rs.getString(EndpointRegistryConstants.COLUMN_REG_TYPE));
+                    endpointRegistry.setMode(rs.getString(EndpointRegistryConstants.COLUMN_REG_MODE));
+                    endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_REG_OWNER));
+                    endpointRegistry.setRegistryId(rs.getInt(EndpointRegistryConstants.COLUMN_ID));
                     return endpointRegistry;
                 }
             }
@@ -14897,11 +14898,11 @@ public class ApiMgtDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     EndpointRegistryInfo endpointRegistry = new EndpointRegistryInfo();
-                    endpointRegistry.setUuid(rs.getString("UUID"));
-                    endpointRegistry.setName(rs.getString("REG_NAME"));
-                    endpointRegistry.setType(rs.getString("REG_TYPE"));
-                    endpointRegistry.setMode(rs.getString("REG_MODE"));
-                    endpointRegistry.setOwner(rs.getString("REG_OWNER"));
+                    endpointRegistry.setUuid(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
+                    endpointRegistry.setName(rs.getString(EndpointRegistryConstants.COLUMN_REG_NAME));
+                    endpointRegistry.setType(rs.getString(EndpointRegistryConstants.COLUMN_REG_TYPE));
+                    endpointRegistry.setMode(rs.getString(EndpointRegistryConstants.COLUMN_REG_MODE));
+                    endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_REG_OWNER));
                     endpointRegistryInfoList.add(endpointRegistry);
                 }
             }
@@ -14928,13 +14929,15 @@ public class ApiMgtDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
-                    endpointRegistryEntry.setEntryId(rs.getString("UUID"));
-                    endpointRegistryEntry.setName(rs.getString("ENTRY_NAME"));
-                    endpointRegistryEntry.setDefinitionType(rs.getString("DEFINITION_TYPE"));
-                    endpointRegistryEntry.setDefinitionURL(rs.getString("DEFINITION_URL"));
-                    endpointRegistryEntry.setServiceType(rs.getString("SERVICE_TYPE"));
-                    endpointRegistryEntry.setServiceURL(rs.getString("SERVICE_URL"));
-                    endpointRegistryEntry.setMetaData(rs.getString("METADATA"));
+                    endpointRegistryEntry.setEntryId(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
+                    endpointRegistryEntry.setName(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_NAME));
+                    endpointRegistryEntry.setDefinitionType(
+                            rs.getString(EndpointRegistryConstants.COLUMN_DEFINITION_TYPE));
+                    endpointRegistryEntry.setDefinitionURL(
+                            rs.getString(EndpointRegistryConstants.COLUMN_DEFINITION_URL));
+                    endpointRegistryEntry.setServiceType(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_TYPE));
+                    endpointRegistryEntry.setServiceURL(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_URL));
+                    endpointRegistryEntry.setMetaData(rs.getString(EndpointRegistryConstants.COLUMN_METADATA));
                     return endpointRegistryEntry;
                 }
             }
@@ -14963,13 +14966,13 @@ public class ApiMgtDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
-                    endpointRegistryEntry.setEntryId(rs.getString("UUID"));
-                    endpointRegistryEntry.setName(rs.getString("ENTRY_NAME"));
-                    endpointRegistryEntry.setServiceURL(rs.getString("SERVICE_URL"));
-                    endpointRegistryEntry.setDefinitionType(rs.getString("DEFINITION_TYPE"));
-                    endpointRegistryEntry.setDefinitionURL(rs.getString("DEFINITION_URL"));
-                    endpointRegistryEntry.setServiceType(rs.getString("SERVICE_TYPE"));
-                    endpointRegistryEntry.setMetaData(rs.getString("METADATA"));
+                    endpointRegistryEntry.setEntryId(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
+                    endpointRegistryEntry.setName(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_NAME));
+                    endpointRegistryEntry.setServiceURL(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_URL));
+                    endpointRegistryEntry.setDefinitionType(rs.getString(EndpointRegistryConstants.COLUMN_DEFINITION_TYPE));
+                    endpointRegistryEntry.setDefinitionURL(rs.getString(EndpointRegistryConstants.COLUMN_DEFINITION_URL));
+                    endpointRegistryEntry.setServiceType(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_TYPE));
+                    endpointRegistryEntry.setMetaData(rs.getString(EndpointRegistryConstants.COLUMN_METADATA));
                     endpointRegistryEntryList.add(endpointRegistryEntry);
                 }
             }
