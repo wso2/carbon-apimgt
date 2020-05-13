@@ -15013,6 +15013,32 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Updates Registry Entry
+     *
+     * @param registryEntry EndpointRegistryEntry
+     * @throws APIManagementException if failed to update EndpointRegistryEntry
+     */
+    public void updateEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException {
+        String query = SQLConstants.UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            ps.setString(1, registryEntry.getName());
+            ps.setString(2, registryEntry.getServiceURL());
+            ps.setString(3, registryEntry.getDefinitionType());
+            ps.setString(4, registryEntry.getDefinitionURL());
+            ps.setString(5, registryEntry.getMetaData());
+            ps.setString(6, registryEntry.getServiceType());
+            ps.setBlob(7, registryEntry.getEndpointDefinition().getContent());
+            ps.setString(8, registryEntry.getEntryId());
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while updating endpoint registry entry with id: " + registryEntry.getEntryId(), e);
+        }
+    }
+
+    /**
      * Checks whether the given endpoint registry entry name is already available under given registry
      *
      * @param registryEntry

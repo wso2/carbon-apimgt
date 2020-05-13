@@ -1439,6 +1439,17 @@ public class SQLConstants {
             "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, METADATA," +
                     "SERVICE_TYPE, ENDPOINT_DEFINITION, REG_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
+    public static final String UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL =
+            "UPDATE ENDPOINT_REG_ENTRY SET " +
+                    "ENTRY_NAME = ?, " +
+                    "SERVICE_URL = ?, " +
+                    "DEFINITION_TYPE = ?, " +
+                    "DEFINITION_URL = ?, " +
+                    "METADATA = ?, " +
+                    "SERVICE_TYPE = ?, " +
+                    "ENDPOINT_DEFINITION = ? " +
+                    "WHERE UUID = ?";
+
     public static final String IS_ENDPOINT_REGISTRY_NAME_EXISTS = "SELECT COUNT(UUID) AS ENDPOINT_REGISTRY_COUNT" +
             " FROM ENDPOINT_REG WHERE LOWER(REG_NAME) = LOWER(?) AND TENANT_ID = ?";
 

@@ -163,15 +163,15 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             ResourceFile definitionFile = new ResourceFile(definitionFileInputStream, definitionFileDetail
                     .getContentType().getType());
             EndpointRegistryEntry entryToAdd = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
-                    definitionFile, endpointRegistry.getRegistryId());
+                    null, definitionFile, endpointRegistry.getRegistryId());
             String entryId = registryProvider.addEndpointRegistryEntry(entryToAdd);
             createdEntry = registryProvider.getEndpointRegistryEntryByUUID(registryId, entryId);
         } catch (APIMgtResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry Entry with name '"
                     + registryEntry.getEntryName() + "' already exists", e, log);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving details of endpoint registry by id: "
-                    + registryId, e, log);
+            RestApiUtil.handleInternalServerError("Error while adding new entry for the endpoint registry " +
+                    "with id: " + registryId, e, log);
         }
         audit.info("Successfully created endpoint registry entry with id :" + createdEntry.getEntryId() +
                  " in :" + registryId + " by:" + user);
@@ -254,8 +254,40 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     @Override
     public Response updateRegistryEntry(String registryId, String entryId, RegistryEntryDTO registryEntry, InputStream
             definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        EndpointRegistry registryProvider = new EndpointRegistryImpl();
+        EndpointRegistryEntry updatedEntry = null;
 
-        return Response.ok().entity(registryEntry).build();
+        try {
+            EndpointRegistryInfo endpointRegistry =
+                    registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
+            if (endpointRegistry == null) {
+                RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
+                        " is not found", log);
+            }
+            EndpointRegistryEntry endpointRegistryEntry =
+                    registryProvider.getEndpointRegistryEntryByUUID(registryId, entryId);
+            if (endpointRegistryEntry == null) {
+                RestApiUtil.handleResourceNotFoundError("Endpoint registry entry with the id: " + entryId +
+                        " is not found", log);
+            }
+
+            ResourceFile definitionFile = new ResourceFile(definitionFileInputStream, definitionFileDetail
+                    .getContentType().getType());
+            EndpointRegistryEntry entryToUpdate = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
+                    entryId, definitionFile, endpointRegistry.getRegistryId());
+            registryProvider.updateEndpointRegistryEntry(entryToUpdate);
+
+            updatedEntry = registryProvider.getEndpointRegistryEntryByUUID(registryId, entryId);
+        } catch (APIMgtResourceAlreadyExistsException e) {
+            RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry Entry with name '"
+                    + registryEntry.getEntryName() + "' already exists", e, log);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while updating the endpoint registry entry " +
+                    "with id: " + entryId, e, log);
+        }
+
+        return Response.ok().entity(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(updatedEntry)).build();
     }
 
     @Override
