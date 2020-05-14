@@ -105,6 +105,13 @@ function AddEditMGLabel(props) {
                     error = false;
                 }
                 break;
+            case 'hosts':
+                if (value && value.length === 0) {
+                    error = 'Please add at least one host';
+                } else {
+                    error = false;
+                }
+                break;
             default:
                 break;
         }
@@ -113,8 +120,12 @@ function AddEditMGLabel(props) {
     const getAllFormErrors = () => {
         let errorText = '';
         const NameErrors = hasErrors('name', name);
+        const hostErrors = hasErrors('hosts', hosts);
         if (NameErrors) {
             errorText += NameErrors + '\n';
+        }
+        if (hostErrors) {
+            errorText += hostErrors + '\n';
         }
         return errorText;
     };
@@ -128,6 +139,7 @@ function AddEditMGLabel(props) {
         let promiseAPICall;
         if (id) {
             // assign the update promise to the promiseAPICall
+            console.log(id, name, description, hosts);
             promiseAPICall = restApi.updateMicrogatewayLabel(id, name, description, hosts);
         } else {
             // assign the create promise to the promiseAPICall
@@ -144,6 +156,7 @@ function AddEditMGLabel(props) {
                     );
                 })
                 .catch((error) => {
+                    console.log(error);
                     const { response } = error;
                     if (response.body) {
                         const { errorBody } = response.body;

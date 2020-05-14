@@ -3,77 +3,71 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 
 let id;
-let userHosts;
-let existingInputFields;
 
-const InputList = ({ onHostChange, availableHosts }) => {
-    const [inputFields, setInputFields] = useState([]);
+const InputList = (props) => {
+    const { onHostChange, availableHosts } = props;
+    const [userHosts, setUserHosts] = useState([]);
 
     const handleInput = (e) => {
-        const tempHosts = userHosts.filter((host) => host.key !== e.target.name);
-        userHosts = [...tempHosts, { key: e.target.name, value: e.target.value }];
-        onHostChange(userHosts.map((host) => { return host.value; }));
+        let tempHosts = userHosts.filter((host) => host.key !== e.target.name);
+        tempHosts = [...tempHosts, { key: '' + e.target.name, value: e.target.value }];
+        tempHosts.sort((a, b) => {
+            return a.key - b.key;
+        });
+        setUserHosts(tempHosts);
+    };
+
+    const handleDelete = (deletingKey) => {
+        const tempHosts = userHosts.filter((host) => (host.key !== deletingKey));
+        setUserHosts(tempHosts);
     };
 
     useEffect(() => {
-        id = 0;
-        userHosts = [{ key: 'host1', value: '' }];
-        existingInputFields = null;
+        const nonEmptyHosts = [];
+        for (let i = 0; i < userHosts.length; i++) {
+            if (userHosts[i].value && userHosts[i].value.trim() !== '') {
+                nonEmptyHosts.push(userHosts[i].value.trim());
+            }
+        }
+        onHostChange(nonEmptyHosts);
+    }, [userHosts]);
 
+    useEffect(() => {
+        id = 1;
         if (availableHosts) {
-            userHosts = [];
-            existingInputFields = availableHosts.map((host) => {
-                id += 1;
-                userHosts = [...userHosts, { key: 'host' + id, value: host }];
-                return (
-                    <TextField
-                        margin='dense'
-                        name={'host' + id}
-                        onChange={handleInput}
-                        label={'host ' + id}
-                        defaultValue={host}
-                        helperText='Enter host'
-                        variant='outlined'
-                    />
-                );
-            });
-            setInputFields(existingInputFields);
+            setUserHosts(availableHosts.map((host) => {
+                return { key: '' + id++, value: host };
+            }));
+        } else {
+            setUserHosts([{ key: '1', value: '' }]);
         }
     }, []);
 
     const onAddInputField = () => {
-        id += 1;
-        setInputFields([...inputFields,
-            <TextField
-                margin='dense'
-                name={'host' + id}
-                onChange={handleInput}
-                label={'host ' + id}
-                fullWidth
-                helperText='Enter host'
-                variant='outlined'
-            />]);
+        const newUserHosts = [...userHosts, { key: '' + id++, value: '' }];
+        setUserHosts(newUserHosts);
     };
 
-
+    let labelCounter = 1;
     return (
         <div>
-            {(existingInputFields)
-                ? null
-                : (
-                    <TextField
-                        margin='dense'
-                        name='host1'
-                        onChange={handleInput}
-                        label='host 1'
-                        fullWidth
-                        helperText='Enter host'
-                        variant='outlined'
-                    />
-                )}
-
-            {inputFields.map((inputField) => {
-                return inputField;
+            {userHosts.map((host) => {
+                return (
+                    <div>
+                        <TextField
+                            margin='dense'
+                            name={host.key}
+                            onChange={handleInput}
+                            label={'Host ' + labelCounter++}
+                            value={host.value}
+                            helperText='Enter host'
+                            variant='outlined'
+                        />
+                        <Button onClick={() => handleDelete(host.key)}>
+                            {'Remove ' + host.key}
+                        </Button>
+                    </div>
+                );
             })}
             <Button onClick={onAddInputField}>Add Host</Button>
         </div>
