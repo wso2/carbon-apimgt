@@ -14,6 +14,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -23,27 +24,21 @@ import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.OPADto;
 
 import org.json.simple.parser.ParseException;
-//import org.json.JSONObject;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.tracing.Util;
-//import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
 
 import java.io.*;
-import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -69,13 +64,19 @@ public class OPAHandler extends AbstractHandler {
     public boolean handleRequest(MessageContext messageContext) {
 
         setUsername(messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER).toString());
-        setScopes(messageContext.getProperty("Access-Control-Allow-Headers").toString());
+        setScopes(APIConstants.REST_API_SCOPE);
         setApiName(messageContext.getProperty(APIMgtGatewayConstants.API).toString());
         setVersion(messageContext.getProperty(APIMgtGatewayConstants.VERSION).toString());
         setApiContext(messageContext.getProperty(RESTConstants.REST_API_CONTEXT).toString());
         setResourcePath(messageContext.getProperty(APIMgtGatewayConstants.RESOURCE).toString());
         setHttpMethod(messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD).toString());
-        setApiType(messageContext.getProperty(APIMgtGatewayConstants.API_TYPE).toString());
+        if("false" == messageContext.getProperty("IsClientDoingSOAP11").toString() && "API" == messageContext.getProperty(APIMgtGatewayConstants.API_TYPE)){
+            setApiType("REST");
+        }
+        else {
+            setApiType("SOAP");
+        }
+//        setApiType(messageContext.getProperty(APIMgtGatewayConstants.API_TYPE).toString());
         setApplicationName(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME).toString());
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).
@@ -189,6 +190,8 @@ public class OPAHandler extends AbstractHandler {
                 APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
         messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION,e);
 
+        Mediator sequence = messageContext.getSequence(APISecurityConstants.API_AUTH_FAILURE_HANDLER);
+
         String errorDetail = APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(),e.getMessage());
         messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDetail);
 
@@ -214,9 +217,17 @@ public class OPAHandler extends AbstractHandler {
         }
         messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE,status);
 
+        if(sequence != null && !sequence.mediate(messageContext)){
+            return;
+        }
+        if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
+            Utils.setFaultPayload(messageContext, getFaultPayload(e));
+        } else {
+            Utils.setSOAPFault(messageContext,"Client", " failure",e.getMessage());
+        }
+
 
         log.error("wrong credentials: Request breaks provided policies",e);
-        Utils.setFaultPayload(messageContext, getFaultPayload(e));
 
         Utils.sendFault(messageContext, status);
     }
