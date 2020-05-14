@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl } from 'react-intl';
-import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -13,11 +12,15 @@ import RouteMenuMapping from 'AppComponents/Base/RouteMenuMapping';
 import { Link as RouterLink, withRouter } from 'react-router-dom';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
+import NavigatorChildren from './NavigatorChildren';
 
 const styles = (theme) => ({
     categoryHeader: {
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
+        '& svg': {
+            color: theme.palette.common.white,
+        },
     },
     categoryHeaderPrimary: {
         color: theme.palette.common.white,
@@ -33,8 +36,8 @@ const styles = (theme) => ({
     itemCategory: {
         backgroundColor: '#232f3e',
         boxShadow: '0 -1px 0 #404854 inset',
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
     },
     firebase: {
         fontSize: 24,
@@ -52,6 +55,11 @@ const styles = (theme) => ({
     },
     divider: {
         marginTop: theme.spacing(2),
+    },
+    logoWrapper: {
+        padding: 0,
+        paddingLeft: theme.spacing(1),
+        height: 50,
     },
 });
 
@@ -92,11 +100,12 @@ function Navigator(props) {
     });
     const { location: { pathname: currentPath } } = history;
     updateAllRoutePaths(currentPath);
+
     return (
         // eslint-disable-next-line react/jsx-props-no-spreading
         <Drawer variant='permanent' {...other}>
             <List disablePadding>
-                <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory)}>
+                <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory, classes.logoWrapper)}>
                     <Link component={RouterLink} to='/'>
                         <img
                             alt='logo'
@@ -105,7 +114,6 @@ function Navigator(props) {
                         />
                     </Link>
                 </ListItem>
-
 
                 {routeMenuMapping.map(({
                     id, children, icon: parentIcon, path: parentPath, active: parentActive,
@@ -135,37 +143,7 @@ function Navigator(props) {
                         )}
                         {children && (
                             <React.Fragment key={id}>
-                                <ListItem className={classes.categoryHeader}>
-                                    <ListItemText
-                                        classes={{
-                                            primary: classes.categoryHeaderPrimary,
-                                        }}
-                                    >
-                                        {id}
-                                    </ListItemText>
-                                </ListItem>
-                                {children.map(({
-                                    id: childId, icon, path, active,
-                                }) => (
-                                    <Link component={RouterLink} to={path || '/'}>
-                                        <ListItem
-                                            key={childId}
-                                            button
-                                            className={clsx(classes.item, active && classes.itemActiveItem)}
-                                        >
-                                            <ListItemIcon className={classes.itemIcon}>{icon}</ListItemIcon>
-                                            <ListItemText
-                                                classes={{
-                                                    primary: classes.itemPrimary,
-                                                }}
-                                            >
-                                                {childId}
-                                            </ListItemText>
-                                        </ListItem>
-                                    </Link>
-                                ))}
-
-                                <Divider className={classes.divider} />
+                                <NavigatorChildren navChildren={children} navId={id} classes={classes} />
                             </React.Fragment>
                         )}
 

@@ -28,7 +28,9 @@ import PhonelinkSetupIcon from '@material-ui/icons/PhonelinkSetup';
 import HomeIcon from '@material-ui/icons/Home';
 import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
 import DemoTable from 'AppComponents/AdminPages/Microgateways/List';
-import APICategories from 'AppComponents/AdminOperations/APICategories';
+import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
+import APICategories from 'AppComponents/APICategories/ListApiCategories';
+import BlacklistThrottlingPolicies from 'AppComponents/Throttling/Blacklist/List';
 
 
 const RouteMenuMapping = (intl) => [
@@ -154,13 +156,13 @@ const RouteMenuMapping = (intl) => [
     {
         id: intl.formatMessage({
             id: 'Base.RouteMenuMapping.throttling.policies',
-            defaultMessage: 'Throttling Policies',
+            defaultMessage: 'Rate Limiting Policies',
         }),
         children: [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.advanced.throttling.policies',
-                    defaultMessage: 'Advanced Throttling Policies',
+                    defaultMessage: 'Advanced Policies',
                 }),
                 path: '/throttling/advanced',
                 component: () => <DemoTable />,
@@ -169,16 +171,16 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.application.throttling.policies',
-                    defaultMessage: 'Application Throttling Policies',
+                    defaultMessage: 'Application Policies',
                 }),
                 path: '/throttling/application',
-                component: () => <DemoTable />,
+                component: () => <ApplicationThrottlingPolicies />,
                 icon: <TimerIcon />,
             },
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.subscription.throttling.policies',
-                    defaultMessage: 'Subscription Throttling Policies',
+                    defaultMessage: 'Subscription Policies',
                 }),
                 path: '/throttling/subscription',
                 component: () => <DemoTable />,
@@ -187,7 +189,7 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.custom.throttling.policies',
-                    defaultMessage: 'Custom Throttling Policies',
+                    defaultMessage: 'Custom Policies',
                 }),
                 path: '/throttling/custom',
                 component: () => <DemoTable />,
@@ -196,10 +198,10 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.blacklisted.items',
-                    defaultMessage: 'Blacklisted Items',
+                    defaultMessage: 'Blacklist Policies',
                 }),
                 path: '/throttling/blacklisted',
-                component: () => <DemoTable />,
+                component: () => <BlacklistThrottlingPolicies />,
                 icon: <PhonelinkSetupIcon />,
             },
         ],
