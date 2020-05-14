@@ -715,7 +715,6 @@ public class OASParserUtil {
         return apiDefinitionValidationResponse;
     }
 
-
     /**
      * Try to validate a give openAPI definition using OpenAPI 3 parser
      *
