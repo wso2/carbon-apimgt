@@ -309,8 +309,48 @@ class API extends Resource {
         }
     }
 
-    createMgLabel(name, description, callback = null) {
-        // todo: impl this
+    addMicrogatewayLabel(name, description, hosts,  callback = null) {
+        const promiseCreateMicrogatewayLabel = this.client.then((client) => {
+            const data = {
+                name: name,
+                description: description,
+                accessUrls: hosts,
+            };
+            const payload = {
+                body: data,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Label'].post_labels(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+
+        if (callback) {
+            return promiseCreateMicrogatewayLabel.then(callback);
+        } else {
+            return promiseCreateMicrogatewayLabel;
+        }
+    }
+
+    updateMicrogatewayLabel(id, name, description, hosts,  callback = null) {
+        const promiseUpdateMicrogatewayLabel = this.client.then((client) => {
+            const data = {
+                name: name,
+                description: description,
+                accessUrls: hosts,
+            };
+            return client.apis['Label'].put_labels__labelId_(
+                { labelId: id, body: data },
+                this._requestMetaData(),
+            );
+        });
+
+        if (callback) {
+            return promiseUpdateMicrogatewayLabel.then(callback);
+        } else {
+            return promiseUpdateMicrogatewayLabel;
+        }
     }
 
     /**
