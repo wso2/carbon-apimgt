@@ -18,6 +18,7 @@ public class APICategoryDTO   {
     private String id = null;
     private String name = null;
     private String description = null;
+    private Integer numberOfAPIs = null;
 
   /**
    **/
@@ -71,6 +72,23 @@ public class APICategoryDTO   {
     this.description = description;
   }
 
+  /**
+   **/
+  public APICategoryDTO numberOfAPIs(Integer numberOfAPIs) {
+    this.numberOfAPIs = numberOfAPIs;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1", value = "")
+  @JsonProperty("numberOfAPIs")
+  public Integer getNumberOfAPIs() {
+    return numberOfAPIs;
+  }
+  public void setNumberOfAPIs(Integer numberOfAPIs) {
+    this.numberOfAPIs = numberOfAPIs;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -83,12 +101,13 @@ public class APICategoryDTO   {
     APICategoryDTO apICategory = (APICategoryDTO) o;
     return Objects.equals(id, apICategory.id) &&
         Objects.equals(name, apICategory.name) &&
-        Objects.equals(description, apICategory.description);
+        Objects.equals(description, apICategory.description) &&
+        Objects.equals(numberOfAPIs, apICategory.numberOfAPIs);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description);
+    return Objects.hash(id, name, description, numberOfAPIs);
   }
 
   @Override
@@ -99,6 +118,7 @@ public class APICategoryDTO   {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    numberOfAPIs: ").append(toIndentedString(numberOfAPIs)).append("\n");
     sb.append("}");
     return sb.toString();
   }

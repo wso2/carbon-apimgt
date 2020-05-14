@@ -1597,7 +1597,7 @@ paths:
       x-wso2-request: |
         GET https://localhost:9443/api/am/admin/v1/throttling/blacklist
         Authorization: Bearer a1e3951b-a15c-3d79-a15b-99f1d612843e
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"count\": 3,\r\n  \"list\": [\r\n    {\r\n      \"conditionId\": \"0b65b686-841b-48eb-b4c2-427d24584d71\",\r\n      \"conditionType\": \"IP\",\r\n      \"conditionValue\": \"127.0.0.332\"\r\n    },\r\n    {\r\n      \"conditionId\": \"3baa990c-f90b-4e3e-9db7-f29ee7f46f48\",\r\n      \"conditionType\": \"IP\",\r\n      \"conditionValue\": \"localhost\"\r\n    },\r\n    {\r\n      \"conditionId\": \"b513eb68-69e8-4c32-92cf-852c101363cf\",\r\n      \"conditionType\": \"IP\",\r\n      \"conditionValue\": \"10.100.7.77\"\r\n    }\r\n  ]\r\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"count\": 3,\r\n  \"list\": [\r\n    {\r\n      \"conditionId\": \"0b65b686-841b-48eb-b4c2-427d24584d71\",\r\n      \"conditionType\": \"IP\",\r\n      \"conditionValue\": \"127.0.0.332\",\r\n      \"conditionStatus\": \"true\"\r\n    },\r\n    {\r\n      \"conditionId\": \"3baa990c-f90b-4e3e-9db7-f29ee7f46f48\",\r\n      \"conditionType\": \"IP\",\r\n      \"conditionValue\": \"localhost\",\r\n      \"conditionStatus\": \"false\"\r\n    },\r\n    {\r\n      \"conditionId\": \"b513eb68-69e8-4c32-92cf-852c101363cf\",\r\n      \"conditionType\": \"IP\",\r\n      \"conditionValue\": \"10.100.7.77\",\r\n      \"conditionStatus\": \"true\"\r\n    }\r\n  ]\r\n}"
       security:
         - OAuth2Security:
             - apim:bl_view
@@ -1648,8 +1648,8 @@ paths:
 #-----------------------------------------------------
     post:
       x-wso2-curl: "curl -k -X POST -H \"Authorization: Bearer a1e3951b-a15c-3d79-a15b-99f1d612843e\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v1/throttling/blacklist"
-      x-wso2-request: "POST https://localhost:9443/api/am/admin/v1/throttling/blacklist\r\nAuthorization: Bearer a1e3951b-a15c-3d79-a15b-99f1d612843e\r\nContent-Type: application/json\r\n\r\n{\r\n   \"conditionType\": \"IP\",\r\n   \"conditionValue\": \"10.100.7.77\"\r\n}\r\n"
-      x-wso2-response: "HTTP/1.1 201 Created\r\nLocation: https://localhost:9443/api/am/admin/v1/throttling/blacklist/b513eb68-69e8-4c32-92cf-852c101363cf\r\nContent-Type: application/json\r\n\r\n{\r\n  \"conditionId\": \"b513eb68-69e8-4c32-92cf-852c101363cf\",\r\n  \"conditionType\": \"IP\",\r\n  \"conditionValue\": \"10.100.7.77\"\r\n}"
+      x-wso2-request: "POST https://localhost:9443/api/am/admin/v1/throttling/blacklist\r\nAuthorization: Bearer a1e3951b-a15c-3d79-a15b-99f1d612843e\r\nContent-Type: application/json\r\n\r\n{\r\n   \"conditionType\": \"IP\",\r\n   \"conditionValue\": \"10.100.7.77\",\r\n      \"conditionStatus\": \"false\"\r\n    }\r\n"
+      x-wso2-response: "HTTP/1.1 201 Created\r\nLocation: https://localhost:9443/api/am/admin/v1/throttling/blacklist/b513eb68-69e8-4c32-92cf-852c101363cf\r\nContent-Type: application/json\r\n\r\n{\r\n  \"conditionId\": \"b513eb68-69e8-4c32-92cf-852c101363cf\",\r\n  \"conditionType\": \"IP\",\r\n  \"conditionValue\": \"10.100.7.77\",\r\n      \"conditionStatus\": \"false\"\r\n    }"
       security:
         - OAuth2Security:
             - apim:bl_manage
@@ -2759,7 +2759,7 @@ paths:
               GET https://localhost:9443/api/am/admin/v1/api-categories
               Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v1/api-categories\""
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      \"numberOfAPIs\":1\r\n}\r\n   ]\r\n      }\r\n   ]\r\n}"
       summary: Get all API categories
       description: |
         Get all API categories
@@ -2782,7 +2782,7 @@ paths:
             - apim:admin_operations
       x-wso2-curl: "curl -k -X POST -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://apis.wso2.com/api/am/admin/v1/api-categories -d @data.json"
       x-wso2-request: "POST https://localhost:9443/api/am/admin/v1/api-categories\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n -d  {\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n }"
-      x-wso2-response: "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}"
+      x-wso2-response: "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n }"
       summary: Add a new API Category
       description: |
         Add a new API Category
@@ -3617,6 +3617,10 @@ definitions:
         type: object
         description: Value of the blocking condition
         example: '{"fixedIp":"192.168.1.1":"invert":false}'
+      conditionStatus:
+        type: boolean
+        description: Status of the blocking condition
+        example: true
 
 #-----------------------------------------------------
 # The Throttling Blocking Condition List resource
@@ -3976,7 +3980,9 @@ definitions:
       description:
         type: string
         example: "Finance related APIs"
-
+      numberOfAPIs:
+        type: integer
+        example: 1
   #-----------------------------------------------------
   # The Category List resource
   #-----------------------------------------------------

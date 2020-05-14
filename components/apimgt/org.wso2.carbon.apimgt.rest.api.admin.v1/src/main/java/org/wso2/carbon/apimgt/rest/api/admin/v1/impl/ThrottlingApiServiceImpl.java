@@ -875,12 +875,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //  exists in the system
             String uuid = null;
             if (APIConstants.BLOCKING_CONDITIONS_API.equals(body.getConditionType()) || APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(body.getConditionType()) || APIConstants.BLOCKING_CONDITIONS_USER.equals(body.getConditionType())) {
-                uuid = apiProvider.addBlockCondition(body.getConditionType(), (String) body.getConditionValue());
+                uuid = apiProvider.addBlockCondition(body.getConditionType(), (String) body.getConditionValue(), body.isConditionStatus());
             } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(body.getConditionType()) || APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(body.getConditionType())) {
                 if (body.getConditionValue() instanceof Map) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.putAll((Map) body.getConditionValue());
-                    uuid = apiProvider.addBlockCondition(body.getConditionType(), jsonObject.toJSONString());
+                    uuid = apiProvider.addBlockCondition(body.getConditionType(), jsonObject.toJSONString(), body.isConditionStatus());
                 }
             }
 

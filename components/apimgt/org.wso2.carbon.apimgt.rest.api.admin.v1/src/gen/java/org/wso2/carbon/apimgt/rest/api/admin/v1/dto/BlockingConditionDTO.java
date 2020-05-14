@@ -22,6 +22,7 @@ public class BlockingConditionDTO   {
     private String conditionId = null;
     private String conditionType = null;
     private Object conditionValue = null;
+    private Boolean conditionStatus = null;
 
   /**
    * Id of the blocking condition
@@ -80,6 +81,24 @@ public class BlockingConditionDTO   {
   }
 
 
+  /**
+   * Status of the blocking condition
+   **/
+  public BlockingConditionDTO conditionStatus(Boolean conditionStatus) {
+    this.conditionStatus = conditionStatus;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Status of the blocking condition")
+  @JsonProperty("conditionStatus")
+  public Boolean isConditionStatus() {
+    return conditionStatus;
+  }
+  public void setConditionStatus(Boolean conditionStatus) {
+    this.conditionStatus = conditionStatus;
+  }
+
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
@@ -91,12 +110,13 @@ public class BlockingConditionDTO   {
     BlockingConditionDTO blockingCondition = (BlockingConditionDTO) o;
     return Objects.equals(conditionId, blockingCondition.conditionId) &&
         Objects.equals(conditionType, blockingCondition.conditionType) &&
-        Objects.equals(conditionValue, blockingCondition.conditionValue);
+        Objects.equals(conditionValue, blockingCondition.conditionValue) &&
+        Objects.equals(conditionStatus, blockingCondition.conditionStatus);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(conditionId, conditionType, conditionValue);
+    return Objects.hash(conditionId, conditionType, conditionValue, conditionStatus);
   }
 
   @Override
@@ -107,6 +127,7 @@ public class BlockingConditionDTO   {
     sb.append("    conditionId: ").append(toIndentedString(conditionId)).append("\n");
     sb.append("    conditionType: ").append(toIndentedString(conditionType)).append("\n");
     sb.append("    conditionValue: ").append(toIndentedString(conditionValue)).append("\n");
+    sb.append("    conditionStatus: ").append(toIndentedString(conditionStatus)).append("\n");
     sb.append("}");
     return sb.toString();
   }

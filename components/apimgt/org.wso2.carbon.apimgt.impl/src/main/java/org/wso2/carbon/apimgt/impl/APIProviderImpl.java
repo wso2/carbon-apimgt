@@ -6174,6 +6174,34 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return createdBlockConditionsDto.getUUID();
     }
 
+    /**
+     * addBlockCondition with condition status
+     *
+     * @param conditionType type of the condition (IP, Context .. )
+     * @param conditionValue value of the condition
+     * @param conditionStatus status of the condition
+     */
+    public String addBlockCondition(String conditionType, String conditionValue, boolean conditionStatus) throws APIManagementException {
+
+        if (APIConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
+            conditionValue = MultitenantUtils.getTenantAwareUsername(conditionValue);
+            conditionValue = conditionValue + "@" + tenantDomain;
+        }
+        BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
+        blockConditionsDTO.setConditionType(conditionType);
+        blockConditionsDTO.setConditionValue(conditionValue);
+        blockConditionsDTO.setTenantDomain(tenantDomain);
+        blockConditionsDTO.setEnabled(conditionStatus);
+        blockConditionsDTO.setUUID(UUID.randomUUID().toString());
+        BlockConditionsDTO createdBlockConditionsDto = apiMgtDAO.addBlockConditions(blockConditionsDTO);
+
+        if (createdBlockConditionsDto != null) {
+            publishBlockingEvent(createdBlockConditionsDto, "true");
+        }
+
+        return createdBlockConditionsDto.getUUID();
+    }
+
     @Override
     public boolean deleteBlockCondition(int conditionId) throws APIManagementException {
 
