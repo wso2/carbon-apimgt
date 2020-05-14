@@ -151,6 +151,11 @@
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.graphQL</groupId>
+            <artifactId>graphQL</artifactId>
+            <version>${graphql.java.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
