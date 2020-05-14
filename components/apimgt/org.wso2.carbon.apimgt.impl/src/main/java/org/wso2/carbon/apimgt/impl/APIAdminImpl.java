@@ -319,7 +319,6 @@ public class APIAdminImpl implements APIAdmin {
             for (APICategory category : categories) {
                 int length = isCategoryAttached(category, username);
                 category.setNumberOfAPIs(length);
-                log.info("number of category :" + category.getNumberOfAPIs());
             }
         }
         return categories;
