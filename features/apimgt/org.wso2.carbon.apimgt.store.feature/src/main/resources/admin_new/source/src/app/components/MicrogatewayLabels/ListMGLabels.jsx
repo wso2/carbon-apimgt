@@ -30,7 +30,7 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
 import Delete from 'AppComponents/MicrogatewayLabels/DeleteMGLabel';
-import AddEdit from 'AppComponents/APICategories/AddEditAPICategory';
+import AddEdit from 'AppComponents/MicrogatewayLabels/AddEditMGLabel';
 import EditIcon from '@material-ui/icons/Edit';
 
 /**
