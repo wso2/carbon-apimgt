@@ -1194,16 +1194,21 @@ public class OAS2Parser extends APIDefinition {
      */
     private boolean isDefaultGiven(String swaggerContent) throws APIManagementException {
         Swagger swagger = getSwagger(swaggerContent);
-        boolean isDefaultIsGiven = true;
+        boolean isDefaultGiven = true;
+        try {
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
         if (securityDefinitions == null) {
             securityDefinitions = new HashMap<>();
         }
         OAuth2Definition checkDefault = (OAuth2Definition) securityDefinitions.get(SWAGGER_SECURITY_SCHEMA_KEY);
         if (checkDefault == null) {
-            isDefaultIsGiven = false;
+            isDefaultGiven = false;
         }
-        return isDefaultIsGiven;
+        return isDefaultGiven;
+        } catch (NullPointerException e){
+            isDefaultGiven = false;
+            return isDefaultGiven;
+        }
     }
 
     /**

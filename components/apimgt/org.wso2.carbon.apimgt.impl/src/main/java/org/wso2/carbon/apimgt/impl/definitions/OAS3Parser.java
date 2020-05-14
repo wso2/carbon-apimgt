@@ -1260,12 +1260,17 @@ public class OAS3Parser extends APIDefinition {
      */
     private boolean isDefaultGiven(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
-        boolean isDefaultIsGiven = true;
-        SecurityScheme checkDefault = openAPI.getComponents().getSecuritySchemes().get(OPENAPI_SECURITY_SCHEMA_KEY);
-        if (checkDefault == null) {
-            isDefaultIsGiven = false;
+        boolean isDefaultGiven = true;
+        try {
+            SecurityScheme checkDefault = openAPI.getComponents().getSecuritySchemes().get(OPENAPI_SECURITY_SCHEMA_KEY);
+            if (checkDefault == null) {
+                isDefaultGiven = false;
+            }
+            return isDefaultGiven;
+        } catch (NullPointerException e) {
+            isDefaultGiven = false;
+            return isDefaultGiven;
         }
-        return isDefaultIsGiven;
     }
 
     /**
