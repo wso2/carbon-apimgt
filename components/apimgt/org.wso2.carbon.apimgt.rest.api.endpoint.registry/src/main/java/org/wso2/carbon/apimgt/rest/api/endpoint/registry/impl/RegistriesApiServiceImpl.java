@@ -42,7 +42,11 @@ import org.wso2.carbon.apimgt.rest.api.endpoint.registry.util.EndpointRegistryMa
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import javax.enterprise.context.RequestScoped;
@@ -162,6 +166,24 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             }
             ResourceFile definitionFile;
             if (definitionFileInputStream == null || definitionFileDetail == null) {
+                // Retrieve the endpoint definition from URL
+                try {
+                    URL definitionURL = new URL(registryEntry.getDefinitionUrl());
+                    HttpURLConnection httpConn = (HttpURLConnection) definitionURL.openConnection();
+                    int responseCode = httpConn.getResponseCode();
+                    if (responseCode != HttpURLConnection.HTTP_OK) {
+                        RestApiUtil.handleInternalServerError("Error while reaching the " +
+                                "definition url: " + registryEntry.getDefinitionUrl() + " given for the new " +
+                                "Endpoint Registry Entry of the Endpoint Registry with Id: " + registryId, log);
+                    }
+                } catch (MalformedURLException e) {
+                    RestApiUtil.handleBadRequest("The definition url provided is invalid for the new " +
+                            "Endpoint Registry Entry of the Endpoint Registry with Id: " + registryId, e, log);
+                } catch (IOException e) {
+                    RestApiUtil.handleInternalServerError("Error while reaching the " +
+                            "definition url: " + registryEntry.getDefinitionUrl() + " given for the new " +
+                            "Endpoint Registry Entry of the Endpoint Registry with Id: " + registryId, e, log);
+                }
                 definitionFile = new ResourceFile(null, null);
             } else {
                 definitionFile = new ResourceFile(definitionFileInputStream, definitionFileDetail
@@ -279,6 +301,24 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             }
             ResourceFile definitionFile;
             if (definitionFileInputStream == null || definitionFileDetail == null) {
+                // Retrieve the endpoint definition from URL
+                try {
+                    URL definitionURL = new URL(registryEntry.getDefinitionUrl());
+                    HttpURLConnection httpConn = (HttpURLConnection) definitionURL.openConnection();
+                    int responseCode = httpConn.getResponseCode();
+                    if (responseCode != HttpURLConnection.HTTP_OK) {
+                        RestApiUtil.handleInternalServerError("Error while reaching the " +
+                                "definition url: " + registryEntry.getDefinitionUrl() + " given for the " +
+                                "Endpoint Registry Entry with Id: " + entryId, log);
+                    }
+                } catch (MalformedURLException e) {
+                    RestApiUtil.handleBadRequest("The definition url provided is invalid for the endpoint " +
+                            "registry entry with id: " + entryId, e, log);
+                } catch (IOException e) {
+                    RestApiUtil.handleInternalServerError("Error while reaching the definition url: "
+                            + registryEntry.getDefinitionUrl() + " given for the Endpoint Registry Entry with Id: "
+                            + entryId, e, log);
+                }
                 definitionFile = new ResourceFile(null, null);
             } else {
                 definitionFile = new ResourceFile(definitionFileInputStream, definitionFileDetail
