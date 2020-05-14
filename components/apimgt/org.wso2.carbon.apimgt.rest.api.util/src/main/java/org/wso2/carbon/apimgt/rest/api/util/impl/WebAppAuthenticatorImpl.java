@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
@@ -120,7 +121,9 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                         //when the username is an email in supertenant, it has at least 2 occurrences of '@'
                         long count = username.chars().filter(ch -> ch == '@').count();
                         //in the case of email, there will be more than one '@'
-                        if (username.endsWith(SUPER_TENANT_SUFFIX) && count <= 1) {
+                        boolean isEmailUsernameEnabled = Boolean.parseBoolean(CarbonUtils.getServerConfiguration().
+                                getFirstProperty("EnableEmailUserName"));
+                        if (isEmailUsernameEnabled || (username.endsWith(SUPER_TENANT_SUFFIX) && count <= 1)) {
                             username = MultitenantUtils.getTenantAwareUsername(username);
                         }
                     }
