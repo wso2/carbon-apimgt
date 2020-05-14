@@ -892,14 +892,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
                 RestApiUtil.handleResourceAlreadyExistsError("A black list item with type: " + body.getConditionType() + ", value: " + body.getConditionValue() + " already exists", e, log);
             } else {
-                String errorMessage =
-                        "Error while adding Blocking Condition. Condition type: " + body.getConditionType() + ", " +
-                                "value: " + body.getConditionValue();
+                String errorMessage = "Error while adding Blocking Condition : " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (URISyntaxException | ParseException e) {
-            String errorMessage =
-                    "Error while retrieving Blocking Condition resource location. Condition type: " + body.getConditionType() + ", value: " + body.getConditionValue();
+            String errorMessage = "Error while retrieving Blocking Condition resource location: "  + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
