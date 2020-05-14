@@ -172,7 +172,6 @@ export default function ListMGLabels() {
             </Typography>
         ),
     };
-
     return (
         <ListBase
             columProps={columProps}

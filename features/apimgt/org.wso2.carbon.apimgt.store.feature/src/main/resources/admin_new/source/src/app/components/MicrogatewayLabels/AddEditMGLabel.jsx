@@ -72,8 +72,10 @@ function AddEditMGLabel(props) {
 
     if (dataRow) {
         // eslint-disable-next-line react/prop-types
-        const { name: originalName, description: originalDescription, hosts: originalHosts } = dataRow;
+        const { name: originalName, description: originalDescription, accessUrls: originalHosts } = dataRow;
         id = dataRow.id;
+        // console.log('editing initial state', name, description, hosts);
+        // console.log('editing initial state', id);
 
         initialState = {
             name: originalName,
@@ -81,8 +83,10 @@ function AddEditMGLabel(props) {
             hosts: originalHosts,
         };
     }
+
     const [state, dispatch] = useReducer(reducer, initialState);
     const { name, description, hosts } = state;
+
 
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
@@ -115,7 +119,6 @@ function AddEditMGLabel(props) {
         return errorText;
     };
     const formSaveCallback = () => {
-        console.log('multiplehosts', name, description, hosts);
         const formErrors = getAllFormErrors();
         if (formErrors !== '') {
             Alert.error(formErrors);
@@ -125,7 +128,7 @@ function AddEditMGLabel(props) {
         let promiseAPICall;
         if (id) {
             // assign the update promise to the promiseAPICall
-            promiseAPICall = restApi.updateMicrogatewayLabel(id, description, hosts);
+            promiseAPICall = restApi.updateMicrogatewayLabel(id, name, description, hosts);
         } else {
             // assign the create promise to the promiseAPICall
             promiseAPICall = restApi.addMicrogatewayLabel(name, description, hosts);
@@ -155,7 +158,7 @@ function AddEditMGLabel(props) {
     };
 
     const onHostChange = (userHosts) => {
-        dispatch({ field: hosts, value: userHosts });
+        dispatch({ field: 'hosts', value: userHosts });
     };
 
     return (
@@ -202,7 +205,10 @@ function AddEditMGLabel(props) {
                 helperText='Enter description'
                 variant='outlined'
             />
-            <ListInput onHostChange={onHostChange} />
+            {(id)
+                ? <ListInput onHostChange={onHostChange} availableHosts={hosts} />
+                : <ListInput onHostChange={onHostChange} />}
+
 
         </FormDialogBase>
     );
