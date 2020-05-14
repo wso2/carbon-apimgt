@@ -29,7 +29,7 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
 import AddEdit from 'AppComponents/Throttling/Blacklist/AddEdit';
-import Delete from 'AppComponents/Throttling/Blacklist/Delete';
+import Delete from 'AppComponents/Throttling/Custom/Delete';
 import API from 'AppData/api';
 import EditIcon from '@material-ui/icons/Edit';
 
