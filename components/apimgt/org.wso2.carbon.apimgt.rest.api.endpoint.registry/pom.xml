@@ -154,7 +154,7 @@
         <dependency>
             <groupId>org.wso2.orbit.graphQL</groupId>
             <artifactId>graphQL</artifactId>
-            <version>${graphql.java.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
