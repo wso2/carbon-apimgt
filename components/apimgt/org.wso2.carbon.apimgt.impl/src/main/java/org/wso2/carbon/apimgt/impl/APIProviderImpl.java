@@ -115,6 +115,10 @@ import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
@@ -874,6 +878,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int apiId = apiMgtDAO.addAPI(api, tenantId);
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
+
+        APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                APIConstants.EventType.API_CREATE.name(), tenantId, api.getId().getApiName(), apiId,
+                api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
+                api.getStatus());
+        APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
     /**
@@ -1470,6 +1480,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //notify key manager with API update
         registerOrUpdateResourceInKeyManager(api);
+
+        int apiId = apiMgtDAO.getAPIID(api.getId(), null);
+        APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                APIConstants.EventType.API_UPDATE.name(), tenantId, api.getId().getApiName(), apiId,
+                api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
+                api.getStatus());
+        APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
     /**
@@ -3255,7 +3272,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String logMessage = "Successfully created new version : " + newVersion + " of : " + api.getId().getApiName();
                 log.debug(logMessage);
             }
-
         } catch (DuplicateAPIException e) {
             throw e;
         } catch (ParseException e) {
@@ -4051,6 +4067,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (identifier.toString() != null) {
                 keyManager.deleteRegisteredResourceByAPIId(identifier.toString());
             }
+
+            APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    APIConstants.EventType.API_DELETE.name(), tenantId, api.getId().getApiName(), apiId,
+                    api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
+                    api.getStatus());
+            APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+
         } catch (RegistryException e) {
             handleException("Failed to remove the API from : " + path, e);
         } catch (WorkflowException e) {
@@ -5336,6 +5359,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 String providerName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
                 String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+                String apiContext = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
+                String apiType = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
                 String currentStatus = apiArtifact.getLifecycleState();
 
@@ -5359,6 +5384,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         apiStateWorkflow.setApiCurrentState(currentStatus);
                         apiStateWorkflow.setApiLCAction(action);
                         apiStateWorkflow.setApiName(apiName);
+                        apiStateWorkflow.setApiContext(apiContext);
+                        apiStateWorkflow.setApiType(apiType);
                         apiStateWorkflow.setApiVersion(apiVersion);
                         apiStateWorkflow.setApiProvider(providerName);
                         apiStateWorkflow.setCallbackUrl(workflowProperties.getWorkflowCallbackAPI());
@@ -5406,6 +5433,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + ", API Version " + apiIdentifier.getVersion() + ", New Status : " + targetStatus;
                         log.debug(logMessage);
                     }
+                    APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                            APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), tenantId, apiName, apiId, apiVersion,
+                            apiType, apiContext, providerName, targetStatus);
+                    APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
                     return response;
                 }
             }
@@ -5824,6 +5855,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String defaultPolicyName = policyFile + "_default";
                 executionFlows.put(defaultPolicyName, defaultPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_API;
+                APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,apiPolicy.getPolicyId(),
+                        apiPolicy.getPolicyName(), apiPolicy.getDefaultQuotaPolicy().getType());
+                APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
                 //Check if there's a policy exists before adding the new policy
@@ -5836,6 +5871,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 executionFlows.put(policyFile, policyString);
                 apiMgtDAO.addApplicationPolicy(appPolicy);
                 policyLevel = PolicyConstants.POLICY_LEVEL_APP;
+                ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,appPolicy.getPolicyId(),
+                        appPolicy.getPolicyName(), appPolicy.getDefaultQuotaPolicy().getType());
+                APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
             } else if (policy instanceof SubscriptionPolicy) {
                 SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
                 //Check if there's a policy exists before adding the new policy
@@ -5853,6 +5892,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     createMonetizationPlan(subPolicy);
                 }
                 policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
+                SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,subPolicy.getPolicyId(),
+                        subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
+                        subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach());
+                APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
@@ -6138,6 +6182,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String policyContext = APIConstants.POLICY_CACHE_CONTEXT + "/t/" + apiPolicy.getTenantDomain()
                             + "/";
                     invalidateResourceCache(policyContext, null, Collections.EMPTY_SET);
+                APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,apiPolicy.getPolicyId(),
+                        apiPolicy.getPolicyName(), apiPolicy.getDefaultQuotaPolicy().getType());
+                APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
@@ -6146,6 +6194,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 executionFlows.put(policyFile, policyString);
                 policiesToUndeploy.add(policyFile);
                 policyLevel = PolicyConstants.POLICY_LEVEL_APP;
+                ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,appPolicy.getPolicyId(),
+                        appPolicy.getPolicyName(), appPolicy.getDefaultQuotaPolicy().getType());
+                APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
             } else if (policy instanceof SubscriptionPolicy) {
                 SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
@@ -6160,6 +6212,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 policiesToUndeploy.add(policyFile);
                 executionFlows.put(policyFile, policyString);
                 policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
+                SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,subPolicy.getPolicyId(),
+                        subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
+                        subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach());
+                APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
@@ -6255,6 +6312,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     policyFileNames.add(policyFile + "_condition_" + pipeline.getId());
                 }
             }
+            APIPolicyEvent apiPolicyEvent = new APIPolicyEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,policy.getPolicyId(),
+                    policy.getPolicyName(), policy.getDefaultQuotaPolicy().getType());
+            APIUtil.sendNotification(apiPolicyEvent, APIConstants.NotifierType.POLICY.name());
 
         } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
             ApplicationPolicy appPolicy = apiMgtDAO.getApplicationPolicy(policyName, tenantID);
@@ -6262,6 +6323,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 policyFile = appPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + policyName;
                 policyFileNames.add(policyFile);
             }
+            ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,appPolicy.getPolicyId(),
+                    appPolicy.getPolicyName(), appPolicy.getDefaultQuotaPolicy().getType());
+            APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
             SubscriptionPolicy subscriptionPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantID);
             if (subscriptionPolicy.isDeployed()) {
@@ -6271,6 +6336,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             //call the monetization extension point to delete plans if any
             deleteMonetizationPlan(subscriptionPolicy);
+            SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,subscriptionPolicy.getPolicyId(),
+                    subscriptionPolicy.getPolicyName(), subscriptionPolicy.getDefaultQuotaPolicy().getType(),
+                    subscriptionPolicy.getRateLimitCount(),subscriptionPolicy.getRateLimitTimeUnit(),
+                    subscriptionPolicy.isStopOnQuotaReach());
+            APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
             GlobalPolicy globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
             if (globalPolicy.isDeployed()) {
