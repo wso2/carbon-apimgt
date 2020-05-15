@@ -25,7 +25,7 @@ import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
 import Alert from 'AppComponents/Shared/Alert';
-import ListInput from 'AppComponents/MicrogatewayLabels/ListInput';
+import ListInput from 'AppComponents/AdminPages/Addons/InputListBase';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -219,8 +219,23 @@ function AddEditMGLabel(props) {
                 variant='outlined'
             />
             {(id)
-                ? <ListInput onHostChange={onHostChange} availableHosts={hosts} />
-                : <ListInput onHostChange={onHostChange} />}
+                ? (
+                    <ListInput
+                        onInputListChange={onHostChange}
+                        initialList={hosts}
+                        inputLabelPrefix='Host'
+                        helperText='Enter Host'
+                        addButtonLabel='Add Host'
+                    />
+                )
+                : (
+                    <ListInput
+                        onInputListChange={onHostChange}
+                        inputLabelPrefix='Host'
+                        helperText='Enter Host'
+                        addButtonLabel='Add Host'
+                    />
+                )}
 
 
         </FormDialogBase>
