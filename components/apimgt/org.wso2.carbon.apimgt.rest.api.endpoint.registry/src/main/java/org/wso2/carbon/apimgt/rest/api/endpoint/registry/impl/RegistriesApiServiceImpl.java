@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.endpoint.registry.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -44,6 +45,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import javax.enterprise.context.RequestScoped;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @RequestScoped
@@ -242,5 +244,40 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     public Response deleteRegistryEntry(String registryId, String entryId, MessageContext messageContext) {
 
         return Response.ok().entity("Successfully deleted the registry entry").build();
+    }
+
+    @Override
+    public Response getEndpointDefinition(String registryId, String entryId, MessageContext messageContext) {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String contentType = StringUtils.EMPTY;
+        EndpointRegistry registryProvider = new EndpointRegistryImpl();
+        ResourceFile endpointDefinition = null;
+        try {
+            EndpointRegistryInfo endpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
+            if (endpointRegistry == null) {
+                RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
+                        " is not found", log);
+            }
+            EndpointRegistryEntry registryEntry = registryProvider.getEndpointRegistryEntryByUUID(registryId, entryId);
+            if (registryEntry == null) {
+                RestApiUtil.handleResourceNotFoundError("Endpoint registry entry with the id: " + entryId +
+                        " is not found", log);
+            }
+            String type = registryEntry.getDefinitionType();
+            if (RegistryEntryDTO.DefinitionTypeEnum.OAS.equals(RegistryEntryDTO.DefinitionTypeEnum.fromValue(type))
+                    || RegistryEntryDTO.DefinitionTypeEnum.GQL_SDL.equals(RegistryEntryDTO.DefinitionTypeEnum
+                    .fromValue(type))) {
+                contentType = MediaType.APPLICATION_JSON;
+            } else if (RegistryEntryDTO.DefinitionTypeEnum.WSDL1.equals(RegistryEntryDTO.DefinitionTypeEnum
+                    .fromValue(type)) || RegistryEntryDTO.DefinitionTypeEnum.WSDL2.equals(RegistryEntryDTO
+                    .DefinitionTypeEnum.fromValue(type))) {
+                contentType = MediaType.TEXT_XML;
+            }
+            endpointDefinition = registryEntry.getEndpointDefinition();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving the endpoint definition of registry " +
+                    "entry with id: " + entryId, e, log);
+        }
+        return Response.ok(endpointDefinition.getContent()).type(contentType).build();
     }
 }

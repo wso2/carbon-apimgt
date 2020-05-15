@@ -14923,6 +14923,8 @@ public class ApiMgtDAO {
                     endpointRegistryEntry.setServiceType(rs.getString("SERVICE_TYPE"));
                     endpointRegistryEntry.setServiceURL(rs.getString("SERVICE_URL"));
                     endpointRegistryEntry.setMetaData(rs.getString("METADATA"));
+                    ResourceFile resourceFile = new ResourceFile(rs.getBinaryStream("ENDPOINT_DEFINITION"),"");
+                    endpointRegistryEntry.setEndpointDefinition(resourceFile);
                     return endpointRegistryEntry;
                 }
             }

@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-13T15:48:21.897+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-15T12:21:41.358+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -187,7 +187,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     @Produces({ "application/json" })
     @Operation(summary = "Get All entries in the registry", description = "",
         security = {  @SecurityRequirement(name = "default" , scopes = { "" })
-                 }, tags={ "Registries Entries" })
+                 }, tags={ "Registry Entries" })
 
     @ApiResponses(value = { 
         @ApiResponse(responseCode = "200",
@@ -234,6 +234,43 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 ) throws APIManagementException{
         return delegate.getAllEntriesInRegistry(registryId, query, sortBy, sortOrder, limit, offset, securityContext);
+        }
+    @GET
+    @Path("/{registryId}/entries/{entryId}/definition-file")
+    
+    @Produces({ "application/octet-stream", "application/json" })
+    @Operation(summary = "Retrieve the definition file of a specific Entry in a Registry", description = "Using this operation, you can retrieve the definition file of a specific entry in a Registry using the EntryId and RegistryId. ",
+        security = {  @SecurityRequirement(name = "default" , scopes = { "" })
+                 }, tags={ "Registry Entries" })
+
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "200",
+            description = "Updated. Successful response with the definition file as entity in the body. ",
+            content = @Content(
+            schema = @Schema(implementation = File.class))),
+    
+        @ApiResponse(responseCode = "400",
+            description = "Invalid Request ",
+            content = @Content(
+            schema = @Schema(implementation = ErrorDTO.class))),
+    
+        @ApiResponse(responseCode = "404",
+            description = "Not Found. Requested Registry or Entry does not exist. ",
+            content = @Content(
+            schema = @Schema(implementation = ErrorDTO.class)))
+     })
+    public Response getEndpointDefinition(
+
+@Parameter(description = "uuid of the registry",required=true) @PathParam("registryId") String registryId
+
+
+, 
+
+@Parameter(description = "uuid of the registry entry",required=true) @PathParam("entryId") String entryId
+
+
+) throws APIManagementException{
+        return delegate.getEndpointDefinition(registryId, entryId, securityContext);
         }
     @GET
     
