@@ -60,6 +60,7 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.converter.SwaggerConverter;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import org.apache.axis2.Constants;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -660,52 +661,48 @@ public class OASParserUtil {
      * @return APIDefinitionValidationResponse
      * @throws APIManagementException if error occurred while parsing definition
      */
-    public static APIDefinitionValidationResponse extractAndValidateOpenAPIArchive(InputStream inputStream, boolean returnContent)
-            throws APIManagementException, IOException {
-        String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator + APIConstants.OPENAPI_ARCHIVES_TEMP_FOLDER + File.separator + UUID
-                .randomUUID().toString();
+    public static APIDefinitionValidationResponse extractAndValidateOpenAPIArchive(InputStream inputStream,
+            boolean returnContent) throws APIManagementException, IOException {
+        String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator +
+                APIConstants.OPENAPI_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
         String archivePath = path + File.separator + APIConstants.OPENAPI_ARCHIVE_ZIP_FILE;
         String extractedLocation = APIFileUtil
                 .extractUploadedArchive(inputStream, APIConstants.OPENAPI_EXTRACTED_DIRECTORY, archivePath, path);
         File[] listOfFiles = new File(extractedLocation).listFiles();
-        File archive_directory = null;
+        File archiveDirectory = null;
         if (listOfFiles != null) {
             for (File file: listOfFiles) {
                 if (file.isDirectory()) {
-                    archive_directory = file.getAbsoluteFile();
+                    archiveDirectory = file.getAbsoluteFile();
                 }
             }
         }
-        if (archive_directory == null) {
-            log.error("Could not find an archive in the given ZIP file ");
-            throw new FileNotFoundException();
+        if (archiveDirectory == null) {
+            throw new FileNotFoundException("Could not find an archive in the given ZIP file.");
         }
-        File master_swagger;
-        if ((new File(archive_directory + APIConstants.OPENAPI_MASTER_JSON)).exists()) {
-            master_swagger = new File(archive_directory + APIConstants.OPENAPI_MASTER_JSON);
-        } else if ((new File(archive_directory + APIConstants.OPENAPI_MASTER_YAML)).exists()) {
-            master_swagger = new File(archive_directory + APIConstants.OPENAPI_MASTER_YAML);
+        File masterSwagger;
+        if ((new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_JSON)).exists()) {
+            masterSwagger = new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_JSON);
+        } else if ((new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_YAML)).exists()) {
+            masterSwagger = new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_YAML);
         } else {
-            log.error("Could not find a master swagger file with the name of swagger.json /swagger.yaml");
-            throw new FileNotFoundException();
+            throw new FileNotFoundException("Could not find a master swagger file with the name of swagger.json "
+                    + "/swagger.yaml");
         }
         String openAPIContent = "";
-        FileInputStream fis = new FileInputStream(master_swagger);
-        byte[] data = new byte[(int) master_swagger.length()];
-        fis.read(data);
-        fis.close();
-        String content = new String(data, APIConstants.CHARSET);
+        InputStream masterInputStream = new FileInputStream(masterSwagger);
+        String content = IOUtils.toString(masterInputStream, APIConstants.CHARSET);
         SwaggerVersion version;
         version = getSwaggerVersion(content);
-        if (version.equals(SwaggerVersion.OPEN_API)) {
-            String filePath = master_swagger.getAbsolutePath();
+        if (SwaggerVersion.OPEN_API.equals(version)) {
+            String filePath = masterSwagger.getAbsolutePath();
             OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
             ParseOptions options = new ParseOptions();
             options.setResolve(true);
             OpenAPI openAPI = openAPIV3Parser.read(filePath, null, options);
             openAPIContent = SerializerUtils.toYamlString(openAPI);
-        } else if (version.equals(SwaggerVersion.SWAGGER)) {
-            String filePath = master_swagger.getAbsolutePath();
+        } else if (SwaggerVersion.SWAGGER.equals(version)) {
+            String filePath = masterSwagger.getAbsolutePath();
             SwaggerParser parser = new SwaggerParser();
             Swagger swagger = parser.read(filePath, null, true);
             openAPIContent = Yaml.pretty().writeValueAsString(swagger);
