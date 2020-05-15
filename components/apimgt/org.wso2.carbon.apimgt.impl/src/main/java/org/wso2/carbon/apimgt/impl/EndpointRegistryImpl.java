@@ -191,10 +191,29 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * {@inheritDoc}
      */
-    public void updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistryInfo) throws
-            APIManagementException {
+    public void updateEndpointRegistry(String registryId, String registryName, EndpointRegistryInfo
+            endpointRegistryInfo) throws APIManagementException {
 
-        apiMgtDAO.updateEndpointRegistry(registryId, endpointRegistryInfo);
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(endpointRegistryInfo.getOwner()));
+        int tenantId;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            // if another registry with the updated name already exists, fail the operation.
+            if (!registryName.equals(endpointRegistryInfo.getName()) &&
+                    apiMgtDAO.isEndpointRegistryNameExists(endpointRegistryInfo.getName(), tenantId)) {
+                APIUtil.handleResourceAlreadyExistsException("Endpoint Registry with name '" + endpointRegistryInfo
+                        .getName() + "' already exists");
+            }
+            apiMgtDAO.updateEndpointRegistry(registryId, endpointRegistryInfo);
+        } catch (UserStoreException e) {
+            String msg = "Error while retrieving tenant information";
+            log.error(msg, e);
+            throw new APIManagementException("Error in retrieving Tenant Information while updating " +
+                    "endpoint registry with id :" + registryId, e);
+        }
+
     }
 
 }

@@ -238,7 +238,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
                         " is not found", log);
             }
-            registryProvider.updateEndpointRegistry(registryId, registryToUpdate);
+            registryProvider.updateEndpointRegistry(registryId, endpointRegistry.getName(), registryToUpdate);
             updatedEndpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while updating the endpoint registry " +
