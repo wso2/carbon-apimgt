@@ -1095,7 +1095,8 @@ public class OAS3Parser extends APIDefinition {
 
         String[] apiTransports = transports.split(",");
         List<Server> servers = new ArrayList<>();
-        if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)) {
+        if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL) && hostsWithSchemes
+                .containsKey(APIConstants.HTTPS_PROTOCOL)) {
             String host = hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL).trim()
                     .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
             String httpsURL = APIConstants.HTTPS_PROTOCOL + "://" + host + basePath;
@@ -1103,7 +1104,8 @@ public class OAS3Parser extends APIDefinition {
             httpsServer.setUrl(httpsURL);
             servers.add(httpsServer);
         }
-        if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)) {
+        if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL) && hostsWithSchemes
+                .containsKey(APIConstants.HTTP_PROTOCOL)) {
             String host = hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL).trim()
                     .replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "");
             String httpURL = APIConstants.HTTP_PROTOCOL + "://" + host + basePath;
