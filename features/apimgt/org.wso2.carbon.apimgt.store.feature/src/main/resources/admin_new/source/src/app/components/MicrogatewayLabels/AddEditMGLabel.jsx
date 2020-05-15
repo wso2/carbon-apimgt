@@ -22,6 +22,7 @@ import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import { FormattedMessage } from 'react-intl';
+import FormControl from '@material-ui/core/FormControl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
 import Alert from 'AppComponents/Shared/Alert';
@@ -31,8 +32,10 @@ const useStyles = makeStyles((theme) => ({
     error: {
         color: theme.palette.error.dark,
     },
-    addEditForm: {
-        minHeight: theme.spacing(24),
+    addEditFormControl: {
+        minHeight: theme.spacing(40),
+        maxHeight: theme.spacing(40),
+        minWidth: theme.spacing(55),
     },
 }));
 
@@ -190,7 +193,6 @@ function AddEditMGLabel(props) {
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
-            className={classes.addEditForm}
         >
             <DialogContentText>
                 {(id) ? (
@@ -206,55 +208,56 @@ function AddEditMGLabel(props) {
                         />
                     )}
             </DialogContentText>
-            <TextField
-                autoFocus
-                margin='dense'
-                name='name'
-                value={name}
-                onChange={onChange}
-                label={(
-                    <span>
-                        <FormattedMessage id='AdminPages.Microgateway.AddEdit.form.name' defaultMessage='Name' />
+            <FormControl component='fieldset' className={classes.addEditFormControl}>
+                <TextField
+                    autoFocus
+                    margin='dense'
+                    name='name'
+                    value={name}
+                    onChange={onChange}
+                    label={(
+                        <span>
+                            <FormattedMessage id='AdminPages.Microgateway.AddEdit.form.name' defaultMessage='Name' />
 
-                        <span className={classes.error}>*</span>
-                    </span>
-                )}
-                fullWidth
-                error={hasErrors('name', name)}
-                helperText={hasErrors('name', name) || 'Enter Microgateway Label'}
-                variant='outlined'
-                disabled={id}
-            />
-            <TextField
-                margin='dense'
-                name='description'
-                value={description}
-                onChange={onChange}
-                label='Description'
-                fullWidth
-                multiline
-                helperText='Enter description'
-                variant='outlined'
-            />
-            {(id)
-                ? (
-                    <ListInput
-                        onInputListChange={onHostChange}
-                        initialList={hosts}
-                        inputLabelPrefix='Host'
-                        helperText='Enter Host'
-                        addButtonLabel='Add Host'
-                    />
-                )
-                : (
-                    <ListInput
-                        onInputListChange={onHostChange}
-                        inputLabelPrefix='Host'
-                        helperText='Enter Host'
-                        addButtonLabel='Add Host'
-                    />
-                )}
-
+                            <span className={classes.error}>*</span>
+                        </span>
+                    )}
+                    fullWidth
+                    error={hasErrors('name', name)}
+                    helperText={hasErrors('name', name) || 'Enter Microgateway Label'}
+                    variant='outlined'
+                    disabled={id}
+                />
+                <TextField
+                    margin='dense'
+                    name='description'
+                    value={description}
+                    onChange={onChange}
+                    label='Description'
+                    fullWidth
+                    multiline
+                    helperText='Enter description'
+                    variant='outlined'
+                />
+                {(id)
+                    ? (
+                        <ListInput
+                            onInputListChange={onHostChange}
+                            initialList={hosts}
+                            inputLabelPrefix='Host'
+                            helperText='Enter Host'
+                            addButtonLabel='Add Host'
+                        />
+                    )
+                    : (
+                        <ListInput
+                            onInputListChange={onHostChange}
+                            inputLabelPrefix='Host'
+                            helperText='Enter Host'
+                            addButtonLabel='Add Host'
+                        />
+                    )}
+            </FormControl>
 
         </FormDialogBase>
     );
