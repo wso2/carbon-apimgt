@@ -311,6 +311,7 @@ class API extends Resource {
     createMgLabel(name, description, callback = null) {
         // todo: impl this
     }
+
     /**
      * Get Blacklist Policies
      */
@@ -356,7 +357,75 @@ class API extends Resource {
     blacklistPolicyGet(policyId) {
         return this.client.then((client) => {
             return client.apis['Blacklist (Individual)'].get_throttling_blacklist__conditionId_(
-                { policyId: policyId },
+                { conditionId: policyId },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get Custom Policies
+     */
+    customPoliciesGet() {
+        return this.client.then((client) => {
+            return client.apis['Custom Rules (Collection)'].get_throttling_policies_custom(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Add a Custom Policy
+     */
+    addCustomPolicy(body) {
+        return this.client.then((client) => {
+            const payload = {
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Custom Rules (Collection)'].post_throttling_policies_custom(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+
+     /**
+     * Delete a Custom Policy
+     */
+    deleteCustomPolicy(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Custom Rules (Individual)'].delete_throttling_policies_custom__ruleId_(
+                { ruleId: policyId },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get details of a Custom Policy
+     */
+    customPolicyGet(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Custom Rules (Individual)'].get_throttling_policies_custom__ruleId_(
+                { ruleId: policyId },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+     /**
+     * Update a Custom Policy
+     */
+    updateCustomPolicy(policyId, body) {
+        return this.client.then((client) => {
+            const payload = {
+                ruleId: policyId,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Custom Rules (Individual)'].put_throttling_policies_custom__ruleId_(
+                payload,
                 this._requestMetaData(),
             );
         });

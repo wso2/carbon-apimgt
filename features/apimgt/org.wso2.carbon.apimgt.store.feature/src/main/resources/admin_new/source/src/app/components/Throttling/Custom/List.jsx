@@ -28,8 +28,8 @@ import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
 import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
-import AddEdit from 'AppComponents/Throttling/Application/AddEdit';
-import Delete from 'AppComponents/Throttling/Application/Delete';
+import AddEdit from 'AppComponents/Throttling/Custom/AddEdit';
+import Delete from 'AppComponents/Throttling/Custom/Delete';
 import API from 'AppData/api';
 import EditIcon from '@material-ui/icons/Edit';
 
@@ -37,25 +37,25 @@ import EditIcon from '@material-ui/icons/Edit';
  * Render a list
  * @returns {JSX} Header AppBar components.
  */
-export default function ListApplicationThrottlingPolicies() {
+export default function ListCustomThrottlingPolicies() {
     const intl = useIntl();
     const restApi = new API();
 
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
-            id: 'Throttling.Application.Policy.List.addButtonProps.triggerButtonText',
-            defaultMessage: 'Add Policy',
+            id: 'Throttling.Custom.Policy.List.addButtonProps.triggerButtonText',
+            defaultMessage: 'Define Policy',
         }),
         /* This title is what as the title of the popup dialog box */
         title: intl.formatMessage({
-            id: 'Throttling.Application.Policy.List.addButtonProps.title',
-            defaultMessage: 'Add Policy',
+            id: 'Throttling.Custom.Policy.List.addButtonProps.title',
+            defaultMessage: 'Define Custom Policy ',
         }),
     };
     const searchProps = {
         searchPlaceholder: intl.formatMessage({
-            id: 'Throttling.Application.Policy..List.search.default',
-            defaultMessage: 'Search by Application Policy name',
+            id: 'Throttling.Custom.Policy.List.search.default',
+            defaultMessage: 'Search by Custom Policy name',
         }),
         active: true,
     };
@@ -70,31 +70,12 @@ export default function ListApplicationThrottlingPolicies() {
                         <Link
                             target='_blank'
                             href={Configurations.app.docUrl
-            + 'learn/rate-limiting/adding-new-throttling-policies/#adding-a-new-application-level-throttling-tier'}
+            + 'learn/rate-limiting/advanced-topics/custom-throttling/'}
                         >
                             <ListItemText primary={(
                                 <FormattedMessage
-                                    id='Throttling.Application.Policy.List.help.link.one'
-                                    defaultMessage='Create an Application Rate Limiting Policy'
-                                />
-                            )}
-                            />
-
-                        </Link>
-                    </ListItem>
-                    <ListItem button>
-                        <ListItemIcon>
-                            <DescriptionIcon />
-                        </ListItemIcon>
-                        <Link
-                            target='_blank'
-                            href={Configurations.app.docUrl
-                + 'learn/rate-limiting/setting-throttling-limits/#application-level-throttling-application-developer'}
-                        >
-                            <ListItemText primary={(
-                                <FormattedMessage
-                                    id='Throttling.Application.Policy.List.help.link.two'
-                                    defaultMessage='Setting an Application Rate Limiting Policy'
+                                    id='Throttling.Custom.Policy.List.help.link.one'
+                                    defaultMessage='Custom Throttling Policy'
                                 />
                             )}
                             />
@@ -105,20 +86,16 @@ export default function ListApplicationThrottlingPolicies() {
             </HelpBase>),
         pageStyle: 'half',
         title: intl.formatMessage({
-            id: 'Throttling.Application.Policy.search.default',
-            defaultMessage: 'Application Rate Limiting Policies',
-        }),
-        EditTitle: intl.formatMessage({
-            id: 'Throttling.Application.Policy.search.default',
-            defaultMessage: 'Application Rate Limiting Policies',
+            id: 'Throttling.Custom.Policy.search.default',
+            defaultMessage: 'Custom Rate Limiting Policies',
         }),
     };
 
     const columProps = [
         {
-            name: 'name',
+            name: 'policyName',
             label: intl.formatMessage({
-                id: 'Admin.Throttling.Application.Throttling.policy.table.header.name',
+                id: 'Admin.Throttling.Custom.Throttling.policy.table.header.name',
                 defaultMessage: 'Name',
             }),
             options: {
@@ -127,10 +104,10 @@ export default function ListApplicationThrottlingPolicies() {
             },
         },
         {
-            name: 'quotaPolicy',
+            name: 'description',
             label: intl.formatMessage({
-                id: 'Admin.Throttling.Application.Throttling.policy.table.header.quota.policy',
-                defaultMessage: 'Quota Policy',
+                id: 'Admin.Throttling.Custom.Throttling.policy.table.header.description',
+                defaultMessage: 'Description',
             }),
             options: {
                 filter: true,
@@ -138,21 +115,10 @@ export default function ListApplicationThrottlingPolicies() {
             },
         },
         {
-            name: 'quota',
+            name: 'keyTemplate',
             label: intl.formatMessage({
-                id: 'Admin.Throttling.Application.Throttling.policy.table.header.quota',
-                defaultMessage: 'Quota',
-            }),
-            options: {
-                filter: true,
-                sort: false,
-            },
-        },
-        {
-            name: 'unitTime',
-            label: intl.formatMessage({
-                id: 'Admin.Throttling.Application.Throttling.policy.table.header.unit.time',
-                defaultMessage: 'Unit Time',
+                id: 'Admin.Throttling.Custom.Throttling.policy.table.header.key.template',
+                defaultMessage: 'Key Template',
             }),
             options: {
                 filter: true,
@@ -165,16 +131,16 @@ export default function ListApplicationThrottlingPolicies() {
         content: (
             <Typography variant='body2' color='textSecondary' component='p'>
                 <FormattedMessage
-                    id='Throttling.Application.Policy.List.empty.content.application.policies'
-                    defaultMessage={'Application-level throttling policies are applicable per access '
-                    + 'token generated for an application.'}
+                    id='Throttling.Custom.Policy.List.empty.content.custom.policies and abuse by'
+                    defaultMessage={'Custom throttling allows system administrators to define dynamic'
+                    + ' rules for specific use cases, which are applied globally across all tenants.'}
                 />
             </Typography>),
         title: (
             <Typography gutterBottom variant='h5' component='h2'>
                 <FormattedMessage
-                    id='Throttling.Application.Policy.List.empty.title.application.policies'
-                    defaultMessage='Application Policies'
+                    id='Throttling.Custom.Policy.List.empty.title.custom.policies'
+                    defaultMessage='Custom Policies'
                 />
 
             </Typography>),
@@ -185,26 +151,17 @@ export default function ListApplicationThrottlingPolicies() {
  * @returns {Promise}.
  */
     function apiCall() {
-        let applicationThrottlingvalues;
         return new Promise(((resolve, reject) => {
-            restApi.applicationThrottlingPoliciesGet().then((result) => {
-                const applicationPolicies = result.body.list.map((obj) => {
+            restApi.customPoliciesGet().then((result) => {
+                const customPolicies = result.body.list.map((obj) => {
                     return {
-                        policyName: obj.policyName,
-                        quotaPolicy: obj.defaultLimit.type,
-                        quota: obj.defaultLimit.requestCount
-                || obj.defaultLimit.dataAmount + ' ' + obj.defaultLimit.dataUnit,
-                        unitTime: obj.defaultLimit.unitTime + ' ' + obj.defaultLimit.timeUnit,
                         policyId: obj.policyId,
+                        policyName: obj.policyName,
+                        description: obj.description,
+                        keyTemplate: obj.keyTemplate,
                     };
                 });
-
-                applicationThrottlingvalues = applicationPolicies
-                    .filter((policy) => policy.policyName !== 'Unlimited')
-                    .map((obj) => {
-                        return Object.values(obj);
-                    });
-                resolve(applicationThrottlingvalues);
+                resolve(customPolicies);
             }).catch((error) => {
                 reject(error);
             });
@@ -219,12 +176,12 @@ export default function ListApplicationThrottlingPolicies() {
             searchProps={searchProps}
             emptyBoxProps={emptyBoxProps}
             apiCall={apiCall}
-            editComponentProps={{
-                icon: <EditIcon />,
-                title: 'Edit Application Policy',
-            }}
             DeleteComponent={Delete}
             EditComponent={AddEdit}
+            editComponentProps={{
+                icon: <EditIcon />,
+                title: 'Edit Custom Policy',
+            }}
         />
     );
 }
