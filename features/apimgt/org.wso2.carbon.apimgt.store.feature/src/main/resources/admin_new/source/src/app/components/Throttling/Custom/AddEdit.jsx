@@ -16,7 +16,9 @@
  * under the License.
  */
 
-import React, { useReducer, useState } from 'react';
+import React, {
+    useReducer, useState, Suspense, lazy,
+} from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -25,8 +27,10 @@ import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
 import { Typography } from '@material-ui/core';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
-import MonacoEditor from 'react-monaco-editor';
 import sqlFormatter from 'sql-formatter';
+import { Progress } from 'AppComponents/Shared';
+
+const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "CustomPolicyAddMonacoEditor" */));
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -308,13 +312,15 @@ function AddEdit(props) {
                     </Typography>
                 </>
             )}
-            <MonacoEditor
-                language='sql'
-                height='250px'
-                theme='vs-dark'
-                value={siddhiQuery}
-                onChange={siddhiQueryOnChange}
-            />
+            <Suspense fallback={<Progress />}>
+                <MonacoEditor
+                    language='sql'
+                    height='250px'
+                    theme='vs-dark'
+                    value={siddhiQuery}
+                    onChange={siddhiQueryOnChange}
+                />
+            </Suspense>
         </FormDialogBase>
     );
 }
