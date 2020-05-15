@@ -14957,16 +14957,27 @@ public class ApiMgtDAO {
     /**
      * Returns all entries belong to a given endpoint registry
      *
+     * @param sortBy     Name of the sorting field
+     * @param sortOrder  Order of sorting (asc or desc)
+     * @param limit      Limit
+     * @param offset     Offset
      * @param registryId UUID of the endpoint registry
      * @return A list of EndpointRegistryEntry objects
      * @throws APIManagementException if failed to get entries of an Endpoint Registry
      */
-    public List<EndpointRegistryEntry> getEndpointRegistryEntries(String registryId) throws APIManagementException {
+    public List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit,
+                                                                  int offset, String registryId)
+            throws APIManagementException {
         List<EndpointRegistryEntry> endpointRegistryEntryList = new ArrayList<>();
-        String query = SQLConstants.GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY;
+        String query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY");
+        query = query.replace("$1", sortBy);
+        query = query.replace("$2", sortOrder);
+
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, registryId);
+            ps.setInt(2, offset);
+            ps.setInt(3, limit);
             ps.executeQuery();
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

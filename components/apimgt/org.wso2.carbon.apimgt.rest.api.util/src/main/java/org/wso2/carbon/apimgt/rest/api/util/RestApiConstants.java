@@ -210,6 +210,8 @@ public final class RestApiConstants {
 
     //Constants for endpoint registry sortBy
     public static final String ENDPOINT_REG_NAME = "registryName";
+    public static final String ENDPOINT_REG_ENTRY_DEFINITION_TYPE = "definitionType";
+    public static final String ENDPOINT_REG_ENTRY_SERVICE_TYPE = "serviceType";
 
     //default error messages
     public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";

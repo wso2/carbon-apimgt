@@ -73,11 +73,16 @@ public interface EndpointRegistry {
     /**
      * Returns all entries belong to a given endpoint registry
      *
+     * @param sortBy     Name of the sorting field
+     * @param sortOrder  Order of sorting (asc or desc)
+     * @param limit      Limit
+     * @param offset     Offset
      * @param registryId UUID of the endpoint registry
      * @return A list of EndpointRegistryEntry objects
      * @throws APIManagementException if failed to get entries of an Endpoint Registry
      */
-    List<EndpointRegistryEntry> getEndpointRegistryEntries(String registryId) throws APIManagementException;
+    List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit, int offset,
+                                                           String registryId) throws APIManagementException;
 
     /**
      * Returns details of a specific Endpoint Registry Entry
