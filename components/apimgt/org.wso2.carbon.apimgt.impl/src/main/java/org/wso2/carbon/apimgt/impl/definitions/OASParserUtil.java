@@ -95,11 +95,26 @@ import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashMap;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Arrays;
+import java.util.UUID;
+
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
