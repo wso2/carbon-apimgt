@@ -197,13 +197,13 @@ function AddEditMGLabel(props) {
             <DialogContentText>
                 {(id) ? (
                     <FormattedMessage
-                        id='AdminPages.Microgateway.AddEdit.form.info'
+                        id='AdminPages.Microgateway.AddEdit.form.edit.info'
                         defaultMessage='Edit selected Microgateway Label'
                     />
                 )
                     : (
                         <FormattedMessage
-                            id='AdminPages.Microgateway.AddEdit.form.info'
+                            id='AdminPages.Microgateway.AddEdit.form.add.info'
                             defaultMessage='Add a new Microgateway Label'
                         />
                     )}
