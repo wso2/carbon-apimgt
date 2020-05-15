@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -966,7 +966,8 @@ public interface APIProvider extends APIManager {
      * @return UUID of the new Block Condition
      * @throws APIManagementException
      */
-    String addBlockCondition(String conditionType, String conditionValue, boolean conditionStatus) throws APIManagementException;
+    String addBlockCondition(String conditionType, String conditionValue, boolean conditionStatus)
+            throws APIManagementException;
 
     /**
      * Deletes a block condition given its Id

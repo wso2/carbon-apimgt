@@ -80,7 +80,6 @@ public class BlockingConditionDTO   {
     this.conditionValue = conditionValue;
   }
 
-
   /**
    * Status of the blocking condition
    **/
@@ -98,6 +97,7 @@ public class BlockingConditionDTO   {
   public void setConditionStatus(Boolean conditionStatus) {
     this.conditionStatus = conditionStatus;
   }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
