@@ -677,7 +677,7 @@ public class OASParserUtil {
      * @throws APIManagementException if error occurred while parsing definition
      */
     public static APIDefinitionValidationResponse extractAndValidateOpenAPIArchive(InputStream inputStream,
-            boolean returnContent) throws APIManagementException, IOException {
+            boolean returnContent) throws APIManagementException {
         String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator +
                 APIConstants.OPENAPI_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
         String archivePath = path + File.separator + APIConstants.OPENAPI_ARCHIVE_ZIP_FILE;
@@ -693,7 +693,7 @@ public class OASParserUtil {
             }
         }
         if (archiveDirectory == null) {
-            throw new FileNotFoundException("Could not find an archive in the given ZIP file.");
+            throw new APIManagementException("Could not find an archive in the given ZIP file.");
         }
         File masterSwagger;
         if ((new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_JSON)).exists()) {
@@ -701,12 +701,17 @@ public class OASParserUtil {
         } else if ((new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_YAML)).exists()) {
             masterSwagger = new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_YAML);
         } else {
-            throw new FileNotFoundException("Could not find a master swagger file with the name of swagger.json "
+            throw new APIManagementException("Could not find a master swagger file with the name of swagger.json "
                     + "/swagger.yaml");
         }
+        String content;
+        try {
+            InputStream masterInputStream = new FileInputStream(masterSwagger);
+            content = IOUtils.toString(masterInputStream, APIConstants.CHARSET);
+        } catch (IOException e) {
+            throw new APIManagementException("Error reading master swagger file");
+        }
         String openAPIContent = "";
-        InputStream masterInputStream = new FileInputStream(masterSwagger);
-        String content = IOUtils.toString(masterInputStream, APIConstants.CHARSET);
         SwaggerVersion version;
         version = getSwaggerVersion(content);
         if (SwaggerVersion.OPEN_API.equals(version)) {
@@ -720,7 +725,11 @@ public class OASParserUtil {
             String filePath = masterSwagger.getAbsolutePath();
             SwaggerParser parser = new SwaggerParser();
             Swagger swagger = parser.read(filePath, null, true);
-            openAPIContent = Yaml.pretty().writeValueAsString(swagger);
+            try {
+                openAPIContent = Yaml.pretty().writeValueAsString(swagger);
+            } catch (IOException e) {
+                throw new APIManagementException("Error in converting swagger to openAPI content. " + e);
+            }
         }
         APIDefinitionValidationResponse apiDefinitionValidationResponse;
         apiDefinitionValidationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
