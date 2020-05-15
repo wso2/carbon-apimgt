@@ -100,7 +100,7 @@ const RouteMenuMapping = (intl) => [
             defaultMessage: 'Microgateways',
         }),
         path: '/settings/mg-labels',
-        component: () => <DemoTable />,
+        component: () => <MicrogatewayLabels />,
         icon: <PhonelinkSetupIcon />,
     },
     {
