@@ -31,6 +31,9 @@ const useStyles = makeStyles((theme) => ({
     error: {
         color: theme.palette.error.dark,
     },
+    addEditForm: {
+        minHeight: theme.spacing(24),
+    },
 }));
 
 let initialState = {
@@ -53,6 +56,7 @@ function reducer(state, { field, value }) {
 
 /**
  * Render a pop-up dialog to add/edit an Microgateway label
+ * @param {JSON} props .
  * @returns {JSX}.
  */
 function AddEditMGLabel(props) {
@@ -74,8 +78,6 @@ function AddEditMGLabel(props) {
         // eslint-disable-next-line react/prop-types
         const { name: originalName, description: originalDescription, accessUrls: originalHosts } = dataRow;
         id = dataRow.id;
-        // console.log('editing initial state', name, description, hosts);
-        // console.log('editing initial state', id);
 
         initialState = {
             name: originalName,
@@ -139,28 +141,35 @@ function AddEditMGLabel(props) {
         let promiseAPICall;
         if (id) {
             // assign the update promise to the promiseAPICall
-            console.log(id, name, description, hosts);
-            promiseAPICall = restApi.updateMicrogatewayLabel(id, name, description, hosts);
+            promiseAPICall = restApi.updateMicrogatewayLabel(id, name.trim(), description, hosts);
         } else {
             // assign the create promise to the promiseAPICall
-            promiseAPICall = restApi.addMicrogatewayLabel(name, description, hosts);
+            promiseAPICall = restApi.addMicrogatewayLabel(name.trim(), description, hosts);
         }
         promiseAPICall = new Promise((resolve, reject) => {
             promiseAPICall
                 .then(() => {
                     resolve(
-                        <FormattedMessage
-                            id='todo: dynamically render this message'
-                            defaultMessage='microgateway added/edited successfully'
-                        />,
+                        (id)
+                            ? (
+                                <FormattedMessage
+                                    id='AdminPages.Microgateway.AddEdit.form.info.edit.successful'
+                                    defaultMessage='Microgateway Label edited successfully'
+                                />
+                            )
+                            : (
+                                <FormattedMessage
+                                    id='AdminPages.Microgateway.AddEdit.form.info.add.successful'
+                                    defaultMessage='microgateway Label added successfully'
+                                />
+                            )
+                        ,
                     );
                 })
                 .catch((error) => {
-                    console.log(error);
                     const { response } = error;
                     if (response.body) {
-                        const { errorBody } = response.body;
-                        reject(errorBody);
+                        reject(response.body.description);
                     }
                 })
                 .finally(() => {
@@ -181,12 +190,21 @@ function AddEditMGLabel(props) {
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
+            className={classes.addEditForm}
         >
             <DialogContentText>
-                <FormattedMessage
-                    id='AdminPages.Microgateway.AddEdit.form.info'
-                    defaultMessage='todo: dynamically render'
-                />
+                {(id) ? (
+                    <FormattedMessage
+                        id='AdminPages.Microgateway.AddEdit.form.info'
+                        defaultMessage='Edit selected Microgateway Label'
+                    />
+                )
+                    : (
+                        <FormattedMessage
+                            id='AdminPages.Microgateway.AddEdit.form.info'
+                            defaultMessage='Add a new Microgateway Label'
+                        />
+                    )}
             </DialogContentText>
             <TextField
                 autoFocus

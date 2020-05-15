@@ -116,7 +116,7 @@ export default function ListMGLabels() {
     const searchProps = {
         searchPlaceholder: intl.formatMessage({
             id: 'AdminPages.Microgateways.List.search.default',
-            defaultMessage: 'Search by Label name',
+            defaultMessage: 'Search Microgateway by Name, Description or Host',
         }),
         active: true,
     };
@@ -130,17 +130,54 @@ export default function ListMGLabels() {
                         </ListItemIcon>
                         <Link
                             target='_blank'
-                            href={
-                                Configurations.app.docUrl = 'todo'
-                            }
+                            href={Configurations.app.docUrl
+                        + 'learn/api-microgateway/grouping-apis-with-labels/#step-1-create-a-microgateway-label'}
                         >
-                            <ListItemText
-                                primary={(
-                                    <FormattedMessage
-                                        id='AdminPages.Microgateways.List.help.link.one'
-                                        defaultMessage='todo'
-                                    />
-                                )}
+                            <ListItemText primary={(
+                                <FormattedMessage
+                                    id='AdminPages.Microgateways.List.help.link.one'
+                                    defaultMessage='Create a Microgateway label'
+                                />
+                            )}
+                            />
+
+                        </Link>
+                    </ListItem>
+                    <ListItem button>
+                        <ListItemIcon>
+                            <DescriptionIcon />
+                        </ListItemIcon>
+                        <Link
+                            target='_blank'
+                            href={Configurations.app.docUrl
+                        + 'learn/api-microgateway/grouping-apis-with-labels/'
+                        + '#step-2-assign-the-microgateway-label-to-an-api'}
+                        >
+                            <ListItemText primary={(
+                                <FormattedMessage
+                                    id='AdminPages.Microgateways.List.help.link.two'
+                                    defaultMessage='Assign the Microgateway label to an API'
+                                />
+                            )}
+                            />
+
+                        </Link>
+                    </ListItem>
+                    <ListItem button>
+                        <ListItemIcon>
+                            <DescriptionIcon />
+                        </ListItemIcon>
+                        <Link
+                            target='_blank'
+                            href={Configurations.app.docUrl
+                        + 'learn/api-microgateway/grouping-apis-with-labels/#step-3-view-the-microgateway-labels'}
+                        >
+                            <ListItemText primary={(
+                                <FormattedMessage
+                                    id='AdminPages.Microgateways.List.help.link.three'
+                                    defaultMessage='View the Microgateway labels'
+                                />
+                            )}
                             />
                         </Link>
                     </ListItem>
@@ -158,8 +195,10 @@ export default function ListMGLabels() {
         content: (
             <Typography variant='body2' color='textSecondary' component='p'>
                 <FormattedMessage
-                    id='AdminPages.Microgateways.List.empty.content'
-                    defaultMessage='todo'
+                    id='AdminPages.Microgateways.List.empty.content.microgateways'
+                    defaultMessage={'It is possible to create a Microgateway distribution for a '
+                    + 'group of APIs. In order to group APIs, a label needs to be created and '
+                    + 'attached to the APIs that need to be in a single group.'}
                 />
             </Typography>
         ),
