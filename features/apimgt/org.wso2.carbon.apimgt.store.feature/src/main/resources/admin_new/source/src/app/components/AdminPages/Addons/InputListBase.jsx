@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { createMuiTheme } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 
 let id;
+
+const theme = createMuiTheme();
+theme.spacing(2);
 
 const InputList = (props) => {
     const {
@@ -56,7 +62,7 @@ const InputList = (props) => {
         <div>
             {userInputItems.map((item) => {
                 return (
-                    <div>
+                    <Grid container xs={12} direction='row' spacing={0}>
                         <TextField
                             margin='dense'
                             name={item.key}
@@ -66,11 +72,18 @@ const InputList = (props) => {
                             helperText={helperText}
                             variant='outlined'
                         />
-                        <Button onClick={() => handleDelete(item.key)}> Remove </Button>
-                    </div>
+                        <Box mt={1}>
+                            <Button
+                                color='primary'
+                                onClick={() => handleDelete(item.key)}
+                            >
+                                    Remove
+                            </Button>
+                        </Box>
+                    </Grid>
                 );
             })}
-            <Button onClick={onAddInputField}>{addButtonLabel}</Button>
+            <Button variant='outlined' onClick={onAddInputField}>{addButtonLabel}</Button>
         </div>
     );
 };
