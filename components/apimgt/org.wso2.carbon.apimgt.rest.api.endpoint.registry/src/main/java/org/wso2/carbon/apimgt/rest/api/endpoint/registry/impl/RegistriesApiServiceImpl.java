@@ -231,15 +231,19 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         EndpointRegistryInfo registryToUpdate = EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(body, user);
         EndpointRegistryInfo updatedEndpointRegistry = null;
+        EndpointRegistryInfo endpointRegistry = null;
         try {
-            EndpointRegistryInfo endpointRegistry =
+            endpointRegistry =
                     registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
             if (endpointRegistry == null) {
                 RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
                         " is not found", log);
             }
-            registryProvider.updateEndpointRegistry(registryId, registryToUpdate);
+            registryProvider.updateEndpointRegistry(registryId, endpointRegistry.getName(), registryToUpdate);
             updatedEndpointRegistry = registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
+        } catch (APIMgtResourceAlreadyExistsException e) {
+            RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry with name '"
+                    + endpointRegistry.getName() + "' already exists", e, log);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while updating the endpoint registry " +
                     "with id: " + registryId, e, log);
