@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -201,12 +202,15 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                             "Endpoint Registry with Registry Id: " + registryId, e, log);
                 }
             } else {
-                if (!isValidEndpointDefinition(null, definitionFileInputStream,
+                byte[] definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
+                if (!isValidEndpointDefinition(null, definitionFileByteArray,
                         registryEntry.getDefinitionType().toString())) {
                     RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
                             "the new registry entry with registry id: " + registryId, log);
                 }
-                definitionFile = getDefinitionFromInput(definitionFileInputStream, registryEntry.getDefinitionType());
+                definitionFileByteArray = transformDefinitionContent(definitionFileByteArray,
+                        registryEntry.getDefinitionType());
+                definitionFile = new ByteArrayInputStream(definitionFileByteArray);
             }
             EndpointRegistryEntry entryToAdd = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
                     null, definitionFile, endpointRegistry.getRegistryId());
@@ -348,12 +352,15 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                             + entryId, e, log);
                 }
             } else {
-                if (!isValidEndpointDefinition(null, definitionFileInputStream,
+                byte[] definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
+                if (!isValidEndpointDefinition(null, definitionFileByteArray,
                         registryEntry.getDefinitionType().toString())) {
                     RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
                             "the registry entry with id: " + entryId, log);
                 }
-                definitionFile = getDefinitionFromInput(definitionFileInputStream, registryEntry.getDefinitionType());
+                definitionFileByteArray = transformDefinitionContent(definitionFileByteArray,
+                        registryEntry.getDefinitionType());
+                definitionFile = new ByteArrayInputStream(definitionFileByteArray);
             }
             EndpointRegistryEntry entryToUpdate = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
                     entryId, definitionFile, endpointRegistry.getRegistryId());
@@ -401,14 +408,13 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
         return Response.ok().entity("Successfully deleted the endpoint registry entry").build();
     }
 
-    private boolean isValidEndpointDefinition(URL definitionURL, InputStream definitionFileInputStream,
+    private boolean isValidEndpointDefinition(URL definitionURL, byte[] definitionFileByteArray,
                                               String definitionType) {
         String definitionContent = null;
         try {
             // definition file is given priority than the definition url
-            if (definitionFileInputStream != null) {
-                definitionContent = IOUtils.toString(definitionFileInputStream);
-                definitionFileInputStream.reset();
+            if (definitionFileByteArray != null) {
+                definitionContent = new String(definitionFileByteArray);
             } else if (definitionURL != null) {
                 definitionContent = IOUtils.toString(definitionURL.openStream());
             }
@@ -436,16 +442,14 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 RegistryEntryDTO.DefinitionTypeEnum.WSDL2.toString().equals(definitionType)) {
             // Validate WSDL1 and WSDL2 definitions
             try {
-                if (definitionFileInputStream != null) {
-                    isValid = APIMWSDLReader.validateWSDLFile(definitionFileInputStream).isValid();
-                    definitionFileInputStream.reset();
+                if (definitionFileByteArray != null) {
+                    ByteArrayInputStream definitionFileByteStream = new ByteArrayInputStream(definitionFileByteArray);
+                    isValid = APIMWSDLReader.validateWSDLFile(definitionFileByteStream).isValid();
                 } else {
                     isValid = APIMWSDLReader.validateWSDLUrl(definitionURL).isValid();
                 }
             } catch (APIManagementException e) {
                 log.error("Unable to parse the WSDL endpoint definition", e);
-            } catch (IOException e) {
-                log.error("Error in reading endpoint definition file content", e);
             }
         } else if (RegistryEntryDTO.DefinitionTypeEnum.GQL_SDL.toString().equals(definitionType)) {
             // Validate GraphQL definitions
@@ -502,20 +506,24 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
         return Response.ok(endpointDefinition).type(contentType).build();
     }
 
-    private InputStream getDefinitionFromInput(InputStream definitionFileInputStream,
-                                               RegistryEntryDTO.DefinitionTypeEnum type) throws IOException {
+    private byte[] getDefinitionFromInput(InputStream definitionFileInputStream) throws IOException {
+
+        ByteArrayOutputStream definitionFileOutputByteStream = new ByteArrayOutputStream();
+        IOUtils.copy(definitionFileInputStream, definitionFileOutputByteStream);
+        return definitionFileOutputByteStream.toByteArray();
+    }
+
+    private byte[] transformDefinitionContent(byte[] definitionFileByteArray,
+                                              RegistryEntryDTO.DefinitionTypeEnum type) throws IOException {
+
         if (RegistryEntryDTO.DefinitionTypeEnum.OAS.equals(type)) {
-            String oasContent = IOUtils.toString(definitionFileInputStream);
-            definitionFileInputStream.reset();
+            String oasContent = new String(definitionFileByteArray);
             if (!oasContent.trim().startsWith("{")) {
                 String jsonContent = CommonUtil.yamlToJson(oasContent);
-                return new ByteArrayInputStream(jsonContent.getBytes(StandardCharsets.UTF_8));
-            } else {
-                return definitionFileInputStream;
+                return jsonContent.getBytes(StandardCharsets.UTF_8);
             }
-        } else {
-            return definitionFileInputStream;
         }
+        return definitionFileByteArray;
     }
 
 }
