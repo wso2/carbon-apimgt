@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-15T12:21:41.358+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-15T17:47:25.049+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;

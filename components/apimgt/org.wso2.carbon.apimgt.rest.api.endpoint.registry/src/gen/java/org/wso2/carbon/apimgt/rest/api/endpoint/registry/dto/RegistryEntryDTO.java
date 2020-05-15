@@ -15,6 +15,37 @@ public class RegistryEntryDTO   {
     private String id = null;
     private String entryName = null;
     private String serviceUrl = null;
+            @XmlType(name="ServiceCategoryEnum")
+            @XmlEnum(String.class)
+            public enum ServiceCategoryEnum {
+            
+                @XmlEnumValue("UTILITY") UTILITY(String.valueOf("UTILITY")), @XmlEnumValue("EDGE") EDGE(String.valueOf("EDGE")), @XmlEnumValue("DOMAIN") DOMAIN(String.valueOf("DOMAIN"));
+            
+            
+            private String value;
+            
+            ServiceCategoryEnum (String v) {
+            value = v;
+            }
+            
+            public String value() {
+            return value;
+            }
+            
+            @Override
+            public String toString() {
+            return String.valueOf(value);
+            }
+            
+            public static ServiceCategoryEnum fromValue(String v) {
+            for (ServiceCategoryEnum b : ServiceCategoryEnum.values()) {
+            if (String.valueOf(b.value).equals(v)) {
+            return b;
+            }
+            }
+            return null;
+            }
+            }    private ServiceCategoryEnum serviceCategory = null;
             @XmlType(name="ServiceTypeEnum")
             @XmlEnum(String.class)
             public enum ServiceTypeEnum {
@@ -135,6 +166,25 @@ public class RegistryEntryDTO   {
     }
 
     /**
+        * Business Category of the Endpoint
+    **/
+    public RegistryEntryDTO serviceCategory(ServiceCategoryEnum serviceCategory) {
+    this.serviceCategory = serviceCategory;
+    return this;
+    }
+
+    
+    
+    @Schema(description = "Business Category of the Endpoint")
+    @JsonProperty("serviceCategory")
+          public ServiceCategoryEnum getServiceCategory() {
+    return serviceCategory;
+    }
+    public void setServiceCategory(ServiceCategoryEnum serviceCategory) {
+    this.serviceCategory = serviceCategory;
+    }
+
+    /**
         * Type of the backend connecting to
     **/
     public RegistryEntryDTO serviceType(ServiceTypeEnum serviceType) {
@@ -221,6 +271,7 @@ RegistryEntryDTO registryEntry = (RegistryEntryDTO) o;
     return Objects.equals(id, registryEntry.id) &&
     Objects.equals(entryName, registryEntry.entryName) &&
     Objects.equals(serviceUrl, registryEntry.serviceUrl) &&
+    Objects.equals(serviceCategory, registryEntry.serviceCategory) &&
     Objects.equals(serviceType, registryEntry.serviceType) &&
     Objects.equals(definitionType, registryEntry.definitionType) &&
     Objects.equals(definitionUrl, registryEntry.definitionUrl) &&
@@ -229,7 +280,7 @@ RegistryEntryDTO registryEntry = (RegistryEntryDTO) o;
 
 @Override
 public int hashCode() {
-return Objects.hash(id, entryName, serviceUrl, serviceType, definitionType, definitionUrl, metadata);
+return Objects.hash(id, entryName, serviceUrl, serviceCategory, serviceType, definitionType, definitionUrl, metadata);
 }
 
 @Override
@@ -240,6 +291,7 @@ sb.append("class RegistryEntryDTO {\n");
 sb.append("    id: ").append(toIndentedString(id)).append("\n");
 sb.append("    entryName: ").append(toIndentedString(entryName)).append("\n");
 sb.append("    serviceUrl: ").append(toIndentedString(serviceUrl)).append("\n");
+sb.append("    serviceCategory: ").append(toIndentedString(serviceCategory)).append("\n");
 sb.append("    serviceType: ").append(toIndentedString(serviceType)).append("\n");
 sb.append("    definitionType: ").append(toIndentedString(definitionType)).append("\n");
 sb.append("    definitionUrl: ").append(toIndentedString(definitionUrl)).append("\n");

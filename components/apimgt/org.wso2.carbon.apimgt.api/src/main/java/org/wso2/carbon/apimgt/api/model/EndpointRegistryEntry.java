@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.io.InputStream;
+
 /**
  * Endpoint Registry Entry Object.
  */
@@ -37,7 +39,7 @@ public class EndpointRegistryEntry {
 
     private String definitionURL = null;
 
-    private ResourceFile endpointDefinition = null;
+    private InputStream endpointDefinition = null;
 
     private String metaData = null;
 
@@ -76,7 +78,7 @@ public class EndpointRegistryEntry {
         return definitionURL;
     }
 
-    public ResourceFile getEndpointDefinition() {
+    public InputStream getEndpointDefinition() {
 
         return endpointDefinition;
     }
@@ -121,7 +123,7 @@ public class EndpointRegistryEntry {
         this.definitionURL = definitionURL;
     }
 
-    public void setEndpointDefinition(ResourceFile endpointDefinition) {
+    public void setEndpointDefinition(InputStream endpointDefinition) {
 
         this.endpointDefinition = endpointDefinition;
     }

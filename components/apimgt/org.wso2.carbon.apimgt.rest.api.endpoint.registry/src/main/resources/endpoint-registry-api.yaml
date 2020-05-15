@@ -691,6 +691,13 @@ components:
         serviceUrl:
           type: string
           example: http://localhost/pizzashack
+        serviceCategory:
+          type: string
+          description: "Business Category of the Endpoint"
+          enum:
+          - UTILITY
+          - EDGE
+          - DOMAIN
         serviceType:
           description: Type of the backend connecting to
           type: string
