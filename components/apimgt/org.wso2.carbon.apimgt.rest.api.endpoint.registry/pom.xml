@@ -19,7 +19,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.6.203-SNAPSHOT</version>
+        <version>6.6.208-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -149,6 +149,11 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.graphQL</groupId>
+            <artifactId>graphQL</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

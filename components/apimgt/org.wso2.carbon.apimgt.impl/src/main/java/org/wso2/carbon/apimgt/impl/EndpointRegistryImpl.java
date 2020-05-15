@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EndpointRegistry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
@@ -70,7 +71,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * Returns details of an Endpoint Registry
      *
-     * @param registryId Registry Identifier
+     * @param registryId   Registry Identifier
      * @param tenantDomain
      * @return An EndpointRegistryInfo object related to the given identifier or null
      * @throws APIManagementException if failed to get details of an Endpoint Registry
@@ -97,22 +98,27 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      * @throws APIManagementException if failed to delete the Endpoint Registry
      */
     public void deleteEndpointRegistry(String registryUUID) throws APIManagementException {
-        apiMgtDAO.deleteEndpointRegistry(registryUUID );
+        apiMgtDAO.deleteEndpointRegistry(registryUUID);
     }
 
     /**
      * Returns details of all Endpoint Registries belong to a given tenant
      *
+     * @param sortBy       Name of the sorting field
+     * @param sortOrder    Order of sorting (asc or desc)
+     * @param limit        Limit
+     * @param offset       Offset
      * @param tenantDomain
      * @return A list of EndpointRegistryInfo objects
      * @throws APIManagementException if failed to get details of an Endpoint Registries
      */
-    public List<EndpointRegistryInfo> getEndpointRegistries(String tenantDomain) throws APIManagementException {
+    public List<EndpointRegistryInfo> getEndpointRegistries(String sortBy, String sortOrder, int limit, int offset,
+                                                            String tenantDomain) throws APIManagementException {
         int tenantId;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
-            return apiMgtDAO.getEndpointRegistries(tenantId);
+            return apiMgtDAO.getEndpointRegistries(sortBy, sortOrder, limit, offset, tenantId);
         } catch (UserStoreException e) {
             String msg = "Error while retrieving tenant information";
             log.error(msg, e);
@@ -149,10 +155,37 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      */
     public String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException {
         if (apiMgtDAO.isRegistryEntryNameExists(registryEntry)) {
-            APIUtil.handleResourceAlreadyExistsException("Endpoint Registry with name '" + registryEntry.getName()
-                    + "' already exists");
+            APIUtil.handleResourceAlreadyExistsException("Endpoint Registry Entry with name '"
+                    + registryEntry.getName() + "' already exists");
         }
         return apiMgtDAO.addEndpointRegistryEntry(registryEntry);
+    }
+
+    /**
+     * Updates Registry Entry
+     *
+     * @param registryEntry EndpointRegistryEntry
+     * @throws APIManagementException if failed to update EndpointRegistryEntry
+     */
+    public void updateEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException {
+        EndpointRegistryEntry endpointRegistryEntry =
+                apiMgtDAO.getEndpointRegistryEntryByUUID(registryEntry.getEntryId());
+        if (!endpointRegistryEntry.getName().equals(registryEntry.getName()) &&
+                apiMgtDAO.isRegistryEntryNameExists(registryEntry)) {
+            APIUtil.handleResourceAlreadyExistsException("Endpoint Registry Entry with name '"
+                    + registryEntry.getName() + "' already exists");
+        }
+        apiMgtDAO.updateEndpointRegistryEntry(registryEntry);
+    }
+
+    /**
+     * Deletes an Endpoint Registry Entry
+     *
+     * @param entryId Registry Entry Identifier(UUID)
+     * @throws APIManagementException if failed to delete the Endpoint Registry Entry
+     */
+    public void deleteEndpointRegistryEntry(String entryId) throws APIManagementException {
+        apiMgtDAO.deleteEndpointRegistryEntry(entryId);
     }
 
     /**

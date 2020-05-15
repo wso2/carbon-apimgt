@@ -19,8 +19,10 @@ package org.wso2.carbon.apimgt.rest.api.endpoint.registry.util;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.impl.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryDTO;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 
 /**
  * This class is responsible for mapping APIM core Endpoint Registry related objects into REST API
@@ -81,13 +83,15 @@ public class EndpointRegistryMappingUtils {
     /**
      * Converts a RegistryEntryDTO object with endpointDefinition file into EndpointRegistryEntry object
      *
-     * @param registryEntryDTO RegistryEntryDTO object
+     * @param registryEntryDTO   RegistryEntryDTO object
+     * @param entryUUID   Registry Entry Identifier(UUID)
      * @param endpointDefinition endpointDefinition file
      * @return EndpointRegistryEntry corresponds to RegistryEntryDTO object
      */
-    public static EndpointRegistryEntry fromDTOToRegistryEntry(RegistryEntryDTO registryEntryDTO,
+    public static EndpointRegistryEntry fromDTOToRegistryEntry(RegistryEntryDTO registryEntryDTO, String entryUUID,
                                                                ResourceFile endpointDefinition, int registryId) {
         EndpointRegistryEntry registryEntry = new EndpointRegistryEntry();
+        registryEntry.setEntryId(entryUUID);
         registryEntry.setName(registryEntryDTO.getEntryName());
         registryEntry.setDefinitionType(registryEntryDTO.getDefinitionType().toString());
         registryEntry.setDefinitionURL(registryEntryDTO.getDefinitionUrl());
@@ -97,5 +101,19 @@ public class EndpointRegistryMappingUtils {
         registryEntry.setServiceURL(registryEntryDTO.getServiceUrl());
         registryEntry.setRegistryId(registryId);
         return registryEntry;
+    }
+
+    /***
+     * Converts the sort by object according to the input
+     *
+     * @param sortBy
+     * @return Updated sort by field
+     */
+    public static String getRegistriesSortByField(String sortBy) {
+        String updatedSortBy = EndpointRegistryConstants.COLUMN_ID; // default sortBy field
+        if (RestApiConstants.ENDPOINT_REG_NAME.equals(sortBy)) {
+            updatedSortBy = EndpointRegistryConstants.COLUMN_REG_NAME;
+        }
+        return updatedSortBy;
     }
 }

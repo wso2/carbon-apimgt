@@ -1429,10 +1429,6 @@ public class SQLConstants {
             " SELECT UUID, ENTRY_NAME, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, SERVICE_URL, ENDPOINT_DEFINITION," +
                     "METADATA FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
 
-    public static final String GET_ALL_ENDPOINT_REGISTRIES_OF_TENANT =
-            " SELECT UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, REG_OWNER, READ_ROLE, WRITE_ROLE FROM " +
-                    "ENDPOINT_REG WHERE TENANT_ID = ?";
-
     public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY =
             "SELECT E.UUID, E.ENTRY_NAME, E.DEFINITION_TYPE, E.DEFINITION_URL, E.METADATA, " +
                     "E.SERVICE_TYPE, E.SERVICE_URL " +
@@ -1442,6 +1438,19 @@ public class SQLConstants {
     public static final String ADD_ENDPOINT_REGISTRY_ENTRY_SQL =
             "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, METADATA," +
                     "SERVICE_TYPE, ENDPOINT_DEFINITION, REG_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    public static final String UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL =
+            "UPDATE ENDPOINT_REG_ENTRY SET " +
+                    "ENTRY_NAME = ?, " +
+                    "SERVICE_URL = ?, " +
+                    "DEFINITION_TYPE = ?, " +
+                    "DEFINITION_URL = ?, " +
+                    "METADATA = ?, " +
+                    "SERVICE_TYPE = ?, " +
+                    "ENDPOINT_DEFINITION = ? " +
+                    "WHERE UUID = ?";
+
+    public static final String DELETE_ENDPOINT_REGISTRY_ENTRY_SQL = "DELETE FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
 
     public static final String IS_ENDPOINT_REGISTRY_NAME_EXISTS = "SELECT COUNT(UUID) AS ENDPOINT_REGISTRY_COUNT" +
             " FROM ENDPOINT_REG WHERE LOWER(REG_NAME) = LOWER(?) AND TENANT_ID = ?";
