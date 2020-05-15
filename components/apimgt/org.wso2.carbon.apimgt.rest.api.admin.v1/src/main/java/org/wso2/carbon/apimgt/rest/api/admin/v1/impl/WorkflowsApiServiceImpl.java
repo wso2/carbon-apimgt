@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.WorkflowsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -99,6 +100,9 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             String workflowType = workflowDTO.getWorkflowType();
             WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
             workflowExecutor.complete(workflowDTO);
+            if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
+                WorkflowUtils.sendNotificationAfterWFComplete(workflowDTO, workflowType);
+            }
             return Response.ok().entity(body).build();
 
         } catch (APIManagementException e) {
