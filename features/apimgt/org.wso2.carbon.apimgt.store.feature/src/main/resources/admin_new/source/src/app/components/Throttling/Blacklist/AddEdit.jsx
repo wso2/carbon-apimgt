@@ -38,18 +38,9 @@ const useStyles = makeStyles((theme) => ({
         minWidth: theme.spacing(150),
 
     },
-    quotaHeading: {
-        marginTop: theme.spacing(3),
-        marginBottom: theme.spacing(2),
-    },
     unitTime: {
         display: 'flex',
         marginTop: theme.spacing(2),
-    },
-    unitTimeSelection: {
-        marginTop: theme.spacing(2.6),
-        marginLeft: theme.spacing(2),
-        minWidth: theme.spacing(15),
     },
     helperText: {
         color: green[600],

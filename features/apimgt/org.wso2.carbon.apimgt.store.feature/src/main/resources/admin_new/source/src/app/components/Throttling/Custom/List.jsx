@@ -28,7 +28,7 @@ import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
 import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
-import AddEdit from 'AppComponents/Throttling/Blacklist/AddEdit';
+import AddEdit from 'AppComponents/Throttling/Custom/AddEdit';
 import Delete from 'AppComponents/Throttling/Custom/Delete';
 import API from 'AppData/api';
 import EditIcon from '@material-ui/icons/Edit';
@@ -43,13 +43,13 @@ export default function ListCustomThrottlingPolicies() {
 
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
-            id: 'Throttling.Custome.Policy.List.addButtonProps.triggerButtonText',
-            defaultMessage: 'Add Policy',
+            id: 'Throttling.Custom.Policy.List.addButtonProps.triggerButtonText',
+            defaultMessage: 'Define Policy',
         }),
         /* This title is what as the title of the popup dialog box */
         title: intl.formatMessage({
             id: 'Throttling.Custom.Policy.List.addButtonProps.title',
-            defaultMessage: 'Add Custom Policy ',
+            defaultMessage: 'Define Custom Policy ',
         }),
     };
     const searchProps = {

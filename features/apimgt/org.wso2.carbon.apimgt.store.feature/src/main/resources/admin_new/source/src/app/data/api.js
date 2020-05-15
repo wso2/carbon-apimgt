@@ -383,7 +383,7 @@ class API extends Resource {
                 body,
                 'Content-Type': 'application/json',
             };
-            return client.apis['Custom Rules (Collection)'].post_throttling_blacklist(
+            return client.apis['Custom Rules (Collection)'].post_throttling_policies_custom(
                 payload,
                 this._requestMetaData(),
             );
