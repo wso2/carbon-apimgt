@@ -139,6 +139,7 @@ const DefaultConfigurations = {
         noApiImage: '/site/public/images/nodata.svg',
         landingPage: {
             active: false,
+            activeForAnonymous: true,
             carousel: {
                 active: true,
                 slides: [
@@ -200,6 +201,7 @@ const DefaultConfigurations = {
             },
             contact: {
                 active: true,
+                contactHTML: '<div><strong>Mailing Address</strong><p><div>787 Castro Street</div><div>Mountain View,</div><div>CA 94041</div></p><div>Tel: +1 650 745 4499 </div><div>Fax: +1 650 584 3894</div></div>',
             },
         },
         tagWise: {
@@ -315,6 +317,16 @@ const DefaultConfigurations = {
         info: {
             color: '#64b5f6',    
         },
+        /* 
+            This is the config for the public teant store.
+            Set "active: false" to redirect the teant user to the url
+            given by redirectToIfInactive. It will also hide the link
+            GO TO PUBLIC DEV PORTAL link at the header.
+        */
+       publicTenantStore: {
+            active: true,
+            redirectToIfInactive: 'https://wso2.com/api-management/cloud/',
+        }
     },
 };
 
