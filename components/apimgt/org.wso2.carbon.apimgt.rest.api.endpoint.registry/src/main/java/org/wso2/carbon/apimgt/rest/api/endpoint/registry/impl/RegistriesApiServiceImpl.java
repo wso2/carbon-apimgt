@@ -206,18 +206,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                     RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
                             "the new registry entry with registry id: " + registryId, log);
                 }
-                if (RegistryEntryDTO.DefinitionTypeEnum.OAS.equals(registryEntry.getDefinitionType())) {
-                    String oasContent = IOUtils.toString(definitionFileInputStream);
-                    definitionFileInputStream.reset();
-                    if (!oasContent.trim().startsWith("{")) {
-                        String jsonContent = CommonUtil.yamlToJson(oasContent);
-                        definitionFile = new ByteArrayInputStream(jsonContent.getBytes(StandardCharsets.UTF_8));
-                    } else {
-                        definitionFile = definitionFileInputStream;
-                    }
-                } else {
-                    definitionFile = definitionFileInputStream;
-                }
+                definitionFile = getDefinitionFromInput(definitionFileInputStream, registryEntry.getDefinitionType());
             }
             EndpointRegistryEntry entryToAdd = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
                     null, definitionFile, endpointRegistry.getRegistryId());
@@ -360,18 +349,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                     RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
                             "the registry entry with id: " + entryId, log);
                 }
-                if (RegistryEntryDTO.DefinitionTypeEnum.OAS.equals(registryEntry.getDefinitionType())) {
-                    String oasContent = IOUtils.toString(definitionFileInputStream);
-                    definitionFileInputStream.reset();
-                    if (!oasContent.trim().startsWith("{")) {
-                        String jsonContent = CommonUtil.yamlToJson(oasContent);
-                        definitionFile = new ByteArrayInputStream(jsonContent.getBytes(StandardCharsets.UTF_8));
-                    } else {
-                        definitionFile = definitionFileInputStream;
-                    }
-                } else {
-                    definitionFile = definitionFileInputStream;
-                }
+                definitionFile = getDefinitionFromInput(definitionFileInputStream, registryEntry.getDefinitionType());
             }
             EndpointRegistryEntry entryToUpdate = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
                     entryId, definitionFile, endpointRegistry.getRegistryId());
@@ -513,7 +491,27 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             RestApiUtil.handleInternalServerError("Error while retrieving the endpoint definition of registry " +
                     "entry with id: " + entryId, e, log);
         }
+        if (endpointDefinition == null) {
+            RestApiUtil.handleResourceNotFoundError("Endpoint definition not found for entry with ID: "
+                    + entryId, log);
+        }
         return Response.ok(endpointDefinition).type(contentType).build();
+    }
+
+    private InputStream getDefinitionFromInput(InputStream definitionFileInputStream,
+                                               RegistryEntryDTO.DefinitionTypeEnum type) throws IOException {
+        if (RegistryEntryDTO.DefinitionTypeEnum.OAS.equals(type)) {
+            String oasContent = IOUtils.toString(definitionFileInputStream);
+            definitionFileInputStream.reset();
+            if (!oasContent.trim().startsWith("{")) {
+                String jsonContent = CommonUtil.yamlToJson(oasContent);
+                return new ByteArrayInputStream(jsonContent.getBytes(StandardCharsets.UTF_8));
+            } else {
+                return definitionFileInputStream;
+            }
+        } else {
+            return definitionFileInputStream;
+        }
     }
 
 }
