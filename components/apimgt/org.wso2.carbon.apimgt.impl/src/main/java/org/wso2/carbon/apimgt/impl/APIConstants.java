@@ -182,7 +182,6 @@ public final class APIConstants {
     public static final String OPENAPI_ARCHIVES_TEMP_FOLDER = "OPENAPI-archives";
     public static final String OPENAPI_EXTRACTED_DIRECTORY = "extracted";
     public static final String OPENAPI_ARCHIVE_ZIP_FILE = "openapi-archive.zip";
-    public static final String CHARSET = "UTF-8";
     public static final String OPENAPI_MASTER_JSON = "swagger.json";
     public static final String OPENAPI_MASTER_YAML = "swagger.yaml";
 

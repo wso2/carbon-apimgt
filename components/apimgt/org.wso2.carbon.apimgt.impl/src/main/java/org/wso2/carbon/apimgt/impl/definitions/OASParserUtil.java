@@ -100,6 +100,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashSet;
@@ -115,7 +116,7 @@ import java.util.LinkedHashSet;
 import java.util.Arrays;
 import java.util.UUID;
 
-
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.checkAccessTokenPartitioningEnabled;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 /**
@@ -668,6 +669,30 @@ public class OASParserUtil {
         return "";
     }
 
+    public static File checkMasterSwagger(File archiveDirectory) throws APIManagementException {
+        File masterSwagger = null;
+        if ((new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_JSON)).exists()) {
+            masterSwagger = new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_JSON);
+            return masterSwagger;
+        } else if ((new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_YAML)).exists()) {
+            masterSwagger = new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_YAML);
+            return masterSwagger;
+        } else {
+            File[] listOfFiles = archiveDirectory.listFiles(File::isDirectory);
+            if (listOfFiles != null) {
+                for (File file: listOfFiles) {
+                    masterSwagger = checkMasterSwagger(file);
+                }
+            }
+        }
+        if (masterSwagger != null) {
+            return masterSwagger;
+        } else {
+            throw new APIManagementException("Could not find a master swagger file with the name of swagger.json " +
+                    "/swagger.yaml");
+        }
+    }
+
     /**
      * Extract the archive file and validates the openAPI definition
      *
@@ -692,37 +717,29 @@ public class OASParserUtil {
                 }
             }
         }
+        //verify whether the zipped input is archive or file.
         if (archiveDirectory == null) {
             throw new APIManagementException("Could not find an archive in the given ZIP file.");
         }
-        File masterSwagger;
-        if ((new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_JSON)).exists()) {
-            masterSwagger = new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_JSON);
-        } else if ((new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_YAML)).exists()) {
-            masterSwagger = new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_YAML);
-        } else {
-            throw new APIManagementException("Could not find a master swagger file with the name of swagger.json "
-                    + "/swagger.yaml");
-        }
+        File masterSwagger = checkMasterSwagger(archiveDirectory);
         String content;
         try {
             InputStream masterInputStream = new FileInputStream(masterSwagger);
-            content = IOUtils.toString(masterInputStream, APIConstants.CHARSET);
+            content = IOUtils.toString(masterInputStream, APIConstants.DigestAuthConstants.CHARSET);
         } catch (IOException e) {
-            throw new APIManagementException("Error reading master swagger file");
+            throw new APIManagementException("Error reading master swagger file" + e);
         }
         String openAPIContent = "";
         SwaggerVersion version;
         version = getSwaggerVersion(content);
+        String filePath = masterSwagger.getAbsolutePath();
         if (SwaggerVersion.OPEN_API.equals(version)) {
-            String filePath = masterSwagger.getAbsolutePath();
             OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
             ParseOptions options = new ParseOptions();
             options.setResolve(true);
             OpenAPI openAPI = openAPIV3Parser.read(filePath, null, options);
             openAPIContent = SerializerUtils.toYamlString(openAPI);
         } else if (SwaggerVersion.SWAGGER.equals(version)) {
-            String filePath = masterSwagger.getAbsolutePath();
             SwaggerParser parser = new SwaggerParser();
             Swagger swagger = parser.read(filePath, null, true);
             try {
