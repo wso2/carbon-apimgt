@@ -78,6 +78,8 @@ public class EndpointRegistryMappingUtils {
         registryEntryDTO.setMetadata(registryEntry.getMetaData());
         registryEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.fromValue(registryEntry.getServiceType()));
         registryEntryDTO.setServiceUrl(registryEntry.getServiceURL());
+        registryEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.fromValue(registryEntry
+                .getServiceCategory()));
         return registryEntryDTO;
     }
 
@@ -101,6 +103,7 @@ public class EndpointRegistryMappingUtils {
         registryEntry.setServiceType(registryEntryDTO.getServiceType().toString());
         registryEntry.setServiceURL(registryEntryDTO.getServiceUrl());
         registryEntry.setRegistryId(registryId);
+        registryEntry.setServiceCategory(registryEntryDTO.getServiceCategory().toString());
         return registryEntry;
     }
 

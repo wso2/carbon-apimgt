@@ -35,6 +35,8 @@ public class EndpointRegistryEntry {
 
     private String serviceType = null;
 
+    private String serviceCategory = null;
+
     private String definitionType = null;
 
     private String definitionURL = null;
@@ -131,5 +133,15 @@ public class EndpointRegistryEntry {
     public void setMetaData(String metaData) {
 
         this.metaData = metaData;
+    }
+
+    public String getServiceCategory() {
+
+        return serviceCategory;
+    }
+
+    public void setServiceCategory(String serviceCategory) {
+
+        this.serviceCategory = serviceCategory;
     }
 }

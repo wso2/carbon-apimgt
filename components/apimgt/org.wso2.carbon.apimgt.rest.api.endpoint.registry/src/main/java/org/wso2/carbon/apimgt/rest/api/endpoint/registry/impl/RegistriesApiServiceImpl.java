@@ -416,6 +416,10 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             if (definitionFileByteArray != null) {
                 definitionContent = new String(definitionFileByteArray);
             } else if (definitionURL != null) {
+                if (isDefinitionUrlParameterized(definitionURL.toString())) {
+                    // if parameterized skip content validation
+                    return true;
+                }
                 definitionContent = IOUtils.toString(definitionURL.openStream());
             }
         } catch (IOException e) {
@@ -465,6 +469,14 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             }
         }
         return isValid;
+    }
+
+    private boolean isDefinitionUrlParameterized(String url) {
+
+        if (url.contains("{") && url.contains("}")) {
+            return true;
+        }
+        return false;
     }
 
     @Override
