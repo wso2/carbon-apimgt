@@ -3227,6 +3227,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
             apiToAdd.setUriTemplates(uriTemplates);
             apiToAdd.setScopes(scopes);
+            //Set x-wso2-extensions to API when importing through API publisher
+            boolean isBasepathExtractedFromSwagger = false;
+            apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd, isBasepathExtractedFromSwagger);
             if (!syncOperations) {
                 swaggerData = new SwaggerData(apiToAdd);
                 definitionToAdd = apiDefinition

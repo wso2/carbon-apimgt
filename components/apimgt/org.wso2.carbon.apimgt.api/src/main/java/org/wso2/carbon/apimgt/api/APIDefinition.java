@@ -206,4 +206,15 @@ public abstract class APIDefinition {
     public abstract String processOtherSchemeScopes(String resourceConfigsJSON)
             throws APIManagementException;
 
+    /**
+     * This method returns api that is attched with api extensions related to micro-gw
+     *
+     * @param swaggerContent String
+     * @param api            API
+     * @param isBasepathExtractedFromSwagger boolean
+     * @return URITemplate
+     */
+    public abstract API setExtensionsToAPI(String swaggerContent, API api, boolean isBasepathExtractedFromSwagger)
+            throws APIManagementException;
+
 }

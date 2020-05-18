@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -1261,12 +1262,19 @@ public class OAS3Parser extends APIDefinition {
      */
     private boolean isDefaultGiven(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
-        boolean isDefaultIsGiven = true;
+        Components components = openAPI.getComponents();
+        if (components == null) {
+            return false;
+        }
+        Map<String, SecurityScheme> securitySchemes = components.getSecuritySchemes();
+        if (securitySchemes == null) {
+            return false;
+        }
         SecurityScheme checkDefault = openAPI.getComponents().getSecuritySchemes().get(OPENAPI_SECURITY_SCHEMA_KEY);
         if (checkDefault == null) {
-            isDefaultIsGiven = false;
+            return false;
         }
-        return isDefaultIsGiven;
+        return true;
     }
 
     /**
@@ -1456,6 +1464,76 @@ public class OAS3Parser extends APIDefinition {
         }
         openAPI.setPaths(paths);
         return openAPI;
+    }
+
+    /**
+     * This method returns api that is attached with api extensions related to micro-gw
+     *
+     * @param apiDefinition                  String
+     * @param api                            API
+     * @param isBasepathExtractedFromSwagger boolean
+     * @return URITemplate
+     */
+    @Override
+    public API setExtensionsToAPI(String apiDefinition, API api, boolean isBasepathExtractedFromSwagger) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(apiDefinition);
+        Map<String, Object> extensions = openAPI.getExtensions();
+        if (extensions == null) {
+            return api;
+        }
+
+        //Setup Custom auth header for API
+        String authHeader = OASParserUtil.getAuthorizationHeaderFromSwagger(extensions);
+        if (authHeader != null) {
+            api.setAuthorizationHeader(authHeader);
+        }
+        //Setup mutualSSL configuration
+        String mutualSSL = OASParserUtil.getMutualSSLEnabledFromSwagger(extensions);
+        if (StringUtils.isBlank(mutualSSL)) {
+            String securityList = api.getApiSecurity();
+            if (StringUtils.isBlank(securityList)) {
+                securityList = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+            }
+            if (APIConstants.OPTIONAL.equals(mutualSSL)) {
+                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
+            } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
+                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
+            }
+            api.setApiSecurity(securityList);
+        }
+        //Setup CORSConfigurations
+        CORSConfiguration corsConfiguration = OASParserUtil.getCorsConfigFromSwagger(extensions);
+        if (corsConfiguration != null) {
+            api.setCorsConfiguration(corsConfiguration);
+        }
+        //Setup Response cache enabling
+        boolean responseCacheEnable = OASParserUtil.getResponseCacheFromSwagger(extensions);
+        if (responseCacheEnable) {
+            api.setResponseCache(APIConstants.ENABLED);
+        }
+        //Setup cache timeOut
+        int cacheTimeOut = OASParserUtil.getCacheTimeOutFromSwagger(extensions);
+        if (cacheTimeOut != 0) {
+            api.setCacheTimeout(cacheTimeOut);
+        }
+        //Setup Transports
+        String transports = OASParserUtil.getTransportsFromSwagger(extensions);
+        if (transports != null) {
+            api.setTransports(transports);
+        }
+        //Setup Throttlingtiers
+        String throttleTier = OASParserUtil.getThrottleTierFromSwagger(extensions);
+        if (throttleTier != null) {
+            api.setApiLevelPolicy(throttleTier);
+        }
+        //Setup Basepath
+        String basePath = OASParserUtil.getBasePathFromSwagger(extensions);
+        if (basePath != null && isBasepathExtractedFromSwagger) {
+            basePath = basePath.replace("{version}", api.getId().getVersion());
+            api.setContextTemplate(basePath);
+            api.setContext(basePath);
+        }
+        return api;
     }
 
 }
