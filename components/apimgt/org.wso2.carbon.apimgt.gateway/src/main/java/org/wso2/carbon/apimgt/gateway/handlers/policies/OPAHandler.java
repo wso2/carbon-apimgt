@@ -33,8 +33,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -60,23 +61,24 @@ public class OPAHandler extends AbstractHandler {
     OPADto opaDto;
     private static HttpClient httpClient = null;
 
+    APIKeyValidationInfoDTO info;
+
     @Override
     public boolean handleRequest(MessageContext messageContext) {
 
-        setUsername(messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER).toString());
-        setScopes(APIConstants.REST_API_SCOPE);
-        setApiName(messageContext.getProperty(APIMgtGatewayConstants.API).toString());
         setVersion(messageContext.getProperty(APIMgtGatewayConstants.VERSION).toString());
-        setApiContext(messageContext.getProperty(RESTConstants.REST_API_CONTEXT).toString());
-        setResourcePath(messageContext.getProperty(APIMgtGatewayConstants.RESOURCE).toString());
         setHttpMethod(messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD).toString());
-        if("false" == messageContext.getProperty("IsClientDoingSOAP11").toString() && "API" == messageContext.getProperty(APIMgtGatewayConstants.API_TYPE)){
+        setApiContext(messageContext.getProperty(RESTConstants.REST_API_CONTEXT).toString());
+        setUsername(messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER).toString());
+        setScopes(messageContext.getProperty(APIMgtGatewayConstants.SCOPES).toString());
+        setApiName(messageContext.getProperty(APIMgtGatewayConstants.API).toString());
+        setResourcePath(messageContext.getProperty(APIMgtGatewayConstants.RESOURCE).toString());
+        if("true" == messageContext.getProperty("IsClientDoingREST").toString() && "API" == messageContext.getProperty(APIMgtGatewayConstants.API_TYPE)){
             setApiType("REST");
         }
-        else {
+        else if("true" == messageContext.getProperty("IsClientDoingSOAP11").toString() && "API" == messageContext.getProperty(APIMgtGatewayConstants.API_TYPE)){
             setApiType("SOAP");
         }
-//        setApiType(messageContext.getProperty(APIMgtGatewayConstants.API_TYPE).toString());
         setApplicationName(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME).toString());
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).
@@ -97,7 +99,6 @@ public class OPAHandler extends AbstractHandler {
         } else {
             clientIp = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
-
 
         opaDto = new OPADto(
                 getUsername(),
@@ -132,7 +133,6 @@ public class OPAHandler extends AbstractHandler {
                     throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,"OPA Failure");
                 }
             }
-
         }
         catch (IOException e) {
             log.error("Could not get any response: The server couldn't send a response:\n" +
