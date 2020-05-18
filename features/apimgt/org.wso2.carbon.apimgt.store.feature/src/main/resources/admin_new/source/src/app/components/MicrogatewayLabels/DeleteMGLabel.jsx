@@ -33,6 +33,7 @@ function Delete({ updateList, dataRow }) {
     const { id } = dataRow;
 
     const formSaveCallback = () => {
+        // todo: don't create a new promise
         const promiseAPICall = new Promise((resolve, reject) => {
             const restApi = new API();
             restApi
