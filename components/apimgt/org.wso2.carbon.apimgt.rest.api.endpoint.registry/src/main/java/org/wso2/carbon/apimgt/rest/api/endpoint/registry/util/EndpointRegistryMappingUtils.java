@@ -110,13 +110,29 @@ public class EndpointRegistryMappingUtils {
     /***
      * Converts the sort by object according to the input
      *
-     * @param sortBy
+     * @param sortBy Sort By field name
      * @return Updated sort by field
      */
     public static String getRegistriesSortByField(String sortBy) {
         String updatedSortBy = EndpointRegistryConstants.COLUMN_ID; // default sortBy field
         if (RestApiConstants.ENDPOINT_REG_NAME.equals(sortBy)) {
             updatedSortBy = EndpointRegistryConstants.COLUMN_REG_NAME;
+        }
+        return updatedSortBy;
+    }
+
+    /***
+     * Converts the sort by object according to the input
+     *
+     * @param sortBy Sort By field name
+     * @return Updated sort by field
+     */
+    public static String getRegistryEntriesSortByField(String sortBy) {
+        String updatedSortBy = EndpointRegistryConstants.COLUMN_ENTRY_NAME; // default sortBy field
+        if (RestApiConstants.ENDPOINT_REG_ENTRY_DEFINITION_TYPE.equals(sortBy)) {
+            updatedSortBy = EndpointRegistryConstants.COLUMN_DEFINITION_TYPE;
+        } else if (RestApiConstants.ENDPOINT_REG_ENTRY_SERVICE_TYPE.equals(sortBy)) {
+            updatedSortBy = EndpointRegistryConstants.COLUMN_SERVICE_TYPE;
         }
         return updatedSortBy;
     }

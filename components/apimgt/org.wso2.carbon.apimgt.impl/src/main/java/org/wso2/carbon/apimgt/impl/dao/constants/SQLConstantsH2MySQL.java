@@ -246,4 +246,22 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " ORDER BY $1 $2 " +
                     " LIMIT ?, ? ";
 
+    public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY =
+            " SELECT " +
+                    "   E.UUID, " +
+                    "   E.ENTRY_NAME, " +
+                    "   E.DEFINITION_TYPE, " +
+                    "   E.DEFINITION_URL, " +
+                    "   E.METADATA, " +
+                    "   E.SERVICE_TYPE, " +
+                    "   E.SERVICE_URL " +
+                    " FROM " +
+                    "   ENDPOINT_REG_ENTRY AS E, " +
+                    "   ENDPOINT_REG AS R " +
+                    " WHERE " +
+                    "   E.REG_ID=R.ID AND " +
+                    "   R.UUID=? " +
+                    " ORDER BY $1 $2 " +
+                    " LIMIT ?, ? ";
+
 }
