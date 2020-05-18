@@ -337,6 +337,9 @@ public final class APIImportUtil {
                 targetApi = apiProvider.getAPI(apiIdentifier);
                 // Store target API status
                 currentStatus = targetApi.getStatus();
+
+                // Since the overwrite should be done, the imported API Identifier should be equal to the target API Identifier
+                importedApi.setId(targetApi.getId());
             } else {
                 if (apiProvider.isAPIAvailable(importedApi.getId())
                         || apiProvider.isApiNameWithDifferentCaseExist(apiName)) {
