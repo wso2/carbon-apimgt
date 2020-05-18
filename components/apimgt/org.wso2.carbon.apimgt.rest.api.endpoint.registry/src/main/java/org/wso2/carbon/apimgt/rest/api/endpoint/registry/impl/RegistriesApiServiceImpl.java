@@ -37,10 +37,12 @@ import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.EndpointRegistry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.impl.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.impl.EndpointRegistryImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
+import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApiService;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -75,8 +77,9 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
 
     @Override
-    public Response getAllEntriesInRegistry(String registryId, String query, String sortBy, String sortOrder,
-                                            Integer limit, Integer offset, MessageContext messageContext) {
+    public Response getAllEntriesInRegistry(String registryId, String query, RegistriesApi.SortByEntryEnum sortByEntry,
+                    RegistriesApi.SortEntryEnum sortEntry, Integer limit, Integer offset,
+                                            MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         RegistryEntryArrayDTO registryEntryArray = new RegistryEntryArrayDTO();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
@@ -127,20 +130,21 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     }
 
     @Override
-    public Response getRegistries(String query, String sortBy, String sortOrder, Integer limit, Integer offset,
-                                  MessageContext messageContext) {
+    public Response getRegistries(String query, RegistriesApi.SortByRegistryEnum sortByRegistry, RegistriesApi
+            .SortOrderEnum sortOrder, Integer limit, Integer offset, MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         RegistryArrayDTO registryDTOList = new RegistryArrayDTO();
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DEFAULT_SORT_ORDER;
-        sortBy = EndpointRegistryMappingUtils.getRegistriesSortByField(sortBy);
+        String sortOrderStr = sortOrder != null ? sortOrder.toString() : RegistriesApi.SortOrderEnum.asc.toString();
+        String sortBy = sortByRegistry != null ? EndpointRegistryConstants.COLUMN_REG_NAME :
+                EndpointRegistryConstants.COLUMN_ID;
 
         try {
             List<EndpointRegistryInfo> endpointRegistryInfoList =
-                    registryProvider.getEndpointRegistries(sortBy, sortOrder, limit, offset, tenantDomain);
+                    registryProvider.getEndpointRegistries(sortBy, sortOrderStr, limit, offset, tenantDomain);
             for (EndpointRegistryInfo endpointRegistryInfo: endpointRegistryInfoList) {
                 registryDTOList.add(EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfo));
             }
