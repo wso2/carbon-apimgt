@@ -52,7 +52,6 @@ function Delete({ updateList, dataRow }) {
                     updateList();
                 });
         });
-
         return promiseAPICall;
     };
 
