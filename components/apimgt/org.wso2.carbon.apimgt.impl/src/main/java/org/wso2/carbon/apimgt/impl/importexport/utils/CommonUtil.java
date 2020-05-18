@@ -81,7 +81,7 @@ public class CommonUtil {
 
         String currentDirectory = System.getProperty(APIConstants.JAVA_IO_TMPDIR);
         String createdDirectories;
-        if (apiToReturn != null){
+        if (apiToReturn != null) {
             createdDirectories = File.separator + apiToReturn.getId().toString() + File.separator;
         } else {
             createdDirectories = File.separator + RandomStringUtils
