@@ -254,7 +254,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.DEFINITION_URL, " +
                     "   E.METADATA, " +
                     "   E.SERVICE_TYPE, " +
-                    "   E.SERVICE_URL " +
+                    "   E.SERVICE_URL," +
+                    "   E.SERVICE_CATEGORY " +
                     " FROM " +
                     "   ENDPOINT_REG_ENTRY AS E, " +
                     "   ENDPOINT_REG AS R " +
