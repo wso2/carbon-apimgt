@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-15T17:47:25.049+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-18T11:57:39.074+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -210,32 +210,38 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the Registry",required=true) @PathParam("registryId") String registryId
 
 
-, 
-@Parameter(description = "**Search condition**.  You can search for a registry entry by specifying the entry name as \"query\" attribute.  Eg. \"pizzaServer\" will match a registry entry if the name is exactly \"pizzaServer\". ")  @QueryParam("query") String query
+,             @Parameter(description = "**Search condition**.  You can search for a registry entry by specifying the entry name as \"query\" attribute.  Eg. \"pizzaServer\" will match a registry entry if the name is exactly \"pizzaServer\". ") 
+        @QueryParam("query") String query
 
 
-, 
-@Parameter(description = "",     schema=@Schema(allowableValues={ "definitionType", "serviceType" })
-)  @QueryParam("sortBy") String sortBy
+,             @Parameter(description = "",     schema=@Schema(allowableValues={ "definitionType", "serviceType" })
+) 
+        @QueryParam("sortByEntry") SortByEntryEnum sortByEntry
 
 
-, 
-@Parameter(description = "",     schema=@Schema(allowableValues={ "asc", "desc" })
-)  @QueryParam("sortOrder") String sortOrder
+,             @Parameter(description = "",     schema=@Schema(allowableValues={ "asc", "desc" })
+) 
+        @QueryParam("sortEntry") SortEntryEnum sortEntry
 
 
-, 
-@Parameter(description = "Maximum limit of items to return. ") @DefaultValue("25") @QueryParam("limit") Integer limit
+,             @Parameter(description = "Maximum limit of items to return. ") 
+            @DefaultValue("25")
+        @QueryParam("limit") Integer limit
 
 
-, 
-@Parameter(description = "Starting point within the complete list of items qualified. ") @DefaultValue("0") @QueryParam("offset") Integer offset
+,             @Parameter(description = "Starting point within the complete list of items qualified. ") 
+            @DefaultValue("0")
+        @QueryParam("offset") Integer offset
 
 
 ) throws APIManagementException{
-        return delegate.getAllEntriesInRegistry(registryId, query, sortBy, sortOrder, limit, offset, securityContext);
+        return delegate.getAllEntriesInRegistry(registryId, query, sortByEntry, sortEntry, limit, offset, securityContext);
         }
-    @GET
+    public enum SortByEntryEnum {
+    definitionType,serviceType;
+    }    public enum SortEntryEnum {
+    asc,desc;
+    }    @GET
     @Path("/{registryId}/entries/{entryId}/definition-file")
     
     @Produces({ "application/octet-stream", "application/json" })
@@ -286,32 +292,38 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
             content = @Content(
             schema = @Schema(implementation = RegistryArrayDTO.class)))
      })
-    public Response getRegistries(
-@Parameter(description = "**Search condition**. You can search for a registry by specifying the registry name as \"query\" attribute.  Eg. \"prodServer\" will match a registry entry if the name is exactly \"prodServer\". ")  @QueryParam("query") String query
+    public Response getRegistries(            @Parameter(description = "**Search condition**. You can search for a registry by specifying the registry name as \"query\" attribute.  Eg. \"prodServer\" will match a registry entry if the name is exactly \"prodServer\". ") 
+        @QueryParam("query") String query
 
 
-, 
-@Parameter(description = "",     schema=@Schema(allowableValues={ "registryName" })
-)  @QueryParam("sortBy") String sortBy
+,             @Parameter(description = "",     schema=@Schema(allowableValues={ "registryName" })
+) 
+        @QueryParam("sortByRegistry") SortByRegistryEnum sortByRegistry
 
 
-, 
-@Parameter(description = "",     schema=@Schema(allowableValues={ "asc", "desc" })
-)  @QueryParam("sortOrder") String sortOrder
+,             @Parameter(description = "",     schema=@Schema(allowableValues={ "asc", "desc" })
+) 
+        @QueryParam("sortOrder") SortOrderEnum sortOrder
 
 
-, 
-@Parameter(description = "Maximum limit of items to return. ") @DefaultValue("25") @QueryParam("limit") Integer limit
+,             @Parameter(description = "Maximum limit of items to return. ") 
+            @DefaultValue("25")
+        @QueryParam("limit") Integer limit
 
 
-, 
-@Parameter(description = "Starting point within the complete list of items qualified. ") @DefaultValue("0") @QueryParam("offset") Integer offset
+,             @Parameter(description = "Starting point within the complete list of items qualified. ") 
+            @DefaultValue("0")
+        @QueryParam("offset") Integer offset
 
 
 ) throws APIManagementException{
-        return delegate.getRegistries(query, sortBy, sortOrder, limit, offset, securityContext);
+        return delegate.getRegistries(query, sortByRegistry, sortOrder, limit, offset, securityContext);
         }
-    @GET
+    public enum SortByRegistryEnum {
+    registryName;
+    }    public enum SortOrderEnum {
+    asc,desc;
+    }    @GET
     @Path("/{registryId}")
     
     @Produces({ "application/json" })
