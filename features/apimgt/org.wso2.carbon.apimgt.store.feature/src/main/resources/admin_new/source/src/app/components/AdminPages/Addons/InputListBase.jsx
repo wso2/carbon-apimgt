@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import { createMuiTheme } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
@@ -76,7 +77,10 @@ const InputList = (props) => {
                                 color='primary'
                                 onClick={() => handleDelete(item.key)}
                             >
-                                    Remove
+                                <FormattedMessage
+                                    id='AdminPages.Addons.InputListBase.textfield.remove.label'
+                                    defaultMessage='Remove'
+                                />
                             </Button>
                         </Box>
                     </Grid>

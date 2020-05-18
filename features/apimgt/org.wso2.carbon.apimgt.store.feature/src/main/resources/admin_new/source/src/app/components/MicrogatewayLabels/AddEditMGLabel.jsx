@@ -188,7 +188,12 @@ function AddEditMGLabel(props) {
     return (
         <FormDialogBase
             title={title}
-            saveButtonText='Save'
+            saveButtonText={(
+                <FormattedMessage
+                    id='AdminPages.Microgateway.AddEdit.form.save.button.label'
+                    defaultMessage='Save'
+                />
+            )}
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
