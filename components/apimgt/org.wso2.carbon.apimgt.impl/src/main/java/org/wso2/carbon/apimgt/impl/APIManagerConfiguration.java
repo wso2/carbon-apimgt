@@ -81,6 +81,10 @@ public class APIManagerConfiguration {
     private static final String EMAIL_LOGIN = "EmailLogin";
     private static final String PRIMARY_LOGIN = "primary";
     private static final String CLAIM_URI = "ClaimUri";
+    private static final String TOKEN_REVOCATION_NOTIFIERS ="TokenRevocationNotifiers";
+    private static final String REALTIME_NOTIFIER = "RealtimeNotifier";
+    private static final String PERSISTENT_NOTIFIER = "PersistentNotifier";
+    private static final String TOKEN_REVOCATION_NOTIFIERS_PASSWORD = "TokenRevocationNotifiers.Notifier.Password";
     public static final  String RECEIVER_URL_PORT = "receiver.url.port";
     public static final String  AUTH_URL_PORT = "auth.url.port";
     public static final String  JMS_PORT = "jms.port";
@@ -228,9 +232,9 @@ public class APIManagerConfiguration {
             OMElement element = (OMElement) childElements.next();
             String localName = element.getLocalName();
             nameStack.push(localName);
-            if ("TokenRevocationNotifiers".equals(localName)) {
+            if (TOKEN_REVOCATION_NOTIFIERS.equals(localName)) {
                 tokenRevocationClassName = element.getAttributeValue(new QName("class"));
-            } else if ("RealtimeNotifier".equals(localName)) {
+            } else if (REALTIME_NOTIFIER.equals(localName)) {
                 Iterator revocationPropertiesIterator = element.getChildrenWithLocalName("Property");
                 Properties properties = new Properties();
                 while (revocationPropertiesIterator.hasNext()) {
@@ -239,7 +243,7 @@ public class APIManagerConfiguration {
                             propertyElem.getText());
                 }
                 realtimeNotifierProperties = properties;
-            } else if ("PersistentNotifier".equals(localName)) {
+            } else if (PERSISTENT_NOTIFIER.equals(localName)) {
                 Iterator revocationPropertiesIterator = element.getChildrenWithLocalName("Property");
                 Properties properties = new Properties();
                 while (revocationPropertiesIterator.hasNext()) {
@@ -247,10 +251,10 @@ public class APIManagerConfiguration {
                     if (propertyElem.getAttributeValue(new QName("name")).
                             equalsIgnoreCase("password")) {
                         if (secretResolver.isInitialized() && secretResolver
-                                .isTokenProtected("TokenRevocationNotifiers.Notifier.Password")) {
+                                .isTokenProtected(TOKEN_REVOCATION_NOTIFIERS_PASSWORD)) {
                             properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
                                     secretResolver.
-                                            resolve("TokenRevocationNotifiers.Notifier.Password"));
+                                            resolve(TOKEN_REVOCATION_NOTIFIERS_PASSWORD));
                         } else {
                             properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
                                     propertyElem.getText());
@@ -1125,7 +1129,7 @@ public class APIManagerConfiguration {
                                         .getText()));
                     } else {
                         String serviceUrl = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
-                                System.getProperty(APIConstants.KEYMANAGER_PORT) + "/throttle/data/v1";
+                                System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.UTILITY_WEB_APP_EP;
                         blockConditionRetrieverConfiguration.setServiceUrl(serviceUrl);
                     }
 

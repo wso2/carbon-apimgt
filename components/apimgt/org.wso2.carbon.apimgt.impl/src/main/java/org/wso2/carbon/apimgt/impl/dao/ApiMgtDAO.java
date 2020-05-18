@@ -49,6 +49,8 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
+import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -56,6 +58,7 @@ import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -81,6 +84,7 @@ import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
@@ -116,7 +120,14 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -4660,17 +4671,17 @@ public class ApiMgtDAO {
             } else {
                 if (forceCaseInsensitiveComparisons) {
                     sqlQuery = SQLConstantManagerFactory.
-                            getSQlString("GET_APPLICATIONS_PREFIX_CASESENSITVE_WITHGROUPID");
+                            getSQlString("GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITHGROUPID");
                 } else {
                     sqlQuery = SQLConstantManagerFactory.
-                            getSQlString("GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITHGROUPID");
+                            getSQlString("GET_APPLICATIONS_PREFIX_CASESENSITVE_WITHGROUPID");
                 }
             }
         } else {
             if (forceCaseInsensitiveComparisons) {
-                sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_CASESENSITVE");
-            } else {
                 sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE");
+            } else {
+                sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_CASESENSITVE");
             }
         }
 
@@ -9872,7 +9883,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, contextTemplate);
+            ps.setString(1, contextTemplate.toLowerCase());
 
             resultSet = ps.executeQuery();
             if (resultSet.next()) {
@@ -10410,6 +10421,17 @@ public class ApiMgtDAO {
             policyStatement.executeUpdate();
 
             conn.commit();
+        } catch (SQLIntegrityConstraintViolationException e){
+            boolean isAppPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_APP, policy.getTenantId(),
+                    policy.getPolicyName());
+
+            if (isAppPolicyExists) {
+                log.warn(
+                        "Application Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                                + " is already persisted");
+            } else {
+                handleException("Failed to add Application Policy: " + policy, e);
+            }
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -10420,7 +10442,17 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the add Application Policy: " + policy.toString(), ex);
                 }
             }
-            handleException("Failed to add Application Policy: " + policy, e);
+            if (StringUtils.containsIgnoreCase(e.getMessage(), "Violation of UNIQUE KEY constraint")) {
+                boolean isAppPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_APP, policy.getTenantId(),
+                        policy.getPolicyName());
+
+                if (isAppPolicyExists) {
+                    log.warn("Application Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                            + " is already persisted");
+                }
+            } else {
+                handleException("Failed to add Application Policy: " + policy, e);
+            }
         } finally {
             APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
         }
@@ -10471,6 +10503,17 @@ public class ApiMgtDAO {
             policyStatement.executeUpdate();
 
             conn.commit();
+        } catch (SQLIntegrityConstraintViolationException e) {
+            boolean isSubscriptionPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_SUB, policy.getTenantId(),
+                    policy.getPolicyName());
+
+            if (isSubscriptionPolicyExists) {
+                log.warn(
+                        "Subscription Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                                + " is already persisted");
+            } else {
+                handleException("Failed to add Subscription Policy: " + policy, e);
+            }
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -10481,7 +10524,17 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the add Subscription Policy: " + policy.toString(), ex);
                 }
             }
-            handleException("Failed to add Subscription Policy: " + policy, e);
+            if (StringUtils.containsIgnoreCase(e.getMessage(), "Violation of UNIQUE KEY constraint")) {
+                boolean isSubscriptionPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_SUB, policy.getTenantId(),
+                        policy.getPolicyName());
+
+                if (isSubscriptionPolicyExists) {
+                    log.warn("Subscription Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                            + " is already persisted");
+                }
+            } else {
+                handleException("Failed to add Subscription Policy: " + policy, e);
+            }
         } finally {
             APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
         }
@@ -10502,6 +10555,17 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             addAPIPolicy(policy, connection);
             connection.commit();
+        } catch (SQLIntegrityConstraintViolationException e) {
+            boolean isAPIPolicyExists = isPolicyExist(connection, PolicyConstants.POLICY_LEVEL_API, policy.getTenantId(),
+                    policy.getPolicyName());
+
+            if (isAPIPolicyExists) {
+                log.warn(
+                        "API Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                                + " is already persisted");
+            } else {
+                handleException("Failed to add API Policy: " + policy, e);
+            }
         } catch (SQLException e) {
             if (connection != null) {
                 try {
@@ -10512,7 +10576,17 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the add Api Policy: " + policy.toString(), ex);
                 }
             }
-            handleException("Failed to add Api Policy: " + policy, e);
+            if (StringUtils.containsIgnoreCase(e.getMessage(), "Violation of UNIQUE KEY constraint")) {
+                boolean isAPIPolicyExists = isPolicyExist(connection, PolicyConstants.POLICY_LEVEL_API, policy.getTenantId(),
+                        policy.getPolicyName());
+
+                if (isAPIPolicyExists) {
+                    log.warn("API Policy " + policy.getPolicyName() + " in tenant domain " + policy.getTenantId()
+                            + " is already persisted");
+                }
+            } else {
+                handleException("Failed to add Api Policy: " + policy, e);
+            }
         } finally {
             APIMgtDBUtil.closeAllConnections(null, connection, null);
         }
@@ -12292,7 +12366,16 @@ public class ApiMgtDAO {
     }
 
     public boolean isPolicyExist(String policyType, int tenantId, String policyName) throws APIManagementException {
-        Connection connection = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();) {
+            return isPolicyExist(connection, policyType, tenantId, policyName);
+        } catch (SQLException e) {
+            handleException("Error while checking policy existence " + policyName + "-" + tenantId, e);
+        }
+        return false;
+    }
+
+    public boolean isPolicyExist(Connection connection, String policyType, int tenantId, String policyName)
+            throws APIManagementException {
         PreparedStatement isExistStatement = null;
 
         boolean isExist = false;
@@ -12307,8 +12390,8 @@ public class ApiMgtDAO {
             policyTable = PolicyConstants.POLICY_SUBSCRIPTION_TABLE;
         }
         try {
-            String query = "SELECT " + PolicyConstants.POLICY_ID + " FROM " + policyTable + " WHERE TENANT_ID =? AND NAME = ? ";
-            connection = APIMgtDBUtil.getConnection();
+            String query = "SELECT " + PolicyConstants.POLICY_ID + " FROM " + policyTable
+                    + " WHERE TENANT_ID =? AND NAME = ? ";
             connection.setAutoCommit(true);
             isExistStatement = connection.prepareStatement(query);
             isExistStatement.setInt(1, tenantId);
@@ -14659,6 +14742,364 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return list;
+    }
+
+    /**
+     * Add a new endpoint registry
+     *
+     * @param endpointRegistry EndpointRegistryInfo
+     * @param tenantID         ID of the owner's tenant
+     * @return registryId
+     */
+    public String addEndpointRegistry(EndpointRegistryInfo endpointRegistry, int tenantID) throws APIManagementException {
+        String query = SQLConstants.ADD_ENDPOINT_REGISTRY_SQL;
+        String uuid = UUID.randomUUID().toString();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            ps.setString(1, uuid);
+            ps.setString(2, endpointRegistry.getName());
+            ps.setString(3, endpointRegistry.getType());
+            ps.setString(4, endpointRegistry.getMode());
+            ps.setInt(5, tenantID);
+            ps.setString(6, endpointRegistry.getOwner());
+            // Need to update the role names
+            ps.setString(7, "");
+            ps.setString(8, "");
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding new endpoint registry: " + endpointRegistry.getName(), e);
+        }
+        return uuid;
+    }
+
+    /**
+     * Update an existing endpoint registry.
+     *
+     * @param registryId       uuid of the endpoint registry
+     * @param endpointRegistry EndpointRegistryInfo object with updated details
+     * @throws APIManagementException if unable to update the endpoint registry
+     */
+    public void updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistry) throws
+            APIManagementException {
+
+        String query = SQLConstants.UPDATE_ENDPOINT_REGISTRY_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            ps.setString(1, endpointRegistry.getName());
+            ps.setString(2, endpointRegistry.getType());
+            ps.setString(3, endpointRegistry.getMode());
+            // Need to update the role names
+            ps.setString(4, "");
+            ps.setString(5, "");
+            ps.setString(6, registryId);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while updating endpoint registry: " + endpointRegistry.getName(), e);
+        }
+        return;
+    }
+
+    /**
+     * Return the details of an Endpoint Registry
+     *
+     * @param registryId Endpoint Registry Identifier
+     * @param tenantID   ID of the owner's tenant
+     * @return Endpoint Registry Object
+     * @throws APIManagementException
+     */
+    public EndpointRegistryInfo getEndpointRegistryByUUID(String registryId, int tenantID)
+            throws APIManagementException {
+        String query = SQLConstants.GET_ENDPOINT_REGISTRY_BY_UUID;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, registryId);
+            ps.setInt(2, tenantID);
+            ps.executeQuery();
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    EndpointRegistryInfo endpointRegistry = new EndpointRegistryInfo();
+                    endpointRegistry.setUuid(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
+                    endpointRegistry.setName(rs.getString(EndpointRegistryConstants.COLUMN_REG_NAME));
+                    endpointRegistry.setType(rs.getString(EndpointRegistryConstants.COLUMN_REG_TYPE));
+                    endpointRegistry.setMode(rs.getString(EndpointRegistryConstants.COLUMN_REG_MODE));
+                    endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_REG_OWNER));
+                    endpointRegistry.setRegistryId(rs.getInt(EndpointRegistryConstants.COLUMN_ID));
+                    return endpointRegistry;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving details of endpoint registry with Id: "
+                    + registryId, e);
+        }
+        return null;
+    }
+
+    /**
+     * Deletes an Endpoint Registry
+     *
+     * @param registryUUID Registry Identifier(UUID)
+     * @throws APIManagementException if failed to delete the Endpoint Registry
+     */
+    public void deleteEndpointRegistry(String registryUUID) throws APIManagementException {
+        String deleteRegQuery = SQLConstants.DELETE_ENDPOINT_REGISTRY_SQL;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statementDeleteRegistry = connection.prepareStatement(deleteRegQuery)
+             ) {
+            connection.setAutoCommit(false);
+            statementDeleteRegistry.setString(1, registryUUID);
+            statementDeleteRegistry.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Failed to delete Endpoint Registry with the id: " + registryUUID, e);
+        }
+    }
+
+    /**
+     * Checks whether the given endpoint registry name is already available under given tenant domain
+     *
+     * @param registryName
+     * @param tenantID
+     * @return boolean
+     */
+    public boolean isEndpointRegistryNameExists(String registryName, int tenantID) throws APIManagementException {
+        String sql = SQLConstants.IS_ENDPOINT_REGISTRY_NAME_EXISTS;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, registryName);
+            statement.setInt(2, tenantID);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt("ENDPOINT_REGISTRY_COUNT");
+                if (count > 0) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check the existence of Endpoint Registry: " + registryName, e);
+        }
+        return false;
+    }
+
+    /**
+     * Returns details of all Endpoint Registries belong to a given tenant
+     *
+     * @param sortBy    Name of the sorting field
+     * @param sortOrder Order of sorting (asc or desc)
+     * @param limit     Limit
+     * @param offset    Offset
+     * @param tenantID
+     * @return A list of EndpointRegistryInfo objects
+     * @throws APIManagementException if failed to get details of Endpoint Registries
+     */
+    public List<EndpointRegistryInfo> getEndpointRegistries(String sortBy, String sortOrder, int limit, int offset,
+                                                            int tenantID) throws APIManagementException {
+
+        List<EndpointRegistryInfo> endpointRegistryInfoList = new ArrayList<>();
+
+        String query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENDPOINT_REGISTRIES_OF_TENANT");
+        query = query.replace("$1", sortBy);
+        query = query.replace("$2", sortOrder);
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, tenantID);
+            ps.setInt(2, offset);
+            ps.setInt(3, limit);
+            ps.executeQuery();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    EndpointRegistryInfo endpointRegistry = new EndpointRegistryInfo();
+                    endpointRegistry.setUuid(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
+                    endpointRegistry.setName(rs.getString(EndpointRegistryConstants.COLUMN_REG_NAME));
+                    endpointRegistry.setType(rs.getString(EndpointRegistryConstants.COLUMN_REG_TYPE));
+                    endpointRegistry.setMode(rs.getString(EndpointRegistryConstants.COLUMN_REG_MODE));
+                    endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_REG_OWNER));
+                    endpointRegistryInfoList.add(endpointRegistry);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving details of endpoint registries", e);
+        }
+        return endpointRegistryInfoList;
+    }
+
+    /**
+     * Returns the details of an endpoint registry entry.
+     *
+     * @param registryEntryUuid endpoint registry entry identifier.
+     * @return EndpointRegistryEntry object.
+     * @throws APIManagementException
+     */
+    public EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryEntryUuid) throws APIManagementException
+    {
+
+        String query = SQLConstants.GET_ENDPOINT_REGISTRY_ENTRY_BY_UUID;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, registryEntryUuid);
+            ps.executeQuery();
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
+                    endpointRegistryEntry.setEntryId(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
+                    endpointRegistryEntry.setName(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_NAME));
+                    endpointRegistryEntry.setDefinitionType(
+                            rs.getString(EndpointRegistryConstants.COLUMN_DEFINITION_TYPE));
+                    endpointRegistryEntry.setDefinitionURL(
+                            rs.getString(EndpointRegistryConstants.COLUMN_DEFINITION_URL));
+                    endpointRegistryEntry.setServiceType(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_TYPE));
+                    endpointRegistryEntry.setServiceURL(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_URL));
+                    endpointRegistryEntry.setMetaData(rs.getString(EndpointRegistryConstants.COLUMN_METADATA));
+                    endpointRegistryEntry.setEndpointDefinition(
+                            rs.getBinaryStream(EndpointRegistryConstants.COLUMN_ENDPOINT_DEFINITION));
+                    return endpointRegistryEntry;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving details of endpoint registry with Id: "
+                    + registryEntryUuid, e);
+        }
+        return null;
+
+    }
+
+    /**
+     * Returns all entries belong to a given endpoint registry
+     *
+     * @param registryId UUID of the endpoint registry
+     * @return A list of EndpointRegistryEntry objects
+     * @throws APIManagementException if failed to get entries of an Endpoint Registry
+     */
+    public List<EndpointRegistryEntry> getEndpointRegistryEntries(String registryId) throws APIManagementException {
+        List<EndpointRegistryEntry> endpointRegistryEntryList = new ArrayList<>();
+        String query = SQLConstants.GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, registryId);
+            ps.executeQuery();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
+                    endpointRegistryEntry.setEntryId(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
+                    endpointRegistryEntry.setName(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_NAME));
+                    endpointRegistryEntry.setServiceURL(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_URL));
+                    endpointRegistryEntry.setDefinitionType(rs.getString(EndpointRegistryConstants.COLUMN_DEFINITION_TYPE));
+                    endpointRegistryEntry.setDefinitionURL(rs.getString(EndpointRegistryConstants.COLUMN_DEFINITION_URL));
+                    endpointRegistryEntry.setServiceType(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_TYPE));
+                    endpointRegistryEntry.setMetaData(rs.getString(EndpointRegistryConstants.COLUMN_METADATA));
+                    endpointRegistryEntryList.add(endpointRegistryEntry);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving entries of endpoint registry", e);
+        }
+        return endpointRegistryEntryList;
+    }
+
+    /**
+     * Add a new endpoint registry entry
+     *
+     * @param registryEntry EndpointRegistryEntry
+     * @return registryId
+     */
+    public String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException {
+        String query = SQLConstants.ADD_ENDPOINT_REGISTRY_ENTRY_SQL;
+        String uuid = UUID.randomUUID().toString();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            ps.setString(1, uuid);
+            ps.setString(2, registryEntry.getName());
+            ps.setString(3, registryEntry.getServiceURL());
+            ps.setString(4, registryEntry.getDefinitionType());
+            ps.setString(5, registryEntry.getDefinitionURL());
+            ps.setString(6, registryEntry.getMetaData());
+            ps.setString(7, registryEntry.getServiceType());
+            ps.setBlob(8, registryEntry.getEndpointDefinition());
+            ps.setInt(9, registryEntry.getRegistryId());
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding new endpoint registry entry: " + registryEntry.getName(), e);
+        }
+        return uuid;
+    }
+
+    /**
+     * Updates Registry Entry
+     *
+     * @param registryEntry EndpointRegistryEntry
+     * @throws APIManagementException if failed to update EndpointRegistryEntry
+     */
+    public void updateEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException {
+        String query = SQLConstants.UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            ps.setString(1, registryEntry.getName());
+            ps.setString(2, registryEntry.getServiceURL());
+            ps.setString(3, registryEntry.getDefinitionType());
+            ps.setString(4, registryEntry.getDefinitionURL());
+            ps.setString(5, registryEntry.getMetaData());
+            ps.setString(6, registryEntry.getServiceType());
+            ps.setBlob(7, registryEntry.getEndpointDefinition());
+            ps.setString(8, registryEntry.getEntryId());
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while updating endpoint registry entry with id: " + registryEntry.getEntryId(), e);
+        }
+    }
+
+    /**
+     * Deletes an Endpoint Registry Entry
+     *
+     * @param entryId Registry Entry Identifier(UUID)
+     * @throws APIManagementException if failed to delete the Endpoint Registry Entry
+     */
+    public void deleteEndpointRegistryEntry(String entryId) throws APIManagementException {
+        String query = SQLConstants.DELETE_ENDPOINT_REGISTRY_ENTRY_SQL;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)
+        ) {
+            connection.setAutoCommit(false);
+            statement.setString(1, entryId);
+            statement.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Failed to delete Endpoint Registry Entry with the id: " + entryId, e);
+        }
+    }
+
+    /**
+     * Checks whether the given endpoint registry entry name is already available under given registry
+     *
+     * @param registryEntry
+     * @return boolean
+     */
+    public boolean isRegistryEntryNameExists(EndpointRegistryEntry registryEntry) throws APIManagementException {
+        String sql = SQLConstants.IS_ENDPOINT_REGISTRY_ENTRY_NAME_EXISTS;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, registryEntry.getName());
+            statement.setInt(2, registryEntry.getRegistryId());
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt("REGISTRY_ENTRY_COUNT");
+                if (count > 0) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check the existence of Registry Entry: " + registryEntry.getName(), e);
+        }
+        return false;
     }
 
     /**

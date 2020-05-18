@@ -50,6 +50,7 @@ const styles = (theme) => ({
         color: theme.palette.text.secondary,
         minHeight: 400 + theme.spacing(4),
         height: '100%',
+        background: theme.custom.apiDetailPages.documentBackground,
     },
     contentWrapper: {
         paddingLeft: theme.spacing(3),
@@ -78,6 +79,9 @@ const styles = (theme) => ({
         paddingTop: 0,
         marginTop: 0,
         paddingBottom: 0,
+        '& .material-icons': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
@@ -88,6 +92,7 @@ const styles = (theme) => ({
         marginLeft: theme.spacing(2),
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
+        color: theme.palette.getContrastText(theme.palette.background.default),
     },
     generateCredentialWrapper: {
         marginLeft: 0,
@@ -121,9 +126,11 @@ const styles = (theme) => ({
         position: 'relative',
         background: '#fff9',
         paddingLeft: 20,
+        background: theme.custom.apiDetailPages.documentBackground,
     },
     docsWrapper: {
         margin: 0,
+        background: theme.custom.apiDetailPages.documentBackground,
     },
     docContainer: {
         display: 'flex',
@@ -191,7 +198,7 @@ function DocList(props) {
             <div className={classes.docContainer}>
                 {showDocList && (
                     <div className={classes.docListWrapper}>
-                        <Paper className={classes.paperMenu}>
+                        <div className={classes.paperMenu}>
                             <List component='nav' className={classes.listRoot}>
                                 {documentList.map((type, indexA) => (
                                     <React.Fragment key={indexA}>
@@ -243,7 +250,7 @@ function DocList(props) {
                                     </React.Fragment>
                                 ))}
                             </List>
-                        </Paper>
+                        </div>
                     </div>
                 )}
                 <div className={classes.toggleWrapper}>

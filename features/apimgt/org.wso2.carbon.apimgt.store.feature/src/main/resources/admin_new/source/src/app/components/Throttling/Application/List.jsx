@@ -221,7 +221,7 @@ export default function ListApplicationThrottlingPolicies() {
             apiCall={apiCall}
             editComponentProps={{
                 icon: <EditIcon />,
-                title: 'Edit Application Policies',
+                title: 'Edit Application Policy',
             }}
             DeleteComponent={Delete}
             EditComponent={AddEdit}

@@ -42,8 +42,9 @@ const styles = theme => ({
     },
     tableRow: {
         height: theme.spacing(5),
-        borderLeft: 'solid 1px #fff',
-        borderRight: 'solid 1px #fff',
+        '& td': {
+            padding: theme.spacing(0.5),
+        }
     },
 });
 const StyledTableCell = withStyles(theme => ({

@@ -225,7 +225,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 if (requestMap.containsKey(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT)) {
                     req.headers().add(HttpHeaders.AUTHORIZATION, APIConstants.CONSUMER_KEY_SEGMENT + ' '
                                     + requestMap.get(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT).get(0));
-                    requestMap.remove(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT);
+                    removeTokenFromQuery(requestMap);
                 } else {
                     log.error("No Authorization Header or access_token query parameter present");
                     return false;
@@ -494,5 +494,18 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             // flow should not break if event publishing failed
             log.error("Cannot publish event. " + e.getMessage(), e);
         }
+    }
+
+    private void removeTokenFromQuery(Map<String, List<String>> parameters) {
+        StringBuilder queryBuilder = new StringBuilder(uri.substring(0, uri.indexOf('?') + 1));
+
+        for (Map.Entry<String, List<String>> entry : parameters.entrySet()) {
+            if (!APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT.equals(entry.getKey())) {
+                queryBuilder.append(entry.getKey()).append('=').append(entry.getValue().get(0)).append('&');
+            }
+        }
+
+        // remove trailing '?' or '&' from the built string
+        uri = queryBuilder.substring(0, queryBuilder.length() - 1);
     }
 }

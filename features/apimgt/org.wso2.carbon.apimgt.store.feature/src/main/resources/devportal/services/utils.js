@@ -28,6 +28,14 @@ var getLoopbackOrigin = function() {
     return origin;
 };
 
+function getIDPOrigin(){
+    return utils.getExternalIDPOrigin();
+}
+
+function getIDPCheckSessionEndpoint(){
+    return utils.getExternalIDPCheckSessionEndpoint();
+}
+
 var getTenantBaseStoreContext = function() {
     var tenantDomain = getTenantDomain();
     var tenantContext = utils.getTenantBasedDevPortalContext(tenantDomain);

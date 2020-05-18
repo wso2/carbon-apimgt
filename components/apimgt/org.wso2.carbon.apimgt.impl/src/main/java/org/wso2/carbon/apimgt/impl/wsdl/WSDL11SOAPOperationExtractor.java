@@ -102,6 +102,7 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
     private List primitiveTypeList = Arrays.asList(primitiveTypes);
     private boolean canProcess = false;
 
+    private static final String XPATH_REPLACEMENT = "&sub;";
     private static final String JAVAX_WSDL_VERBOSE_MODE = "javax.wsdl.verbose";
     private static final String JAVAX_WSDL_IMPORT_DOCUMENTS = "javax.wsdl.importDocuments";
 
@@ -457,7 +458,7 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
             if (log.isDebugEnabled()) {
                 log.debug("Processing current document node: " + getNodeName(current) + " with the xPath:" + xPath);
             }
-            String[] elements = xPath.split("\\.");
+            String[] elements = xPath.split(XPATH_REPLACEMENT);
             if (getNodeName(current).equals(elements[elements.length - 1]) || getNodeName(current)
                     .equals(elements[elements.length - 1].substring(elements[elements.length - 1].indexOf(":") + 1))
                     || type.equals(SOAPToRESTConstants.RESTRICTION_ATTR)) {
@@ -685,9 +686,9 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
 
         if (node.getParentNode() != null) {
             String xPath = getXPath(node);
-            xPath = xPath.replaceAll("/+", ".");
-            if (xPath.startsWith(".")) {
-                xPath = xPath.substring(1);
+            xPath = xPath.replaceAll("/+", XPATH_REPLACEMENT);
+            if (xPath.startsWith(XPATH_REPLACEMENT)) {
+                xPath = xPath.substring(XPATH_REPLACEMENT.length());
                 return xPath;
             }
         }

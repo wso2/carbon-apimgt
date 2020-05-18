@@ -79,6 +79,7 @@ const styles = (theme) => ({
         marginLeft: theme.spacing(3),
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
+        color: theme.palette.getContrastText(theme.palette.background.default),
     },
     generateCredentialWrapper: {
         marginLeft: 0,

@@ -2705,6 +2705,8 @@ paths:
         Retreive store settings
       tags:
         - Settings
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -4866,6 +4868,14 @@ definitions:
       IsUnlimitedTierPaid:
         type: boolean
         default: false
+      identityProvider:
+        properties:
+          external:
+            type: boolean
+            default: false
+      IsAnonymousModeEnabled:
+        type: boolean
+        default: true
 #-----------------------------------------------------
 # The Application Attribute resource
 #-----------------------------------------------------

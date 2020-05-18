@@ -66,7 +66,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Settings returned ", response = SettingsDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Settings does not exist. ", response = ErrorDTO.class) })
-    public Response settingsGet() throws APIManagementException{
-        return delegate.settingsGet(securityContext);
+    public Response settingsGet(@ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.settingsGet(xWSO2Tenant, securityContext);
     }
 }

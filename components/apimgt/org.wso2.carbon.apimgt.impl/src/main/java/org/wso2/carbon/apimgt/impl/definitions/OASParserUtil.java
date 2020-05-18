@@ -713,7 +713,7 @@ public class OASParserUtil {
      */
     public static void updateValidationResponseAsSuccess(APIDefinitionValidationResponse validationResponse,
             String originalAPIDefinition, String openAPIVersion, String title, String version, String context,
-            String description) {
+            String description, List<String> endpoints) {
         validationResponse.setValid(true);
         validationResponse.setContent(originalAPIDefinition);
         APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
@@ -722,6 +722,7 @@ public class OASParserUtil {
         info.setVersion(version);
         info.setContext(context);
         info.setDescription(description);
+        info.setEndpoints(endpoints);
         validationResponse.setInfo(info);
     }
 
@@ -1210,5 +1211,19 @@ public class OASParserUtil {
         List<Scope> scopesSortedlist = new ArrayList<>(scopeSet);
         scopesSortedlist.sort(Comparator.comparing(Scope::getName));
         return new LinkedHashSet<>(scopesSortedlist);
+    }
+
+    /**
+     * Preprocessing of scopes schemes to support multiple schemes other than 'default' type
+     * This method will change the given definition
+     *
+     * @param swaggerContent
+     * @return processedSwaggerContent
+     */
+    public static String preProcess(String swaggerContent) throws APIManagementException {
+        //Load required properties from swagger to the API
+        APIDefinition apiDefinition = getOASParser(swaggerContent);
+        String swaggerContentUpdated = apiDefinition.processOtherSchemeScopes(swaggerContent);
+        return swaggerContentUpdated;
     }
 }

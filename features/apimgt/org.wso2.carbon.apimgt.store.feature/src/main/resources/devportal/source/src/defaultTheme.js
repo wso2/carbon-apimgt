@@ -86,6 +86,7 @@ const DefaultConfigurations = {
         overview: {
             titleIconColor: '#89b4ff',
             titleIconSize: 16,
+            noContentBackground: 'rgba(255, 255, 255, 0.2)',
         },
         adminRole: 'admin',
         commentsLimit: 5,
@@ -246,6 +247,10 @@ const DefaultConfigurations = {
             showDocuments: true,
             showSdks: true,
             onlyShowSdks: [], // You can put an array of strings to enable only a given set of sdks. Leave empty to show all. ex: ['java','javascript']
+            sdkBackground: '#ffffff',
+            swaggerUIBackground: '#efefef',
+            documentBackground: '#efefef',
+            tokenTextBoxBackground: '#efefef',
         },
         banner: {
             active: false, // make it true to display a banner image
@@ -261,9 +266,11 @@ const DefaultConfigurations = {
         },
         footer: {
             active: true,
+            footerHTML: '',
             text: '', // Leave empty to show the default WSO2 Text. Provide custom text to display your own thing.
             background: '#000',
             color: '#fff',
+            height: 50,
         },
         title: {
             prefix: '[Devportal]',
@@ -304,6 +311,9 @@ const DefaultConfigurations = {
             showFlag: true,
             showText: true,
             minWidth: 60, // Width of the language switcher in pixles
+        },
+        info: {
+            color: '#64b5f6',    
         },
     },
 };

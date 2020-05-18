@@ -859,10 +859,14 @@ public interface APIConsumer extends APIManager {
      * @param application          The Application Object that represents the Application.
      * @param userName             Username of the user requesting the api key.
      * @param validityPeriod       Requested validity period for the api key.
+     * @param permittedIP          Permitted IP addresses for the api key.
+     * @param permittedReferer     Permitted referrers for the api key.
      * @return Generated api key.
      * @throws APIManagementException
      */
-    String generateApiKey(Application application, String userName, long validityPeriod) throws APIManagementException;
+    String generateApiKey(Application application, String userName, long validityPeriod, String permittedIP,
+                          String permittedReferer)
+            throws APIManagementException;
 
     /**
      * Regenerate new consumer secret.
@@ -1016,4 +1020,12 @@ public interface APIConsumer extends APIManager {
      *
      */
     String getRequestedTenant();
+
+    /**
+     * Checks whether the DevPortal Anonymous Mode is enabled.
+     *
+     * @param tenantDomain       tenant domain
+     * @throws APIManagementException if an error occurs while reading configs
+     */
+    boolean isDevPortalAnonymousEnabled(String tenantDomain) throws APIManagementException;
 }

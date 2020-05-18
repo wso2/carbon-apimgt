@@ -339,7 +339,21 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     } else {
                         validityPeriod = -1;
                     }
-                    String apiKey = apiConsumer.generateApiKey(application, userName, (long) validityPeriod);
+
+                    String restrictedIP = null;
+                    String restrictedReferer = null;
+
+                    if (body.getAdditionalProperties() != null) {
+                        Map additionalProperties = (HashMap) body.getAdditionalProperties();
+                        if (additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_IP) != null) {
+                            restrictedIP = (String) additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_IP);
+                        }
+                        if (additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_REFERER) != null) {
+                            restrictedReferer = (String) additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
+                        }
+                    }
+                    String apiKey = apiConsumer.generateApiKey(application, userName, (long) validityPeriod,
+                            restrictedIP, restrictedReferer);
                     APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKey, validityPeriod);
                     return Response.ok().entity(apiKeyDto).build();
                 }

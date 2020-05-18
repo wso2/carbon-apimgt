@@ -1406,6 +1406,58 @@ public class SQLConstants {
             " GROUP BY " +
             "   API_ID ";
 
+    public static final String ADD_ENDPOINT_REGISTRY_SQL =
+            "INSERT INTO ENDPOINT_REG (UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, REG_OWNER, READ_ROLE," +
+                    " WRITE_ROLE) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+    public static final String UPDATE_ENDPOINT_REGISTRY_SQL =
+            "UPDATE ENDPOINT_REG " +
+                    "SET REG_NAME = ?, " +
+                    "REG_TYPE = ?, " +
+                    "REG_MODE = ?, " +
+                    "READ_ROLE = ? ," +
+                    "WRITE_ROLE = ? " +
+                    "WHERE UUID = ?";
+
+    public static final String DELETE_ENDPOINT_REGISTRY_SQL = "DELETE FROM ENDPOINT_REG WHERE UUID = ?";
+
+    public static final String GET_ENDPOINT_REGISTRY_BY_UUID =
+            " SELECT UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, REG_OWNER, READ_ROLE, WRITE_ROLE, ID FROM " +
+                    "ENDPOINT_REG WHERE UUID = ? AND TENANT_ID = ?";
+
+    public static final String GET_ENDPOINT_REGISTRY_ENTRY_BY_UUID =
+            " SELECT UUID, ENTRY_NAME, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, SERVICE_URL, " +
+                    "ENDPOINT_DEFINITION, METADATA FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
+
+    public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY =
+            "SELECT E.UUID, E.ENTRY_NAME, E.DEFINITION_TYPE, E.DEFINITION_URL, E.METADATA, " +
+                    "E.SERVICE_TYPE, E.SERVICE_URL " +
+                    "FROM ENDPOINT_REG_ENTRY AS E, ENDPOINT_REG AS R " +
+                    "WHERE E.REG_ID=R.ID AND R.UUID=?";
+
+    public static final String ADD_ENDPOINT_REGISTRY_ENTRY_SQL =
+            "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, METADATA," +
+                    "SERVICE_TYPE, ENDPOINT_DEFINITION, REG_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    public static final String UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL =
+            "UPDATE ENDPOINT_REG_ENTRY SET " +
+                    "ENTRY_NAME = ?, " +
+                    "SERVICE_URL = ?, " +
+                    "DEFINITION_TYPE = ?, " +
+                    "DEFINITION_URL = ?, " +
+                    "METADATA = ?, " +
+                    "SERVICE_TYPE = ?, " +
+                    "ENDPOINT_DEFINITION = ? " +
+                    "WHERE UUID = ?";
+
+    public static final String DELETE_ENDPOINT_REGISTRY_ENTRY_SQL = "DELETE FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
+
+    public static final String IS_ENDPOINT_REGISTRY_NAME_EXISTS = "SELECT COUNT(UUID) AS ENDPOINT_REGISTRY_COUNT" +
+            " FROM ENDPOINT_REG WHERE LOWER(REG_NAME) = LOWER(?) AND TENANT_ID = ?";
+
+    public static final String IS_ENDPOINT_REGISTRY_ENTRY_NAME_EXISTS = "SELECT COUNT(UUID) AS REGISTRY_ENTRY_COUNT" +
+            " FROM ENDPOINT_REG_ENTRY WHERE LOWER(ENTRY_NAME) = LOWER(?) AND REG_ID = ?";
+
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
             "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME, " +
@@ -2643,7 +2695,7 @@ public class SQLConstants {
             "   AND IDN.tenant_id = ?";
 
     public static final String GET_CONTEXT_TEMPLATE_COUNT_SQL =
-            "SELECT COUNT(CONTEXT_TEMPLATE) AS CTX_COUNT FROM AM_API WHERE CONTEXT_TEMPLATE = ?";
+            "SELECT COUNT(CONTEXT_TEMPLATE) AS CTX_COUNT FROM AM_API WHERE LOWER(CONTEXT_TEMPLATE) = ?";
 
     public static final String GET_API_NAMES_MATCHES_CONTEXT=
             "SELECT DISTINCT API_NAME FROM AM_API WHERE CONTEXT_TEMPLATE = ?";

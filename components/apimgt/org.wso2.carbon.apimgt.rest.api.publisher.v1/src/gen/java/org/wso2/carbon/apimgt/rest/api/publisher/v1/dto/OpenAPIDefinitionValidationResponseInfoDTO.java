@@ -3,6 +3,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.*;
 
 /**
@@ -24,6 +26,7 @@ public class OpenAPIDefinitionValidationResponseInfoDTO   {
     private String context = null;
     private String description = null;
     private String openAPIVersion = null;
+    private List<String> endpoints = new ArrayList<>();
 
   /**
    **/
@@ -110,6 +113,24 @@ public class OpenAPIDefinitionValidationResponseInfoDTO   {
     this.openAPIVersion = openAPIVersion;
   }
 
+  /**
+   * contains host/servers specified in the OpenAPI file/URL 
+   **/
+  public OpenAPIDefinitionValidationResponseInfoDTO endpoints(List<String> endpoints) {
+    this.endpoints = endpoints;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "contains host/servers specified in the OpenAPI file/URL ")
+  @JsonProperty("endpoints")
+  public List<String> getEndpoints() {
+    return endpoints;
+  }
+  public void setEndpoints(List<String> endpoints) {
+    this.endpoints = endpoints;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -124,12 +145,13 @@ public class OpenAPIDefinitionValidationResponseInfoDTO   {
         Objects.equals(version, openAPIDefinitionValidationResponseInfo.version) &&
         Objects.equals(context, openAPIDefinitionValidationResponseInfo.context) &&
         Objects.equals(description, openAPIDefinitionValidationResponseInfo.description) &&
-        Objects.equals(openAPIVersion, openAPIDefinitionValidationResponseInfo.openAPIVersion);
+        Objects.equals(openAPIVersion, openAPIDefinitionValidationResponseInfo.openAPIVersion) &&
+        Objects.equals(endpoints, openAPIDefinitionValidationResponseInfo.endpoints);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, version, context, description, openAPIVersion);
+    return Objects.hash(name, version, context, description, openAPIVersion, endpoints);
   }
 
   @Override
@@ -142,6 +164,7 @@ public class OpenAPIDefinitionValidationResponseInfoDTO   {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    openAPIVersion: ").append(toIndentedString(openAPIVersion)).append("\n");
+    sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
     sb.append("}");
     return sb.toString();
   }

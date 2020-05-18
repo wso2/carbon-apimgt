@@ -497,7 +497,11 @@
                 <URI>/api/am/publisher/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </WhiteListedURI>
-                        <WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/admin/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
                 <URI>/api/am/store/{version}/api-products</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
@@ -669,7 +673,7 @@
             <Password>${admin.password}</Password>
         </PolicyDeployer>
         <BlockCondition>
-            <ServiceURL>http://${carbon.local.ip}:${mgt.transport.http.port}/throttle/data/v1</ServiceURL>
+            <ServiceURL>http://${carbon.local.ip}:${mgt.transport.http.port}/internal/data/v1</ServiceURL>
             <Enabled>true</Enabled>
             <!--InitDelay>300000</InitDelay>
             <Period>3600000</Period-->

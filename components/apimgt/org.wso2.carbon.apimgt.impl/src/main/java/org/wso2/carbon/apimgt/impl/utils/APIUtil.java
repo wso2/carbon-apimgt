@@ -73,6 +73,8 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
@@ -332,6 +334,9 @@ public final class APIUtil {
     private static final String META = "Meta";
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + APIConstants.SUPER_TENANT_DOMAIN;
+
+    private static final int IPV4_ADDRESS_BIT_LENGTH = 32;
+    private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
@@ -1940,6 +1945,16 @@ public final class APIUtil {
         throw new APIMgtInternalException(msg, t);
     }
 
+    public static void handleResourceAlreadyExistsException(String msg) throws APIMgtResourceAlreadyExistsException {
+        log.error(msg);
+        throw new APIMgtResourceAlreadyExistsException(msg);
+    }
+
+    public static void handleResourceNotFoundException(String msg) throws APIMgtResourceNotFoundException {
+        log.error(msg);
+        throw new APIMgtResourceNotFoundException(msg);
+    }
+
     public static void handleAuthFailureException(String msg) throws APIMgtAuthorizationFailedException {
         log.error(msg);
         throw new APIMgtAuthorizationFailedException(msg);
@@ -2194,6 +2209,44 @@ public final class APIUtil {
         String wsdl2NameSpace = "http://www.w3.org/ns/wsdl";
         String wsdlContent = new String(wsdl);
         return wsdlContent.indexOf(wsdl2NameSpace) > 0;
+    }
+
+    /**
+     * Get the External IDP host name when UIs use an external IDP for SSO or other purpose
+     * By default this is equal to $ref{server.base_path} (i:e https://localhost:9443)
+     *
+     * @return Origin string of the external IDP
+     */
+
+    public static String getExternalIDPOrigin() throws APIManagementException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String idpEndpoint = config.getFirstProperty(APIConstants.IDENTITY_PROVIDER_SERVER_URL);
+        if (idpEndpoint == null) {
+            return getServerURL();
+        } else {
+            return idpEndpoint;
+        }
+    }
+
+    /**
+     * Get the check session URL to load in the session management iframe
+     *
+     * @return URL to be used in iframe source for the check session with IDP
+     */
+
+    public static String getExternalIDPCheckSessionEndpoint() throws APIManagementException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String oidcCheckSessionEndpoint = config.getFirstProperty(
+                APIConstants.IDENTITY_PROVIDER_OIDC_CHECK_SESSION_ENDPOINT);
+        if (oidcCheckSessionEndpoint == null) {
+            return getServerURL() + "/oidc/checksession";
+        } else {
+            return oidcCheckSessionEndpoint;
+        }
     }
 
     /**
@@ -4399,6 +4452,7 @@ public final class APIUtil {
 
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
             createSelfSignUpRoles(tenantId);
+            createEndpointRegistryRoles(tenantId);
         }
     }
 
@@ -4707,6 +4761,18 @@ public final class APIUtil {
         Permission[] analyticsPermissions = new Permission[]{
                 new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION)};
         createRole(roleName, analyticsPermissions, tenantId);
+    }
+
+    /**
+     * Create Endpoint Registry roles in specified tenant
+     *
+     * @param tenantId id of the tenant
+     * @throws APIManagementException
+     */
+    public static void createEndpointRegistryRoles(int tenantId) throws APIManagementException {
+        createRole(APIConstants.ENDPOINT_REGISTRY_ADMIN_ROLE, null, tenantId);
+        createRole(APIConstants.ENDPOINT_REGISTRY_USER_ROLE, null, tenantId);
+        createRole(APIConstants.ENDPOINT_REGISTRY_BROWSER_ROLE, null, tenantId);
     }
 
     /**
@@ -8234,6 +8300,47 @@ public final class APIUtil {
         return InetAddress.getByName(ipAddress);
     }
 
+    public static boolean isIpInNetwork(String ip, String cidr) {
+        if (StringUtils.isEmpty(ip) || StringUtils.isEmpty(cidr)) {
+            return false;
+        }
+        ip = ip.trim();
+        cidr = cidr.trim();
+
+        if (cidr.contains("/")) {
+            String[] cidrArr = cidr.split("/");
+            if (cidrArr.length < 2 || (ip.contains(".") && !cidr.contains(".")) ||
+                    (ip.contains(":") && !cidr.contains(":"))) {
+                return false;
+            }
+
+            BigInteger netAddress = ipToBigInteger(cidrArr[0]);
+            int netBits = Integer.parseInt(cidrArr[1]);
+            BigInteger givenIP = ipToBigInteger(ip);
+
+            if (ip.contains(".")) {
+                // IPv4
+                if ( netAddress.shiftRight(IPV4_ADDRESS_BIT_LENGTH - netBits)
+                        .shiftLeft(IPV4_ADDRESS_BIT_LENGTH - netBits).compareTo(
+                        givenIP.shiftRight(IPV4_ADDRESS_BIT_LENGTH - netBits)
+                                .shiftLeft(IPV4_ADDRESS_BIT_LENGTH - netBits)) == 0) {
+                    return true;
+                }
+            } else if (ip.contains(":")) {
+                // IPv6
+                if ( netAddress.shiftRight(IPV6_ADDRESS_BIT_LENGTH - netBits)
+                        .shiftLeft(IPV6_ADDRESS_BIT_LENGTH - netBits).compareTo(
+                        givenIP.shiftRight(IPV6_ADDRESS_BIT_LENGTH - netBits)
+                                .shiftLeft(IPV6_ADDRESS_BIT_LENGTH - netBits)) == 0) {
+                    return true;
+                }
+            }
+        } else if (ip.equals(cidr)){
+            return true;
+        }
+        return false;
+    }
+
     public String getFullLifeCycleData(Registry registry) throws XMLStreamException, RegistryException {
         return CommonUtil.getLifecycleConfiguration(APIConstants.API_LIFE_CYCLE, registry);
 
@@ -8453,8 +8560,8 @@ public final class APIUtil {
                                  final long accessExp) {
 
         Iterable<Cache<?, ?>> availableCaches = Caching.getCacheManager(cacheManagerName).getCaches();
-        for (Cache cache:availableCaches) {
-            if(cache.getName().equalsIgnoreCase(getCacheName(cacheName))){
+        for (Cache cache : availableCaches) {
+            if (cache.getName().equalsIgnoreCase(getCacheName(cacheName))) {
                 return Caching.getCacheManager(cacheManagerName).getCache(cacheName);
             }
         }
@@ -8479,8 +8586,8 @@ public final class APIUtil {
     }
 
     private static String getCacheName(String cacheName) {
-        return Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("Cache.ForceLocalCache"))
-                && !cacheName.startsWith("$__local__$.") ? "$__local__$." + cacheName : cacheName;
+        return (Boolean.parseBoolean(ServerConfiguration.getInstance().getFirstProperty("Cache.ForceLocalCache"))
+                && !cacheName.startsWith("$__local__$.")) ? "$__local__$." + cacheName : cacheName;
     }
 
     /**
@@ -10343,6 +10450,16 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    public static boolean isDevPortalAnonymous() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String anonymousMode = config.getFirstProperty(APIConstants.API_DEVPORTAL_ANONYMOUS_MODE);
+        if (anonymousMode == null) {
+            return true;
+        }
+        return Boolean.parseBoolean(anonymousMode);
     }
 
     public static Map<String, EndpointSecurity> setEndpointSecurityForAPIProduct(API api) throws APIManagementException {

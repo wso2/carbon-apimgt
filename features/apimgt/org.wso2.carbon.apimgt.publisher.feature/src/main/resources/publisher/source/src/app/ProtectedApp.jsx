@@ -114,7 +114,7 @@ export default class Protected extends Component {
         setInterval(() => {
             const { clientId, sessionStateCookie } = this.state;
             const msg = clientId + ' ' + sessionStateCookie;
-            document.getElementById('iframeOP').contentWindow.postMessage(msg, 'https://' + window.location.host);
+            document.getElementById('iframeOP').contentWindow.postMessage(msg, Configurations.idp.origin);
         }, 2000);
     }
 
@@ -126,7 +126,7 @@ export default class Protected extends Component {
         const { user = AuthManager.getUser(), messages } = this.state;
         const header = <Header avatar={<Avatar user={user} />} user={user} />;
         const { settings, clientId } = this.state;
-        const checkSessionURL = 'https://' + window.location.host + '/oidc/checksession?client_id='
+        const checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
         + clientId + '&redirect_uri=https://' + window.location.host
         + Configurations.app.context + '/services/auth/callback/login';
         if (!user) {

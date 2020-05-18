@@ -290,7 +290,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 RestAPIStoreUtils.checkSubscriptionAllowed(apiTypeWrapper,
                         subscriptionDTO.getThrottlingPolicy());
 
-                apiIdentifier.setTier(subscriptionDTO.getThrottlingPolicy());
+                apiTypeWrapper.setTier(subscriptionDTO.getThrottlingPolicy());
                 SubscriptionResponse subscriptionResponse = apiConsumer
                         .addSubscription(apiTypeWrapper, username, application.getId());
                 SubscribedAPI addedSubscribedAPI = apiConsumer

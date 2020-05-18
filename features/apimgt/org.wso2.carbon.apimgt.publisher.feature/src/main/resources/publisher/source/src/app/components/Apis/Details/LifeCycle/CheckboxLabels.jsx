@@ -26,7 +26,9 @@ import Paper from '@material-ui/core/Paper';
 import CloseIcon from '@material-ui/icons/Close';
 import CheckIcon from '@material-ui/icons/Check';
 import green from '@material-ui/core/colors/green';
+import yellow from '@material-ui/core/colors/yellow';
 import LaunchIcon from '@material-ui/icons/Launch';
+import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
 
 const useStyles = makeStyles((theme) => ({
     stateButton: {
@@ -47,6 +49,13 @@ const useStyles = makeStyles((theme) => ({
     },
     iconFalse: {
         color: theme.palette.grey[500],
+        marginRight: theme.spacing(1),
+        display: 'block',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+    },
+    iconWarn: {
+        color: yellow[700],
         marginRight: theme.spacing(1),
         display: 'block',
         justifyContent: 'flex-start',
@@ -74,6 +83,7 @@ export default function CheckboxLabels(props) {
         api, isMutualSSLEnabled, isCertAvailable, isAppLayerSecurityMandatory, isBusinessPlanAvailable,
     } = props;
     const isEndpointAvailable = api.endpointConfig !== null && !api.endpointConfig.implementation_status;
+    const isEnvironmentAvailable = api.gatewayEnvironments.length !== 0;
     const isPrototypedAvailable = (api.endpointConfig !== null
         && api.endpointConfig.implementation_status === 'prototyped')
         || api.endpointImplementationType === 'INLINE';
@@ -159,6 +169,22 @@ export default function CheckboxLabels(props) {
                                 </Grid>
                             ) }
                         </>
+                        <Grid xs={12} className={classes.grid}>
+                            {isEnvironmentAvailable ? (
+                                <CheckIcon className={classes.iconTrue} />
+                            ) : (
+                                <WarningRoundedIcon className={classes.iconWarn} />
+                            )}
+                            <Typography>
+                                <FormattedMessage
+                                    id='Apis.Details.LifeCycle.CheckboxLabels.gateway.environments.selected'
+                                    defaultMessage='Gateway Environment(s) selected'
+                                />
+                            </Typography>
+                            <Link to={'/apis/' + api.id + '/environments'}>
+                                <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
+                            </Link>
+                        </Grid>
                     </Grid>
                     { api.type !== 'GRAPHQL' && (
                         <>
@@ -184,6 +210,22 @@ export default function CheckboxLabels(props) {
                                         />
                                     </Typography>
                                     <Link to={'/apis/' + api.id + '/endpoints'}>
+                                        <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
+                                    </Link>
+                                </Grid>
+                                <Grid xs={12} className={classes.grid}>
+                                    {isEnvironmentAvailable ? (
+                                        <CheckIcon className={classes.iconTrue} />
+                                    ) : (
+                                        <WarningRoundedIcon className={classes.iconWarn} />
+                                    )}
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='Apis.Details.LifeCycle.CheckboxLabels.gateway.environments.selected'
+                                            defaultMessage='Gateway Environment(s) selected'
+                                        />
+                                    </Typography>
+                                    <Link to={'/apis/' + api.id + '/environments'}>
                                         <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
                                     </Link>
                                 </Grid>
