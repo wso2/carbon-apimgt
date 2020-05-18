@@ -21,9 +21,10 @@ import qs from 'qs';
 import { withTheme } from '@material-ui/core/styles';
 import Settings from 'Settings';
 import Tenants from 'AppData/Tenants';
-import SettingsContext from 'AppComponents/Shared/SettingsContext';
 import queryString from 'query-string';
 import PropTypes from 'prop-types';
+import SettingsContext from 'AppComponents/Shared/SettingsContext';
+import RedirectToLogin from 'AppComponents/Login/RedirectToLogin';
 import API from './data/api';
 import Base from './components/Base/index';
 import AuthManager from './data/AuthManager';
@@ -40,8 +41,6 @@ import LoginDenied from './LoginDenied';
  * Render protected application paths
  */
 class ProtectedApp extends Component {
-    static contextType = SettingsContext;
-
     /**
      *  constructor
      * @param {*} props props passed to constructor
@@ -69,7 +68,7 @@ class ProtectedApp extends Component {
         window.addEventListener('message', this.handleMessage);
         const { location: { search } } = this.props;
         const { setTenantDomain, setSettings } = this.context;
-        const { app: { customUrl: { tenantDomain: customUrlEnabledDomain } }} = Settings;
+        const { app: { customUrl: { tenantDomain: customUrlEnabledDomain } } } = Settings;
         let tenant = null;
         if (customUrlEnabledDomain !== 'null') {
             tenant = customUrlEnabledDomain;
@@ -97,7 +96,6 @@ class ProtectedApp extends Component {
         ConfigManager.getConfigs()
             .environments.then((response) => {
                 this.environments = response.data.environments;
-                // this.handleEnvironmentQueryParam(); todo: do we really need to handle environment query params here ?
             })
             .catch((error) => {
                 console.error(
@@ -164,7 +162,7 @@ class ProtectedApp extends Component {
 
     handleMessage(e) {
         if (e.data === 'changed') {
-            window.location = Settings.app.context + '/services/configs?not-Login';
+            window.location = Settings.app.context + '/services/configs?loginPrompt=false';
         }
     }
 
@@ -175,10 +173,9 @@ class ProtectedApp extends Component {
         setInterval(() => {
             const { clientId, sessionStateCookie } = this.state;
             const msg = clientId + ' ' + sessionStateCookie;
-            document.getElementById('iframeOP').contentWindow.postMessage(msg, 'https://' + window.location.host);
+            document.getElementById('iframeOP').contentWindow.postMessage(msg, Settings.idp.origin);
         }, 2000);
     }
-
 
 
     /**
@@ -217,12 +214,12 @@ class ProtectedApp extends Component {
      */
     render() {
         const {
-            userResolved, tenantList, notEnoughPermission, tenantResolved, clientId
+            userResolved, tenantList, notEnoughPermission, tenantResolved, clientId,
         } = this.state;
-        const checkSessionURL = window.location.origin + '/oidc/checksession?client_id='
-            + clientId + '&redirect_uri='+ window.location.origin
+        const checkSessionURL = Settings.idp.checkSessionEndpoint + '?client_id='
+            + clientId + '&redirect_uri=' + window.location.origin
             + Settings.app.context + '/services/auth/callback/login';
-        const { tenantDomain } = this.context;
+        const { tenantDomain, settings } = this.context;
         if (!userResolved) {
             return <Loading />;
         }
@@ -233,9 +230,9 @@ class ProtectedApp extends Component {
             isAuthenticated = true;
         }
         if (notEnoughPermission) {
-            return <LoginDenied />;
+            return <LoginDenied IsAnonymousModeEnabled={settings.IsAnonymousModeEnabled} />;
         }
-        
+
         // Waiting till the tenant list is retrieved
         if (!tenantResolved) {
             return <Loading />;
@@ -246,10 +243,18 @@ class ProtectedApp extends Component {
         if (tenantList.length > 0 && (tenantDomain === 'INVALID' || (!isAuthenticated && tenantDomain === null))) {
             return <TenantListing tenantList={tenantList} />;
         }
+
+        if (!isAuthenticated && !settings.IsAnonymousModeEnabled && !sessionStorage.getItem(CONSTS.ISLOGINPERMITTED)) {
+            return <RedirectToLogin />;
+        }
+
+        if (settings.IsAnonymousModeEnabled && sessionStorage.getItem(CONSTS.ISLOGINPERMITTED)) {
+            sessionStorage.removeItem(CONSTS.ISLOGINPERMITTED);
+        }
         // check for widget=true in the query params. If it's present we render without <Base> component.
         const pageUrl = new URL(window.location);
         const isWidget = pageUrl.searchParams.get('widget');
-        if(isWidget) {
+        if (isWidget) {
             return (
                 <>
                     <iframe
@@ -259,9 +264,9 @@ class ProtectedApp extends Component {
                         width='0px'
                         height='0px'
                     />
-                    <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />  
+                    <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
                 </>
-            );  
+            );
         }
         /**
          * Note: AuthManager.getUser() method is a passive check, which simply
@@ -283,6 +288,7 @@ class ProtectedApp extends Component {
         );
     }
 }
+ProtectedApp.contextType = SettingsContext;
 ProtectedApp.propTypes = {
     location: PropTypes.shape({
         search: PropTypes.string.isRequired,

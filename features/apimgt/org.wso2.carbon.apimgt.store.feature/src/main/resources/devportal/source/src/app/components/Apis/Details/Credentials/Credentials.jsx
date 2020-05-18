@@ -51,11 +51,15 @@ const styles = (theme) => ({
         marginLeft: theme.spacing(3),
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
+        color: theme.palette.getContrastText(theme.palette.background.default),
     },
     generateCredentialWrapper: {
         marginLeft: 0,
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
+        '& span, & h5, & label, & td, & li, & div': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        }
     },
     tableMain: {
         width: '100%',
@@ -63,17 +67,33 @@ const styles = (theme) => ({
         marginTop: theme.spacing(3),
         marginLeft: theme.spacing(2),
         marginRight: theme.spacing(1),
+        '& tr td':{
+            paddingLeft: theme.spacing(1),
+        },
+        '& tr:nth-child(even)': {
+            backgroundColor: theme.custom.listView.tableBodyEvenBackgrund,
+            '& td, & a, & .material-icons': {
+                color: theme.palette.getContrastText(theme.custom.listView.tableBodyEvenBackgrund),
+            },
+        },
+        '& tr:nth-child(odd)': {
+            backgroundColor: theme.custom.listView.tableBodyOddBackgrund,
+            '& td, & a, & .material-icons': {
+                color: theme.palette.getContrastText(theme.custom.listView.tableBodyOddBackgrund),
+            },
+        },
+        '& th': {
+            backgroundColor: theme.custom.listView.tableHeadBackground,
+            color: theme.palette.getContrastText(theme.custom.listView.tableHeadBackground),
+            paddingLeft: theme.spacing(1),
+            borderBottom: 'solid 1px ' + theme.palette.grey.A200,
+            borderTop: 'solid 1px ' + theme.palette.grey.A200,
+            textAlign: 'left',
+            fontSize: '11px',
+            paddingTop: theme.spacing(1),
+            paddingBottom: theme.spacing(1),
+        },
 
-    },
-    th: {
-        color: theme.palette.getContrastText(theme.palette.background.default),
-        borderBottom: 'solid 1px ' + theme.palette.grey.A200,
-        borderTop: 'solid 1px ' + theme.palette.grey.A200,
-        textAlign: 'left',
-        fontSize: '11px',
-        paddingLeft: theme.spacing(1),
-        paddingTop: theme.spacing(1),
-        paddingBottom: theme.spacing(1),
     },
     expansion: {
         background: 'transparent',
@@ -104,6 +124,7 @@ const styles = (theme) => ({
     },
     descWrapper: {
         marginBottom: theme.spacing(2),
+        color: theme.palette.getContrastText(theme.palette.background.paper),
     },
     credentialBoxWrapper: {
         paddingLeft: theme.spacing(2),
@@ -117,6 +138,17 @@ const styles = (theme) => ({
     },
     addLinkWrapper: {
         marginLeft: theme.spacing(2),
+    },
+    subsListTitle: {
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+    },
+    subsListDesc: {
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+    },
+    buttonElm: {
+        '& span': {
+            color: theme.palette.getContrastText(theme.palette.primary.main),
+        },
     },
 });
 
@@ -439,14 +471,14 @@ class Credentials extends React.Component {
                                     */}
                         {subscribedApplications && subscribedApplications.length > 0 && (
                             <>
-                                <Typography variant='h5'>
+                                <Typography variant='h5' className={classes.subsListTitle}>
                                     <FormattedMessage
                                         id={'Apis.Details.Credentials.Credentials.'
                                         + 'api.credentials.subscribed.apps.title'}
                                         defaultMessage='Subscriptions'
                                     />
                                 </Typography>
-                                <Typography variant='body2'>
+                                <Typography variant='body2' className={classes.subsListDesc}>
                                     <FormattedMessage
                                         id={'Apis.Details.Credentials.Credentials.'
                                         + 'api.credentials.subscribed.apps.description'}

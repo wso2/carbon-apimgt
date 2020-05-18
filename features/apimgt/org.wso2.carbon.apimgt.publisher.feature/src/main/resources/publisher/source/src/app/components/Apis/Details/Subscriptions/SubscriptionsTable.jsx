@@ -20,11 +20,9 @@ import React, { Component } from 'react';
 import { FormattedMessage, injectIntl, defineMessages } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
-import InputBase from '@material-ui/core/InputBase';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
-import Search from '@material-ui/icons/Search';
 import LastPageIcon from '@material-ui/icons/LastPage';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -32,13 +30,15 @@ import Grid from '@material-ui/core/Grid';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
-import TableFooter from '@material-ui/core/TableFooter';
-import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
+import TablePagination from '@material-ui/core/TablePagination';
 import Tooltip from '@material-ui/core/Tooltip';
 import withStyles from '@material-ui/core/styles/withStyles';
+import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
+import MUIDataTable from 'mui-datatables';
+import InfoIcon from '@material-ui/icons/Info';
+import UserIcon from '@material-ui/icons/Person';
 
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
@@ -122,55 +122,27 @@ const styles = (theme) => ({
     titleWrapper: {
         marginBottom: theme.spacing(3),
     },
+    typography: {
+        padding: theme.spacing(2),
+    },
+    root: {
+        flexGrow: 1,
+    },
+    InfoToolTip: {
+        backgroundColor: theme.custom.disableColor,
+        color: theme.palette.getContrastText(theme.custom.disableColor),
+        fontSize: theme.typography.fontSize,
+        fontWeight: theme.typography.h6.fontWeight,
+        border: 'solid 1px ' + theme.palette.grey,
+        borderRadius: theme.shape.borderRadius,
+        padding: theme.spacing(2),
+    },
+    subscriberHeader: {
+        fontSize: theme.typography.h6.fontSize,
+        color: theme.typography.h6.color,
+        fontWeight: theme.typography.h6.fontWeight,
+    },
 });
-
-const tableHeaders = (
-    <TableRow>
-        <TableCell>
-            <FormattedMessage
-                id='Apis.Details.Subscriptions.SubscriptionsTable.subscriber'
-                defaultMessage='Subscriber'
-            />
-        </TableCell>
-        <TableCell>
-            <FormattedMessage
-                id='Apis.Details.Subscriptions.SubscriptionsTable.application'
-                defaultMessage='Application'
-            />
-        </TableCell>
-        <TableCell>
-            <FormattedMessage
-                id='Apis.Details.Subscriptions.SubscriptionsTable.tier'
-                defaultMessage='Tier'
-            />
-        </TableCell>
-        <TableCell>
-            <FormattedMessage
-                id='Apis.Details.Subscriptions.SubscriptionsTable.status'
-                defaultMessage='Status'
-            />
-        </TableCell>
-        <TableCell>
-            <ScopeValidation
-                resourceMethod={resourceMethod.POST}
-                resourcePath={resourcePath.BLOCK_SUBSCRIPTION}
-            >
-                <FormattedMessage
-                    id='Apis.Details.Subscriptions.SubscriptionsTable.actions'
-                    defaultMessage='Actions'
-                />
-            </ScopeValidation>
-        </TableCell>
-        <Tooltip title='Only for Usage based plans'>
-            <TableCell>
-                <FormattedMessage
-                    id='Apis.Details.Subscriptions.SubscriptionsTable.invoice.heading'
-                    defaultMessage='Invoice'
-                />
-            </TableCell>
-        </Tooltip>
-    </TableRow>
-);
 
 const subscriptionStatus = {
     BLOCKED: 'BLOCKED',
@@ -282,6 +254,7 @@ class SubscriptionsTable extends Component {
             rowsPerPageOptions: [5, 10, 25, 50, 100],
             emptyColumnHeight: 60,
             policies: [],
+            subscriberClaims: null,
         };
         this.formatSubscriptionStateString = this.formatSubscriptionStateString.bind(this);
         this.blockSubscription = this.blockSubscription.bind(this);
@@ -291,6 +264,7 @@ class SubscriptionsTable extends Component {
         this.handleChangeRowsPerPage = this.handleChangeRowsPerPage.bind(this);
         this.filterSubscriptions = this.filterSubscriptions.bind(this);
         this.isMonetizedPolicy = this.isMonetizedPolicy.bind(this);
+        this.renderClaims = this.renderClaims.bind(this);
         this.isNotCreator = AuthManager.isNotCreator();
         this.isNotPublisher = AuthManager.isNotPublisher();
     }
@@ -573,10 +547,29 @@ class SubscriptionsTable extends Component {
         const { page, rowsPerPage, searchQuery } = this.state;
         const promisedSubscriptions = api.subscriptions(this.api.id, page * rowsPerPage, rowsPerPage, searchQuery);
         promisedSubscriptions
-            .then((response) => this.setState({
-                subscriptions: response.body.list,
-                totalSubscription: response.body.pagination.total,
-            }))
+            .then((response) => {
+                this.setState({
+                    subscriptions: response.body.list,
+                    totalSubscription: response.body.pagination.total,
+                });
+                for (let i = 0; i < response.body.list.length; i++) {
+                    const { subscriptionId } = response.body.list[i];
+                    const promisedInfo = api.getSubscriberInfo(subscriptionId);
+                    promisedInfo
+                        .then((resp) => {
+                            this.setState((prevState) => ({
+                                subscriberClaims: {
+                                    ...prevState.subscriberClaims,
+                                    [subscriptionId]: resp.body,
+                                },
+                            }));
+                        })
+                        .catch((errorMessage) => {
+                            console.error(errorMessage);
+                            Alert.error(JSON.stringify(errorMessage));
+                        });
+                }
+            })
             .catch((errorMessage) => {
                 console.error(errorMessage);
                 Alert.error(JSON.stringify(errorMessage));
@@ -633,11 +626,62 @@ class SubscriptionsTable extends Component {
         this.setState({ searchQuery: event.target.value }, this.fetchSubscriptionData);
     }
 
+    /**
+     * Render claims based on the claim object
+     */
+    renderClaims(claimsObject) {
+        const { classes } = this.props;
+        if (claimsObject) {
+            return (
+                <div className={classes.root}>
+                    <Grid container spacing={1}>
+                        <Grid item>
+                            <UserIcon color='primary' />
+                        </Grid>
+                        <Grid item>
+                            {claimsObject.name}
+                        </Grid>
+                    </Grid>
+                    {claimsObject.claims && (
+                        <div>
+                            <Table className={classes.table}>
+                                <TableBody>
+                                    {claimsObject.claims.map((claim) => (
+                                        <TableRow hover>
+                                            <TableCell>{claim.name}</TableCell>
+                                            {claim.value ? (
+                                                <TableCell>{claim.value}</TableCell>
+                                            ) : (
+                                                <TableCell>Not Available</TableCell>
+                                            )}
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        return (
+            <div>
+                <Typography className={classes.typography}>
+                    <FormattedMessage
+                        id='Apis.Details.Subscriptions.Subscriber.no.claims'
+                        defaultMessage='No subscriber claims data available'
+                    />
+                </Typography>
+            </div>
+        );
+    }
+
+
     render() {
         const {
             subscriptions, page, rowsPerPage, totalSubscription, rowsPerPageOptions, emptyColumnHeight,
+            subscriberClaims,
         } = this.state;
-        const { classes, intl, api } = this.props;
+        const { classes, api } = this.props;
         if (!subscriptions) {
             return (
                 <Grid container direction='row' justify='center' alignItems='center'>
@@ -647,98 +691,213 @@ class SubscriptionsTable extends Component {
                 </Grid>
             );
         }
+        const columns = [
+            {
+                name: 'subscriptionId',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                },
+            },
+            {
+                name: 'applicationInfo.applicationId',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                },
+            },
+            {
+                name: 'applicationInfo.subscriber',
+                label: (
+                    <FormattedMessage
+                        id='Apis.Details.Subscriptions.Listing.column.header.subscriber'
+                        defaultMessage='Subscriber'
+                    />
+                ),
+                options: {
+                    sort: false,
+                    customBodyRender: (value, tableMeta) => {
+                        if (tableMeta.rowData) {
+                            return (
+                                <div>
+                                    <Tooltip
+                                        interactive
+                                        placement='top'
+                                        classes={{
+                                            tooltip: classes.InfoToolTip,
+                                        }}
+                                        title={(
+                                            <>
+                                                {subscriberClaims && (
+                                                    <div>
+                                                        {this.renderClaims(subscriberClaims[tableMeta.rowData[0]])}
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                    >
+                                        <Grid container direction='row' alignItems='center' spacing={1}>
+                                            <Grid item>
+                                                <Typography>
+                                                    <InfoIcon color='action' />
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                {value}
+                                            </Grid>
+                                        </Grid>
+                                    </Tooltip>
+                                </div>
+                            );
+                        }
+                        return null;
+                    },
+                },
+            },
+            {
+                name: 'applicationInfo.name',
+                label: (
+                    <FormattedMessage
+                        id='Apis.Details.Subscriptions.Listing.column.header.application'
+                        defaultMessage='Application'
+                    />
+                ),
+                options: {
+                    sort: false,
+                },
+            },
+            {
+                name: 'applicationInfo.description',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                },
+            },
+            {
+                name: 'applicationInfo.subscriptionCount',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                },
+            },
+            {
+                name: 'throttlingPolicy',
+                label: (
+                    <FormattedMessage
+                        id='Apis.Details.Subscriptions.Listing.column.header.throttling.tier'
+                        defaultMessage='Tier'
+                    />
+                ),
+                options: {
+                    sort: false,
+                },
+            },
+            {
+                name: 'subscriptionStatus',
+                label: (
+                    <FormattedMessage
+                        id='Apis.Details.Subscriptions.Listing.column.header.subscription.status'
+                        defaultMessage='Status'
+                    />
+                ),
+                options: {
+                    sort: false,
+                },
+            },
+            {
+                name: 'actions',
+                label: (
+                    <FormattedMessage
+                        id='Apis.Details.Subscriptions.Listing.column.header.subscription.actions'
+                        defaultMessage='Actions'
+                    />
+                ),
+                options: {
+                    sort: false,
+                    customBodyRender: (value, tableMeta) => {
+                        if (tableMeta.rowData) {
+                            const status = tableMeta.rowData[7];
+                            const subscriptionId = tableMeta.rowData[0];
+                            return (
+                                <ScopeValidation
+                                    resourceMethod={resourceMethod.POST}
+                                    resourcePath={resourcePath.BLOCK_SUBSCRIPTION}
+                                >
+                                    {
+                                        this.getSubscriptionBlockingButtons(
+                                            status,
+                                            subscriptionId,
+                                        )
+                                    }
+                                </ScopeValidation>
+                            );
+                        }
+                        return null;
+                    },
+                },
+            },
+            {
+                name: 'invoice',
+                label: (
+                    <FormattedMessage
+                        id='Apis.Details.Subscriptions.Listing.column.header.subscription.invoice'
+                        defaultMessage='Invoice'
+                    />
+                ),
+                options: {
+                    sort: false,
+                    customBodyRender: (value, tableMeta) => {
+                        if (tableMeta.rowData) {
+                            const throttlingPolicy = tableMeta.rowData[6];
+                            const subscriptionId = tableMeta.rowData[0];
+                            return (
+                                <Invoice
+                                    subscriptionId={subscriptionId}
+                                    isNotAuthorized={this.isNotCreator && this.isNotPublisher}
+                                    isMonetizedUsagePolicy={
+                                        this.isMonetizedPolicy(throttlingPolicy)
+                                    }
+                                    api={api}
+                                />
+                            );
+                        }
+                        return null;
+                    },
+                },
+            },
+        ];
+
+        const options = {
+            title: false,
+            print: false,
+            download: false,
+            viewColumns: false,
+            customToolbar: false,
+            search: false,
+            selectableRows: 'none',
+            rowsPerPageOptions: [5, 10, 25, 50, 100],
+            customFooter: () => {
+                return (
+                    <TablePagination
+                        rowsPerPageOptions={rowsPerPageOptions}
+                        colSpan={6}
+                        count={totalSubscription}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onChangePage={this.handleChangePage}
+                        onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                        ActionsComponent={SubscriptionTablePagination}
+                    />
+                );
+            },
+        };
+
         return (
             <>
                 <Paper>
-                    <Tooltip
-                        title={intl.formatMessage({
-                            id: 'Apis.Details.Subscriptions.SubscriptionsTable.search.tooltip',
-                            defaultMessage: 'Search subscriptions by Subscriber, Application and Tier',
-                        })}
-                        aria-label='Search tooltip'
-                    >
-                        <div className={classes.searchDiv}>
-                            <div className={classes.searchRoot}>
-                                <InputBase
-                                    className={classes.searchInput}
-                                    placeholder={intl.formatMessage({
-                                        id: 'Apis.Details.Subscriptions.SubscriptionsTable.search',
-                                        defaultMessage: 'Search',
-                                    })}
-                                    inputProps={{ 'aria-label': 'Search' }}
-                                    onChange={(e) => this.filterSubscriptions(e)}
-                                />
-                                <IconButton className={classes.searchIconButton} aria-label='Search' disabled>
-                                    <Search />
-                                </IconButton>
-                            </div>
-                        </div>
-                    </Tooltip>
                     {subscriptions.length > 0 ? (
                         <div>
-                            <Table className={classes.table}>
-                                <colgroup>
-                                    <col className={classes.tableColumnSize} />
-                                    <col className={classes.tableColumnSize} />
-                                    <col className={classes.tableColumnSize} />
-                                    <col className={classes.tableColumnSize} />
-                                    <col className={classes.tableColumnSize2} />
-                                    <col className={classes.tableColumnSize} />
-                                </colgroup>
-                                <TableHead>
-                                    {tableHeaders}
-                                </TableHead>
-                                <TableBody>
-                                    {subscriptions
-                                        .map((sub) => (
-                                            <TableRow key={sub.subscriptionId}>
-                                                <TableCell>{sub.applicationInfo.subscriber}</TableCell>
-                                                <TableCell>{sub.applicationInfo.name}</TableCell>
-                                                <TableCell>{sub.throttlingPolicy}</TableCell>
-                                                <TableCell>
-                                                    {this.formatSubscriptionStateString(sub.subscriptionStatus)}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <ScopeValidation
-                                                        resourceMethod={resourceMethod.POST}
-                                                        resourcePath={resourcePath.BLOCK_SUBSCRIPTION}
-                                                    >
-                                                        {
-                                                            this.getSubscriptionBlockingButtons(
-                                                                sub.subscriptionStatus,
-                                                                sub.subscriptionId,
-                                                            )
-                                                        }
-                                                    </ScopeValidation>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Invoice
-                                                        subscriptionId={sub.subscriptionId}
-                                                        isNotAuthorized={this.isNotCreator && this.isNotPublisher}
-                                                        isMonetizedUsagePolicy={
-                                                            this.isMonetizedPolicy(sub.throttlingPolicy)
-                                                        }
-                                                        api={api}
-                                                    />
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                </TableBody>
-                                <TableFooter>
-                                    <TableRow>
-                                        <TablePagination
-                                            rowsPerPageOptions={rowsPerPageOptions}
-                                            colSpan={6}
-                                            count={totalSubscription}
-                                            rowsPerPage={rowsPerPage}
-                                            page={page}
-                                            onChangePage={this.handleChangePage}
-                                            onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                                            ActionsComponent={SubscriptionTablePagination}
-                                        />
-                                    </TableRow>
-                                </TableFooter>
-                            </Table>
+                            <MUIDataTable title='' data={subscriptions} columns={columns} options={options} />
                         </div>
                     )
                         : (

@@ -210,7 +210,7 @@ class Details extends React.Component {
                         Alert.error(message);
                     }
                     console.error('Error when getting apis', error);
-                    if (status === 404) {
+                    if (status === 404 || status === 403) {
                         this.setState({ notFound: true });
                     }
                 });

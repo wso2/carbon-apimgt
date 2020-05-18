@@ -87,6 +87,9 @@ const styles = makeStyles((theme) => ({
     tooltip: {
         marginLeft: theme.spacing(1),
     },
+    menuItem: {
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+    },
 }));
 
 /**
@@ -101,7 +104,7 @@ function TryOutController(props) {
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
         setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes,
         setSecurityScheme, setUsername, setPassword, username, password,
-        setProductionApiKey, setSandboxApiKey, productionApiKey, sandboxApiKey,
+        setProductionApiKey, setSandboxApiKey, productionApiKey, sandboxApiKey, environmentObject, setURLs,
     } = props;
     const classes = styles();
 
@@ -304,6 +307,10 @@ function TryOutController(props) {
         switch (name) {
             case 'selectedEnvironment':
                 setSelectedEnvironment(value, true);
+                if (environmentObject) {
+                    const urls = environmentObject.find((elm) => value === elm.environmentName).URLs;
+                    setURLs(urls);
+                }
                 break;
             case 'selectedApplication':
                 setProductionAccessToken('');
@@ -327,6 +334,17 @@ function TryOutController(props) {
                 break;
             case 'password':
                 setPassword(value);
+                break;
+            case 'accessToken':
+                if (securitySchemeType === 'API-KEY' && selectedKeyType === 'PRODUCTION') {
+                    setProductionApiKey(value);
+                } else if (securitySchemeType === 'API-KEY' && selectedKeyType === 'SANDBOX') {
+                    setSandboxApiKey(value);
+                } else if (selectedKeyType === 'PRODUCTION') {
+                    setProductionAccessToken(value);
+                } else {
+                    setSandboxAccessToken(value);
+                }
                 break;
             default:
         }
@@ -499,7 +517,7 @@ function TryOutController(props) {
                                                 name='accessToken'
                                                 onChange={handleChanges}
                                                 type={showToken ? 'text' : 'password'}
-                                                value={tokenValue}
+                                                value={tokenValue || ''}
                                                 helperText={(
                                                     <FormattedMessage
                                                         id='enter.access.token'
@@ -604,7 +622,7 @@ function TryOutController(props) {
                                                 variant='outlined'
                                             >
                                                 {environments && environments.length > 0 && (
-                                                    <MenuItem value='' disabled>
+                                                    <MenuItem value='' disabled className={classes.menuItem}>
                                                         <em>
                                                             <FormattedMessage
                                                                 id='api.gateways'
@@ -615,7 +633,11 @@ function TryOutController(props) {
                                                 )}
                                                 {environments && (
                                                     environments.map((env) => (
-                                                        <MenuItem value={env} key={env}>
+                                                        <MenuItem
+                                                            value={env}
+                                                            key={env}
+                                                            className={classes.menuItem}
+                                                        >
                                                             {env}
                                                         </MenuItem>
                                                     )))}
@@ -625,13 +647,18 @@ function TryOutController(props) {
                                                             <FormattedMessage
                                                                 id='micro.gateways'
                                                                 defaultMessage='Microgateways'
+                                                                className={classes.menuItem}
                                                             />
                                                         </em>
                                                     </MenuItem>
                                                 )}
                                                 {labels && (
                                                     labels.map((label) => (
-                                                        <MenuItem value={label} key={label}>
+                                                        <MenuItem
+                                                            value={label}
+                                                            key={label}
+                                                            className={classes.menuItem}
+                                                        >
                                                             {label}
                                                         </MenuItem>
                                                     ))

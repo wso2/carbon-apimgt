@@ -40,6 +40,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -50,6 +52,7 @@ import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
@@ -132,7 +135,6 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -3487,7 +3489,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.isEndpointSecured() && StringUtils.isEmpty(api.getEndpointUTPassword())) {
             String errorMessage = "Empty password is given for endpointSecurity when creating API "
                     + api.getId().getApiName();
-            log.error(errorMessage);
             throw new APIManagementException(errorMessage);
         }
 
@@ -5652,7 +5653,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // checking if policy already exist
                 Policy existingPolicy = getGlobalPolicy(globalPolicy.getPolicyName());
                 if (existingPolicy != null) {
-                    throw new APIManagementException("Policy Name Already Exist");
+                    throw new APIManagementException("Policy name already exists");
                 }
 
                 String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + globalPolicy.getPolicyName();
@@ -8016,5 +8017,63 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<APIResource> getResourcesToBeRemovedFromAPIProducts(APIIdentifier apiId, String swaggerContent)
+            throws APIManagementException {
+        API existingAPI = getAPI(apiId);
+        APIDefinitionValidationResponse response = OASParserUtil
+                .validateAPIDefinition(swaggerContent, true);
+        APIDefinition oasParser = response.getParser();
+        String apiDefinition = response.getJsonContent();
+        Set<URITemplate> uriTemplates = null;
+        try {
+            uriTemplates = oasParser.getURITemplates(apiDefinition);
+        } catch (APIManagementException e) {
+            // catch APIManagementException inside again to capture validation error
+            log.error("Swagger validation error");
+        }
+        if(uriTemplates == null || uriTemplates.isEmpty()) {
+            log.error("No resources found");
+        }
+
+        List<APIResource> removedProductResources = getRemovedProductResources(uriTemplates, existingAPI);
+        return removedProductResources;
+    }
+
+    @Override
+    public List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI) {
+        Set<URITemplate> existingUriTemplates = existingAPI.getUriTemplates();
+        List<APIResource> removedReusedResources = new ArrayList<>();
+
+        for (URITemplate existingUriTemplate : existingUriTemplates) {
+
+            // If existing URITemplate is used by any API Products
+            if (!existingUriTemplate.retrieveUsedByProducts().isEmpty()) {
+                String existingVerb = existingUriTemplate.getHTTPVerb();
+                String existingPath = existingUriTemplate.getUriTemplate();
+                boolean isReusedResourceRemoved = true;
+
+                for (URITemplate updatedUriTemplate : updatedUriTemplates) {
+                    String updatedVerb = updatedUriTemplate.getHTTPVerb();
+                    String updatedPath = updatedUriTemplate.getUriTemplate();
+
+                    //Check if existing reused resource is among updated resources
+                    if (existingVerb.equalsIgnoreCase(updatedVerb) &&
+                            existingPath.equalsIgnoreCase(updatedPath)) {
+                        isReusedResourceRemoved = false;
+                        break;
+                    }
+                }
+
+                // Existing reused resource is not among updated resources
+                if (isReusedResourceRemoved) {
+                    APIResource removedResource = new APIResource(existingVerb, existingPath);
+                    removedReusedResources.add(removedResource);
+                }
+            }
+        }
+        return removedReusedResources;
     }
 }

@@ -46,7 +46,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "   (GROUP_ID= ?  OR  (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER(?)))" +
+            "   (GROUP_ID= ?  OR  (GROUP_ID='' AND SUB.USER_ID = ?))" +
             " And " +
             "    NAME like ?" +
             " limit ? , ? "+
@@ -74,7 +74,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "   (GROUP_ID= ?  OR (GROUP_ID='' AND SUB.USER_ID=?))"+
+            "   (GROUP_ID= ?  OR (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER (?)))"+
             " And "+
             "    NAME like ?"+
             " limit ? , ? "+
@@ -104,7 +104,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID " +
                     " IN ($params) AND TENANT = ? ))" +
                     "           OR " +
-                    "    (SUB.USER_ID = ? )" +
+                    "    (SUB.USER_ID = ?)" +
                     "           OR " +
                     "     (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
@@ -169,7 +169,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "    LOWER(SUB.USER_ID) = LOWER(?)"+
+            "    SUB.USER_ID = ? "+
             " And "+
             "    NAME like ?"+
             " limit ? , ? "+
@@ -196,7 +196,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "   SUB.USER_ID=?" +
+            "   LOWER (SUB.USER_ID) =LOWER (?)" +
             " And "+
             "    NAME like ?"+
             " limit ? , ? "+
@@ -228,5 +228,22 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " ) ORDER BY $1 $2 " +
                     " limit ? , ? "+
                     " )x ";
+
+    public static final String GET_ALL_ENDPOINT_REGISTRIES_OF_TENANT =
+            " SELECT " +
+                    "   UUID, " +
+                    "   REG_NAME, " +
+                    "   REG_TYPE, " +
+                    "   REG_MODE, " +
+                    "   TENANT_ID, " +
+                    "   REG_OWNER, " +
+                    "   READ_ROLE, " +
+                    "   WRITE_ROLE " +
+                    " FROM " +
+                    "   ENDPOINT_REG " +
+                    " WHERE " +
+                    "   TENANT_ID = ?" +
+                    " ORDER BY $1 $2 " +
+                    " LIMIT ?, ? ";
 
 }

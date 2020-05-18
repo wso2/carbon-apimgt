@@ -28,6 +28,10 @@ import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
 const useStyles = makeStyles((theme) => ({
     root: {
         padding: theme.spacing(3, 2),
+        '& td, & th': {
+            color: theme.palette.getContrastText(theme.custom.infoBar.background),
+        },
+        background: theme.custom.infoBar.background,
     },
     table: {
         minWidth: '100%',
@@ -126,7 +130,7 @@ function Overview(props) {
     const pathPrefix = '/applications/' + applicationId;
     return (
         <>
-            <Paper className={classes.root}>
+            <div className={classes.root}>
                 <Table className={classes.table}>
                     <TableBody>
                         <TableRow>
@@ -258,8 +262,8 @@ function Overview(props) {
 
                     </TableBody>
                 </Table>
-            </Paper>
-            <Grid container className={classes.root} spacing={2}>
+            </div>
+            <Grid container spacing={2}>
                 <Grid item xs={12} lg={6}>
                     <ExpansionPanel defaultExpanded>
                         <ExpansionPanelSummary classes={{ content: classes.summaryRoot }}>

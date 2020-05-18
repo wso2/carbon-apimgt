@@ -45,6 +45,7 @@
   <script src="<%= settings.Settings.app.context %>/site/public/fonts/iconfont/MaterialIcons.js"></script>
   <script src="<%= settings.Settings.app.context %>/site/public/dist/index.bundle.js"></script>
   <link rel="stylesheet" href="<%= settings.Settings.app.context %>/site/public/fonts/iconfont/material-icons.css">
+  <link rel="stylesheet" href="<%= settings.Settings.app.context %>/site/public/css/overrides.css">
   <script type="text/javascript">
     Settings.app.customUrl.tenantDomain = '<%=appUtils.getCustomUrlEnabledDomain()%>';
   </script>

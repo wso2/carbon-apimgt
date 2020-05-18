@@ -8996,6 +8996,13 @@ definitions:
           openAPIVersion:
             type: string
             example: "3.0.0"
+          endpoints:
+            type: array
+            description: |
+              contains host/servers specified in the OpenAPI file/URL
+            items:
+              type: string
+              example: "https://localhost:9443/am/sample/pizzashack/v1/api/"
       errors:
         type: array
         description: |
@@ -9216,6 +9223,10 @@ definitions:
             type: string
             description: A string that represents the context of the user's request
             example: CalculatorAPI
+          version:
+            type: string
+            description: The version of the API Product
+            example: 1.0.0
           provider:
             description: |
               If the provider value is not given, the user invoking the API will be used as the provider.

@@ -197,4 +197,13 @@ public abstract class APIDefinition {
     public abstract String getOASDefinitionWithTierContentAwareProperty(String oasDefinition,
             List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException;
 
+    /**
+     * This method changes the URI templates from the API definition as it support different schemes
+     * @param resourceConfigsJSON json String of oasDefinition
+     * @throws APIManagementException throws if an error occurred
+     * @return URI templates
+     */
+    public abstract String processOtherSchemeScopes(String resourceConfigsJSON)
+            throws APIManagementException;
+
 }

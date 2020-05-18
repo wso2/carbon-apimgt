@@ -19,11 +19,17 @@ import javax.ws.rs.core.SecurityContext;
 {{>generatedAnnotation}}
 {{#operations}}
 public class {{classname}}ServiceImpl implements {{classname}}Service {
-  {{#operation}}
-      public Response {{nickname}}({{#allParams}}{{>serviceQueryParams}}{{>servicePathParams}}{{>serviceHeaderParams}}{{>serviceBodyParams}}{{>serviceFormParams}}, {{/allParams}}MessageContext messageContext) {
-      // do some magic!
-      return Response.ok().entity("magic!").build();
-  }
-  {{/operation}}
+    {{#operation}}
+
+    public Response {{nickname}}({{#allParams}}{{>serviceQueryParams}}{{>servicePathParams}}{{>serviceHeaderParams}}{{>serviceBodyParams}}{{>serviceFormParams}}, {{/allParams}}MessageContext messageContext) {
+        // remove errorObject and add implementation code!
+        ErrorDTO errorObject = new ErrorDTO();
+        Response.Status status  = Response.Status.NOT_IMPLEMENTED;
+        errorObject.setCode((long) status.getStatusCode());
+        errorObject.setMessage(status.toString());
+        errorObject.setDescription("The requested resource has not been implemented");
+        return Response.status(status).entity(errorObject).build();
+    }
+    {{/operation}}
 }
 {{/operations}}

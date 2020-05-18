@@ -68,6 +68,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -159,42 +160,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
     private static final String API_PRODUCT_TYPE = "APIPRODUCT";
-
-    class APIResource {
-        String verb;
-        String path;
-
-        APIResource(String verb, String path) {
-            this.verb = verb;
-            this.path = path;
-        }
-
-        @Override
-        public String toString() {
-            return "{" +
-                    "verb='" + verb + '\'' +
-                    ", path='" + path + '\'' +
-                    '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-
-            if (!(o instanceof APIResource)) {
-                return false;
-            }
-
-            APIResource that = (APIResource) o;
-            return verb.equals(that.verb) &&
-                    path.equals(that.path);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(verb, path);
-        }
-    }
 
     @Override
     public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query,
@@ -1004,49 +969,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                             httpConn.getResponseCode() + " - " + httpConn.getResponseMessage());
         }
         return auditUuid;
-    }
-
-    /**
-     * Finds resources that have been removed in the updated API URITemplates,
-     * that are currently reused by API Products.
-     *
-     * @param updatedUriTemplates Updated URITemplates
-     * @param existingAPI         Existing API
-     * @return List of removed resources that are reused among API Products
-     */
-    private List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI) {
-        Set<URITemplate> existingUriTemplates = existingAPI.getUriTemplates();
-        List<APIResource> removedReusedResources = new ArrayList<>();
-
-        for (URITemplate existingUriTemplate : existingUriTemplates) {
-
-            // If existing URITemplate is used by any API Products
-            if (!existingUriTemplate.retrieveUsedByProducts().isEmpty()) {
-                String existingVerb = existingUriTemplate.getHTTPVerb();
-                String existingPath = existingUriTemplate.getUriTemplate();
-                boolean isReusedResourceRemoved = true;
-
-                for (URITemplate updatedUriTemplate : updatedUriTemplates) {
-                    String updatedVerb = updatedUriTemplate.getHTTPVerb();
-                    String updatedPath = updatedUriTemplate.getUriTemplate();
-
-                    //Check if existing reused resource is among updated resources
-                    if (existingVerb.equalsIgnoreCase(updatedVerb) &&
-                            existingPath.equalsIgnoreCase(updatedPath)) {
-                        isReusedResourceRemoved = false;
-                        break;
-                    }
-                }
-
-                // Existing reused resource is not among updated resources
-                if (isReusedResourceRemoved) {
-                    APIResource removedResource = new APIResource(existingVerb, existingPath);
-                    removedReusedResources.add(removedResource);
-                }
-            }
-        }
-
-        return removedReusedResources;
     }
 
     /**
@@ -2944,6 +2866,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIDefinition oasParser = response.getParser();
         String apiDefinition = response.getJsonContent();
+        apiDefinition = OASParserUtil.preProcess(apiDefinition);
         Set<URITemplate> uriTemplates = null;
         try {
             uriTemplates = oasParser.getURITemplates(apiDefinition);
@@ -2969,7 +2892,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
 
-        List<APIResource> removedProductResources = getRemovedProductResources(uriTemplates, existingAPI);
+        List<APIResource> removedProductResources = apiProvider.getRemovedProductResources(uriTemplates, existingAPI);
 
         if (!removedProductResources.isEmpty()) {
             RestApiUtil.handleConflict("Cannot remove following resource paths " +
@@ -3299,6 +3222,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 swaggerData = new SwaggerData(apiToAdd);
                 definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
             }
+            definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
             Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
             Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
             apiToAdd.setUriTemplates(uriTemplates);

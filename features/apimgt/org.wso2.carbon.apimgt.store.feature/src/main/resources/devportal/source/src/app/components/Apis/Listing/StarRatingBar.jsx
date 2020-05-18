@@ -42,9 +42,15 @@ const styles = theme => ({
         fontSize: 30,
         color: theme.palette.grey.A200,
     },
+    iconFilled: {
+        color: theme.custom.infoBar.starColor,
+    },
+    iconEmpty: {
+        color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
+    },
     removeRating: {
         fontSize: 20,
-        color: 'black',
+        color: theme.palette.getContrastText(theme.custom.infoBar.background),
     },
     userRating: {
         display: 'flex',
@@ -199,7 +205,13 @@ class StarRatingBar extends React.Component {
                             </React.Fragment>
                         ) : (
                             <React.Fragment>
-                                <Rating name='half-rating' value={apiRatingNumber} precision={0.1} readOnly />
+                                <Rating 
+                                    name='half-rating' 
+                                    value={apiRatingNumber} 
+                                    precision={0.1} 
+                                    readOnly 
+                                    classes={{iconEmpty:classes.iconEmpty,iconFilled: classes.iconFilled}}
+                                />
                             </React.Fragment>
                         )}
                     </React.Fragment>

@@ -192,10 +192,16 @@ const styles = (theme) => {
         button: {
             display: 'inline-grid',
             cursor: 'pointer',
+            '& .material-icons, & span': {
+                color: theme.palette.getContrastText(theme.custom.infoBar.background),
+            },
         },
         editButton: {
             display: 'inline-grid',
             cursor: 'pointer',
+            '& .material-icons, & span': {
+                color: theme.palette.getContrastText(theme.custom.infoBar.background),
+            },
         },
         iconButton: {
             display: 'flex',

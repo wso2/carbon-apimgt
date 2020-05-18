@@ -43,7 +43,8 @@ const styles = (theme) => ({
     },
     bootstrapInput: {
         borderRadius: 4,
-        backgroundColor: theme.palette.common.white,
+        backgroundColor: theme.custom.apiDetailPages.tokenTextBoxBackground,
+        color: theme.palette.getContrastText(theme.custom.apiDetailPages.tokenTextBoxBackground),
         border: '1px solid #ced4da',
         padding: '5px 12px',
         height: 100,
@@ -76,6 +77,10 @@ const styles = (theme) => ({
     },
     root: {
         marginTop: 20,
+        '& span, & h5, & label, & td, & li, & div, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
+
     },
 });
 /**
