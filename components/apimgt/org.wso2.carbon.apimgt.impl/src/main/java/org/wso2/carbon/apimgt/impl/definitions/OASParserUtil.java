@@ -1267,13 +1267,13 @@ public class OASParserUtil {
      * @throws APIManagementException throws if an error occurred
      */
     public static String getThrottleTierFromSwagger(Map<String, Object> extensions) throws APIManagementException {
-        String trottleTier = null;
+        String throttleTier = null;
         ObjectMapper mapper = new ObjectMapper();
         if (extensions.containsKey(APIConstants.X_WSO2_THROTTLING_TIER)) {
             Object object = extensions.get(APIConstants.X_WSO2_THROTTLING_TIER).toString();
-            trottleTier = mapper.convertValue(object, String.class);
+            throttleTier = mapper.convertValue(object, String.class);
         }
-        return trottleTier;
+        return throttleTier;
     }
 
     /**
