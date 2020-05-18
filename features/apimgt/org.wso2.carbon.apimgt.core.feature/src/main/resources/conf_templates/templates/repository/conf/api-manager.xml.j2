@@ -143,6 +143,7 @@
                 {% else %}
                 <GatewayWSEndpoint></GatewayWSEndpoint>
                 {% endif %}
+                <OpaServer>{{environment_name.opa_server}}</OpaServer>
             </Environment>
             {% endfor %}
         </Environments>
@@ -569,7 +570,7 @@
             {% for uri in apim.rest_api.whitelisted_uri %}
                 <WhiteListedURI>
                 <URI>{{uri.uri_path}}</URI>
-                <HTTPMethods>{{uri.http_method}}</HTTPMethods>
+                <HTTPMethods>{{uri.httpMethod}}</HTTPMethods>
                 </WhiteListedURI>
             {% endfor %}
          {% endif %}

@@ -2554,8 +2554,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                     authProperties);
-            Map<String, String> properties = new HashMap<String, String>();
 
+            Map<String, String> opaProperties = new HashMap<>();
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.policies.OPAHandler", opaProperties);
+
+            Map<String, String> properties = new HashMap<String, String>();
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
             if (api.getProductionMaxTps() != null) {
                 properties.put("productionMaxCount", api.getProductionMaxTps());
