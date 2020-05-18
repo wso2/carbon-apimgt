@@ -70,7 +70,6 @@ public class OPAHandler extends AbstractHandler {
         setHttpMethod(messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD).toString());
         setApiContext(messageContext.getProperty(RESTConstants.REST_API_CONTEXT).toString());
         setUsername(messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER).toString());
-        setScopes(messageContext.getProperty(APIMgtGatewayConstants.SCOPES).toString());
         setApiName(messageContext.getProperty(APIMgtGatewayConstants.API).toString());
         setResourcePath(messageContext.getProperty(APIMgtGatewayConstants.RESOURCE).toString());
         if("true" == messageContext.getProperty("IsClientDoingREST").toString() && "API" == messageContext.getProperty(APIMgtGatewayConstants.API_TYPE)){
@@ -80,6 +79,7 @@ public class OPAHandler extends AbstractHandler {
             setApiType("SOAP");
         }
         setApplicationName(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME).toString());
+        setScopes(messageContext.getProperty(APIMgtGatewayConstants.SCOPES).toString());
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
