@@ -92,7 +92,6 @@ function AddEditMGLabel(props) {
     const [state, dispatch] = useReducer(reducer, initialState);
     const { name, description, hosts } = state;
 
-
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
     };
@@ -218,7 +217,6 @@ function AddEditMGLabel(props) {
                     label={(
                         <span>
                             <FormattedMessage id='AdminPages.Microgateway.AddEdit.form.name' defaultMessage='Name' />
-
                             <span className={classes.error}>*</span>
                         </span>
                     )}
@@ -258,7 +256,6 @@ function AddEditMGLabel(props) {
                         />
                     )}
             </FormControl>
-
         </FormDialogBase>
     );
 }

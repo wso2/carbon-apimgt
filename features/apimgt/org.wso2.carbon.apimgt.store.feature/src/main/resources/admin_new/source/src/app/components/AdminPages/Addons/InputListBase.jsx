@@ -6,20 +6,19 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 
-let id;
-
 const theme = createMuiTheme();
 theme.spacing(2);
 
 const InputList = (props) => {
+    let id;
     const {
         onInputListChange, initialList, inputLabelPrefix, helperText, addButtonLabel,
     } = props;
     const [userInputItems, setUserInputItems] = useState([]);
 
-    const handleInput = (e) => {
-        let tempItems = userInputItems.filter((item) => item.key !== e.target.name);
-        tempItems = [...tempItems, { key: '' + e.target.name, value: e.target.value }];
+    const handleInput = ({ target: { name, value } }) => {
+        let tempItems = userInputItems.filter((item) => item.key !== name);
+        tempItems = [...tempItems, { key: '' + name, value }];
         tempItems.sort((a, b) => {
             return a.key - b.key;
         });
@@ -48,7 +47,7 @@ const InputList = (props) => {
                 return { key: '' + id++, value: item };
             }));
         } else {
-            setUserInputItems([{ key: '1', value: '' }]);
+            setUserInputItems([{ key: '' + id++, value: '' }]);
         }
     }, []);
 
