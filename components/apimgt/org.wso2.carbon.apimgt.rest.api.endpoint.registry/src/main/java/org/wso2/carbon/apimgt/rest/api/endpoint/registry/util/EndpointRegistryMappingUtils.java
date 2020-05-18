@@ -18,11 +18,12 @@ package org.wso2.carbon.apimgt.rest.api.endpoint.registry.util;
 
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+
+import java.io.InputStream;
 
 /**
  * This class is responsible for mapping APIM core Endpoint Registry related objects into REST API
@@ -89,7 +90,7 @@ public class EndpointRegistryMappingUtils {
      * @return EndpointRegistryEntry corresponds to RegistryEntryDTO object
      */
     public static EndpointRegistryEntry fromDTOToRegistryEntry(RegistryEntryDTO registryEntryDTO, String entryUUID,
-                                                               ResourceFile endpointDefinition, int registryId) {
+                                                               InputStream endpointDefinition, int registryId) {
         EndpointRegistryEntry registryEntry = new EndpointRegistryEntry();
         registryEntry.setEntryId(entryUUID);
         registryEntry.setName(registryEntryDTO.getEntryName());

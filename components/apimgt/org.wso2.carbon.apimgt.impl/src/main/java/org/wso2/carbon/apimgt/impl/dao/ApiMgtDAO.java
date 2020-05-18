@@ -14939,6 +14939,8 @@ public class ApiMgtDAO {
                     endpointRegistryEntry.setServiceType(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_TYPE));
                     endpointRegistryEntry.setServiceURL(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_URL));
                     endpointRegistryEntry.setMetaData(rs.getString(EndpointRegistryConstants.COLUMN_METADATA));
+                    endpointRegistryEntry.setEndpointDefinition(
+                            rs.getBinaryStream(EndpointRegistryConstants.COLUMN_ENDPOINT_DEFINITION));
                     return endpointRegistryEntry;
                 }
             }
@@ -15002,7 +15004,7 @@ public class ApiMgtDAO {
             ps.setString(5, registryEntry.getDefinitionURL());
             ps.setString(6, registryEntry.getMetaData());
             ps.setString(7, registryEntry.getServiceType());
-            ps.setBlob(8, registryEntry.getEndpointDefinition().getContent());
+            ps.setBlob(8, registryEntry.getEndpointDefinition());
             ps.setInt(9, registryEntry.getRegistryId());
             ps.executeUpdate();
             connection.commit();
@@ -15029,7 +15031,7 @@ public class ApiMgtDAO {
             ps.setString(4, registryEntry.getDefinitionURL());
             ps.setString(5, registryEntry.getMetaData());
             ps.setString(6, registryEntry.getServiceType());
-            ps.setBlob(7, registryEntry.getEndpointDefinition().getContent());
+            ps.setBlob(7, registryEntry.getEndpointDefinition());
             ps.setString(8, registryEntry.getEntryId());
             ps.executeUpdate();
             connection.commit();

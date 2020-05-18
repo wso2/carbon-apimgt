@@ -299,7 +299,7 @@
     },
     "/registries/{registryId}/entries" : {
       "get" : {
-        "tags" : [ "Registries Entries" ],
+        "tags" : [ "Registry Entries" ],
         "summary" : "Get All entries in the registry",
         "operationId" : "getAllEntriesInRegistry",
         "parameters" : [ {
@@ -654,6 +654,71 @@
           "default" : [ "registry:entry_write" ]
         } ]
       }
+    },
+    "/registries/{registryId}/entries/{entryId}/definition-file" : {
+      "get" : {
+        "tags" : [ "Registry Entries" ],
+        "summary" : "Retrieve the definition file of a specific Entry in a Registry",
+        "description" : "Using this operation, you can retrieve the definition file of a specific entry in a Registry using the EntryId and RegistryId.\n",
+        "operationId" : "getEndpointDefinition",
+        "parameters" : [ {
+          "name" : "registryId",
+          "in" : "path",
+          "description" : "uuid of the registry",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "entryId",
+          "in" : "path",
+          "description" : "uuid of the registry entry",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Updated.\nSuccessful response with the definition file as entity in the body.\n",
+            "content" : {
+              "application/octet-stream" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid Request\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested Registry or Entry does not exist.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "default" : [ "registry:entry_view" ]
+        } ]
+      }
     }
   },
   "components" : {
@@ -715,6 +780,11 @@
           "serviceUrl" : {
             "type" : "string",
             "example" : "http://localhost/pizzashack"
+          },
+          "serviceCategory" : {
+            "type" : "string",
+            "description" : "Business Category of the Endpoint",
+            "enum" : [ "UTILITY", "EDGE", "DOMAIN" ]
           },
           "serviceType" : {
             "type" : "string",
@@ -833,7 +903,6 @@
         "flows" : {
           "implicit" : {
             "authorizationUrl" : "https://example.com/oauth/authorize",
-            "tokenUrl" : "https://example.com/oauth/token",
             "scopes" : {
               "registry:view" : "view registry",
               "registry:write" : "write registry",
