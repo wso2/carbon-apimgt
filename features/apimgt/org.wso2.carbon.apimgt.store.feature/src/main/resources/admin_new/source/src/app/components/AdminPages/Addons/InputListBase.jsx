@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { createMuiTheme } from '@material-ui/core/styles';
+import FormGroup from '@material-ui/core/FormGroup';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
@@ -10,8 +11,9 @@ import Box from '@material-ui/core/Box';
 const theme = createMuiTheme();
 theme.spacing(2);
 
+let id = 1;
+
 const InputList = (props) => {
-    let id;
     const {
         onInputListChange, initialList, inputLabelPrefix, helperText, addButtonLabel,
     } = props;
@@ -59,35 +61,50 @@ const InputList = (props) => {
 
     let labelCounter = 1;
     return (
-        <div>
-            {userInputItems.map((item) => {
-                return (
-                    <Grid container xs={12} direction='row' spacing={0}>
-                        <TextField
-                            margin='dense'
-                            name={item.key}
-                            onChange={handleInput}
-                            label={inputLabelPrefix + ' ' + labelCounter++}
-                            value={item.value}
-                            helperText={helperText}
-                            variant='outlined'
-                        />
-                        <Box mt={1}>
-                            <Button
-                                color='primary'
-                                onClick={() => handleDelete(item.key)}
-                            >
-                                <FormattedMessage
-                                    id='AdminPages.Addons.InputListBase.textfield.remove.label'
-                                    defaultMessage='Remove'
+        <FormGroup>
+            <Grid xs={12} container direction='row' spacing={3}>
+                <Grid item>
+                    {userInputItems.map((item) => {
+                        return (
+                            <Grid container xs={12} direction='row' spacing={0}>
+                                <TextField
+                                    margin='dense'
+                                    name={item.key}
+                                    onChange={handleInput}
+                                    label={inputLabelPrefix + ' ' + labelCounter++}
+                                    value={item.value}
+                                    helperText={helperText}
+                                    variant='outlined'
                                 />
-                            </Button>
-                        </Box>
-                    </Grid>
-                );
-            })}
-            <Button variant='outlined' onClick={onAddInputField}>{addButtonLabel}</Button>
-        </div>
+                                <Box mt={1}>
+                                    <Button
+                                        color='primary'
+                                        onClick={() => handleDelete(item.key)}
+                                        disabled={userInputItems.length === 1}
+                                    >
+                                        <FormattedMessage
+                                            id='AdminPages.Addons.InputListBase.textfield.remove.label'
+                                            defaultMessage='Remove'
+                                        />
+                                    </Button>
+                                </Box>
+                            </Grid>
+                        );
+                    })}
+                </Grid>
+                <Grid item>
+                    <Box mt={1}>
+                        <Button
+                            variant='contained'
+                            color={theme.palette.action.disabledBackground}
+                            onClick={onAddInputField}
+                        >
+                            {addButtonLabel}
+                        </Button>
+                    </Box>
+                </Grid>
+            </Grid>
+        </FormGroup>
     );
 };
 

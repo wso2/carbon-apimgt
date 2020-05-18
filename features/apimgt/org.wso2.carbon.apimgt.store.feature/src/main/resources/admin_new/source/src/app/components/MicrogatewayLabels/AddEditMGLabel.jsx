@@ -16,11 +16,10 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import { FormattedMessage } from 'react-intl';
 import FormControl from '@material-ui/core/FormControl';
 import { makeStyles } from '@material-ui/core/styles';
@@ -38,12 +37,6 @@ const useStyles = makeStyles((theme) => ({
         minWidth: theme.spacing(55),
     },
 }));
-
-let initialState = {
-    name: '',
-    description: '',
-    hosts: [],
-};
 
 /**
  * Reducer
@@ -67,18 +60,16 @@ function AddEditMGLabel(props) {
         updateList, dataRow, icon, triggerButtonText, title,
     } = props;
     const classes = useStyles();
-    let id = null;
-    // If the dataRow is there ( form is in edit mode ) else it's a new creation
-    useEffect(() => {
-        initialState = {
-            name: '',
-            description: '',
-            hosts: [],
-        };
-    }, [title]);
 
+    let id = null;
+    let initialState = {
+        name: '',
+        description: '',
+        hosts: [],
+    };
+
+    // If the dataRow is there, assign data to initialState
     if (dataRow) {
-        // eslint-disable-next-line react/prop-types
         const { name: originalName, description: originalDescription, accessUrls: originalHosts } = dataRow;
         id = dataRow.id;
 
@@ -148,37 +139,32 @@ function AddEditMGLabel(props) {
             // assign the create promise to the promiseAPICall
             promiseAPICall = restApi.addMicrogatewayLabel(name.trim(), description, hosts);
         }
-        promiseAPICall = new Promise((resolve, reject) => {
-            promiseAPICall
-                .then(() => {
-                    resolve(
-                        (id)
-                            ? (
-                                <FormattedMessage
-                                    id='AdminPages.Microgateway.AddEdit.form.info.edit.successful'
-                                    defaultMessage='Microgateway Label edited successfully'
-                                />
-                            )
-                            : (
-                                <FormattedMessage
-                                    id='AdminPages.Microgateway.AddEdit.form.info.add.successful'
-                                    defaultMessage='microgateway Label added successfully'
-                                />
-                            )
-                        ,
-                    );
-                })
-                .catch((error) => {
-                    const { response } = error;
-                    if (response.body) {
-                        reject(response.body.description);
-                    }
-                })
-                .finally(() => {
-                    updateList();
-                });
+
+        return promiseAPICall.then(() => {
+            if (id) {
+                return (
+                    <FormattedMessage
+                        id='AdminPages.Microgateway.AddEdit.form.info.edit.successful'
+                        defaultMessage='Microgateway Label edited successfully'
+                    />
+                );
+            } else {
+                return (
+                    <FormattedMessage
+                        id='AdminPages.Microgateway.AddEdit.form.info.add.successful'
+                        defaultMessage='microgateway Label added successfully'
+                    />
+                );
+            }
+        }).catch((error) => {
+            const { response } = error;
+            if (response.body) {
+                throw (response.body.description);
+            }
+            return null;
+        }).finally(() => {
+            updateList();
         });
-        return promiseAPICall;
     };
 
     const onHostChange = (userHosts) => {
@@ -198,20 +184,6 @@ function AddEditMGLabel(props) {
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
         >
-            <DialogContentText>
-                {(id) ? (
-                    <FormattedMessage
-                        id='AdminPages.Microgateway.AddEdit.form.edit.info'
-                        defaultMessage='Edit selected Microgateway Label'
-                    />
-                )
-                    : (
-                        <FormattedMessage
-                            id='AdminPages.Microgateway.AddEdit.form.add.info'
-                            defaultMessage='Add a new Microgateway Label'
-                        />
-                    )}
-            </DialogContentText>
             <FormControl component='fieldset' className={classes.addEditFormControl}>
                 <TextField
                     autoFocus
@@ -276,6 +248,7 @@ AddEditMGLabel.propTypes = {
         id: PropTypes.string.isRequired,
         description: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired,
+        accessUrls: PropTypes.shape([]),
     }),
     icon: PropTypes.element,
     triggerButtonText: PropTypes.shape({}).isRequired,
