@@ -1465,7 +1465,7 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
-     * This method returns api that is attched with api extensions related to micro-gw
+     * This method returns api that is attached with api extensions related to micro-gw
      *
      * @param apiDefinition                  String
      * @param api                            API
@@ -1519,7 +1519,7 @@ public class OAS3Parser extends APIDefinition {
         if (transports != null) {
             api.setTransports(transports);
         }
-        //Setup Trottlingtiers
+        //Setup Throttlingtiers
         String throttleTier = OASParserUtil.getThrottleTierFromSwagger(extensions);
         if (throttleTier != null) {
             api.setApiLevelPolicy(throttleTier);

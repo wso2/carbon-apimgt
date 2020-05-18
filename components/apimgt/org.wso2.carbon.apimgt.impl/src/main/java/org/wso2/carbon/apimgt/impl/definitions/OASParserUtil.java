@@ -1230,7 +1230,7 @@ public class OASParserUtil {
     }
 
     /**
-     * This method returns api that is attched with api extensions related to micro-gw
+     * This method returns api that is attached with api extensions related to micro-gw
      *
      * @param swaggerContent String
      * @param api            API
@@ -1243,7 +1243,7 @@ public class OASParserUtil {
     }
 
     /**
-     * This method returns extension of trottling tier related to micro-gw
+     * This method returns extension of basepath related to micro-gw
      *
      * @param extensions Map<String, Object> extensions
      * @return String String
@@ -1260,7 +1260,7 @@ public class OASParserUtil {
     }
 
     /**
-     * This method returns extension of trottling tier related to micro-gw
+     * This method returns extension of throttling tier related to micro-gw
      *
      * @param extensions Map<String, Object> extensions
      * @return String String

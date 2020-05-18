@@ -1186,7 +1186,7 @@ public class OAS2Parser extends APIDefinition {
     }
 
     /**
-     * This method returns the boolean value which checks whether the swagge is included default security scheme or not
+     * This method returns the boolean value which checks whether the swagger is included default security scheme or not
      *
      * @param swaggerContent resource json
      * @return is default is given already
@@ -1345,7 +1345,7 @@ public class OAS2Parser extends APIDefinition {
     }
 
     /**
-     * This method returns api that is attched with api extensions related to micro-gw
+     * This method returns api that is attached with api extensions related to micro-gw
      *
      * @param apiDefinition                  String
      * @param api                            API
@@ -1399,7 +1399,7 @@ public class OAS2Parser extends APIDefinition {
         if (transports != null) {
             api.setTransports(transports);
         }
-        //Setup Trottlingtiers
+        //Setup Throttlingtiers
         String throttleTier = OASParserUtil.getThrottleTierFromSwagger(extensions);
         if (throttleTier != null) {
             api.setApiLevelPolicy(throttleTier);
