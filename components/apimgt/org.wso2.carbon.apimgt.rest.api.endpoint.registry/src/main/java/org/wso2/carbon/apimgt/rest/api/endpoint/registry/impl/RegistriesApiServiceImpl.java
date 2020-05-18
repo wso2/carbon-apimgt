@@ -77,8 +77,8 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
 
     @Override
-    public Response getAllEntriesInRegistry(String registryId, String query, RegistriesApi.SortByEntryEnum sortByEntry,
-                    RegistriesApi.SortEntryEnum sortEntry, Integer limit, Integer offset,
+    public Response getAllEntriesInRegistry(String registryId, String query, RegistriesApi.SortEntryByEnum sortByEntry,
+                    RegistriesApi.SortEntryOrderEnum sortEntry, Integer limit, Integer offset,
                                             MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         RegistryEntryArrayDTO registryEntryArray = new RegistryEntryArrayDTO();
@@ -130,15 +130,16 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     }
 
     @Override
-    public Response getRegistries(String query, RegistriesApi.SortByRegistryEnum sortByRegistry, RegistriesApi
-            .SortOrderEnum sortOrder, Integer limit, Integer offset, MessageContext messageContext) {
+    public Response getRegistries(String query, RegistriesApi.SortRegistryByEnum sortByRegistry, RegistriesApi
+            .SortRegistryOrderEnum sortOrder, Integer limit, Integer offset, MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
         RegistryArrayDTO registryDTOList = new RegistryArrayDTO();
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        String sortOrderStr = sortOrder != null ? sortOrder.toString() : RegistriesApi.SortOrderEnum.asc.toString();
+        String sortOrderStr = sortOrder != null ? sortOrder.toString() :
+                RegistriesApi.SortRegistryOrderEnum.asc.toString();
         String sortBy = sortByRegistry != null ? EndpointRegistryConstants.COLUMN_REG_NAME :
                 EndpointRegistryConstants.COLUMN_ID;
 

@@ -28,7 +28,7 @@
             "type" : "string"
           }
         }, {
-          "name" : "sortByRegistry",
+          "name" : "sortRegistryBy",
           "in" : "query",
           "required" : false,
           "style" : "form",
@@ -38,7 +38,7 @@
             "enum" : [ "registryName" ]
           }
         }, {
-          "name" : "sortOrder",
+          "name" : "sortRegistryOrder",
           "in" : "query",
           "required" : false,
           "style" : "form",
@@ -323,7 +323,7 @@
             "type" : "string"
           }
         }, {
-          "name" : "sortByEntry",
+          "name" : "sortEntryBy",
           "in" : "query",
           "required" : false,
           "style" : "form",
@@ -333,7 +333,7 @@
             "enum" : [ "definitionType", "serviceType" ]
           }
         }, {
-          "name" : "sortEntry",
+          "name" : "sortEntryOrder",
           "in" : "query",
           "required" : false,
           "style" : "form",

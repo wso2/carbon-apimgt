@@ -50,13 +50,13 @@ paths:
           "prodServer" will match a registry entry if the name is exactly "prodServer".
         schema:
           type: string
-      - name: sortByRegistry
+      - name: sortRegistryBy
         in: query
         schema:
           type: string
           enum:
             - registryName
-      - name: sortOrder
+      - name: sortRegistryOrder
         in: query
         schema:
           type: string
@@ -291,14 +291,14 @@ paths:
           "pizzaServer" will match a registry entry if the name is exactly "pizzaServer".
         schema:
           type: string
-      - name: sortByEntry
+      - name: sortEntryBy
         in: query
         schema:
           type: string
           enum:
             - definitionType
             - serviceType
-      - name: sortEntry
+      - name: sortEntryOrder
         in: query
         schema:
           type: string

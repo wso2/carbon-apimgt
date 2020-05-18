@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-18T11:57:39.074+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-18T16:04:10.682+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -216,12 +216,12 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 ,             @Parameter(description = "",     schema=@Schema(allowableValues={ "definitionType", "serviceType" })
 ) 
-        @QueryParam("sortByEntry") SortByEntryEnum sortByEntry
+        @QueryParam("sortEntryBy") SortEntryByEnum sortEntryBy
 
 
 ,             @Parameter(description = "",     schema=@Schema(allowableValues={ "asc", "desc" })
 ) 
-        @QueryParam("sortEntry") SortEntryEnum sortEntry
+        @QueryParam("sortEntryOrder") SortEntryOrderEnum sortEntryOrder
 
 
 ,             @Parameter(description = "Maximum limit of items to return. ") 
@@ -235,11 +235,11 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 
 ) throws APIManagementException{
-        return delegate.getAllEntriesInRegistry(registryId, query, sortByEntry, sortEntry, limit, offset, securityContext);
+        return delegate.getAllEntriesInRegistry(registryId, query, sortEntryBy, sortEntryOrder, limit, offset, securityContext);
         }
-    public enum SortByEntryEnum {
+    public enum SortEntryByEnum {
     definitionType,serviceType;
-    }    public enum SortEntryEnum {
+    }    public enum SortEntryOrderEnum {
     asc,desc;
     }    @GET
     @Path("/{registryId}/entries/{entryId}/definition-file")
@@ -298,12 +298,12 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 ,             @Parameter(description = "",     schema=@Schema(allowableValues={ "registryName" })
 ) 
-        @QueryParam("sortByRegistry") SortByRegistryEnum sortByRegistry
+        @QueryParam("sortRegistryBy") SortRegistryByEnum sortRegistryBy
 
 
 ,             @Parameter(description = "",     schema=@Schema(allowableValues={ "asc", "desc" })
 ) 
-        @QueryParam("sortOrder") SortOrderEnum sortOrder
+        @QueryParam("sortRegistryOrder") SortRegistryOrderEnum sortRegistryOrder
 
 
 ,             @Parameter(description = "Maximum limit of items to return. ") 
@@ -317,11 +317,11 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 
 ) throws APIManagementException{
-        return delegate.getRegistries(query, sortByRegistry, sortOrder, limit, offset, securityContext);
+        return delegate.getRegistries(query, sortRegistryBy, sortRegistryOrder, limit, offset, securityContext);
         }
-    public enum SortByRegistryEnum {
+    public enum SortRegistryByEnum {
     registryName;
-    }    public enum SortOrderEnum {
+    }    public enum SortRegistryOrderEnum {
     asc,desc;
     }    @GET
     @Path("/{registryId}")
