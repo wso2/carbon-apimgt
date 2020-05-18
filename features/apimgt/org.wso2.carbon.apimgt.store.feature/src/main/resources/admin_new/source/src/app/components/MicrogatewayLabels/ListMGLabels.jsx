@@ -66,7 +66,6 @@ export default function ListMGLabels() {
                 defaultMessage: 'Label',
             }),
             options: {
-                filter: true,
                 sort: true,
             },
         },
@@ -77,7 +76,6 @@ export default function ListMGLabels() {
                 defaultMessage: 'Description',
             }),
             options: {
-                filter: true,
                 sort: false,
             },
         },
@@ -88,15 +86,12 @@ export default function ListMGLabels() {
                 defaultMessage: 'Gateway Host(s)',
             }),
             options: {
-                filter: true,
                 sort: true,
                 customBodyRender: (value) => {
                     return (
-                        <td>
-                            {value.map((host) => (
-                                <tr>{host}</tr>
-                            ))}
-                        </td>
+                        value.map((host) => (
+                            <div>{host}</div>
+                        ))
                     );
                 },
             },
