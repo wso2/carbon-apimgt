@@ -111,11 +111,13 @@ export default class Protected extends Component {
      * Invoke checksession oidc endpoint.
      */
     checkSession() {
-        setInterval(() => {
-            const { clientId, sessionStateCookie } = this.state;
-            const msg = clientId + ' ' + sessionStateCookie;
-            document.getElementById('iframeOP').contentWindow.postMessage(msg, Configurations.idp.origin);
-        }, 2000);
+        if (Configurations.app.singleLogout && Configurations.app.singleLogout.enabled) {
+            setInterval(() => {
+                const { clientId, sessionStateCookie } = this.state;
+                const msg = clientId + ' ' + sessionStateCookie;
+                document.getElementById('iframeOP').contentWindow.postMessage(msg, Configurations.idp.origin);
+            }, Configurations.app.singleLogout.timeout);
+        }
     }
 
     /**
