@@ -16,9 +16,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.endpoint.registry.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.impl.EndpointRegistryConstants;
+import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -113,9 +115,11 @@ public class EndpointRegistryMappingUtils {
      * @param sortBy Sort By field name
      * @return Updated sort by field
      */
-    public static String getRegistriesSortByField(String sortBy) {
-        String updatedSortBy = EndpointRegistryConstants.COLUMN_ID; // default sortBy field
-        if (RestApiConstants.ENDPOINT_REG_NAME.equals(sortBy)) {
+    public static String getRegistriesSortByField(RegistriesApi.SortByRegistryEnum sortBy) {
+        String updatedSortBy = StringUtils.EMPTY;
+        if (sortBy == null) {
+            updatedSortBy = EndpointRegistryConstants.COLUMN_ID; // default sortBy field
+        } else if (RestApiConstants.ENDPOINT_REG_NAME.equals(sortBy.toString())) {
             updatedSortBy = EndpointRegistryConstants.COLUMN_REG_NAME;
         }
         return updatedSortBy;
@@ -127,11 +131,13 @@ public class EndpointRegistryMappingUtils {
      * @param sortBy Sort By field name
      * @return Updated sort by field
      */
-    public static String getRegistryEntriesSortByField(String sortBy) {
-        String updatedSortBy = EndpointRegistryConstants.COLUMN_ENTRY_NAME; // default sortBy field
-        if (RestApiConstants.ENDPOINT_REG_ENTRY_DEFINITION_TYPE.equals(sortBy)) {
+    public static String getRegistryEntriesSortByField(RegistriesApi.SortByEntryEnum sortBy) {
+        String updatedSortBy = StringUtils.EMPTY;
+        if (sortBy == null) {
+            updatedSortBy = EndpointRegistryConstants.COLUMN_ENTRY_NAME; // default sortBy field
+        } else if (RestApiConstants.ENDPOINT_REG_ENTRY_DEFINITION_TYPE.equals(sortBy.toString())) {
             updatedSortBy = EndpointRegistryConstants.COLUMN_DEFINITION_TYPE;
-        } else if (RestApiConstants.ENDPOINT_REG_ENTRY_SERVICE_TYPE.equals(sortBy)) {
+        } else if (RestApiConstants.ENDPOINT_REG_ENTRY_SERVICE_TYPE.equals(sortBy.toString())) {
             updatedSortBy = EndpointRegistryConstants.COLUMN_SERVICE_TYPE;
         }
         return updatedSortBy;
