@@ -62,7 +62,12 @@ function Delete({ updateList, dataRow }) {
             icon={<DeleteForeverIcon />}
             formSaveCallback={formSaveCallback}
         >
-            <DialogContentText>Are you sure you want to delete this Microgateway Label?</DialogContentText>
+            <DialogContentText>
+                <FormattedMessage
+                    id='AdminPages.Microgateways.Delete.form.delete.confirmation.message'
+                    defaultMessage='Are you sure you want to delete this Microgateway Label?'
+                />
+            </DialogContentText>
         </FormDialogBase>
     );
 }
