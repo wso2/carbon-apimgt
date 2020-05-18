@@ -1260,17 +1260,19 @@ public class OAS3Parser extends APIDefinition {
      */
     private boolean isDefaultGiven(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
-        boolean isDefaultGiven = true;
-        try {
-            SecurityScheme checkDefault = openAPI.getComponents().getSecuritySchemes().get(OPENAPI_SECURITY_SCHEMA_KEY);
-            if (checkDefault == null) {
-                isDefaultGiven = false;
-            }
-            return isDefaultGiven;
-        } catch (NullPointerException e) {
-            isDefaultGiven = false;
-            return isDefaultGiven;
+        Components components = openAPI.getComponents();
+        if (components == null) {
+            return false;
         }
+        Map<String, SecurityScheme> securitySchemes = components.getSecuritySchemes();
+        if (securitySchemes == null) {
+            return false;
+        }
+        SecurityScheme checkDefault = openAPI.getComponents().getSecuritySchemes().get(OPENAPI_SECURITY_SCHEMA_KEY);
+        if (checkDefault == null) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -1465,8 +1467,8 @@ public class OAS3Parser extends APIDefinition {
     /**
      * This method returns api that is attched with api extensions related to micro-gw
      *
-     * @param apiDefinition String
-     * @param api           API
+     * @param apiDefinition                  String
+     * @param api                            API
      * @param isBasepathExtractedFromSwagger boolean
      * @return URITemplate
      */
@@ -1478,22 +1480,21 @@ public class OAS3Parser extends APIDefinition {
             return api;
         }
 
-//        //Setup Custom auth header for API
+        //Setup Custom auth header for API
         String authHeader = OASParserUtil.getAuthorizationHeaderFromSwagger(extensions);
         if (authHeader != null) {
             api.setAuthorizationHeader(authHeader);
         }
         //Setup mutualSSL configuration
         String mutualSSL = OASParserUtil.getMutualSSLEnabledFromSwagger(extensions);
-        if (mutualSSL != null) {
+        if (StringUtils.isBlank(mutualSSL)) {
             String securityList = api.getApiSecurity();
-            if ("".equals(securityList)) {
-                securityList = APIConstants.DEFAULT_API_SECURITY_OAUTH2 ;
+            if (StringUtils.isBlank(securityList)) {
+                securityList = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
             }
             if (APIConstants.OPTIONAL.equals(mutualSSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
-            }
-            else if (APIConstants.MANDATORY.equals(mutualSSL)) {
+            } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
             }
             api.setApiSecurity(securityList);
@@ -1519,14 +1520,14 @@ public class OAS3Parser extends APIDefinition {
             api.setTransports(transports);
         }
         //Setup Trottlingtiers
-        String throttleTier = OASParserUtil.getTrottleTierFromSwagger(extensions);
+        String throttleTier = OASParserUtil.getThrottleTierFromSwagger(extensions);
         if (throttleTier != null) {
             api.setApiLevelPolicy(throttleTier);
         }
         //Setup Basepath
         String basePath = OASParserUtil.getBasePathFromSwagger(extensions);
         if (basePath != null && isBasepathExtractedFromSwagger) {
-            basePath = basePath.replace("{version}",api.getId().getVersion());
+            basePath = basePath.replace("{version}", api.getId().getVersion());
             api.setContextTemplate(basePath);
             api.setContext(basePath);
         }
