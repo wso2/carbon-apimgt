@@ -39,7 +39,12 @@ import java.util.List;
 public class EndpointRegistryImpl implements EndpointRegistry {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
-    ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+    private ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+    private String username;
+
+    public EndpointRegistryImpl(String username) {
+        this.username = username;
+    }
 
     /**
      * Adds a new Endpoint Registry
