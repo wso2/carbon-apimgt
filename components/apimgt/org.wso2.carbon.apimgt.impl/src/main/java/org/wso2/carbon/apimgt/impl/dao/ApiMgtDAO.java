@@ -14937,6 +14937,8 @@ public class ApiMgtDAO {
                     endpointRegistryEntry.setDefinitionURL(
                             rs.getString(EndpointRegistryConstants.COLUMN_DEFINITION_URL));
                     endpointRegistryEntry.setServiceType(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_TYPE));
+                    endpointRegistryEntry.setServiceCategory(rs.getString(EndpointRegistryConstants.
+                            COLUMN_SERVICE_CATEGORY));
                     endpointRegistryEntry.setServiceURL(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_URL));
                     endpointRegistryEntry.setMetaData(rs.getString(EndpointRegistryConstants.COLUMN_METADATA));
                     endpointRegistryEntry.setEndpointDefinition(
@@ -14972,9 +14974,13 @@ public class ApiMgtDAO {
                     endpointRegistryEntry.setEntryId(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
                     endpointRegistryEntry.setName(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_NAME));
                     endpointRegistryEntry.setServiceURL(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_URL));
-                    endpointRegistryEntry.setDefinitionType(rs.getString(EndpointRegistryConstants.COLUMN_DEFINITION_TYPE));
-                    endpointRegistryEntry.setDefinitionURL(rs.getString(EndpointRegistryConstants.COLUMN_DEFINITION_URL));
+                    endpointRegistryEntry.setDefinitionType(rs.getString(EndpointRegistryConstants.
+                            COLUMN_DEFINITION_TYPE));
+                    endpointRegistryEntry.setDefinitionURL(rs.getString(EndpointRegistryConstants.
+                            COLUMN_DEFINITION_URL));
                     endpointRegistryEntry.setServiceType(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_TYPE));
+                    endpointRegistryEntry.setServiceCategory(rs.getString(EndpointRegistryConstants
+                            .COLUMN_SERVICE_CATEGORY));
                     endpointRegistryEntry.setMetaData(rs.getString(EndpointRegistryConstants.COLUMN_METADATA));
                     endpointRegistryEntryList.add(endpointRegistryEntry);
                 }
@@ -15004,8 +15010,9 @@ public class ApiMgtDAO {
             ps.setString(5, registryEntry.getDefinitionURL());
             ps.setString(6, registryEntry.getMetaData());
             ps.setString(7, registryEntry.getServiceType());
-            ps.setBlob(8, registryEntry.getEndpointDefinition());
-            ps.setInt(9, registryEntry.getRegistryId());
+            ps.setString(8, registryEntry.getServiceCategory());
+            ps.setBlob(9, registryEntry.getEndpointDefinition());
+            ps.setInt(10, registryEntry.getRegistryId());
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -15031,8 +15038,9 @@ public class ApiMgtDAO {
             ps.setString(4, registryEntry.getDefinitionURL());
             ps.setString(5, registryEntry.getMetaData());
             ps.setString(6, registryEntry.getServiceType());
-            ps.setBlob(7, registryEntry.getEndpointDefinition());
-            ps.setString(8, registryEntry.getEntryId());
+            ps.setString(7, registryEntry.getServiceCategory());
+            ps.setBlob(8, registryEntry.getEndpointDefinition());
+            ps.setString(9, registryEntry.getEntryId());
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {

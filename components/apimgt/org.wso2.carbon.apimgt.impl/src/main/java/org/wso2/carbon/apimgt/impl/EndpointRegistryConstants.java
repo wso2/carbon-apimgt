@@ -49,6 +49,8 @@ public class EndpointRegistryConstants {
 
     public static final String COLUMN_SERVICE_TYPE = "SERVICE_TYPE";
 
+    public static final String COLUMN_SERVICE_CATEGORY = "SERVICE_CATEGORY";
+
     public static final String COLUMN_DEFINITION_TYPE = "DEFINITION_TYPE";
 
     public static final String COLUMN_DEFINITION_URL = "DEFINITION_URL";

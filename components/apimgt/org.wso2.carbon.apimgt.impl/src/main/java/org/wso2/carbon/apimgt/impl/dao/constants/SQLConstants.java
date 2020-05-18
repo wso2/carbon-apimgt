@@ -1426,18 +1426,18 @@ public class SQLConstants {
                     "ENDPOINT_REG WHERE UUID = ? AND TENANT_ID = ?";
 
     public static final String GET_ENDPOINT_REGISTRY_ENTRY_BY_UUID =
-            " SELECT UUID, ENTRY_NAME, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, SERVICE_URL, " +
-                    "ENDPOINT_DEFINITION, METADATA FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
+            " SELECT UUID, ENTRY_NAME, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, SERVICE_CATEGORY, SERVICE_URL," +
+                    " ENDPOINT_DEFINITION, METADATA FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
 
     public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY =
             "SELECT E.UUID, E.ENTRY_NAME, E.DEFINITION_TYPE, E.DEFINITION_URL, E.METADATA, " +
-                    "E.SERVICE_TYPE, E.SERVICE_URL " +
+                    "E.SERVICE_TYPE, E.SERVICE_CATEGORY, E.SERVICE_URL " +
                     "FROM ENDPOINT_REG_ENTRY AS E, ENDPOINT_REG AS R " +
                     "WHERE E.REG_ID=R.ID AND R.UUID=?";
 
     public static final String ADD_ENDPOINT_REGISTRY_ENTRY_SQL =
             "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, METADATA," +
-                    "SERVICE_TYPE, ENDPOINT_DEFINITION, REG_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    "SERVICE_TYPE, SERVICE_CATEGORY, ENDPOINT_DEFINITION, REG_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public static final String UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL =
             "UPDATE ENDPOINT_REG_ENTRY SET " +
@@ -1447,6 +1447,7 @@ public class SQLConstants {
                     "DEFINITION_URL = ?, " +
                     "METADATA = ?, " +
                     "SERVICE_TYPE = ?, " +
+                    "SERVICE_CATEGORY = ?, " +
                     "ENDPOINT_DEFINITION = ? " +
                     "WHERE UUID = ?";
 
