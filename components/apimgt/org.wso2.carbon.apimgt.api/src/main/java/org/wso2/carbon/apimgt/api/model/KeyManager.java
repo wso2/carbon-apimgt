@@ -249,12 +249,12 @@ public interface KeyManager {
     /**
      * This method will be used to retrieve details of a Scope in the authorization server.
      *
-     * @param scopeName    Scope Name to retrieve
+     * @param name    Scope Name to retrieve
      * @param tenantDomain tenant domain to retrieve scope from
      * @return Scope object
      * @throws APIManagementException if an error while retrieving scope
      */
-    Scope getScopeByName(String scopeName, String tenantDomain) throws APIManagementException;
+    Scope getScopeByName(String name, String tenantDomain) throws APIManagementException;
 
     /**
      * This method will be used to retrieve all the scopes available in the authorization server for the given tenant

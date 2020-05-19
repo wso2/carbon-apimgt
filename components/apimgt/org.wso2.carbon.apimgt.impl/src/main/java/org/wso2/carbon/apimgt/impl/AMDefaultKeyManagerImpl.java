@@ -912,24 +912,24 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     /**
      * This method will be used to retrieve details of a Scope in the authorization server.
      *
-     * @param scopeName    Scope Name to retrieve
+     * @param name    Scope Name to retrieve
      * @param tenantDomain tenant domain to retrieve scope from
      * @return Scope object
      * @throws APIManagementException if an error while retrieving scope
      */
     @Override
-    public Scope getScopeByName(String scopeName, String tenantDomain) throws APIManagementException {
+    public Scope getScopeByName(String name, String tenantDomain) throws APIManagementException {
 
         ScopeDTO scopeDTO;
         AccessTokenInfo accessToken = getAccessTokenForScopeMgt(tenantDomain);
         String scopeEndpoint = getScopeManagementServiceEndpoint(tenantDomain)
                 + (APIConstants.KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME
-                .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, scopeName));
+                .replace(APIConstants.KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM, name));
         HttpGet httpGet = new HttpGet(scopeEndpoint);
         httpGet.setHeader(HttpHeaders.AUTHORIZATION, getBearerAuthorizationHeader(accessToken));
         if (log.isDebugEnabled()) {
             log.debug("Invoking Scope Management REST API of KM: " + scopeEndpoint + " to get scope "
-                    + scopeName);
+                    + name);
         }
         try (CloseableHttpResponse httpResponse = kmHttpClient.execute(httpGet)) {
             int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -937,11 +937,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (statusCode == HttpStatus.SC_OK && StringUtils.isNoneEmpty(responseString)) {
                 scopeDTO = new Gson().fromJson(responseString, ScopeDTO.class);
             } else {
-                throw new APIManagementException("Error occurred while retrieving scope: " + scopeName + " via "
+                throw new APIManagementException("Error occurred while retrieving scope: " + name + " via "
                         + scopeEndpoint + ". Error Status: " + statusCode + ". Error Response: " + responseString);
             }
         } catch (IOException e) {
-            String errorMessage = "Error occurred while retrieving scope: " + scopeName + " via " + scopeEndpoint;
+            String errorMessage = "Error occurred while retrieving scope: " + name + " via " + scopeEndpoint;
             throw new APIManagementException(errorMessage, e);
         }
         return fromDTOToScope(scopeDTO);

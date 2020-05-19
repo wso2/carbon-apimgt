@@ -151,7 +151,7 @@ public class FakeKeyManagerForTest implements KeyManager {
     }
 
     @Override
-    public Scope getScopeByName(String scopeName, String tenantDomain) throws APIManagementException {
+    public Scope getScopeByName(String name, String tenantDomain) throws APIManagementException {
 
         return null;
     }
