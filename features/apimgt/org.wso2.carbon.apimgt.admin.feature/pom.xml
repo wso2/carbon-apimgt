@@ -1,33 +1,37 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
- ~ Copyright (c) 2010-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- ~
- ~ Licensed under the Apache License, Version 2.0 (the "License");
- ~ you may not use this file except in compliance with the License.
- ~ You may obtain a copy of the License at
- ~
- ~      http://www.apache.org/licenses/LICENSE-2.0
- ~
- ~ Unless required by applicable law or agreed to in writing, software
- ~ distributed under the License is distributed on an "AS IS" BASIS,
- ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- ~ See the License for the specific language governing permissions and
- ~ limitations under the License.
+  ~ Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.6.227-SNAPSHOT</version>
+        <version>6.6.213-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.apimgt.store.feature</artifactId>
+    <artifactId>org.wso2.carbon.apimgt.admin.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - API Developer Portal Feature</name>
+    <name>WSO2 Carbon - Admin Portal Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the core bundles required for API management back end
     </description>
@@ -35,39 +39,7 @@
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.hostobjects</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.identity.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.registry.cache.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.woden.wso2</groupId>
-            <artifactId>woden</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
@@ -84,14 +56,6 @@
         <dependency>
             <groupId>net.sf.ehcache.wso2</groupId>
             <artifactId>ehcache</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.commons</groupId>
-            <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.template.manager.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -169,7 +133,7 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.carbon.apimgt.store</id>
+                            <id>org.wso2.carbon.apimgt.admin</id>
                             <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
@@ -191,39 +155,14 @@
                                 <bundleDef>com.fasterxml.jackson.core:jackson-annotations</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.core:jackson-databind</bundleDef>
                                 <bundleDef>org.yaml:snakeyaml</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client</bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.registry.cache.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.identity.framework:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.statsupdate.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tier.cache.stub:${carbon.apimgt.version}
-                                </bundleDef>
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.output.adapter.http:${carbon.apimgt.version}
                                 </bundleDef>
-                                <bundleDef>org.apache.woden.wso2:woden</bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
                                 <bundleDef>org.json.wso2:json:${orbit.version.json}</bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.analytics-common:org.wso2.carbon.event.template.manager.stub:${carbon.analytics.common.version}
-                                </bundleDef>
                                 <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
@@ -257,9 +196,6 @@
                                 <importBundleDef>
                                     org.wso2.orbit.com.github.dblock.waffle:waffle-jna:${waffle-jna.version}
                                 </importBundleDef>
-                                <importBundleDef>
-                                    org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}
-                                </importBundleDef>
                             </importBundles>
                         </configuration>
                     </execution>
@@ -277,7 +213,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
-                            <workingDirectory>${basedir}/src/main/resources/devportal</workingDirectory>
+                            <workingDirectory>${basedir}/src/main/resources/admin_new</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>ci</argument>
@@ -292,7 +228,7 @@
                         </goals>
                         <phase>compile</phase>
                         <configuration>
-                            <workingDirectory>${basedir}/src/main/resources/devportal</workingDirectory>
+                            <workingDirectory>${basedir}/src/main/resources/admin_new</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>run</argument>
@@ -310,27 +246,23 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>devportal/site/**</include>
-                    <include>devportal/services/**</include>
-                    <include>devportal/jaggery.conf</include>
-                    <include>devportal/source/**</include>
-                    <include>devportal/override/**</include>
-                    <include>devportal/.eslintignore</include>
-                    <include>devportal/.eslintrc.js</include>
-                    <include>devportal/.npmrc</include>
-                    <include>devportal/babel.config.js</include>
-                    <include>devportal/jest.config.js</include>
-                    <include>devportal/jsconfig.json</include>
-                    <include>devportal/loader.js</include>
-                    <include>devportal/package-lock.json</include>
-                    <include>devportal/package.json</include>
-                    <include>devportal/webpack.config.js</include>
-                    <include>devportal/Readme.txt</include>
+                    <include>admin_new/site/**</include>
+                    <include>admin_new/services/**</include>
+                    <include>admin_new/jaggery.conf</include>
+                    <include>admin_new/source/**</include>
+                    <include>admin_new/override/**</include>
+                    <include>admin_new/.eslintignore</include>
+                    <include>admin_new/.eslintrc.js</include>
+                    <include>admin_new/.npmrc</include>
+                    <include>admin_new/babel.config.js</include>
+                    <include>admin_new/jest.config.js</include>
+                    <include>admin_new/jsconfig.json</include>
+                    <include>admin_new/loader.js</include>
+                    <include>admin_new/package-lock.json</include>
+                    <include>admin_new/package.json</include>
+                    <include>admin_new/webpack.config.js</include>
+                    <include>admin_new/Readme.txt</include>
                     <include>p2.inf</include>
-                    <include>admin/**</include>
-                    <include>apistore/**</include>
-                    <include>customTheme/**</include>
-                    <include>store-old/**</include>
                 </includes>
             </resource>
         </resources>
