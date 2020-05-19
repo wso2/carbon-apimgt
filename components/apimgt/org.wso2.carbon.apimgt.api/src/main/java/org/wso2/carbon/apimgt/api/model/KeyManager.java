@@ -227,15 +227,6 @@ public interface KeyManager {
      */
     AccessTokenInfo getAccessTokenByConsumerKey(String consumerKey) throws APIManagementException;
 
-    /**
-     * Get Scopes of the APIs by API Ids
-     *
-     * @param apiIdsString String of API Ids
-     * @param tenantDomain tenant domain
-     * @return {@link java.util.Map} having scopes of each API
-     * @throws APIManagementException
-     */
-    Map<String,Set<Scope>> getScopesForAPIS(String apiIdsString) throws  APIManagementException;
 
     /**
      * This method will check for token get validated from Key Manager
@@ -248,46 +239,41 @@ public interface KeyManager {
         return true;
     }
 
-    Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString, String tenantDomain) throws APIManagementException;
+    Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException;
 
     /**
      * This method will be used to register a Scope in the authorization server.
      *
      * @param scope        Scope to register
-     * @param tenantDomain tenant domain to add scope
      * @throws APIManagementException if an error occurs while registering scope
      */
-    void registerScope(Scope scope, String tenantDomain) throws APIManagementException;
+    void registerScope(Scope scope) throws APIManagementException;
 
     /**
      * This method will be used to retrieve details of a Scope in the authorization server.
      *
      * @param name    Scope Name to retrieve
-     * @param tenantDomain tenant domain to retrieve scope from
      * @return Scope object
      * @throws APIManagementException if an error while retrieving scope
      */
-    Scope getScopeByName(String name, String tenantDomain) throws APIManagementException;
+    Scope getScopeByName(String name) throws APIManagementException;
 
     /**
      * This method will be used to retrieve all the scopes available in the authorization server for the given tenant
      * domain.
-     *
-     * @param tenantDomain tenant domain to retrieve scopes from
      * @return Mapping of Scope object to scope key
      * @throws APIManagementException if an error occurs while getting scopes list
      */
-    Map<String, Scope> getAllScopes(String tenantDomain) throws APIManagementException;
+    Map<String, Scope> getAllScopes() throws APIManagementException;
 
     /**
      * This method will be used to attach the resource scopes of an API in the authorization server.
      *
      * @param api          API
      * @param uriTemplates URITemplate Set with attached scopes
-     * @param tenantDomain tenant domain
      * @throws APIManagementException if an error occurs while attaching resource scopes of the API
      */
-    default void attachResourceScopes(API api, Set<URITemplate> uriTemplates, String tenantDomain)
+    default void attachResourceScopes(API api, Set<URITemplate> uriTemplates)
             throws APIManagementException {
         // Doing nothing in default implementation. If KM supports attach resource scopes operation, override the
         // implementation.
@@ -302,12 +288,10 @@ public interface KeyManager {
      * @param newLocalScopes    New local scopes of the API after update
      * @param oldURITemplates   Old URI templates of the API before update
      * @param newURITemplates   New URI templates of the API after update
-     * @param tenantDomain      Tenant Domain
      * @throws APIManagementException if fails to update resources scopes
      */
     default void updateResourceScopes(API api, Set<String> oldLocalScopeKeys, Set<Scope> newLocalScopes,
-                                      Set<URITemplate> oldURITemplates, Set<URITemplate> newURITemplates,
-                                      String tenantDomain) throws APIManagementException {
+                                      Set<URITemplate> oldURITemplates, Set<URITemplate> newURITemplates) throws APIManagementException {
         // Doing nothing in default implementation. If KM supports update resource scopes operation, override the
         // implementation.
     }
@@ -318,10 +302,9 @@ public interface KeyManager {
      *
      * @param api          API   API
      * @param uriTemplates URITemplate Set with attach scopes to detach
-     * @param tenantDomain Tenant Domain
      * @throws APIManagementException if an error occurs while detaching resource scopes of the API.
      */
-    default void detachResourceScopes(API api, Set<URITemplate> uriTemplates, String tenantDomain)
+    default void detachResourceScopes(API api, Set<URITemplate> uriTemplates)
             throws APIManagementException {
         // Doing nothing in default implementation. If KM supports detach resource scopes operation, override the
         // implementation.
@@ -331,43 +314,41 @@ public interface KeyManager {
      * This method will be used to delete a Scope in the authorization server.
      *
      * @param scopeName    Scope name
-     * @param tenantDomain tenant domain to delete the scope from
      * @throws APIManagementException if an error occurs while deleting the scope
      */
-    void deleteScope(String scopeName, String tenantDomain) throws APIManagementException;
+    void deleteScope(String scopeName) throws APIManagementException;
 
     /**
      * This method will be used to update a Scope in the authorization server.
      *
      * @param scope        Scope object
-     * @param tenantDomain tenant domain to update the scope
      * @throws APIManagementException if an error occurs while updating the scope
      */
-    void updateScope(Scope scope, String tenantDomain) throws APIManagementException;
+    void updateScope(Scope scope) throws APIManagementException;
 
     /**
      * This method will be used to check whether the a Scope exists for the given scope name in the authorization
      * server.
      *
      * @param scopeName    Scope Name
-     * @param tenantDomain tenant Domain to check scope existence
      * @return whether scope exists or not
      * @throws APIManagementException if an error occurs while checking the existence of the scope
      */
-    boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException;
+    boolean isScopeExists(String scopeName) throws APIManagementException;
 
     /**
      * This method will be used to validate the scope set provided and populate the additional parameters for each
      * Scope object. Default implementation will return the received scope set as it is.
      *
      * @param scopes       Scope List to validate
-     * @param tenantDomain tenant domain
      * @throws APIManagementException if an error occurs while validating and populating
      */
-    default void validateScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException {
+    default void validateScopes(Set<Scope> scopes) throws APIManagementException {
         // Doing nothing in default implementation. If KM supports validate scopes operation, override the
         // implementation.
     }
 
     public String getType();
+
+    public void setTenantDomain(String tenantDomain);
 }

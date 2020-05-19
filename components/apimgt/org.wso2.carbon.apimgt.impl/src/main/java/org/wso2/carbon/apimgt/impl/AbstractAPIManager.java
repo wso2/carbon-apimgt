@@ -1584,7 +1584,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantid);
         if (!apiMgtDAO.isSharedScopeExists(scopeKey, tenantid)) {
-            return KeyManagerHolder.getKeyManagerInstance().isScopeExists(scopeKey, tenantDomain);
+            return KeyManagerHolder.getKeyManagerInstance(tenantDomain).isScopeExists(scopeKey);
         }
         if (log.isDebugEnabled()) {
             log.debug("Scope name: " + scopeKey + " exists as a shared scope in tenant: " + tenantDomain);
@@ -2729,12 +2729,11 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             }
 
-            String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
             // setting scope
             if (!apiIdsString.isEmpty()) {
                 String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
-                Map<String, Set<Scope>> apiScopeSet = keyManager.getScopesForAPIS(apiIdsString, tenantDomain);
+                Map<String, Set<Scope>> apiScopeSet = keyManager.getScopesForAPIS(apiIdsString);
                 if (apiScopeSet.size() > 0) {
                     for (int i = 0; i < apiCount; i++) {
                         Object api = apiList.get(i);

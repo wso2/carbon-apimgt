@@ -480,7 +480,12 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //attach micro-geteway labels
         assignLabelsToDTO(body, apiToAdd);
-
+        if (body.getKeyManagers() instanceof List) {
+            apiToAdd.setKeyManagers((List<String>) body.getKeyManagers());
+        } else {
+            apiToAdd.setKeyManagers(
+                    Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
+        }
         return apiToAdd;
     }
 

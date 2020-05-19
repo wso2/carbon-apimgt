@@ -154,7 +154,7 @@ public class AbstractAPIManagerTestCase {
         graphQLSchemaDefinition = Mockito.mock(GraphQLSchemaDefinition.class);
         keyManager = Mockito.mock(KeyManager.class);
         PowerMockito.mockStatic(KeyManagerHolder.class);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
+        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super")).thenReturn(keyManager);
     }
 
     @Test
@@ -1127,7 +1127,7 @@ public class AbstractAPIManagerTestCase {
 
         Mockito.when(apiMgtDAO.isSharedScopeExists(Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn(false, true, false);
-        Mockito.when(keyManager.isScopeExists(Mockito.anyString(), Mockito.anyString())).thenReturn(false, false);
+        Mockito.when(keyManager.isScopeExists(Mockito.anyString())).thenReturn(false, false);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         Assert.assertFalse(abstractAPIManager.isScopeKeyExist("sample", -1234));
         Assert.assertTrue(abstractAPIManager.isScopeKeyExist("sample1", -1234));

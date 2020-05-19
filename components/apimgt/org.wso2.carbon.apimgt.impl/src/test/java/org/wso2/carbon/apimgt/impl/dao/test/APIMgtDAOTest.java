@@ -131,7 +131,7 @@ public class APIMgtDAOTest {
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl
                 (config));
         PowerMockito.mockStatic(KeyManagerHolder.class);
-        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        keyManager = Mockito.mock(KeyManager.class);
         APIMgtDBUtil.initialize();
         apiMgtDAO = ApiMgtDAO.getInstance();
         IdentityTenantUtil.setRealmService(new TestRealmService());

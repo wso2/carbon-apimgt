@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
 public abstract class AbstractKeyManager implements KeyManager {
     private static Log log = LogFactory.getLog(AbstractKeyManager.class);
     protected KeyManagerConfiguration configuration;
-
+    protected String tenantDomain;
     public AccessTokenRequest buildAccessTokenRequestFromJSON(String jsonInput, AccessTokenRequest tokenRequest)
             throws APIManagementException {
 
@@ -213,6 +213,11 @@ public abstract class AbstractKeyManager implements KeyManager {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void setTenantDomain(String tenantDomain) {
+        this.tenantDomain = tenantDomain;
     }
 
     /**
