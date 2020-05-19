@@ -128,7 +128,7 @@ class AuthManager {
                 let username;
                 if (data.active) {
                     const currentEnv = Utils.getCurrentEnvironment();
-                    username = data;
+                    username = data.username;
                     user = new User(currentEnv.label, username);
                     const scopes = data.scope.split(' ');
                     if (this.hasBasicLoginPermission(scopes)) {
