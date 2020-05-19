@@ -262,7 +262,6 @@ function AddEdit(props) {
                 helperText={validationError.policyName && validationError.policyName}
             />
             <TextField
-                autoFocus
                 margin='dense'
                 name='description'
                 label='Description'
@@ -272,7 +271,6 @@ function AddEdit(props) {
                 onChange={onChange}
             />
             <TextField
-                autoFocus
                 margin='dense'
                 name='keyTemplate'
                 label='Key Template'
