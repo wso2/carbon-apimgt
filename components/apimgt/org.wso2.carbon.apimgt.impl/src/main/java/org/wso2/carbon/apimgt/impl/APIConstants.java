@@ -538,6 +538,8 @@ public final class APIConstants {
     public static final String GATEWAY_JWKS_CACHE = "JWKS_CACHE";
     public static final String BLOCKING_CONDITION_ID = "id";
     public static final String API_OVERVIEW_KEY_MANAGERS = "overview_keyManagers";
+    public static final String KEY_MANAGER_CONSUMER_KEY = "consumer_key";
+    public static final String KEY_MANAGER_CONSUMER_SECRET = "consumer_secret";
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
@@ -649,7 +651,7 @@ public final class APIConstants {
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
             + KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM;
-    public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_MGT_SCOPES[] = {"internal_application_mgt_create",
+    public static final String[] KEY_MANAGER_OAUTH2_SCOPES_REST_API_MGT_SCOPES = {"internal_application_mgt_create",
             "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view"};
     public static final String API_KEY_MANAGER_CONFIGURATION = "Configuration.";
     public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
@@ -2029,6 +2031,7 @@ public final class APIConstants {
     public static final String AUTHORIZATION_BASIC = "Basic ";
     public static final String AUTHORIZATION_BEARER = "Bearer ";
     public static final String TOKEN_GRANT_TYPE_KEY = "grant_type";
+    public static final String SCOPES_KEY = "scopes";
     public static final String TOKEN_KEY = "token";
     public static final String GRANT_TYPE_VALUE = "client_credentials";
     public static final String RECOMMENDATIONS_CACHE_NAME = "APIRecommendationsCache";

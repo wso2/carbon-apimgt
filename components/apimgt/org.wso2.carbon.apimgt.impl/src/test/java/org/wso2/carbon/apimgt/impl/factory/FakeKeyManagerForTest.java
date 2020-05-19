@@ -35,10 +35,7 @@ import java.util.Set;
  */
 public class FakeKeyManagerForTest implements KeyManager {
 
-    @Override
-    public void deleteScope(String scopeName, String tenantDomain) throws APIManagementException {
 
-    }
 
     @Override public OAuthApplicationInfo createApplication(OAuthAppRequest oAuthAppRequest)
             throws APIManagementException {
@@ -138,32 +135,49 @@ public class FakeKeyManagerForTest implements KeyManager {
         return null;
     }
 
-    @Override
-    public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString, String tenantDomain)
-            throws APIManagementException {
 
-        return null;
-    }
-
-    @Override
-    public void registerScope(Scope scope, String tenantDomain) throws APIManagementException {
-
-    }
-
-    @Override
-    public Scope getScopeByName(String name, String tenantDomain) throws APIManagementException {
-
-        return null;
-    }
-
-    @Override
-    public Map<String, Scope> getAllScopes(String tenantDomain) throws APIManagementException {
-
-        return null;
-    }
 
     @Override
     public boolean canHandleToken(String accessToken) throws APIManagementException {
+
+        return false;
+    }
+
+    @Override
+    public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
+
+        return null;
+    }
+
+    @Override
+    public void registerScope(Scope scope) throws APIManagementException {
+
+    }
+
+    @Override
+    public Scope getScopeByName(String name) throws APIManagementException {
+
+        return null;
+    }
+
+    @Override
+    public Map<String, Scope> getAllScopes() throws APIManagementException {
+
+        return null;
+    }
+
+    @Override
+    public void deleteScope(String scopeName) throws APIManagementException {
+
+    }
+
+    @Override
+    public void updateScope(Scope scope) throws APIManagementException {
+
+    }
+
+    @Override
+    public boolean isScopeExists(String scopeName) throws APIManagementException {
 
         return false;
     }
@@ -175,13 +189,8 @@ public class FakeKeyManagerForTest implements KeyManager {
     }
 
     @Override
-    public void updateScope(Scope scope, String tenantDomain) throws APIManagementException {
+    public void setTenantDomain(String tenantDomain) {
 
     }
 
-    @Override
-    public boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException {
-
-        return false;
-    }
 }

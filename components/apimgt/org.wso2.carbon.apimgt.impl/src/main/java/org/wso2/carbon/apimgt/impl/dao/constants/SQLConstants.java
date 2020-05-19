@@ -3488,11 +3488,6 @@ public class SQLConstants {
      */
     public static class KeyMgtConstants {
 
-        public static final String ADD_KM_APPLICATION =
-                "INSERT INTO AM_KM_MGT_APPLICATION (CONSUMER_KEY,CONSUMER_SECRET,TENANT_ID) VALUES (?,?,?)";
-
-        public static final String GET_KM_APPLICATION_FOR_TENANT =
-                "SELECT CONSUMER_KEY, CONSUMER_SECRET FROM AM_KM_MGT_APPLICATION WHERE TENANT_ID = ?";
     }
 
     //TODO: Need remove after KM seperation

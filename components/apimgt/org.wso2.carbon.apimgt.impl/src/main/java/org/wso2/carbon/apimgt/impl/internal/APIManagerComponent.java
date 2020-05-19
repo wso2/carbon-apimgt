@@ -298,7 +298,6 @@ public class APIManagerComponent {
             //Initialize Recommendation wso2event output publisher
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
-            APIUtil.registerDefaultKeyManager(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {

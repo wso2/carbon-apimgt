@@ -1137,8 +1137,7 @@ public class APIProviderImplTest {
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(apimgtDAO.addAPI(api, -1234)).thenReturn(1);
         Mockito.doNothing().when(apimgtDAO).addURITemplates(1, api, -1234);
-        Mockito.doNothing().when(keyManager)
-                .attachResourceScopes(api, api.getUriTemplates(), "carbon.super");
+        Mockito.doNothing().when(keyManager).attachResourceScopes(api, api.getUriTemplates());
         try {
             apiProvider.addAPI(api);
         } catch (Exception e) {
@@ -1528,8 +1527,7 @@ public class APIProviderImplTest {
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apimgtDAO);
         Mockito.when(apimgtDAO.addAPI(api, -1)).thenReturn(1);
         Mockito.doNothing().when(apimgtDAO).addURITemplates(1, api, -1);
-        Mockito.doNothing().when(keyManager)
-                .attachResourceScopes(api, api.getUriTemplates(), "carbon.super");
+        Mockito.doNothing().when(keyManager).attachResourceScopes(api, api.getUriTemplates());
 
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.replaceEmailDomain(apiId.getProviderName())).thenReturn("admin");
@@ -1649,8 +1647,7 @@ public class APIProviderImplTest {
         RegistryService registryService = PowerMockito.mock(RegistryService.class);
         Mockito.when(apimgtDAO.addAPI(api, -1)).thenReturn(1);
         Mockito.doNothing().when(apimgtDAO).addURITemplates(1, api, -1);
-        Mockito.doNothing().when(keyManager)
-                .attachResourceScopes(api, api.getUriTemplates(), "carbon.super");
+        Mockito.doNothing().when(keyManager).attachResourceScopes(api, api.getUriTemplates());
         Mockito.when(artifactManager.newGovernanceArtifact(Matchers.any(QName.class))).thenReturn(artifact);
         Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
         Map<String, String> failedToPubGWEnv = new HashMap<String, String>();

@@ -140,12 +140,14 @@ import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
@@ -10750,27 +10752,6 @@ public final class APIUtil {
             return tokenEndpoint;
         }
     }
-    public static void registerDefaultKeyManager(String tenantDomain) throws APIManagementException {
-
-        KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
-        keyManagerConfigurationDTO.setName(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
-        keyManagerConfigurationDTO.setEnabled(true);
-        keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
-        keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
-        keyManagerConfigurationDTO.setType(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE);
-        keyManagerConfigurationDTO.setDescription(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_DESCRIPTION);
-        ApiMgtDAO instance = ApiMgtDAO.getInstance();
-        if (instance.getKeyManagerConfigurationByName(tenantDomain, APIConstants.KeyManager.DEFAULT_KEY_MANAGER) ==
-                null) {
-            instance.addKeyManagerConfiguration(keyManagerConfigurationDTO);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-                KeyManagerConfigurationDTO keyManagerConfiguration =
-                        APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfigurationDTO);
-                new KeyMgtNotificationSender()
-                        .notify(keyManagerConfiguration, APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD);
-            }
-        }
-    }
 
     public static Map<String, KeyManagerConfigurationsDto.KeyManagerConfigurationDto> getKeyManagerConfigurations() {
 
@@ -10813,7 +10794,7 @@ public final class APIUtil {
 
         Map<String, Scope> scopeToKeyMap = new HashMap<>();
         for (String scopeKey : scopeKeys) {
-            Scope scope = KeyManagerHolder.getKeyManagerInstance().getScopeByName(scopeKey, tenantDomain);
+            Scope scope = KeyManagerHolder.getKeyManagerInstance(tenantDomain).getScopeByName(scopeKey);
             scopeToKeyMap.put(scopeKey, scope);
         }
         return scopeToKeyMap;
