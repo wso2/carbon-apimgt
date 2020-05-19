@@ -16,11 +16,10 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
@@ -31,11 +30,6 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.error.dark,
     },
 }));
-
-let initialState = {
-    name: '',
-    description: '',
-};
 
 /**
  * Reducer
@@ -51,23 +45,23 @@ function reducer(state, { field, value }) {
 
 /**
  * Render a pop-up dialog to add/edit an API category
+ * @param {JSON} props .
  * @returns {JSX}.
  */
-function AddEdit({
-    updateList, dataRow, icon, triggerButtonText, title,
-}) {
+function AddEdit(props) {
+    const {
+        updateList, dataRow, icon, triggerButtonText, title,
+    } = props;
     const classes = useStyles();
-    let id = null;
-    // If the dataRow is there ( form is in edit mode ) else it's a new creation
-    useEffect(() => {
-        initialState = {
-            name: '',
-            description: '',
-        };
-    }, [title]);
 
+    let id = null;
+    let initialState = {
+        name: '',
+        description: '',
+    };
+
+    // If the dataRow is there, assign data to initialState
     if (dataRow) {
-        // eslint-disable-next-line react/prop-types
         const { name: originalName, description: originalDescription } = dataRow;
         id = dataRow.id;
 
@@ -76,6 +70,7 @@ function AddEdit({
             description: originalDescription,
         };
     }
+
     const [state, dispatch] = useReducer(reducer, initialState);
     const { name, description } = state;
 
@@ -162,12 +157,6 @@ function AddEdit({
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
         >
-            <DialogContentText>
-                <FormattedMessage
-                    id='AdminPages.ApiCategories.AddEdit.form.info'
-                    defaultMessage='Provide a name and a short description to create a new API category'
-                />
-            </DialogContentText>
             <TextField
                 autoFocus
                 margin='dense'
@@ -177,7 +166,6 @@ function AddEdit({
                 label={(
                     <span>
                         <FormattedMessage id='AdminPages.ApiCategories.AddEdit.form.name' defaultMessage='Name' />
-
                         <span className={classes.error}>*</span>
                     </span>
                 )}
