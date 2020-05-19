@@ -1621,17 +1621,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return true;
     }
 
-    @Deprecated
-    public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid)
-            throws APIManagementException {
-
-        if (System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES) != null && Boolean
-                .parseBoolean(System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES))) {
-            return false;
-        }
-        return isScopeKeyAssignedLocally(identifier, scopeKey, tenantid);
-    }
-
     /**
      * Check whether the given scope key is already assigned to any API under given tenant.
      *

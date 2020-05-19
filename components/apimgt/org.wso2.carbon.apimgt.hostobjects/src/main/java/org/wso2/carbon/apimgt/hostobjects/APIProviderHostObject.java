@@ -561,7 +561,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
                     if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
-                        if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
+                        if (apiProvider.isScopeKeyAssignedLocally(apiId, scope.getKey(), tenantId)) {
                             handleException("Scope " + scope.getKey() + " is already assigned by another API");
                         }
                     }
@@ -1742,7 +1742,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
                     if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
-                        if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
+                        if (apiProvider.isScopeKeyAssignedLocally(apiId, scope.getKey(), tenantId)) {
                             handleException("Scope " + scope.getKey() + " is already assigned by another API");
                         }
                     }
@@ -2249,7 +2249,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     for (URITemplate uriTemplate : uriTemplates) {
                         Scope scope = uriTemplate.getScope();
                         if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
-                            if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
+                            if (apiProvider.isScopeKeyAssignedLocally(apiId, scope.getKey(), tenantId)) {
                                 handleException("Scope " + scope.getKey() + " is already assigned by another API");
                             }
                         }
