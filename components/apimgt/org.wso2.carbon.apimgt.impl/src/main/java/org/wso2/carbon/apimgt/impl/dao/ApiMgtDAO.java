@@ -892,7 +892,7 @@ public class ApiMgtDAO {
             preparedStForInsert.setInt(3, applicationId);
             preparedStForInsert.setString(4, status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED);
             preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-            preparedStForInsert.setString(6, identifier.getProviderName());
+            preparedStForInsert.setString(6, subscriber);
 
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             preparedStForInsert.setTimestamp(7, timestamp);
