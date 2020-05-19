@@ -70,7 +70,6 @@ public class OAS3ParserTest extends OASTestBase {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
 
         // check remove vendor extensions
-        System.setProperty(APIDefinition.KEEP_LEGACY_EXTENSION_PROP, Boolean.toString(false));
         String definition = testGenerateAPIDefinitionWithExtension(oas3Parser, oas3Resources);
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
         OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
@@ -88,26 +87,8 @@ public class OAS3ParserTest extends OASTestBase {
             }
         }
 
-        // check preserve vendor extensions
-        System.setProperty(APIDefinition.KEEP_LEGACY_EXTENSION_PROP, Boolean.toString(true));
-        definition = testGenerateAPIDefinitionWithExtension(oas3Parser, oas3Resources);
-        parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
-        openAPI = parseAttemptForV3.getOpenAPI();
-        Assert.assertTrue(openAPI.getExtensions().containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY));
-        Assert.assertEquals(2, openAPI.getPaths().size());
-
-        itr = openAPI.getPaths().entrySet().iterator();
-        while (itr.hasNext()) {
-            Map.Entry<String, PathItem> pathEntry = itr.next();
-            PathItem path = pathEntry.getValue();
-            for (Operation operation : path.readOperations()) {
-                Assert.assertTrue(operation.getExtensions().containsKey(APIConstants.SWAGGER_X_SCOPE));
-            }
-        }
-
-        // check updated scopes in both extension and security definition
+        // check updated scopes in security definition
         Operation itemGet = openAPI.getPaths().get("/items").getGet();
-        Assert.assertEquals("newScope", itemGet.getExtensions().get(APIConstants.SWAGGER_X_SCOPE));
         Assert.assertTrue(itemGet.getSecurity().get(0).get("default").contains("newScope"));
 
         // check available scopes in security definition
@@ -121,24 +102,6 @@ public class OAS3ParserTest extends OASTestBase {
                 (Map<String, String>) implicityOauth.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
         Assert.assertTrue(scopeBinding.containsKey("newScope"));
         Assert.assertEquals("admin", scopeBinding.get("newScope"));
-
-        // check available scopes in extensions
-        Map<String, LinkedHashMap<String, ArrayList<LinkedHashMap<String, String>>>> scopesInEx =
-                (Map<String, LinkedHashMap<String, ArrayList<LinkedHashMap<String, String>>>>) openAPI.getExtensions()
-                        .get(APIConstants.SWAGGER_X_WSO2_SECURITY);
-        ArrayList<LinkedHashMap<String, String>> scopeList =
-                scopesInEx.get(APIConstants.SWAGGER_OBJECT_NAME_APIM).get(APIConstants.SWAGGER_X_WSO2_SCOPES);
-        Assert.assertEquals(3, scopeList.size());
-        boolean found = false;
-        for (LinkedHashMap<String, String> map : scopeList) {
-            if ("newScope".equals(map.get("name"))) {
-                Assert.assertEquals("admin", map.get("roles"));
-                Assert.assertEquals("newScope", map.get("key"));
-                Assert.assertEquals("newScopeDescription", map.get("description"));
-                found = true;
-            }
-        }
-        Assert.assertTrue("Newly added scope not found in the updated definition", found);
     }
 
     @Test

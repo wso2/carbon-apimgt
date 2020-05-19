@@ -122,6 +122,11 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_ROLES_CREATOR_ROLE = "CreatorRole";
     public static final String API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE = "SubscriberRole";
     public static final String ANALYTICS_ROLE = "Internal/analytics";
+    public static final String API_TENANT_CONF_ENABLE_ANONYMOUS_MODE = "EnableAnonymous";
+
+    public static final String ENDPOINT_REGISTRY_ADMIN_ROLE = "Internal/registry_admin";
+    public static final String ENDPOINT_REGISTRY_USER_ROLE = "Internal/registry_user";
+    public static final String ENDPOINT_REGISTRY_BROWSER_ROLE = "Internal/registry_browser";
 
     public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
 
@@ -217,6 +222,9 @@ public final class APIConstants {
     public static final String EXTERNAL_API_STORES_LOCATION = APIMGT_REGISTRY_LOCATION + "/externalstores/external-api-stores.xml";
 
     public static final String GA_CONFIGURATION_LOCATION = APIMGT_REGISTRY_LOCATION + "/statistics/ga-config.xml";
+
+    public static final String GA_CONF_KEY = "ga-config-key";
+    public static final String GA_CONF_MEDIA_TYPE = "ga-config";
 
     public static final String WORKFLOW_EXECUTOR_LOCATION = API_APPLICATION_DATA_LOCATION + "/workflow-extensions.xml";
 
@@ -630,6 +638,22 @@ public final class APIConstants {
     public static final String KEY_MANAGER_USERNAME = "Username";
     public static final String KEY_MANAGER_PASSWORD = "Password";
     public static final String AUTHSERVER_URL = "ServerURL";
+    public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
+    public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
+    public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
+            + KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM;
+    public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_MGT_SCOPES[] = {"internal_application_mgt_create",
+            "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view"};
+    public static final String API_KEY_MANAGER_CONFIGURATION = "Configuration.";
+    public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
+    public static final String WSO2_IS_APP_MGT_REST_API_BASE_PATH = "/api/server/v1/applications";
+    public static final String WSO2_IS_APP_MGT_INBOUND_OIDC_SUFFIX = "/inbound-protocols/oidc";
+    public static final String WSO2_IS_APP_NAME = "name";
+    public static final String WSO2_IS_APP_INBOUND_CONFIG = "inboundProtocolConfiguration";
+    public static final String WSO2_IS_APP_INBOUND_OIDC = "oidc";
+    public static final String WSO2_IS_APP_INBOUND_OIDC_GRANT_TYPES = "grantTypes";
+    public static final String WSO2_IS_APP_CLIENT_ID = "clientId";
+    public static final String WSO2_IS_APP_CLIENT_SECRET = "clientSecret";
 
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
@@ -689,6 +713,7 @@ public final class APIConstants {
     public static final String API_STORE_MAP_EXISTING_AUTH_APPS = API_STORE + "MapExistingAuthApps";
     public static final String API_STORE_API_KEY_ALIAS = API_STORE + "ApiKeyAlias";
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
+    public static final String API_DEVPORTAL_ANONYMOUS_MODE = API_STORE + "EnableAnonymousMode";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";
@@ -699,6 +724,7 @@ public final class APIConstants {
     public static final String API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS = API_PUBLISHER
             + "EnableAccessControl";
     public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
+    public static final String API_PUBLISHER_SUBSCRIBER_CLAIMS = API_PUBLISHER + "SubscriberClaims";
     public static final String WSO2_API_STORE_TYPE = "wso2";
 
     public static final String EXTERNAL_API_STORES = "ExternalAPIStores";
@@ -722,6 +748,8 @@ public final class APIConstants {
     public static final String IDENTITY_PROVIDER = "IdentityProvider.";
     public static final String IDENTITY_PROVIDER_AUTHORIZE_ENDPOINT = IDENTITY_PROVIDER + "AuthorizeEndpoint";
     public static final String IDENTITY_PROVIDER_OIDC_LOGOUT_ENDPOINT = IDENTITY_PROVIDER + "OIDCLogoutEndpoint";
+    public static final String IDENTITY_PROVIDER_SERVER_URL = IDENTITY_PROVIDER + "ServerURL";
+    public static final String IDENTITY_PROVIDER_OIDC_CHECK_SESSION_ENDPOINT = IDENTITY_PROVIDER + "CheckSessionEndpoint";
 
     public static final String SELF_SIGN_UP = "SelfSignUp.";
     public static final String SELF_SIGN_UP_ENABLED = SELF_SIGN_UP + "Enabled";
@@ -947,6 +975,7 @@ public final class APIConstants {
     public static final String API_USER_ROLE_CACHE = "appPublisherUserRoleCache";
     public static final String API_PUBLISHER_ADMIN_PERMISSION_CACHE = "apimAdminPermissionCache";
     public static final String API_SUBSCRIBER_CACHE = "subscriberCache";
+    public static final String EMAIL_CLAIM = "http://wso2.org/claims/emailaddress";
 
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =
@@ -1584,6 +1613,12 @@ public final class APIConstants {
         public static final String ENABLE_JWT_CLAIM_CONDITIONS = "EnableJWTClaimConditions";
         public static final String ENABLE_QUERY_PARAM_CONDITIONS = "EnableQueryParamConditions";
         public static final String ENABLED = "Enabled";
+        public static final String IS_THROTTLED = "isThrottled";
+        public static final String THROTTLE_KEY = "throttleKey";
+        public static final String EXPIRY_TIMESTAMP = "expiryTimeStamp";
+        public static final String EVALUATED_CONDITIONS = "evaluatedConditions";
+        public static final String TRUE = "true";
+        public static final String ADD = "add";
     }
 
     /**
@@ -1684,6 +1719,8 @@ public final class APIConstants {
         public static final String API_NAME = "name";
         public static final String QUOTA_TYPE = "tierQuotaType";
         public static final String QUOTA_TYPE_BANDWIDTH = "bandwidthVolume";
+        public static final String PERMITTED_IP = "permittedIP";
+        public static final String PERMITTED_REFERER = "permittedReferer";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
@@ -1907,6 +1944,8 @@ public final class APIConstants {
         public static final String PUB_API_LIST_RESPONSE_PARAMS_LIST = "list";
         public static final String PUB_API_LIST_RESPONSE_PARAMS_COUNT = "count";
         public static final String PUB_API_RESPONSE_PARAMS_ID = "id";
+        public static final String DYNAMIC_CLIENT_REGISTRATION_URL_SUFFIX =
+                "/client-registration/" + REST_API_OLD_VERSION + "/register";
     }
 
     public static final int MAX_LENGTH_API_NAME = 50;
@@ -1920,7 +1959,7 @@ public final class APIConstants {
      * */
     public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
     public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
-    public static final String UTILITY_WEB_APP_EP = "/throttle/data/v1";
+    public static final String UTILITY_WEB_APP_EP = "/internal/data/v1";
     public static final String API_KEY_REVOKE_PATH = "/apikey/revoke";
 
     public static final String SKIP_ROLES_BY_REGEX = "skipRolesByRegex";
@@ -2023,5 +2062,21 @@ public final class APIConstants {
             public static final String REMOTE_CLAIM = "RemoteClaim";
 
         }
+    }
+
+    public static class GlobalCacheInvalidation {
+        public static final String ENABLED = "Enabled";
+        public static final Object GLOBAL_CACHE_INVALIDATION = "GlobalCacheInvalidation";
+
+        public static final String Domain = "Domain";
+        public static final String Stream = "Stream";
+        public static final String REVEIVER_URL_GROUP = "ReceiverUrlGroup";
+        public static final String AUTH_URL_GROUP = "AuthUrlGroup";
+        public static final String USERNAME = "Username";
+        public static final String PASSWORD = "Password";
+        public static final String TOPIC_NAME = "Topic";
+        public static final String EXCLUDED_CACHES = "ExcludedCaches";
+
+        public static String ReceiverConnectionDetails  = "ReceiverConnectionDetails";
     }
 }

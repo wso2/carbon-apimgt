@@ -111,7 +111,7 @@ class Scope extends React.Component {
      */
     handleChange(roles) {
         const { apiScope } = this.state;
-        apiScope.bindings.values = roles;
+        apiScope.bindings = roles;
         this.setState({ apiScope });
     }
 
@@ -194,7 +194,7 @@ class Scope extends React.Component {
                                 </Col>
                                 <Col span={20}>
                                     <TagsInput
-                                        value={this.state.apiScope.bindings.values}
+                                        value={this.state.apiScope.bindings}
                                         onChange={this.handleChange}
                                         onlyUnique
                                         inputProps={{

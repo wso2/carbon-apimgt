@@ -44,6 +44,9 @@ const styles = (theme) => ({
     paper: {
         margin: theme.spacing(1),
         padding: theme.spacing(1),
+        '& span, & h5, & label, & td, & li, & div, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
     },
     grid: {
         marginTop: theme.spacing(4),
@@ -58,6 +61,10 @@ const styles = (theme) => ({
         marginLeft: theme.spacing(2),
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
+        color: theme.palette.getContrastText(theme.palette.background.default),
+    },
+    swaggerUIPaper: {
+        backgroundColor: theme.custom.apiDetailPages.swaggerUIBackground,
     },
 });
 
@@ -102,6 +109,7 @@ class ApiConsole extends React.Component {
     componentDidMount() {
         const { api } = this.context;
         const apiID = api.id;
+        const user = AuthManager.getUser();
         let apiData;
         let environments;
         let labels;
@@ -138,14 +146,20 @@ class ApiConsole extends React.Component {
             })
             .then((swaggerResponse) => {
                 swagger = swaggerResponse.obj;
-                this.setState({
-                    api: apiData,
-                    swagger,
-                    environments,
-                    labels,
-                    productionAccessToken,
-                    sandboxAccessToken,
-                });
+                if (user != null) {
+                    this.setState({
+                        api: apiData,
+                        swagger,
+                        environments,
+                        labels,
+                        productionAccessToken,
+                        sandboxAccessToken,
+
+                    });
+                    return this.apiClient.getSubscriptions(apiID);
+                } else {
+                    return null;
+                }
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -384,7 +398,7 @@ class ApiConsole extends React.Component {
                         </Grid>
                     </Grid>
                 </Paper>
-                <Paper className={classes.paper}>
+                <Paper className={classes.swaggerUIPaper}>
                     <SwaggerUI
                         api={this.state.api}
                         accessTokenProvider={this.accessTokenProvider}

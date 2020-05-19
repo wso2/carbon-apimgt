@@ -20,6 +20,8 @@ const CONSTS = {
         INSUFFICIENT_PREVILEGES: '900403: Insufficient privileges to login',
         INVALID_TOKEN: '900401: Invalid token',
     },
+    ISLOGINPERMITTED: 'isLoginPermitted',
+    LOGINSTATUS: 'loginStatus',
 };
 
 export default CONSTS;

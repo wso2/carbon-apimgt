@@ -79,6 +79,7 @@ public final class RestApiConstants {
     public static final String DOCUMENTID_PARAM = "{documentId}";
     public static final String APICATEGORYID_PARAM = "{apiCategoryId}";
     public static final String API_VERSION_PARAM="{version}";
+    public static final String SHARED_SCOPE_ID_PARAM = "{scopeId}";
     public static final String URL_ENCODED_API_ID_DELIMITER = "%2D";
     public static final String CHARSET = "UTF-8";
 
@@ -88,6 +89,9 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
     public static final String RESOURCE_PATH_THROTTLING = "/throttling";
     public static final String RESOURCE_PATH_LABEL = "/labels";
+    public static final String RESOURCE_PATH_SHARED_SCOPES =  "/scopes";
+    public static final String RESOURCE_PATH_SHARED_SCOPES_SCOPE_ID =
+            RESOURCE_PATH_SHARED_SCOPES + "/" + SHARED_SCOPE_ID_PARAM;
     public static final String RESOURCE_PATH_THROTTLING_POLICIES = RESOURCE_PATH_THROTTLING + "/policies";
     public static final String RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS = RESOURCE_PATH_THROTTLING
             + "/blacklist";
@@ -141,8 +145,13 @@ public final class RestApiConstants {
     public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
             REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_1;
     public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin";
-    public static final String REST_API_ADMIN_VERSION = "v0.16";
+    public static final String REST_API_ADMIN_VERSION_0 = "v0.16";
+    public static final String REST_API_ADMIN_VERSION_1 = "v1";
+    public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_0;
+    public static final String REST_API_ADMIN_CONTEXT_FULL_1 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_1;
     public static final String REST_API_PROVIDER = "admin";
+    public static final String REST_API_ENDPOINT_REGISTRY_CONTEXT = "/api/am/endpoint-registry";
+    public static final String REST_API_ENDPOINT_REGISTRY_VERSION = "v1";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
     public static final Pattern REGEX_BEARER_PATTERN = Pattern.compile("Bearer\\s");
@@ -186,6 +195,9 @@ public final class RestApiConstants {
     public static final String TAGS_GET_PAGINATION_URL =
             RESOURCE_PATH_TAGS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
+    public static final String SCOPES_GET_PAGINATION_URL =
+            RESOURCE_PATH_SHARED_SCOPES + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
     public static final String RESOURCE_PATH_PAGINATION_URL =
             RESOURCE_PATH_RESOURCE_PATHS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
@@ -202,6 +214,11 @@ public final class RestApiConstants {
     public static final String SORT_BY_NAME = "name";
     public static final String SORT_BY_THROTTLING_TIER = "throttlingTier";
     public static final String SORT_BY_STATUS = "status";
+
+    //Constants for endpoint registry sortBy
+    public static final String ENDPOINT_REG_NAME = "registryName";
+    public static final String ENDPOINT_REG_ENTRY_DEFINITION_TYPE = "definitionType";
+    public static final String ENDPOINT_REG_ENTRY_SERVICE_TYPE = "serviceType";
 
     //default error messages
     public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";

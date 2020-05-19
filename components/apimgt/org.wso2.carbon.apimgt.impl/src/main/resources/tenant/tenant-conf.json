@@ -130,6 +130,10 @@
         "Roles": "admin,Internal/subscriber"
       },
       {
+        "Name": "apim:admin_settings",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:client_certificates_view",
         "Roles": "admin,Internal/creator"
       },
@@ -158,28 +162,52 @@
         "Roles": "admin"
       },
       {
-        "Name": "apim_analytics:product_manager",
-        "Roles": "admin,Internal/creator,Internal/publisher,Internal/subscriber"
+        "Name": "apim_analytics:monitoring_dashboard:own",
+        "Roles": "admin"
       },
       {
-        "Name": "apim_analytics:api_developer",
-        "Roles": "admin,Internal/creator,Internal/publisher"
+        "Name": "apim_analytics:monitoring_dashboard:edit",
+        "Roles": "admin"
       },
       {
-        "Name": "apim_analytics:app_developer",
-        "Roles": "admin,Internal/subscriber"
-      },
-      {
-        "Name": "apim_analytics:devops_engineer",
-        "Roles": "admin,Internal/creator,Internal/publisher,Internal/subscriber"
-      },
-      {
-        "Name": "apim_analytics:analytics_viewer",
+        "Name": "apim_analytics:monitoring_dashboard:view",
         "Roles": "admin,Internal/analytics"
       },
       {
-        "Name": "apim_analytics:everyone",
-        "Roles": "Internal/everyone"
+        "Name": "apim_analytics:manager_dashboard:own",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim_analytics:manager_dashboard:edit",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim_analytics:manager_dashboard:view",
+        "Roles": "admin,Internal/analytics"
+      },
+      {
+        "Name": "apim_analytics:publisher_dashboard:own",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim_analytics:publisher_dashboard:edit",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim_analytics:publisher_dashboard:view",
+        "Roles": "admin,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim_analytics:subscriber_dashboard:own",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim_analytics:subscriber_dashboard:edit",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim_analytics:subscriber_dashboard:view",
+        "Roles": "admin,Internal/subscriber"
       },
       {
         "Name": "apim:pub_alert_manage",
@@ -196,6 +224,26 @@
       {
         "Name": "apim:admin_operations",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:shared_scope_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "registry:view",
+        "Roles": "admin,Internal/registry_admin,Internal/registry_user,Internal/registry_browser,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "registry:write",
+        "Roles": "admin,Internal/registry_admin"
+      },
+      {
+        "Name": "registry:entry_view",
+        "Roles": "admin,Internal/registry_admin,Internal/registry_user,Internal/registry_browser,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "registry:entry_write",
+        "Roles": "admin,Internal/registry_admin,Internal/registry_user"
       }
     ]
   },

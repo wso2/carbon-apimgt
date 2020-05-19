@@ -45,6 +45,24 @@ public class JwtTokenInfoDTO implements Serializable {
     private Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, SubscriptionPolicyDTO>();
     private OAuthTokenReqMessageContext tokReqMsgCtx;
     private OAuthAuthzReqMessageContext oauthAuthzMsgCtx;
+    private String permittedIP;
+    private String permittedReferer;
+
+    public String getPermittedIP() {
+        return permittedIP;
+    }
+
+    public void setPermittedIP(String permittedIP) {
+        this.permittedIP = permittedIP;
+    }
+
+    public String getPermittedReferer() {
+        return permittedReferer;
+    }
+
+    public void setPermittedReferer(String permittedReferer) {
+        this.permittedReferer = permittedReferer;
+    }
 
     public String getSubscriber() {
         return subscriber;

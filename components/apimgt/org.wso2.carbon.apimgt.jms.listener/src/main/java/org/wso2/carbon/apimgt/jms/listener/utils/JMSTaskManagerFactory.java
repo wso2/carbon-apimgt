@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.jms.listener.utils;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.transport.base.BaseConstants;
 import org.apache.axis2.transport.base.threads.WorkerPool;
-import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottlingRunTimeException;
+import org.wso2.carbon.apimgt.jms.listener.ThrottlingRunTimeException;
 
 import javax.jms.Session;
 import java.util.HashMap;

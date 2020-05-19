@@ -44,7 +44,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     " WHERE " +
                     "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     " AND " +
-                    "   (GROUP_ID= ?  OR  (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER(?)))" +
+                    "   (GROUP_ID= ?  OR  (GROUP_ID='' AND SUB.USER_ID = ?))" +
                     " And " +
                     "    NAME like ?" +
                     " ORDER BY $1 $2 " +
@@ -72,7 +72,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     " WHERE " +
                     "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     " AND " +
-                    "   (GROUP_ID= ?  OR (GROUP_ID='' AND SUB.USER_ID=?))"+
+                    "   (GROUP_ID= ?  OR (GROUP_ID='' AND LOWER (SUB.USER_ID) =LOWER (?)))"+
                     " And "+
                     "    NAME like ?"+
                     " ORDER BY $1 $2 " +
@@ -101,7 +101,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     " AND (" +
                     "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
                     "           OR " +
-                    "    (LOWER (SUB.USER_ID) = LOWER(?))" +
+                    "    SUB.USER_ID = ?" +
                     "           OR " +
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
@@ -135,7 +135,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID " +
                     " IN ($params) AND TENANT = ? ))" +
                     "           OR " +
-                    "    (LOWER (SUB.USER_ID) = LOWER(?))" +
+                    "    (LOWER (SUB.USER_ID) = LOWER (?))" +
                     "           OR " +
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
@@ -166,7 +166,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     " WHERE " +
                     "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     " AND " +
-                    "    LOWER(SUB.USER_ID) = LOWER(?)"+
+                    "    SUB.USER_ID = ?"+
                     " And "+
                     "    NAME like ?"+
                     " ORDER BY $1 $2 " +
@@ -193,7 +193,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     " WHERE " +
                     "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     " AND " +
-                    "   SUB.USER_ID=?" +
+                    "   LOWER (SUB.USER_ID) =LOWER (?)" +
                     " And "+
                     "    NAME like ?"+
                     " ORDER BY $1 $2 " +

@@ -11,9 +11,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import javax.validation.constraints.*;
 
@@ -247,7 +247,7 @@ public enum EndpointImplementationTypeEnum {
 }
 
     private EndpointImplementationTypeEnum endpointImplementationType = EndpointImplementationTypeEnum.ENDPOINT;
-    private List<ScopeDTO> scopes = new ArrayList<>();
+    private List<APIScopeDTO> scopes = new ArrayList<>();
     private List<APIOperationsDTO> operations = new ArrayList<>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
     private List<String> categories = new ArrayList<>();
@@ -1004,7 +1004,7 @@ public enum EndpointImplementationTypeEnum {
 
   /**
    **/
-  public APIDTO scopes(List<ScopeDTO> scopes) {
+  public APIDTO scopes(List<APIScopeDTO> scopes) {
     this.scopes = scopes;
     return this;
   }
@@ -1012,10 +1012,10 @@ public enum EndpointImplementationTypeEnum {
   
   @ApiModelProperty(value = "")
   @JsonProperty("scopes")
-  public List<ScopeDTO> getScopes() {
+  public List<APIScopeDTO> getScopes() {
     return scopes;
   }
-  public void setScopes(List<ScopeDTO> scopes) {
+  public void setScopes(List<APIScopeDTO> scopes) {
     this.scopes = scopes;
   }
 

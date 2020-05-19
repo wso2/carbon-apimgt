@@ -30,3 +30,11 @@ var getLoopbackOrigin = function() {
     var origin = 'https://' + app.origin.host + ":" + mgtTransportPort;
     return origin; // Unless there is a port offset this is https://localhost:9443
 };
+
+function getIDPOrigin(){
+    return utils.getExternalIDPOrigin();
+}
+
+function getIDPCheckSessionEndpoint(){
+    return utils.getExternalIDPCheckSessionEndpoint();
+}

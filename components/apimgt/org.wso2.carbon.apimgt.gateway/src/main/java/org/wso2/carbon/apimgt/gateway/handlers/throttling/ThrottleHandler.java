@@ -34,6 +34,7 @@ import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.throttle.core.AccessInformation;
+import org.apache.synapse.commons.throttle.core.CallerConfiguration;
 import org.apache.synapse.commons.throttle.core.RoleBasedAccessRateController;
 import org.apache.synapse.commons.throttle.core.Throttle;
 import org.apache.synapse.commons.throttle.core.ThrottleConfiguration;
@@ -836,7 +837,20 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                     PolicyEngine.getPolicy(spikeArrestSubscriptionLevelPolicy));
                         }
                     } else {
+                        boolean createSpikeArrestSubscriptionLevelPolicy = false;
                         if (throttle.getThrottleContext(subscriptionLevelThrottleKey) == null) {
+                            createSpikeArrestSubscriptionLevelPolicy = true;
+                        } else {
+                            CallerConfiguration existingCallerConfig =
+                                    throttle.getThrottleContext(subscriptionLevelThrottleKey).getThrottleConfiguration()
+                                    .getCallerConfiguration(subscriptionLevelThrottleKey);
+                            if (existingCallerConfig.getMaximumRequestPerUnitTime() != maxRequestCount ||
+                                    existingCallerConfig.getUnitTime() != spikeArrestWindowUnitTime) {
+                                createSpikeArrestSubscriptionLevelPolicy = true;
+                            }
+                        }
+
+                        if (createSpikeArrestSubscriptionLevelPolicy) {
                             OMElement spikeArrestSubscriptionLevelPolicy = createSpikeArrestSubscriptionLevelPolicy(
                                     subscriptionLevelThrottleKey, maxRequestCount, spikeArrestWindowUnitTime);
                             if (spikeArrestSubscriptionLevelPolicy != null) {
@@ -846,7 +860,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                         getThrottleConfiguration(ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
                                 ThrottleContext subscriptionLevelSpikeThrottle = ThrottleContextFactory.
                                         createThrottleContext(ThrottleConstants.ROLE_BASE, newThrottleConfig);
-                                throttle.addThrottleContext(subscriptionLevelThrottleKey, subscriptionLevelSpikeThrottle);
+                                throttle.addThrottleContext(subscriptionLevelThrottleKey,
+                                        subscriptionLevelSpikeThrottle);
                             }
                         }
                     }

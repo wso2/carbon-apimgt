@@ -56,7 +56,7 @@ public class BlockingConditionRetrieverTest {
         blockCondition.setUsername("admin");
         blockCondition.setPassword("admin");
         blockCondition.setEnabled(true);
-        blockCondition.setServiceUrl("http://localhost:18083/throttle/data/v1");
+        blockCondition.setServiceUrl("http://localhost:18083/internal/data/v1");
         ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
         throttleProperties.setBlockCondition(blockCondition);
         BlockingConditionRetriever blockingConditionRetriever = new BlockingConditionRetrieverWrapper

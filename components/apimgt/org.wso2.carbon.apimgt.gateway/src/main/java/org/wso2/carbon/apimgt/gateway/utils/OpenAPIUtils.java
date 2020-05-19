@@ -83,6 +83,7 @@ public class OpenAPIUtils {
                     return null;
                 } else {
                     // We support only one scope for gateway authentication. Hence using the first scope from the list
+                    // TODO:// add support multiple scopes per resource
                     return securityScopes.get(0);
                 }
             } else {

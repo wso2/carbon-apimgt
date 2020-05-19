@@ -18,6 +18,7 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
   
     private String description = null;
     private String context = null;
+    private String version = null;
     private String provider = null;
     private String status = null;
     private String thumbnailUri = null;
@@ -56,6 +57,24 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
   }
   public void setContext(String context) {
     this.context = context;
+  }
+
+  /**
+   * The version of the API Product
+   **/
+  public APIProductSearchResultDTO version(String version) {
+    this.version = version;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1.0.0", value = "The version of the API Product")
+  @JsonProperty("version")
+  public String getVersion() {
+    return version;
+  }
+  public void setVersion(String version) {
+    this.version = version;
   }
 
   /**
@@ -123,6 +142,7 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
     APIProductSearchResultDTO apIProductSearchResult = (APIProductSearchResultDTO) o;
     return Objects.equals(description, apIProductSearchResult.description) &&
         Objects.equals(context, apIProductSearchResult.context) &&
+        Objects.equals(version, apIProductSearchResult.version) &&
         Objects.equals(provider, apIProductSearchResult.provider) &&
         Objects.equals(status, apIProductSearchResult.status) &&
         Objects.equals(thumbnailUri, apIProductSearchResult.thumbnailUri);
@@ -130,7 +150,7 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, provider, status, thumbnailUri);
+    return Objects.hash(description, context, version, provider, status, thumbnailUri);
   }
 
   @Override
@@ -140,6 +160,7 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
+    sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");

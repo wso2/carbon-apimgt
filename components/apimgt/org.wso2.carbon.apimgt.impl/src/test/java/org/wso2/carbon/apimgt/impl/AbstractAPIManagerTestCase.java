@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -60,6 +61,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -99,18 +101,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.UUID;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.TestUtils.mockRegistryAndUserRealm;
+import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_URI;
 import static org.wso2.carbon.utils.ServerConstants.CARBON_HOME;
 
 @RunWith (PowerMockRunner.class)
 @PrepareForTest({ APIUtil.class, MultitenantUtils.class, PrivilegedCarbonContext.class, ServiceReferenceHolder.class,
         GovernanceUtils.class, PaginationContext.class, IOUtils.class, AXIOMUtil.class, RegistryUtils.class,
-        AbstractAPIManager.class, OASParserUtil.class })
+        AbstractAPIManager.class, OASParserUtil.class, KeyManagerHolder.class })
 public class AbstractAPIManagerTestCase {
 
     public static final String SAMPLE_API_NAME = "test";
@@ -128,6 +133,7 @@ public class AbstractAPIManagerTestCase {
     private RegistryService registryService;
     private TenantManager tenantManager;
     private GraphQLSchemaDefinition graphQLSchemaDefinition;
+    private KeyManager keyManager;
 
     @Before
     public void init() {
@@ -145,6 +151,9 @@ public class AbstractAPIManagerTestCase {
         registryService = Mockito.mock(RegistryService.class);
         tenantManager = Mockito.mock(TenantManager.class);
         graphQLSchemaDefinition = Mockito.mock(GraphQLSchemaDefinition.class);
+        keyManager = Mockito.mock(KeyManager.class);
+        PowerMockito.mockStatic(KeyManagerHolder.class);
+        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
     }
 
     @Test
@@ -1096,20 +1105,24 @@ public class AbstractAPIManagerTestCase {
 
     @Test
     public void testIsScopeKeyExist() throws APIManagementException {
-        Mockito.when(apiMgtDAO.isScopeKeyExist(Mockito.anyString(), Mockito.anyInt())).thenReturn(false, true);
+
+        Mockito.when(apiMgtDAO.isSharedScopeExists(Mockito.anyString(), Mockito.anyInt()))
+                .thenReturn(false, true, false);
+        Mockito.when(keyManager.isScopeExists(Mockito.anyString(), Mockito.anyString())).thenReturn(false, false);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         Assert.assertFalse(abstractAPIManager.isScopeKeyExist("sample", -1234));
         Assert.assertTrue(abstractAPIManager.isScopeKeyExist("sample1", -1234));
+        Assert.assertFalse(abstractAPIManager.isScopeKeyExist("sample2", -1234));
     }
 
     @Test
     public void testIsScopeKeyAssigned() throws APIManagementException {
         APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        Mockito.when(apiMgtDAO.isScopeKeyAssigned((APIIdentifier) Mockito.any(), Mockito.anyString(), Mockito.anyInt()))
+        Mockito.when(apiMgtDAO.isScopeKeyAssignedLocally((APIIdentifier) Mockito.any(), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn(false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Assert.assertFalse(abstractAPIManager.isScopeKeyAssigned(identifier, "sample", -1234));
-        Assert.assertTrue(abstractAPIManager.isScopeKeyAssigned(identifier, "sample1", -1234));
+        Assert.assertFalse(abstractAPIManager.isScopeKeyAssignedLocally(identifier, "sample", -1234));
+        Assert.assertTrue(abstractAPIManager.isScopeKeyAssignedLocally(identifier, "sample1", -1234));
     }
 
     @Test
@@ -1129,6 +1142,10 @@ public class AbstractAPIManagerTestCase {
                 apiMgtDAO);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenThrow(UserStoreException.class)
                 .thenReturn(tenantId);
+        PowerMockito.mockStatic(APIUtil.class);
+        SortedMap<String, String> claimValues = new TreeMap<String, String>();
+        claimValues.put("admin@wso2.om", APIConstants.EMAIL_CLAIM);
+        PowerMockito.when(APIUtil.getClaims(API_PROVIDER, tenantId, DEFAULT_DIALECT_URI)).thenReturn(claimValues);
         try {
             abstractAPIManager.addSubscriber(API_PROVIDER, SAMPLE_RESOURCE_ID);
             Assert.fail("User store exception not thrown for error scenario");

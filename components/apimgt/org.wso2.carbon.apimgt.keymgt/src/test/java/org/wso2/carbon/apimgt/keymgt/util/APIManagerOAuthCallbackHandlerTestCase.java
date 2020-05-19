@@ -114,7 +114,8 @@ public class APIManagerOAuthCallbackHandlerTestCase {
                 OAuthCallbackType.SCOPE_VALIDATION_AUTHZ);
         String[] scopesList = {"wso2:default", "wso2:test"};
         List<String> authorizedScopes = Arrays.asList(scopesList);
-        List<String> whiteListScopes = new ArrayList<>();        oAuthCallback.setRequestedScope(scopesList);
+        List<String> whiteListScopes = new ArrayList<>();
+        oAuthCallback.setRequestedScope(scopesList);
         Callback[] callbacks = {oAuthCallback};
         APIManagerOAuthCallbackHandler handler = new APIManagerOAuthCallbackHandler();
         PowerMockito.mockStatic(APIKeyMgtDataHolder.class);
