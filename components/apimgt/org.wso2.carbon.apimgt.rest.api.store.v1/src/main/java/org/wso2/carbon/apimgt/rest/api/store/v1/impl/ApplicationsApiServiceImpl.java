@@ -101,7 +101,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DEFAULT_SORT_ORDER;
         sortBy = sortBy != null ?
                 ApplicationMappingUtil.getApplicationSortByField(sortBy) :
-                RestApiConstants.SORT_BY_NAME;
+                APIConstants.APPLICATION_NAME;
         query = query == null ? "" : query;
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
 
