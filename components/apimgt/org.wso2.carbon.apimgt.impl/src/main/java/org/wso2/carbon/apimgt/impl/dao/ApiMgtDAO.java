@@ -806,7 +806,7 @@ public class ApiMgtDAO {
         return null;
     }
 
-    public int addSubscription(ApiTypeWrapper apiTypeWrapper, int applicationId, String status)
+    public int addSubscription(ApiTypeWrapper apiTypeWrapper, int applicationId, String status, String subscriber)
             throws APIManagementException {
         Connection conn = null;
         final boolean isProduct = apiTypeWrapper.isAPIProduct();
@@ -891,7 +891,7 @@ public class ApiMgtDAO {
             preparedStForInsert.setInt(3, applicationId);
             preparedStForInsert.setString(4, status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED);
             preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-            preparedStForInsert.setString(6, identifier.getProviderName());
+            preparedStForInsert.setString(6, subscriber);
 
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             preparedStForInsert.setTimestamp(7, timestamp);
@@ -2867,9 +2867,9 @@ public class ApiMgtDAO {
      * @param applicationId Application id
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update subscriber
      */
-    public void updateSubscriptions(ApiTypeWrapper apiTypeWrapper, int applicationId)
+    public void updateSubscriptions(ApiTypeWrapper apiTypeWrapper, int applicationId,String subscriber)
             throws APIManagementException {
-        addSubscription(apiTypeWrapper, applicationId, APIConstants.SubscriptionStatus.UNBLOCKED);
+        addSubscription(apiTypeWrapper, applicationId, APIConstants.SubscriptionStatus.UNBLOCKED, subscriber);
     }
 
     /**
@@ -5774,7 +5774,8 @@ public class ApiMgtDAO {
                             subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
                         }
                         apiTypeWrapper.setTier(info.tierId);
-                        int subscriptionId = addSubscription(apiTypeWrapper, info.applicationId, subscriptionStatus);
+                        int subscriptionId = addSubscription(apiTypeWrapper, info.applicationId, subscriptionStatus,
+                                apiIdentifier.getProviderName());
                         if (subscriptionId == -1) {
                             String msg = "Unable to add a new subscription for the API: " + apiIdentifier.getName() +
                                     ":v" + apiIdentifier.getVersion();
@@ -5826,7 +5827,7 @@ public class ApiMgtDAO {
                             subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
                         }
                         apiTypeWrapper.setTier(rs.getString("TIER_ID"));
-                        addSubscription(apiTypeWrapper, applicationId, subscriptionStatus);
+                        addSubscription(apiTypeWrapper, applicationId, subscriptionStatus, apiIdentifier.getProviderName());
                         // catching the exception because when copy the api without the option "require re-subscription"
                         // need to go forward rather throwing the exception
                     } catch (SubscriptionAlreadyExistingException e) {
