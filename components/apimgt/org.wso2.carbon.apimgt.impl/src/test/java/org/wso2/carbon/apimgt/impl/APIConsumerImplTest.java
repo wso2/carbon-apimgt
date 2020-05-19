@@ -886,7 +886,7 @@ public class APIConsumerImplTest {
                         Mockito.anyString()))
                 .thenReturn(oAuthAppRequest);
         Mockito.when(apiMgtDAO
-                .getConsumerKeyForApplicationKeyType(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                .getConsumerKeyByApplicationIdKeyTypeKeyManager(Mockito.anyInt(),Mockito.anyString(),
                         Mockito.anyString())).thenReturn(consumerKey);
         OAuthApplicationInfo updatedAppInfo = new OAuthApplicationInfo();
         String clientName = "sample client";

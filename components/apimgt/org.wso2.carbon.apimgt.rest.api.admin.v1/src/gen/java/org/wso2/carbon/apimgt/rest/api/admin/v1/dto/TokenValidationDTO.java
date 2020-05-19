@@ -21,7 +21,7 @@ public class TokenValidationDTO   {
 @XmlEnum(String.class)
 public enum TypeEnum {
 
-    @XmlEnumValue("REGEX") REGEX(String.valueOf("REGEX")), @XmlEnumValue("JWT") JWT(String.valueOf("JWT")), @XmlEnumValue("CUSTOM") CUSTOM(String.valueOf("CUSTOM"));
+    @XmlEnumValue("REFERENCE") REFERENCE(String.valueOf("REFERENCE")), @XmlEnumValue("JWT") JWT(String.valueOf("JWT")), @XmlEnumValue("CUSTOM") CUSTOM(String.valueOf("CUSTOM"));
 
 
     private String value;

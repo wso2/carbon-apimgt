@@ -5,11 +5,12 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 
 public interface KeyManagerConfigurationService {
 
-    void addKeyManagerConfiguration(String tenantDomain,String name,String type, KeyManagerConfiguration keyManagerConfiguration) throws
+    void addKeyManagerConfiguration(String tenantDomain, String name, String type,
+                                    KeyManagerConfiguration keyManagerConfiguration) throws
             APIManagementException;
 
-    void updateKeyManagerConfiguration(String tenantDomain,String name,String type,
-                                       KeyManagerConfiguration keyManagerConfiguration,boolean enabled)
+    void updateKeyManagerConfiguration(String tenantDomain, String name, String type,
+                                       KeyManagerConfiguration keyManagerConfiguration)
             throws APIManagementException;
 
     void removeKeyManagerConfiguration(String tenantDomain, String name) throws APIManagementException;

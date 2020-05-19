@@ -269,10 +269,12 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                                     "Invalid JWT token");
                         }
                         signedJWT = SignedJWT.parse(apiKey);
-                        isJwtToken =
-                                ServiceReferenceHolder.getInstance().getJwtValidationService().isJWTTokenValidateSelf(signedJWT);
+                        String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
+                                .getKeyManagerNameIfJwtValidatorExist(signedJWT);
+                        if (StringUtils.isNotEmpty(keyManager)){
+                            isJwtToken = true;
+                        }
                     } catch ( ParseException e) {
-                        isJwtToken = false;
                         log.debug("Not a JWT token. Failed to decode the token header.", e);
                     } catch (APIManagementException e) {
                         log.error("error while check validation of JWt", e);

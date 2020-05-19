@@ -37,6 +37,7 @@ public class KeyManagerDTO   {
     private Boolean enableTokenEncryption = false;
     private Boolean enableTokenHashing = false;
     private Boolean enableMapOAuthConsumerApps = false;
+    private Boolean enableOAuthAppCreation = false;
     private Boolean enableSelfValidationJWT = true;
     private List<ClaimMappingEntryDTO> claimMapping = new ArrayList<>();
     private TokenValidationDTO tokenValidation = null;
@@ -353,6 +354,23 @@ public class KeyManagerDTO   {
 
   /**
    **/
+  public KeyManagerDTO enableOAuthAppCreation(Boolean enableOAuthAppCreation) {
+    this.enableOAuthAppCreation = enableOAuthAppCreation;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("enableOAuthAppCreation")
+  public Boolean isEnableOAuthAppCreation() {
+    return enableOAuthAppCreation;
+  }
+  public void setEnableOAuthAppCreation(Boolean enableOAuthAppCreation) {
+    this.enableOAuthAppCreation = enableOAuthAppCreation;
+  }
+
+  /**
+   **/
   public KeyManagerDTO enableSelfValidationJWT(Boolean enableSelfValidationJWT) {
     this.enableSelfValidationJWT = enableSelfValidationJWT;
     return this;
@@ -464,6 +482,7 @@ public class KeyManagerDTO   {
         Objects.equals(enableTokenEncryption, keyManager.enableTokenEncryption) &&
         Objects.equals(enableTokenHashing, keyManager.enableTokenHashing) &&
         Objects.equals(enableMapOAuthConsumerApps, keyManager.enableMapOAuthConsumerApps) &&
+        Objects.equals(enableOAuthAppCreation, keyManager.enableOAuthAppCreation) &&
         Objects.equals(enableSelfValidationJWT, keyManager.enableSelfValidationJWT) &&
         Objects.equals(claimMapping, keyManager.claimMapping) &&
         Objects.equals(tokenValidation, keyManager.tokenValidation) &&
@@ -473,7 +492,7 @@ public class KeyManagerDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, description, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, jwksEndpoint, issuer, scopeManagementEndpoint, availableGrantTypes, enableTokenGneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableSelfValidationJWT, claimMapping, tokenValidation, enabled, additionalProperties);
+    return Objects.hash(id, name, type, description, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, jwksEndpoint, issuer, scopeManagementEndpoint, availableGrantTypes, enableTokenGneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, tokenValidation, enabled, additionalProperties);
   }
 
   @Override
@@ -499,6 +518,7 @@ public class KeyManagerDTO   {
     sb.append("    enableTokenEncryption: ").append(toIndentedString(enableTokenEncryption)).append("\n");
     sb.append("    enableTokenHashing: ").append(toIndentedString(enableTokenHashing)).append("\n");
     sb.append("    enableMapOAuthConsumerApps: ").append(toIndentedString(enableMapOAuthConsumerApps)).append("\n");
+    sb.append("    enableOAuthAppCreation: ").append(toIndentedString(enableOAuthAppCreation)).append("\n");
     sb.append("    enableSelfValidationJWT: ").append(toIndentedString(enableSelfValidationJWT)).append("\n");
     sb.append("    claimMapping: ").append(toIndentedString(claimMapping)).append("\n");
     sb.append("    tokenValidation: ").append(toIndentedString(tokenValidation)).append("\n");

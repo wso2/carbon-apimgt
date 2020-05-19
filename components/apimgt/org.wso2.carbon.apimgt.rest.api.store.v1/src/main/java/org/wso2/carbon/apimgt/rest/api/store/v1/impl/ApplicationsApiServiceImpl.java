@@ -998,7 +998,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         }
                     }
                     OAuthApplicationInfo updatedData = apiConsumer.updateAuthClient(username, application.getName(),
-                            application.getTokenType(), body.getCallbackUrl(), null, null, null,
+                            appKey.getKeyType().value(), body.getCallbackUrl(), null, null, null,
                             body.getGroupId(),new Gson().toJson(jsonParams),appKey.getKeyManager());
                     ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
                     applicationKeyDTO.setCallbackUrl(updatedData.getCallBackURL());

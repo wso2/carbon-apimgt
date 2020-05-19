@@ -4657,6 +4657,10 @@ definitions:
         type: boolean
         example: false
         default: false
+      enableOAuthAppCreation:
+        type: boolean
+        example: false
+        default: false
       enableSelfValidationJWT:
         type: boolean
         example: true
@@ -4772,7 +4776,7 @@ definitions:
       type:
         type: string
         enum:
-          - REGEX
+          - REFERENCE
           - JWT
           - CUSTOM
       value:

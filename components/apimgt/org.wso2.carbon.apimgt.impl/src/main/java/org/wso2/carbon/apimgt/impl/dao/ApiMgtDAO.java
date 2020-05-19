@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -5159,193 +5158,32 @@ public class ApiMgtDAO {
         return consumerKeys.toArray(new APIKey[consumerKeys.size()]);
     }
 
-    /**
-     * Returns the consumer Key for a given Application Name, Subscriber Name, Key Type, Grouping Id combination.
-     *
-     * @param applicationName Name of the Application.
-     * @param subscriberId    Name of Subscriber.
-     * @param keyType         PRODUCTION | SANDBOX.
-     * @param groupingId      Grouping ID. When set to null query will be performed using the other three values.
-     * @return Consumer Key matching the provided combination.
-     * @throws APIManagementException
-     */
-    public String getConsumerKeyForApplicationKeyType(String applicationName, String subscriberId, String keyType,
-                                                      String groupingId) throws APIManagementException {
-
-        String consumerKey = null;
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        String sqlQuery = SQLConstants.GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_SQL;
-        String whereSubscriberUserID = "SUB.USER_ID = ?";
-
-        if (forceCaseInsensitiveComparisons) {
-            whereSubscriberUserID = "lower(SUB.USER_ID) = ?";
-            subscriberId = subscriberId.toLowerCase();
-        }
-
-        String whereClauseWithGroupId = " AND " + "(APP.GROUP_ID= ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL) AND " +
-                whereSubscriberUserID + "))";
-
-        String whereClauseWithMultiGroupId = " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
-                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  " +
-                whereSubscriberUserID + ")";
-
-        String whereClause = " AND " + whereSubscriberUserID;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-
-            if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-                if (multiGroupAppSharingEnabled) {
-                    Subscriber subscriber = getSubscriber(subscriberId);
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                    String groupIDArray[] = groupingId.split(",");
-                    sqlQuery += whereClauseWithMultiGroupId;
-                    prepStmt = fillQueryParams(connection, sqlQuery, groupIDArray, 3);
-                    prepStmt.setString(1, applicationName);
-                    prepStmt.setString(2, keyType);
-                    int paramIndex = groupIDArray.length + 2;
-                    prepStmt.setString(++paramIndex, tenantDomain);
-                    prepStmt.setString(++paramIndex, subscriberId);
-                } else {
-                    sqlQuery += whereClauseWithGroupId;
-                    prepStmt = connection.prepareStatement(sqlQuery);
-                    prepStmt.setString(1, applicationName);
-                    prepStmt.setString(2, keyType);
-                    prepStmt.setString(3, groupingId);
-                    prepStmt.setString(4, subscriberId);
-                }
-            } else {
-                sqlQuery += whereClause;
-                prepStmt = connection.prepareStatement(sqlQuery);
-                prepStmt.setString(1, applicationName);
-                prepStmt.setString(2, keyType);
-                prepStmt.setString(3, subscriberId);
-            }
-
-            rs = prepStmt.executeQuery();
-
-            while (rs.next()) {
-                consumerKey = rs.getString("CONSUMER_KEY");
-            }
-        } catch (SQLException e) {
-            handleException("Error when reading the application information from" + " the persistence store.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return consumerKey;
-    }
-
-    /**
-     * Returns the consumer Key for a given Application Name, Subscriber Name, Key Type, Grouping Id combination.
-     *
-     * @param applicationId   Id of the Application.
-     * @param subscriberId    Name of Subscriber.
-     * @param keyType         PRODUCTION | SANDBOX.
-     * @param groupingId      Grouping ID. When set to null query will be performed using the other three values.
-     * @return Consumer Key matching the provided combination.
-     * @throws APIManagementException
-     */
-    public String getConsumerKeyForApplicationKeyType(int applicationId, String subscriberId, String keyType,
-            String groupingId) throws APIManagementException {
-        String consumerKey = null;
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        String sqlQuery = SQLConstants.GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_BY_APP_ID_SQL;
-        String whereSubscriberUserID = "SUB.USER_ID = ?";
-        if (forceCaseInsensitiveComparisons) {
-            whereSubscriberUserID = "lower(SUB.USER_ID) = ?";
-            subscriberId = subscriberId.toLowerCase();
-        }
-        String whereClauseWithGroupId = " AND " + "(APP.GROUP_ID= ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL) AND " +
-                whereSubscriberUserID + "))";
-        String whereClauseWithMultiGroupId = " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
-                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  " +
-                whereSubscriberUserID + ")";
-        String whereClause = " AND " + whereSubscriberUserID;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-                if (multiGroupAppSharingEnabled) {
-                    Subscriber subscriber = getSubscriber(subscriberId);
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                    String groupIDArray[] = groupingId.split(",");
-                    sqlQuery += whereClauseWithMultiGroupId;
-                    prepStmt = fillQueryParams(connection, sqlQuery, groupIDArray, 3);
-                    prepStmt.setInt(1, applicationId);
-                    prepStmt.setString(2, keyType);
-                    int paramIndex = groupIDArray.length + 2;
-                    prepStmt.setString(++paramIndex, tenantDomain);
-                    prepStmt.setString(++paramIndex, subscriberId);
-                } else {
-                    sqlQuery += whereClauseWithGroupId;
-                    prepStmt = connection.prepareStatement(sqlQuery);
-                    prepStmt.setInt(1, applicationId);
-                    prepStmt.setString(2, keyType);
-                    prepStmt.setString(3, groupingId);
-                    prepStmt.setString(4, subscriberId);
-                }
-            } else {
-                sqlQuery += whereClause;
-                prepStmt = connection.prepareStatement(sqlQuery);
-                prepStmt.setInt(1, applicationId);
-                prepStmt.setString(2, keyType);
-                prepStmt.setString(3, subscriberId);
-            }
-            rs = prepStmt.executeQuery();
-            while (rs.next()) {
-                consumerKey = rs.getString("CONSUMER_KEY");
-            }
-        } catch (SQLException e) {
-            handleException("Error when reading the application information from the persistence store.", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return consumerKey;
-    }
-
-    /**
-     * This method will return a java Map that contains application ID and token type.
-     *
-     * @param consumerKey consumer key of the oAuth application.
-     * @return Map.
-     * @throws APIManagementException
-     */
-    public Map<String, String> getApplicationIdAndTokenTypeByConsumerKey(String consumerKey)
+    public String getConsumerKeyByApplicationIdKeyTypeKeyManager(int applicationId, String keyType, String keyManager)
             throws APIManagementException {
-        Map<String, String> appIdAndConsumerKey = new HashMap<String, String>();
 
-        if (log.isDebugEnabled()) {
-            log.debug("fetching application id and token type by consumer key " + consumerKey);
-        }
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.GET_APPLICATION_ID_BY_CONSUMER_KEY_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-
-            prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setString(1, consumerKey);
-            rs = prepStmt.executeQuery();
-            while (rs.next()) {
-                appIdAndConsumerKey.put("application_id", rs.getString("APPLICATION_ID"));
-                appIdAndConsumerKey.put("token_type", rs.getString("KEY_TYPE"));
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement(SQLConstants.GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_APP_ID_KEY_MANAGER_SQL)) {
+            preparedStatement.setInt(1, applicationId);
+            preparedStatement.setString(2, keyType);
+            preparedStatement.setString(3, keyManager);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("CONSUMER_KEY");
+                }
             }
         } catch (SQLException e) {
-            handleException("Error when reading application subscription information", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            String msg = "Error occurred while retreving consumer key for application" + applicationId + " keyType " +
+                    keyType + " Key Manager " + keyManager;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         }
-        return appIdAndConsumerKey;
+        return null;
     }
 
     /*
-        Delete mapping record by given consumer key
-     */
+    Delete mapping record by given consumer key
+ */
     public void deleteApplicationKeyMappingByConsumerKey(String consumerKey) throws APIManagementException {
 
         Connection connection = null;
@@ -8711,17 +8549,17 @@ public class ApiMgtDAO {
                 String configurationJson = new Gson().toJson(keyManagerConfigurationDTO.getAdditionalProperties());
                 preparedStatement.setBinaryStream(5, new ByteArrayInputStream(configurationJson.getBytes()));
                 preparedStatement.setString(6, keyManagerConfigurationDTO.getTenantDomain());
-                preparedStatement.setBoolean(7,keyManagerConfigurationDTO.isEnabled());
+                preparedStatement.setBoolean(7, keyManagerConfigurationDTO.isEnabled());
                 preparedStatement.executeUpdate();
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
-                if (e instanceof SQLIntegrityConstraintViolationException){
-                    if (getKeyManagerConfigurationByName(conn,keyManagerConfigurationDTO.getTenantDomain(),
-                            keyManagerConfigurationDTO.getName())!= null){
+                if (e instanceof SQLIntegrityConstraintViolationException) {
+                    if (getKeyManagerConfigurationByName(conn, keyManagerConfigurationDTO.getTenantDomain(),
+                            keyManagerConfigurationDTO.getName()) != null) {
                         log.warn(keyManagerConfigurationDTO.getName() + " Key Manager Already Registered in tenant" +
                                 keyManagerConfigurationDTO.getTenantDomain());
-                    }else {
+                    } else {
                         throw new APIManagementException("Error while Storing key manager configuration with name " +
                                 keyManagerConfigurationDTO.getName() + " in tenant " +
                                 keyManagerConfigurationDTO.getTenantDomain(), e);

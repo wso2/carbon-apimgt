@@ -138,7 +138,7 @@ public class KeyManagerMappingUtil {
         if (validationTypeElement != null) {
             if (APIConstants.KeyManager.VALIDATION_JWT.equals(validationTypeElement.getAsString())) {
                 tokenValidationDTO.setType(TokenValidationDTO.TypeEnum.JWT);
-            } else if (APIConstants.KeyManager.VALIDATION_REGEX.equals(validationTypeElement.getAsString())) {
+            } else if (APIConstants.KeyManager.VALIDATION_REFERENCE.equals(validationTypeElement.getAsString())) {
                 tokenValidationDTO.setType(TokenValidationDTO.TypeEnum.REGEX);
             } else if (APIConstants.KeyManager.VALIDATION_CUSTOM.equals(validationTypeElement.getAsString())) {
                 tokenValidationDTO.setType(TokenValidationDTO.TypeEnum.CUSTOM);
@@ -234,7 +234,7 @@ public class KeyManagerMappingUtil {
                         .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_JWT);
             } else if (TokenValidationDTO.TypeEnum.REGEX.equals(tokenValidation.getType())) {
                 additionalProperties
-                        .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_REGEX);
+                        .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_REFERENCE);
             }else{
                 additionalProperties
                         .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_CUSTOM);

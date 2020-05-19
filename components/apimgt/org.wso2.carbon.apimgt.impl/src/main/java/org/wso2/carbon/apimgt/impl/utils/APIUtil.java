@@ -130,6 +130,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
@@ -757,6 +758,12 @@ public final class APIUtil {
             api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
             //non empty URLs to API object
+            String keyManagers = artifact.getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
+            if (StringUtils.isNotEmpty(keyManagers)){
+                api.setKeyManagers(new Gson().fromJson(keyManagers,List.class));
+            }else{
+                api.setKeyManagers(Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
+            }
             try {
                 api.setEnvironmentList(extractEnvironmentListForAPI(
                         artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
@@ -1327,6 +1334,9 @@ public final class APIUtil {
             if (api.getMonetizationProperties() != null) {
                 artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
                         api.getMonetizationProperties().toJSONString());
+            }
+            if (api.getKeyManagers() != null) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS, new Gson().toJson(api.getKeyManagers()));
             }
 
         } catch (GovernanceException e) {
@@ -10612,6 +10622,7 @@ public final class APIUtil {
         }
         return temp;
     }
+
     public static KeyManagerConfigurationDTO getAndSetDefaultKeyManagerConfiguration(
             KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
@@ -10632,23 +10643,25 @@ public final class APIUtil {
             if (keyManagerConfigurationDTO.getProperty(APIConstants.KeyManager.ENABLE_TOKEN_ENCRYPTION) == null) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE,
                         Boolean.parseBoolean(enableTokenEncryption));
-                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.AUTHSERVER_URL)){
+                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.AUTHSERVER_URL)) {
                     keyManagerConfigurationDTO.addProperty(APIConstants.AUTHSERVER_URL,
                             apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL));
                 }
-                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.KEY_MANAGER_USERNAME)){
+                if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                        .containsKey(APIConstants.KEY_MANAGER_USERNAME)) {
                     keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_USERNAME,
                             apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME));
                 }
-                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.KEY_MANAGER_PASSWORD)){
+                if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                        .containsKey(APIConstants.KEY_MANAGER_PASSWORD)) {
                     keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_PASSWORD,
                             apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD));
                 }
-                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.REVOKE_URL)){
+                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.REVOKE_URL)) {
                     keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL,
                             apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_API_URL));
                 }
-                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.TOKEN_URL)){
+                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.TOKEN_URL)) {
                     String revokeUrl = apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_API_URL);
                     String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
                     keyManagerConfigurationDTO.addProperty(APIConstants.TOKEN_URL, tokenUrl);
@@ -10667,8 +10680,12 @@ public final class APIUtil {
         }
         if (!keyManagerConfigurationDTO.getAdditionalProperties()
                 .containsKey(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION)) {
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION,
-                    APIUtil.isMapExistingAuthAppsEnabled());
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION,true);
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS)) {
+            keyManagerConfigurationDTO
+                    .addProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, isMapExistingAuthAppsEnabled());
         }
         if (!keyManagerConfigurationDTO.getAdditionalProperties()
                 .containsKey(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION)) {
@@ -10685,7 +10702,7 @@ public final class APIUtil {
                     getTokenEndpoint().concat("/revoke"));
         }
         if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
-                APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD)){
+                APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD)) {
             keyManagerConfigurationDTO.addProperty(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD,
                     String.valueOf(validityPeriod));
         }
@@ -10700,6 +10717,10 @@ public final class APIUtil {
         if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                 APIConstants.KeyManager.ISSUER)) {
             keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ISSUER, issuerIdentifier);
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                APIConstants.KeyManager.CLAIM_MAPPING)){
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CLAIM_MAPPING, getDefaultClaimMappings());
         }
         return keyManagerConfigurationDTO;
     }
@@ -10811,4 +10832,19 @@ public final class APIUtil {
         return null;
     }
 
+    public static List<ClaimMappingDto> getDefaultClaimMappings() {
+
+        List<ClaimMappingDto> claimMappingDtoList = new ArrayList<>();
+        try (InputStream resourceAsStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("claimMappings/default-claim-mapping.json")) {
+            String content = IOUtils.toString(resourceAsStream);
+            Map<String, String> claimMapping = new Gson().fromJson(content, Map.class);
+            claimMapping.forEach((remoteClaim, localClaim) -> {
+                claimMappingDtoList.add(new ClaimMappingDto(remoteClaim, localClaim));
+            });
+        } catch (IOException e) {
+            log.error("Error while reading default-claim-mapping.json", e);
+        }
+        return claimMappingDtoList;
+    }
 }

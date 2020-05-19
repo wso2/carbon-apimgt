@@ -454,7 +454,7 @@ public class JWTValidator {
                 }
                 if (apiKeyValidationInfoDTO.isAuthorized()) {
                     log.debug("JWT authentication successful.");
-                    String endUserToken = null;
+                    String endUserToken;
                     if (jwtGenerationEnabled) {
                         JWTInfoDto jwtInfoDto;
                         try {

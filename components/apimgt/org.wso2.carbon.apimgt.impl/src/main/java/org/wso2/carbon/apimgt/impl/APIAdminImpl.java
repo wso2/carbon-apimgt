@@ -553,7 +553,8 @@ public class APIAdminImpl implements APIAdmin {
                     }
                     if (!missingRequiredConfigurations.isEmpty()){
                         throw new APIManagementException("Key Manager Configuration value for " + String.join(",",
-                                missingRequiredConfigurations)  + " are required",ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING);
+                                missingRequiredConfigurations)  + " is/are required",
+                                ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING);
                     }
                 }
             }
