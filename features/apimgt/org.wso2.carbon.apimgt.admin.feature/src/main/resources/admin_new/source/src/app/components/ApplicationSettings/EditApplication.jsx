@@ -108,30 +108,26 @@ function Edit(props) {
             Alert.error(formErrors);
             return false;
         }
-        const restApi = new API();
 
-        const promiseAPICall = new Promise((resolve, reject) => {
-            restApi.updateApplicationOwner(id, owner)
-                .then(() => {
-                    resolve(
-                        <FormattedMessage
-                            id='AdminPages.ApplicationSettings.Edit.form.edit.successful'
-                            defaultMessage='Application owner changed successfully'
-                        />,
-                    );
-                })
-                .catch((error) => {
-                    const { response } = error;
-                    if (response.body) {
-                        const { errorBody } = response.body;
-                        reject(errorBody);
-                    }
-                })
-                .finally(() => {
-                    updateList();
-                });
-        });
-        return promiseAPICall;
+        const restApi = new API();
+        return restApi.updateApplicationOwner(id, owner)
+            .then(() => {
+                return (
+                    <FormattedMessage
+                        id='AdminPages.ApplicationSettings.Edit.form.edit.successful'
+                        defaultMessage='Application owner changed successfully'
+                    />
+                );
+            })
+            .catch((error) => {
+                const { response } = error;
+                if (response.body) {
+                    throw response.body.description;
+                }
+            })
+            .finally(() => {
+                updateList();
+            });
     };
 
     return (

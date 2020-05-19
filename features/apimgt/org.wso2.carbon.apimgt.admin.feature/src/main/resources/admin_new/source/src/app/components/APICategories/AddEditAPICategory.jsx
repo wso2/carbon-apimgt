@@ -124,29 +124,34 @@ function AddEdit({
             // assign the create promise to the promiseAPICall
             promiseAPICall = restApi.createAPICategory(name, description);
         }
-        promiseAPICall = new Promise((resolve, reject) => {
-            promiseAPICall
-                .then(() => {
-                    resolve(
+
+        return promiseAPICall
+            .then(() => {
+                if (id) {
+                    return (
+                        <FormattedMessage
+                            id='AdminPages.ApiCategories.AddEdit.form.edit.successful'
+                            defaultMessage='API Category edited successfully'
+                        />
+                    );
+                } else {
+                    return (
                         <FormattedMessage
                             id='AdminPages.ApiCategories.AddEdit.form.add.successful'
                             defaultMessage='API Category added successfully'
-                        />,
+                        />
                     );
-                })
-                .catch((error) => {
-                    const { response } = error;
-                    if (response.body) {
-                        const { errorBody } = response.body;
-                        reject(errorBody);
-                    }
-                })
-                .finally(() => {
-                    dispatch('', '');
-                    updateList();
-                });
-        });
-        return promiseAPICall;
+                }
+            })
+            .catch((error) => {
+                const { response } = error;
+                if (response.body) {
+                    throw response.body.description;
+                }
+            })
+            .finally(() => {
+                updateList();
+            });
     };
 
     return (
