@@ -446,19 +446,6 @@ public interface APIManager {
     boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException;
 
     /**
-     * Check whether the given scope key is already assigned to an API under given tenant
-     *
-     * @param identifier API Identifier
-     * @param scopeKey   candidate scope key
-     * @param tenantid   tenant id
-     * @return true if the scope key is already available
-     * @throws APIManagementException if failed to check the context availability
-     * @deprecated Use isScopeKeyAssignedLocally() instead.
-     */
-    @Deprecated
-    boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid) throws APIManagementException;
-
-    /**
      * Check whether the given scope key is already assigned to any API under given tenant.
      *
      * @param scopeKey     Scope
