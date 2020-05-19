@@ -11,17 +11,21 @@ import Box from '@material-ui/core/Box';
 const theme = createMuiTheme();
 theme.spacing(2);
 
-let id = 1;
+const defaultValidationFn = () => {
+    return false;
+};
 
 const InputList = (props) => {
     const {
-        onInputListChange, initialList, inputLabelPrefix, helperText, addButtonLabel,
+        onInputListChange, initialList, inputLabelPrefix, helperText, addButtonLabel, onValidation,
     } = props;
     const [userInputItems, setUserInputItems] = useState([]);
+    const [id, setId] = useState(0);
 
     const handleInput = ({ target: { name, value } }) => {
         let tempItems = userInputItems.filter((item) => item.key !== name);
-        tempItems = [...tempItems, { key: '' + name, value }];
+        const fieldErrors = onValidation(value);
+        tempItems = [...tempItems, { key: '' + name, value, error: fieldErrors }];
         tempItems.sort((a, b) => {
             return a.key - b.key;
         });
@@ -44,18 +48,20 @@ const InputList = (props) => {
     }, [userInputItems]);
 
     useEffect(() => {
-        id = 1;
         if (initialList) {
             setUserInputItems(initialList.map((item) => {
-                return { key: '' + id++, value: item };
+                setId(id + 1);
+                return { key: '' + id, value: item, error: onValidation(item) };
             }));
         } else {
-            setUserInputItems([{ key: '' + id++, value: '' }]);
+            setId(id + 1);
+            setUserInputItems([{ key: '' + id, value: '', error: onValidation('') }]);
         }
     }, []);
 
     const onAddInputField = () => {
-        const newUserItemList = [...userInputItems, { key: '' + id++, value: '' }];
+        setId(id + 1);
+        const newUserItemList = [...userInputItems, { key: '' + id, value: '', error: onValidation('') }];
         setUserInputItems(newUserItemList);
     };
 
@@ -73,8 +79,11 @@ const InputList = (props) => {
                                     onChange={handleInput}
                                     label={inputLabelPrefix + ' ' + labelCounter++}
                                     value={item.value}
-                                    helperText={helperText}
+                                    helperText={
+                                        userInputItems.filter((obj) => obj.key === item.key)[0].error || helperText
+                                    }
                                     variant='outlined'
+                                    error={userInputItems.filter((obj) => obj.key === item.key)[0].error}
                                 />
                                 <Box mt={1}>
                                     <Button
@@ -96,7 +105,6 @@ const InputList = (props) => {
                     <Box mt={1}>
                         <Button
                             variant='contained'
-                            color={theme.palette.action.disabledBackground}
                             onClick={onAddInputField}
                         >
                             {addButtonLabel}
@@ -113,6 +121,7 @@ InputList.defaultProps = {
     helperText: 'Enter item',
     addButtonLabel: 'Add item',
     initialList: null,
+    onValidation: defaultValidationFn,
 };
 
 InputList.propTypes = {
@@ -121,6 +130,7 @@ InputList.propTypes = {
     addButtonLabel: PropTypes.string,
     onInputListChange: PropTypes.func.isRequired,
     initialList: PropTypes.shape([]),
+    onValidation: PropTypes.func,
 };
 
 export default InputList;

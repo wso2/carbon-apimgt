@@ -19,6 +19,7 @@
 import React, { useReducer } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
+import Joi from '@hapi/joi';
 import TextField from '@material-ui/core/TextField';
 import { FormattedMessage } from 'react-intl';
 import FormControl from '@material-ui/core/FormControl';
@@ -167,8 +168,24 @@ function AddEditMGLabel(props) {
         });
     };
 
-    const onHostChange = (userHosts) => {
+    const handleHostChange = (userHosts) => {
         dispatch({ field: 'hosts', value: userHosts });
+    };
+
+    const handleHostValidation = (hostName) => {
+        const schema = Joi.string().uri().empty();
+        const validationError = schema.validate(hostName).error;
+
+        if (validationError) {
+            const errorType = validationError.details[0].type;
+            if (errorType === 'any.empty') {
+                return 'Host is empty';
+            }
+            if (errorType === 'string.uri') {
+                return 'Invalid Host';
+            }
+        }
+        return false;
     };
 
     return (
@@ -217,19 +234,21 @@ function AddEditMGLabel(props) {
                 {(id)
                     ? (
                         <ListInput
-                            onInputListChange={onHostChange}
+                            onInputListChange={handleHostChange}
                             initialList={hosts}
                             inputLabelPrefix='Host'
                             helperText='Enter Host'
                             addButtonLabel='Add Host'
+                            onValidation={handleHostValidation}
                         />
                     )
                     : (
                         <ListInput
-                            onInputListChange={onHostChange}
+                            onInputListChange={handleHostChange}
                             inputLabelPrefix='Host'
                             helperText='Enter Host'
                             addButtonLabel='Add Host'
+                            onValidation={handleHostValidation}
                         />
                     )}
             </FormControl>

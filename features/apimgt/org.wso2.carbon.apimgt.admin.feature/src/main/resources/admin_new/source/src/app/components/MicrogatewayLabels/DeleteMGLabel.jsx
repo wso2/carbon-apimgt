@@ -33,27 +33,23 @@ function Delete({ updateList, dataRow }) {
     const { id } = dataRow;
 
     const formSaveCallback = () => {
-        // todo: don't create a new promise
-        const promiseAPICall = new Promise((resolve, reject) => {
-            const restApi = new API();
-            restApi
-                .deleteMicrogatewayLabel(id)
-                .then(() => {
-                    resolve(
-                        <FormattedMessage
-                            id='AdminPages.Microgateways.Delete.form.delete.successful'
-                            defaultMessage='Microgateway Label deleted successfully'
-                        />,
-                    );
-                })
-                .catch((error) => {
-                    reject(error.response.body.description);
-                })
-                .finally(() => {
-                    updateList();
-                });
-        });
-        return promiseAPICall;
+        const restApi = new API();
+        return restApi
+            .deleteMicrogatewayLabel(id)
+            .then(() => {
+                return (
+                    <FormattedMessage
+                        id='AdminPages.Microgateways.Delete.form.delete.successful'
+                        defaultMessage='Microgateway Label deleted successfully'
+                    />
+                );
+            })
+            .catch((error) => {
+                throw (error.response.body.description);
+            })
+            .finally(() => {
+                updateList();
+            });
     };
 
     return (
