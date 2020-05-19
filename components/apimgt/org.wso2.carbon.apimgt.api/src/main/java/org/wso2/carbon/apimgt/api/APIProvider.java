@@ -958,6 +958,18 @@ public interface APIProvider extends APIManager {
     String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
 
     /**
+     *  Add a block condition with condition status
+     *
+     * @param conditionType type of the condition (IP, Context .. )
+     * @param conditionValue value of the condition
+     * @param conditionStatus status of the condition
+     * @return UUID of the new Block Condition
+     * @throws APIManagementException
+     */
+    String addBlockCondition(String conditionType, String conditionValue, boolean conditionStatus)
+            throws APIManagementException;
+
+    /**
      * Deletes a block condition given its Id
      *
      * @param conditionId Id of the condition

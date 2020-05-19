@@ -74,6 +74,7 @@ public class BlockingConditionMappingUtil {
             Object parse = new JSONParser().parse(blockCondition.getConditionValue());
             dto.setConditionValue(parse);
         }
+        dto.setConditionStatus(blockCondition.isEnabled());
         return dto;
     }
 }

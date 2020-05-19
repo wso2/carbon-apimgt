@@ -874,13 +874,18 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //Add the block condition. It will throw BlockConditionAlreadyExistsException if the condition already
             //  exists in the system
             String uuid = null;
-            if (APIConstants.BLOCKING_CONDITIONS_API.equals(body.getConditionType()) || APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(body.getConditionType()) || APIConstants.BLOCKING_CONDITIONS_USER.equals(body.getConditionType())) {
-                uuid = apiProvider.addBlockCondition(body.getConditionType(), (String) body.getConditionValue());
-            } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(body.getConditionType()) || APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(body.getConditionType())) {
+            if (APIConstants.BLOCKING_CONDITIONS_API.equals(body.getConditionType()) ||
+                    APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(body.getConditionType()) ||
+                    APIConstants.BLOCKING_CONDITIONS_USER.equals(body.getConditionType())) {
+                uuid = apiProvider.addBlockCondition(body.getConditionType(), (String) body.getConditionValue(),
+                        body.isConditionStatus());
+            } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(body.getConditionType()) ||
+                    APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(body.getConditionType())) {
                 if (body.getConditionValue() instanceof Map) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.putAll((Map) body.getConditionValue());
-                    uuid = apiProvider.addBlockCondition(body.getConditionType(), jsonObject.toJSONString());
+                    uuid = apiProvider.addBlockCondition(body.getConditionType(), jsonObject.toJSONString(),
+                            body.isConditionStatus());
                 }
             }
 
@@ -890,16 +895,16 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS + "/" + uuid)).entity(dto).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
-                RestApiUtil.handleResourceAlreadyExistsError("A black list item with type: " + body.getConditionType() + ", value: " + body.getConditionValue() + " already exists", e, log);
+                RestApiUtil.handleResourceAlreadyExistsError("A black list item with type: "
+                        + body.getConditionType() + ", value: " + body.getConditionValue() + " already exists", e, log);
             } else {
-                String errorMessage =
-                        "Error while adding Blocking Condition. Condition type: " + body.getConditionType() + ", " +
-                                "value: " + body.getConditionValue();
+                String errorMessage = "Error while adding Blocking Condition. Condition type: "
+                        + body.getConditionType() + ", " + "value: " + body.getConditionValue() + ". " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (URISyntaxException | ParseException e) {
-            String errorMessage =
-                    "Error while retrieving Blocking Condition resource location. Condition type: " + body.getConditionType() + ", value: " + body.getConditionValue();
+            String errorMessage = "Error while retrieving Blocking Condition resource location: Condition type: "
+                    + body.getConditionType() + ", " + "value: " + body.getConditionValue() + ". "  + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
