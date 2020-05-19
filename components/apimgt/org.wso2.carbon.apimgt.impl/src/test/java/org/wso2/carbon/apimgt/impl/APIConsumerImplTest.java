@@ -1282,7 +1282,7 @@ public class APIConsumerImplTest {
         Mockito.doNothing().when(apiMgtDAO).updateSubscriptions(apiTypeWrapper, 2, "1");
         new APIConsumerImplWrapper(apiMgtDAO).updateSubscriptions(identifier, "1", 2);
         Mockito.verify(apiMgtDAO, Mockito.times(1)).
-                updateSubscriptions(Mockito.any(ApiTypeWrapper.class), eq(2), "1");
+                updateSubscriptions(Mockito.any(ApiTypeWrapper.class), eq(2), eq("1"));
     }
 
     @Test
