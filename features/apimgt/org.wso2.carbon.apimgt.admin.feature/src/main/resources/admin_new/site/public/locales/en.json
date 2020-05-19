@@ -83,6 +83,7 @@
   "Admin.Throttling.Blacklist.Throttling.Policy.add.condition.type": "Condition Type",
   "Admin.Throttling.Blacklist.Throttling.policy.table.header.condition.id": "Condition ID",
   "Admin.Throttling.Blacklist.Throttling.policy.table.header.condition.type": "Condition Type",
+  "Admin.Throttling.Blacklist.Throttling.policy.table.header.conditional.value": "Conditional Value",
   "Admin.Throttling.Blacklist.policy.add.invert.condition": "Invert Condition:",
   "Admin.Throttling.Custom.Throttling.policy.table.header.description": "Description",
   "Admin.Throttling.Custom.Throttling.policy.table.header.key.template": "Key Template",

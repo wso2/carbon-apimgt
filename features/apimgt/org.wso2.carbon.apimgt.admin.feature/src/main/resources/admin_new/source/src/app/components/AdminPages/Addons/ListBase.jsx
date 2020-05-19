@@ -65,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
 function ListLabels(props) {
     const {
         EditComponent, editComponentProps, DeleteComponent, showActionColumn,
-        columProps, pageProps, addButtonProps, addButtonOverride, isBlacklist,
+        columProps, pageProps, addButtonProps, addButtonOverride,
         searchProps: { active: searchActive, searchPlaceholder }, apiCall, emptyBoxProps: {
             title: emptyBoxTitle,
             content: emptyBoxContent,
@@ -102,21 +102,6 @@ function ListLabels(props) {
     const columns = [
         ...columProps,
     ];
-    if (isBlacklist) {
-        columns.push(
-            {
-                name: 'conditionValue',
-                label: 'ConditionValue',
-                options: {
-                    customBodyRender: (value) => (
-                        <div>{value.length > 1 ? value.map((child) => <div>{child.join(' : ')}</div>) : value}</div>
-                    ),
-                    filter: true,
-                    sort: false,
-                },
-            },
-        );
-    }
     if (showActionColumn) {
         columns.push(
             {
@@ -301,6 +286,5 @@ ListLabels.propTypes = {
     }),
     noDataMessage: PropTypes.element,
     addButtonOverride: PropTypes.element,
-    isBlacklist: PropTypes.bool.isRequired,
 };
 export default ListLabels;

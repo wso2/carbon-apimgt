@@ -364,7 +364,6 @@ function AddEdit(props) {
                             required
                         />
                         <TextField
-                            autoFocus
                             margin='dense'
                             name='endingIp'
                             label='End IP Address'
