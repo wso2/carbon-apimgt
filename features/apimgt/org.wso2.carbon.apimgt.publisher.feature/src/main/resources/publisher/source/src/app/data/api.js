@@ -530,7 +530,8 @@ class API extends Resource {
 
     /**
      * Get all the scopes
-     * @param id {String} UUID of the API in which the swagger is needed
+     * @param offset {String} offset of the scopes list which needs to be retrieved
+     * @param limit {String} limit of the scopes list which needs to be retrieved
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
@@ -652,8 +653,8 @@ class API extends Resource {
     }
 
     /**
-     * Get all the scopes
-     * @param id {String} UUID of the API in which the swagger is needed
+     * Get a particular scope
+     * @param scopeId {String} UUID of the scope
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
@@ -702,6 +703,11 @@ class API extends Resource {
         return promised_addScope;
     }
 
+    /**
+     * Add a shared scope
+     * @param body {any} body of the shared scope details
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
     addSharedScope(body) {
         const promised_addSharedScope = this.client.then(client => {
             const payload = {
@@ -713,6 +719,12 @@ class API extends Resource {
         return promised_addSharedScope;
     }
 
+    /**
+     * Update a shared scope
+     * @param scopeId {String} UUID of the scope
+     * @param body {any} body of the shared scope details
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
     updateSharedScope(scopeId, body) {
         const promised_updateSharedScope = this.client.then(client => {
             const payload = {
@@ -738,6 +750,11 @@ class API extends Resource {
         return promise_deleteScope;
     }
 
+    /**
+     * Delete a shared scope
+     * @param scopeId {String} UUID of the scope
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
     deleteSharedScope(scopeId) {
         const promise_deleteScope = this.client.then(client => {
             return client.apis['Scopes'].deleteSharedScope(
