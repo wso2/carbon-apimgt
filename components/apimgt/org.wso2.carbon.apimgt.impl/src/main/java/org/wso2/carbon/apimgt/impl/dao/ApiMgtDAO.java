@@ -5788,8 +5788,8 @@ public class ApiMgtDAO {
                             subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
                         }
                         apiTypeWrapper.setTier(info.tierId);
-                        int subscriptionId = addSubscription(apiTypeWrapper, info.applicationId, subscriptionStatus
-                                , apiIdentifier.getProviderName());
+                        int subscriptionId = addSubscription(apiTypeWrapper, info.applicationId, subscriptionStatus,
+                                apiIdentifier.getProviderName());
                         if (subscriptionId == -1) {
                             String msg = "Unable to add a new subscription for the API: " + apiIdentifier.getName() +
                                     ":v" + apiIdentifier.getVersion();
