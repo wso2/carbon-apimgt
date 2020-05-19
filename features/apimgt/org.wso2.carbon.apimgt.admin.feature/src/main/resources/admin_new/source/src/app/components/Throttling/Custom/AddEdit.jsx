@@ -17,7 +17,7 @@
  */
 
 import React, {
-    useReducer, useState, Suspense, lazy,
+    useReducer, useState, Suspense, lazy, useEffect,
 } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
@@ -56,13 +56,6 @@ const sampleSiddhiQuery = "FROM RequestStream SELECT userId, ( userId == 'admin@
 + 'INSERT ALL EVENTS into ResultStream;';
 const formattedSampleSiddhiQuery = sqlFormatter.format(sampleSiddhiQuery);
 
-let initialState = {
-    policyName: '',
-    description: '',
-    keyTemplate: '',
-    siddhiQuery: formattedSampleSiddhiQuery,
-};
-
 
 /**
  * Reducer
@@ -94,6 +87,12 @@ function AddEdit(props) {
     const {
         updateList, icon, triggerButtonText, title, dataRow,
     } = props;
+    const [initialState, setInitialState] = useState({
+        policyName: '',
+        description: '',
+        keyTemplate: '',
+        siddhiQuery: formattedSampleSiddhiQuery,
+    });
     const [state, dispatch] = useReducer(reducer, initialState);
     const {
         policyName, description, keyTemplate, siddhiQuery,
@@ -101,6 +100,21 @@ function AddEdit(props) {
     const [validationError, setValidationError] = useState([]);
     const [editMode, setIsEditMode] = useState(false);
     const restApi = new API();
+
+    useEffect(() => {
+        setInitialState({
+            policyName: '',
+            description: '',
+            defaultLimit: {
+                requestCount: '',
+                timeUnit: 'min',
+                unitTime: '',
+                type: 'RequestCountLimit',
+                dataAmount: '',
+                dataUnit: 'KB',
+            },
+        });
+    }, []);
 
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
@@ -167,52 +181,49 @@ function AddEdit(props) {
             const { policyId } = dataRow;
             promisedAddCustomPolicy = restApi.updateCustomPolicy(policyId,
                 customPolicy);
-            promisedAddCustomPolicy = new Promise((resolve, reject) => {
-                promisedAddCustomPolicy
-                    .then(() => {
-                        resolve(
-                            <FormattedMessage
-                                id='Throttling.Application.Policy.policy.edit.success'
-                                defaultMessage='Application Rate Limiting Policy edited successfully.'
-                            />,
-                        );
-                    })
-                    .catch((error) => {
-                        const { response } = error;
-                        if (response.body) {
-                            reject(response.body.description);
-                        }
-                    })
-                    .finally(() => {
-                        updateList();
-                    });
-            });
+            return promisedAddCustomPolicy
+                .then(() => {
+                    return (
+                        <FormattedMessage
+                            id='Throttling.Application.Policy.policy.edit.success'
+                            defaultMessage='Application Rate Limiting Policy edited successfully.'
+                        />
+                    );
+                })
+                .catch((error) => {
+                    const { response } = error;
+                    if (response.body) {
+                        throw (response.body.description);
+                    }
+                    return null;
+                })
+                .finally(() => {
+                    updateList();
+                });
         } else {
             promisedAddCustomPolicy = restApi.addCustomPolicy(
                 customPolicy,
             );
-            promisedAddCustomPolicy = new Promise((resolve, reject) => {
-                promisedAddCustomPolicy
-                    .then(() => {
-                        resolve(
-                            <FormattedMessage
-                                id='Throttling.Application.Policy.policy.add.success'
-                                defaultMessage='Custom Policy added successfully.'
-                            />,
-                        );
-                    })
-                    .catch((error) => {
-                        const { response } = error;
-                        if (response.body) {
-                            reject(response.body.description);
-                        }
-                    })
-                    .finally(() => {
-                        updateList();
-                    });
-            });
+            return promisedAddCustomPolicy
+                .then(() => {
+                    return (
+                        <FormattedMessage
+                            id='Throttling.Application.Policy.policy.add.success'
+                            defaultMessage='Custom Policy added successfully.'
+                        />
+                    );
+                })
+                .catch((error) => {
+                    const { response } = error;
+                    if (response.body) {
+                        throw (response.body.description);
+                    }
+                    return null;
+                })
+                .finally(() => {
+                    updateList();
+                });
         }
-        return (promisedAddCustomPolicy);
     };
 
     const dialogOpenCallback = () => {
@@ -221,13 +232,13 @@ function AddEdit(props) {
             const { policyId } = dataRow;
             restApi.customPolicyGet(policyId).then((result) => {
                 const formattedSiddhiQuery = sqlFormatter.format(result.body.siddhiQuery);
-                initialState = {
+                const editState = {
                     policyName: result.body.policyName,
                     description: result.body.description,
                     keyTemplate: result.body.keyTemplate,
                     siddhiQuery: formattedSiddhiQuery,
                 };
-                dispatch(initialState);
+                dispatch(editState);
             });
         }
     };
