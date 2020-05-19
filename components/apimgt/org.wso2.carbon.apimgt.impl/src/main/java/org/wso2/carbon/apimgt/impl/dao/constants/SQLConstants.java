@@ -3412,6 +3412,11 @@ public class SQLConstants {
             "WHERE TENANT_ID = ? AND NAME = ?";
     public static final String GET_ALL_SHARED_SCOPES_BY_TENANT = "SELECT UUID, NAME FROM AM_SHARED_SCOPE " +
             "WHERE TENANT_ID = ?";
+    public static final String GET_SHARED_SCOPE_USAGE_COUNT_BY_TENANT =
+            "SELECT SS.NAME, SS.UUID, "
+                    + "(SELECT COUNT(*) FROM AM_API_RESOURCE_SCOPE_MAPPING RSM WHERE RSM.SCOPE_NAME=SS.NAME ) usage "
+                    + "FROM AM_SHARED_SCOPE SS "
+                    + "WHERE SS.TENANT_ID = ?";
 
     //Resource Scope related constants
     public static final String ADD_API_RESOURCE_SCOPE_MAPPING =
