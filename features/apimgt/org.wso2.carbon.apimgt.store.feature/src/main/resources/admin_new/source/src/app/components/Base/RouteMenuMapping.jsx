@@ -33,6 +33,7 @@ import APICategories from 'AppComponents/APICategories/ListApiCategories';
 import BlacklistThrottlingPolicies from 'AppComponents/Throttling/Blacklist/List';
 import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom/List';
 import ListApplications from 'AppComponents/ApplicationSettings/ListApplications';
+import MicrogatewayLabels from 'AppComponents/MicrogatewayLabels/ListMGLabels';
 
 
 const RouteMenuMapping = (intl) => [
@@ -99,7 +100,7 @@ const RouteMenuMapping = (intl) => [
             defaultMessage: 'Microgateways',
         }),
         path: '/settings/mg-labels',
-        component: () => <DemoTable />,
+        component: () => <MicrogatewayLabels />,
         icon: <PhonelinkSetupIcon />,
     },
     {
