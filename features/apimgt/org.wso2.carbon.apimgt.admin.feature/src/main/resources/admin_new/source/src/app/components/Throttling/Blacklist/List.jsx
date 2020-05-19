@@ -118,6 +118,20 @@ export default function ListBlacklistThrottlingPolicies() {
                 sort: false,
             },
         },
+        {
+            name: 'conditionValue',
+            label: intl.formatMessage({
+                id: 'Admin.Throttling.Blacklist.Throttling.policy.table.header.conditional.value',
+                defaultMessage: 'Conditional Value',
+            }),
+            options: {
+                customBodyRender: (value) => (
+                    <div>{value.length > 1 ? value.map((child) => <div>{child.join(' : ')}</div>) : value}</div>
+                ),
+                filter: true,
+                sort: false,
+            },
+        },
         // TODO : Condition Status
     ];
 

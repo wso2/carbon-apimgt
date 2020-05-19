@@ -306,7 +306,6 @@ function AddEdit(props) {
                 helperText={validationError.policyName && 'Application Policy Name is empty'}
             />
             <TextField
-                autoFocus
                 margin='dense'
                 name='description'
                 label='Description'
@@ -347,7 +346,6 @@ function AddEdit(props) {
                 </RadioGroup>
                 {type === 'RequestCountLimit' ? (
                     <TextField
-                        autoFocus
                         margin='dense'
                         name='requestCount'
                         label='Request Count'
@@ -368,7 +366,6 @@ function AddEdit(props) {
                 ) : (
                     <Grid className={classes.unitTime}>
                         <TextField
-                            autoFocus
                             margin='dense'
                             name='dataAmount'
                             label='Data Bandwith'
@@ -404,7 +401,6 @@ function AddEdit(props) {
                 )}
                 <Grid className={classes.unitTime}>
                     <TextField
-                        autoFocus
                         margin='dense'
                         name='unitTime'
                         label='Unit Time'
