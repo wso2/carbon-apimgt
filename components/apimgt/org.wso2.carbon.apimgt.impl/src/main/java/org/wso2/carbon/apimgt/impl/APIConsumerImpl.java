@@ -2837,10 +2837,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         WorkflowResponse workflowResponse = null;
+        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state)) {
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, applicationId,
-                    APIConstants.SubscriptionStatus.ON_HOLD);
+                    APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
 
             boolean isTenantFlowStarted = false;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -3209,7 +3210,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void updateSubscriptions(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
         API api = getAPI(identifier);
-        apiMgtDAO.updateSubscriptions(new ApiTypeWrapper(api), applicationId);
+        apiMgtDAO.updateSubscriptions(new ApiTypeWrapper(api), applicationId, userId);
     }
 
     /**

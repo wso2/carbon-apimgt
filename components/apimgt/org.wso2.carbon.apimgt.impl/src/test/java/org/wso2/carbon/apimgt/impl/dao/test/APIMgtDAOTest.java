@@ -243,7 +243,7 @@ public class APIMgtDAOTest {
         apiIdentifier.setTier("T1");
         API api = new API(apiIdentifier);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        apiMgtDAO.addSubscription(apiTypeWrapper, 100, "UNBLOCKED");
+        apiMgtDAO.addSubscription(apiTypeWrapper, 100, "UNBLOCKED", "admin");
     }
 
 
@@ -603,7 +603,7 @@ public class APIMgtDAOTest {
         api.setContextTemplate("/wso2utils/{version}");
         apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, applicationId, "UNBLOCKED");
+        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, applicationId, "UNBLOCKED", "sub_user1");
         String[] apiDetail = apiMgtDAO.getAPIDetailsByContext("/wso2utils");
         assertTrue(apiDetail.length == 2);
         assertEquals(apiDetail[0], "WSO2-Utils");
@@ -904,9 +904,9 @@ public class APIMgtDAOTest {
         apiMgtDAO.populateAppRegistrationWorkflowDTO(retrievedApplicationRegistrationWorkflowDTO);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         ApiTypeWrapper apiTypeWrapper1 = new ApiTypeWrapper(api1);
-        apiMgtDAO.addSubscription(apiTypeWrapper, application.getId(), APIConstants.SubscriptionStatus.ON_HOLD);
+        apiMgtDAO.addSubscription(apiTypeWrapper, application.getId(), APIConstants.SubscriptionStatus.ON_HOLD,subscriber.getName());
         int subsId = apiMgtDAO.addSubscription(apiTypeWrapper1, application.getId(),
-                APIConstants.SubscriptionStatus.ON_HOLD);
+                APIConstants.SubscriptionStatus.ON_HOLD, subscriber.getName());
         assertTrue(apiMgtDAO.isContextExist(api.getContext()));
         assertTrue(api.getContext().equals(apiMgtDAO.getAPIContext(apiId)));
         apiMgtDAO.removeSubscription(apiId, application.getId());
@@ -979,7 +979,7 @@ public class APIMgtDAOTest {
         apiId.setTier(subscriptionPolicy.getPolicyName());
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, application.getId(),
-                APIConstants.SubscriptionStatus.ON_HOLD);
+                APIConstants.SubscriptionStatus.ON_HOLD, subscriber.getName());
         assertTrue(apiMgtDAO.getApplicationsByTier(subscriptionPolicy.getPolicyName()).length > 0);
         String subStatus = apiMgtDAO.getSubscriptionStatusById(subsId);
         assertEquals(subStatus, APIConstants.SubscriptionStatus.ON_HOLD);
