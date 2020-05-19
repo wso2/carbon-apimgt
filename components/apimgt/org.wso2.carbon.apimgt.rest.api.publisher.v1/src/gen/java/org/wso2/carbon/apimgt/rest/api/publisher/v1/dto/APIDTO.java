@@ -251,6 +251,7 @@ public enum EndpointImplementationTypeEnum {
     private List<APIOperationsDTO> operations = new ArrayList<>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
     private List<String> categories = new ArrayList<>();
+    private Object keyManagers = null;
 
   /**
    * UUID of the api registry artifact 
@@ -1071,6 +1072,24 @@ public enum EndpointImplementationTypeEnum {
     this.categories = categories;
   }
 
+  /**
+   * API Key Managers 
+   **/
+  public APIDTO keyManagers(Object keyManagers) {
+    this.keyManagers = keyManagers;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "API Key Managers ")
+  @JsonProperty("keyManagers")
+  public Object getKeyManagers() {
+    return keyManagers;
+  }
+  public void setKeyManagers(Object keyManagers) {
+    this.keyManagers = keyManagers;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1127,12 +1146,13 @@ public enum EndpointImplementationTypeEnum {
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(operations, API.operations) &&
         Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies) &&
-        Objects.equals(categories, API.categories);
+        Objects.equals(categories, API.categories) &&
+        Objects.equals(keyManagers, API.keyManagers);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers);
   }
 
   @Override
@@ -1187,6 +1207,7 @@ public enum EndpointImplementationTypeEnum {
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
+    sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("}");
     return sb.toString();
   }

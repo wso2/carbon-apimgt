@@ -176,7 +176,7 @@ public abstract class AbstractKeyManager implements KeyManager {
         if (enabledTokenValidation != null && (Boolean) enabledTokenValidation) {
             Object tokenHandlingScript = configuration.getParameter(APIConstants.KeyManager.VALIDATION_VALUE);
             Object tokenHandlingType = configuration.getParameter(APIConstants.KeyManager.VALIDATION_TYPE);
-            if (APIConstants.KeyManager.VALIDATION_REGEX.equals(tokenHandlingType)) {
+            if (APIConstants.KeyManager.VALIDATION_REFERENCE.equals(tokenHandlingType)) {
                 if (tokenHandlingScript != null && StringUtils.isNotEmpty((CharSequence) tokenHandlingScript)) {
                     Pattern pattern = Pattern.compile((String) tokenHandlingScript);
                     Matcher matcher = pattern.matcher(accessToken);

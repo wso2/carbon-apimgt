@@ -203,10 +203,19 @@ public class OAuthAuthenticator implements Authenticator {
                                 "Invalid JWT token");
                     }
                     signedJWT = SignedJWT.parse(apiKey);
-                    isJwtToken =
-                            ServiceReferenceHolder.getInstance().getJwtValidationService().isJWTTokenValidateSelf(signedJWT);
+                    String keyManager =
+                            ServiceReferenceHolder.getInstance().getJwtValidationService().getKeyManagerNameIfJwtValidatorExist(signedJWT);
+                    if (StringUtils.isNotEmpty(keyManager)){
+                        if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
+                                keyManagerList.contains(keyManager)) {
+                            isJwtToken = true;
+                        }else{
+                            return new AuthenticationResponse(false, isMandatory, true,
+                                    APISecurityConstants.API_INVALID_KEY_MANAGER,
+                                    APISecurityConstants.API_KEY_MANAGER_NOT_AVAILABLE_MESSAGE);
+                        }
+                    }
                 } catch ( ParseException  e) {
-                    isJwtToken = false;
                     log.debug("Not a JWT token. Failed to decode the token header.", e);
                 } catch (APIManagementException e) {
                     log.error("error while check validation of JWt", e);

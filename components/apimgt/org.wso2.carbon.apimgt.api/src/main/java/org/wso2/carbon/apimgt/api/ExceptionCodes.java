@@ -311,7 +311,7 @@ ExceptionCodes implements ErrorHandler {
     INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),
     // Key Manager Related
     INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
-    REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missed",400,"Missing " +
+    REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +
             "required configuration"),
     KEY_MANAGER_ALREADY_EXIST(901402, "Key Manager Already Exist", 409, "Key Manager Already Exist"),
     KEY_MANAGER_NOT_FOUND(901403, "Key Manager Not found", 400, "Key Manager not found"), KEY_MANAGER_NAME_EMPTY(901404,

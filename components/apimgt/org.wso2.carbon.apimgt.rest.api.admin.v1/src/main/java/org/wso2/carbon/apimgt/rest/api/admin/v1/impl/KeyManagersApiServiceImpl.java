@@ -88,7 +88,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         return null;
     }
 
-    public Response keyManagersPost(KeyManagerDTO body, MessageContext messageContext) {
+    public Response keyManagersPost(KeyManagerDTO body, MessageContext messageContext) throws APIManagementException {
 
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         APIAdmin apiAdmin = new APIAdminImpl();
@@ -100,7 +100,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             URI location = new URI(RestApiConstants.KEY_MANAGERS + "/" + createdKeyManagerConfiguration.getUuid());
             return Response.created(location)
                     .entity(KeyManagerMappingUtil.toKeyManagerDTO(createdKeyManagerConfiguration)).build();
-        } catch (URISyntaxException | APIManagementException e) {
+        } catch (URISyntaxException e) {
             String error = "Error while Creating Key Manager configuration in tenant " + tenantDomain;
             RestApiUtil.handleInternalServerError(error, e, log);
         }

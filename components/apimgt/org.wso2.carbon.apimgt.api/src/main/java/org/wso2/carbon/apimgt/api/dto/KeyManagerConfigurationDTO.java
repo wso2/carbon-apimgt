@@ -30,7 +30,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
     private String uuid;
     private String description;
     private String tenantDomain;
-    private Map additionalProperties = new HashMap();
+    private Map<String,Object> additionalProperties = new HashMap();
     private String type;
     private boolean enabled;
 
@@ -74,12 +74,12 @@ public class KeyManagerConfigurationDTO implements Serializable {
         this.tenantDomain = tenantDomain;
     }
 
-    public Map getAdditionalProperties() {
+    public Map<String,Object> getAdditionalProperties() {
 
         return additionalProperties;
     }
 
-    public void setAdditionalProperties(Map additionalProperties) {
+    public void setAdditionalProperties(Map<String,Object> additionalProperties) {
 
         this.additionalProperties = additionalProperties;
     }

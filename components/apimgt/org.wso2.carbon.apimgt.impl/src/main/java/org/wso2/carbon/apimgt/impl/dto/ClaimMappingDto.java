@@ -1,10 +1,20 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
 import java.util.Objects;
 
-public class ClaimMappingDto {
+public class ClaimMappingDto implements Serializable {
+
+    @SerializedName("remoteClaim")
     private String remoteClaim;
+    @SerializedName("localClaim")
     private String localClaim;
+
+    public ClaimMappingDto() {
+
+    }
 
     public ClaimMappingDto(String remoteClaim, String localClaim) {
 

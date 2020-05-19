@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
@@ -84,22 +85,24 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
             // Obtaining details about the token.
             if (StringUtils.isNotEmpty(validationContext.getTenantDomain())) {
-                Map<String, KeyManager>
+                Map<String, KeyManagerDto>
                         tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(validationContext.getTenantDomain());
                 KeyManager keyManagerInstance = null;
 
                 if (validationContext.getKeyManagers().contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS)) {
-                    for (KeyManager keyManager : tenantKeyManagers.values()) {
-                        if (keyManager.canHandleToken(validationContext.getAccessToken())) {
-                            keyManagerInstance = keyManager;
+                    for (KeyManagerDto keyManagerDto : tenantKeyManagers.values()) {
+                        if (keyManagerDto.getKeyManager() != null &&
+                                keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
+                            keyManagerInstance = keyManagerDto.getKeyManager();
                             break;
                         }
                     }
                 } else {
                     for (String selectedKeyManager : validationContext.getKeyManagers()) {
-                        KeyManager keyManager = tenantKeyManagers.get(selectedKeyManager);
-                        if (keyManager.canHandleToken(validationContext.getAccessToken())) {
-                            keyManagerInstance = keyManager;
+                        KeyManagerDto keyManagerDto = tenantKeyManagers.get(selectedKeyManager);
+                        if (keyManagerDto != null && keyManagerDto.getKeyManager() != null &&
+                                keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
+                            keyManagerInstance = keyManagerDto.getKeyManager();
                             break;
                         }
                     }
@@ -107,6 +110,12 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
                 if (keyManagerInstance != null) {
                     tokenInfo = keyManagerInstance.getTokenMetaData(validationContext.getAccessToken());
+                }else{
+                    APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+                    validationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
+                    apiKeyValidationInfoDTO
+                            .setValidationStatus(APIConstants.KeyValidationStatus.KEY_MANAGER_NOT_AVAILABLE);
+                    return false;
                 }
             }
 

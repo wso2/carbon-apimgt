@@ -537,6 +537,7 @@ public final class APIConstants {
     public static final String CACHE_INVALIDATION_TYPE = "type";
     public static final String GATEWAY_JWKS_CACHE = "JWKS_CACHE";
     public static final String BLOCKING_CONDITION_ID = "id";
+    public static final String API_OVERVIEW_KEY_MANAGERS = "overview_keyManagers";
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
@@ -938,6 +939,7 @@ public final class APIConstants {
         public static final int API_AUTH_RESOURCE_FORBIDDEN = 900908;
         public static final int SUBSCRIPTION_INACTIVE = 900909;
         public static final int INVALID_SCOPE = 900910;
+        public static final int KEY_MANAGER_NOT_AVAILABLE = 900912;
 
         private KeyValidationStatus() {
         }
@@ -2120,13 +2122,15 @@ public final class APIConstants {
         public static final String CLAIM_MAPPING = "claim_mappings" ;
         public static final String VALIDATION_TYPE = "validation_type";
         public static final String VALIDATION_JWT = "jwt";
-        public static final String VALIDATION_REGEX = "regex";
+        public static final String VALIDATION_REFERENCE = "reference";
         public static final String VALIDATION_CUSTOM = "custom";
         public static final String VALIDATION_VALUE = "validation_value";
         public static final String ENABLE_TOKEN_VALIDATION = "validation_enable";
         public static final String VALIDATION_ENTRY_JWT_BODY = "body";
         public static final String API_LEVEL_ALL_KEY_MANAGERS = "all";
         public static final String REGISTERED_TENANT_DOMAIN = "tenantDomain";
+        public static final String ENABLE_MAP_OAUTH_CONSUMER_APPS = "enable_map_oauth_consumer_apps";
+
         public static class KeyManagerEvent {
 
             public static final String EVENT_TYPE = "event_type";

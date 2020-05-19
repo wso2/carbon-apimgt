@@ -82,7 +82,7 @@ public class KeyManagerMappingUtil {
             jsonObject.remove(APIConstants.KeyManager.SCOPE_MANAGEMENT_ENDPOINT);
         }
         JsonElement grantTypesElement = jsonObject.get(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE);
-        if (grantTypesElement != null && grantTypesElement instanceof JsonArray) {
+        if (grantTypesElement instanceof JsonArray) {
             keyManagerDTO.setAvailableGrantTypes(new Gson().fromJson(grantTypesElement, List.class));
             jsonObject.remove(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE);
         }
@@ -108,8 +108,13 @@ public class KeyManagerMappingUtil {
         }
         JsonElement enableOauthAppCreation = jsonObject.get(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
         if (enableOauthAppCreation != null) {
-            keyManagerDTO.setEnableMapOAuthConsumerApps(!enableOauthAppCreation.getAsBoolean());
+            keyManagerDTO.setEnableOAuthAppCreation(enableOauthAppCreation.getAsBoolean());
             jsonObject.remove(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
+        }
+        JsonElement enableMapOauthConsumerApps = jsonObject.get(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS);
+        if (enableMapOauthConsumerApps != null) {
+            keyManagerDTO.setEnableMapOAuthConsumerApps(enableMapOauthConsumerApps.getAsBoolean());
+            jsonObject.remove(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS);
         }
         JsonElement enableTokenEncryption = jsonObject.get(APIConstants.KeyManager.ENABLE_TOKEN_ENCRYPTION);
         if (enableTokenEncryption != null) {
@@ -138,8 +143,8 @@ public class KeyManagerMappingUtil {
         if (validationTypeElement != null) {
             if (APIConstants.KeyManager.VALIDATION_JWT.equals(validationTypeElement.getAsString())) {
                 tokenValidationDTO.setType(TokenValidationDTO.TypeEnum.JWT);
-            } else if (APIConstants.KeyManager.VALIDATION_REGEX.equals(validationTypeElement.getAsString())) {
-                tokenValidationDTO.setType(TokenValidationDTO.TypeEnum.REGEX);
+            } else if (APIConstants.KeyManager.VALIDATION_REFERENCE.equals(validationTypeElement.getAsString())) {
+                tokenValidationDTO.setType(TokenValidationDTO.TypeEnum.REFERENCE);
             } else if (APIConstants.KeyManager.VALIDATION_CUSTOM.equals(validationTypeElement.getAsString())) {
                 tokenValidationDTO.setType(TokenValidationDTO.TypeEnum.CUSTOM);
             }
@@ -149,7 +154,7 @@ public class KeyManagerMappingUtil {
             tokenValidationDTO.setValue(validationValueElement.getAsString());
             jsonObject.remove(APIConstants.KeyManager.VALIDATION_VALUE);
         }else if (validationValueElement instanceof JsonObject){
-            Map validationValue = new Gson().fromJson(validationValueElement,Map.class);
+            Map<String, Object> validationValue = new Gson().fromJson(validationValueElement, Map.class);
             tokenValidationDTO.setValue(validationValue);
             jsonObject.remove(APIConstants.KeyManager.VALIDATION_VALUE);
         }
@@ -176,7 +181,7 @@ public class KeyManagerMappingUtil {
         keyManagerConfigurationDTO.setEnabled(keyManagerDTO.isEnabled());
         keyManagerConfigurationDTO.setType(keyManagerDTO.getType());
         keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
-        Map additionalProperties = new HashMap();
+        Map<String,Object> additionalProperties = new HashMap();
         if (keyManagerDTO.getAdditionalProperties() != null && keyManagerDTO.getAdditionalProperties() instanceof Map) {
             additionalProperties.putAll((Map) keyManagerDTO.getAdditionalProperties());
         }
@@ -215,7 +220,10 @@ public class KeyManagerMappingUtil {
             additionalProperties.put(APIConstants.KeyManager.AUTHORIZE_ENDPOINT, keyManagerDTO.getAuthorizeEndpoint());
         }
         additionalProperties
-                .put(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, !keyManagerDTO.isEnableMapOAuthConsumerApps());
+                .put(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, keyManagerDTO.isEnableOAuthAppCreation());
+        additionalProperties.put(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS,
+                keyManagerDTO.isEnableMapOAuthConsumerApps());
+
         additionalProperties
                 .put(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION, keyManagerDTO.isEnableTokenGneration());
 
@@ -232,9 +240,9 @@ public class KeyManagerMappingUtil {
             if (TokenValidationDTO.TypeEnum.JWT.equals(tokenValidation.getType())) {
                 additionalProperties
                         .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_JWT);
-            } else if (TokenValidationDTO.TypeEnum.REGEX.equals(tokenValidation.getType())) {
+            } else if (TokenValidationDTO.TypeEnum.REFERENCE.equals(tokenValidation.getType())) {
                 additionalProperties
-                        .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_REGEX);
+                        .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_REFERENCE);
             }else{
                 additionalProperties
                         .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_CUSTOM);

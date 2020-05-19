@@ -107,7 +107,7 @@ public class JMSTransportHandler {
         jmsListenerForKeyManagerTopic = createJMSMessageListener(JMSConstants.TOPIC_KEY_MANAGER, minThreadPoolSize,
                 maxThreadPoolSize, keepAliveTimeInMillis, jobQueueSize, new KeyManagerJMSMessageListener());
         jmsListenerForKeyManagerTopic.startListener();
-        log.info("Starting jms topic consumer thread for the keymanager topic...");
+        log.info("Starting jms topic consumer thread for the keyManager topic...");
     }
 
     private JMSListener createJMSMessageListener(String topicName, int minThreadPoolSize, int maxThreadPoolSize,

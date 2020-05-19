@@ -56,6 +56,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
@@ -1254,7 +1255,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!isValid) {
             throw new APIManagementException(" User doesn't have permission for update");
         }
-
+        List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
+                apiMgtDAO.getKeyManagerConfigurationsByTenant(tenantDomain);
+        List<String> configuredMissingKeyManagers = new ArrayList<>();
+        for (String keyManager : api.getKeyManagers()) {
+            if (!APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManager)) {
+                KeyManagerConfigurationDTO selectedKeyManager = null;
+                for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
+                    if (keyManager.equals(keyManagerConfigurationDTO.getName())) {
+                        selectedKeyManager = keyManagerConfigurationDTO;
+                        break;
+                    } else {
+                        configuredMissingKeyManagers.add(keyManager);
+                    }
+                }
+                if (selectedKeyManager == null) {
+                    configuredMissingKeyManagers.add(keyManager);
+                }
+            }
+        }
+        if (!configuredMissingKeyManagers.isEmpty()) {
+            throw new APIManagementException("Configured Key Managers didn't exist",
+                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+        }
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<>();
         API oldApi = getAPI(api.getId());
         Gson gson = new Gson();
@@ -2722,7 +2745,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            Map<String, String> authProperties = new HashMap<String, String>();
+            Map<String, String> authProperties = new HashMap<>();
             if (!StringUtils.isBlank(authorizationHeader)) {
                 authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
             }
@@ -2743,7 +2766,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
             }
             authProperties.put(APIConstants.API_UUID, api.getUUID());
-
+            authProperties.put("keyManagers", api.getKeyManagers().toString());
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 Map<String, String> apiUUIDProperty = new HashMap<String, String>();
                 apiUUIDProperty.put(APIConstants.API_UUID, api.getUUID());

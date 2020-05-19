@@ -78,7 +78,7 @@ public class KeyManagerJMSMessageListener implements MessageListener {
                                 if (APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE.equals(action)) {
                                     ServiceReferenceHolder.getInstance().getKeyManagerService()
                                             .updateKeyManagerConfiguration(tenantDomain, name, type,
-                                                    keyManagerConfiguration, enabled);
+                                                    keyManagerConfiguration);
                                 }
                             }
                             if (APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE.equals(action)) {
