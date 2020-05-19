@@ -46,6 +46,10 @@
     // For more info about response.xhr object refer http://jaggeryjs.org/documentation.jag?api=xhr
     
     if (introspectResult.xhr.status === 200) {
+        var isEnableEmailUserName = appUtils.isEnableEmailUserName();
+        if (isEnableEmailUserName || introspectResult.data.username.endsWith('@carbon.super')) {
+            introspectResult.data.username = introspectResult.data.username.replace('@carbon.super', '');
+        }
         response.contentType = "application/json";
         print(introspectResult.data);
     } else {
