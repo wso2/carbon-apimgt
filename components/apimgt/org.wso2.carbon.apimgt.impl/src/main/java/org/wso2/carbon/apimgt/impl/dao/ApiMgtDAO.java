@@ -14082,9 +14082,11 @@ public class ApiMgtDAO {
 
         String addProductResourceMappingSql = SQLConstants.ADD_PRODUCT_RESOURCE_MAPPING_SQL;
 
+        boolean isNewConnection = false;
         try {
             if (connection == null) {
                 connection = APIMgtDBUtil.getConnection();
+                isNewConnection = true;
             }
 
             prepStmtAddResourceMapping = connection.prepareStatement(addProductResourceMappingSql);
@@ -14105,6 +14107,9 @@ public class ApiMgtDAO {
             handleException("Error while adding API product Resources" , e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtAddResourceMapping, null, null);
+            if (isNewConnection) {
+                APIMgtDBUtil.closeAllConnections(null, connection, null);
+            }
         }
     }
 
