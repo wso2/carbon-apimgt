@@ -1960,7 +1960,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
         Map<String, Object> examples = OASParserUtil.generateExamples(apiDefinition);
         List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get(APIConstants.MOCK_GEN_POLICY_LIST);
-        System.out.println(messageContext.toString());
         return Response.ok().entity(APIMappingUtil.fromMockPayloadsToListDTO(policies)).build();
     }
 
