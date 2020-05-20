@@ -952,7 +952,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void getEndpointDefinition() throws APIManagementException {
+    public void getEndpointDefinitionForOAS() throws APIManagementException {
         final String REGISTRY_UUID = "reg1";
 
         EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
@@ -964,6 +964,99 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
         endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
         endpointRegistryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS.toString());
+
+        InputStream definitionFileInputStream = Mockito.mock(InputStream.class);
+        endpointRegistryEntry.setEndpointDefinition(definitionFileInputStream);
+
+        Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
+                endpointRegistryEntry.getEntryId()))
+                .thenReturn(endpointRegistryEntry);
+
+        Response response =
+                registriesApiService.getEndpointDefinition(REGISTRY_UUID, endpointRegistryEntry.getEntryId(),
+                        messageContext);
+
+        Assert.assertNotNull("Endpoint definition retrieval failed", response);
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        Assert.assertEquals(endpointRegistryEntry.getEndpointDefinition(), response.getEntity());
+        Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+    }
+
+    @Test
+    public void getEndpointDefinitionForWSDL1() throws APIManagementException {
+        final String REGISTRY_UUID = "reg1";
+
+        EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
+        endpointRegistryEntry.setEntryId("entry1");
+        endpointRegistryEntry.setName("Entry Name 1");
+        endpointRegistryEntry.setMetaData("{mutualTLS: true}");
+        endpointRegistryEntry.setServiceURL("https://xyz.com");
+        endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
+        endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
+        endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
+        endpointRegistryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.WSDL1.toString());
+
+        InputStream definitionFileInputStream = Mockito.mock(InputStream.class);
+        endpointRegistryEntry.setEndpointDefinition(definitionFileInputStream);
+
+        Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
+                endpointRegistryEntry.getEntryId()))
+                .thenReturn(endpointRegistryEntry);
+
+        Response response =
+                registriesApiService.getEndpointDefinition(REGISTRY_UUID, endpointRegistryEntry.getEntryId(),
+                        messageContext);
+
+        Assert.assertNotNull("Endpoint definition retrieval failed", response);
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        Assert.assertEquals(endpointRegistryEntry.getEndpointDefinition(), response.getEntity());
+        Assert.assertEquals(MediaType.TEXT_XML_TYPE, response.getMediaType());
+    }
+
+    @Test
+    public void getEndpointDefinitionForWSDL2() throws APIManagementException {
+        final String REGISTRY_UUID = "reg1";
+
+        EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
+        endpointRegistryEntry.setEntryId("entry1");
+        endpointRegistryEntry.setName("Entry Name 1");
+        endpointRegistryEntry.setMetaData("{mutualTLS: true}");
+        endpointRegistryEntry.setServiceURL("https://xyz.com");
+        endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
+        endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
+        endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
+        endpointRegistryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.WSDL2.toString());
+
+        InputStream definitionFileInputStream = Mockito.mock(InputStream.class);
+        endpointRegistryEntry.setEndpointDefinition(definitionFileInputStream);
+
+        Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
+                endpointRegistryEntry.getEntryId()))
+                .thenReturn(endpointRegistryEntry);
+
+        Response response =
+                registriesApiService.getEndpointDefinition(REGISTRY_UUID, endpointRegistryEntry.getEntryId(),
+                        messageContext);
+
+        Assert.assertNotNull("Endpoint definition retrieval failed", response);
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        Assert.assertEquals(endpointRegistryEntry.getEndpointDefinition(), response.getEntity());
+        Assert.assertEquals(MediaType.TEXT_XML_TYPE, response.getMediaType());
+    }
+
+    @Test
+    public void getEndpointDefinitionForGraphQL() throws APIManagementException {
+        final String REGISTRY_UUID = "reg1";
+
+        EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
+        endpointRegistryEntry.setEntryId("entry1");
+        endpointRegistryEntry.setName("Entry Name 1");
+        endpointRegistryEntry.setMetaData("{mutualTLS: true}");
+        endpointRegistryEntry.setServiceURL("https://xyz.com");
+        endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
+        endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
+        endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
+        endpointRegistryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.GQL_SDL.toString());
 
         InputStream definitionFileInputStream = Mockito.mock(InputStream.class);
         endpointRegistryEntry.setEndpointDefinition(definitionFileInputStream);
