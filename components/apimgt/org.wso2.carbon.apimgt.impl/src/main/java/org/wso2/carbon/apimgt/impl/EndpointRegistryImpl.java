@@ -143,6 +143,10 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      * @param limit      Limit
      * @param offset     Offset
      * @param registryId UUID of the endpoint registry
+     * @param serviceType The endpoint service type
+     * @param definitionType Then endpoint definition type
+     * @param entryName The registry entry name
+     * @param serviceCategory The service category
      * @return A list of EndpointRegistryEntry objects
      * @throws APIManagementException if failed to get entries of an Endpoint Registry
      */
