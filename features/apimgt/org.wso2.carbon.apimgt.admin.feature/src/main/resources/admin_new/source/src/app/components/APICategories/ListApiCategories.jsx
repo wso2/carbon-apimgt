@@ -38,17 +38,15 @@ import EditIcon from '@material-ui/icons/Edit';
  * @returns {Promise}.
  */
 function apiCall() {
-    return new Promise((resolve, reject) => {
-        const restApi = new API();
-        restApi
-            .apiCategoriesListGet()
-            .then((result) => {
-                resolve(result.body.list);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    const restApi = new API();
+    return restApi
+        .apiCategoriesListGet()
+        .then((result) => {
+            return result.body.list;
+        })
+        .catch((error) => {
+            throw error;
+        });
 }
 
 /**
