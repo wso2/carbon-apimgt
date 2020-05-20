@@ -34,6 +34,7 @@ import BlacklistThrottlingPolicies from 'AppComponents/Throttling/Blacklist/List
 import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom/List';
 import ListApplications from 'AppComponents/ApplicationSettings/ListApplications';
 import MicrogatewayLabels from 'AppComponents/MicrogatewayLabels/ListMGLabels';
+import ListEmails from 'AppComponents/BotDetection/EmailConfig/ListEmails';
 
 
 const RouteMenuMapping = (intl) => [
@@ -117,9 +118,26 @@ const RouteMenuMapping = (intl) => [
             id: 'Base.RouteMenuMapping.bot.detection',
             defaultMessage: 'Bot Detection',
         }),
-        path: '/settings/bot-detection',
-        component: () => <DemoTable />,
-        icon: <PhonelinkSetupIcon />,
+        children: [
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.bot.detection.data',
+                    defaultMessage: 'Bot Detection Data',
+                }),
+                path: '/settings/bot-detection/bot-detected-data-list',
+                component: () => <DemoTable />,
+                icon: <DnsRoundedIcon />,
+            },
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.configure.emails',
+                    defaultMessage: 'Configure Emails',
+                }),
+                path: '/settings/bot-detection/bot-detection-email-configuration',
+                component: () => <ListEmails />,
+                icon: <PhonelinkSetupIcon />,
+            },
+        ],
     },
     {
         id: intl.formatMessage({

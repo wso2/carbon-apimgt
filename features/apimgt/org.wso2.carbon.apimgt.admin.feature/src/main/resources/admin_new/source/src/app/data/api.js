@@ -471,6 +471,16 @@ class API extends Resource {
         });
     }
 
+    /**
+     * Get list of emails configured at Bot Detection --> Configure Emails
+     */
+    botDetectionNotifyingEmailsGet() {
+        return this.client.then((client) => {
+            return client.apis['default'].get_botData_getEmailList(
+                this._requestMetaData(),
+            );
+        });
+    }
 }
 
 API.CONSTS = {
