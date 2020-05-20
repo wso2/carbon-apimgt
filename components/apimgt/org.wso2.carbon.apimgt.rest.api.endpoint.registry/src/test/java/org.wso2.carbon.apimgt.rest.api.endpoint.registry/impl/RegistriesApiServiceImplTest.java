@@ -707,7 +707,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void updateRegistryEntryDefinitionFile() throws APIManagementException {
+    public void updateRegistryEntryWithDefinitionFile() throws APIManagementException {
         final String REGISTRY_UUID = "reg1";
 
         EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
@@ -755,7 +755,8 @@ public class RegistriesApiServiceImplTest {
         Response response = registriesApiService.updateRegistryEntry(REGISTRY_UUID, payloadEntryDTO.getId(),
                 payloadEntryDTO, definitionFileStream, definitionFileDetail, messageContext);
 
-        Mockito.verify(registryProvider).updateEndpointRegistryEntry(Mockito.any(EndpointRegistryEntry.class));
+        Mockito.verify(registryProvider).updateEndpointRegistryEntry(Mockito.eq(endpointRegistryEntryOld.getName()),
+                Mockito.any(EndpointRegistryEntry.class));
         Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         RegistryEntryDTO responseEntryDTO = (RegistryEntryDTO) response.getEntity();
@@ -763,7 +764,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void updateRegistryEntryDefinitionUrl() throws APIManagementException {
+    public void updateRegistryEntryWithDefinitionUrl() throws APIManagementException {
         final String REGISTRY_UUID = "reg1";
 
         EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
@@ -807,7 +808,8 @@ public class RegistriesApiServiceImplTest {
         Response response = registriesApiService.updateRegistryEntry(REGISTRY_UUID, payloadEntryDTO.getId(),
                 payloadEntryDTO, null, null, messageContext);
 
-        Mockito.verify(registryProvider).updateEndpointRegistryEntry(Mockito.any(EndpointRegistryEntry.class));
+        Mockito.verify(registryProvider).updateEndpointRegistryEntry(Mockito.eq(endpointRegistryEntryOld.getName()),
+                Mockito.any(EndpointRegistryEntry.class));
         Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         RegistryEntryDTO responseEntryDTO = (RegistryEntryDTO) response.getEntity();

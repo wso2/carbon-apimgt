@@ -315,7 +315,7 @@ public class EndpointRegistryImplTest {
         Mockito.when(apiMgtDAO.isRegistryEntryNameExists(endpointRegistryEntryNew))
                 .thenReturn(false);
 
-        endpointRegistry.updateEndpointRegistryEntry(endpointRegistryEntryNew);
+        endpointRegistry.updateEndpointRegistryEntry(endpointRegistryEntryOld.getName(), endpointRegistryEntryNew);
         Mockito.verify(apiMgtDAO).updateEndpointRegistryEntry(endpointRegistryEntryNew);
     }
 
@@ -350,7 +350,7 @@ public class EndpointRegistryImplTest {
         Mockito.when(apiMgtDAO.isRegistryEntryNameExists(endpointRegistryEntryNew))
                 .thenReturn(true);
 
-        endpointRegistry.updateEndpointRegistryEntry(endpointRegistryEntryNew);
+        endpointRegistry.updateEndpointRegistryEntry(endpointRegistryEntryOld.getName(), endpointRegistryEntryNew);
     }
 
     @Test

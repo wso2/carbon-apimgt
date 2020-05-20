@@ -388,7 +388,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             }
             EndpointRegistryEntry entryToUpdate = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
                     entryId, definitionFile, endpointRegistry.getRegistryId());
-            registryProvider.updateEndpointRegistryEntry(entryToUpdate);
+            registryProvider.updateEndpointRegistryEntry(endpointRegistryEntry.getName(), entryToUpdate);
 
             EndpointRegistryEntry updatedEntry = registryProvider.getEndpointRegistryEntryByUUID(registryId, entryId);
             audit.info("Successfully updated endpoint registry entry with id :" + entryId +
