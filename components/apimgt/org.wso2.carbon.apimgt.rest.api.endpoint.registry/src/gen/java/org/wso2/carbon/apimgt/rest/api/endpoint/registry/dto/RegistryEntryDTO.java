@@ -81,7 +81,7 @@ public class RegistryEntryDTO   {
             @XmlEnum(String.class)
             public enum DefinitionTypeEnum {
             
-                @XmlEnumValue("OAS") OAS(String.valueOf("OAS")), @XmlEnumValue("WSDL1") WSDL1(String.valueOf("WSDL1")), @XmlEnumValue("WSDL2") WSDL2(String.valueOf("WSDL2")), @XmlEnumValue("GQL-SDL") GQL_SDL(String.valueOf("GQL-SDL"));
+                @XmlEnumValue("OAS") OAS(String.valueOf("OAS")), @XmlEnumValue("WSDL1") WSDL1(String.valueOf("WSDL1")), @XmlEnumValue("WSDL2") WSDL2(String.valueOf("WSDL2")), @XmlEnumValue("GQL_SDL") GQL_SDL(String.valueOf("GQL_SDL"));
             
             
             private String value;

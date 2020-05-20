@@ -262,6 +262,14 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " WHERE " +
                     "   E.REG_ID=R.ID AND " +
                     "   R.UUID=? " +
+                    "   AND " +
+                    "       ENTRY_NAME like ?" +
+                    "   AND " +
+                    "       DEFINITION_TYPE like ?" +
+                    "   AND " +
+                    "       SERVICE_TYPE like ?" +
+                    "   AND " +
+                    "       SERVICE_CATEGORY like ?" +
                     " ORDER BY $1 $2 " +
                     " LIMIT ?, ? ";
 
