@@ -115,6 +115,23 @@ public class ImportApiServiceImpl implements ImportApiService {
     }
 
     /**
+     * Import an API Product by uploading an archive file. All relevant API Product data will be included upon the creation of
+     * the API Product. Depending on the choice of the user, provider of the imported API Product will be preserved or modified.
+     *
+     * @param fileInputStream       UploadedInputStream input stream from the REST request
+     * @param fileDetail            File details as Attachment
+     * @param preserveProvider      User choice to keep or replace the API Product provider
+     * @param overwriteAPIProduct   Whether to update the API Product or not. This is used when updating already existing API Products.
+     * @param overwriteAPIs         Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product.
+     * @return API Product import response
+     */
+    @Override
+    public Response importApiProductPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider,
+                                         Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, MessageContext messageContext) {
+        return null;
+    }
+
+    /**
      * Import an Application which has been exported to a zip file
      *
      * @param appOwner            target owner of the application
