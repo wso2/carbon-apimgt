@@ -14,24 +14,29 @@ DCID VARCHAR2 (50) DEFAULT 'DC2',                                               
                                                                                                 #
 Change 2                                                                                        #
 --------------------                                                                            #
-The sequences in tables.sql and apimgt/tables.sql files should be altered to create       		#
+The CREATE TABLE queries  in tables.sql and apimgt/tables.sql files should be altered to create #
 a unique number for each DC based on the number of DB instances in your environment.            #
-At the start of tables.sql files there are list of tables under "Tables need to be edited". At 	# those tables primary key is defined with the Keyword "IDENTITY".The above keyword and it's  	  # bindings are responsible for creating auto increment integers which act as the primary keys for # relevant tables. Unless they are altered to create a unique numbers based on the DC, it can  	  # create a unqiue constraint violation when Replicating DBs.										#
-																								#
-After the keyword "IDENTITY", in the brackets there are two values. 							#
-(StartingValue, NumberOfNodes)																	#
-																								#
+At the start of tables.sql files there are list of tables under "Tables need to be edited". At  #
+those tables primary key is defined with the Keyword "IDENTITY".The above keyword and it's      #
+bindings are responsible for creating auto increment integers which act as the primary keys for #
+relevant tables. Unless they are altered to create a unique numbers based on the DC, it can     #
+create a unqiue constraint violation when Replicating DBs.                                      #
+                                                                                                #
+After the keyword "IDENTITY", in the brackets there are two values.                             #
+(StartingValue, NumberOfNodes)                                                                  #
+                                                                                                #
 The  start value should be set as the instance id of the particular DC and increment value      #
-should be set based on the number of DC in your deployment. The below example shows how to alter# the sequences on a sample scenario where you have 3 master DB instances in 3 DC's  			  #
-																								#
+should be set based on the number of DC in your deployment. The below example shows how to alter#
+the queries on a sample scenario where you have 3 master DB instances in 3 DC's                 #
+                                                                                                #
 DC1 TABLES                                                                                      # 
-ID INTEGER IDENTITY(1,3) 										  								#
-																								#
+ID INTEGER IDENTITY(1,3)                                                                        #
+                                                                                                #
 DC2 TABLES                                                                                      #
-ID INTEGER IDENTITY(2,3)                          												#
+ID INTEGER IDENTITY(2,3)                                                                        #
                                                                                                 #
 DC3 TABLES                                                                                      #
-ID INTEGER IDENTITY(3,3)																		#
+ID INTEGER IDENTITY(3,3)                                                                        #
                                                                                                 #
 For more details refer                                                                          #
 (https://wso2.com/library/article/deploying-wso2-api-manager-in-a-multi-dc-environment/)        #
