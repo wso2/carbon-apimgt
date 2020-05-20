@@ -81,8 +81,10 @@ public interface EndpointRegistry {
      * @return A list of EndpointRegistryEntry objects
      * @throws APIManagementException if failed to get entries of an Endpoint Registry
      */
-    List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit, int offset,
-                                                           String registryId) throws APIManagementException;
+    List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit,
+                                                           int offset, String registryId, String serviceType,
+                                                           String definitionType, String entryName,
+                                                           String serviceCategory) throws APIManagementException;
 
     /**
      * Returns details of a specific Endpoint Registry Entry

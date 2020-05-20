@@ -14966,7 +14966,9 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to get entries of an Endpoint Registry
      */
     public List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit,
-                                                                  int offset, String registryId)
+                                                                  int offset, String registryId, String serviceType,
+                                                                  String definitionType, String entryName,
+                                                                  String serviceCategory)
             throws APIManagementException {
         List<EndpointRegistryEntry> endpointRegistryEntryList = new ArrayList<>();
         String query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY");
@@ -14976,8 +14978,12 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, registryId);
-            ps.setInt(2, offset);
-            ps.setInt(3, limit);
+            ps.setString(2, "%" + entryName + "%");
+            ps.setString(3, "%" + definitionType + "%");
+            ps.setString(4, "%" + serviceType + "%");
+            ps.setString(5, "%" + serviceCategory + "%");
+            ps.setInt(6, offset);
+            ps.setInt(7, limit);
             ps.executeQuery();
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

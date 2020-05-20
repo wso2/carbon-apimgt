@@ -147,9 +147,12 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      * @throws APIManagementException if failed to get entries of an Endpoint Registry
      */
     public List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit,
-                                                                  int offset, String registryId)
+                                                                  int offset, String registryId, String serviceType,
+                                                                  String definitionType, String entryName,
+                                                                  String serviceCategory)
             throws APIManagementException {
-        return apiMgtDAO.getEndpointRegistryEntries(sortBy, sortOrder, limit, offset, registryId);
+        return apiMgtDAO.getEndpointRegistryEntries(sortBy, sortOrder, limit, offset, registryId, serviceType,
+                definitionType, entryName, serviceCategory);
     }
 
     /**

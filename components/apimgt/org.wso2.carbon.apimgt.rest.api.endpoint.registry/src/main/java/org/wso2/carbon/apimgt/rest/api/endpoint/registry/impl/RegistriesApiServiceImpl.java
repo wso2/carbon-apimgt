@@ -77,9 +77,12 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
 
     @Override
-    public Response getAllEntriesInRegistry(String registryId, String query, RegistriesApi.SortEntryByEnum sortByEntry,
-                    RegistriesApi.SortEntryOrderEnum sortEntry, Integer limit, Integer offset,
-                                            MessageContext messageContext) {
+    public Response getAllEntriesInRegistry(String registryId, RegistriesApi.ServiceTypeEnum serviceType,
+                                            RegistriesApi.DefinitionTypeEnum definitionType, String name,
+                                            RegistriesApi.ServiceCategoryEnum serviceCategory,
+                                            RegistriesApi.SortEntryByEnum sortEntryBy,
+                                            RegistriesApi.SortEntryOrderEnum sortEntryOrder,
+                                            Integer limit, Integer offset, MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         RegistryEntryArrayDTO registryEntryArray = new RegistryEntryArrayDTO();
         EndpointRegistry registryProvider = new EndpointRegistryImpl();
@@ -93,11 +96,16 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
             limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
             offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-            String sortOrder = sortEntry != null ? sortEntry.toString() : RestApiConstants.DEFAULT_SORT_ORDER;
-            String sortBy = EndpointRegistryMappingUtils.getRegistryEntriesSortByField(sortByEntry);
+            String sortOrder = sortEntryOrder != null ? sortEntryOrder.toString() : RestApiConstants.DEFAULT_SORT_ORDER;
+            String sortBy = EndpointRegistryMappingUtils.getRegistryEntriesSortByField(sortEntryBy);
+            name = name == null ? StringUtils.EMPTY : name;
+            String serviceTypeStr = serviceType == null ? StringUtils.EMPTY : serviceType.toString();
+            String definitionTypeStr = definitionType == null ? StringUtils.EMPTY : definitionType.toString();
+            String serviceCategoryStr = serviceCategory == null ? StringUtils.EMPTY : serviceCategory.toString();
 
             List<EndpointRegistryEntry> endpointRegistryEntryList =
-                    registryProvider.getEndpointRegistryEntries(sortBy, sortOrder, limit, offset, registryId);
+                    registryProvider.getEndpointRegistryEntries(sortBy, sortOrder, limit, offset, registryId,
+                            serviceTypeStr, definitionTypeStr, name, serviceCategoryStr);
             for (EndpointRegistryEntry endpointRegistryEntry : endpointRegistryEntryList) {
                 registryEntryArray.add(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry));
             }
