@@ -1,5 +1,24 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.impl;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,7 +26,6 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.testng.Assert;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
@@ -98,6 +116,7 @@ public class EndpointRegistryImplTest {
 
         endpointRegistry.updateEndpointRegistry(endpointRegistryInfo.getUuid(), endpointRegistryInfo.getName(),
                 endpointRegistryInfo);
+        Mockito.verify(apiMgtDAO).updateEndpointRegistry(endpointRegistryInfo.getUuid(), endpointRegistryInfo);
     }
 
     @Test(expected = APIMgtResourceAlreadyExistsException.class)
@@ -118,7 +137,9 @@ public class EndpointRegistryImplTest {
 
     @Test
     public void deleteEndpointRegistry() throws APIManagementException {
-        endpointRegistry.deleteEndpointRegistry("abc1");
+        final String REGISTRY_UUID = "abc1";
+        endpointRegistry.deleteEndpointRegistry(REGISTRY_UUID);
+        Mockito.verify(apiMgtDAO).deleteEndpointRegistry(REGISTRY_UUID);
     }
 
     @Test
@@ -295,6 +316,7 @@ public class EndpointRegistryImplTest {
                 .thenReturn(false);
 
         endpointRegistry.updateEndpointRegistryEntry(endpointRegistryEntryNew);
+        Mockito.verify(apiMgtDAO).updateEndpointRegistryEntry(endpointRegistryEntryNew);
     }
 
     @Test(expected = APIMgtResourceAlreadyExistsException.class)
@@ -333,28 +355,30 @@ public class EndpointRegistryImplTest {
 
     @Test
     public void deleteEndpointRegistryEntry() throws APIManagementException {
-        endpointRegistry.deleteEndpointRegistryEntry("entry1");
+        final String ENTRY_UUID = "entry1";
+        endpointRegistry.deleteEndpointRegistryEntry(ENTRY_UUID);
+        Mockito.verify(apiMgtDAO).deleteEndpointRegistryEntry(ENTRY_UUID);
     }
 
     private void compareRegistryInfo(EndpointRegistryInfo expected, EndpointRegistryInfo actual) {
-        org.junit.Assert.assertEquals(expected.getUuid(), actual.getUuid());
-        org.junit.Assert.assertEquals(expected.getName(), actual.getName());
-        org.junit.Assert.assertEquals(expected.getMode(), actual.getMode());
-        org.junit.Assert.assertEquals(expected.getType(), actual.getType());
-        org.junit.Assert.assertEquals(expected.getOwner(), actual.getOwner());
-        org.junit.Assert.assertEquals(expected.getRegistryId(), actual.getRegistryId());
+        Assert.assertEquals(expected.getUuid(), actual.getUuid());
+        Assert.assertEquals(expected.getName(), actual.getName());
+        Assert.assertEquals(expected.getMode(), actual.getMode());
+        Assert.assertEquals(expected.getType(), actual.getType());
+        Assert.assertEquals(expected.getOwner(), actual.getOwner());
+        Assert.assertEquals(expected.getRegistryId(), actual.getRegistryId());
     }
 
     private void compareRegistryEntryInfo(EndpointRegistryEntry expected, EndpointRegistryEntry actual) {
-        org.junit.Assert.assertEquals(expected.getEntryId(), actual.getEntryId());
-        org.junit.Assert.assertEquals(expected.getName(), actual.getName());
-        org.junit.Assert.assertEquals(expected.getMetaData(), actual.getMetaData());
-        org.junit.Assert.assertEquals(expected.getRegistryId(), actual.getRegistryId());
-        org.junit.Assert.assertEquals(expected.getServiceURL(), actual.getServiceURL());
-        org.junit.Assert.assertEquals(expected.getServiceType(), actual.getServiceType());
-        org.junit.Assert.assertEquals(expected.getServiceCategory(), actual.getServiceCategory());
-        org.junit.Assert.assertEquals(expected.getDefinitionURL(), actual.getDefinitionURL());
-        org.junit.Assert.assertEquals(expected.getDefinitionType(), actual.getDefinitionType());
-        org.junit.Assert.assertEquals(expected.getEndpointDefinition(), actual.getEndpointDefinition());
+        Assert.assertEquals(expected.getEntryId(), actual.getEntryId());
+        Assert.assertEquals(expected.getName(), actual.getName());
+        Assert.assertEquals(expected.getMetaData(), actual.getMetaData());
+        Assert.assertEquals(expected.getRegistryId(), actual.getRegistryId());
+        Assert.assertEquals(expected.getServiceURL(), actual.getServiceURL());
+        Assert.assertEquals(expected.getServiceType(), actual.getServiceType());
+        Assert.assertEquals(expected.getServiceCategory(), actual.getServiceCategory());
+        Assert.assertEquals(expected.getDefinitionURL(), actual.getDefinitionURL());
+        Assert.assertEquals(expected.getDefinitionType(), actual.getDefinitionType());
+        Assert.assertEquals(expected.getEndpointDefinition(), actual.getEndpointDefinition());
     }
 }

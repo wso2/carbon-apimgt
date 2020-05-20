@@ -1,5 +1,29 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.rest.api.endpoint.registry.impl;
 
+import graphql.schema.GraphQLSchema;
+import graphql.schema.idl.SchemaParser;
+import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.idl.UnExecutableSchemaGenerator;
+import graphql.schema.validation.SchemaValidationError;
+import graphql.schema.validation.SchemaValidator;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.junit.Assert;
@@ -11,13 +35,17 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.impl.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.impl.EndpointRegistryImpl;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApiService;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryArrayDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
@@ -33,12 +61,16 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor({"org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil"})
-@PrepareForTest({RestApiUtil.class, RegistriesApiServiceImpl.class, ServiceReferenceHolder.class, MultitenantUtils.class})
+@PrepareForTest({RestApiUtil.class, RegistriesApiServiceImpl.class, ServiceReferenceHolder.class,
+        MultitenantUtils.class, OASParserUtil.class, APIMWSDLReader.class, UnExecutableSchemaGenerator.class})
 public class RegistriesApiServiceImplTest {
     private final String ADMIN_USERNAME = "admin";
     private final String TENANT_DOMAIN = "carbon.super";
@@ -66,6 +98,35 @@ public class RegistriesApiServiceImplTest {
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.doReturn(ADMIN_USERNAME).when(RestApiUtil.class, "getLoggedInUsername");
         PowerMockito.doReturn(TENANT_DOMAIN).when(RestApiUtil.class, "getLoggedInUserTenantDomain");
+
+        PowerMockito.mockStatic(OASParserUtil.class);
+        APIDefinitionValidationResponse oasValidationResponse =
+                Mockito.mock(APIDefinitionValidationResponse.class);
+        Mockito.when(oasValidationResponse.isValid()).thenReturn(true);
+        PowerMockito.doReturn(oasValidationResponse).when(OASParserUtil.class, "validateAPIDefinition",
+                Mockito.anyString(), Mockito.anyBoolean());
+
+        PowerMockito.mockStatic(APIMWSDLReader.class);
+        WSDLValidationResponse wsdlValidationResponse = Mockito.mock(WSDLValidationResponse.class);
+        Mockito.when(wsdlValidationResponse.isValid()).thenReturn(true);
+        PowerMockito.when(APIMWSDLReader.class, "validateWSDLFile", Mockito.any(InputStream.class))
+                .thenReturn(wsdlValidationResponse);
+        PowerMockito.when(APIMWSDLReader.class, "validateWSDLUrl", Mockito.any(URL.class))
+                .thenReturn(wsdlValidationResponse);
+
+
+        TypeDefinitionRegistry typeRegistry = Mockito.mock(TypeDefinitionRegistry.class);
+        SchemaParser schemaParser = Mockito.mock(SchemaParser.class);
+        Mockito.when(schemaParser.parse(Mockito.anyString())).thenReturn(typeRegistry);
+        PowerMockito.whenNew(SchemaParser.class).withNoArguments().thenReturn(schemaParser);
+        PowerMockito.mockStatic(UnExecutableSchemaGenerator.class);
+        GraphQLSchema graphQLSchema = Mockito.mock(GraphQLSchema.class);
+        PowerMockito.when(UnExecutableSchemaGenerator.class, "makeUnExecutableSchema",
+                Mockito.eq(typeRegistry)).thenReturn(graphQLSchema);
+        SchemaValidator schemaValidator = Mockito.mock(SchemaValidator.class);
+        PowerMockito.whenNew(SchemaValidator.class).withNoArguments().thenReturn(schemaValidator);
+        Set<SchemaValidationError> validationErrors = new HashSet<>();
+        Mockito.when(schemaValidator.validateSchema(graphQLSchema)).thenReturn(validationErrors);
 
         messageContext = Mockito.mock(MessageContext.class);
         registryProvider = Mockito.mock(EndpointRegistryImpl.class);
@@ -224,6 +285,9 @@ public class RegistriesApiServiceImplTest {
 
         Response response = registriesApiService.updateRegistry(payloadDTO.getId(), payloadDTO, messageContext);
 
+        Mockito.verify(registryProvider)
+                .updateEndpointRegistry(Mockito.eq(payloadDTO.getId()), Mockito.eq(endpointRegistryInfoOld.getName()),
+                        Mockito.any(EndpointRegistryInfo.class));
         Assert.assertNotNull("Endpoint Registry update failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         RegistryDTO responseDTO = (RegistryDTO) response.getEntity();
@@ -281,12 +345,13 @@ public class RegistriesApiServiceImplTest {
 
         Response response = registriesApiService.deleteRegistry(REGISTRY_UUID, messageContext);
 
+        Mockito.verify(registryProvider).deleteEndpointRegistry(REGISTRY_UUID);
         Assert.assertNotNull("Endpoint Registry delete failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
 
     @Test
-    public void createRegistryEntry_validOASYaml() throws APIManagementException {
+    public void createRegistryEntry_validOASV2Yaml() throws Exception {
         final String REGISTRY_UUID = "reg1";
 
         EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
@@ -308,7 +373,7 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
 
         InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("swagger-sample.yaml");
+                .getResourceAsStream("oasV2-sample.yaml");
         Attachment definitionFileDetail = Mockito.mock(Attachment.class);
 
         EndpointRegistryEntry endpointRegistryEntry =
@@ -331,7 +396,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void createRegistryEntry_validOASJSon() throws APIManagementException {
+    public void createRegistryEntry_validOASV2JSon() throws Exception {
         final String REGISTRY_UUID = "reg1";
 
         EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
@@ -353,7 +418,7 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
 
         InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("swagger-sample.json");
+                .getResourceAsStream("oasV2-sample.json");
         Attachment definitionFileDetail = Mockito.mock(Attachment.class);
 
         EndpointRegistryEntry endpointRegistryEntry =
@@ -376,7 +441,97 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void createRegistryEntry_validWSDL() throws APIManagementException {
+    public void createRegistryEntry_validOASV3JSon() throws Exception {
+        final String REGISTRY_UUID = "reg1";
+
+        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
+        endpointRegistryInfo.setName("Endpoint Registry 1");
+        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
+        endpointRegistryInfo.setOwner("admin");
+        endpointRegistryInfo.setRegistryId(1);
+        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
+        endpointRegistryInfo.setUuid(REGISTRY_UUID);
+
+        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
+        payloadEntryDTO.setId("entry1");
+        payloadEntryDTO.setEntryName("Entry Name 1");
+        payloadEntryDTO.setMetadata("{mutualTLS: true}");
+        payloadEntryDTO.setServiceUrl("https://xyz.com");
+        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
+        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
+        payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
+        payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
+
+        InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("oasV3-sample.json");
+        Attachment definitionFileDetail = Mockito.mock(Attachment.class);
+
+        EndpointRegistryEntry endpointRegistryEntry =
+                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
+                        definitionFileStream, endpointRegistryInfo.getRegistryId());
+
+        Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
+                .thenReturn(endpointRegistryInfo);
+        Mockito.when(registryProvider.addEndpointRegistryEntry(Mockito.any(EndpointRegistryEntry.class)))
+                .thenReturn(endpointRegistryEntry.getEntryId());
+        Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
+                endpointRegistryEntry.getEntryId())).thenReturn(endpointRegistryEntry);
+
+        Response response = registriesApiService.createRegistryEntry(REGISTRY_UUID, payloadEntryDTO,
+                definitionFileStream, definitionFileDetail, messageContext);
+        Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        RegistryEntryDTO responseEntryDTO = (RegistryEntryDTO) response.getEntity();
+        compareRegistryEntryDTOs(payloadEntryDTO, responseEntryDTO);
+    }
+
+    @Test
+    public void createRegistryEntry_validOASV3Yaml() throws Exception {
+        final String REGISTRY_UUID = "reg1";
+
+        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
+        endpointRegistryInfo.setName("Endpoint Registry 1");
+        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
+        endpointRegistryInfo.setOwner("admin");
+        endpointRegistryInfo.setRegistryId(1);
+        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
+        endpointRegistryInfo.setUuid(REGISTRY_UUID);
+
+        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
+        payloadEntryDTO.setId("entry1");
+        payloadEntryDTO.setEntryName("Entry Name 1");
+        payloadEntryDTO.setMetadata("{mutualTLS: true}");
+        payloadEntryDTO.setServiceUrl("https://xyz.com");
+        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
+        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
+        payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
+        payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
+
+        InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("oasV3-sample.yaml");
+        Attachment definitionFileDetail = Mockito.mock(Attachment.class);
+
+        EndpointRegistryEntry endpointRegistryEntry =
+                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
+                        definitionFileStream, endpointRegistryInfo.getRegistryId());
+
+        Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
+                .thenReturn(endpointRegistryInfo);
+        Mockito.when(registryProvider.addEndpointRegistryEntry(Mockito.any(EndpointRegistryEntry.class)))
+                .thenReturn(endpointRegistryEntry.getEntryId());
+        Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
+                endpointRegistryEntry.getEntryId())).thenReturn(endpointRegistryEntry);
+
+        Response response = registriesApiService.createRegistryEntry(REGISTRY_UUID, payloadEntryDTO,
+                definitionFileStream, definitionFileDetail, messageContext);
+        Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        RegistryEntryDTO responseEntryDTO = (RegistryEntryDTO) response.getEntity();
+        compareRegistryEntryDTOs(payloadEntryDTO, responseEntryDTO);
+    }
+
+    @Test
+    public void createRegistryEntry_validWSDL1() throws APIManagementException {
         final String REGISTRY_UUID = "reg1";
 
         EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
@@ -398,7 +553,52 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.WSDL1);
 
         InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("wsdl-sample.wsdl");
+                .getResourceAsStream("wsdl1-sample.wsdl");
+        Attachment definitionFileDetail = Mockito.mock(Attachment.class);
+
+        EndpointRegistryEntry endpointRegistryEntry =
+                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
+                        definitionFileStream, endpointRegistryInfo.getRegistryId());
+
+        Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
+                .thenReturn(endpointRegistryInfo);
+        Mockito.when(registryProvider.addEndpointRegistryEntry(Mockito.any(EndpointRegistryEntry.class)))
+                .thenReturn(endpointRegistryEntry.getEntryId());
+        Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
+                endpointRegistryEntry.getEntryId())).thenReturn(endpointRegistryEntry);
+
+        Response response = registriesApiService.createRegistryEntry(REGISTRY_UUID, payloadEntryDTO,
+                definitionFileStream, definitionFileDetail, messageContext);
+        Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        RegistryEntryDTO responseEntryDTO = (RegistryEntryDTO) response.getEntity();
+        compareRegistryEntryDTOs(payloadEntryDTO, responseEntryDTO);
+    }
+
+    @Test
+    public void createRegistryEntry_validWSDL2() throws APIManagementException {
+        final String REGISTRY_UUID = "reg1";
+
+        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
+        endpointRegistryInfo.setName("Endpoint Registry 1");
+        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
+        endpointRegistryInfo.setOwner("admin");
+        endpointRegistryInfo.setRegistryId(1);
+        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
+        endpointRegistryInfo.setUuid(REGISTRY_UUID);
+
+        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
+        payloadEntryDTO.setId("entry1");
+        payloadEntryDTO.setEntryName("Entry Name 1");
+        payloadEntryDTO.setMetadata("{mutualTLS: true}");
+        payloadEntryDTO.setServiceUrl("https://xyz.com");
+        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
+        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
+        payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
+        payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.WSDL2);
+
+        InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("wsdl2-sample.wsdl");
         Attachment definitionFileDetail = Mockito.mock(Attachment.class);
 
         EndpointRegistryEntry endpointRegistryEntry =
@@ -529,7 +729,7 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
 
         InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("swagger-sample.yaml");
+                .getResourceAsStream("oasV2-sample.yaml");
         Attachment definitionFileDetail = Mockito.mock(Attachment.class);
 
         EndpointRegistryEntry endpointRegistryEntryNew =
@@ -554,6 +754,8 @@ public class RegistriesApiServiceImplTest {
 
         Response response = registriesApiService.updateRegistryEntry(REGISTRY_UUID, payloadEntryDTO.getId(),
                 payloadEntryDTO, definitionFileStream, definitionFileDetail, messageContext);
+
+        Mockito.verify(registryProvider).updateEndpointRegistryEntry(Mockito.any(EndpointRegistryEntry.class));
         Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         RegistryEntryDTO responseEntryDTO = (RegistryEntryDTO) response.getEntity();
@@ -561,7 +763,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void updateRegistryEntryDefintionUrl() throws APIManagementException {
+    public void updateRegistryEntryDefinitionUrl() throws APIManagementException {
         final String REGISTRY_UUID = "reg1";
 
         EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
@@ -604,6 +806,8 @@ public class RegistriesApiServiceImplTest {
 
         Response response = registriesApiService.updateRegistryEntry(REGISTRY_UUID, payloadEntryDTO.getId(),
                 payloadEntryDTO, null, null, messageContext);
+
+        Mockito.verify(registryProvider).updateEndpointRegistryEntry(Mockito.any(EndpointRegistryEntry.class));
         Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         RegistryEntryDTO responseEntryDTO = (RegistryEntryDTO) response.getEntity();
@@ -695,6 +899,8 @@ public class RegistriesApiServiceImplTest {
 
         Response response = registriesApiService.deleteRegistryEntry(REGISTRY_UUID,
                 endpointRegistryEntry.getEntryId(), messageContext);
+
+        Mockito.verify(registryProvider).deleteEndpointRegistryEntry(endpointRegistryEntry.getEntryId());
         Assert.assertNotNull("Endpoint Registry Entry deletion failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
