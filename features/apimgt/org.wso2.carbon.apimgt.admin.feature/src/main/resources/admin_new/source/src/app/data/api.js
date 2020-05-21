@@ -503,6 +503,22 @@ class API extends Resource {
             return promiseAddEmail;
         }
     }
+
+    deleteBotDetectionNotifyingEmail(id, callback = null) {
+        const promiseDeleteEmail = this.client.then((client) => {
+            return client.apis['default'].delete_botData_deleteEmail(
+                { uuid: id },
+                this._requestMetaData(),
+            );
+        });
+
+        if (callback) {
+            return promiseDeleteEmail.then(callback);
+        } else {
+            return promiseDeleteEmail;
+        }
+    }
+    
 }
 
 API.CONSTS = {
