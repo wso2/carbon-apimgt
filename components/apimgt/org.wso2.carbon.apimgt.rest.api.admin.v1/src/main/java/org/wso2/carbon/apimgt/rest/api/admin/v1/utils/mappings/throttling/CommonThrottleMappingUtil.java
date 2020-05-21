@@ -169,7 +169,6 @@ public class CommonThrottleMappingUtil {
             return fromDTOToJWTClaimsCondition((JWTClaimsConditionDTO) dto);
         } else {
             String msg = "Throttle Condition type " + dto.getClass().getName() + " is not supported";
-            log.error(msg);
             throw new UnsupportedThrottleConditionTypeException(msg);
         }
     }
@@ -193,7 +192,6 @@ public class CommonThrottleMappingUtil {
             return fromJWTClaimsConditionToDTO((JWTClaimsCondition) condition);
         } else {
             String msg = "Throttle Condition type " + condition.getClass().getName() + " is not supported";
-            log.error(msg);
             throw new UnsupportedThrottleConditionTypeException(msg);
         }
     }
@@ -228,16 +226,13 @@ public class CommonThrottleMappingUtil {
         if (dto.getBandwidth() != null && dto.getRequestCount() != null) {
             String msg = "Throttle limit types " + dto.getBandwidth().getClass().getName() + " and " +
                     dto.getRequestCount().getClass().getName() + " cannot be specified at once";
-            log.error(msg);
             throw new UnsupportedThrottleLimitTypeException(msg);
         } else if (dto.getBandwidth() != null) {
             return dto.getBandwidth();
         } else if (dto.getRequestCount() != null) {
             return dto.getRequestCount();
         } else {
-            String msg = "A Throttle limit type has not been specified";
-            log.error(msg);
-            throw new UnsupportedThrottleLimitTypeException(msg);
+            throw new UnsupportedThrottleLimitTypeException("A Throttle limit type has not been specified");
         }
     }
 
@@ -260,7 +255,6 @@ public class CommonThrottleMappingUtil {
             defaultLimitType.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
         } else {
             String msg = "Throttle limit type " + quotaPolicy.getType() + " is not supported";
-            log.error(msg);
             throw new UnsupportedThrottleLimitTypeException(msg);
         }
         return defaultLimitType;
@@ -280,7 +274,6 @@ public class CommonThrottleMappingUtil {
             return fromDTOToRequestCountLimit((RequestCountLimitDTO) dto);
         } else {
             String msg = "Throttle limit type " + dto.getClass().getName() + " is not supported";
-            log.error(msg);
             throw new UnsupportedThrottleLimitTypeException(msg);
         }
     }
