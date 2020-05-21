@@ -18,8 +18,6 @@
 import React from 'react';
 import { Drawer, withStyles } from '@material-ui/core';
 import PropTypes from 'prop-types';
-import Hidden from '@material-ui/core/Hidden';
-import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import GlobalNavLinks from './GlobalNavLinks';
 
 const styles = (theme) => ({
@@ -60,39 +58,29 @@ const GlobalNavBar = (props) => {
         },
     };
     return (
-        <>
-            <Hidden smDown>
-                <VerticalDivider height={32} />
-                <div className={classes.listInline}>
-                    <GlobalNavLinks smallView />
+        <Drawer
+            className={classes.drawerStyles}
+            PaperProps={paperStyles}
+            SlideProps={commonStyle}
+            ModalProps={commonStyle}
+            BackdropProps={commonStyle}
+            open={open}
+            onClose={toggleGlobalNavBar}
+        >
+            <div tabIndex={0} role='button' onClick={toggleGlobalNavBar} onKeyDown={toggleGlobalNavBar}>
+                <div className={classes.list} />
+            </div>
+            <div
+                tabIndex={0}
+                role='button'
+                onClick={toggleGlobalNavBar}
+                onKeyDown={toggleGlobalNavBar}
+            >
+                <div className={classes.list}>
+                    <GlobalNavLinks smallView={false} />
                 </div>
-            </Hidden>
-            <Hidden mdUp>
-                <Drawer
-                    className={classes.drawerStyles}
-                    PaperProps={paperStyles}
-                    SlideProps={commonStyle}
-                    ModalProps={commonStyle}
-                    BackdropProps={commonStyle}
-                    open={open}
-                    onClose={toggleGlobalNavBar}
-                >
-                    <div tabIndex={0} role='button' onClick={toggleGlobalNavBar} onKeyDown={toggleGlobalNavBar}>
-                        <div className={classes.list} />
-                    </div>
-                    <div
-                        tabIndex={0}
-                        role='button'
-                        onClick={toggleGlobalNavBar}
-                        onKeyDown={toggleGlobalNavBar}
-                    >
-                        <div className={classes.list}>
-                            <GlobalNavLinks smallView={false} />
-                        </div>
-                    </div>
-                </Drawer>
-            </Hidden>
-        </>
+            </div>
+        </Drawer>
     );
 };
 
