@@ -518,7 +518,19 @@ class API extends Resource {
             return promiseDeleteEmail;
         }
     }
-    
+
+    /**
+     * Mock api call with delay
+     * todo: Replace with the rest api when available
+     */
+    getAnalyticsEnabled(){
+        const promiseAnalyticsEnabled = new Promise((resolve)=>{
+            setTimeout(() => { 
+                resolve({body:{isAnalyticsEnabled:true}}); 
+            }, 2000);
+        })
+        return promiseAnalyticsEnabled;
+    }
 }
 
 API.CONSTS = {

@@ -39,13 +39,18 @@ import AddEmails from 'AppComponents/BotDetection/EmailConfig/AddEmail';
 export default function ListEmails() {
     const intl = useIntl();
     const [emailList, setEmailList] = useState([]);
+    const [isAnalyticsEnabled, setIsAnalyticsEnabled] = useState(false);
+    const restApi = new API();
+
+    restApi.getAnalyticsEnabled().then((result) => {
+        setIsAnalyticsEnabled(result.body.isAnalyticsEnabled);
+    });
 
     /**
      * API call to get all emails
      * @returns {Promise}.
      */
     function apiCall() {
-        const restApi = new API();
         return restApi
             .botDetectionNotifyingEmailsGet()
             .then((result) => {
@@ -181,17 +186,65 @@ export default function ListEmails() {
         ),
     };
 
-    return (
-        <ListBase
-            columProps={columProps}
-            pageProps={pageProps}
-            addButtonProps={addButtonProps}
-            searchProps={searchProps}
-            emptyBoxProps={emptyBoxProps}
-            apiCall={apiCall}
-            EditComponent={AddEmails}
-            editComponentProps={null}
-            DeleteComponent={DeleteEmail}
-        />
-    );
+    if (isAnalyticsEnabled) {
+        return (
+            <ListBase
+                columProps={columProps}
+                pageProps={pageProps}
+                addButtonProps={addButtonProps}
+                searchProps={searchProps}
+                emptyBoxProps={emptyBoxProps}
+                apiCall={apiCall}
+                EditComponent={AddEmails}
+                editComponentProps={null}
+                DeleteComponent={DeleteEmail}
+            />
+        );
+    } else {
+        const emptyApiCall = () => {
+            return new Promise((resolve) => {
+                resolve([]);
+            });
+        };
+        const analyticsDisabledEmptyBoxProps = {
+            content: (
+                <Typography variant='body2' color='textSecondary' component='p'>
+                    <FormattedMessage
+                        id='AdminPages.BotDetection.Email.List.analytics.disabled.empty.content'
+                        values={{
+                            breakingLine: <br />,
+                        }}
+                        defaultMessage={
+                            'If you enable WSO2 API Manager Analytics with WSO2 API Manager, '
+                        + 'you can enable email notifications for all unauthorized API calls that '
+                        + 'you receive and also view the bot detection data easily via the Admin Portal.'
+                        + '{breakingLine}{breakingLine}'
+                        + 'Follow documentations on help to enable Analytics and get started.'
+                        }
+                    />
+                </Typography>
+            ),
+            title: (
+                <Typography gutterBottom variant='h5' component='h2'>
+                    <FormattedMessage
+                        id='AdminPages.BotDetection.Email.List.analytics.disabled.empty.title'
+                        defaultMessage='Analytics disabled!'
+                    />
+                </Typography>
+            ),
+        };
+        return (
+            <ListBase
+                columProps={columProps}
+                pageProps={pageProps}
+                addButtonProps={null}
+                searchProps={searchProps}
+                emptyBoxProps={analyticsDisabledEmptyBoxProps}
+                apiCall={emptyApiCall}
+                EditComponent={AddEmails}
+                editComponentProps={null}
+                DeleteComponent={DeleteEmail}
+            />
+        );
+    }
 }
