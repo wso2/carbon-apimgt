@@ -1101,6 +1101,18 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
+     * Method to search the client certificates for the provided tenant id, alias and api product identifier.
+     *
+     * @param tenantId      : ID of the tenant.
+     * @param alias         : Alias of the certificate.
+     * @param apiProductIdentifier : Identifier of the API Product.
+     * @return list of client certificates that match search criteria.
+     * @throws APIManagementException API Management Exception.
+     */
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIProductIdentifier apiProductIdentifier)
+            throws APIManagementException;
+
+    /**
      * Retrieve the total number of certificates which a specified tenant has.
      *
      * @param tenantId : The id of the tenant

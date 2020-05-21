@@ -111,6 +111,8 @@ public final class APIImportExportConstants {
 
     public static final String JSON_CLIENT_CERTIFICATE_FILE = File.separator
             + APIImportExportConstants.META_INFO_DIRECTORY + File.separator + "client_certificates.json";
+
+    public static final String APIS_DIRECTORY = "APIs";
     
     public static final String HOSTNAME_JSON_KEY = "hostName";
 

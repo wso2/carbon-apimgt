@@ -35,16 +35,16 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
-import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
@@ -153,14 +153,15 @@ public class APIExportUtil {
             exportEndpointCertificates(archivePath, apiToReturn, tenantId, exportFormat);
 
             //export meta information
-            exportMetaInformation(archivePath, apiToReturn, registry, exportFormat, provider);
+            exportAPIMetaInformation(archivePath, apiToReturn, registry, exportFormat, provider);
             
             //export mTLS authentication related certificates
             if(provider.isClientCertificateBasedAuthenticationConfigured()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Mutual SSL enabled. Exporting client certificates.");
                 }
-                exportClientCertificates(archivePath, apiToReturn, tenantId, provider, exportFormat);
+                ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiToReturn);
+                APIAndAPIProductCommonUtil.exportClientCertificates(archivePath, apiTypeWrapper, tenantId, provider, exportFormat);
             }
         } catch (APIManagementException e) {
             String errorMessage = "Unable to retrieve API Documentation for API: " + apiIDToReturn.getApiName()
@@ -184,45 +185,7 @@ public class APIExportUtil {
      */
     private static void exportAPIThumbnail(String archivePath, APIIdentifier apiIdentifier, Registry registry)
             throws APIImportExportException {
-
-        String thumbnailUrl = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR
-                + apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getApiName()
-                + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion() + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.API_ICON_IMAGE;
-        String localImagePath = archivePath + File.separator + APIImportExportConstants.IMAGE_RESOURCE;
-        try {
-            if (registry.resourceExists(thumbnailUrl)) {
-                Resource icon = registry.get(thumbnailUrl);
-                String mediaType = icon.getMediaType();
-                String extension = APIImportExportConstants.fileExtensionMapping.get(mediaType);
-                if (extension != null) {
-                    CommonUtil.createDirectory(localImagePath);
-                    try (InputStream imageDataStream = icon.getContentStream();
-                         OutputStream outputStream = new FileOutputStream(localImagePath + File.separator
-                                 + APIConstants.API_ICON_IMAGE + APIConstants.DOT + extension)) {
-                        IOUtils.copy(imageDataStream, outputStream);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Thumbnail image retrieved successfully for API: " + apiIdentifier.getApiName()
-                                    + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
-                                    + apiIdentifier.getVersion());
-                        }
-                    }
-                } else {
-                    //api gets imported without thumbnail
-                    log.error("Unsupported media type for icon " + mediaType + ". Skipping thumbnail export.");
-                }
-            } else if (log.isDebugEnabled()) {
-                log.debug("Thumbnail URL [" + thumbnailUrl + "] does not exists in registry for API: "
-                        + apiIdentifier.getApiName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
-                        + apiIdentifier.getVersion() + ". Skipping thumbnail export.");
-            }
-        } catch (RegistryException e) {
-            log.error("Error while retrieving API Thumbnail " + thumbnailUrl, e);
-        } catch (IOException e) {
-            //Exception is ignored by logging due to the reason that Thumbnail is not essential for
-            //an API to be recreated.
-            log.error("I/O error while writing API Thumbnail: " + thumbnailUrl + " to file", e);
-        }
+        APIAndAPIProductCommonUtil.exportAPIOrAPIProductThumbnail(archivePath, apiIdentifier, registry);
     }
 
 
@@ -606,7 +569,7 @@ public class APIExportUtil {
      * @param apiProvider  API Provider
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
-    private static void exportMetaInformation(String archivePath, API apiToReturn, Registry registry,
+    private static void exportAPIMetaInformation(String archivePath, API apiToReturn, Registry registry,
                                               ExportFormat exportFormat, APIProvider apiProvider)
             throws APIImportExportException, APIManagementException {
 
@@ -779,52 +742,6 @@ public class APIExportUtil {
             throw new APIImportExportException(errorMessage, e);
         }
     }
-    
-    /**
-     * Export Mutual SSL related certificates
-     * 
-     * @param api          API to be exported
-     * @param tenantId     tenant id of the user
-     * @param provider  api Provider
-     * @param exportFormat Export format of file
-     * @throws APIImportExportException
-     */
-
-    private static void exportClientCertificates(String archivePath, API api, int tenantId, APIProvider provider,
-            ExportFormat exportFormat) throws APIImportExportException {
-
-        List<ClientCertificateDTO> certificateMetadataDTOS;
-        try {
-            certificateMetadataDTOS = provider.searchClientCertificates(tenantId, null, api.getId());
-            if (!certificateMetadataDTOS.isEmpty()) {
-                CommonUtil.createDirectory(archivePath + File.separator + APIImportExportConstants.META_INFO_DIRECTORY);
-
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                String element = gson.toJson(certificateMetadataDTOS,
-                        new TypeToken<ArrayList<ClientCertificateDTO>>() {
-                        }.getType());
-
-                switch (exportFormat) {
-                    case YAML:
-                        String yaml = CommonUtil.jsonToYaml(element);
-                        CommonUtil.writeFile(archivePath + APIImportExportConstants.YAML_CLIENT_CERTIFICATE_FILE,
-                                yaml);
-                        break;
-                    case JSON:
-                        CommonUtil.writeFile(archivePath + APIImportExportConstants.JSON_CLIENT_CERTIFICATE_FILE,
-                                element);
-                }
-            }
-        } catch (IOException e) {
-            String errorMessage = "Error while retrieving saving as YAML";
-            log.error(errorMessage, e);
-            throw new APIImportExportException(errorMessage, e);
-        } catch (APIManagementException e) {
-            String errorMsg = "Error retrieving certificate meta data. tenantId [" + tenantId + "] api ["
-                    + tenantId + "]";
-            throw new APIImportExportException(errorMsg, e);
-        }
-    }
 
     /**
      * Get endpoint url list from endpoint config.
@@ -978,8 +895,8 @@ public class APIExportUtil {
         APIImportExportManager apiImportExportManager;
         boolean isStatusPreserved = preserveStatus == null || preserveStatus;
         api = apiProvider.getAPI(apiIdentifier);
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         apiImportExportManager = new APIImportExportManager(apiProvider, userName);
-        return apiImportExportManager.exportAPIArchive(api, isStatusPreserved, exportFormat);
+        return apiImportExportManager.exportAPIOrAPIProductArchive(apiTypeWrapper, isStatusPreserved, exportFormat);
     }
-
 }
