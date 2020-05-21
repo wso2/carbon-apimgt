@@ -1804,6 +1804,53 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+#-----------------------------------------------------
+# Update a blocking condition status
+#-----------------------------------------------------
+    patch:
+      security:
+        - OAuth2Security:
+            - apim:bl_manage
+      x-wso2-curl: "curl -k -X PATCH -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v1/throttling/blacklist/b513eb68-69e8-4c32-92cf-852c101363cf -d @data.json"
+      x-wso2-request: "PUT https://localhost:9443/api/am/admin/v1/throttling/blacklist/b513eb68-69e8-4c32-92cf-852c101363cf\r\nAuthorization: Bearer a1e3951b-a15c-3d79-a15b-99f1d612843e\r\nContent-Type: application/json\r\n\r\n{\r\n    \"conditionStatus\": \"true\"\r\n    }\r\n"
+      x-wso2-response: "HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\n\r\n{\r\n  \"conditionId\": \"b513eb68-69e8-4c32-92cf-852c101363cf\",\r\n  \"conditionType\": \"IP\",\r\n  \"conditionValue\": \"10.100.7.77\",\r\n      \"conditionStatus\": \"true\"\r\n    }"
+      summary: Update a blocking condition
+      description: |
+        Update a blocking condition by Id
+      parameters:
+        - $ref: '#/parameters/conditionId'
+        - in: body
+          name: body
+          description: |
+            Blocking condition with updated status
+          required: true
+          schema:
+            $ref: '#/definitions/BlockingConditionStatus'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - Blacklist (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully updated.
+          schema:
+            $ref: '#/definitions/BlockingCondition'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # The "Application Collection" resource APIs
 ######################################################
@@ -3637,6 +3684,23 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/BlockingCondition'
+#-----------------------------------------------------
+# The Throttling Blocking Condition Status resource
+#-----------------------------------------------------
+  BlockingConditionStatus:
+    title: Blocking Conditions Status
+    description: Blocking Conditions Status
+    required:
+      - conditionStatus
+    properties:
+      conditionId:
+        type: string
+        description: Id of the blocking condition
+        example: b513eb68-69e8-4c32-92cf-852c101363cf
+      conditionStatus:
+        type: boolean
+        description: Status of the blocking condition
+        example: true
 
 #-----------------------------------------------------
 # Custom Attribute object
