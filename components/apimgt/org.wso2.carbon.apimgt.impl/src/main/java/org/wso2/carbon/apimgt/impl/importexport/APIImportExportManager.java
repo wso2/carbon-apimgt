@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportUtil;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIProductImportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIProductExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 
@@ -152,4 +153,32 @@ public class APIImportExportManager {
         FileUtils.deleteQuietly(new File(extractedFolderName));
     }
 
+    /**
+     * This method is used to import the given API Product archive file. Importing an API Product as a new API and overwriting an existing
+     * API Product both are supported.
+     *
+     * @param uploadedInputStream       Input stream for importing API archive file
+     * @param isProviderPreserved       Is API Provider preserved or not
+     * @param overwriteAPIProduct       Whether to overwrite an existing API Product (update API Product)
+     * @param overwriteAPIs             Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product.
+     * @param isImportAPIs              Whether to import the dependent APIs or not.
+     * @throws APIImportExportException If an error occurs while importing the API
+     */
+    public void importAPIProductArchive(InputStream uploadedInputStream, Boolean isProviderPreserved, Boolean overwriteAPIProduct,
+                                        Boolean overwriteAPIs, Boolean isImportAPIs)
+            throws APIImportExportException {
+        // Temporary directory is used to create the required folders
+        File importFolder = CommonUtil.createTempDirectory();
+        String uploadFileName = APIImportExportConstants.UPLOAD_FILE_NAME;
+        String absolutePath = importFolder.getAbsolutePath() + File.separator;
+        CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
+
+        String extractedFolderName = CommonUtil.extractArchive(new File(absolutePath + uploadFileName), absolutePath);
+
+        APIProductImportUtil.importAPIProduct(absolutePath + extractedFolderName, loggedInUsername, isProviderPreserved,
+                    apiProvider, overwriteAPIProduct, overwriteAPIs, isImportAPIs);
+
+        FileUtils.deleteQuietly(importFolder);
+        FileUtils.deleteQuietly(new File(extractedFolderName));
+    }
 }

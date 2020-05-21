@@ -747,6 +747,26 @@ public interface APIProvider extends APIManager {
     void saveSwaggerDefinition(APIProduct apiProduct, String jsonText) throws APIManagementException;
 
     /**
+     * This method adds the swagger definition of an API Product in registry
+     *
+     * @param apiToProductResourceMapping   List of API Product resource mappings
+     * @param apiProduct   API Product
+     * @throws APIManagementException
+     */
+    void addAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
+            throws APIManagementException;
+
+    /**
+     * This method updates the swagger definition of an API Product in registry
+     *
+     * @param apiToProductResourceMapping   List of API Product resource mappings
+     * @param apiProduct   API Product
+     * @throws APIManagementException
+     */
+    void updateAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
+            throws APIManagementException, FaultGatewaysException;
+
+    /**
      * This method validates the existence of all the resource level throttling tiers in URI templates of API
      *
      * @param api           api

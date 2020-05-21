@@ -68,4 +68,68 @@ public class ApiTypeWrapper {
             api.getId().setTier(tier);
         }
     }
+
+    public void setContext(String context) {
+        if (isAPIProduct) {
+            apiProduct.setContext(context);
+        } else {
+            api.setContext(context);
+        }
+    }
+
+    public String getContext() {
+        if (isAPIProduct) {
+            return apiProduct.getContext();
+        } else {
+            return api.getContext();
+        }
+    }
+
+    public void setContextTemplate(String contextTemplate) {
+        if (isAPIProduct) {
+            apiProduct.setContextTemplate(contextTemplate);
+        } else {
+            api.setContextTemplate(contextTemplate);
+        }
+    }
+
+    public String getContextTemplate() {
+        if (isAPIProduct) {
+            return apiProduct.getContextTemplate();
+        } else {
+            return api.getContextTemplate();
+        }
+    }
+
+    public Identifier getId() {
+        if (isAPIProduct) {
+            return apiProduct.getId();
+        } else {
+            return api.getId();
+        }
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        if (isAPIProduct) {
+            apiProduct.setThumbnailUrl(thumbnailUrl);
+        } else {
+            api.setThumbnailUrl(thumbnailUrl);
+        }
+    }
+
+    public String getVisibleRoles() {
+        if (isAPIProduct) {
+            return apiProduct.getVisibleRoles();
+        } else {
+            return api.getVisibleRoles();
+        }
+    }
+
+    public String getVisibility() {
+        if (isAPIProduct) {
+            return apiProduct.getVisibility();
+        } else {
+            return api.getVisibility();
+        }
+    }
 }
