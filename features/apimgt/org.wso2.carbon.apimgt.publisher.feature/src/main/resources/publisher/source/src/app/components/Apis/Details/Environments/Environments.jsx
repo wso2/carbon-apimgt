@@ -82,6 +82,7 @@ export default function Environments() {
         console.log(settings);
         console.log(allDeployments);
         console.log('swlectefjhdsf', selectedDeployments);
+        console.log('deployment status', deploymentStatus);
         setUpdating(true);
         updateAPI({
             gatewayEnvironments,
@@ -133,6 +134,10 @@ export default function Environments() {
                         {settings.environment.map((row) => (
                             <TableRow key={row.name}>
                                 <TableCell padding='checkbox'>
+                                    {console.log('gatewayEnvironments ', gatewayEnvironments)}
+                                    {console.log('swlectefjhdsf', selectedDeployments)}
+                                    {console.log(gatewayEnvironments.includes(row.name))}
+                                    {/* {console.log('kubernetes', selectedDeployments.map((clusters) => clusters.filter((e) => e.type === 'Kubernetes')))} */}
                                     <Checkbox
                                         disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                         checked={gatewayEnvironments.includes(row.name)}

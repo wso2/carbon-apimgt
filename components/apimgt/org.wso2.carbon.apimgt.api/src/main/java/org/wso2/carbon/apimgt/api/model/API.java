@@ -154,6 +154,7 @@ public class API implements Serializable {
     private Set<DeploymentEnvironments> deploymentEnvironments;
 
     // Used for endpoint environments configured with non empty URLs
+
     private Set<String> environmentList;
 
     // API security at the gateway level.

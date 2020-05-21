@@ -109,6 +109,7 @@ import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerManager;
+import org.wso2.carbon.apimgt.impl.containermgt.K8sManager;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -5673,6 +5674,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 }
                             }
                         }
+
                     }
                     return response;
                 }
@@ -8795,6 +8797,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         return null;
     }
+
+//    private Map<String, Map<String, String>> getAllClustersFromConfig() throws UserStoreException, RegistryException,
+//            ParseException {
+//
+//        JSONObject configs;
+//
+//        if ( MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+//            //read configs from deployment toml
+//            String content = getTenantConfigContent();
+//            JSONParser jsonParser = new JSONParser();
+//            configs = (JSONObject) jsonParser.parse(content);
+//        } else {
+//            String content = getTenantConfigContent();
+//            JSONParser jsonParser = new JSONParser();
+//            configs = (JSONObject) jsonParser.parse(content);
+//        }
+//
+//        return APIUtil.getClusterInfoFromConfig(configs);
+//    }
 
     /**
      * This method returns security audit properties from the API Manager Configuration

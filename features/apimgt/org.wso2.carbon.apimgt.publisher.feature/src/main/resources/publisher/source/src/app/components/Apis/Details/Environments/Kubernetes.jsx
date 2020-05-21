@@ -152,7 +152,7 @@ export default function Kubernetes(props) {
                         {clusters.clusters.map((row) => (
                             <TableRow key={row.clusterId}>
                                 <TableCell padding='checkbox'>
-                                    <Checkbox
+                                    { <Checkbox
                                         disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                         checked={handleOnChecked(row.clusterId)}
                                         onChange={(e) => handleEnvironmentsSelect(e, row.clusterId)}

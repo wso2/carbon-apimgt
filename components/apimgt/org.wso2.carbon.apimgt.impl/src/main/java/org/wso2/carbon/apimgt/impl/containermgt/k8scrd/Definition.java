@@ -65,7 +65,7 @@ public class Definition implements KubernetesResource {
         return "Definition{" +
                 "swaggerConfigmapNames=" + Arrays.toString(swaggerConfigmapNames) +
                 ", type='" + type + '\'' +
-                ", interceptors=" + interceptors +
+               // ", interceptors=" + interceptors +
                 '}';
     }
 }

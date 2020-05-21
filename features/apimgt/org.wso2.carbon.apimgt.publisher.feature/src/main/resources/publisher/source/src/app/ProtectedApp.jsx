@@ -121,6 +121,20 @@ export default class Protected extends Component {
             userPromise.then((loggedUser) => this.setState({ user: loggedUser }));
             deploymentPromise.then((deploymentsNew) => this.setState({ allDeployments: deploymentsNew }));
         }
+        const deploymentStatusPromise = api.getDeploymentStatus();
+        if (user) {
+            this.setState({ user });
+            deploymentStatusPromise
+                .then((deploymentStatusNew) => this.setState({ deploymentStatus: deploymentStatusNew }));
+        } else {
+            // If no user data available , Get the user info from existing token information
+            // This could happen when OAuth code authentication took place and could send
+            // user information via redirection
+            const userPromise = AuthManager.getUserFromToken();
+            userPromise.then((loggedUser) => this.setState({ user: loggedUser }));
+            deploymentStatusPromise
+                .then((deploymentStatusNew) => this.setState({ deploymentStatus: deploymentStatusNew }));
+        }
     }
 
     /**

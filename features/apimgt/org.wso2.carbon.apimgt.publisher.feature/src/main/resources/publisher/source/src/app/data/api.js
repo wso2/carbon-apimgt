@@ -653,14 +653,36 @@ class API extends Resource {
         }
     }
         /**
-         * Get deployments details from tenant-conf
-         */
-        getDeployments() {
-            const promisedDeployments = this.client.then(client => {
-                return client.apis['Deployments'].deploymentsGet();
-            });
-            return promisedDeployments.then(response => response.body);
-        }
+     * Get deployments details from tenant-conf
+     */
+    getDeployments() {
+        const promisedDeployments = this.client.then(client => {
+            return client.apis['Deployments'].deploymentsGet();
+        });
+        return promisedDeployments.then(response => response.body);
+    }
+
+    /**
+     * Get status of API deployments in cloud clusters
+     * @param id {String} UUID of the API in which the deployment status is needed
+     */
+    // getDeploymentStatus(api_id) {
+    //     const promisedDeploymentStatus = this.client.then(client => {
+    //         return client.apis['DeploymentStatus'].deploymentsGetStatus(
+    //             {
+    //             apiId: api_id,
+    //             }, 
+    //         this._requestMetaData(),
+    //         );
+    //     });
+    //     return promisedDeploymentStatus.then(response => response.body);
+    // }
+    getDeploymentStatus() {
+        const promisedDeploymentStatus = this.client.then(client => {
+            return client.apis['DeploymentStatus'].deploymentsGetStatus();
+        });
+        return promisedDeploymentStatus.then(response => response.body);
+    }
 
     getDeployments() {
         return this.client.then(client => {
