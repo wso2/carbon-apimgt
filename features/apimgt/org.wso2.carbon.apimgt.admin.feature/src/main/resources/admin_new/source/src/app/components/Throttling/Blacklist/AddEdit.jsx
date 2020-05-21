@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import DialogContentText from '@material-ui/core/DialogContentText';
@@ -56,16 +56,6 @@ const useStyles = makeStyles((theme) => ({
         minHeight: theme.spacing(24),
     },
 }));
-
-let initialState = {
-    conditionType: 'API',
-    conditionValue: {
-        endingIp: '',
-        startingIp: '',
-        invert: false,
-        fixedIp: '',
-    },
-};
 
 /**
  * Reducer
@@ -111,6 +101,15 @@ function AddEdit(props) {
     const {
         updateList, icon, triggerButtonText, title,
     } = props;
+    const [initialState, setInitialState] = useState({
+        conditionType: 'API',
+        conditionValue: {
+            endingIp: '',
+            startingIp: '',
+            invert: false,
+            fixedIp: '',
+        },
+    });
     const [state, dispatch] = useReducer(reducer, initialState);
     const {
         conditionType, conditionValue, conditionValue: {
@@ -128,7 +127,7 @@ function AddEdit(props) {
     };
 
     useEffect(() => {
-        initialState = {
+        setInitialState({
             conditionType: 'API',
             conditionValue: {
                 endingIp: '',
@@ -136,7 +135,7 @@ function AddEdit(props) {
                 invert: false,
                 fixedIp: '',
             },
-        };
+        });
     }, [conditionType]);
 
     const hasErrors = (fieldName, value) => {
@@ -198,34 +197,28 @@ function AddEdit(props) {
             blacklistThrottlingPolicy = state;
         }
 
-        let promisedAddBlacklistPolicy = restApi.addBlacklistPolicy(
+        const promisedAddBlacklistPolicy = restApi.addBlacklistPolicy(
             blacklistThrottlingPolicy,
         );
-
-        promisedAddBlacklistPolicy = new Promise((resolve, reject) => {
-            promisedAddBlacklistPolicy
-                .then(() => {
-                    resolve(
-                        <FormattedMessage
-                            id='Throttling.Blacklist.Policy.policy.add.success'
-                            defaultMessage='Blacklist Policy added successfully.'
-                        />,
-                    );
-                })
-                .catch((error) => {
-                    const { response } = error;
-                    if (response.body) {
-                        reject(response.body.description);
-                    }
-                })
-                .finally(() => {
-                    updateList();
-                });
-        });
-        return (promisedAddBlacklistPolicy);
-    };
-
-    const dialogOpenCallback = () => {
+        return promisedAddBlacklistPolicy
+            .then(() => {
+                return (
+                    <FormattedMessage
+                        id='Throttling.Blacklist.Policy.policy.add.success'
+                        defaultMessage='Blacklist Policy added successfully.'
+                    />
+                );
+            })
+            .catch((error) => {
+                const { response } = error;
+                if (response.body) {
+                    throw (response.body.description);
+                }
+                return null;
+            })
+            .finally(() => {
+                updateList();
+            });
     };
 
     return (
@@ -235,7 +228,6 @@ function AddEdit(props) {
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
-            dialogOpenCallback={dialogOpenCallback}
             className={classes.addForm}
         >
             <DialogContentText>
@@ -364,7 +356,6 @@ function AddEdit(props) {
                             required
                         />
                         <TextField
-                            autoFocus
                             margin='dense'
                             name='endingIp'
                             label='End IP Address'
