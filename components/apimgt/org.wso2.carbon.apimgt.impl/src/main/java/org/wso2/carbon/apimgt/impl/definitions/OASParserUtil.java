@@ -790,7 +790,7 @@ public class OASParserUtil {
             HttpResponse response = httpClient.execute(httpGet);
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
-                String responseStr = EntityUtils.toString(response.getEntity());
+                String responseStr = EntityUtils.toString(response.getEntity(), "UTF-8");
                 validationResponse = validateAPIDefinition(responseStr, returnJsonContent);
             } else {
                 validationResponse.setValid(false);
