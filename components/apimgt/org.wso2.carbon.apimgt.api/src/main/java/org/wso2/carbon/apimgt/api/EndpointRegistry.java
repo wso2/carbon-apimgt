@@ -110,10 +110,12 @@ public interface EndpointRegistry {
     /**
      * Updates Registry Entry
      *
+     * @param entryName     original name of the registry entry
      * @param registryEntry EndpointRegistryEntry
      * @throws APIManagementException if failed to update EndpointRegistryEntry
      */
-    void updateEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException;
+    void updateEndpointRegistryEntry(String entryName, EndpointRegistryEntry registryEntry)
+            throws APIManagementException;
 
     /**
      * Deletes an Endpoint Registry Entry

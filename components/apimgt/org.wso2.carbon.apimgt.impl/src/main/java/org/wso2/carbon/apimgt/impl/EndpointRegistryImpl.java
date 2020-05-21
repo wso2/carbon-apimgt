@@ -39,7 +39,12 @@ import java.util.List;
 public class EndpointRegistryImpl implements EndpointRegistry {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
-    ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+    private ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+    private String username;
+
+    public EndpointRegistryImpl(String username) {
+        this.username = username;
+    }
 
     /**
      * Adds a new Endpoint Registry
@@ -177,13 +182,13 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * Updates Registry Entry
      *
+     * @param entryName     original name of the registry entry
      * @param registryEntry EndpointRegistryEntry
      * @throws APIManagementException if failed to update EndpointRegistryEntry
      */
-    public void updateEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException {
-        EndpointRegistryEntry endpointRegistryEntry =
-                apiMgtDAO.getEndpointRegistryEntryByUUID(registryEntry.getEntryId());
-        if (!endpointRegistryEntry.getName().equals(registryEntry.getName()) &&
+    public void updateEndpointRegistryEntry(String entryName, EndpointRegistryEntry registryEntry)
+            throws APIManagementException {
+        if (!entryName.equals(registryEntry.getName()) &&
                 apiMgtDAO.isRegistryEntryNameExists(registryEntry)) {
             APIUtil.handleResourceAlreadyExistsException("Endpoint Registry Entry with name '"
                     + registryEntry.getName() + "' already exists");
