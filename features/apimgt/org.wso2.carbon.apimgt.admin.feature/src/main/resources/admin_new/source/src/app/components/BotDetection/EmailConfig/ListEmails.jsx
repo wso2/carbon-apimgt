@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import API from 'AppData/api';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
@@ -33,27 +33,30 @@ import DeleteEmail from 'AppComponents/BotDetection/EmailConfig/DeleteEmail';
 import AddEmails from 'AppComponents/BotDetection/EmailConfig/AddEmail';
 
 /**
- * API call to get all emails
- * @returns {Promise}.
- */
-function apiCall() {
-    const restApi = new API();
-    return restApi
-        .botDetectionNotifyingEmailsGet()
-        .then((result) => {
-            return result.body;
-        })
-        .catch((error) => {
-            throw error;
-        });
-}
-
-/**
  * Render a list
  * @returns {JSX} Header AppBar components.
  */
 export default function ListEmails() {
     const intl = useIntl();
+    const [emailList, setEmailList] = useState([]);
+
+    /**
+     * API call to get all emails
+     * @returns {Promise}.
+     */
+    function apiCall() {
+        const restApi = new API();
+        return restApi
+            .botDetectionNotifyingEmailsGet()
+            .then((result) => {
+                setEmailList(result.body);
+                return result.body;
+            })
+            .catch((error) => {
+                throw error;
+            });
+    }
+
     const columProps = [
         { name: 'uuid', options: { display: false } },
         {
@@ -77,6 +80,7 @@ export default function ListEmails() {
             id: 'AdminPages.BotDetection.Email.List.addButtonProps.title',
             defaultMessage: 'Add Email',
         }),
+        emailList,
     };
     const searchProps = {
         searchPlaceholder: intl.formatMessage({
@@ -142,7 +146,7 @@ export default function ListEmails() {
             defaultMessage: 'Emails',
         }),
     };
-
+    // todo: check whether analytics are enabled and show this
     const emptyBoxProps = {
         content: (
             <Typography variant='body2' color='textSecondary' component='p'>

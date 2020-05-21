@@ -481,6 +481,28 @@ class API extends Resource {
             );
         });
     }
+
+    addBotDetectionNotifyingEmail(email, callback = null) {
+        const promiseAddEmail = this.client.then((client) => {
+            const data = {
+                email: email,
+            };
+            const payload = {
+                body: data,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['default'].post_botData_addEmail(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+
+        if (callback) {
+            return promiseAddEmail.then(callback);
+        } else {
+            return promiseAddEmail;
+        }
+    }
 }
 
 API.CONSTS = {
