@@ -116,7 +116,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
         dto = CommonThrottleMappingUtil.updateDefaultMandatoryFieldsOfThrottleDTO(dto);
 
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(dto.getPolicyName());
-        //subscriptionPolicy = CommonThrottleMappingUtil.updateFieldsFromDTOToPolicy(dto, subscriptionPolicy);
+        subscriptionPolicy = CommonThrottleMappingUtil.updateFieldsFromDTOToPolicy(dto, subscriptionPolicy);
         subscriptionPolicy.setBillingPlan(dto.getBillingPlan());
         subscriptionPolicy.setRateLimitTimeUnit(dto.getRateLimitTimeUnit());
         subscriptionPolicy.setRateLimitCount(dto.getRateLimitCount());
