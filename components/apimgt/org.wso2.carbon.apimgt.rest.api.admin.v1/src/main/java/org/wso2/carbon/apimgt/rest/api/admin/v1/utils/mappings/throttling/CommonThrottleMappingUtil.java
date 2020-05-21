@@ -205,33 +205,65 @@ public class CommonThrottleMappingUtil {
      * @return Derived Quota policy object from DTO
      * @throws UnsupportedThrottleLimitTypeException
      */
-    public static QuotaPolicy fromDTOToQuotaPolicy(ThrottleLimitDTO dto) throws UnsupportedThrottleLimitTypeException {
+    public static QuotaPolicy fromDTOToQuotaPolicy(ThrottleLimitTypeDTO dto)
+            throws UnsupportedThrottleLimitTypeException {
+
+        ThrottleLimitDTO throttleLimit = getThrottleLimitType(dto);
         QuotaPolicy quotaPolicy = new QuotaPolicy();
-        quotaPolicy.setLimit(fromDTOToLimit(dto));
-        quotaPolicy.setType(mapQuotaPolicyTypeFromDTOToModel(dto.getType()));
+        quotaPolicy.setLimit(fromDTOToLimit(throttleLimit));
+        quotaPolicy.setType(mapQuotaPolicyTypeFromDTOToModel(throttleLimit.getType()));
         return quotaPolicy;
     }
 
     /**
-     * Converts a Quota Policy object into a Throttle Limit DTO object
+     * Obtain Throttle Limit DTO object from Throttle Limit Type object
      *
-     * @param quotaPolicy Quota Policy object
-     * @return Throttle Limit DTO object derived from the Quota Policy object
+     * @param dto Throttle Policy Default limit DTO object
+     * @return Throttle Limit DTO object
      * @throws UnsupportedThrottleLimitTypeException
      */
-    public static ThrottleLimitDTO fromQuotaPolicyToDTO(QuotaPolicy quotaPolicy)
+    public static ThrottleLimitDTO getThrottleLimitType(ThrottleLimitTypeDTO dto)
             throws UnsupportedThrottleLimitTypeException {
+
+        if (dto.getBandwidth() != null && dto.getRequestCount() != null) {
+            String msg = "Throttle limit types " + dto.getBandwidth().getClass().getName() + " and " +
+                    dto.getRequestCount().getClass().getName() + " cannot be specified at once";
+            log.error(msg);
+            throw new UnsupportedThrottleLimitTypeException(msg);
+        } else if (dto.getBandwidth() != null) {
+            return dto.getBandwidth();
+        } else if (dto.getRequestCount() != null) {
+            return dto.getRequestCount();
+        } else {
+            String msg = "A Throttle limit type has not been specified";
+            log.error(msg);
+            throw new UnsupportedThrottleLimitTypeException(msg);
+        }
+    }
+
+    /**
+     * Converts a Quota Policy object into a Throttle Limit Type DTO object
+     *
+     * @param quotaPolicy Quota Policy object
+     * @return Throttle Limit Type DTO object derived from the Quota Policy object
+     * @throws UnsupportedThrottleLimitTypeException
+     */
+    public static ThrottleLimitTypeDTO fromQuotaPolicyToDTO(QuotaPolicy quotaPolicy)
+            throws UnsupportedThrottleLimitTypeException {
+
+        ThrottleLimitTypeDTO defaultLimitType = new ThrottleLimitTypeDTO();
         if (PolicyConstants.REQUEST_COUNT_TYPE.equals(quotaPolicy.getType())) {
             RequestCountLimit requestCountLimit = (RequestCountLimit) quotaPolicy.getLimit();
-            return fromRequestCountLimitToDTO(requestCountLimit);
+            defaultLimitType.setRequestCount(fromRequestCountLimitToDTO(requestCountLimit));
         } else if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaPolicy.getType())) {
             BandwidthLimit bandwidthLimit = (BandwidthLimit) quotaPolicy.getLimit();
-            return fromBandwidthLimitToDTO(bandwidthLimit);
+            defaultLimitType.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
         } else {
             String msg = "Throttle limit type " + quotaPolicy.getType() + " is not supported";
             log.error(msg);
             throw new UnsupportedThrottleLimitTypeException(msg);
         }
+        return defaultLimitType;
     }
 
     /**
