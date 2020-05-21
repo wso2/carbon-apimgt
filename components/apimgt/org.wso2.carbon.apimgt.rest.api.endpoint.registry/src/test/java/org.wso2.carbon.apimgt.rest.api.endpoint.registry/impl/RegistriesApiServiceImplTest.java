@@ -24,6 +24,7 @@ import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.junit.Assert;
@@ -935,13 +936,14 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntry2.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.GQL_SDL.toString());
         endpointRegistryEntryList.add(endpointRegistryEntry2);
 
-        Mockito.when(registryProvider.getEndpointRegistryEntries(EndpointRegistryConstants.COLUMN_REG_NAME,
+        Mockito.when(registryProvider.getEndpointRegistryEntries(EndpointRegistryConstants.COLUMN_ID,
                 RestApiConstants.DEFAULT_SORT_ORDER, RestApiConstants.PAGINATION_LIMIT_DEFAULT,
-                RestApiConstants.PAGINATION_OFFSET_DEFAULT, REGISTRY_UUID))
+                RestApiConstants.PAGINATION_OFFSET_DEFAULT, REGISTRY_UUID, StringUtils.EMPTY, StringUtils.EMPTY,
+                StringUtils.EMPTY, StringUtils.EMPTY))
                 .thenReturn(endpointRegistryEntryList);
 
         Response response = registriesApiService.getAllEntriesInRegistry(REGISTRY_UUID, null, null,
-                null, null, null, messageContext);
+                null, null, null, null, null, null, messageContext);
         Assert.assertNotNull("Endpoint registries retrieval failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         RegistryEntryArrayDTO registryEntryArrayDTO = (RegistryEntryArrayDTO) response.getEntity();

@@ -251,11 +251,13 @@ public class EndpointRegistryImplTest {
         endpointRegistryEntryList.add(endpointRegistryEntry2);
 
         Mockito.when(apiMgtDAO.getEndpointRegistryEntries(EndpointRegistryConstants.COLUMN_ENTRY_NAME,
-                "ASC", 25, 0, registryUUID)).thenReturn(endpointRegistryEntryList);
+                "ASC", 25, 0, registryUUID, "REST", "OAS",
+                "Entry 2", "UTILITY")).thenReturn(endpointRegistryEntryList);
 
         List<EndpointRegistryEntry> endpointRegistryEntryListResponse =
                 endpointRegistry.getEndpointRegistryEntries(EndpointRegistryConstants.COLUMN_ENTRY_NAME,
-                        "ASC", 25, 0, registryUUID);
+                        "ASC", 25, 0, registryUUID, "REST", "OAS",
+                        "Entry 2", "UTILITY");
 
         for (int i = 0; i < endpointRegistryEntryListResponse.size(); i++) {
             compareRegistryEntryInfo(endpointRegistryEntryList.get(i), endpointRegistryEntryListResponse.get(i));
