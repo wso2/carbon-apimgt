@@ -190,18 +190,18 @@ public abstract class APIDefinition {
      * This method changes the URI templates from the API definition as it support different schemes
      * @param resourceConfigsJSON json String of oasDefinition
      * @throws APIManagementException throws if an error occurred
-     * @return URI templates
+     * @return String
      */
     public abstract String processOtherSchemeScopes(String resourceConfigsJSON)
             throws APIManagementException;
 
     /**
-     * This method returns api that is attched with api extensions related to micro-gw
+     * This method returns api that is attached with api extensions related to micro-gw
      *
      * @param swaggerContent String
      * @param api            API
      * @param isBasepathExtractedFromSwagger boolean
-     * @return URITemplate
+     * @return API
      */
     public abstract API setExtensionsToAPI(String swaggerContent, API api, boolean isBasepathExtractedFromSwagger)
             throws APIManagementException;

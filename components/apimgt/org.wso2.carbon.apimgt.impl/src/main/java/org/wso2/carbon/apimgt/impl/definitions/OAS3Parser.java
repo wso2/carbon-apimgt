@@ -1252,11 +1252,12 @@ public class OAS3Parser extends APIDefinition {
      * This method returns the boolean value which checks whether the swagger is included default security scheme or not
      *
      * @param swaggerContent resource json
-     * @return is default is given already
+     * @return boolean
      * @throws APIManagementException
      */
     private boolean isDefaultGiven(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
+
         Components components = openAPI.getComponents();
         if (components == null) {
             return false;
@@ -1276,14 +1277,12 @@ public class OAS3Parser extends APIDefinition {
      * This method will inject scopes of other schemes to the swagger definition
      *
      * @param swaggerContent resource json
-     * @return updated json string
+     * @return String
      * @throws APIManagementException
      */
     @Override
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
-        boolean isDefaultAvailable = isDefaultGiven(swaggerContent);
-
-        if (!isDefaultAvailable) {
+        if (!isDefaultGiven(swaggerContent)) {
             OpenAPI openAPI = getOpenAPI(swaggerContent);
             openAPI = injectOtherScopesToDefaultScheme(openAPI);
             openAPI = injectOtherResourceScopesToDefaultScheme(openAPI);
@@ -1296,7 +1295,7 @@ public class OAS3Parser extends APIDefinition {
      * This method returns the oauth scopes according to the given swagger(version 3)
      *
      * @param openAPI - OpenApi object
-     * @return scope set as all defaults
+     * @return OpenAPI
      * @throws APIManagementException
      */
     private OpenAPI injectOtherScopesToDefaultScheme(OpenAPI openAPI) throws APIManagementException {
@@ -1364,7 +1363,7 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param noneDefaultTypeFlow , OAuthflow
      * @param defaultTypeFlow,    OAuthflow
-     * @return scopes of given flow
+     * @return OAuthFlow
      */
     private OAuthFlow extractAndInjectScopesFromFlow(OAuthFlow noneDefaultTypeFlow, OAuthFlow defaultTypeFlow) {
         Scopes noneDefaultFlowScopes = noneDefaultTypeFlow.getScopes();
@@ -1375,12 +1374,10 @@ public class OAS3Parser extends APIDefinition {
         }
 
         for (Map.Entry<String, String> input : noneDefaultFlowScopes.entrySet()) {
-            String name = input.getKey();
-            String description = input.getValue();
             //Inject scopes set into default scheme
-            defaultFlowScopes.addString(name, description);
-            defaultTypeFlow.setScopes(defaultFlowScopes);
+            defaultFlowScopes.addString(input.getKey(), input.getValue());
         }
+        defaultTypeFlow.setScopes(defaultFlowScopes);
         //Check X-Scope Bindings
         Map<String, String> noneDefaultScopeBindings = null;
         Map<String, Object> defaultTypeExtension = defaultTypeFlow.getExtensions();
@@ -1395,9 +1392,7 @@ public class OAS3Parser extends APIDefinition {
                 defaultScopeBindings = new HashMap<>();
             }
             for (Map.Entry<String, String> roleInUse : noneDefaultScopeBindings.entrySet()) {
-                String noneDefaultTypeScope = roleInUse.getKey();
-                String noneDefaultTypeRole = roleInUse.getValue();
-                defaultScopeBindings.put(noneDefaultTypeScope, noneDefaultTypeRole);
+                defaultScopeBindings.put(roleInUse.getKey(), roleInUse.getValue());
             }
         }
         defaultTypeExtension.put(APIConstants.SWAGGER_X_SCOPES_BINDINGS, defaultScopeBindings);
@@ -1408,8 +1403,8 @@ public class OAS3Parser extends APIDefinition {
     /**
      * This method returns URI templates according to the given swagger file(Swagger version 3)
      *
-     * @param openAPI OpenAPI,isDefaultAvailable boolean
-     * @return URI Templates
+     * @param openAPI OpenAPI
+     * @return OpenAPI
      * @throws APIManagementException
      */
     private OpenAPI injectOtherResourceScopesToDefaultScheme(OpenAPI openAPI) throws APIManagementException {
@@ -1467,7 +1462,7 @@ public class OAS3Parser extends APIDefinition {
      * @param apiDefinition                  String
      * @param api                            API
      * @param isBasepathExtractedFromSwagger boolean
-     * @return URITemplate
+     * @return API
      */
     @Override
     public API setExtensionsToAPI(String apiDefinition, API api, boolean isBasepathExtractedFromSwagger) throws APIManagementException {
@@ -1479,12 +1474,12 @@ public class OAS3Parser extends APIDefinition {
 
         //Setup Custom auth header for API
         String authHeader = OASParserUtil.getAuthorizationHeaderFromSwagger(extensions);
-        if (authHeader != null) {
+        if (StringUtils.isNotBlank(authHeader)) {
             api.setAuthorizationHeader(authHeader);
         }
         //Setup mutualSSL configuration
         String mutualSSL = OASParserUtil.getMutualSSLEnabledFromSwagger(extensions);
-        if (StringUtils.isBlank(mutualSSL)) {
+        if (StringUtils.isNotBlank(mutualSSL)) {
             String securityList = api.getApiSecurity();
             if (StringUtils.isBlank(securityList)) {
                 securityList = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
@@ -1513,17 +1508,17 @@ public class OAS3Parser extends APIDefinition {
         }
         //Setup Transports
         String transports = OASParserUtil.getTransportsFromSwagger(extensions);
-        if (transports != null) {
+        if (StringUtils.isNotBlank(transports)) {
             api.setTransports(transports);
         }
         //Setup Throttlingtiers
         String throttleTier = OASParserUtil.getThrottleTierFromSwagger(extensions);
-        if (throttleTier != null) {
+        if (StringUtils.isNotBlank(throttleTier)) {
             api.setApiLevelPolicy(throttleTier);
         }
         //Setup Basepath
         String basePath = OASParserUtil.getBasePathFromSwagger(extensions);
-        if (basePath != null && isBasepathExtractedFromSwagger) {
+        if (StringUtils.isNotBlank(basePath) && isBasepathExtractedFromSwagger) {
             basePath = basePath.replace("{version}", api.getId().getVersion());
             api.setContextTemplate(basePath);
             api.setContext(basePath);
