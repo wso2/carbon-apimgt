@@ -35,8 +35,6 @@ public class EndpointRegistryConstants {
 
     public static final String COLUMN_REG_MODE = "REG_MODE";
 
-    public static final String COLUMN_REG_OWNER= "REG_OWNER";
-
     public static final String COLUMN_TENANT_ID = "TENANT_ID";
 
     public static final String COLUMN_READ_ROLE = "READ_ROLE";
@@ -58,5 +56,13 @@ public class EndpointRegistryConstants {
     public static final String COLUMN_ENDPOINT_DEFINITION = "ENDPOINT_DEFINITION";
 
     public static final String COLUMN_METADATA = "METADATA";
+
+    public static final String COLUMN_CREATED_BY = "CREATED_BY";
+
+    public static final String COLUMN_UPDATED_BY = "UPDATED_BY";
+
+    public static final String COLUMN_CREATED_AT = "CREATED_AT";
+
+    public static final String COLUMN_UPDATED_AT = "UPDATED_AT";
 
 }

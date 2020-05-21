@@ -176,7 +176,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
             APIUtil.handleResourceAlreadyExistsException("Endpoint Registry Entry with name '"
                     + registryEntry.getName() + "' already exists");
         }
-        return apiMgtDAO.addEndpointRegistryEntry(registryEntry);
+        return apiMgtDAO.addEndpointRegistryEntry(registryEntry, username);
     }
 
     /**
@@ -193,7 +193,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
             APIUtil.handleResourceAlreadyExistsException("Endpoint Registry Entry with name '"
                     + registryEntry.getName() + "' already exists");
         }
-        apiMgtDAO.updateEndpointRegistryEntry(registryEntry);
+        apiMgtDAO.updateEndpointRegistryEntry(registryEntry, username);
     }
 
     /**
@@ -224,7 +224,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
                 APIUtil.handleResourceAlreadyExistsException("Endpoint Registry with name '" + endpointRegistryInfo
                         .getName() + "' already exists");
             }
-            apiMgtDAO.updateEndpointRegistry(registryId, endpointRegistryInfo);
+            apiMgtDAO.updateEndpointRegistry(registryId, endpointRegistryInfo, username);
         } catch (UserStoreException e) {
             String msg = "Error while retrieving tenant information";
             log.error(msg, e);
