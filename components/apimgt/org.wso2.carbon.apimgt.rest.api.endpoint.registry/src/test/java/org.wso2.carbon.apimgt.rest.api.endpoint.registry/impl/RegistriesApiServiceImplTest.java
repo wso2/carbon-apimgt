@@ -367,7 +367,7 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setId("entry1");
         payloadEntryDTO.setEntryName("Entry Name 1");
         payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
+        payloadEntryDTO.setProductionServiceUrl("https://xyz.com");
         payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
         payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
         payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
@@ -412,7 +412,7 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setId("entry1");
         payloadEntryDTO.setEntryName("Entry Name 1");
         payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
+        payloadEntryDTO.setProductionServiceUrl("https://xyz.com");
         payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
         payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
         payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
@@ -457,7 +457,7 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setId("entry1");
         payloadEntryDTO.setEntryName("Entry Name 1");
         payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
+        payloadEntryDTO.setProductionServiceUrl("https://xyz.com");
         payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
         payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
         payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
@@ -502,7 +502,7 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setId("entry1");
         payloadEntryDTO.setEntryName("Entry Name 1");
         payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
+        payloadEntryDTO.setProductionServiceUrl("https://xyz.com");
         payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
         payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
         payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
@@ -547,7 +547,7 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setId("entry1");
         payloadEntryDTO.setEntryName("Entry Name 1");
         payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
+        payloadEntryDTO.setProductionServiceUrl("https://xyz.com");
         payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
         payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
         payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
@@ -592,7 +592,7 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setId("entry1");
         payloadEntryDTO.setEntryName("Entry Name 1");
         payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
+        payloadEntryDTO.setProductionServiceUrl("https://xyz.com");
         payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
         payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
         payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
@@ -637,7 +637,7 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setId("entry1");
         payloadEntryDTO.setEntryName("Entry Name 1");
         payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
+        payloadEntryDTO.setProductionServiceUrl("https://xyz.com");
         payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
         payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
         payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
@@ -682,7 +682,7 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setId("entry1");
         payloadEntryDTO.setEntryName("Entry Name 1");
         payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
+        payloadEntryDTO.setProductionServiceUrl("https://xyz.com");
         payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
         payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
         payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
@@ -723,7 +723,7 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setId("entry1");
         payloadEntryDTO.setEntryName("Entry Name 2");
         payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz2.com");
+        payloadEntryDTO.setProductionServiceUrl("https://xyz2.com");
         payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1);
         payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.DOMAIN);
         payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
@@ -780,7 +780,7 @@ public class RegistriesApiServiceImplTest {
         payloadEntryDTO.setId("entry1");
         payloadEntryDTO.setEntryName("Entry Name 2");
         payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz2.com");
+        payloadEntryDTO.setProductionServiceUrl("https://xyz2.com");
         payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1);
         payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.DOMAIN);
         payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
@@ -825,7 +825,7 @@ public class RegistriesApiServiceImplTest {
         registryEntryDTO.setId("entry1");
         registryEntryDTO.setEntryName("Entry Name 2");
         registryEntryDTO.setMetadata("{mutualTLS: true}");
-        registryEntryDTO.setServiceUrl("https://xyz2.com");
+        registryEntryDTO.setProductionServiceUrl("https://xyz2.com");
         registryEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1);
         registryEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.DOMAIN);
         registryEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
@@ -857,7 +857,7 @@ public class RegistriesApiServiceImplTest {
         registryEntryDTO.setId("entry1");
         registryEntryDTO.setEntryName("Entry Name 2");
         registryEntryDTO.setMetadata("{mutualTLS: true}");
-        registryEntryDTO.setServiceUrl("https://xyz2.com");
+        registryEntryDTO.setProductionServiceUrl("https://xyz2.com");
         registryEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1);
         registryEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.DOMAIN);
         registryEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
@@ -885,7 +885,7 @@ public class RegistriesApiServiceImplTest {
         registryEntryDTO.setId("entry1");
         registryEntryDTO.setEntryName("Entry Name 2");
         registryEntryDTO.setMetadata("{mutualTLS: true}");
-        registryEntryDTO.setServiceUrl("https://xyz2.com");
+        registryEntryDTO.setProductionServiceUrl("https://xyz2.com");
         registryEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1);
         registryEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.DOMAIN);
         registryEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
@@ -1091,7 +1091,7 @@ public class RegistriesApiServiceImplTest {
         Assert.assertEquals(expectedDTO.getId(), actualDTO.getId());
         Assert.assertEquals(expectedDTO.getEntryName(), actualDTO.getEntryName());
         Assert.assertEquals(expectedDTO.getMetadata(), actualDTO.getMetadata());
-        Assert.assertEquals(expectedDTO.getServiceUrl(), actualDTO.getServiceUrl());
+        Assert.assertEquals(expectedDTO.getProductionServiceUrl(), actualDTO.getProductionServiceUrl());
         Assert.assertEquals(expectedDTO.getServiceType(), actualDTO.getServiceType());
         Assert.assertEquals(expectedDTO.getServiceCategory(), actualDTO.getServiceCategory());
         Assert.assertEquals(expectedDTO.getDefinitionUrl(), actualDTO.getDefinitionUrl());
