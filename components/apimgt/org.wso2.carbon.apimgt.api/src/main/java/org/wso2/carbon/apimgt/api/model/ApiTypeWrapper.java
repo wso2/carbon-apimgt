@@ -46,19 +46,11 @@ public class ApiTypeWrapper {
     }
 
     public String getName() {
-        if (isAPIProduct) {
-            return apiProduct.getId().getName();
-        } else {
-            return api.getId().getName();
-        }
+        return isAPIProduct ? apiProduct.getId().getName() : api.getId().getName();
     }
 
     public String getStatus() {
-        if (isAPIProduct) {
-            return apiProduct.getState();
-        } else {
-            return api.getStatus();
-        }
+        return isAPIProduct ? apiProduct.getState() : api.getStatus();
     }
 
     public void setTier(String tier) {
@@ -78,11 +70,7 @@ public class ApiTypeWrapper {
     }
 
     public String getContext() {
-        if (isAPIProduct) {
-            return apiProduct.getContext();
-        } else {
-            return api.getContext();
-        }
+        return isAPIProduct ? apiProduct.getContext() : api.getContext();
     }
 
     public void setContextTemplate(String contextTemplate) {
@@ -94,19 +82,11 @@ public class ApiTypeWrapper {
     }
 
     public String getContextTemplate() {
-        if (isAPIProduct) {
-            return apiProduct.getContextTemplate();
-        } else {
-            return api.getContextTemplate();
-        }
+        return isAPIProduct ? apiProduct.getContextTemplate() : api.getContextTemplate();
     }
 
     public Identifier getId() {
-        if (isAPIProduct) {
-            return apiProduct.getId();
-        } else {
-            return api.getId();
-        }
+        return isAPIProduct ? apiProduct.getId() : api.getId();
     }
 
     public void setThumbnailUrl(String thumbnailUrl) {
@@ -118,18 +98,10 @@ public class ApiTypeWrapper {
     }
 
     public String getVisibleRoles() {
-        if (isAPIProduct) {
-            return apiProduct.getVisibleRoles();
-        } else {
-            return api.getVisibleRoles();
-        }
+        return isAPIProduct ? apiProduct.getVisibleRoles() : api.getVisibleRoles();
     }
 
     public String getVisibility() {
-        if (isAPIProduct) {
-            return apiProduct.getVisibility();
-        } else {
-            return api.getVisibility();
-        }
+        return isAPIProduct ? apiProduct.getVisibility() : api.getVisibility();
     }
 }
