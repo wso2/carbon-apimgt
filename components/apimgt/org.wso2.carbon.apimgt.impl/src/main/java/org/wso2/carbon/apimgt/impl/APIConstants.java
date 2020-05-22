@@ -362,6 +362,9 @@ public final class APIConstants {
     //This constant is used in Json schema validator
     public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
 
+    // This constant used in Endpoint Registry Entries
+    public static final String API_OVERVIEW_ENPOINT_REGISTRY_ENTRY = "overview_endpointRegistryEntry";
+
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME = "overview_name";
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
@@ -1396,6 +1399,8 @@ public final class APIConstants {
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
+    public static final String ENDPOINT_REGISTRY_TYPE = "Registry";
+    public static final String ENDPOINT_REGISTRY_ENTRY_ID = "endpoint_id";
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
