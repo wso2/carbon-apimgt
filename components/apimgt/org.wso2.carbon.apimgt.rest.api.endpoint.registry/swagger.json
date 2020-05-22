@@ -810,7 +810,11 @@
             "type" : "string",
             "example" : "Pizzashack-Endpoint"
           },
-          "serviceUrl" : {
+          "productionServiceUrl" : {
+            "type" : "string",
+            "example" : "http://localhost/pizzashack"
+          },
+          "sandboxServiceUrl" : {
             "type" : "string",
             "example" : "http://localhost/pizzashack"
           },

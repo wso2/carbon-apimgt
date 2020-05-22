@@ -19,8 +19,6 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,7 +55,6 @@ import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -15075,7 +15072,10 @@ public class ApiMgtDAO {
                     endpointRegistryEntry.setServiceType(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_TYPE));
                     endpointRegistryEntry.setServiceCategory(rs.getString(EndpointRegistryConstants.
                             COLUMN_SERVICE_CATEGORY));
-                    endpointRegistryEntry.setServiceURL(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_URL));
+                    endpointRegistryEntry.setProductionServiceURL(rs.getString(EndpointRegistryConstants.
+                            COLUMN_PRODUCTION_SERVICE_URL));
+                    endpointRegistryEntry.setSandboxServiceUrl(rs.getString(EndpointRegistryConstants.
+                            COLUMN_SANDBOX_SERVICE_URL));
                     endpointRegistryEntry.setMetaData(rs.getString(EndpointRegistryConstants.COLUMN_METADATA));
                     endpointRegistryEntry.setEndpointDefinition(
                             rs.getBinaryStream(EndpointRegistryConstants.COLUMN_ENDPOINT_DEFINITION));
@@ -15136,7 +15136,10 @@ public class ApiMgtDAO {
                     EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
                     endpointRegistryEntry.setEntryId(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
                     endpointRegistryEntry.setName(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_NAME));
-                    endpointRegistryEntry.setServiceURL(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_URL));
+                    endpointRegistryEntry.setProductionServiceURL(rs.getString(EndpointRegistryConstants.
+                            COLUMN_PRODUCTION_SERVICE_URL));
+                    endpointRegistryEntry.setSandboxServiceUrl(rs.getString(EndpointRegistryConstants.
+                            COLUMN_SANDBOX_SERVICE_URL));
                     endpointRegistryEntry.setDefinitionType(rs.getString(EndpointRegistryConstants.
                             COLUMN_DEFINITION_TYPE));
                     endpointRegistryEntry.setDefinitionURL(rs.getString(EndpointRegistryConstants.
@@ -15180,19 +15183,20 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             ps.setString(1, uuid);
             ps.setString(2, registryEntry.getName());
-            ps.setString(3, registryEntry.getServiceURL());
-            ps.setString(4, registryEntry.getDefinitionType());
-            ps.setString(5, registryEntry.getDefinitionURL());
-            ps.setString(6, registryEntry.getMetaData());
-            ps.setString(7, registryEntry.getServiceType());
-            ps.setString(8, registryEntry.getServiceCategory());
-            ps.setBlob(9, registryEntry.getEndpointDefinition());
-            ps.setInt(10, registryEntry.getRegistryId());
-            ps.setString(11, username);
+            ps.setString(3, registryEntry.getProductionServiceURL());
+            ps.setString(4, registryEntry.getSandboxServiceUrl());
+            ps.setString(5, registryEntry.getDefinitionType());
+            ps.setString(6, registryEntry.getDefinitionURL());
+            ps.setString(7, registryEntry.getMetaData());
+            ps.setString(8, registryEntry.getServiceType());
+            ps.setString(9, registryEntry.getServiceCategory());
+            ps.setBlob(10, registryEntry.getEndpointDefinition());
+            ps.setInt(11, registryEntry.getRegistryId());
             ps.setString(12, username);
+            ps.setString(13, username);
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            ps.setTimestamp(13, timestamp);
             ps.setTimestamp(14, timestamp);
+            ps.setTimestamp(15, timestamp);
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -15215,16 +15219,17 @@ public class ApiMgtDAO {
              PreparedStatement ps = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
             ps.setString(1, registryEntry.getName());
-            ps.setString(2, registryEntry.getServiceURL());
-            ps.setString(3, registryEntry.getDefinitionType());
-            ps.setString(4, registryEntry.getDefinitionURL());
-            ps.setString(5, registryEntry.getMetaData());
-            ps.setString(6, registryEntry.getServiceType());
-            ps.setString(7, registryEntry.getServiceCategory());
-            ps.setBlob(8, registryEntry.getEndpointDefinition());
-            ps.setString(9, username);
-            ps.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
-            ps.setString(11, registryEntry.getEntryId());
+            ps.setString(2, registryEntry.getProductionServiceURL());
+            ps.setString(3, registryEntry.getSandboxServiceUrl());
+            ps.setString(4, registryEntry.getDefinitionType());
+            ps.setString(5, registryEntry.getDefinitionURL());
+            ps.setString(6, registryEntry.getMetaData());
+            ps.setString(7, registryEntry.getServiceType());
+            ps.setString(8, registryEntry.getServiceCategory());
+            ps.setBlob(9, registryEntry.getEndpointDefinition());
+            ps.setString(10, username);
+            ps.setTimestamp(11, new Timestamp(System.currentTimeMillis()));
+            ps.setString(12, registryEntry.getEntryId());
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
