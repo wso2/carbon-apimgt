@@ -1407,31 +1407,37 @@ public class SQLConstants {
             "   API_ID ";
 
     public static final String ADD_ENDPOINT_REGISTRY_SQL =
-            "INSERT INTO ENDPOINT_REG (UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, REG_OWNER, READ_ROLE," +
-                    " WRITE_ROLE) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO ENDPOINT_REG (UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, READ_ROLE, WRITE_ROLE, " +
+                    "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public static final String UPDATE_ENDPOINT_REGISTRY_SQL =
             "UPDATE ENDPOINT_REG " +
                     "SET REG_NAME = ?, " +
                     "REG_TYPE = ?, " +
                     "REG_MODE = ?, " +
-                    "READ_ROLE = ? ," +
-                    "WRITE_ROLE = ? " +
+                    "READ_ROLE = ?, " +
+                    "WRITE_ROLE = ?, " +
+                    "UPDATED_BY = ?, " +
+                    "UPDATED_TIME = ? " +
                     "WHERE UUID = ?";
 
     public static final String DELETE_ENDPOINT_REGISTRY_SQL = "DELETE FROM ENDPOINT_REG WHERE UUID = ?";
 
     public static final String GET_ENDPOINT_REGISTRY_BY_UUID =
-            " SELECT UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, REG_OWNER, READ_ROLE, WRITE_ROLE, ID FROM " +
+            " SELECT UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, READ_ROLE, WRITE_ROLE, ID, " +
+                    "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME FROM " +
                     "ENDPOINT_REG WHERE UUID = ? AND TENANT_ID = ?";
 
     public static final String GET_ENDPOINT_REGISTRY_ENTRY_BY_UUID =
             " SELECT UUID, ENTRY_NAME, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, SERVICE_CATEGORY, SERVICE_URL," +
-                    " ENDPOINT_DEFINITION, METADATA FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
+                    " ENDPOINT_DEFINITION, METADATA, CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME " +
+                    "FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
 
     public static final String ADD_ENDPOINT_REGISTRY_ENTRY_SQL =
             "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, METADATA," +
-                    "SERVICE_TYPE, SERVICE_CATEGORY, ENDPOINT_DEFINITION, REG_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    "SERVICE_TYPE, SERVICE_CATEGORY, ENDPOINT_DEFINITION, REG_ID, " +
+                    "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public static final String UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL =
             "UPDATE ENDPOINT_REG_ENTRY SET " +
@@ -1442,7 +1448,9 @@ public class SQLConstants {
                     "METADATA = ?, " +
                     "SERVICE_TYPE = ?, " +
                     "SERVICE_CATEGORY = ?, " +
-                    "ENDPOINT_DEFINITION = ? " +
+                    "ENDPOINT_DEFINITION = ?, " +
+                    "UPDATED_BY = ?, " +
+                    "UPDATED_TIME = ? " +
                     "WHERE UUID = ?";
 
     public static final String DELETE_ENDPOINT_REGISTRY_ENTRY_SQL = "DELETE FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";

@@ -14594,10 +14594,15 @@ public class ApiMgtDAO {
             ps.setString(3, endpointRegistry.getType());
             ps.setString(4, endpointRegistry.getMode());
             ps.setInt(5, tenantID);
-            ps.setString(6, endpointRegistry.getOwner());
             // Need to update the role names
+            ps.setString(6, "");
             ps.setString(7, "");
-            ps.setString(8, "");
+            ps.setString(8, endpointRegistry.getOwner());
+            ps.setString(9, endpointRegistry.getOwner());
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            ps.setTimestamp(10, timestamp);
+            ps.setTimestamp(11, timestamp);
+
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -14611,10 +14616,11 @@ public class ApiMgtDAO {
      *
      * @param registryId       uuid of the endpoint registry
      * @param endpointRegistry EndpointRegistryInfo object with updated details
+     * @param username         logged in username
      * @throws APIManagementException if unable to update the endpoint registry
      */
-    public void updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistry) throws
-            APIManagementException {
+    public void updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistry, String username)
+            throws APIManagementException {
 
         String query = SQLConstants.UPDATE_ENDPOINT_REGISTRY_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -14626,7 +14632,9 @@ public class ApiMgtDAO {
             // Need to update the role names
             ps.setString(4, "");
             ps.setString(5, "");
-            ps.setString(6, registryId);
+            ps.setString(6, username);
+            ps.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            ps.setString(8, registryId);
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -14658,8 +14666,18 @@ public class ApiMgtDAO {
                     endpointRegistry.setName(rs.getString(EndpointRegistryConstants.COLUMN_REG_NAME));
                     endpointRegistry.setType(rs.getString(EndpointRegistryConstants.COLUMN_REG_TYPE));
                     endpointRegistry.setMode(rs.getString(EndpointRegistryConstants.COLUMN_REG_MODE));
-                    endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_REG_OWNER));
                     endpointRegistry.setRegistryId(rs.getInt(EndpointRegistryConstants.COLUMN_ID));
+                    endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
+                    endpointRegistry.setUpdatedBy(rs.getString(EndpointRegistryConstants.COLUMN_UPDATED_BY));
+
+                    Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_TIME);
+                    endpointRegistry.setCreatedTime(
+                            createdTime == null ? null : String.valueOf(createdTime.getTime()));
+
+                    Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_TIME);
+                    endpointRegistry.setLastUpdatedTime(
+                            updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
+
                     return endpointRegistry;
                 }
             }
@@ -14834,7 +14852,17 @@ public class ApiMgtDAO {
                     endpointRegistry.setName(rs.getString(EndpointRegistryConstants.COLUMN_REG_NAME));
                     endpointRegistry.setType(rs.getString(EndpointRegistryConstants.COLUMN_REG_TYPE));
                     endpointRegistry.setMode(rs.getString(EndpointRegistryConstants.COLUMN_REG_MODE));
-                    endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_REG_OWNER));
+                    endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
+                    endpointRegistry.setUpdatedBy(rs.getString(EndpointRegistryConstants.COLUMN_UPDATED_BY));
+
+                    Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_TIME);
+                    endpointRegistry.setCreatedTime(
+                            createdTime == null ? null : String.valueOf(createdTime.getTime()));
+
+                    Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_TIME);
+                    endpointRegistry.setLastUpdatedTime(
+                            updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
+
                     endpointRegistryInfoList.add(endpointRegistry);
                 }
             }
@@ -15051,6 +15079,16 @@ public class ApiMgtDAO {
                     endpointRegistryEntry.setMetaData(rs.getString(EndpointRegistryConstants.COLUMN_METADATA));
                     endpointRegistryEntry.setEndpointDefinition(
                             rs.getBinaryStream(EndpointRegistryConstants.COLUMN_ENDPOINT_DEFINITION));
+                    endpointRegistryEntry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
+                    endpointRegistryEntry.setUpdatedBy(rs.getString(EndpointRegistryConstants.COLUMN_UPDATED_BY));
+
+                    Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_TIME);
+                    endpointRegistryEntry.setCreatedTime(
+                            createdTime == null ? null : String.valueOf(createdTime.getTime()));
+
+                    Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_TIME);
+                    endpointRegistryEntry.setLastUpdatedTime(
+                            updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
                     return endpointRegistryEntry;
                 }
             }
@@ -15107,6 +15145,16 @@ public class ApiMgtDAO {
                     endpointRegistryEntry.setServiceCategory(rs.getString(EndpointRegistryConstants
                             .COLUMN_SERVICE_CATEGORY));
                     endpointRegistryEntry.setMetaData(rs.getString(EndpointRegistryConstants.COLUMN_METADATA));
+                    endpointRegistryEntry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
+                    endpointRegistryEntry.setUpdatedBy(rs.getString(EndpointRegistryConstants.COLUMN_UPDATED_BY));
+
+                    Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_TIME);
+                    endpointRegistryEntry.setCreatedTime(
+                            createdTime == null ? null : String.valueOf(createdTime.getTime()));
+
+                    Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_TIME);
+                    endpointRegistryEntry.setLastUpdatedTime(
+                            updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
                     endpointRegistryEntryList.add(endpointRegistryEntry);
                 }
             }
@@ -15120,9 +15168,11 @@ public class ApiMgtDAO {
      * Add a new endpoint registry entry
      *
      * @param registryEntry EndpointRegistryEntry
+     * @param username      logged in username
      * @return registryId
      */
-    public String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException {
+    public String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry, String username)
+            throws APIManagementException {
         String query = SQLConstants.ADD_ENDPOINT_REGISTRY_ENTRY_SQL;
         String uuid = UUID.randomUUID().toString();
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -15138,6 +15188,11 @@ public class ApiMgtDAO {
             ps.setString(8, registryEntry.getServiceCategory());
             ps.setBlob(9, registryEntry.getEndpointDefinition());
             ps.setInt(10, registryEntry.getRegistryId());
+            ps.setString(11, username);
+            ps.setString(12, username);
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            ps.setTimestamp(13, timestamp);
+            ps.setTimestamp(14, timestamp);
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -15150,9 +15205,11 @@ public class ApiMgtDAO {
      * Updates Registry Entry
      *
      * @param registryEntry EndpointRegistryEntry
+     * @param username      logged in username
      * @throws APIManagementException if failed to update EndpointRegistryEntry
      */
-    public void updateEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException {
+    public void updateEndpointRegistryEntry(EndpointRegistryEntry registryEntry, String username)
+            throws APIManagementException {
         String query = SQLConstants.UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
@@ -15165,7 +15222,9 @@ public class ApiMgtDAO {
             ps.setString(6, registryEntry.getServiceType());
             ps.setString(7, registryEntry.getServiceCategory());
             ps.setBlob(8, registryEntry.getEndpointDefinition());
-            ps.setString(9, registryEntry.getEntryId());
+            ps.setString(9, username);
+            ps.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
+            ps.setString(11, registryEntry.getEntryId());
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {

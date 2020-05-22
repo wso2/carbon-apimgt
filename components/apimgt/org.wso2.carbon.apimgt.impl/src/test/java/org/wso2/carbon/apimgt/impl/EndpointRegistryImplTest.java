@@ -116,7 +116,8 @@ public class EndpointRegistryImplTest {
 
         endpointRegistry.updateEndpointRegistry(endpointRegistryInfo.getUuid(), endpointRegistryInfo.getName(),
                 endpointRegistryInfo);
-        Mockito.verify(apiMgtDAO).updateEndpointRegistry(endpointRegistryInfo.getUuid(), endpointRegistryInfo);
+        Mockito.verify(apiMgtDAO).updateEndpointRegistry(endpointRegistryInfo.getUuid(), endpointRegistryInfo,
+                ADMIN_USERNAME);
     }
 
     @Test(expected = APIMgtResourceAlreadyExistsException.class)
@@ -278,7 +279,7 @@ public class EndpointRegistryImplTest {
         endpointRegistryEntry.setDefinitionType("OAS");
         endpointRegistryEntry.setEndpointDefinition(new ByteArrayInputStream(new byte[]{}));
 
-        Mockito.when(apiMgtDAO.addEndpointRegistryEntry(endpointRegistryEntry))
+        Mockito.when(apiMgtDAO.addEndpointRegistryEntry(endpointRegistryEntry, ADMIN_USERNAME))
                 .thenReturn(endpointRegistryEntry.getEntryId());
 
         String entryUUID = endpointRegistry.addEndpointRegistryEntry(endpointRegistryEntry);
@@ -318,7 +319,7 @@ public class EndpointRegistryImplTest {
                 .thenReturn(false);
 
         endpointRegistry.updateEndpointRegistryEntry(endpointRegistryEntryOld.getName(), endpointRegistryEntryNew);
-        Mockito.verify(apiMgtDAO).updateEndpointRegistryEntry(endpointRegistryEntryNew);
+        Mockito.verify(apiMgtDAO).updateEndpointRegistryEntry(endpointRegistryEntryNew, ADMIN_USERNAME);
     }
 
     @Test(expected = APIMgtResourceAlreadyExistsException.class)
