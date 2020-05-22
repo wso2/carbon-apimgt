@@ -14670,11 +14670,11 @@ public class ApiMgtDAO {
                     endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
                     endpointRegistry.setUpdatedBy(rs.getString(EndpointRegistryConstants.COLUMN_UPDATED_BY));
 
-                    Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_AT);
+                    Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_TIME);
                     endpointRegistry.setCreatedTime(
                             createdTime == null ? null : String.valueOf(createdTime.getTime()));
 
-                    Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_AT);
+                    Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_TIME);
                     endpointRegistry.setLastUpdatedTime(
                             updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
 
@@ -14855,11 +14855,11 @@ public class ApiMgtDAO {
                     endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
                     endpointRegistry.setUpdatedBy(rs.getString(EndpointRegistryConstants.COLUMN_UPDATED_BY));
 
-                    Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_AT);
+                    Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_TIME);
                     endpointRegistry.setCreatedTime(
                             createdTime == null ? null : String.valueOf(createdTime.getTime()));
 
-                    Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_AT);
+                    Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_TIME);
                     endpointRegistry.setLastUpdatedTime(
                             updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
 
@@ -15082,11 +15082,11 @@ public class ApiMgtDAO {
                     endpointRegistryEntry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
                     endpointRegistryEntry.setUpdatedBy(rs.getString(EndpointRegistryConstants.COLUMN_UPDATED_BY));
 
-                    Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_AT);
+                    Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_TIME);
                     endpointRegistryEntry.setCreatedTime(
                             createdTime == null ? null : String.valueOf(createdTime.getTime()));
 
-                    Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_AT);
+                    Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_TIME);
                     endpointRegistryEntry.setLastUpdatedTime(
                             updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
                     return endpointRegistryEntry;
@@ -15148,11 +15148,11 @@ public class ApiMgtDAO {
                     endpointRegistryEntry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
                     endpointRegistryEntry.setUpdatedBy(rs.getString(EndpointRegistryConstants.COLUMN_UPDATED_BY));
 
-                    Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_AT);
+                    Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_TIME);
                     endpointRegistryEntry.setCreatedTime(
                             createdTime == null ? null : String.valueOf(createdTime.getTime()));
 
-                    Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_AT);
+                    Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_TIME);
                     endpointRegistryEntry.setLastUpdatedTime(
                             updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
                     endpointRegistryEntryList.add(endpointRegistryEntry);

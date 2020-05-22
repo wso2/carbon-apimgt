@@ -240,8 +240,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   WRITE_ROLE, " +
                     "   CREATED_BY, " +
                     "   UPDATED_BY, " +
-                    "   CREATED_AT, " +
-                    "   UPDATED_AT " +
+                    "   CREATED_TIME, " +
+                    "   UPDATED_TIME " +
                     " FROM " +
                     "   ENDPOINT_REG " +
                     " WHERE " +
@@ -261,8 +261,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.SERVICE_CATEGORY, " +
                     "   E.CREATED_BY, " +
                     "   E.UPDATED_BY, " +
-                    "   E.CREATED_AT, " +
-                    "   E.UPDATED_AT " +
+                    "   E.CREATED_TIME, " +
+                    "   E.UPDATED_TIME " +
                     " FROM " +
                     "   ENDPOINT_REG_ENTRY AS E, " +
                     "   ENDPOINT_REG AS R " +

@@ -61,8 +61,8 @@ public class EndpointRegistryConstants {
 
     public static final String COLUMN_UPDATED_BY = "UPDATED_BY";
 
-    public static final String COLUMN_CREATED_AT = "CREATED_AT";
+    public static final String COLUMN_CREATED_TIME = "CREATED_TIME";
 
-    public static final String COLUMN_UPDATED_AT = "UPDATED_AT";
+    public static final String COLUMN_UPDATED_TIME = "UPDATED_TIME";
 
 }
