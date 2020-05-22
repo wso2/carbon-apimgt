@@ -156,14 +156,12 @@ public class APIAndAPIProductCommonUtil {
             for (Documentation doc : docList) {
                 String sourceType = doc.getSourceType().name();
                 String resourcePath = null;
-                String localFilePath;
                 String localFileName = null;
-                String localDocDirectoryPath = docDirectoryPath;
                 if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
                     localFileName = doc.getFilePath().substring(
                             doc.getFilePath().lastIndexOf(RegistryConstants.PATH_SEPARATOR) + 1);
                     resourcePath = APIUtil.getDocumentationFilePath(identifier, localFileName);
-                    localDocDirectoryPath += File.separator + APIImportExportConstants.FILE_DOCUMENT_DIRECTORY;
+                    docDirectoryPath += File.separator + APIImportExportConstants.FILE_DOCUMENT_DIRECTORY;
                     doc.setFilePath(localFileName);
                 } else if (Documentation.DocumentSourceType.INLINE.toString().equalsIgnoreCase(sourceType)
                         || Documentation.DocumentSourceType.MARKDOWN.toString().equalsIgnoreCase(sourceType)) {
@@ -172,15 +170,15 @@ public class APIAndAPIProductCommonUtil {
                     localFileName = doc.getName();
                     resourcePath = APIUtil.getAPIOrAPIProductDocPath(identifier) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
                             + RegistryConstants.PATH_SEPARATOR + localFileName;
-                    localDocDirectoryPath += File.separator + APIImportExportConstants.INLINE_DOCUMENT_DIRECTORY;
+                    docDirectoryPath += File.separator + APIImportExportConstants.INLINE_DOCUMENT_DIRECTORY;
                 }
 
                 if (resourcePath != null) {
                     //Write content separately for Inline/Markdown/File type documentations only
                     //check whether resource exists in the registry
                     if (registry.resourceExists(resourcePath)) {
-                        CommonUtil.createDirectory(archivePath + localDocDirectoryPath);
-                        localFilePath = localDocDirectoryPath + File.separator + localFileName;
+                        CommonUtil.createDirectory(archivePath + docDirectoryPath);
+                        String localFilePath = docDirectoryPath + File.separator + localFileName;
                         Resource docFile = registry.get(resourcePath);
                         try (OutputStream outputStream = new FileOutputStream(archivePath + localFilePath);
                              InputStream fileInputStream = docFile.getContentStream()) {
@@ -281,9 +279,8 @@ public class APIAndAPIProductCommonUtil {
 
                 switch (exportFormat) {
                     case YAML:
-                        String yaml = CommonUtil.jsonToYaml(element);
                         CommonUtil.writeFile(archivePath + APIImportExportConstants.YAML_CLIENT_CERTIFICATE_FILE,
-                                yaml);
+                                CommonUtil.jsonToYaml(element));
                         break;
                     case JSON:
                         CommonUtil.writeFile(archivePath + APIImportExportConstants.JSON_CLIENT_CERTIFICATE_FILE,

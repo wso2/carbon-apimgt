@@ -76,11 +76,15 @@ public class APIImportExportManager {
         if (!apiTypeWrapper.isAPIProduct()) {
             APIIdentifier apiIdentifier = apiTypeWrapper.getApi().getId();
             archiveBasePath = exportAPIArtifacts(apiTypeWrapper.getApi(), isStatusPreserved, exportFormat);
-            log.info("API" + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion() + " exported successfully");
+            if (log.isDebugEnabled()) {
+                log.debug("API" + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion() + " exported successfully");
+            }
         } else {
             APIProductIdentifier apiProductIdentifier = apiTypeWrapper.getApiProduct().getId();
             archiveBasePath = exportAPIProductArtifacts(apiTypeWrapper.getApiProduct(), isStatusPreserved, exportFormat);
-            log.info("API Product" + apiProductIdentifier.getName() + "-" + apiProductIdentifier.getVersion() + " exported successfully");
+            if (log.isDebugEnabled()) {
+                log.info("API Product" + apiProductIdentifier.getName() + "-" + apiProductIdentifier.getVersion() + " exported successfully");
+            }
         }
         CommonUtil.archiveDirectory(archiveBasePath);
         FileUtils.deleteQuietly(new File(archiveBasePath));

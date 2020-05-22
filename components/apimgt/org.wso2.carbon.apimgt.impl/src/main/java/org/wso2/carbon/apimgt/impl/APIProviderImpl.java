@@ -7425,9 +7425,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // legitimate apis
         List<APIProductResource> validResources = new ArrayList<APIProductResource>();
         for (APIProductResource apiProductResource : resources) {
-            API api = null;
-            APIProductIdentifier productIdentifier = apiProductResource.getProductIdentifier();
-            if (productIdentifier != null) {
+            API api;
+            if (apiProductResource.getProductIdentifier() != null) {
                 APIIdentifier productAPIIdentifier = apiProductResource.getApiIdentifier();
                 String emailReplacedAPIProviderName = APIUtil.replaceEmailDomain(productAPIIdentifier.getProviderName());
                 APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
