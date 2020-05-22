@@ -51,7 +51,7 @@
         <field type="text">
             <name>Redirect URL</name>
         </field>
-	    <field type="text">
+	<field type="text">
             <name>Advertise Only</name>
         </field>
         <field type="text">
@@ -60,7 +60,7 @@
         <field type="text-area">
             <name>Description</name>
         </field>
-	    <field type="text">
+	<field type="text">
             <name>Endpoint Secured</name>
         </field>
         <field type="text">
@@ -69,10 +69,10 @@
         <field type="text">
             <name>Implementation</name>
         </field>
- 	    <field type="text-area">
+ 	<field type="text-area">
             <name>Endpoint Config</name>
         </field>
-	    <field type="text" url="true">
+	<field type="text" url="true">
             <name>Endpoint Username</name>
         </field>
 		<field type="text" url="true">
@@ -81,13 +81,13 @@
         <field type="text">
             <name>Endpoint Registry Entry</name>
         </field>
-	    <field type="text">
+	<field type="text">
             <name>InSequence</name>
         </field>
         <field type="text">
             <name>OutSequence</name>
         </field>
-	    <field type="text">
+	<field type="text">
             <name>FaultSequence</name>
         </field>
         <field type="text">
