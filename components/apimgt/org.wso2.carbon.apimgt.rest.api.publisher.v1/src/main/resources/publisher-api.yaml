@@ -7642,6 +7642,12 @@ definitions:
               }
             }
 
+          `Endpoint from Endpoint Registry`
+            {
+              "endpoint_type": "Registry",
+              "endpoint_id": "{registry-name:entry-name:version}",
+            }
+
         example:
           {
             "endpoint_type": "http",

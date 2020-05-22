@@ -255,6 +255,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                         endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
                         body.setEndpointConfig(endpointConfig);
                     }
+                } else if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig
+                        .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
+                        !endpointConfig.containsKey(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID)){
+                    RestApiUtil.handleBadRequest("Parameter endpoint_id should be provided", log);
                 }
             }
 
@@ -576,6 +580,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                             body.setEndpointConfig(endpointConfig);
                         }
                     }
+                } else if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig
+                        .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
+                        !endpointConfig.containsKey(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID)){
+                    RestApiUtil.handleBadRequest("Parameter endpoint_id should be provided", log);
                 }
             }
 
