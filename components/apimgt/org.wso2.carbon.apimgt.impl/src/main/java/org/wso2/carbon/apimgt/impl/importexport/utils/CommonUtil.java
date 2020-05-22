@@ -66,7 +66,6 @@ public class CommonUtil {
             File file = new File(path);
             if (!file.exists() && !file.mkdirs()) {
                 String errorMessage = "Error while creating directory : " + path;
-                log.error(errorMessage);
                 throw new APIImportExportException(errorMessage);
             }
         }
@@ -147,7 +146,6 @@ public class CommonUtil {
             }
         } catch (IOException e) {
             String errorMessage = "I/O error while adding files to archive";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -177,7 +175,6 @@ public class CommonUtil {
             zipOutputStream.closeEntry();
         } catch (IOException e) {
             String errorMessage = "I/O error while writing files to archive";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -195,7 +192,6 @@ public class CommonUtil {
             IOUtils.copy(new StringReader(content), writer);
         } catch (IOException e) {
             String errorMessage = "I/O error while writing to file: " + path;
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -269,7 +265,6 @@ public class CommonUtil {
             }
         } catch (IOException e) {
             String errorMessage = "Error in transferring files.";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -310,7 +305,6 @@ public class CommonUtil {
                 if (!canonicalizedDestinationFilePath.startsWith(new File(destination).getCanonicalPath())) {
                     String errorMessage = "Attempt to upload invalid zip archive with file at " + currentEntry +
                             ". File path is outside target directory";
-                    log.error(errorMessage);
                     throw new APIImportExportException(errorMessage);
                 }
 
@@ -331,7 +325,6 @@ public class CommonUtil {
             return archiveName;
         } catch (IOException e) {
             String errorMessage = "Failed to extract the archive (zip) file. ";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }

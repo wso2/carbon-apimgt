@@ -233,7 +233,6 @@ public final class APIImportUtil {
                 if (lifecycleAction == null) {
                     String errMsg = "Error occurred while importing the API. " + targetStatus + " is not reachable from "
                             + currentStatus;
-                    log.error(errMsg);
                     throw new APIImportExportException(errMsg);
                 }
             }
@@ -292,7 +291,6 @@ public final class APIImportUtil {
                             String errorMessage =
                                     "Error in adding API. Scope " + scope.getKey() +
                                             " is already assigned by another API.";
-                            log.error(errorMessage);
                             throw new APIImportExportException(errorMessage);
                         }
                     }
@@ -336,15 +334,12 @@ public final class APIImportUtil {
         } catch (IOException e) {
             //Error is logged and APIImportExportException is thrown because adding API and swagger are mandatory steps
             String errorMessage = "Error while reading API meta information from path: " + pathToArchive;
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API: " + importedApi.getId().getApiName();
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (RegistryException e) {
             String errorMessage = "Error while getting governance registry for tenant: " + tenantId;
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing API: ";
@@ -352,7 +347,6 @@ public final class APIImportUtil {
                 errorMessage += importedApi.getId().getApiName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION
                         + ": " + importedApi.getId().getVersion();
             }
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -530,7 +524,6 @@ public final class APIImportUtil {
         } catch (APIManagementException e) {
             String errorMessage = "Error in adding Swagger definition for the API: " + apiId.getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiId.getVersion();
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -589,7 +582,6 @@ public final class APIImportUtil {
         } catch (IOException e) {
             String errorMessage = "Error in reading " + APIImportExportConstants.YAML_ENDPOINTS_CERTIFICATE_FILE
                     + " file";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }

@@ -166,11 +166,9 @@ public class APIExportUtil {
         } catch (APIManagementException e) {
             String errorMessage = "Unable to retrieve API Documentation for API: " + apiIDToReturn.getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + " : " + apiIDToReturn.getVersion();
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (RegistryException e) {
             String errorMessage = "Error while getting governance registry for tenant: " + tenantId;
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -240,10 +238,8 @@ public class APIExportUtil {
                 }
             }
         } catch (IOException e) {
-            log.error("I/O error while  writing API SOAP to REST logic to file", e);
             throw new APIImportExportException("I/O error while writing API SOAP to REST logic to file", e);
         } catch (RegistryException e) {
-            log.error("Error while retrieving API SOAP to REST logic ", e);
             throw new APIImportExportException("Error while retrieving SOAP to REST logic", e);
         } finally {
             IOUtils.closeQuietly(inputStream);
@@ -332,12 +328,10 @@ public class APIExportUtil {
             String errorMessage = "I/O error while writing API documentation to file for API: "
                     + apiIdentifier.getApiName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
                     + apiIdentifier.getVersion();
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (RegistryException e) {
             String errorMessage = "Error while retrieving documentation for API: " + apiIdentifier.getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiIdentifier.getVersion();
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -373,11 +367,9 @@ public class APIExportUtil {
             }
         } catch (IOException e) {
             String errorMessage = "I/O error while writing WSDL: " + wsdlPath + " to file";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (RegistryException e) {
             String errorMessage = "Error while retrieving WSDL: " + wsdlPath + " to file";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -508,12 +500,10 @@ public class APIExportUtil {
             }
         } catch (RegistryException e) {
             String errorMessage = "Error while retrieving sequence: " + sequenceName + " from the path: " + regPath;
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (Exception e) {
             //APIUtil.buildOMElement() throws a generic exception
             String errorMessage = "Error while reading content for sequence: " + sequenceName + " from the registry";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
         return sequenceDetails;
@@ -544,16 +534,13 @@ public class APIExportUtil {
                 }
             } catch (IOException e) {
                 String errorMessage = "Unable to find file: " + exportedSequenceFile;
-                log.error(errorMessage, e);
                 throw new APIImportExportException(errorMessage, e);
             } catch (XMLStreamException e) {
                 String errorMessage = "Error while processing XML stream ";
-                log.error(errorMessage, e);
                 throw new APIImportExportException(errorMessage, e);
             }
         } else {
             String errorMessage = "Error while writing sequence of API: " + apiIdentifier.getApiName() + " to file.";
-            log.error(errorMessage);
             throw new APIImportExportException(errorMessage);
         }
     }
@@ -643,12 +630,10 @@ public class APIExportUtil {
             String errorMessage = "Error while retrieving Swagger definition for API: "
                     + apiToReturn.getId().getApiName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
                     + apiToReturn.getId().getVersion();
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (IOException e) {
             String errorMessage = "Error while retrieving saving as YAML for API: " + apiToReturn.getId().getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiToReturn.getId().getVersion();
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -738,7 +723,6 @@ public class APIExportUtil {
         } catch (IOException e) {
             String errorMessage = "Error while retrieving saving endpoint certificate details for API: "
                     + api.getId().getApiName() + " as YAML";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -810,17 +794,14 @@ public class APIExportUtil {
         } catch (UserStoreException e) {
             String msg = "UserStoreException thrown when getting API tenant config from registry while reading " +
                     "ExposeEndpointPassword config";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
             String msg = "RegistryException thrown when getting API tenant config from registry while reading " +
                     "ExposeEndpointPassword config";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (ParseException e) {
             String msg = "ParseException thrown when parsing API tenant config from registry while reading " +
                     "ExposeEndpointPassword config";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return false;

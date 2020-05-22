@@ -203,11 +203,9 @@ public abstract class AbstractAPIManager implements APIManager {
             registerCustomQueries(configRegistry, username);
         } catch (RegistryException e) {
             String msg = "Error while obtaining registry objects";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error while getting user registry for user:" + username;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
 
@@ -236,7 +234,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
             } catch (UserStoreException e) {
                 String msg = "Error while setting the permissions";
-                log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
         } else if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -248,7 +245,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
             } catch (org.wso2.carbon.user.api.UserStoreException e) {
                 String msg = "Error while setting the permissions";
-                log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
 
@@ -382,7 +378,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Failed to get APIs from the registry";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
             if (isTenantFlowStarted) {
@@ -452,11 +447,9 @@ public abstract class AbstractAPIManager implements APIManager {
 
         } catch (RegistryException e) {
             String msg = "Failed to get API from : " + apiPath;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get API from : " + apiPath;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -524,16 +517,13 @@ public abstract class AbstractAPIManager implements APIManager {
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                log.error(msg);
                 throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (RegistryException e) {
             String msg = "Failed to get API";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get API";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
             if (tenantFlowStarted) {
@@ -658,16 +648,13 @@ public abstract class AbstractAPIManager implements APIManager {
                 return getApiInformation(registry, apiArtifact);
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                log.error(msg);
                 throw new APIMgtResourceNotFoundException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, uuid));
             }
         } catch (RegistryException e) {
             String msg = "Failed to get API with uuid " + uuid;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get tenant Id while getting API with uuid " + uuid;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -706,12 +693,10 @@ public abstract class AbstractAPIManager implements APIManager {
                 return getApiInformation(registry,apiArtifact);
             } else {
                 String msg = "Failed to get registry from api identifier: " + identifier;
-                log.error(msg);
                 throw new APIManagementException(msg);
             }
         } catch (RegistryException e) {
             String msg = "Failed to get API from : " + apiPath;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
             if (tenantFlowStarted) {
@@ -766,11 +751,9 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Failed to get API from registry on path of : " + apiPath;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get API from registry on path of : " + apiPath;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return passRegistry;
@@ -790,7 +773,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
         } catch (RegistryException e) {
             String msg = "Failed to get API from : " + apiPath;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -803,7 +785,6 @@ public abstract class AbstractAPIManager implements APIManager {
             return registry.resourceExists(path);
         } catch (RegistryException e) {
             String msg = "Failed to check availability of api :" + path;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -816,7 +797,6 @@ public abstract class AbstractAPIManager implements APIManager {
             return registry.resourceExists(path);
         } catch (RegistryException e) {
             String msg = "Failed to check availability of API Product :" + path;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -843,7 +823,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Failed to get versions for API: " + apiName;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return versionSet;
@@ -907,7 +886,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Failed to get global mediation policies";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return mediationList;
@@ -989,7 +967,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Failed to get wsdl list";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return wsdlList;
@@ -1058,7 +1035,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Error while accessing registry objects";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return null;
@@ -1092,7 +1068,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             } catch (RegistryException e) {
                 String msg = "Failed to delete wsdl " + wsdlResourcePath;
-                log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
         }
@@ -1145,7 +1120,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException | org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error while getting wsdl file from the registry for API: " + apiId.toString();
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
             if (isTenantFlowStarted) {
@@ -1170,7 +1144,6 @@ public abstract class AbstractAPIManager implements APIManager {
             registry.put(resourcePath, resource);
         } catch (RegistryException e) {
             String msg = "Error while uploading wsdl to from the registry ";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -1189,7 +1162,6 @@ public abstract class AbstractAPIManager implements APIManager {
             registry.put(resourcePath,resource);
         } catch (RegistryException e) {
             String msg = "Error while updating the existing wsdl ";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -1217,7 +1189,6 @@ public abstract class AbstractAPIManager implements APIManager {
             schema = schemaDef.getGraphqlSchemaDefinition(apiId, registryType);
         } catch (org.wso2.carbon.user.api.UserStoreException | RegistryException e) {
             String msg = "Failed to get graphql schema definition of Graphql API : " + apiId;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return schema;
@@ -1253,11 +1224,9 @@ public abstract class AbstractAPIManager implements APIManager {
             swaggerDoc = OASParserUtil.getAPIDefinition(apiId, registryType);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get swagger documentation of API : " + apiId;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (RegistryException e) {
             String msg = "Failed to get swagger documentation of API : " + apiId;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
             if (tenantFlowStarted) {
@@ -1288,7 +1257,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Error while adding the resource to the registry";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -1312,7 +1280,6 @@ public abstract class AbstractAPIManager implements APIManager {
             return registry.resourceExists(docPath);
         } catch (RegistryException e) {
             String msg = "Failed to check existence of the document :" + docPath;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -1363,7 +1330,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
         } catch (RegistryException e) {
             String msg = "Failed to get documentations for api/product " + id.getName();
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return documentationList;
@@ -1395,7 +1361,6 @@ public abstract class AbstractAPIManager implements APIManager {
                     //do nothing. Permission not allowed to access the doc.
                 } catch (RegistryException e) {
                     String msg = "Failed to get documentations for api " + apiId.getApiName();
-                    log.error(msg, e);
                     throw new APIManagementException(msg, e);
                 }
                 if (docResource != null) {
@@ -1433,11 +1398,9 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Failed to get documentations for api " + apiId.getApiName();
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get documentations for api " + apiId.getApiName();
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return documentationList;
@@ -1477,7 +1440,6 @@ public abstract class AbstractAPIManager implements APIManager {
             documentation = APIUtil.getDocumentation(artifact);
         } catch (RegistryException e) {
             String msg = "Failed to get documentation details";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return documentation;
@@ -1522,11 +1484,9 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Failed to get documentation details";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get documentation details";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return documentation;
@@ -1579,12 +1539,10 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (RegistryException e) {
             String msg = "No document content found for documentation: "
                     + documentationName + " of "+ identifierType + " : " + identifier.getName();
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get document content found for documentation: "
                     + documentationName + " of " + identifierType + " : " + identifier.getName();
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
             if (isTenantFlowStarted) {
@@ -1712,11 +1670,9 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (APIManagementException e) {
             String msg = "Error while adding the subscriber " + subscriber.getName();
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error while adding the subscriber " + subscriber.getName();
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -1791,12 +1747,10 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (RegistryException e) {
             String msg = "Error while loading API icon of API " +  identifier.getApiName()
                     + ":" + identifier.getVersion() + " from the registry";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error while loading API icon of API " + identifier.getApiName()
                     + ":" + identifier.getVersion();
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
             if (isTenantFlowStarted) {
@@ -1840,7 +1794,6 @@ public abstract class AbstractAPIManager implements APIManager {
                     }
                 } catch (RegistryException e) {
                     String msg = "Failed to get APIs for subscriber: " + subscriber.getName();
-                    log.error(msg, e);
                     throw  new APIManagementException(msg, e);
                 }
             }
@@ -1901,44 +1854,36 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     protected final void handleException(String msg, Exception e) throws APIManagementException {
-        log.error(msg, e);
         throw new APIManagementException(msg, e);
     }
 
     protected final void handleException(String msg) throws APIManagementException {
-        log.error(msg);
         throw new APIManagementException(msg);
     }
 
     protected final void handleResourceAlreadyExistsException(String msg) throws APIMgtResourceAlreadyExistsException {
-        log.error(msg);
         throw new APIMgtResourceAlreadyExistsException(msg);
     }
 
     protected final void handleResourceNotFoundException(String msg) throws APIMgtResourceNotFoundException {
-        log.error(msg);
         throw new APIMgtResourceNotFoundException(msg);
     }
 
     protected final void handlePolicyNotFoundException(String msg) throws PolicyNotFoundException {
-        log.error(msg);
         throw new PolicyNotFoundException(msg);
     }
 
     protected final void handleBlockConditionNotFoundException(String msg) throws BlockConditionNotFoundException {
-        log.error(msg);
         throw new BlockConditionNotFoundException(msg);
     }
 
     protected final void handleApplicationNameContainSpacesException(String msg)
                                                                 throws ApplicationNameWhiteSpaceValidationException {
-        log.error(msg);
         throw new ApplicationNameWhiteSpaceValidationException(msg);
     }
 
     protected final void handleApplicationNameContainsInvalidCharactersException(String msg) throws
                                                                         ApplicationNameWithInvalidCharactersException{
-        log.error(msg);
         throw new ApplicationNameWithInvalidCharactersException(msg);
     }
 
@@ -1980,7 +1925,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
         } catch (RegistryException e) {
             String msg = "Failed to get API from : " + apiPath;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -2298,7 +2242,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
         } catch (Exception e) {
             String msg = "Failed to Search APIs";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
             if (isTenantFlowStarted) {
@@ -2350,7 +2293,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             } catch (RegistryException e) {
                 String msg = "Failed to delete global mediation policy " + mediationPolicyId;
-                log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
         }
@@ -2413,7 +2355,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Error while accessing registry objects";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return null;
@@ -2461,7 +2402,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Error while obtaining registry objects";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return null;
@@ -2540,7 +2480,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Error occurred  while getting Api Specific mediation policies ";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return mediationList;
@@ -2606,16 +2545,13 @@ public abstract class AbstractAPIManager implements APIManager {
                 mediation.setConfig(contentString);
             } catch (XMLStreamException e) {
                 String errorMsg = "Error occurred while getting omElement out of mediation content";
-                log.error(errorMsg, e);
                 throw new APIManagementException(errorMsg, e);
             } catch (IOException e) {
                 String errorMsg = "Error occurred while converting content stream into string ";
-                log.error(errorMsg, e);
                 throw new APIManagementException(errorMsg, e);
             } catch (RegistryException e) {
                 String errorMsg = "Error occurred while accessing content stream of mediation" +
                         " policy";
-                log.error(errorMsg, e);
                 throw new APIManagementException(errorMsg, e);
             }
         }
@@ -2648,7 +2584,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             } catch (RegistryException e) {
                 String msg = "Failed to delete specific mediation policy ";
-                log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
         }
@@ -2671,7 +2606,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Error while obtaining registry objects";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return value;
@@ -2840,7 +2774,6 @@ public abstract class AbstractAPIManager implements APIManager {
             apiSet.addAll(apiList);
         } catch (RegistryException e) {
             String msg = "Failed to search APIs with type";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
             PaginationContext.destroy();
@@ -3121,7 +3054,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Error while loading API icon from the registry";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return null;
@@ -3306,16 +3238,13 @@ public abstract class AbstractAPIManager implements APIManager {
                 return getApiProduct(registry, apiProductArtifact);
             } else {
                 String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid + " does not exist";
-                log.error(msg);
                 throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (RegistryException e) {
             String msg = "Failed to get API Product";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get API Product";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -3362,11 +3291,9 @@ public abstract class AbstractAPIManager implements APIManager {
 
         } catch (RegistryException e) {
             String msg = "Failed to get API Product from : " + apiProductPath;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get API Product from : " + apiProductPath;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -3411,7 +3338,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
         } catch (Exception e) {
             String msg = "Failed to Search APIs";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
             if (isTenantFlowStarted) {
@@ -3503,7 +3429,6 @@ public abstract class AbstractAPIManager implements APIManager {
             productSet.addAll(productList);
         } catch (RegistryException e) {
             String msg = "Failed to search APIProducts with type";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
             PaginationContext.destroy();
@@ -3554,12 +3479,10 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (RegistryException e) {
             String msg = "Error while loading API Product icon of API Product " +  identifier.getName()
                     + ":" + identifier.getVersion() + " from the registry";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error while loading API Product icon of API Product " + identifier.getName()
                     + ":" + identifier.getVersion();
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
             if (isTenantFlowStarted) {
@@ -3615,11 +3538,9 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "Failed to get documentation details";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get documentation details";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return documentation;
@@ -3639,7 +3560,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
         } catch (RegistryException e) {
             String msg = "Failed to get API Product from : " + productPath;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }

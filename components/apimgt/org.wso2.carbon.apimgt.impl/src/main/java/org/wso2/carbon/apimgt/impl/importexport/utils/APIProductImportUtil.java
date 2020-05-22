@@ -196,7 +196,6 @@ public class APIProductImportUtil {
                 if (lifecycleAction == null) {
                     String errMsg = "Error occurred while importing the API Product. " + targetStatus + " is not reachable from "
                             + currentStatus;
-                    log.error(errMsg);
                     throw new APIImportExportException(errMsg);
                 }
             }
@@ -252,11 +251,9 @@ public class APIProductImportUtil {
         } catch (IOException e) {
             // Error is logged and APIImportExportException is thrown because adding API Product and swagger are mandatory steps
             String errorMessage = "Error while reading API Product meta information from path: " + pathToArchive;
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API Product: " + importedApiProduct.getId().getName();
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing API Product: ";
@@ -264,7 +261,6 @@ public class APIProductImportUtil {
                 errorMessage += importedApiProduct.getId().getName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION
                         + ": " + importedApiProduct.getId().getVersion();
             }
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }

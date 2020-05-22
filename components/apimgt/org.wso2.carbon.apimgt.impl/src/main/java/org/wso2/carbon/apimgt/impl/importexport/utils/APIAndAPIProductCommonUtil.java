@@ -292,7 +292,6 @@ public class APIAndAPIProductCommonUtil {
             }
         } catch (IOException e) {
             String errorMessage = "Error while retrieving saving as YAML";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (APIManagementException e) {
             String errorMsg = "Error retrieving certificate meta data. tenantId [" + tenantId + "] api ["
@@ -374,19 +373,15 @@ public class APIAndAPIProductCommonUtil {
             }
         } catch (ParserConfigurationException | SAXException e) {
             String errorMessage = "Error parsing APILifeCycle for tenant: " + tenantDomain;
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (UnsupportedEncodingException e) {
             String errorMessage = "Error parsing unsupported encoding for APILifeCycle in tenant: " + tenantDomain;
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (IOException e) {
             String errorMessage = "Error reading APILifeCycle for tenant: " + tenantDomain;
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (APIManagementException e) {
             String errorMessage = "Error retrieving APILifeCycle for tenant: " + tenantDomain;
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
 
@@ -639,11 +634,9 @@ public class APIAndAPIProductCommonUtil {
         } catch (IOException e) {
             String errorMessage = "Error in reading " + APIImportExportConstants.YAML_ENDPOINTS_CERTIFICATE_FILE
                     + " file";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing client certificate";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }

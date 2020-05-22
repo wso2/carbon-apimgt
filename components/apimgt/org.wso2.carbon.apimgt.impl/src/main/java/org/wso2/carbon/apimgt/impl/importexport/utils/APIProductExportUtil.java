@@ -116,11 +116,9 @@ public class APIProductExportUtil {
         } catch (APIManagementException e) {
             String errorMessage = "Unable to retrieve artifacts for API Product: " + apiProductIdentifier.getName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + " : " + apiProductIdentifier.getVersion();
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (RegistryException e) {
             String errorMessage = "Error while getting governance registry for tenant: " + tenantId;
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -242,12 +240,10 @@ public class APIProductExportUtil {
             String errorMessage = "Error while retrieving Swagger definition for API Product: "
                     + apiProductToReturn.getId().getName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
                     + apiProductToReturn.getId().getVersion();
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (IOException e) {
             String errorMessage = "Error while retrieving saving as YAML for API Product: " + apiProductToReturn.getId().getName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiProductToReturn.getId().getVersion();
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
