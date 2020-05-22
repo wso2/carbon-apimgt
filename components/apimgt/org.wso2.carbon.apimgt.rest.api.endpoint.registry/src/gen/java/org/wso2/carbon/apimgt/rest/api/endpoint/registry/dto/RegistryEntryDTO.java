@@ -14,7 +14,8 @@ import javax.xml.bind.annotation.*;
 public class RegistryEntryDTO   {
     private String id = null;
     private String entryName = null;
-    private String serviceUrl = null;
+    private String productionServiceUrl = null;
+    private String sandboxServiceUrl = null;
             @XmlType(name="ServiceCategoryEnum")
             @XmlEnum(String.class)
             public enum ServiceCategoryEnum {
@@ -149,20 +150,38 @@ public class RegistryEntryDTO   {
 
     /**
     **/
-    public RegistryEntryDTO serviceUrl(String serviceUrl) {
-    this.serviceUrl = serviceUrl;
+    public RegistryEntryDTO productionServiceUrl(String productionServiceUrl) {
+    this.productionServiceUrl = productionServiceUrl;
     return this;
     }
 
     
     
     @Schema(example = "http://localhost/pizzashack", description = "")
-    @JsonProperty("serviceUrl")
-          public String getServiceUrl() {
-    return serviceUrl;
+    @JsonProperty("productionServiceUrl")
+          public String getProductionServiceUrl() {
+    return productionServiceUrl;
     }
-    public void setServiceUrl(String serviceUrl) {
-    this.serviceUrl = serviceUrl;
+    public void setProductionServiceUrl(String productionServiceUrl) {
+    this.productionServiceUrl = productionServiceUrl;
+    }
+
+    /**
+    **/
+    public RegistryEntryDTO sandboxServiceUrl(String sandboxServiceUrl) {
+    this.sandboxServiceUrl = sandboxServiceUrl;
+    return this;
+    }
+
+    
+    
+    @Schema(example = "http://localhost/pizzashack", description = "")
+    @JsonProperty("sandboxServiceUrl")
+          public String getSandboxServiceUrl() {
+    return sandboxServiceUrl;
+    }
+    public void setSandboxServiceUrl(String sandboxServiceUrl) {
+    this.sandboxServiceUrl = sandboxServiceUrl;
     }
 
     /**
@@ -270,7 +289,8 @@ return false;
 RegistryEntryDTO registryEntry = (RegistryEntryDTO) o;
     return Objects.equals(id, registryEntry.id) &&
     Objects.equals(entryName, registryEntry.entryName) &&
-    Objects.equals(serviceUrl, registryEntry.serviceUrl) &&
+    Objects.equals(productionServiceUrl, registryEntry.productionServiceUrl) &&
+    Objects.equals(sandboxServiceUrl, registryEntry.sandboxServiceUrl) &&
     Objects.equals(serviceCategory, registryEntry.serviceCategory) &&
     Objects.equals(serviceType, registryEntry.serviceType) &&
     Objects.equals(definitionType, registryEntry.definitionType) &&
@@ -280,7 +300,7 @@ RegistryEntryDTO registryEntry = (RegistryEntryDTO) o;
 
 @Override
 public int hashCode() {
-return Objects.hash(id, entryName, serviceUrl, serviceCategory, serviceType, definitionType, definitionUrl, metadata);
+return Objects.hash(id, entryName, productionServiceUrl, sandboxServiceUrl, serviceCategory, serviceType, definitionType, definitionUrl, metadata);
 }
 
 @Override
@@ -290,7 +310,8 @@ sb.append("class RegistryEntryDTO {\n");
 
 sb.append("    id: ").append(toIndentedString(id)).append("\n");
 sb.append("    entryName: ").append(toIndentedString(entryName)).append("\n");
-sb.append("    serviceUrl: ").append(toIndentedString(serviceUrl)).append("\n");
+sb.append("    productionServiceUrl: ").append(toIndentedString(productionServiceUrl)).append("\n");
+sb.append("    sandboxServiceUrl: ").append(toIndentedString(sandboxServiceUrl)).append("\n");
 sb.append("    serviceCategory: ").append(toIndentedString(serviceCategory)).append("\n");
 sb.append("    serviceType: ").append(toIndentedString(serviceType)).append("\n");
 sb.append("    definitionType: ").append(toIndentedString(definitionType)).append("\n");

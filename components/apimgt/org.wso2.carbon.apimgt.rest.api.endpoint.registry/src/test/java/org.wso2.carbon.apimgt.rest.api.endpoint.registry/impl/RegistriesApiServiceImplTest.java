@@ -741,7 +741,7 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntryOld.setEntryId("entry1");
         endpointRegistryEntryOld.setName("Entry Name 1");
         endpointRegistryEntryOld.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntryOld.setServiceURL("https://xyz.com");
+        endpointRegistryEntryOld.setProductionServiceURL("https://xyz.com");
         endpointRegistryEntryOld.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
         endpointRegistryEntryOld.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
         endpointRegistryEntryOld.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
@@ -794,7 +794,7 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntryOld.setEntryId("entry1");
         endpointRegistryEntryOld.setName("Entry Name 1");
         endpointRegistryEntryOld.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntryOld.setServiceURL("https://xyz.com");
+        endpointRegistryEntryOld.setProductionServiceURL("https://xyz.com");
         endpointRegistryEntryOld.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
         endpointRegistryEntryOld.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
         endpointRegistryEntryOld.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
@@ -918,7 +918,7 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntry1.setEntryId("entry1");
         endpointRegistryEntry1.setName("Entry Name 1");
         endpointRegistryEntry1.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntry1.setServiceURL("https://xyz.com");
+        endpointRegistryEntry1.setProductionServiceURL("https://xyz.com");
         endpointRegistryEntry1.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
         endpointRegistryEntry1.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
         endpointRegistryEntry1.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
@@ -929,7 +929,7 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntry2.setEntryId("entry2");
         endpointRegistryEntry2.setName("Entry Name 2");
         endpointRegistryEntry2.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntry2.setServiceURL("https://xyz2.com");
+        endpointRegistryEntry2.setProductionServiceURL("https://xyz2.com");
         endpointRegistryEntry2.setServiceType(RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1.toString());
         endpointRegistryEntry2.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.DOMAIN.toString());
         endpointRegistryEntry2.setDefinitionURL("https://petstore.swagger.io/v2/swagger2.json");
@@ -963,7 +963,7 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntry.setEntryId("entry1");
         endpointRegistryEntry.setName("Entry Name 1");
         endpointRegistryEntry.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntry.setServiceURL("https://xyz.com");
+        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
         endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
         endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
         endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
@@ -994,7 +994,7 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntry.setEntryId("entry1");
         endpointRegistryEntry.setName("Entry Name 1");
         endpointRegistryEntry.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntry.setServiceURL("https://xyz.com");
+        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
         endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
         endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
         endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
@@ -1025,7 +1025,7 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntry.setEntryId("entry1");
         endpointRegistryEntry.setName("Entry Name 1");
         endpointRegistryEntry.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntry.setServiceURL("https://xyz.com");
+        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
         endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
         endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
         endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
@@ -1056,7 +1056,7 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntry.setEntryId("entry1");
         endpointRegistryEntry.setName("Entry Name 1");
         endpointRegistryEntry.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntry.setServiceURL("https://xyz.com");
+        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
         endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
         endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
         endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");

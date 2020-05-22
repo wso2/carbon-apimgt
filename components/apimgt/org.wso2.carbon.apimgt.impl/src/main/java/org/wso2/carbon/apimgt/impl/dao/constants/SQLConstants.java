@@ -1429,20 +1429,21 @@ public class SQLConstants {
                     "ENDPOINT_REG WHERE UUID = ? AND TENANT_ID = ?";
 
     public static final String GET_ENDPOINT_REGISTRY_ENTRY_BY_UUID =
-            " SELECT UUID, ENTRY_NAME, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, SERVICE_CATEGORY, SERVICE_URL," +
-                    " ENDPOINT_DEFINITION, METADATA, CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME " +
-                    "FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
+            " SELECT UUID, ENTRY_NAME, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, SERVICE_CATEGORY, " +
+                    "PRODUCTION_SERVICE_URL, SANDBOX_SERVICE_URL, ENDPOINT_DEFINITION, METADATA, CREATED_BY, UPDATED_BY," +
+                    " CREATED_TIME, UPDATED_TIME FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
 
     public static final String ADD_ENDPOINT_REGISTRY_ENTRY_SQL =
-            "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, METADATA," +
-                    "SERVICE_TYPE, SERVICE_CATEGORY, ENDPOINT_DEFINITION, REG_ID, " +
-                    "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, PRODUCTION_SERVICE_URL, SANDBOX_SERVICE_URL, " +
+                    "DEFINITION_TYPE, DEFINITION_URL, METADATA, SERVICE_TYPE, SERVICE_CATEGORY, ENDPOINT_DEFINITION, " +
+                    "REG_ID, CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public static final String UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL =
             "UPDATE ENDPOINT_REG_ENTRY SET " +
                     "ENTRY_NAME = ?, " +
-                    "SERVICE_URL = ?, " +
+                    "PRODUCTION_SERVICE_URL = ?, " +
+                    "SANDBOX_SERVICE_URL = ?, " +
                     "DEFINITION_TYPE = ?, " +
                     "DEFINITION_URL = ?, " +
                     "METADATA = ?, " +

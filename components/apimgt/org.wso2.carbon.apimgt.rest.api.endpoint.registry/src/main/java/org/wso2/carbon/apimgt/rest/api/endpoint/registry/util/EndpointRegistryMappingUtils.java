@@ -79,7 +79,8 @@ public class EndpointRegistryMappingUtils {
         registryEntryDTO.setDefinitionUrl(registryEntry.getDefinitionURL());
         registryEntryDTO.setMetadata(registryEntry.getMetaData());
         registryEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.fromValue(registryEntry.getServiceType()));
-        registryEntryDTO.setServiceUrl(registryEntry.getServiceURL());
+        registryEntryDTO.setProductionServiceUrl(registryEntry.getProductionServiceURL());
+        registryEntryDTO.setSandboxServiceUrl(registryEntry.getSandboxServiceUrl());
         registryEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.fromValue(registryEntry
                 .getServiceCategory()));
         return registryEntryDTO;
@@ -103,7 +104,8 @@ public class EndpointRegistryMappingUtils {
         registryEntry.setEndpointDefinition(endpointDefinition);
         registryEntry.setMetaData(registryEntryDTO.getMetadata());
         registryEntry.setServiceType(registryEntryDTO.getServiceType().toString());
-        registryEntry.setServiceURL(registryEntryDTO.getServiceUrl());
+        registryEntry.setProductionServiceURL(registryEntryDTO.getProductionServiceUrl());
+        registryEntry.setSandboxServiceUrl(registryEntryDTO.getSandboxServiceUrl());
         registryEntry.setRegistryId(registryId);
         registryEntry.setServiceCategory(registryEntryDTO.getServiceCategory().toString());
         return registryEntry;
