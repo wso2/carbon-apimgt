@@ -21,9 +21,8 @@ import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import {
-    List, Button, Box, Typography, Toolbar, Grid, Paper,
+    List, Button, ListItemAvatar, Typography, Toolbar, Grid, Paper, ListItem, Avatar, ListItemSecondaryAction,
 } from '@material-ui/core';
-import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HelpBase from 'AppComponents/AdminPages/Addons/HelpBase';
@@ -31,21 +30,10 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
-import Dropzone from 'react-dropzone';
-import Icon from '@material-ui/core/Icon';
-import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
-
-const dropzoneStyles = {
-    border: '1px dashed ',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    height: 75,
-    padding: '8px 0px',
-    position: 'relative',
-    textAlign: 'center',
-    width: '95%',
-    margin: '30px 25px',
-};
+import DropZoneLocal, { humanFileSize } from 'AppComponents/Shared/DropZoneLocal';
+import InsertDriveFile from '@material-ui/icons/InsertDriveFile';
+import DeleteIcon from '@material-ui/icons/Delete';
+import IconButton from '@material-ui/core/IconButton';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -78,6 +66,13 @@ const useStyles = makeStyles((theme) => ({
     uploadButtonGrid: {
         display: 'grid',
         padding: '0px 400px 10px',
+    },
+    dropbox: {
+        marginTop: theme.spacing(4),
+        marginBottom: theme.spacing(2),
+    },
+    browseFileButton: {
+        marginTop: theme.spacing(1),
     },
 }));
 
@@ -133,7 +128,6 @@ function UploadTheme() {
                                             />
                                         )}
                                         />
-
                                     </Link>
                                 </ListItem>
                             </List>
@@ -158,49 +152,64 @@ function UploadTheme() {
                     </InlineMessage>
                 </Paper>
                 <Paper className={classes.paperUpload}>
-                    <Dropzone
-                        multiple={false}
-                        accept='.zip'
-                        className={classes.dropzone}
-                        activeClassName={classes.acceptDrop}
-                        rejectClassName={classes.rejectDrop}
-                        onDrop={(dropFile) => {
-                            onDrop(dropFile);
-                        }}
-                    >
-                        {({ getRootProps, getInputProps }) => (
-                            <div {...getRootProps({ style: dropzoneStyles })}>
-                                <input {...getInputProps()} />
-                                <div className={classes.dropZoneWrapper}>
-                                    {isFileAccepted ? (
-                                        <div className={classes.uploadedFile}>
-                                            <InsertDriveFileIcon color='primary' fontSize='large' />
-                                            <Box fontSize='h6.fontSize' fontWeight='fontWeightLight'>
-                                                <Typography>
-                                                    {themeFile && themeFile.name}
-                                                </Typography>
-                                            </Box>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <Icon className={classes.dropIcon}>cloud_upload</Icon>
-                                            <Typography>
-                                                <FormattedMessage
-                                                    id='upload.theme'
-                                                    defaultMessage='Select the theme to upload.'
-                                                />
-                                            </Typography>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
+                    <Grid className={classes.dropbox}>
+                        {(themeFile && themeFile.name) ? (
+                            <List>
+                                <ListItem key={themeFile && themeFile.path}>
+                                    <ListItemAvatar>
+                                        <Avatar>
+                                            <InsertDriveFile />
+                                        </Avatar>
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={`${themeFile && themeFile.path} - 
+                                    ${humanFileSize(themeFile && themeFile.size)}`}
+                                    />
+                                    <ListItemSecondaryAction>
+                                        <IconButton
+                                            edge='end'
+                                            aria-label='delete'
+                                            onClick={() => {
+                                                setThemeFile(null);
+                                                setIsFileAccepted(false);
+                                            }}
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                            </List>
+                        ) : (
+                            <DropZoneLocal
+                                error={isFileAccepted}
+                                onDrop={onDrop}
+                                files={themeFile && themeFile.name}
+                                accept='.zip'
+                            >
+                                <FormattedMessage
+                                    id='TenantTheme.Upload.Theme.drag.and.drop.message'
+                                    defaultMessage='Drag & Drop files here {break} or {break}'
+                                    values={{ break: <br /> }}
+                                />
+                                <Button
+                                    color='primary'
+                                    variant='contained'
+                                    className={classes.browseFileButton}
+                                >
+                                    <FormattedMessage
+                                        id='TenantTheme.Upload.Theme.browse.files.to.upload'
+                                        defaultMessage='Browse File to Upload'
+                                    />
+                                </Button>
+                            </DropZoneLocal>
                         )}
-                    </Dropzone>
+                    </Grid>
                     <Grid className={classes.uploadButtonGrid}>
                         <Button
                             variant='contained'
                             color='primary'
                             onClick={uploadThemeFile}
+                            disabled={!isFileAccepted}
                         >
                             <FormattedMessage
                                 id='TenantTheme.Upload.Theme.button.upload'

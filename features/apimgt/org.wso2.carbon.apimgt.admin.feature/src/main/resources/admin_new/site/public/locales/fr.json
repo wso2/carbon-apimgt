@@ -107,7 +107,9 @@
   "LoginDenied.message": "",
   "LoginDenied.retry": "",
   "LoginDenied.title": "",
+  "TenantTheme.Upload.Theme.browse.files.to.upload": "",
   "TenantTheme.Upload.Theme.button.upload": "",
+  "TenantTheme.Upload.Theme.drag.and.drop.message": "",
   "TenantTheme.Upload.Theme.help.link.one": "",
   "TenantTheme.Upload.Theme.info.message": "",
   "TenantTheme.Upload.Theme.page.heading": "",
@@ -148,6 +150,5 @@
   "UnexpectedError.logout": "",
   "UnexpectedError.message": "",
   "UnexpectedError.title": "",
-  "app.components.Shared.Banner.back": "",
-  "upload.theme": ""
+  "app.components.Shared.Banner.back": ""
 }

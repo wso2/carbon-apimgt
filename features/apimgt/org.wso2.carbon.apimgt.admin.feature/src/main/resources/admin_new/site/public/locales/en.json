@@ -107,7 +107,9 @@
   "LoginDenied.message": "The server could not verify that you are authorized to access the requested resource.",
   "LoginDenied.retry": "Retry",
   "LoginDenied.title": "Error 403 : Forbidden",
+  "TenantTheme.Upload.Theme.browse.files.to.upload": "Browse File to Upload",
   "TenantTheme.Upload.Theme.button.upload": "Upload",
+  "TenantTheme.Upload.Theme.drag.and.drop.message": "Drag & Drop files here {break} or {break}",
   "TenantTheme.Upload.Theme.help.link.one": "Tenant theming",
   "TenantTheme.Upload.Theme.info.message": "The theme should be a zip file containing CSSand images compliant with the API Manager theme format",
   "TenantTheme.Upload.Theme.page.heading": "Upload Tenant Theme",
@@ -148,6 +150,5 @@
   "UnexpectedError.logout": "Logout",
   "UnexpectedError.message": "Error occured due to invalid request",
   "UnexpectedError.title": "Internal Server Error",
-  "app.components.Shared.Banner.back": "Back",
-  "upload.theme": "Select the theme to upload."
+  "app.components.Shared.Banner.back": "Back"
 }
