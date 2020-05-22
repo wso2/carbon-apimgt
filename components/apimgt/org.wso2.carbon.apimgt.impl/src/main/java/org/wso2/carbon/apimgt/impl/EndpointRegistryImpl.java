@@ -38,7 +38,7 @@ import java.util.List;
  */
 public class EndpointRegistryImpl implements EndpointRegistry {
 
-    private static final Log log = LogFactory.getLog(APIAdminImpl.class);
+    private static final Log log = LogFactory.getLog(EndpointRegistryImpl.class);
     private ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
     private String username;
 

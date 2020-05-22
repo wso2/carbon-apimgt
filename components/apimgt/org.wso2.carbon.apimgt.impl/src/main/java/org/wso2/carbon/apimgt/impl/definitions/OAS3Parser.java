@@ -18,12 +18,14 @@
  */
 
 package org.wso2.carbon.apimgt.impl.definitions;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.swagger.oas.inflector.examples.ExampleBuilder;
 import io.swagger.oas.inflector.examples.XmlExampleSerializer;
 import io.swagger.oas.inflector.examples.models.Example;
 import io.swagger.oas.inflector.processors.JsonNodeExampleSerializer;
 import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.util.Yaml;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -1529,6 +1531,36 @@ public class OAS3Parser extends APIDefinition {
             api.setContext(basePath);
         }
         return api;
+    }
+
+    /**
+     * Remove x-examples from all the paths from the OpenAPI definition.
+     *
+     * @param apiDefinition OpenAPI definition as String
+     */
+    public static String removeExamplesFromOpenAPI(String apiDefinition) throws APIManagementException {
+        try {
+            OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+            SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, null);
+            if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
+                log.debug("Errors found when parsing OAS definition");
+            }
+            OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
+            for (Map.Entry<String, PathItem> entry : openAPI.getPaths().entrySet()) {
+                String path = entry.getKey();
+                List<Operation> operations = openAPI.getPaths().get(path).readOperations();
+                for (Operation operation : operations) {
+                    if (operation.getExtensions() != null && operation.getExtensions().keySet()
+                            .contains(APIConstants.SWAGGER_X_EXAMPLES)) {
+                        operation.getExtensions().remove(APIConstants.SWAGGER_X_EXAMPLES);
+                    }
+                }
+            }
+            return Yaml.pretty().writeValueAsString(openAPI);
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error while removing examples from OpenAPI definition", e,
+                    ExceptionCodes.ERROR_REMOVING_EXAMPLES);
+        }
     }
 
 }
