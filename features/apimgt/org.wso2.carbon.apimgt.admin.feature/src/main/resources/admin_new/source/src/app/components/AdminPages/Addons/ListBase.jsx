@@ -70,9 +70,6 @@ function ListLabels(props) {
             title: emptyBoxTitle,
             content: emptyBoxContent,
         },
-        actionColumnProps: {
-            editIconShow, editIconOverride, deleteIconShow, addNewEntry,
-        },
         noDataMessage,
     } = props;
 
