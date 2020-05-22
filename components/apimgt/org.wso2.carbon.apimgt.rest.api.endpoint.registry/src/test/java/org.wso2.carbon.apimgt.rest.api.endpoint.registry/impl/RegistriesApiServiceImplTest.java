@@ -708,6 +708,45 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
+    public void createRegistryEntryWithNoDefinitionFileAndUrl() throws APIManagementException {
+        final String REGISTRY_UUID = "reg1";
+
+        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
+        endpointRegistryInfo.setName("Endpoint Registry 1");
+        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
+        endpointRegistryInfo.setOwner("admin");
+        endpointRegistryInfo.setRegistryId(1);
+        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
+        endpointRegistryInfo.setUuid(REGISTRY_UUID);
+
+        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
+        payloadEntryDTO.setId("entry1");
+        payloadEntryDTO.setEntryName("Entry Name 1");
+        payloadEntryDTO.setMetadata("{mutualTLS: true}");
+        payloadEntryDTO.setServiceUrl("https://xyz.com");
+        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
+        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
+
+        EndpointRegistryEntry endpointRegistryEntry =
+                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
+                        null, endpointRegistryInfo.getRegistryId());
+
+        Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
+                .thenReturn(endpointRegistryInfo);
+        Mockito.when(registryProvider.addEndpointRegistryEntry(Mockito.any(EndpointRegistryEntry.class)))
+                .thenReturn(endpointRegistryEntry.getEntryId());
+        Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
+                endpointRegistryEntry.getEntryId())).thenReturn(endpointRegistryEntry);
+
+        Response response = registriesApiService.createRegistryEntry(REGISTRY_UUID, payloadEntryDTO,
+                null, null, messageContext);
+        Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        RegistryEntryDTO responseEntryDTO = (RegistryEntryDTO) response.getEntity();
+        compareRegistryEntryDTOs(payloadEntryDTO, responseEntryDTO);
+    }
+
+    @Test
     public void updateRegistryEntryWithDefinitionFile() throws APIManagementException {
         final String REGISTRY_UUID = "reg1";
 
@@ -795,6 +834,57 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntryOld.setName("Entry Name 1");
         endpointRegistryEntryOld.setMetaData("{mutualTLS: true}");
         endpointRegistryEntryOld.setProductionServiceURL("https://xyz.com");
+        endpointRegistryEntryOld.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
+        endpointRegistryEntryOld.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
+        endpointRegistryEntryOld.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
+        endpointRegistryEntryOld.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS.toString());
+
+        Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
+                .thenReturn(endpointRegistryInfo);
+        Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
+                endpointRegistryEntryNew.getEntryId()))
+                .thenReturn(endpointRegistryEntryOld, endpointRegistryEntryNew);
+
+        Response response = registriesApiService.updateRegistryEntry(REGISTRY_UUID, payloadEntryDTO.getId(),
+                payloadEntryDTO, null, null, messageContext);
+
+        Mockito.verify(registryProvider).updateEndpointRegistryEntry(Mockito.eq(endpointRegistryEntryOld.getName()),
+                Mockito.any(EndpointRegistryEntry.class));
+        Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        RegistryEntryDTO responseEntryDTO = (RegistryEntryDTO) response.getEntity();
+        compareRegistryEntryDTOs(payloadEntryDTO, responseEntryDTO);
+    }
+
+    @Test
+    public void updateRegistryEntryWithNoDefinitionFileAndUrl() throws APIManagementException {
+        final String REGISTRY_UUID = "reg1";
+
+        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
+        endpointRegistryInfo.setName("Endpoint Registry 1");
+        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
+        endpointRegistryInfo.setOwner(ADMIN_USERNAME);
+        endpointRegistryInfo.setRegistryId(1);
+        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
+        endpointRegistryInfo.setUuid(REGISTRY_UUID);
+
+        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
+        payloadEntryDTO.setId("entry1");
+        payloadEntryDTO.setEntryName("Entry Name 2");
+        payloadEntryDTO.setMetadata("{mutualTLS: true}");
+        payloadEntryDTO.setServiceUrl("https://xyz2.com");
+        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1);
+        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.DOMAIN);
+
+        EndpointRegistryEntry endpointRegistryEntryNew =
+                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
+                        null, endpointRegistryInfo.getRegistryId());
+
+        EndpointRegistryEntry endpointRegistryEntryOld = new EndpointRegistryEntry();
+        endpointRegistryEntryOld.setEntryId("entry1");
+        endpointRegistryEntryOld.setName("Entry Name 1");
+        endpointRegistryEntryOld.setMetaData("{mutualTLS: true}");
+        endpointRegistryEntryOld.setServiceURL("https://xyz.com");
         endpointRegistryEntryOld.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
         endpointRegistryEntryOld.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
         endpointRegistryEntryOld.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
