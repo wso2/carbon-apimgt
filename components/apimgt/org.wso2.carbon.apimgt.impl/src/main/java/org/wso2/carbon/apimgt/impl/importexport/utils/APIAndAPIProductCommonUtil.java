@@ -264,28 +264,29 @@ public class APIAndAPIProductCommonUtil {
 
         List<ClientCertificateDTO> certificateMetadataDTOS;
         try {
-            if (!apiTypeWrapper.isAPIProduct()) {
-                certificateMetadataDTOS = provider.searchClientCertificates(tenantId, null, apiTypeWrapper.getApi().getId());
-            } else {
+            if (apiTypeWrapper.isAPIProduct()) {
                 certificateMetadataDTOS = provider.searchClientCertificates(tenantId, null, apiTypeWrapper.getApiProduct().getId());
+            } else {
+                certificateMetadataDTOS = provider.searchClientCertificates(tenantId, null, apiTypeWrapper.getApi().getId());
             }
-            if (!certificateMetadataDTOS.isEmpty()) {
-                CommonUtil.createDirectory(archivePath + File.separator + APIImportExportConstants.META_INFO_DIRECTORY);
+            if (certificateMetadataDTOS.isEmpty()) {
+                return;
+            }
+            CommonUtil.createDirectory(archivePath + File.separator + APIImportExportConstants.META_INFO_DIRECTORY);
 
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                String element = gson.toJson(certificateMetadataDTOS,
-                        new TypeToken<ArrayList<ClientCertificateDTO>>() {
-                        }.getType());
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String element = gson.toJson(certificateMetadataDTOS,
+                    new TypeToken<ArrayList<ClientCertificateDTO>>() {
+                    }.getType());
 
-                switch (exportFormat) {
-                    case YAML:
-                        CommonUtil.writeFile(archivePath + APIImportExportConstants.YAML_CLIENT_CERTIFICATE_FILE,
-                                CommonUtil.jsonToYaml(element));
-                        break;
-                    case JSON:
-                        CommonUtil.writeFile(archivePath + APIImportExportConstants.JSON_CLIENT_CERTIFICATE_FILE,
-                                element);
-                }
+            switch (exportFormat) {
+                case YAML:
+                    CommonUtil.writeFile(archivePath + APIImportExportConstants.YAML_CLIENT_CERTIFICATE_FILE,
+                            CommonUtil.jsonToYaml(element));
+                    break;
+                case JSON:
+                    CommonUtil.writeFile(archivePath + APIImportExportConstants.JSON_CLIENT_CERTIFICATE_FILE,
+                            element);
             }
         } catch (IOException e) {
             String errorMessage = "Error while retrieving saving as YAML";
@@ -472,10 +473,10 @@ public class APIAndAPIProductCommonUtil {
             apiTypeWrapper.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl,
                     identifier.getProviderName()));
             APIUtil.setResourcePermissions(identifier.getProviderName(), null, null, thumbPath);
-            if (!apiTypeWrapper.isAPIProduct()) {
-                apiProvider.updateAPI(apiTypeWrapper.getApi());
-            } else {
+            if (apiTypeWrapper.isAPIProduct()) {
                 apiProvider.updateAPIProduct(apiTypeWrapper.getApiProduct());
+            } else {
+                apiProvider.updateAPI(apiTypeWrapper.getApi());
             }
         } catch (FaultGatewaysException e) {
             //This is logged and process is continued because icon is optional for an API

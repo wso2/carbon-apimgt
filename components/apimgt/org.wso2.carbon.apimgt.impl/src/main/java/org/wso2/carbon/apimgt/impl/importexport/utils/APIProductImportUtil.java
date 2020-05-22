@@ -305,7 +305,22 @@ public class APIProductImportUtil {
                 String apiName = apiId.get(APIImportExportConstants.API_NAME_ELEMENT).getAsString();
                 String apiVersion = apiId.get(APIImportExportConstants.VERSION_ELEMENT).getAsString();
 
-                if (!isDefaultProviderAllowed) {
+                if (isDefaultProviderAllowed) {
+                    APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName,
+                            apiVersion);
+
+                    // Checking whether the API exists
+                    if (apiProvider.isAPIAvailable(apiIdentifier)) {
+                        // If the API is already imported, update it if the overWriteAPIs flag is specified,
+                        // otherwise do not import/update the API. (Just skip it)
+                        if (Boolean.TRUE.equals(overwriteAPIs)) {
+                            APIImportUtil.importAPI(apiDirectoryPath, currentUser, true, apiProvider, true);
+                        }
+                    } else {
+                        // If the API is not already imported, import it
+                        APIImportUtil.importAPI(apiDirectoryPath, currentUser, true, apiProvider, false);
+                    }
+                } else {
                     // Retrieve the current tenant domain of the logged in user
                     String currentTenantDomain = MultitenantUtils
                             .getTenantDomain(APIUtil.replaceEmailDomainBack(currentUser));
@@ -329,21 +344,6 @@ public class APIProductImportUtil {
                         // Update the provider name of the resources of this API in the current product resources
                         // with the user's name who is the provider of this API
                         updateProviderNameInProductResources(apiName, apiVersion, apiProductResources, apiProviderInCurrentTenantDomain);
-                    }
-                } else {
-                    APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName,
-                            apiVersion);
-
-                    // Checking whether the API exists
-                    if (!apiProvider.isAPIAvailable(apiIdentifier)) {
-                        // If the API is not already imported, import it
-                        APIImportUtil.importAPI(apiDirectoryPath, currentUser, true, apiProvider, false);
-                    } else {
-                        // If the API is already imported, update it if the overWriteAPIs flag is specified,
-                        // otherwise do not import/update the API. (Just skip it)
-                        if (Boolean.TRUE.equals(overwriteAPIs)) {
-                            APIImportUtil.importAPI(apiDirectoryPath, currentUser, true, apiProvider, true);
-                        }
                     }
                 }
             }
@@ -435,7 +435,7 @@ public class APIProductImportUtil {
                         .getAPIProviderFromAPINameVersionTenant(apiName, apiVersion, currentTenantDomain);
 
                 // If the API Provider is available, retrieve the API
-                if (!StringUtils.isBlank(apiProviderInCurrentTenantDomain)) {
+                if (StringUtils.isNotBlank(apiProviderInCurrentTenantDomain)) {
                     APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(apiProviderInCurrentTenantDomain,
                             apiName, apiVersion);
                     api = apiProvider.getAPI(emailReplacedAPIIdentifier);

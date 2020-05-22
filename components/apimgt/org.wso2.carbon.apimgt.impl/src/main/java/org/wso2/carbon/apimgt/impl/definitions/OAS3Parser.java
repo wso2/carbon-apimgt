@@ -1486,7 +1486,7 @@ public class OAS3Parser extends APIDefinition {
         }
         //Setup mutualSSL configuration
         String mutualSSL = OASParserUtil.getMutualSSLEnabledFromSwagger(extensions);
-        if (StringUtils.isBlank(mutualSSL)) {
+        if (StringUtils.isNotBlank(mutualSSL)) {
             String securityList = api.getApiSecurity();
             if (StringUtils.isBlank(securityList)) {
                 securityList = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
