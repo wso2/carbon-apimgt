@@ -70,7 +70,7 @@ function ListLabels(props) {
             title: emptyBoxTitle,
             content: emptyBoxContent,
         },
-        noDataMessage,
+        noDataMessage, reloadAsynchronously,
     } = props;
 
     const classes = useStyles();
@@ -95,7 +95,7 @@ function ListLabels(props) {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [reloadAsynchronously]);
     const columns = [
         ...columProps,
     ];
@@ -258,6 +258,7 @@ ListLabels.defaultProps = {
         />
     ),
     showActionColumn: true,
+    reloadAsynchronously: false,
 };
 ListLabels.propTypes = {
     EditComponent: PropTypes.element.isRequired,
@@ -283,5 +284,6 @@ ListLabels.propTypes = {
     }),
     noDataMessage: PropTypes.element,
     addButtonOverride: PropTypes.element,
+    reloadAsynchronously: PropTypes.bool,
 };
 export default ListLabels;

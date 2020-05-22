@@ -62,6 +62,12 @@ export default function ListEmails() {
             });
     }
 
+    const emptyApiCall = () => {
+        return new Promise((resolve) => {
+            resolve([]);
+        });
+    };
+
     const columProps = [
         { name: 'uuid', options: { display: false } },
         {
@@ -186,54 +192,49 @@ export default function ListEmails() {
         ),
     };
 
-    if (isAnalyticsEnabled) {
-        return (
-            <ListBase
-                columProps={columProps}
-                pageProps={pageProps}
-                addButtonProps={addButtonProps}
-                searchProps={searchProps}
-                emptyBoxProps={emptyBoxProps}
-                apiCall={apiCall}
-                EditComponent={AddEmails}
-                editComponentProps={null}
-                DeleteComponent={DeleteEmail}
-            />
-        );
-    } else {
-        const emptyApiCall = () => {
-            return new Promise((resolve) => {
-                resolve([]);
-            });
-        };
-        const analyticsDisabledEmptyBoxProps = {
-            content: (
-                <Typography variant='body2' color='textSecondary' component='p'>
-                    <FormattedMessage
-                        id='AdminPages.BotDetection.Email.List.analytics.disabled.empty.content'
-                        values={{
-                            breakingLine: <br />,
-                        }}
-                        defaultMessage={
-                            'If you enable WSO2 API Manager Analytics with WSO2 API Manager, '
-                        + 'you can enable email notifications for all unauthorized API calls that '
-                        + 'you receive and also view the bot detection data easily via the Admin Portal.'
-                        + '{breakingLine}{breakingLine}'
-                        + 'Follow documentations on help to enable Analytics and get started.'
-                        }
-                    />
-                </Typography>
-            ),
-            title: (
-                <Typography gutterBottom variant='h5' component='h2'>
-                    <FormattedMessage
-                        id='AdminPages.BotDetection.Email.List.analytics.disabled.empty.title'
-                        defaultMessage='Analytics disabled!'
-                    />
-                </Typography>
-            ),
-        };
-        return (
+    const analyticsDisabledEmptyBoxProps = {
+        content: (
+            <Typography variant='body2' color='textSecondary' component='p'>
+                <FormattedMessage
+                    id='AdminPages.BotDetection.Email.List.analytics.disabled.empty.content'
+                    values={{
+                        breakingLine: <br />,
+                    }}
+                    defaultMessage={
+                        'If you enable WSO2 API Manager Analytics with WSO2 API Manager, '
+                    + 'you can enable email notifications for all unauthorized API calls that '
+                    + 'you receive and also view the bot detection data easily via the Admin Portal.'
+                    + '{breakingLine}{breakingLine}'
+                    + 'Follow documentations on help to enable Analytics and get started.'
+                    }
+                />
+            </Typography>
+        ),
+        title: (
+            <Typography gutterBottom variant='h5' component='h2'>
+                <FormattedMessage
+                    id='AdminPages.BotDetection.Email.List.analytics.disabled.empty.title'
+                    defaultMessage='Analytics disabled!'
+                />
+            </Typography>
+        ),
+    };
+
+    return (isAnalyticsEnabled ? (
+        <ListBase
+            columProps={columProps}
+            pageProps={pageProps}
+            addButtonProps={addButtonProps}
+            searchProps={searchProps}
+            emptyBoxProps={emptyBoxProps}
+            apiCall={apiCall}
+            EditComponent={AddEmails}
+            editComponentProps={null}
+            DeleteComponent={DeleteEmail}
+            reloadAsynchronously
+        />
+    )
+        : (
             <ListBase
                 columProps={columProps}
                 pageProps={pageProps}
@@ -243,8 +244,7 @@ export default function ListEmails() {
                 apiCall={emptyApiCall}
                 EditComponent={AddEmails}
                 editComponentProps={null}
-                DeleteComponent={DeleteEmail}
+                DeleteComponent={() => <span />}
             />
-        );
-    }
+        ));
 }
