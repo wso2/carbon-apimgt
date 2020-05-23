@@ -267,6 +267,26 @@ class Operation extends React.Component {
                     </Select>
                 </TableCell>
                 <TableCell>
+                    <Select
+                        className={classes.dropDown}
+                        value={operation.scopes.length === 0 ? ['none'] : operation.scopes}
+                        onChange={this.handleScopeChange}
+                        inputProps={{
+                            name: 'scopes',
+                            id: 'age-simple',
+                        }}
+                    >
+                        {dropdownScopes.map((tempScope) => (
+                            <MenuItem
+                                key={tempScope.name}
+                                value={tempScope.name}
+                            >
+                                {tempScope.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </TableCell>
+                <TableCell>
                     <Switch
                         checked={(() => {
                             if (operation.authType === 'None') {

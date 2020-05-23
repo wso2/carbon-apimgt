@@ -14933,7 +14933,8 @@ public class ApiMgtDAO {
         List<Scope> scopeList = null;
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_ALL_SHARED_SCOPES_BY_TENANT)) {
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.GET_SHARED_SCOPE_USAGE_COUNT_BY_TENANT)) {
             statement.setInt(1, tenantId);
             try (ResultSet rs = statement.executeQuery()) {
                 scopeList = new ArrayList<>();
@@ -14941,6 +14942,7 @@ public class ApiMgtDAO {
                     Scope scope = new Scope();
                     scope.setId(rs.getString("UUID"));
                     scope.setKey(rs.getString("NAME"));
+                    scope.setUsageCount(rs.getInt("usage"));
                     scopeList.add(scope);
                 }
             }
