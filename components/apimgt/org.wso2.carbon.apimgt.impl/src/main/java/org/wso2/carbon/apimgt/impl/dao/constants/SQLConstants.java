@@ -1781,7 +1781,7 @@ public class SQLConstants {
             "DELETE FROM AM_SECURITY_AUDIT_UUID_MAPPING WHERE API_ID = ?";
 
     public static final String ADD_INITIAL_QUERY_ANALYSIS_SQL =
-            "INSERT INTO AM_GRAPHQL_QUERY_ANALYSIS (API_ID, DEPTH_ENABLED, COMPLEXITY_ENABLED, MAX_COMPLEXITY) VALUES (?,?,?,?)";
+            "INSERT INTO AM_GRAPHQL_QUERY_ANALYSIS (API_ID, MAX_COMPLEXITY, MAX_DEPTH) VALUES (?,?,?)";
 
     public static final String ADD_CUSTOM_COMPLEXITY_DETAILS_SQL =
             "INSERT INTO AM_GRAPHQL_COMPLEXITY (UUID, API_ID, TYPE, FIELD, COMPLEXITY_VALUE) VALUES (?,?,?,?,?)";
@@ -1807,7 +1807,6 @@ public class SQLConstants {
     public static final String UPDATE_COMPLEXITY_DETAILS_SQL =
             " UPDATE AM_GRAPHQL_QUERY_ANALYSIS " +
             " SET " +
-            "   COMPLEXITY_ENABLED = ?," +
             "   MAX_COMPLEXITY = ?" +
             " WHERE " +
             "    API_ID = ?";
@@ -1827,59 +1826,21 @@ public class SQLConstants {
     public static final String REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL =
             "DELETE FROM AM_GRAPHQL_COMPLEXITY WHERE API_ID = ?";
 
-    public static final String REMOVE_FROM_GRAPHQL_DEPTH_SQL =
-            "DELETE FROM AM_GRAPHQL_DEPTH WHERE API_ID = ?";
-
-    public static final String ADD_ROLE_DEPTH_MAPPING_SQL =
-            "INSERT INTO AM_GRAPHQL_DEPTH (UUID, API_ID, ROLE, DEPTH_VALUE) VALUES (?,?,?,?)";
-
-    public static final String UPDATE_ROLE_DEPTH_MAPPING_SQL =
-            " UPDATE AM_GRAPHQL_DEPTH " +
+    public static final String UPDATE_DEPTH_DETAILS_SQL  =
+            " UPDATE AM_GRAPHQL_QUERY_ANALYSIS " +
             " SET " +
-            "   DEPTH_VALUE = ? " +
+            "   MAX_DEPTH = ? " +
             " WHERE" +
-            "   UUID = ? ";
+            "   API_ID = ? ";
 
-    public static final String REMOVE_ROLE_DEPTH_MAPPING_SQL =
-            "DELETE FROM AM_GRAPHQL_DEPTH WHERE UUID = ?";
-
-    public static final String GET_DEPTH_DETAILS_SQL =
+    public static final String GET_DEPTH_COMPLEXITY_DETAILS_SQL =
             "SELECT" +
-            "   UUID," +
-            "   ROLE," +
-            "   DEPTH_VALUE" +
-            " FROM" +
-            "   AM_GRAPHQL_DEPTH " +
-            " WHERE" +
-            "   API_ID = ?";
-
-    public static final String GET_ROLE_DEPTH_MAPPING_SQL =
-            "SELECT" +
-            "   UUID," +
-            "   ROLE," +
-            "   DEPTH_VALUE" +
-            " FROM" +
-            "   AM_GRAPHQL_DEPTH " +
-            " WHERE" +
-            "   UUID = ?";
-
-    public static final String GET_QUERY_ANALYSIS_INFO_SQL =
-            "SELECT" +
-            "   DEPTH_ENABLED," +
-            "   COMPLEXITY_ENABLED" +
+            "   MAX_COMPLEXITY," +
+            "   MAX_DEPTH" +
             " FROM" +
             "   AM_GRAPHQL_QUERY_ANALYSIS " +
             " WHERE" +
             "   API_ID = ?";
-
-    public static final String GET_DEPTH_COMPLEXITY_ENABLED_SQL =
-            "SELECT DEPTH_ENABLED, COMPLEXITY_ENABLED FROM AM_GRAPHQL_QUERY_ANALYSIS WHERE API_ID = ?";
-
-    public static final String UPDATE_DEPTH_ENABLED_SQL =
-            "UPDATE AM_GRAPHQL_QUERY_ANALYSIS SET DEPTH_ENABLED = ? WHERE API_ID = ?";
-
-    public static final String UPDATE_COMPLEXITY_ENABLED_SQL =
-            "UPDATE AM_GRAPHQL_QUERY_ANALYSIS SET COMPLEXITY_ENABLED = ? WHERE API_ID = ?";
 
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +

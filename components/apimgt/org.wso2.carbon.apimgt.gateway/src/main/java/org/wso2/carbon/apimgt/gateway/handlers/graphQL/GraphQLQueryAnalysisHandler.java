@@ -68,60 +68,20 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
         return true;
     }
 
-    /**
-     * This method returns the user roles
-     *
-     * @param username username of the user
-     * @return list of user roles
-     */
-    private String[] getUserRoles(String username) throws APISecurityException {
-        String[] userRoles;
-        APIKeyMgtRemoteUserClient client;
-        try {
-            APIKeyMgtRemoteUserClientPool clientPool = APIKeyMgtRemoteUserClientPool.getInstance();
-            client = clientPool.get();
-            userRoles = client.getUserRoles(username);
-        } catch (Exception e) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
-        }
-        return userRoles;
-    }
 
     /**
-     * This method returns the maximum query depth value
+     * This method returns the maximum query complexity value
      *
-     * @param userRoles        list of user roles
      * @param policyDefinition json object which contains the policy
-     * @return maximum query depth value if exists, or -1 to denote no depth limitation
+     * @return maximum query depth value if exists, or -1 to denote no complexity limitation
      */
-    private int getMaxQueryDepth(String[] userRoles, JSONObject policyDefinition) {
+    private int  getMaxQueryDepth(JSONObject policyDefinition) {
         Object depthObject = policyDefinition.get(APIConstants.QUERY_ANALYSIS_DEPTH);
-        boolean depthCheckEnabled = Boolean.parseBoolean(((JSONObject) depthObject)
-                .get(APIConstants.CHECK_ENABLED).toString());
-        List<Integer> allocatedDepths = new ArrayList<>();
-        if (depthCheckEnabled) {
-            for (String role : userRoles) {
-                Object depth = ((JSONObject) depthObject).get(role);
-                if (depth != null) {
-                    allocatedDepths.add(((Long) depth).intValue());
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("No depth limitation value was assigned for " + role + " role");
-                    }
-                }
-            }
-            if (allocatedDepths.isEmpty()) {
-                Object defaultDepth = ((JSONObject) depthObject).get(APIConstants.DEFAULT_DEPTH_ROLE);
-                if (defaultDepth != null) {
-                    return ((Long) defaultDepth).intValue();
-                } else {
-                    log.error("No default depth was allocated");
-                    return -1;
-                }
-            } else {
-                return Collections.max(allocatedDepths);
-            }
+        Object maxQueryDepth = ((JSONObject) depthObject).get(APIConstants.MAXIMUM_QUERY_DEPTH);
+        if (maxQueryDepth != null) {
+            return ((Long) maxQueryDepth).intValue();
         } else {
+            log.error("Maximum query depth was not allocated");
             return -1;
         }
     }
@@ -161,11 +121,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      * @return true, if the query depth does not exceed the maximum value or false, if query depth exceeds the maximum
      */
     private boolean analyseQueryDepth(MessageContext messageContext, String payload, JSONObject policyDefinition) {
-        String username = APISecurityUtils.getAuthenticationContext(messageContext).getUsername();
+        int maxQueryDepth = getMaxQueryDepth(policyDefinition);
 
-        try {
-            String[] userRoles = getUserRoles(username);
-            int maxQueryDepth = getMaxQueryDepth(userRoles, policyDefinition);
             if (maxQueryDepth > 0) {
                 MaxQueryDepthInstrumentation maxQueryDepthInstrumentation =
                         new MaxQueryDepthInstrumentation(maxQueryDepth);
@@ -210,9 +167,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             } else {
                 return true; // No depth limitation check
             }
-        } catch (APISecurityException e) {
-            log.error(e.getMessage(), e);
-        }
+
         return false;
     }
 
@@ -286,17 +241,11 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      */
     private int getMaxQueryComplexity(JSONObject policyDefinition) {
         Object complexityObject = policyDefinition.get(APIConstants.QUERY_ANALYSIS_COMPLEXITY);
-        boolean complexityCheckEnabled = Boolean.parseBoolean(((JSONObject) complexityObject)
-                .get(APIConstants.CHECK_ENABLED).toString());
-        if (complexityCheckEnabled) {
-            Object maxQueryComplexity = ((JSONObject) complexityObject).get(APIConstants.MAXIMUM_QUERY_COMPLEXITY);
-            if (maxQueryComplexity != null) {
-                return ((Long) maxQueryComplexity).intValue();
-            } else {
-                log.error("Maximum query complexity was not allocated");
-                return -1;
-            }
+        Object maxQueryComplexity = ((JSONObject) complexityObject).get(APIConstants.MAXIMUM_QUERY_COMPLEXITY);
+        if (maxQueryComplexity != null) {
+            return ((Long) maxQueryComplexity).intValue();
         } else {
+            log.error("Maximum query complexity was not allocated");
             return -1;
         }
     }

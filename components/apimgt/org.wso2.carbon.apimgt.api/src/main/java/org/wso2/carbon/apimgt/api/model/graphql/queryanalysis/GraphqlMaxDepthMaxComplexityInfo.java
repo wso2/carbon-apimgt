@@ -17,24 +17,26 @@
  */
 package org.wso2.carbon.apimgt.api.model.graphql.queryanalysis;
 
-public class GraphqlDepthComplexityStatus {
+/**
+ * This class represents the model for depth info of a GraphQL API
+ */
+public class GraphqlMaxDepthMaxComplexityInfo {
 
-    private boolean depthEnabled;
-    private boolean complexityEnabled;
+    private int maxDepth;
+    private int maxComplexity;
 
-    public boolean getDepthEnabled() {
-        return depthEnabled;
+    public int getMaxDepth() {
+        return maxDepth;
     }
 
-    public void setDepthEnabled(boolean depthEnabled) {
-        this.depthEnabled = depthEnabled;
+    public void setMaxDepth(int maxDepth) {
+        this.maxDepth = maxDepth;
+    }
+    public int getMaxComplexity() {
+        return maxComplexity;
     }
 
-    public boolean getComplexityEnabled() {
-        return complexityEnabled;
-    }
-
-    public void setComplexityEnabled(boolean complexityEnabled) {
-        this.complexityEnabled = complexityEnabled;
+    public void setMaxComplexity(int maxComplexity) {
+        this.maxComplexity = maxComplexity;
     }
 }

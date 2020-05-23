@@ -3479,177 +3479,12 @@ paths:
             Requested scope name does not exist.
 
   ######################################################
-  # GraphQL "Query Depth" resource APIs
-  ######################################################
-  /apis/{apiId}/graphql-policies/depth:
-
-    #-----------------------------------------------------
-    # Retrieve Role-Depth Mappings of a given API
-    #-----------------------------------------------------
-    get:
-      summary: Get the list of role-depth mappings of an API
-      security:
-        - OAuth2Security:
-            - apim:api_create
-            - apim:api_publish
-      description: |
-        This operation can be used to retrieve a list of role-depth mappings belonging to an API by providing the id of the API.
-      parameters:
-        - $ref: '#/parameters/apiId'
-      tags:
-        - GraphQL Policies
-      responses:
-        200:
-          description: |
-            OK.
-            Requested role-depth mappings returned.
-          headers:
-            Content-Type:
-              description: |
-                The content of the body.
-              default: application/json
-              type: string
-          schema:
-            $ref: '#/definitions/GraphQLQueryDepthInfoList'
-        404:
-          description: |
-            Not Found.
-            Requested API does not contain any role-depth mappings.
-
-    #-----------------------------------------------------
-    # Add an API specific Role-Depth Mapping
-    #-----------------------------------------------------
-    post:
-      summary: Add a new role-depth mapping to an API
-      security:
-        - OAuth2Security:
-            - apim:api_create
-      description: |
-        This operation can be used to add a role-depth mapping belonging to an API by providing the id of the API.
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - in: body
-          name: body
-          description: |
-            Role-depth mapping that needs to be added
-          required: true
-          schema:
-            $ref: '#/definitions/GraphQLQueryDepthInfo'
-      tags:
-        - GraphQL Policies
-      responses:
-        200:
-          description: |
-            Created.
-            Role-Depth Mapping created successfully.
-        404:
-          description: |
-            Bad Request.
-            Role-Depth Mapping creation failed.
-
-  ######################################################
-  # GraphQL "Individual Role Depth" resource APIs
-  ######################################################
-  /apis/{apiId}/graphql-policies/depth/{roleDepthMappingId}:
-
-    #-----------------------------------------------------
-    # Retrieve a particular role-depth mapping of an API
-    #-----------------------------------------------------
-    get:
-      summary: Get a particular role-depth mapping of an API
-      security:
-        - OAuth2Security:
-            - apim:api_create
-            - apim:api_publish
-      description: |
-        This operation can be used to retrieve a paticular role-depth mapping by providing the API id and uuid.
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/roleDepthMappingId'
-      tags:
-        - GraphQL Policies
-      responses:
-        200:
-          description: |
-            OK.
-            Requested role-depth mapping returned.
-          headers:
-            Content-Type:
-              description: |
-                The content of the body.
-              default: application/json
-              type: string
-          schema:
-            $ref: '#/definitions/GraphQLQueryDepthInfo'
-        404:
-          description: |
-            Not Found.
-            Requested role-depth mapping does not exist.
-
-    #-----------------------------------------------------
-    # Update a particular role-depth mapping of an API
-    #-----------------------------------------------------
-    put:
-      summary: Update a given role-depth mapping of an API
-      security:
-        - OAuth2Security:
-            - apim:api_create
-      description: |
-        This operation can be used to update a role-depth mapping belonging to an API by providing the API id and uuid.
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/roleDepthMappingId'
-        - in: body
-          name: body
-          description: |
-            Role-depth mapping that needs to be updated
-          required: true
-          schema:
-            $ref: '#/definitions/GraphQLQueryDepthInfo'
-      tags:
-        - GraphQL Policies
-      responses:
-        200:
-          description: |
-            OK.
-            Role-Depth Mapping updated successfully.
-        404:
-          description: |
-            Bad Request.
-            Role-Depth Mapping updation failed.
-
-    #-----------------------------------------------------
-    # Delete a particular role-depth mapping of an API
-    #-----------------------------------------------------
-    delete:
-      summary: Delete a given role-depth mapping of an API
-      security:
-        - OAuth2Security:
-            - apim:api_create
-      description: |
-        This operation can be used to delete a role-depth mapping belonging to an API by providing the API id and uuid.
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/roleDepthMappingId'
-      tags:
-        - GraphQL Policies
-      responses:
-        200:
-          description: |
-            OK.
-            Role-Depth Mapping deleted successfully.
-        404:
-          description: |
-            Bad Request.
-            Role-Depth Mapping deletion failed.
-
-  ######################################################
   # GraphQL "Query Complexity" resource APIs
   ######################################################
   /apis/{apiId}/graphql-policies/complexity:
 
     #-----------------------------------------------------
-    # Retrieve Complexity Info of a given API
+    # Retrieve Custom Complexity Info of a given API
     #-----------------------------------------------------
     get:
       summary: Get the complexity related details of an API
@@ -3674,7 +3509,37 @@ paths:
             Requested API does not contain any complexity details.
 
     #-----------------------------------------------------
-    # Update API specific Complexity Info
+    # Add API specific Custom Complexity Info
+    #-----------------------------------------------------
+    post:
+      summary: Create complexity related details of an API
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      description: |
+        This operation can be used to add complexity details belonging to an API by providing the id of the API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Role-depth mapping that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/GraphQLQueryComplexityInfo'
+      tags:
+        - GraphQL Policies
+      responses:
+        200:
+          description: |
+            Created.
+            Complexity details created successfully.
+        404:
+          description: |
+            Bad Request.
+            Complexity detail addition failed.
+    #-----------------------------------------------------
+    # Update API specific Custom Complexity Info
     #-----------------------------------------------------
     put:
       summary: Update complexity related details of an API
@@ -3742,74 +3607,6 @@ paths:
             Not Found.
             Retrieving types and fields failed.
 
-  ######################################################
-  # GraphQL "Query Analysis Enable/Disable" resource APIs
-  ######################################################
-  /apis/{apiId}/graphql-policies/configuration:
-
-    #-----------------------------------------------------
-    # Check if depth and complexity limitation enabled/disabled
-    #-----------------------------------------------------
-    get:
-      summary: Check if depth and complexity limitations are enabled or disabled
-      security:
-        - OAuth2Security:
-            - apim:api_create
-            - apim:api_publish
-      description: |
-        This operation can be used to check if depth and complexity limitations are enabled/disabled by providing the API id.
-      parameters:
-        - $ref: '#/parameters/apiId'
-      tags:
-        - GraphQL Policies
-      responses:
-        200:
-          description: |
-            OK.
-            Status of depth limitation and complexity limitation returned successfully.
-          headers:
-            Content-Type:
-              description: |
-                The content of the body.
-              default: application/json
-              type: string
-          schema:
-            $ref: '#/definitions/GraphQLDepthComplexityStatus'
-        404:
-          description: |
-            Not Found.
-            Retrieving limitation status failed.
-
-    #-----------------------------------------------------
-    # Enable/Disable limitation
-    #-----------------------------------------------------
-    put:
-      summary: Update the specified limitation
-      security:
-        - OAuth2Security:
-            - apim:api_create
-      description: |
-        This operation can be used to enable/disable the depth/complexity limitation by providing the API id.
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - in: body
-          name: body
-          description: |
-            Limitation that needs to be enabled/disabled
-          required: true
-          schema:
-            $ref: '#/definitions/GraphQLDepthComplexityStatus'
-      tags:
-        - GraphQL Policies
-      responses:
-        200:
-          description: |
-            Created.
-            Limitation updated successfully.
-        404:
-          description: |
-            Bad Request.
-            Limitation updation failed.
 
   ######################################################
   # The "Resource Paths" resource
@@ -8303,49 +8100,14 @@ definitions:
       schemaDefinition:
         type: string
 
-  #-----------------------------------------------------
-  # The GraphQL Query Depth Info resource
-  #-----------------------------------------------------
-  GraphQLQueryDepthInfo:
-    title: GraphQL Query Depth Info
-    properties:
-      uuid:
-        type: string
-      role:
-        type: string
-        description: |
-          The user role to which the allowed maximum depth is being specified
-        example: "admin"
-      depthValue:
-        type: integer
-        description: |
-          The depth value allocated for the associated role
-        example: 20
 
-  #-----------------------------------------------------
-  # The GraphQL Query Depth Info List resource
-  #-----------------------------------------------------
-  GraphQLQueryDepthInfoList:
-    title: GraphQL Query Depth Info List
-    properties:
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/GraphQLQueryDepthInfo'
 
   #-----------------------------------------------------
   # The GraphQL Query Complexity Info resource
   #-----------------------------------------------------
   GraphQLQueryComplexityInfo:
     title: GraphQL Query Complexity Info
-    required:
-      - maxComplexity
     properties:
-      maxComplexity:
-        type: integer
-        description: |
-          The maximum complexity allowed for all queries of this API
-        example: 20
       list:
         type: array
         items:
@@ -8406,21 +8168,6 @@ definitions:
         items:
           type: string
         example: ["code","name"]
-
-  #-----------------------------------------------------
-  # The GraphQL Depth Complexity Status resource
-  #-----------------------------------------------------
-  GraphQLDepthComplexityStatus:
-    title: Depth limitation and Complexity limitation status
-    properties:
-      depthEnabled:
-        type: boolean
-        description: |
-          Indicates if depth check is enabled
-      complexityEnabled:
-        type: boolean
-        description: |
-          Indicates if complexity check is enabled
 
   #-----------------------------------------------------
   # The Mediation List resource

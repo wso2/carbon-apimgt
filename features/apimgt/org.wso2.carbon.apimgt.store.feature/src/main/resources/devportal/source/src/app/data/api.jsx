@@ -799,4 +799,21 @@ export default class API extends Resource {
         });
         return promiseGet;
     }
+    /**
+     * Get the complexity related details of an API
+     */
+    
+    getGraphqlPoliciesComplexity(id) {
+        const promisePolicies = this.client.then(client => {
+            return client.apis['GraphQL Policies'].get_apis__apiId__graphql_policies_complexity(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promisePolicies.then(response => response.body);
+    }
+
+    
 }

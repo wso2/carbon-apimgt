@@ -15,10 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLDepthComplexityStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
@@ -396,6 +393,22 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.apisApiIdGraphqlPoliciesComplexityGet(apiId, securityContext);
     }
 
+    @POST
+    @Path("/{apiId}/graphql-policies/complexity")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Create complexity related details of an API", notes = "This operation can be used to add complexity details belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "GraphQL Policies",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Created. Complexity details created successfully. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Bad Request. Complexity detail addition failed. ", response = Void.class) })
+    public Response apisApiIdGraphqlPoliciesComplexityPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping that needs to be added " ,required=true) GraphQLQueryComplexityInfoDTO body) throws APIManagementException{
+        return delegate.apisApiIdGraphqlPoliciesComplexityPost(apiId, body, securityContext);
+    }
+
     @PUT
     @Path("/{apiId}/graphql-policies/complexity")
     @Consumes({ "application/json" })
@@ -427,121 +440,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. Retrieving types and fields failed. ", response = Void.class) })
     public Response apisApiIdGraphqlPoliciesComplexityTypesGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.apisApiIdGraphqlPoliciesComplexityTypesGet(apiId, securityContext);
-    }
-
-    @GET
-    @Path("/{apiId}/graphql-policies/configuration")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Check if depth and complexity limitations are enabled or disabled", notes = "This operation can be used to check if depth and complexity limitations are enabled/disabled by providing the API id. ", response = GraphQLDepthComplexityStatusDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
-        })
-    }, tags={ "GraphQL Policies",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Status of depth limitation and complexity limitation returned successfully. ", response = GraphQLDepthComplexityStatusDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Retrieving limitation status failed. ", response = Void.class) })
-    public Response apisApiIdGraphqlPoliciesConfigurationGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
-        return delegate.apisApiIdGraphqlPoliciesConfigurationGet(apiId, securityContext);
-    }
-
-    @PUT
-    @Path("/{apiId}/graphql-policies/configuration")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Update the specified limitation", notes = "This operation can be used to enable/disable the depth/complexity limitation by providing the API id. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
-        })
-    }, tags={ "GraphQL Policies",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Created. Limitation updated successfully. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Bad Request. Limitation updation failed. ", response = Void.class) })
-    public Response apisApiIdGraphqlPoliciesConfigurationPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Limitation that needs to be enabled/disabled " ,required=true) GraphQLDepthComplexityStatusDTO body) throws APIManagementException{
-        return delegate.apisApiIdGraphqlPoliciesConfigurationPut(apiId, body, securityContext);
-    }
-
-    @GET
-    @Path("/{apiId}/graphql-policies/depth")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get the list of role-depth mappings of an API", notes = "This operation can be used to retrieve a list of role-depth mappings belonging to an API by providing the id of the API. ", response = GraphQLQueryDepthInfoListDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
-        })
-    }, tags={ "GraphQL Policies",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Requested role-depth mappings returned. ", response = GraphQLQueryDepthInfoListDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested API does not contain any role-depth mappings. ", response = Void.class) })
-    public Response apisApiIdGraphqlPoliciesDepthGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
-        return delegate.apisApiIdGraphqlPoliciesDepthGet(apiId, securityContext);
-    }
-
-    @POST
-    @Path("/{apiId}/graphql-policies/depth")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Add a new role-depth mapping to an API", notes = "This operation can be used to add a role-depth mapping belonging to an API by providing the id of the API. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
-        })
-    }, tags={ "GraphQL Policies",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Created. Role-Depth Mapping created successfully. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Bad Request. Role-Depth Mapping creation failed. ", response = Void.class) })
-    public Response apisApiIdGraphqlPoliciesDepthPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping that needs to be added " ,required=true) GraphQLQueryDepthInfoDTO body) throws APIManagementException{
-        return delegate.apisApiIdGraphqlPoliciesDepthPost(apiId, body, securityContext);
-    }
-
-    @DELETE
-    @Path("/{apiId}/graphql-policies/depth/{roleDepthMappingId}")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Delete a given role-depth mapping of an API", notes = "This operation can be used to delete a role-depth mapping belonging to an API by providing the API id and uuid. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
-        })
-    }, tags={ "GraphQL Policies",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Role-Depth Mapping deleted successfully. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Bad Request. Role-Depth Mapping deletion failed. ", response = Void.class) })
-    public Response apisApiIdGraphqlPoliciesDepthRoleDepthMappingIdDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping identifier ",required=true) @PathParam("roleDepthMappingId") String roleDepthMappingId) throws APIManagementException{
-        return delegate.apisApiIdGraphqlPoliciesDepthRoleDepthMappingIdDelete(apiId, roleDepthMappingId, securityContext);
-    }
-
-    @GET
-    @Path("/{apiId}/graphql-policies/depth/{roleDepthMappingId}")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get a particular role-depth mapping of an API", notes = "This operation can be used to retrieve a paticular role-depth mapping by providing the API id and uuid. ", response = GraphQLQueryDepthInfoDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
-        })
-    }, tags={ "GraphQL Policies",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Requested role-depth mapping returned. ", response = GraphQLQueryDepthInfoDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested role-depth mapping does not exist. ", response = Void.class) })
-    public Response apisApiIdGraphqlPoliciesDepthRoleDepthMappingIdGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping identifier ",required=true) @PathParam("roleDepthMappingId") String roleDepthMappingId) throws APIManagementException{
-        return delegate.apisApiIdGraphqlPoliciesDepthRoleDepthMappingIdGet(apiId, roleDepthMappingId, securityContext);
-    }
-
-    @PUT
-    @Path("/{apiId}/graphql-policies/depth/{roleDepthMappingId}")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Update a given role-depth mapping of an API", notes = "This operation can be used to update a role-depth mapping belonging to an API by providing the API id and uuid. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
-        })
-    }, tags={ "GraphQL Policies",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Role-Depth Mapping updated successfully. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Bad Request. Role-Depth Mapping updation failed. ", response = Void.class) })
-    public Response apisApiIdGraphqlPoliciesDepthRoleDepthMappingIdPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Role-depth mapping identifier ",required=true) @PathParam("roleDepthMappingId") String roleDepthMappingId, @ApiParam(value = "Role-depth mapping that needs to be updated " ,required=true) GraphQLQueryDepthInfoDTO body) throws APIManagementException{
-        return delegate.apisApiIdGraphqlPoliciesDepthRoleDepthMappingIdPut(apiId, roleDepthMappingId, body, securityContext);
     }
 
     @GET

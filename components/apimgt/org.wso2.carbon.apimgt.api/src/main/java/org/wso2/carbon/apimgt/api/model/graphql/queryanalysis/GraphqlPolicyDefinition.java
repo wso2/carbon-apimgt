@@ -25,38 +25,31 @@ public class GraphqlPolicyDefinition {
     /**
      * Depth related details
      */
-    private boolean depthEnabled = false;
-    private List<GraphqlDepthInfo> roleDepthMappings = new ArrayList<>();
+    private int maxDepth;
 
     /**
      * Complexity related details
      */
-    private boolean complexityEnabled = false;
+    private int maxComplexity;
     private GraphqlComplexityInfo graphqlComplexityInfo;
 
-    public boolean isDepthEnabled() {
-        return depthEnabled;
+
+    public int getMaxDepth() {
+        return maxDepth;
     }
 
-    public void setDepthEnabled(boolean depthEnabled) {
-        this.depthEnabled = depthEnabled;
+    public void setMaxDepth(int maxDepth) {
+        this.maxDepth = maxDepth;
     }
 
-    public List<GraphqlDepthInfo> getRoleDepthMappings() {
-        return roleDepthMappings;
+    public int getMaxComplexity() {
+        return maxComplexity;
     }
 
-    public void setRoleDepthMappings(List<GraphqlDepthInfo> roleDepthMappings) {
-        this.roleDepthMappings = roleDepthMappings;
+    public void setMaxComplexity(int maxComplexity) {
+        this.maxComplexity = maxComplexity;
     }
 
-    public boolean isComplexityEnabled() {
-        return complexityEnabled;
-    }
-
-    public void setComplexityEnabled(boolean complexityEnabled) {
-        this.complexityEnabled = complexityEnabled;
-    }
 
     public GraphqlComplexityInfo getGraphqlComplexityInfo() {
         return graphqlComplexityInfo;

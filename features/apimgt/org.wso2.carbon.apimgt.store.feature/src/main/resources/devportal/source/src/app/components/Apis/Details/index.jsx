@@ -19,6 +19,7 @@
 import React, { lazy, Suspense } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import MenuIcon from '@material-ui/icons/Menu';
 import {
     Route, Switch, Redirect, Link, withRouter,
 } from 'react-router-dom';
@@ -58,7 +59,7 @@ const LoadableSwitch = withRouter((props) => {
     let tryoutRoute;
     if (api.type === 'GRAPHQL') {
         tryoutRoute = <Route path='/apis/:apiUuid/test' component={GraphQLConsole} />
-    }else {
+    } else {
         tryoutRoute = <Route path='/apis/:apiUuid/test' component={ApiConsole} />
     }
 
@@ -92,6 +93,8 @@ const styles = (theme) => {
     } = theme;
     const shiftToLeft = position === 'vertical-left' ? width : 0;
     const shiftToRight = position === 'vertical-right' ? width : 0;
+    const shiftToLeftMinView = position === 'vertical-left' ? 45 : 0;
+    const shiftToRightMinView = position === 'vertical-right' ? 45 : 0;
     const leftMenuPaddingLeft = position === 'horizontal' ? theme.spacing(3) : 0;
 
     return {
@@ -118,8 +121,13 @@ const styles = (theme) => {
             left: 0,
             overflowY: 'auto',
         },
+        leftMenuVerticalLeftMinView: {
+            width: 45,
+            top: 0,
+            left: 0,
+            overflowY: 'auto',
+        },
         leftMenuVerticalRight: {
-            width: theme.custom.leftMenu.width,
             top: 0,
             right: 0,
             overflowY: 'auto',
@@ -149,9 +157,19 @@ const styles = (theme) => {
         content: {
             display: 'flex',
             flex: 1,
+            flexGrow: 1,
             flexDirection: 'column',
             marginLeft: shiftToLeft,
             marginRight: shiftToRight,
+            paddingBottom: theme.spacing(3),
+        },
+        contentExpandView: {
+            display: 'flex',
+            flex: 1,
+            flexGrow: 1,
+            flexDirection: 'column',
+            marginLeft: shiftToLeftMinView,
+            marginRight: shiftToRightMinView,
             paddingBottom: theme.spacing(3),
         },
         contentLoader: {
@@ -160,6 +178,7 @@ const styles = (theme) => {
         contentLoaderRightMenu: {
             paddingRight: theme.custom.leftMenu.width,
         },
+        
     };
 };
 /**
@@ -273,9 +292,12 @@ class Details extends React.Component {
             applicationsAvailable: [],
             item: 1,
             xo: null,
+            open: false,
         };
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
         this.api_uuid = this.props.match.params.api_uuid;
+        this.handleDrawerClose = this.handleDrawerClose.bind(this);
+        this.handleDrawerOpen = this.handleDrawerOpen.bind(this);
     }
 
     /**
@@ -286,6 +308,15 @@ class Details extends React.Component {
     componentDidMount() {
         this.updateSubscriptionData();
     }
+
+
+    handleDrawerOpen() {
+        this.setState({ open: true });
+    };
+
+    handleDrawerClose() {
+        this.setState({ open: false });
+    };
 
     /**
      *
@@ -309,7 +340,7 @@ class Details extends React.Component {
         } = this.props;
         const user = AuthManager.getUser();
         const { apiUuid } = match.params;
-        const { api, notFound } = this.state;
+        const { api, notFound, open } = this.state;
         const {
             custom: {
                 leftMenu: {
@@ -335,19 +366,23 @@ class Details extends React.Component {
                     <title>{`${prefix} ${api.name}${sufix}`}</title>
                 </Helmet>
                 <style>{globalStyle}</style>
+
                 <div
                     className={classNames(
                         classes.leftMenu,
                         {
-                            [classes.leftMenuHorizontal]: position === 'horizontal',
+                            [classes.leftMenuHorizontal]: position === 'horizontal' 
                         },
                         {
-                            [classes.leftMenuVerticalLeft]: position === 'vertical-left',
+                            [classes.leftMenuVerticalLeft]: position === 'vertical-left' && open,
+                            [classes.leftMenuVerticalLeftMinView]: position === 'vertical-left' && !open,
+
                         },
                         {
                             [classes.leftMenuVerticalRight]: position === 'vertical-right',
                         },
                         'left-menu',
+
                     )}
                 >
                     {rootIconVisible && (
@@ -365,62 +400,95 @@ class Details extends React.Component {
                         route='overview'
                         iconText='overview'
                         to={pathPrefix + 'overview'}
+                        open={open}
                     />
                     {!api.advertiseInfo.advertised && (
                         <>
                             {user && showCredentials && (
                                 <>
-                                    <LeftMenuItem
-                                        text={
-                                            <FormattedMessage
-                                                id='Apis.Details.index.subscriptions'
-                                                defaultMessage='Subscriptions'
-                                            />
-                                        }
-                                        route='credentials'
-                                        iconText='credentials'
-                                        to={pathPrefix + 'credentials'}
-                                    />
+                                    <div onClick={this.handleDrawerClose}>
+                                        <LeftMenuItem
+                                            text={
+                                                <FormattedMessage
+                                                    id='Apis.Details.index.subscriptions'
+                                                    defaultMessage='Subscriptions'
+                                                />
+                                            }
+                                            route='credentials'
+                                            iconText='credentials'
+                                            to={pathPrefix + 'credentials'}
+                                            open={open}
+                                        />
+                                    </div>
                                 </>
                             )}
                             {api.type !== 'WS' && showTryout && (
-                                <LeftMenuItem
-                                    text={<FormattedMessage id='Apis.Details.index.try.out' defaultMessage='Try out' />}
-                                    route='test'
-                                    iconText='test'
-                                    to={pathPrefix + 'test'}
-                                />
+                                <div onClick={this.handleDrawerClose}>
+                                    <LeftMenuItem
+                                        text={<FormattedMessage id='Apis.Details.index.try.out'
+                                            defaultMessage='Try out' />}
+                                        route='test'
+                                        iconText='test'
+                                        to={pathPrefix + 'test'}
+                                        open={open}
+                                    />
+                                </div>
                             )}
                             {showComments && (
-                                <LeftMenuItem
-                                    text={
-                                        <FormattedMessage id='Apis.Details.index.comments' defaultMessage='Comments' />
-                                    }
-                                    route='comments'
-                                    iconText='comments'
-                                    to={pathPrefix + 'comments'}
-                                />
+                                <div onClick={this.handleDrawerClose}>
+                                    <LeftMenuItem
+                                        text={
+                                            <FormattedMessage id='Apis.Details.index.comments'
+                                                defaultMessage='Comments' />
+                                        }
+                                        route='comments'
+                                        iconText='comments'
+                                        to={pathPrefix + 'comments'}
+                                        open={open}
+                                    />
+                                </div>
                             )}
                         </>
                     )}
                     {showDocuments && (
-                        <LeftMenuItem
-                            text={<FormattedMessage id='Apis.Details.index.documentation' defaultMessage='Documentation' />}
-                            route='documents'
-                            iconText='docs'
-                            to={pathPrefix + 'documents'}
-                        />
+                        <div onClick={this.handleDrawerClose}>
+                            <LeftMenuItem
+                                text={<FormattedMessage id='Apis.Details.index.documentation'
+                                    defaultMessage='Documentation' />}
+                                route='documents'
+                                iconText='docs'
+                                to={pathPrefix + 'documents'}
+                                open={open}
+                            />
+                        </div>
                     )}
                     {!api.advertiseInfo.advertised && api.type !== 'WS' && showSdks && (
-                        <LeftMenuItem
-                            text={<FormattedMessage id='Apis.Details.index.sdk' defaultMessage='SDKs' />}
-                            route='sdk'
-                            iconText='sdk'
-                            to={pathPrefix + 'sdk'}
-                        />
+                        <div onClick={this.handleDrawerClose}>
+                            <LeftMenuItem
+                                text={<FormattedMessage id='Apis.Details.index.sdk' defaultMessage='SDKs' />}
+                                route='sdk'
+                                iconText='sdk'
+                                to={pathPrefix + 'sdk'}
+                                open={open}
+                            />
+                        </div>
                     )}
+                    {!open && (
+                        <div onClick={this.handleDrawerOpen}
+                            style={{ paddingLeft: '15px', width: 45 }}
+                        >
+                            <MenuIcon fontSize='medium' style={{ color: 'white' }} />
+                        </div>
+                    )}
+
                 </div>
-                <div className={classes.content}>
+
+                <div 
+                    className={classNames(
+                        { [classes.content]: open },
+                        { [classes.contentExpandView]: !open },
+                    )}
+                >
                     <InfoBar apiId={apiUuid} innerRef={(node) => (this.infoBar = node)} intl={intl} {...this.props} />
                     <div
                         className={classNames(
@@ -431,6 +499,7 @@ class Details extends React.Component {
                         <LoadableSwitch api={api} updateSubscriptionData={this.updateSubscriptionData} />
                     </div>
                 </div>
+
             </ApiContext.Provider>
         ) : (
                 <div className='apim-dual-ring' />

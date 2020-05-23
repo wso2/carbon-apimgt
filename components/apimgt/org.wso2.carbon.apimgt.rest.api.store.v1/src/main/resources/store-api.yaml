@@ -3183,6 +3183,34 @@ paths:
           schema:
             $ref: '#/definitions/APICategoryList'
 
+  ######################################################
+  # GraphQL "Query Complexity" resource APIs
+  ######################################################
+  /apis/{apiId}/graphql-policies/complexity:
+
+    #-----------------------------------------------------
+    # Retrieve Complexity Info of a given API
+    #-----------------------------------------------------
+    get:
+      summary: Get the complexity related details of an API
+      security:
+        - OAuth2Security: []
+      description: |
+        This operation can be used to retrieve complexity related details belonging to an API by providing the API id.
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - GraphQL Policies
+      responses:
+        200:
+          description: |
+            OK.
+            Requested complexity details returned.
+        404:
+          description: |
+            Not Found.
+            Requested API does not contain any complexity details.
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -5158,6 +5186,45 @@ definitions:
         description: Average rating of the API
         example: 4.5
 
+
+  #-----------------------------------------------------
+  # The GraphQL Query Complexity Info resource
+  #-----------------------------------------------------
+  GraphQLQueryComplexityInfo:
+    title: GraphQL Query Complexity Info
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/GraphQLCustomComplexityInfo'
+
+  #-----------------------------------------------------
+  # The GraphQL Custom Complexity Info resource
+  #-----------------------------------------------------
+  GraphQLCustomComplexityInfo:
+    title: GraphQL Custom Complexity Info
+    required:
+      - type
+      - field
+      - complexityValue
+    properties:
+      type:
+        type: string
+        description: |
+          The type found within the schema of the API
+        example: "Country"
+      field:
+        type: string
+        description: |
+          The field which is found under the type within the schema of the API
+        example: "name"
+      complexityValue:
+        type: integer
+        description: |
+          The complexity value allocated for the associated field under the specified type
+        example: 1
+
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------
+

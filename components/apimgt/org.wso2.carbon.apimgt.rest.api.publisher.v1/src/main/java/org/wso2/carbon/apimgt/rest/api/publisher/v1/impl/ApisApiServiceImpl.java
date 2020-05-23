@@ -72,12 +72,8 @@ import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthComplexityStatus;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.Policy;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -86,10 +82,6 @@ import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
-import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
-import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
@@ -785,6 +777,43 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    @Override
+    public Response apisApiIdGraphqlPoliciesComplexityPost(String apiId, GraphQLQueryComplexityInfoDTO body,
+                                                           MessageContext messageContext) throws APIManagementException {
+        try {
+            if (StringUtils.isBlank(apiId)) {
+                String errorMessage = "API ID cannot be empty or null.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            GraphqlComplexityInfo graphqlComplexityInfo =
+                    GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlComplexityInfo(body);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                apiProvider.addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+                return Response.ok().build();
+            } else {
+                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while adding complexity details of API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while adding complexity details of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+
     /**
      * Update complexity details of a given API
      *
@@ -793,6 +822,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param messageContext message context
      * @return Response
      */
+
+
+
     @Override
     public Response apisApiIdGraphqlPoliciesComplexityPut(String apiId, GraphQLQueryComplexityInfoDTO body,
                                                           MessageContext messageContext) {
@@ -869,83 +901,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    /**
-     * Get depth and complexity limitation status
-     *
-     * @param apiId          apiId
-     * @param messageContext message context
-     * @return Response with depth limitation status and complexity limitation status
-     */
-    @Override
-    public Response apisApiIdGraphqlPoliciesConfigurationGet(String apiId, MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                GraphqlDepthComplexityStatus graphqlDepthComplexityStatus = apiProvider.getLimitationStatus(apiIdentifier);
-                GraphQLDepthComplexityStatusDTO graphQLDepthComplexityStatusDTO =
-                        GraphqlQueryAnalysisMappingUtil.fromGraphqlDepthComplexityStatustoDTO(graphqlDepthComplexityStatus);
-                return Response.ok().entity(graphQLDepthComplexityStatusDTO).build();
-            } else {
-                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving limitation status of API : " + apiId, e, log);
-            } else {
-                String msg = "Error while retrieving limitation status of API " + apiId;
-                RestApiUtil.handleInternalServerError(msg, e, log);
-            }
-        }
-        return null;
-    }
 
-    /**
-     * Update limitation status
-     *
-     * @param apiId          apiId
-     * @param body           GraphQLDepthComplexityStatusDTO DTO as request body
-     * @param messageContext message context
-     * @return Response
-     */
-    @Override
-    public Response apisApiIdGraphqlPoliciesConfigurationPut(String apiId, GraphQLDepthComplexityStatusDTO body,
-                                                             MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            GraphqlDepthComplexityStatus graphqlDepthComplexityStatus =
-                    GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlDepthComplexityStatus(body);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                apiProvider.updateLimitationStatus(apiIdentifier, graphqlDepthComplexityStatus);
-                return Response.ok().build();
-            } else {
-                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while updating limitation status of API : " + apiId, e, log);
-            } else {
-                String msg = "Error while updating limitation status of API " + apiId;
-                RestApiUtil.handleInternalServerError(msg, e, log);
-            }
-        }
-        return null;
-    }
+
+
 
     /**
      * Get role-depth mappings of a given API
@@ -954,202 +912,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param messageContext message context
      * @return Response with role-depth mappings of the GraphQL API
      */
-    @Override
-    public Response apisApiIdGraphqlPoliciesDepthGet(String apiId, MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                List<GraphqlDepthInfo> graphqlDepthInfoList = apiProvider.getDepthDetails(apiIdentifier);
-                GraphQLQueryDepthInfoListDTO graphQLQueryDepthInfoListDTO =
-                        GraphqlQueryAnalysisMappingUtil.fromGraphqlDepthInfoListtoDTO(graphqlDepthInfoList);
-                return Response.ok().entity(graphQLQueryDepthInfoListDTO).build();
-            } else {
-                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving role-depth mappings of API : " + apiId, e, log);
-            } else {
-                String msg = "Error while retrieving role-depth mappings of API " + apiId;
-                RestApiUtil.handleInternalServerError(msg, e, log);
-            }
-        }
-        return null;
-    }
 
-    /**
-     * Add a given role-depth mapping to an API
-     *
-     * @param apiId          apiId
-     * @param body           GraphQLQueryDepthInfo DTO as request body
-     * @param messageContext message context
-     * @return created GraphQLQueryDepthInfo DTO as response
-     */
-    @Override
-    public Response apisApiIdGraphqlPoliciesDepthPost(String apiId, GraphQLQueryDepthInfoDTO body,
-                                                      MessageContext messageContext) {
-        try {
-            if (StringUtils.isBlank(apiId)) {
-                String errorMessage = "API ID cannot be empty or null.";
-                RestApiUtil.handleBadRequest(errorMessage, log);
-            }
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            GraphqlDepthInfo graphqlDepthInfo = GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlDepthInfo(body);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                apiProvider.addRoleDepthMapping(apiIdentifier, graphqlDepthInfo);
-                return Response.ok().build();
-            } else {
-                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while adding the role-depth mapping for API : " + apiId, e, log);
-            } else {
-                String errorMessage = "Error while adding the role-depth mapping for API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Delete a particular role-depth mapping
-     *
-     * @param apiId              apiId
-     * @param roleDepthMappingId uuid of the role-depth mapping
-     * @param messageContext     message context
-     * @return Status of role-depth mapping deletion
-     */
-    @Override
-    public Response apisApiIdGraphqlPoliciesDepthRoleDepthMappingIdDelete(String apiId, String roleDepthMappingId,
-                                                                          MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                boolean deleteState = apiProvider.deleteRoleDepthMapping(roleDepthMappingId);
-                if (deleteState) {
-                    return Response.ok().build();
-                }
-            } else {
-                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while deleting the role-depth mapping of API : "
-                                + apiId + " with uuid : " + roleDepthMappingId, e, log);
-            } else {
-                String msg = "Error while deleting the role-depth mapping of API : " + apiId +
-                        " with uuid : " + roleDepthMappingId;
-                RestApiUtil.handleInternalServerError(msg, e, log);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get a particular role-depth mapping
-     *
-     * @param apiId              apiId
-     * @param roleDepthMappingId uuid of the role-depth mapping
-     * @param messageContext     message context
-     * @return Response with the requested role-depth mapping
-     */
-    @Override
-    public Response apisApiIdGraphqlPoliciesDepthRoleDepthMappingIdGet(String apiId, String roleDepthMappingId,
-                                                                       MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                GraphqlDepthInfo graphqlDepthInfo = apiProvider.getRoleDepthMapping(roleDepthMappingId);
-                GraphQLQueryDepthInfoDTO graphQLQueryDepthInfoDTO =
-                        GraphqlQueryAnalysisMappingUtil.fromGraphqlDepthInfotoDTO(graphqlDepthInfo);
-                return Response.ok().entity(graphQLQueryDepthInfoDTO).build();
-            } else {
-                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving the role-depth mapping of API : " +
-                                apiId + " with uuid : " + roleDepthMappingId, e, log);
-            } else {
-                String msg = "Error while retrieving the role-depth mapping of API : " + apiId +
-                        " with uuid : " + roleDepthMappingId;
-                RestApiUtil.handleInternalServerError(msg, e, log);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Update a particular role-depth mapping
-     *
-     * @param apiId              apiId
-     * @param roleDepthMappingId uuid of the role-depth mapping
-     * @param body               GraphQLQueryDepthInfo DTO as request body
-     * @param messageContext     message context
-     * @return Response
-     */
-    @Override
-    public Response apisApiIdGraphqlPoliciesDepthRoleDepthMappingIdPut(String apiId, String roleDepthMappingId,
-                                                        GraphQLQueryDepthInfoDTO body, MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            GraphqlDepthInfo graphqlDepthInfo = GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlDepthInfo(body);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                apiProvider.updateRoleDepthMapping(roleDepthMappingId, graphqlDepthInfo);
-                return Response.ok().build();
-            } else {
-                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while updating the role-depth mapping of API : "
-                                + apiId + " with uuid : " + roleDepthMappingId, e, log);
-            } else {
-                String msg = "Error while updating the role-depth mapping of API : " + apiId
-                        + " with uuid : " + roleDepthMappingId;
-                RestApiUtil.handleInternalServerError(msg, e, log);
-            }
-        }
-        return null;
-    }
 
     // AWS Lambda: rest api operation to get ARNs
     @Override

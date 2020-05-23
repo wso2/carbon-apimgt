@@ -303,13 +303,10 @@ public class GraphQLSchemaDefinition {
             }
         }
 
-        Map<String, Serializable> depthObject = new LinkedHashMap<>(graphqlPolicyDefinition.getRoleDepthMappings().size() + 1);
-        depthObject.put("enabled", graphqlPolicyDefinition.isDepthEnabled());
-        for (GraphqlDepthInfo graphqlDepthInfo : graphqlPolicyDefinition.getRoleDepthMappings()) {
-            depthObject.put(graphqlDepthInfo.getRole(), graphqlDepthInfo.getDepthValue());
-        }
+        Map<String, Object> depthObject = new LinkedHashMap<>(1);
+        depthObject.put("max_query_depth", graphqlPolicyDefinition.getMaxDepth());
 
-        Map<String, Object> complexityObject = new LinkedHashMap<>(3);
+        Map<String, Object> complexityObject = new LinkedHashMap<>(2);
         Map<String, Map<String, Object>> customComplexityObject = new LinkedHashMap<>(customComplexityMap.size());
         for (HashMap.Entry<String, HashMap<String, Integer>> entry : customComplexityMap.entrySet()) {
             HashMap<String, Integer> fieldValueMap = entry.getValue();
@@ -322,9 +319,7 @@ public class GraphQLSchemaDefinition {
             }
             customComplexityObject.put(type, fieldValueObject);
         }
-        GraphqlComplexityInfo graphqlComplexityInfo = graphqlPolicyDefinition.getGraphqlComplexityInfo();
-        complexityObject.put("enabled", graphqlPolicyDefinition.isComplexityEnabled());
-        complexityObject.put("max_query_complexity", graphqlComplexityInfo.getMaxComplexity());
+        complexityObject.put("max_query_complexity", graphqlPolicyDefinition.getMaxComplexity());
         complexityObject.put("custom_complexity_values", customComplexityObject);
 
         policyDefinition.put(APIConstants.QUERY_ANALYSIS_DEPTH, depthObject);

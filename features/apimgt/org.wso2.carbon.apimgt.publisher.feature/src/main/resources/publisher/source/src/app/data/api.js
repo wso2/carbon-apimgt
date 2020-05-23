@@ -983,7 +983,6 @@ class API extends Resource {
             return promise_subscription;
         }
     }
-
     /**
      * Block subscriptions for given subscriptionId
      * @param {String} id Subscription UUID
@@ -1615,6 +1614,75 @@ class API extends Resource {
             return client.apis['Label Collection'].get_labels();
         });
     }
+
+    /**
+     * Get the complexity related details of an API
+     */
+    
+    getGraphqlPoliciesComplexity(id) {
+        const promisePolicies = this.client.then(client => {
+            return client.apis['GraphQL Policies'].get_apis__apiId__graphql_policies_complexity(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promisePolicies.then(response => response.body);
+    }
+    /**
+     * Update complexity related details of an API
+     */
+    addGraphqlPoliciesComplexity(api_id, body) {
+        const promised_updateComplexity = this.client.then(client => {
+            const payload = {
+                apiId: api_id,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['GraphQL Policies'].post_apis__apiId__graphql_policies_complexity(
+                    payload,
+                    this._requestMetaData(),
+            );
+        });
+        return promised_updateComplexity;
+    }
+
+
+    /**
+     * Update complexity related details of an API
+     */
+    updateGraphqlPoliciesComplexity(api_id, body) {
+        const promised_updateComplexity = this.client.then(client => {
+            const payload = {
+                apiId: api_id,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['GraphQL Policies'].put_apis__apiId__graphql_policies_complexity(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+        return promised_updateComplexity;
+    }
+
+    /**
+     * Retrieve all types and fields of a GraphQL Schema
+     */
+    getGraphqlPoliciesComplexityTypes(id) {
+        const promisePolicies = this.client.then(client => {
+            return client.apis['GraphQL Policies'].get_apis__apiId__graphql_policies_complexity_types(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promisePolicies.then(response => response.body);
+    }
+
+    
 
     /**
      *

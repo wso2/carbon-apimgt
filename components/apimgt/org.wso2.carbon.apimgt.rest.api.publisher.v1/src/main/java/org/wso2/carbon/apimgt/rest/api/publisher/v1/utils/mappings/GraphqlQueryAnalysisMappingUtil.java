@@ -40,7 +40,6 @@ public class GraphqlQueryAnalysisMappingUtil {
             GraphqlComplexityInfo graphqlComplexityInfo) {
         GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO = new GraphQLQueryComplexityInfoDTO();
         List<GraphQLCustomComplexityInfoDTO> graphQLCustomComplexityInfoDTOList = new ArrayList<GraphQLCustomComplexityInfoDTO>();
-        graphQLQueryComplexityInfoDTO.setMaxComplexity(graphqlComplexityInfo.getMaxComplexity());
         for (CustomComplexityDetails customComplexityDetails : graphqlComplexityInfo.getList()) {
             GraphQLCustomComplexityInfoDTO graphQLCustomComplexityInfoDTO = new GraphQLCustomComplexityInfoDTO();
             graphQLCustomComplexityInfoDTO.setType(customComplexityDetails.getType());
@@ -62,7 +61,6 @@ public class GraphqlQueryAnalysisMappingUtil {
             GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO) {
         GraphqlComplexityInfo graphqlComplexityInfo = new GraphqlComplexityInfo();
         List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<CustomComplexityDetails>();
-        graphqlComplexityInfo.setMaxComplexity(graphQLQueryComplexityInfoDTO.getMaxComplexity());
         for (GraphQLCustomComplexityInfoDTO graphQLCustomComplexityInfoDTO : graphQLQueryComplexityInfoDTO.getList()) {
             CustomComplexityDetails customComplexityDetails = new CustomComplexityDetails();
             customComplexityDetails.setType(graphQLCustomComplexityInfoDTO.getType());
@@ -72,82 +70,6 @@ public class GraphqlQueryAnalysisMappingUtil {
         }
         graphqlComplexityInfo.setList(customComplexityDetailsList);
         return graphqlComplexityInfo;
-    }
-
-    /**
-     * Converts a list of GraphqlDepthInfo objects into a DTO object
-     *
-     * @param graphqlDepthInfoList List<GraphqlDepthInfo>
-     * @return a new GraphQLQueryDepthInfoListDTO object corresponding to given list of GraphqlDepthInfo objects
-     */
-    public static GraphQLQueryDepthInfoListDTO fromGraphqlDepthInfoListtoDTO(
-            List<GraphqlDepthInfo> graphqlDepthInfoList) {
-        GraphQLQueryDepthInfoListDTO graphQLQueryDepthInfoListDTO = new GraphQLQueryDepthInfoListDTO();
-        List<GraphQLQueryDepthInfoDTO> graphQLQueryDepthInfoDTOList = new ArrayList<GraphQLQueryDepthInfoDTO>();
-        for (GraphqlDepthInfo graphqlDepthInfo : graphqlDepthInfoList) {
-            GraphQLQueryDepthInfoDTO graphQLQueryDepthInfoDTO = new GraphQLQueryDepthInfoDTO();
-            graphQLQueryDepthInfoDTO.setUuid(graphqlDepthInfo.getUuid());
-            graphQLQueryDepthInfoDTO.setRole(graphqlDepthInfo.getRole());
-            graphQLQueryDepthInfoDTO.setDepthValue(graphqlDepthInfo.getDepthValue());
-            graphQLQueryDepthInfoDTOList.add(graphQLQueryDepthInfoDTO);
-        }
-        graphQLQueryDepthInfoListDTO.setList(graphQLQueryDepthInfoDTOList);
-        return graphQLQueryDepthInfoListDTO;
-    }
-
-    /**
-     * Converts a GraphQLQueryDepthInfo DTO object into a GraphqlDepthInfo object
-     *
-     * @param graphQLQueryDepthInfoDTO GraphQLQueryDepthInfoDTO object
-     * @return a new GraphqlDepthInfo object corresponding to given GraphQLQueryDepthInfoDTO object
-     */
-    public static GraphqlDepthInfo fromDTOtoGraphqlDepthInfo(GraphQLQueryDepthInfoDTO graphQLQueryDepthInfoDTO) {
-        GraphqlDepthInfo graphqlDepthInfo = new GraphqlDepthInfo();
-        graphqlDepthInfo.setRole(graphQLQueryDepthInfoDTO.getRole());
-        graphqlDepthInfo.setDepthValue(graphQLQueryDepthInfoDTO.getDepthValue());
-        return graphqlDepthInfo;
-    }
-
-    /**
-     * Converts a GraphqlDepthInfo object into a DTO object
-     *
-     * @param graphqlDepthInfo GraphqlDepthInfo object
-     * @return a new GraphQLQueryDepthInfoDTO object corresponding to given GraphqlDepthInfo object
-     */
-    public static GraphQLQueryDepthInfoDTO fromGraphqlDepthInfotoDTO(GraphqlDepthInfo graphqlDepthInfo) {
-        GraphQLQueryDepthInfoDTO graphQLQueryDepthInfoDTO = new GraphQLQueryDepthInfoDTO();
-        graphQLQueryDepthInfoDTO.setUuid(graphqlDepthInfo.getUuid());
-        graphQLQueryDepthInfoDTO.setRole(graphqlDepthInfo.getRole());
-        graphQLQueryDepthInfoDTO.setDepthValue(graphqlDepthInfo.getDepthValue());
-        return graphQLQueryDepthInfoDTO;
-    }
-
-    /**
-     * Converts a GraphqlDepthComplexityStatus object into a DTO object
-     *
-     * @param graphqlDepthComplexityStatus GraphqlDepthComplexityStatus object
-     * @return a new GraphQLDepthComplexityStatusDTO object corresponding to given GraphqlDepthComplexityStatus object
-     */
-    public static GraphQLDepthComplexityStatusDTO fromGraphqlDepthComplexityStatustoDTO(
-            GraphqlDepthComplexityStatus graphqlDepthComplexityStatus) {
-        GraphQLDepthComplexityStatusDTO graphQLDepthComplexityStatusDTO = new GraphQLDepthComplexityStatusDTO();
-        graphQLDepthComplexityStatusDTO.setDepthEnabled(graphqlDepthComplexityStatus.getDepthEnabled());
-        graphQLDepthComplexityStatusDTO.setComplexityEnabled(graphqlDepthComplexityStatus.getComplexityEnabled());
-        return graphQLDepthComplexityStatusDTO;
-    }
-
-    /**
-     * Converts a GraphQLDepthComplexityStatusDTO object into a GraphqlDepthComplexityStatus object
-     *
-     * @param body GraphQLDepthComplexityStatusDTO object
-     * @return a new GraphqlDepthComplexityStatus object corresponding to given GraphQLDepthComplexityStatusDTO object
-     */
-    public static GraphqlDepthComplexityStatus fromDTOtoGraphqlDepthComplexityStatus(
-            GraphQLDepthComplexityStatusDTO body) {
-        GraphqlDepthComplexityStatus graphqlDepthComplexityStatus = new GraphqlDepthComplexityStatus();
-        graphqlDepthComplexityStatus.setDepthEnabled(body.isDepthEnabled());
-        graphqlDepthComplexityStatus.setComplexityEnabled(body.isComplexityEnabled());
-        return graphqlDepthComplexityStatus;
     }
 
     /**

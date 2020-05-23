@@ -1096,6 +1096,7 @@ public final class APIConstants {
     public static final String QUERY_ANALYSIS_DEPTH = "depth";
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
     public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
+    public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
     public static final String CHECK_ENABLED = "enabled";
     public static final String DEFAULT_DEPTH_ROLE = "default";
 

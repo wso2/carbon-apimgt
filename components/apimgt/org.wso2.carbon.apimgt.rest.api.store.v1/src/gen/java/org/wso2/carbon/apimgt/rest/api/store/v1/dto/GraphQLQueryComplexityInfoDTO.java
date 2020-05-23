@@ -1,10 +1,10 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
+package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryDepthInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.GraphQLCustomComplexityInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -16,13 +16,13 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class GraphQLQueryDepthInfoListDTO   {
+public class GraphQLQueryComplexityInfoDTO   {
   
-    private List<GraphQLQueryDepthInfoDTO> list = new ArrayList<>();
+    private List<GraphQLCustomComplexityInfoDTO> list = new ArrayList<>();
 
   /**
    **/
-  public GraphQLQueryDepthInfoListDTO list(List<GraphQLQueryDepthInfoDTO> list) {
+  public GraphQLQueryComplexityInfoDTO list(List<GraphQLCustomComplexityInfoDTO> list) {
     this.list = list;
     return this;
   }
@@ -30,10 +30,10 @@ public class GraphQLQueryDepthInfoListDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<GraphQLQueryDepthInfoDTO> getList() {
+  public List<GraphQLCustomComplexityInfoDTO> getList() {
     return list;
   }
-  public void setList(List<GraphQLQueryDepthInfoDTO> list) {
+  public void setList(List<GraphQLCustomComplexityInfoDTO> list) {
     this.list = list;
   }
 
@@ -46,8 +46,8 @@ public class GraphQLQueryDepthInfoListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    GraphQLQueryDepthInfoListDTO graphQLQueryDepthInfoList = (GraphQLQueryDepthInfoListDTO) o;
-    return Objects.equals(list, graphQLQueryDepthInfoList.list);
+    GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfo = (GraphQLQueryComplexityInfoDTO) o;
+    return Objects.equals(list, graphQLQueryComplexityInfo.list);
   }
 
   @Override
@@ -58,7 +58,7 @@ public class GraphQLQueryDepthInfoListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GraphQLQueryDepthInfoListDTO {\n");
+    sb.append("class GraphQLQueryComplexityInfoDTO {\n");
     
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
     sb.append("}");

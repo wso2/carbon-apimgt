@@ -64,8 +64,7 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthComplexityStatus;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlDepthInfo;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlMaxDepthMaxComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -1578,38 +1577,24 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getComplexityDetails(apiIdentifier);
     }
 
+    public void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
+        apiMgtDAO.addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+    }
+
+
     public void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
         apiMgtDAO.updateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
     }
 
-    public List<GraphqlDepthInfo> getDepthDetails(APIIdentifier apiIdentifier) throws APIManagementException {
-        return apiMgtDAO.getDepthDetails(apiIdentifier);
+    public GraphqlMaxDepthMaxComplexityInfo getMaxDepthMaxComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
+        return apiMgtDAO.getMaxDepthMaxComplexityDetails(apiIdentifier);
     }
 
-    public void addRoleDepthMapping(APIIdentifier apiIdentifier, GraphqlDepthInfo graphqlDepthInfo) throws APIManagementException {
-        apiMgtDAO.addRoleDepthMapping(apiIdentifier, graphqlDepthInfo);
+
+    public void updateMaxDepthMaxComplexityDetails(APIIdentifier apiIdentifier, GraphqlMaxDepthMaxComplexityInfo graphqlDepthInfo) throws APIManagementException {
+        apiMgtDAO.updateMaxDepthMaxComplexityDetails(apiIdentifier, graphqlDepthInfo);
     }
 
-    public GraphqlDepthInfo getRoleDepthMapping(String uuid) throws APIManagementException {
-        return apiMgtDAO.getRoleDepthMapping(uuid);
-    }
-
-    public void updateRoleDepthMapping(String uuid, GraphqlDepthInfo graphqlDepthInfo) throws APIManagementException {
-        apiMgtDAO.updateRoleDepthMapping(uuid, graphqlDepthInfo);
-    }
-
-    public boolean deleteRoleDepthMapping(String uuid) throws APIManagementException {
-        return apiMgtDAO.deleteRoleDepthMapping(uuid);
-    }
-
-    public GraphqlDepthComplexityStatus getLimitationStatus(APIIdentifier apiIdentifier) throws APIManagementException {
-        return apiMgtDAO.getLimitationStatus(apiIdentifier);
-    }
-
-    public void updateLimitationStatus(APIIdentifier apiIdentifier, GraphqlDepthComplexityStatus
-            graphqlDepthComplexityStatus) throws APIManagementException {
-        apiMgtDAO.updateLimitationStatus(apiIdentifier, graphqlDepthComplexityStatus);
-    }
 
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException {
         return null;

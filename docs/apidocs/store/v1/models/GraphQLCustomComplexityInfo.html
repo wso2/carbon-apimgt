@@ -1,6 +1,6 @@
 <div class="main-content">
 
-        <h2>GraphQLQueryDepthInfo</h2>
+        <h2>GraphQLCustomComplexityInfo</h2>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -21,48 +21,48 @@
                 <tbody>
                     <tr>
                         <td class="parameter">
-                            <p>uuid</p>
+                            <p>type</p>
                             <p class="param-required">
+                                required
                                 
-                                optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">The type found within the schema of the API </p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked"></p></td>
+                        <td class="parameter"> <p class="marked">Country</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>role</p>
+                            <p>field</p>
                             <p class="param-required">
+                                required
                                 
-                                optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">The user role to which the allowed maximum depth is being specified </p></td>
+                        <td class="parameter"><p class="marked">The field which is found under the type within the schema of the API </p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">admin</p></td>
+                        <td class="parameter"> <p class="marked">name</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>depthValue</p>
+                            <p>complexityValue</p>
                             <p class="param-required">
+                                required
                                 
-                                optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">The depth value allocated for the associated role </p></td>
+                        <td class="parameter"><p class="marked">The complexity value allocated for the associated field under the specified type </p></td>
                         <td class="parameter">
                                 <a href="#!/models#integer">integer</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">20</p></td>
+                        <td class="parameter"> <p class="marked">1</p></td>
                     </tr>
                 </tbody>
             </table>

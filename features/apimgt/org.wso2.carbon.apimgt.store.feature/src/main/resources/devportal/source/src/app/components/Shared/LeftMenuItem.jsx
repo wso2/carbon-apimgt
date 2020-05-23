@@ -87,18 +87,18 @@ function LeftMenuItem(props) {
     const [selected, setSelected] = useState(false);
 
     const {
-        classes, theme, Icon, to, history, text, route, submenu,
+        classes, theme, Icon, to, history, text, route, submenu, open
     } = props;
     const routeToCheck = route || text;
     const { leftMenu } = theme.custom;
     const strokeColor = theme.palette.getContrastText(leftMenu.background);
     const { iconSize } = leftMenu;
     const ditectCurrentMenu = (location = null) => {
-        if(!location) {
+        if (!location) {
             location = window.location;
         }
         const { pathname } = location;
-        
+
         const test1 = new RegExp('/' + routeToCheck + '$', 'g');
         const test2 = new RegExp('/' + routeToCheck + '/', 'g');
         if (pathname.match(test1) || pathname.match(test2)) {
@@ -106,8 +106,8 @@ function LeftMenuItem(props) {
         } else {
             setSelected(false);
         }
-        
-        
+
+
     };
     useEffect(() => {
         ditectCurrentMenu();
@@ -116,11 +116,11 @@ function LeftMenuItem(props) {
         ditectCurrentMenu(location);
     });
     let activeBackground = '';
-    if(selected && !submenu) {
+    if (selected && !submenu) {
         activeBackground = leftMenu.leftMenuActive;
-    } else if ( selected && submenu ) {
+    } else if (selected && submenu) {
         activeBackground = leftMenu.leftMenuActiveSubmenu;
-    } 
+    }
     return (
         <Link
             className={classNames(
@@ -152,33 +152,47 @@ function LeftMenuItem(props) {
                         ),
                     })
                 ) : (
-                // We can also add custom icons
-                    <CustomIcon
-                        strokeColor={strokeColor}
-                        width={iconSize}
-                        height={iconSize}
-                        icon={props.iconText}
-                        className={classNames(
-                            classes.leftLInk,
-                            {
-                                [classes.noIcon]: leftMenu.style === 'no icon',
-                            },
-                            'leftLink_Icon',
-                        )}
-                    />
-                ))}
-            <Typography
-                className={classNames(
-                    classes.leftLInkText,
-                    {
-                        [classes.leftLInkText_IconLeft]: leftMenu.style === 'icon left',
-                        [classes.leftLInkText_NoText]: leftMenu.style === 'no text',
-                    },
-                    'leftLInkText',
-                )}
-            >
-                {props.text}
-            </Typography>
+                        // We can also add custom icons
+                        <CustomIcon
+                            strokeColor={strokeColor}
+                            width={iconSize}
+                            height={iconSize}
+                            icon={props.iconText}
+                            className={classNames(
+                                classes.leftLInk,
+                                {
+                                    [classes.noIcon]: leftMenu.style === 'no icon',
+                                },
+                                'leftLink_Icon',
+                            )}
+                        />
+                    ))}
+            {open && (
+                <Typography
+                    className={classNames(
+                        classes.leftLInkText,
+                        {
+                            [classes.leftLInkText_IconLeft]: leftMenu.style === 'icon left',
+                            [classes.leftLInkText_NoText]: leftMenu.style === 'no text',
+                        },
+                        'leftLInkText',
+                    )}
+                >
+                    {props.text}
+                </Typography>
+            )}
+            {!open && (
+                <Typography
+                    className={classNames(
+                        {
+                            [classes.leftLInkText_IconLeft]: leftMenu.style === 'icon left',
+                        },
+                        'leftLInkText',
+                    )}
+                />
+            )}
+            
+
         </Link>
     );
 }

@@ -136,6 +136,22 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
+    @Path("/{apiId}/graphql-policies/complexity")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get the complexity related details of an API", notes = "This operation can be used to retrieve complexity related details belonging to an API by providing the API id. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "GraphQL Policies",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Requested complexity details returned. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested API does not contain any complexity details. ", response = Void.class) })
+    public Response apisApiIdGraphqlPoliciesComplexityGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.apisApiIdGraphqlPoliciesComplexityGet(apiId, securityContext);
+    }
+
+    @GET
     @Path("/{apiId}/graphql-schema")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
