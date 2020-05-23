@@ -22,6 +22,10 @@ var appUtils = require("/services/utils.js");
 var settings = require("/site/public/theme/settings.js");
 response.contentType = "application/javascript";
 settings.Settings.app.context = appUtils.getTenantBaseStoreContext();
+settings.Settings.idp = {
+    origin: appUtils.getIDPOrigin(),
+    checkSessionEndpoint: appUtils.getIDPCheckSessionEndpoint(),
+}
 var content = "const Settings ="+stringify(settings.Settings)+";";
 print(content);
 %>

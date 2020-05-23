@@ -69,10 +69,10 @@ export default function ApiBreadcrumbs(props) {
                     </Link>
                 </RouterLink>
 
-                <Link color='inherit' className={classes.linkNotActive}>
+                {selectedTag && <Link color='inherit' className={classes.linkNotActive}>
                     <CustomIcon width={16} height={16} icon='api' />
                     <span className={classes.selectedTagText}>{selectedTag}</span>
-                </Link>
+                </Link>}
             </Breadcrumbs>
         </Paper>
     );

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.6.142-SNAPSHOT</version>
+        <version>6.6.229-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -62,7 +62,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.throttle.service</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.internal.service</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
@@ -157,11 +157,11 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.wso2.carbon.apimgt</groupId>
-                                    <artifactId>org.wso2.carbon.throttle.service</artifactId>
+                                    <artifactId>org.wso2.carbon.apimgt.internal.service</artifactId>
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>throttle#data#v1.war</destFileName>
+                                    <destFileName>internal#data#v1.war</destFileName>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}/external/libs</outputDirectory>

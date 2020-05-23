@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.keymgt;
 
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
+import org.wso2.carbon.identity.oauth2.authz.OAuthAuthzReqMessageContext;
+import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 
 /**
  * Helper DTO to pass information to the utility method "APIMTokenIssuerUtil.generateToken()"
@@ -28,8 +30,9 @@ public class JWTAccessTokenIssuerDTO {
     private String clientId;
     private long validityPeriod;
     private String[] scopeList;
-    private String authCode;
     private AuthenticatedUser user;
+    private OAuthAuthzReqMessageContext oauthAuthzMsgCtx;
+    private OAuthTokenReqMessageContext tokReqMsgCtx;
 
     public String getClientId() {
 
@@ -61,16 +64,6 @@ public class JWTAccessTokenIssuerDTO {
         this.scopeList = scopeList;
     }
 
-    public String getAuthCode() {
-
-        return authCode;
-    }
-
-    public void setAuthCode(String authCode) {
-
-        this.authCode = authCode;
-    }
-
     public AuthenticatedUser getUser() {
 
         return user;
@@ -81,4 +74,23 @@ public class JWTAccessTokenIssuerDTO {
         this.user = user;
     }
 
+    public void setAuthzMessageContext(OAuthAuthzReqMessageContext oauthAuthzMsgCtx) {
+        this.oauthAuthzMsgCtx  = oauthAuthzMsgCtx;
+
+    }
+
+    public OAuthAuthzReqMessageContext getOauthAuthzMsgCtx() {
+
+        return oauthAuthzMsgCtx;
+    }
+
+    public void setTokenReqMessageContext(OAuthTokenReqMessageContext tokReqMsgCtx) {
+        this.tokReqMsgCtx = tokReqMsgCtx;
+
+    }
+
+    public OAuthTokenReqMessageContext getTokReqMsgCtx() {
+
+        return tokReqMsgCtx;
+    }
 }

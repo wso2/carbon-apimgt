@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.6.142-SNAPSHOT</version>
+        <version>6.6.229-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -37,6 +37,11 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.admin</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.admin.v1</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
@@ -70,6 +75,14 @@
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
                                     <destFileName>api#am#admin#v0.16.war</destFileName>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.wso2.carbon.apimgt</groupId>
+                                    <artifactId>org.wso2.carbon.apimgt.rest.api.admin.v1</artifactId>
+                                    <overWrite>true</overWrite>
+                                    <type>war</type>
+                                    <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
+                                    <destFileName>api#am#admin.war</destFileName>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
@@ -92,6 +105,7 @@
                                     <directory>resources</directory>
                                     <includes>
                                         <include>api#am#admin#v0.16.war</include>
+                                        <include>api#am#admin.war</include>
                                         <include>p2.inf</include>
                                         <include>build.properties</include>
                                     </includes>

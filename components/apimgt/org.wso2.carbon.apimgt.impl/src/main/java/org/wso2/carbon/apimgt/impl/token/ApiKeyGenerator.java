@@ -86,6 +86,13 @@ public class ApiKeyGenerator {
         jwtClaimsSetBuilder.claim("application", jwtTokenInfoDTO.getApplication());
         jwtClaimsSetBuilder.claim("keytype", jwtTokenInfoDTO.getKeyType());
 
+        if (jwtTokenInfoDTO.getPermittedIP() != null) {
+            jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.PERMITTED_IP, jwtTokenInfoDTO.getPermittedIP());
+        }
+        if (jwtTokenInfoDTO.getPermittedReferer() != null) {
+            jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.PERMITTED_REFERER, jwtTokenInfoDTO.getPermittedReferer());
+        }
+
         return jwtClaimsSetBuilder.build().toJSONObject().toJSONString();
     }
 

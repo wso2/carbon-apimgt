@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
@@ -176,6 +177,24 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to get APISubscriptionCountByAPI
      */
     long getAPISubscriptionCountByAPI(APIIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Returns the subscriber name for the given subscription id.
+     *
+     * @param subscriptionId The subscription id of the subscriber to be returned
+     * @return The subscriber or null if the requested subscriber does not exist
+     * @throws APIManagementException if failed to get Subscriber
+     */
+    String getSubscriber(String subscriptionId) throws APIManagementException;
+
+    /**
+     * Returns the claims of subscriber for the given subscriber.
+     *
+     * @param subscriber The name of the subscriber to be returned
+     * @return The looked up claims of the subscriber or null if the requested subscriber does not exist
+     * @throws APIManagementException if failed to get Subscriber
+     */
+    Map getSubscriberClaims(String subscriber) throws APIManagementException;
 
     void addTier(Tier tier) throws APIManagementException;
 
@@ -947,6 +966,18 @@ public interface APIProvider extends APIManager {
     String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
 
     /**
+     *  Add a block condition with condition status
+     *
+     * @param conditionType type of the condition (IP, Context .. )
+     * @param conditionValue value of the condition
+     * @param conditionStatus status of the condition
+     * @return UUID of the new Block Condition
+     * @throws APIManagementException
+     */
+    String addBlockCondition(String conditionType, String conditionValue, boolean conditionStatus)
+            throws APIManagementException;
+
+    /**
      * Deletes a block condition given its Id
      *
      * @param conditionId Id of the condition
@@ -1295,4 +1326,101 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException;
+
+    /**
+     * Find the resources that should be removed from API Products,
+     * because those have been already removed from the swagger definition of the updating API.
+     *
+     * @param apiId API Identifier
+     * @param apiDefinition swagger definition
+     * @return  List of resources to be removed that are reused among API Products
+     * @throws APIManagementException when error updating resources
+     */
+    List<APIResource> getResourcesToBeRemovedFromAPIProducts(APIIdentifier apiId, String apiDefinition)
+            throws APIManagementException;
+
+    /**
+     * Finds resources that have been removed in the updated API URITemplates,
+     * that are currently reused by API Products.
+     *
+     * @param updatedUriTemplates Updated URITemplates
+     * @param existingAPI         Existing API
+     * @return List of removed resources that are reused among API Products
+     */
+    List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI);
+
+    /**
+     * Check whether the given scope name exists as a shared scope in the tenant domain.
+     *
+     * @param scopeName    Shared Scope name
+     * @param tenantDomain Tenant Domain
+     * @return Scope availability
+     * @throws APIManagementException if failed to check the availability
+     */
+    boolean isSharedScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Add a shared scope.
+     *
+     * @param scope        Shared Scope
+     * @param tenantDomain Tenant domain
+     * @return UUID of the added Shared Scope
+     * @throws APIManagementException if failed to add a scope
+     */
+    String addSharedScope(Scope scope, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get all available shared scopes.
+     *
+     * @param tenantDomain tenant domain
+     * @return Shared Scope list
+     * @throws APIManagementException if failed to get the scope list
+     */
+    List<Scope> getAllSharedScopes(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get all available shared scope keys.
+     *
+     * @param tenantDomain tenant domain
+     * @return Shared Scope Keyset
+     * @throws APIManagementException if failed to get the scope key set
+     */
+    Set<String> getAllSharedScopeKeys(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get shared scope by UUID.
+     *
+     * @param sharedScopeId Shared scope Id
+     * @param tenantDomain  tenant domain
+     * @return Shared Scope
+     * @throws APIManagementException If failed to get the scope
+     */
+    Scope getSharedScopeByUUID(String sharedScopeId, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Delete shared scope.
+     *
+     * @param scopeName Shared scope name
+     * @param tenantDomain  tenant domain
+     * @throws APIManagementException If failed to delete the scope
+     */
+    void deleteSharedScope(String scopeName, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Update a shared scope.
+     *
+     * @param sharedScope  Shared Scope
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException If failed to update
+     */
+    void updateSharedScope(Scope sharedScope, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Validate a shared scopes set. Add the additional attributes (scope description, bindings etc).
+     *
+     * @param scopes       Shared scopes set
+     * @param tenantDomain Tenant domain
+     * @throws APIManagementException If failed to validate
+     */
+    void validateSharedScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException;
 }

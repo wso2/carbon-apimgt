@@ -19,13 +19,12 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +52,9 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationtier())) {
             claims.put(dialect + "/applicationtier", jwtInfoDto.getApplicationtier());
         }
+        if (StringUtils.isNotEmpty(jwtInfoDto.getApiName())) {
+            claims.put(dialect + "/apiname", jwtInfoDto.getApiName());
+        }
         if (StringUtils.isNotEmpty(jwtInfoDto.getApicontext())) {
             claims.put(dialect + "/apicontext", jwtInfoDto.getApicontext());
         }
@@ -76,15 +78,18 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
     @Override
     public Map<String, Object> populateCustomClaims(JWTInfoDto jwtInfoDto) {
 
+        String[] restrictedClaims = {"iss", "sub", "aud", "exp", "nbf", "iat", "jti", "application", "tierInfo",
+                "subscribedAPIs"};
         JWTConfigurationDto jwtConfigurationDto =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
         Map<String, Object> claims = new HashMap<>();
-        Set<String> additionalClaims = jwtConfigurationDto.getJwtAdditionalClaims();
+        Set<String> jwtExcludedClaims = jwtConfigurationDto.getJWTExcludedClaims();
+        jwtExcludedClaims.addAll(Arrays.asList(restrictedClaims));
         JWTClaimsSet jwtToken = jwtInfoDto.getJwtToken();
         if (jwtToken != null) {
-            for (String additionalClaim : additionalClaims){
-                if (jwtToken.getClaim(additionalClaim) != null) {
-                    claims.put(additionalClaim, jwtToken.getClaim(additionalClaim));
+            for (Map.Entry<String, Object> jwtClaimEntry : jwtToken.getClaims().entrySet()) {
+                if (!jwtExcludedClaims.contains(jwtClaimEntry.getKey())) {
+                    claims.put(jwtClaimEntry.getKey(), jwtClaimEntry.getValue());
                 }
             }
         }

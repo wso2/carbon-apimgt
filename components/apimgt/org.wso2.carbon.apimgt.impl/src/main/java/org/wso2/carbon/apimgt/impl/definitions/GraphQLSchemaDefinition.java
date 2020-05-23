@@ -170,7 +170,7 @@ public class GraphQLSchemaDefinition {
 
         if (swaggerDef != null) {
             for (URITemplate template : api.getUriTemplates()) {
-                String scopeInURITemplate = template.getScope() != null ? template.getScope().getName() : null;
+                String scopeInURITemplate = template.getScope() != null ? template.getScope().getKey() : null;
                 if (scopeInURITemplate != null) {
                     operationScopeMap.put(template.getUriTemplate(), scopeInURITemplate);
                     if (!scopeRoleMap.containsKey(scopeInURITemplate)) {

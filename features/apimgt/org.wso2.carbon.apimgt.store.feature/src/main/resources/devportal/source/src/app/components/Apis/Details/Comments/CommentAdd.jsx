@@ -49,6 +49,11 @@ const styles = theme => ({
         display: 'flex',
         alignItems: 'top',
     },
+    commentAddButton: {
+        '& span.MuiButton-label span': {
+            color: theme.palette.getContrastText(theme.palette.primary.main),
+        },
+    },
 });
 
 /**
@@ -193,6 +198,7 @@ class CommentAdd extends React.Component {
                                 color='primary'
                                 disabled={currentLength === 0}
                                 onClick={() => this.handleClickAddComment()}
+                                className={classes.commentAddButton}
                             >
                                 <FormattedMessage
                                     id='Apis.Details.Comments.CommentAdd.btn.add.comment'

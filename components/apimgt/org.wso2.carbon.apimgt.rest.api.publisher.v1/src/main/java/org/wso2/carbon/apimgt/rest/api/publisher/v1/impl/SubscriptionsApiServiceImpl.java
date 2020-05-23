@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationUsageDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
@@ -212,5 +213,21 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         }
 
         return null;
+    }
+
+    @Override
+    public Response subscriptionsSubscriptionIdSubscriberInfoGet(String subscriptionId, MessageContext messageContext)
+            throws APIManagementException {
+        if (StringUtils.isBlank(subscriptionId)) {
+            String errorMessage = "Subscription ID cannot be empty or null when getting subscriber info.";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+        }
+        String username = RestApiUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiUtil.getProvider(username);
+        String subscriberName = apiProvider.getSubscriber(subscriptionId);
+        Map subscriberClaims = apiProvider.getSubscriberClaims(subscriberName);
+        SubscriberInfoDTO subscriberInfoDTO = SubscriptionMappingUtil.fromSubscriberClaimsToDTO(subscriberClaims,
+                subscriberName);
+        return Response.ok().entity(subscriberInfoDTO).build();
     }
 }

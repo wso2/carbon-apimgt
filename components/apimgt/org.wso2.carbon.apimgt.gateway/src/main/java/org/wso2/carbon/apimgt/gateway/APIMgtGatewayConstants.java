@@ -132,6 +132,8 @@ public class APIMgtGatewayConstants {
     public static final String GET_ALL_URI_TEMPLATES = "API:GET_ALL_URI_TEMPLATES()";
     public static final String TRACING_ENABLED = "OpenTracer.Enabled";
     public static final String SPAN_KIND = "span.kind";
+    public static final String SPAN_REQUEST_PATH = "span.request.path";
+    public static final String SPAN_REQUEST_METHOD = "span.request.method";
     public static final String SERVER = "server";
     public static final String ERROR = "error";
     public static final String KEY_SPAN_ERROR = "API Authentication Failure";
@@ -194,5 +196,13 @@ public class APIMgtGatewayConstants {
     public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
     public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
     public static final String DEFAULT_JWT_TRANSFORMER_ISSUER = "default";
+    public static final String SPAN_ACTIVITY_ID = "span.activity.id";
+    public static final String SPAN_RESOURCE = "span.resource";
+    public static final String SPAN_API_NAME = "span.api.name";
+    public static final String SPAN_API_VERSION = "span.api.version";
+    public static final String SPAN_APPLICATION_NAME = "span.application.name";
+    public static final String SPAN_APPLICATION_ID = "span.application.id";
+    public static final String SPAN_APPLICATION_CONSUMER_KEY = "span.consumerkey";
+    public static final String SPAN_ENDPOINT = "span.endpoint";
 }
 

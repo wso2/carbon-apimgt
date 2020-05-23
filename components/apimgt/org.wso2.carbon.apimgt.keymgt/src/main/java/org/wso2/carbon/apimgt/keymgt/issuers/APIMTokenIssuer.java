@@ -98,7 +98,7 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
                 jwtAccessTokenIssuerDTO.setClientId(clientId);
                 jwtAccessTokenIssuerDTO.setScopeList(scopes);
                 jwtAccessTokenIssuerDTO.setValidityPeriod(validityPeriod);
-                jwtAccessTokenIssuerDTO.setAuthCode(authCode);
+                jwtAccessTokenIssuerDTO.setTokenReqMessageContext(tokReqMsgCtx);
                 String token = APIMTokenIssuerUtil.generateToken(jwtAccessTokenIssuerDTO, application);
                 if (log.isDebugEnabled()) {
                     long end_time_2 = System.nanoTime();
@@ -149,24 +149,7 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
         return false;
     }
 
-   /* Needs to be uncommented after implicit grant renewal fix
-    @Override
-    public boolean renewAccessTokenPerRequest(OAuthAuthzReqMessageContext oauthAuthzMsgCtx) {
 
-        String clientId = oauthAuthzMsgCtx.getAuthorizationReqDTO().getConsumerKey();
-        Application application;
-        try {
-            application = APIUtil.getApplicationByClientId(clientId);
-            if (null != application) {
-                if (APIConstants.JWT.equals(application.getTokenType())) {
-                    return true;
-                }
-            }
-        } catch (APIManagementException e) {
-            log.error("Error occurred while getting Token type.", e);
-        }
-        return false;
-    }*/
 
     //This method will be called for implicit grant
     @Override
@@ -214,8 +197,7 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
                 jwtAccessTokenIssuerDTO.setClientId(clientId);
                 jwtAccessTokenIssuerDTO.setScopeList(scopeList);
                 jwtAccessTokenIssuerDTO.setValidityPeriod(validityPeriod);
-                jwtAccessTokenIssuerDTO.setAuthCode("");
-
+                jwtAccessTokenIssuerDTO.setAuthzMessageContext(oauthAuthzMsgCtx);
                 String token = APIMTokenIssuerUtil.generateToken(jwtAccessTokenIssuerDTO, application);
 
                 if (log.isDebugEnabled()) {

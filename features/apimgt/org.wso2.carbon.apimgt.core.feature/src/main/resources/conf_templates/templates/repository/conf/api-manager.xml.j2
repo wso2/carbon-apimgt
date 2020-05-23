@@ -31,9 +31,11 @@
 
     {% if apim.idp is defined %}
     <IdentityProvider>
+        <ServerURL>{{apim.idp.server_url}}</ServerURL>
         <!-- Server URL of the Identity Provider used for login/logout operations in API Publisher and API Developer Portal -->
         <AuthorizeEndpoint>{{apim.idp.authorize_endpoint}}</AuthorizeEndpoint>
         <OIDCLogoutEndpoint>{{apim.idp.oidc_logout_endpoint}}</OIDCLogoutEndpoint>
+        <CheckSessionEndpoint>{{apim.idp.oidc_check_session_endpoint}}</CheckSessionEndpoint>
     </IdentityProvider>
     {% endif %}
 
@@ -60,6 +62,9 @@
              JWT. -->
         <ConsumerDialectURI>{{apim.jwt.claim_dialect}}</ConsumerDialectURI>
 
+        <!-- Whether to convert claims retrieved from AuthorizationGrantCache to the dialect defined in ConsumerDialectURI -->
+        <ConvertClaimsToConsumerDialect>{{apim.jwt.convert_dialect}}</ConvertClaimsToConsumerDialect>
+
         <!-- Signature algorithm. Accepts "SHA256withRSA" or "NONE". To disable signing explicitly specify "NONE". -->
         <SignatureAlgorithm>{{apim.jwt.signing_algorithm}}</SignatureAlgorithm>
 
@@ -76,11 +81,11 @@
         <GatewayJWTGeneration>
             <ImplClass>{{apim.jwt.gateway_generator.impl}}</ImplClass>
             <Configuration>
-            <Claims>
-                {%- for claim in apim.jwt.gateway_generator.claims -%}
+            <ExcludedClaims>
+                {%- for claim in apim.jwt.gateway_generator.excluded_claims -%}
                 <Claim>{{claim}}</Claim>
                 {% endfor %}
-            </Claims>
+            </ExcludedClaims>
             </Configuration>
         </GatewayJWTGeneration>
     </JWTConfiguration>
@@ -151,7 +156,11 @@
         <URL>{{issuer_1.jwks.url}}</URL>
       </JWKSConfiguration>
     {% endif %}
-      <ClaimMappings>
+    {% if issuer_1.disable_default_claim_mapping is defined %}
+      <ClaimMappings disable-default-claim-mapping ="{{issuer_1.disable_default_claim_mapping}}">
+    {% else%}
+      <ClaimMappings disable-default-claim-mapping = "false">
+    {% endif %}
       {%- for claim in issuer_1.claim_mapping -%}
          <ClaimMapping>
            <RemoteClaim>{{claim.remote_claim}}</RemoteClaim>
@@ -497,6 +506,9 @@
 
         <!--This parameter specifies the alias value of the Api Key which will be used for Api Key Authentication-->
         <ApiKeyAlias>{{apim.devportal.api_key_alias}}</ApiKeyAlias>
+
+        <!--This parameter specifies whether Anonymous Mode is enabled. By default it is true.-->
+        <EnableAnonymousMode>{{apim.devportal.enable_anonymous_mode}}</EnableAnonymousMode>
     </APIStore>
 
     <APIPublisher>
@@ -511,6 +523,8 @@
         <!--APIsPerPage>30</APIsPerPage-->
         <!-- This property need to be enabled to enable the publisher access control support -->
         <EnableAccessControl>true</EnableAccessControl>
+        <!-- This property is to add the claims that needs to be displayed in Publisher -->
+        <SubscriberClaims>{{apim.publisher.subscriber_claims}}</SubscriberClaims>
     </APIPublisher>
 
     <!-- Status observers can be registered against the API Publisher to listen for
@@ -585,6 +599,10 @@
             </WhiteListedURI>
             <WhiteListedURI>
                 <URI>/api/am/admin/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/endpoint-registry/{version}/swagger.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
             <WhiteListedURI>
@@ -677,6 +695,10 @@
             </WhiteListedURI>
             <WhiteListedURI>
                 <URI>/api/am/publisher/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/admin/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </WhiteListedURI>
             <WhiteListedURI>

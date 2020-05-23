@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
+import org.wso2.carbon.identity.oauth2.authz.OAuthAuthzReqMessageContext;
+import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +43,26 @@ public class JwtTokenInfoDTO implements Serializable {
     private String consumerKey;
     private List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
     private Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, SubscriptionPolicyDTO>();
+    private OAuthTokenReqMessageContext tokReqMsgCtx;
+    private OAuthAuthzReqMessageContext oauthAuthzMsgCtx;
+    private String permittedIP;
+    private String permittedReferer;
+
+    public String getPermittedIP() {
+        return permittedIP;
+    }
+
+    public void setPermittedIP(String permittedIP) {
+        this.permittedIP = permittedIP;
+    }
+
+    public String getPermittedReferer() {
+        return permittedReferer;
+    }
+
+    public void setPermittedReferer(String permittedReferer) {
+        this.permittedReferer = permittedReferer;
+    }
 
     public String getSubscriber() {
         return subscriber;
@@ -137,8 +160,19 @@ public class JwtTokenInfoDTO implements Serializable {
         this.consumerKey = consumerKey;
     }
 
+    public void setTokenReqMessageContext(OAuthTokenReqMessageContext tokReqMsgCtx) {
+        this.tokReqMsgCtx = tokReqMsgCtx;
+    }
 
-    public void setBackendJwt(String backendJwt) {
+    public OAuthTokenReqMessageContext getTokReqMsgCtx() {
+        return tokReqMsgCtx;
+    }
 
+    public void setOauthAuthzMsgCtx(OAuthAuthzReqMessageContext oauthAuthzMsgCtx) {
+        this.oauthAuthzMsgCtx = oauthAuthzMsgCtx;
+    }
+
+    public OAuthAuthzReqMessageContext getOauthAuthzMsgCtx() {
+        return oauthAuthzMsgCtx;
     }
 }

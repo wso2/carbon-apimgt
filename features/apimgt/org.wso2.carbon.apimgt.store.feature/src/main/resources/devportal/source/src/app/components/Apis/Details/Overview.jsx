@@ -97,6 +97,7 @@ const styles = (theme) => ({
     },
     subheading: {
         marginLeft: theme.spacing(2),
+        color: theme.palette.getContrastText(theme.palette.background.paper),
     },
     marginTop: {
         marginTop: theme.spacing(8),
@@ -136,14 +137,22 @@ const styles = (theme) => ({
         minHeight: 236,
     },
     emptyBox: {
-        background: '#ffffff55',
-        color: theme.palette.getContrastText(theme.palette.background.paper),
+        background: theme.custom.overview.noContentBackground,
+        color: theme.palette.getContrastText(theme.custom.overview.noContentBackground),
         border: 'solid 1px #fff',
         padding: theme.spacing(2),
+        '& span': {
+            color: theme.palette.getContrastText(theme.custom.overview.noContentBackground),
+        }
     },
     paper: {
         margin: theme.spacing(2),
         padding: theme.spacing(2),
+    },
+    paperWithDoc: {
+        margin: theme.spacing(2),
+        padding: theme.spacing(2),
+        color: theme.palette.getContrastText(theme.palette.background.paper),
     },
     heading: {
         color: theme.palette.getContrastText(theme.palette.background.paper),
@@ -237,7 +246,7 @@ function Overview(props) {
     if (overviewDocOverride) {
         return (
             <>
-                <Paper className={classes.paper}>
+                <Paper className={classes.paperWithDoc}>
                     <View doc={overviewDocOverride} apiId={api.id} fullScreen />
                 </Paper>
             </>

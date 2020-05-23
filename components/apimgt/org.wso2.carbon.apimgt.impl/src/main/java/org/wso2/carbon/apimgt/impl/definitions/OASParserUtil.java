@@ -55,7 +55,6 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.converter.SwaggerConverter;
-import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,6 +77,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -161,7 +161,8 @@ public class OASParserUtil {
         }
     }
 
-    /**Map<String, Object>
+    /**
+     * Map<String, Object>
      * Return correct OAS parser by validating give definition with OAS 2/3 parsers.
      *
      * @param apiDefinition OAS definition
@@ -218,7 +219,7 @@ public class OASParserUtil {
     }
 
     public static String getOASDefinitionWithTierContentAwareProperty(String apiDefinition,
-            List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException {
+                                                                      List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException {
         if (contentAwareTiersList == null || contentAwareTiersList.isEmpty()) {
             // no modifications if the list is empty
             return apiDefinition;
@@ -503,7 +504,7 @@ public class OASParserUtil {
     }
 
     private static void readPathsAndScopes(PathItem srcPathItem, URITemplate uriTemplate,
-                                 final Set<Scope> allScopes, SwaggerUpdateContext context) {
+                                           final Set<Scope> allScopes, SwaggerUpdateContext context) {
         Map<PathItem.HttpMethod, Operation> srcOperations = srcPathItem.readOperationsMap();
 
         PathItem.HttpMethod httpMethod = PathItem.HttpMethod.valueOf(uriTemplate.getHTTPVerb().toUpperCase());
@@ -712,8 +713,8 @@ public class OASParserUtil {
      * @param description           description of the OpenAPI Definition
      */
     public static void updateValidationResponseAsSuccess(APIDefinitionValidationResponse validationResponse,
-            String originalAPIDefinition, String openAPIVersion, String title, String version, String context,
-            String description) {
+                                                         String originalAPIDefinition, String openAPIVersion, String title, String version, String context,
+                                                         String description, List<String> endpoints) {
         validationResponse.setValid(true);
         validationResponse.setContent(originalAPIDefinition);
         APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
@@ -722,6 +723,7 @@ public class OASParserUtil {
         info.setVersion(version);
         info.setContext(context);
         info.setDescription(description);
+        info.setEndpoints(endpoints);
         validationResponse.setInfo(info);
     }
 
@@ -733,7 +735,7 @@ public class OASParserUtil {
      * @return added ErrorItem object
      */
     public static ErrorItem addErrorToValidationResponse(APIDefinitionValidationResponse validationResponse,
-            String errMessage) {
+                                                         String errMessage) {
         ErrorItem errorItem = new ErrorItem();
         errorItem.setErrorCode(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode());
         errorItem.setMessage(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorMessage());
@@ -788,7 +790,7 @@ public class OASParserUtil {
             HttpResponse response = httpClient.execute(httpGet);
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
-                String responseStr = EntityUtils.toString(response.getEntity());
+                String responseStr = EntityUtils.toString(response.getEntity(), "UTF-8");
                 validationResponse = validateAPIDefinition(responseStr, returnJsonContent);
             } else {
                 validationResponse.setValid(false);
@@ -932,16 +934,19 @@ public class OASParserUtil {
      * Sets the scopes to the URL template object using the given list of scopes
      *
      * @param template URL template
-     * @param scopes   list of scopes
+     * @param resourceScopes   list of scopes of the resource
+     * @param apiScopes set of scopes defined for the API
      * @return URL template after setting the scopes
      */
-    public static URITemplate setScopesToTemplate(URITemplate template, List<String> scopes) {
-        for (String scope : scopes) {
-            Scope scopeObj = new Scope();
-            scopeObj.setKey(scope);
-            scopeObj.setName(scope);
+    public static URITemplate setScopesToTemplate(URITemplate template, List<String> resourceScopes,
+                                                  Set<Scope> apiScopes) throws APIManagementException {
 
-            template.setScopes(scopeObj);
+        for (String scopeName : resourceScopes) {
+            Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
+            if (scope == null) {
+                throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+            }
+            template.setScopes(scope);
         }
         return template;
     }
@@ -1150,6 +1155,7 @@ public class OASParserUtil {
 
     /**
      * Get Application level security types
+     *
      * @param security list of security types
      * @return List of api security
      */
@@ -1166,18 +1172,18 @@ public class OASParserUtil {
     /**
      * generate app security information for OAS definition
      *
-     * @param security          application security
+     * @param security application security
      * @return JsonNode
      */
-     static JsonNode getAppSecurity(String security) {
-         List<String> appSecurityList = new ArrayList<>();
-         ObjectNode endpointResult = objectMapper.createObjectNode();
-         boolean appSecurityOptional = false;
-         if (security != null) {
-             List<String> securityList = Arrays.asList(security.split(","));
-             appSecurityList = getAPISecurity(securityList);
-             appSecurityOptional = !securityList.contains(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
-         }
+    static JsonNode getAppSecurity(String security) {
+        List<String> appSecurityList = new ArrayList<>();
+        ObjectNode endpointResult = objectMapper.createObjectNode();
+        boolean appSecurityOptional = false;
+        if (security != null) {
+            List<String> securityList = Arrays.asList(security.split(","));
+            appSecurityList = getAPISecurity(securityList);
+            appSecurityOptional = !securityList.contains(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+        }
         ArrayNode appSecurityTypes = objectMapper.valueToTree(appSecurityList);
         endpointResult.set(APIConstants.WSO2_APP_SECURITY_TYPES, appSecurityTypes);
         endpointResult.put(APIConstants.OPTIONAL, appSecurityOptional);
@@ -1187,16 +1193,16 @@ public class OASParserUtil {
     /**
      * generate response cache configuration for OAS definition.
      *
-     * @param responseCache     response cache Enabled/Disabled
-     * @param cacheTimeout      cache timeout in seconds
+     * @param responseCache response cache Enabled/Disabled
+     * @param cacheTimeout  cache timeout in seconds
      * @return JsonNode
      */
-     static JsonNode getResponseCacheConfig(String responseCache, int cacheTimeout) {
-         ObjectNode responseCacheConfig = objectMapper.createObjectNode();
-         boolean enabled = APIConstants.ENABLED.equalsIgnoreCase(responseCache);
-         responseCacheConfig.put(APIConstants.RESPONSE_CACHING_ENABLED, enabled);
-         responseCacheConfig.put(APIConstants.RESPONSE_CACHING_TIMEOUT, cacheTimeout);
-         return responseCacheConfig;
+    static JsonNode getResponseCacheConfig(String responseCache, int cacheTimeout) {
+        ObjectNode responseCacheConfig = objectMapper.createObjectNode();
+        boolean enabled = APIConstants.ENABLED.equalsIgnoreCase(responseCache);
+        responseCacheConfig.put(APIConstants.RESPONSE_CACHING_ENABLED, enabled);
+        responseCacheConfig.put(APIConstants.RESPONSE_CACHING_TIMEOUT, cacheTimeout);
+        return responseCacheConfig;
     }
 
     /**
@@ -1208,7 +1214,193 @@ public class OASParserUtil {
      */
     static Set<Scope> sortScopes(Set<Scope> scopeSet) {
         List<Scope> scopesSortedlist = new ArrayList<>(scopeSet);
-        scopesSortedlist.sort(Comparator.comparing(Scope::getName));
+        scopesSortedlist.sort(Comparator.comparing(Scope::getKey));
         return new LinkedHashSet<>(scopesSortedlist);
     }
+
+    /**
+     * Preprocessing of scopes schemes to support multiple schemes other than 'default' type
+     * This method will change the given definition
+     *
+     * @param swaggerContent
+     * @return processedSwaggerContent
+     */
+    public static String preProcess(String swaggerContent) throws APIManagementException {
+        //Load required properties from swagger to the API
+        APIDefinition apiDefinition = getOASParser(swaggerContent);
+        String swaggerContentUpdated = apiDefinition.processOtherSchemeScopes(swaggerContent);
+        return swaggerContentUpdated;
+    }
+
+    /**
+     * This method returns api that is attached with api extensions related to micro-gw
+     *
+     * @param swaggerContent String
+     * @param api            API
+     * @return URITemplate
+     */
+    public static API setExtensionsToAPI(String swaggerContent, API api, boolean isBasepathExtractedFromSwagger) throws APIManagementException {
+        APIDefinition apiDefinition = getOASParser(swaggerContent);
+        api = apiDefinition.setExtensionsToAPI(swaggerContent, api, isBasepathExtractedFromSwagger);
+        return api;
+    }
+
+    /**
+     * This method returns extension of basepath related to micro-gw
+     *
+     * @param extensions Map<String, Object> extensions
+     * @return String String
+     * @throws APIManagementException throws if an error occurred
+     */
+    public static String getBasePathFromSwagger(Map<String, Object> extensions) throws APIManagementException {
+        String basepath = null;
+        ObjectMapper mapper = new ObjectMapper();
+        if (extensions.containsKey(APIConstants.X_WSO2_BASEPATH)) {
+            Object object = extensions.get(APIConstants.X_WSO2_BASEPATH).toString();
+            basepath = mapper.convertValue(object, String.class);
+        }
+        return basepath;
+    }
+
+    /**
+     * This method returns extension of throttling tier related to micro-gw
+     *
+     * @param extensions Map<String, Object> extensions
+     * @return String String
+     * @throws APIManagementException throws if an error occurred
+     */
+    public static String getThrottleTierFromSwagger(Map<String, Object> extensions) throws APIManagementException {
+        String throttleTier = null;
+        ObjectMapper mapper = new ObjectMapper();
+        if (extensions.containsKey(APIConstants.X_WSO2_THROTTLING_TIER)) {
+            Object object = extensions.get(APIConstants.X_WSO2_THROTTLING_TIER).toString();
+            throttleTier = mapper.convertValue(object, String.class);
+        }
+        return throttleTier;
+    }
+
+    /**
+     * This method returns extension of transports(http,https) related to micro-gw
+     *
+     * @param extensions Map<String, Object> extensions
+     * @return String getTransports
+     * @throws APIManagementException throws if an error occurred
+     */
+    public static String getTransportsFromSwagger(Map<String, Object> extensions) throws APIManagementException {
+        String transports = null;
+        ObjectMapper mapper = new ObjectMapper();
+        if (extensions.containsKey(APIConstants.X_WSO2_TRANSPORTS)) {
+            Object object = extensions.get(APIConstants.X_WSO2_TRANSPORTS).toString();
+            transports = mapper.convertValue(object, String.class);
+            transports = transports.replace("[", "");
+            transports = transports.replace("]", "");
+            transports = transports.replace(" ", "");
+        }
+        return transports;
+    }
+
+    /**
+     * This method returns extension of mutualSSL related to micro-gw
+     *
+     * @param extensions Map<String, Object> extensions
+     * @return String getMutualSSLEnabled
+     * @throws APIManagementException throws if an error occurred
+     */
+    public static String getMutualSSLEnabledFromSwagger(Map<String, Object> extensions) throws APIManagementException {
+        String mutualSSl = null;
+        ObjectMapper mapper = new ObjectMapper();
+        if (extensions.containsKey(APIConstants.X_WSO2_MUTUAL_SSL)) {
+            Object object = extensions.get(APIConstants.X_WSO2_MUTUAL_SSL).toString();
+            mutualSSl = mapper.convertValue(object, String.class);
+        }
+        return mutualSSl;
+    }
+
+    /**
+     * This method returns extension of CORS config related to micro-gw
+     *
+     * @param extensions Map<String, Object> extensions
+     * @return CORSConfiguration getCorsConfig
+     * @throws APIManagementException throws if an error occurred
+     */
+    public static CORSConfiguration getCorsConfigFromSwagger(Map<String, Object> extensions) throws APIManagementException {
+        boolean corsConfigurationEnabled = false;
+        boolean accessControlAllowCredentials = false;
+        List<String> accessControlAllowOrigins = new ArrayList<>();
+        List<String> accessControlAllowHeaders = new ArrayList<>();
+        List<String> accessControlAllowMethods = new ArrayList<>();
+        CORSConfiguration corsConfig = new CORSConfiguration(corsConfigurationEnabled,
+                accessControlAllowOrigins, accessControlAllowCredentials, accessControlAllowHeaders,
+                accessControlAllowMethods);
+        ObjectMapper mapper = new ObjectMapper();
+
+        if (extensions.containsKey(APIConstants.X_WSO2_CORS)) {
+            Object corsConfigObject = extensions.get(APIConstants.X_WSO2_CORS);
+            JsonNode objectNode = mapper.convertValue(corsConfigObject, JsonNode.class);
+            corsConfigurationEnabled = Boolean.parseBoolean(String.valueOf(objectNode.get("corsConfigurationEnabled")));
+            accessControlAllowCredentials = Boolean.parseBoolean(String.valueOf(objectNode.get("accessControlAllowCredentials")));
+            accessControlAllowHeaders = mapper.convertValue(objectNode.get("accessControlAllowHeaders"), ArrayList.class);
+            accessControlAllowOrigins = mapper.convertValue(objectNode.get("accessControlAllowOrigins"), ArrayList.class);
+            accessControlAllowMethods = mapper.convertValue(objectNode.get("accessControlAllowMethods"), ArrayList.class);
+            corsConfig.setCorsConfigurationEnabled(corsConfigurationEnabled);
+            corsConfig.setAccessControlAllowCredentials(accessControlAllowCredentials);
+            corsConfig.setAccessControlAllowHeaders(accessControlAllowHeaders);
+            corsConfig.setAccessControlAllowOrigins(accessControlAllowOrigins);
+            corsConfig.setAccessControlAllowMethods(accessControlAllowMethods);
+        }
+        return corsConfig;
+    }
+
+    /**
+     * This method returns extension of responseCache enabling check related to micro-gw
+     *
+     * @param extensions Map<String, Object> extensions
+     * @return String getResponseCache
+     * @throws APIManagementException throws if an error occurred
+     */
+    public static boolean getResponseCacheFromSwagger(Map<String, Object> extensions) throws APIManagementException {
+        ObjectMapper mapper = new ObjectMapper();
+        boolean responseCache = false;
+        if (extensions.containsKey(APIConstants.X_WSO2_RESPONSE_CACHE)) {
+            Object responseCacheConfig = extensions.get(APIConstants.X_WSO2_RESPONSE_CACHE);
+            ObjectNode cacheConfigNode = mapper.convertValue(responseCacheConfig, ObjectNode.class);
+            responseCache = Boolean.parseBoolean(String.valueOf(cacheConfigNode.get(APIConstants.RESPONSE_CACHING_ENABLED)));
+        }
+
+        return responseCache;
+    }
+
+    /**
+     * This method returns extension of cache timeout related to micro-gw
+     *
+     * @param extensions Map<String, Object> extensions
+     * @return int cacheTimeOut
+     * @throws APIManagementException throws if an error occurred
+     */
+    public static int getCacheTimeOutFromSwagger(Map<String, Object> extensions) throws APIManagementException {
+        ObjectMapper mapper = new ObjectMapper();
+        int timeOut = 0;
+        if (extensions.containsKey(APIConstants.X_WSO2_RESPONSE_CACHE)) {
+            Object responseCacheConfig = extensions.get(APIConstants.X_WSO2_RESPONSE_CACHE);
+            ObjectNode cacheConfigNode = mapper.convertValue(responseCacheConfig, ObjectNode.class);
+            timeOut = Integer.parseInt(String.valueOf(cacheConfigNode.get(APIConstants.RESPONSE_CACHING_TIMEOUT)));
+        }
+        return timeOut;
+    }
+
+    /**
+     * This method returns extension of custom authorization Header related to micro-gw
+     *
+     * @param extensions Map<String, Object> extensions
+     * @return String authorizationHeader
+     * @throws APIManagementException throws if an error occurred
+     */
+    public static String getAuthorizationHeaderFromSwagger(Map<String, Object> extensions) throws APIManagementException {
+        String authorizationHeader = null;
+        if (extensions.containsKey(APIConstants.X_WSO2_AUTH_HEADER)) {
+            authorizationHeader = extensions.get(APIConstants.X_WSO2_AUTH_HEADER).toString();
+        }
+        return authorizationHeader;
+    }
+
 }

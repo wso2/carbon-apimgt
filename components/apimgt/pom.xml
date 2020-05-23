@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>6.6.142-SNAPSHOT</version>
+        <version>6.6.229-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -45,8 +45,10 @@
         <module>org.wso2.carbon.apimgt.rest.api.publisher</module>
         <module>org.wso2.carbon.apimgt.rest.api.publisher.v1</module>
         <module>org.wso2.carbon.apimgt.rest.api.admin</module>
+        <module>org.wso2.carbon.apimgt.rest.api.admin.v1</module>
         <module>org.wso2.carbon.apimgt.rest.api.dcr</module>
-        <module>org.wso2.carbon.apimgt.throttling.service</module>
+        <module>org.wso2.carbon.apimgt.rest.api.endpoint.registry</module>
+        <module>org.wso2.carbon.apimgt.internal.service</module>
         <module>org.wso2.carbon.apimgt.throttling.siddhi.extension</module>
         <module>samples/org.wso2.carbon.apimgt.samples.calculator</module>
         <module>samples/org.wso2.carbon.apimgt.samples.pizzashack</module>

@@ -35,6 +35,10 @@ import { SettingsProvider } from './app/components/Shared/SettingsContext';
 import API from './app/data/api';
 import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
 import DefaultConfigurations from './defaultTheme';
+import AuthManager from './app/data/AuthManager';
+import Loading from './app/components/Base/Loading/Loading';
+import CONSTS from './app/data/Constants';
+
 const protectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApp" */));
 
 // Configure JSS
@@ -58,6 +62,7 @@ class DevPortal extends React.Component {
             settings: null,
             tenantDomain: null,
             theme: null,
+            isNonAnonymous: false,
             lanuage: null,
         };
         this.systemTheme = merge(cloneDeep(DefaultConfigurations), Configurations);
@@ -74,7 +79,15 @@ class DevPortal extends React.Component {
         promisedSettings
             .then((response) => {
                 this.setSettings(response.body);
-            }).catch((error) => {
+                if (!this.state.settings.IsAnonymousModeEnabled) {
+                    this.setState({ isNonAnonymous: true });
+                }
+                if (Settings.app.isPassive && !AuthManager.getUser()
+                    && !sessionStorage.getItem(CONSTS.ISLOGINPERMITTED) && !this.state.isNonAnonymous) {
+                    this.checkLoginUser();
+                }
+            })
+            .catch((error) => {
                 console.error(
                     'Error while receiving settings : ',
                     error,
@@ -87,19 +100,17 @@ class DevPortal extends React.Component {
         } else {
             this.setTenantTheme(urlParams.get('tenant'));
         }
-
-        
     }
-     /**
-     * Load locale file.
-     *
-     * @param {string} locale Locale name
-     */
+    /**
+    * Load locale file.
+    *
+    * @param {string} locale Locale name
+    */
     loadLocale(locale = 'en') {
         fetch(`${Settings.app.context}/site/public/locales/${locale}.json`)
             .then((resp) => {
-                if(resp.status === 200){
-                    return(resp.json());
+                if (resp.status === 200) {
+                    return (resp.json());
                 } else {
                     return {};
                 }
@@ -120,21 +131,21 @@ class DevPortal extends React.Component {
         let browserLocal = Utils.getBrowserLocal();
         const { direction: defaultDirection, custom: { languageSwitch: { active: languageSwitchActive, languages } } } = localTheme;
         let lanauageToLoad = null;
-        if(languageSwitchActive){
+        if (languageSwitchActive) {
             const savedLanguage = localStorage.getItem('language');
             let direction = defaultDirection;
             let selectedLanuageObject = null;
-            for(var i=0; i < languages.length; i++){
-                if(savedLanguage && savedLanguage === languages[i].key){
+            for (var i = 0; i < languages.length; i++) {
+                if (savedLanguage && savedLanguage === languages[i].key) {
                     selectedLanuageObject = languages[i];
-                } else if(!savedLanguage && browserLocal === languages[i].key) {
+                } else if (!savedLanguage && browserLocal === languages[i].key) {
                     selectedLanuageObject = languages[i];
                 }
             }
-            if(selectedLanuageObject) {
-                direction = selectedLanuageObject.direction || defaultDirection;       
+            if (selectedLanuageObject) {
+                direction = selectedLanuageObject.direction || defaultDirection;
             }
-            document.body.setAttribute('dir',direction);
+            document.body.setAttribute('dir', direction);
             this.systemTheme.direction = direction;
             lanauageToLoad = savedLanguage || selectedLanuageObject.key || browserLocal;
         } else {
@@ -179,30 +190,29 @@ class DevPortal extends React.Component {
      * @param {string} tenant tenant name
      */
     setTenantTheme(tenant) {
-        if(tenant && tenant !== "INVALID"){
+        if (tenant && tenant !== 'INVALID') {
             fetch(`${Settings.app.context}/site/public/tenant_themes/${tenant}/apim/defaultTheme.json`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("HTTP error " + response.status);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                // Merging with the system theme.
-                const tenantMergedTheme = merge(cloneDeep(DefaultConfigurations), Configurations, data);
-                this.updateLocale(tenantMergedTheme);
-                this.setState({ theme: tenantMergedTheme });
-            })
-            .catch(() => {
-                console.log('Error loading teant theme. Loading the default theme.');
-                this.updateLocale();
-                this.setState({ theme: this.systemTheme });
-            });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("HTTP error " + response.status);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    // Merging with the system theme.
+                    const tenantMergedTheme = merge(cloneDeep(DefaultConfigurations), Configurations, data);
+                    this.updateLocale(tenantMergedTheme);
+                    this.setState({ theme: tenantMergedTheme });
+                })
+                .catch(() => {
+                    console.log('Error loading teant theme. Loading the default theme.');
+                    this.updateLocale();
+                    this.setState({ theme: this.systemTheme });
+                });
         } else {
             this.updateLocale();
             this.setState({ theme: this.systemTheme });
         }
-        
     }
 
     /**
@@ -218,11 +228,22 @@ class DevPortal extends React.Component {
             cssUrlWithTenant = tenantCustomCss.replace('<tenant-domain>', tenantDomain);
         }
         if (cssUrlWithTenant) {
+            let url = cssUrlWithTenant;
+            
+            if(Settings.app.context === ''){
+                if(/^\//.test(cssUrlWithTenant)){
+                    url = cssUrlWithTenant.substr(1);
+                } else {
+                    url = cssUrlWithTenant;
+                }
+            } else {
+                url = Settings.app.context + '/' + cssUrlWithTenant;
+            }
             return (
                 <link
                     rel='stylesheet'
                     type='text/css'
-                    href={`${Settings.app.context}/${cssUrlWithTenant}`}
+                    href={url}
                 />
             );
         } else {
@@ -247,13 +268,29 @@ class DevPortal extends React.Component {
     }
 
     /**
+     * If the passive mode is enabled then this method will check whether
+     * a user is already logged into the publisher.
+     */
+    checkLoginUser() {
+        if (!sessionStorage.getItem(CONSTS.LOGINSTATUS)) {
+            sessionStorage.setItem(CONSTS.LOGINSTATUS, 'check-Login-status');
+            window.location = Settings.app.context + '/services/configs?loginPrompt=false';
+        } else if (sessionStorage.getItem(CONSTS.LOGINSTATUS)) {
+            sessionStorage.removeItem(CONSTS.LOGINSTATUS);
+        }
+    }
+
+    /**
      * Reners the DevPortal component
      * @returns {JSX} this is the description
      * @memberof DevPortal
      */
     render() {
-        const { settings, tenantDomain, theme, messages, language } = this.state;
+        const {
+            settings, tenantDomain, theme, messages, language,
+        } = this.state;
         const { app: { context } } = Settings;
+
         return (
             settings && theme && messages && language && (
                 <SettingsProvider value={{

@@ -35,6 +35,9 @@
 		<field type="text" required="true">
             <name>Version Type</name>
         </field>
+        <field type="text">
+            <name>Type</name>
+        </field>
         <field type="options">
             <name label="isDefaultVersion">Is Default Version</name>
             <values>
@@ -74,6 +77,9 @@
         </field>
 		<field type="text" url="true">
             <name>Endpoint Password</name>
+        </field>
+        <field type="text">
+            <name>Endpoint Registry Entry</name>
         </field>
 	<field type="text">
             <name>InSequence</name>

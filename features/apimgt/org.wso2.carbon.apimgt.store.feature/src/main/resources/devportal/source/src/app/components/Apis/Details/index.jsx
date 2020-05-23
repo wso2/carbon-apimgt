@@ -59,7 +59,7 @@ const LoadableSwitch = withRouter((props) => {
     let tryoutRoute;
     if (api.type === 'GRAPHQL') {
         tryoutRoute = <Route path='/apis/:apiUuid/test' component={GraphQLConsole} />
-    } else {
+    }else {
         tryoutRoute = <Route path='/apis/:apiUuid/test' component={ApiConsole} />
     }
 
@@ -128,6 +128,7 @@ const styles = (theme) => {
             overflowY: 'auto',
         },
         leftMenuVerticalRight: {
+            width: theme.custom.leftMenu.width,
             top: 0,
             right: 0,
             overflowY: 'auto',
@@ -172,13 +173,15 @@ const styles = (theme) => {
             marginRight: shiftToRightMinView,
             paddingBottom: theme.spacing(3),
         },
+        shiftLeft: {
+            marginLeft: 0,
+        },
         contentLoader: {
             paddingTop: theme.spacing(3),
         },
         contentLoaderRightMenu: {
             paddingRight: theme.custom.leftMenu.width,
         },
-        
     };
 };
 /**
@@ -226,7 +229,7 @@ class Details extends React.Component {
                         Alert.error(message);
                     }
                     console.error('Error when getting apis', error);
-                    if (status === 404) {
+                    if (status === 404 || status === 403) {
                         this.setState({ notFound: true });
                     }
                 });
@@ -359,6 +362,9 @@ class Details extends React.Component {
         if (!api && notFound) {
             return <ResourceNotFound />;
         }
+        // check for widget=true in the query params. If it's present we render without <Base> component.
+        const pageUrl = new URL(window.location);
+        const isWidget = pageUrl.searchParams.get('widget');
 
         return api ? (
             <ApiContext.Provider value={this.state}>
@@ -366,12 +372,12 @@ class Details extends React.Component {
                     <title>{`${prefix} ${api.name}${sufix}`}</title>
                 </Helmet>
                 <style>{globalStyle}</style>
-
+                  {!isWidget && (
                 <div
                     className={classNames(
                         classes.leftMenu,
                         {
-                            [classes.leftMenuHorizontal]: position === 'horizontal' 
+                            [classes.leftMenuHorizontal]: position === 'horizontal'
                         },
                         {
                             [classes.leftMenuVerticalLeft]: position === 'vertical-left' && open,
@@ -482,8 +488,9 @@ class Details extends React.Component {
                     )}
 
                 </div>
+                )}
 
-                <div 
+                <div
                     className={classNames(
                         { [classes.content]: open },
                         { [classes.contentExpandView]: !open },
@@ -499,7 +506,6 @@ class Details extends React.Component {
                         <LoadableSwitch api={api} updateSubscriptionData={this.updateSubscriptionData} />
                     </div>
                 </div>
-
             </ApiContext.Provider>
         ) : (
                 <div className='apim-dual-ring' />

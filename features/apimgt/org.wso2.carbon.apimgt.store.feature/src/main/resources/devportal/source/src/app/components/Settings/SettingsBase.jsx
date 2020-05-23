@@ -31,6 +31,9 @@ const styles = theme => ({
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
         paddingLeft: theme.spacing(),
+        '& span, & h5, & label, & input, & td, & li': {
+            color: theme.palette.getContrastText(theme.palette.background.default),
+        },
     },
 });
 

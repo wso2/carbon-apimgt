@@ -9,8 +9,8 @@ import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import javax.validation.constraints.*;
 
 
@@ -189,7 +189,7 @@ public enum SubscriptionAvailabilityEnum {
     private String createdTime = null;
     private String lastUpdatedTime = null;
     private List<ProductAPIDTO> apis = new ArrayList<>();
-    private List<ScopeDTO> scopes = new ArrayList<>();
+    private List<APIScopeDTO> scopes = new ArrayList<>();
     private List<String> categories = new ArrayList<>();
 
   /**
@@ -757,7 +757,7 @@ public enum SubscriptionAvailabilityEnum {
 
   /**
    **/
-  public APIProductDTO scopes(List<ScopeDTO> scopes) {
+  public APIProductDTO scopes(List<APIScopeDTO> scopes) {
     this.scopes = scopes;
     return this;
   }
@@ -765,10 +765,10 @@ public enum SubscriptionAvailabilityEnum {
   
   @ApiModelProperty(value = "")
   @JsonProperty("scopes")
-  public List<ScopeDTO> getScopes() {
+  public List<APIScopeDTO> getScopes() {
     return scopes;
   }
-  public void setScopes(List<ScopeDTO> scopes) {
+  public void setScopes(List<APIScopeDTO> scopes) {
     this.scopes = scopes;
   }
 

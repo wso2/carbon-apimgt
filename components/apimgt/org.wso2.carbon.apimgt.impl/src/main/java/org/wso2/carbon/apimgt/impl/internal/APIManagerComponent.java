@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
+import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
@@ -132,6 +133,9 @@ public class APIManagerComponent {
     public static final String LABELS = "Labels";
 
     public static final String API_SECURITY = "API Security";
+
+    public static final String TYPE_ELEMENT = "<name>Type</name>";
+
     public static final String ENABLE_SCHEMA_VALIDATION = "Enable Schema Validation";
 
     @Activate
@@ -163,6 +167,8 @@ public class APIManagerComponent {
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver, null);
             TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), tenantLoadMessageSender, null);
+            KeyMgtConfigDeployer keyMgtConfigDeployer = new KeyMgtConfigDeployer();
+            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), keyMgtConfigDeployer, null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
@@ -397,6 +403,10 @@ public class APIManagerComponent {
                             }
                             // check whether the resource contains a section called 'API Security' and add it
                             if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).contains(API_SECURITY)) {
+                                updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
+                            }
+                            // check whether the resource contains a section called 'Type' and add it
+                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).contains(TYPE_ELEMENT)) {
                                 updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
                             }
                             // check whether the resource contains a section called 'enable Schema Validation' and

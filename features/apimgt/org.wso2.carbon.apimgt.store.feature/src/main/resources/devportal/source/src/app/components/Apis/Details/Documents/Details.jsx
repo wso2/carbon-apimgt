@@ -43,6 +43,7 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.text.secondary,
         minHeight: 400,
         position: 'relative',
+        background: theme.custom.apiDetailPages.documentBackground,
     },
     popupHeader: {
         display: 'flex',
@@ -72,21 +73,21 @@ export default function Details(props) {
     };
     return (
         <>
-            <Paper className={classes.paper}>
+            <div className={classes.paper}>
                 {(selectedDoc.sourceType === 'MARKDOWN' || selectedDoc.sourceType === 'INLINE') && (
                     <Icon className={classes.fullView} onClick={toggleOpen}>
                         launch
                     </Icon>
                 )}
                 <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
-            </Paper>
+            </div>
             <Dialog fullScreen open={open} onClose={toggleOpen}>
-                <Paper square className={classes.popupHeader}>
+                <div square className={classes.popupHeader}>
                     <IconButton color='inherit' onClick={toggleOpen} aria-label='Close'>
                         <Icon>close</Icon>
                     </IconButton>
                     <Typography variant='h4'>{selectedDoc.name}</Typography>
-                </Paper>
+                </div>
                 <div className={classes.viewWrapper}>
                     <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
                 </div>

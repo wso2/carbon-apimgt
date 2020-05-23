@@ -101,6 +101,7 @@ public class RestApiUtil {
     private static Set<URITemplate> storeResourceMappings;
     private static Set<URITemplate> publisherResourceMappings;
     private static Set<URITemplate> adminAPIResourceMappings;
+    private static Set<URITemplate> endpointRegistryAPIResourceMappings;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> uriToHttpMethodsMap;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> ETagSkipListURIToHttpMethodsMap;
     public static final ThreadLocal userThreadLocal = new ThreadLocal();
@@ -1169,6 +1170,21 @@ public class RestApiUtil {
         return paginatedURL;
     }
 
+    /**
+     * Returns the paginated URL for scopes.
+     *
+     * @param offset starting index
+     * @param limit  max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getScopesPaginatedURL(Integer offset, Integer limit) {
+
+        String paginatedURL = RestApiConstants.SCOPES_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        return paginatedURL;
+    }
+
     /** Returns the paginated url for tags
      *
      * @param offset starting index
@@ -1412,17 +1428,23 @@ public class RestApiUtil {
      *
      * @return URITemplate set associated with API Manager Admin REST API
      */
-    public static Set<URITemplate> getAdminAPIAppResourceMapping() {
+    public static Set<URITemplate> getAdminAPIAppResourceMapping(String version) {
 
         API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants.REST_API_ADMIN_CONTEXT,
-                RestApiConstants.REST_API_ADMIN_VERSION));
+                RestApiConstants.REST_API_ADMIN_VERSION_0));
 
         if (adminAPIResourceMappings != null) {
             return adminAPIResourceMappings;
         } else {
             try {
-                String definition = IOUtils
-                        .toString(RestApiUtil.class.getResourceAsStream("/admin-api.json"), "UTF-8");
+                String definition;
+                if (RestApiConstants.REST_API_ADMIN_VERSION_0.equals(version)) {
+                    definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/admin-api.json"), "UTF-8");
+                } else {
+                    definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/admin-api.yaml"), "UTF-8");
+                }
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
                 adminAPIResourceMappings = oasParser.getURITemplates(definition);
@@ -1432,6 +1454,29 @@ public class RestApiUtil {
                 log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
             }
             return adminAPIResourceMappings;
+        }
+    }
+
+    public static Set<URITemplate> getEndpointRegistryAPIAppResourceMapping() {
+
+        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants
+                .REST_API_ENDPOINT_REGISTRY_CONTEXT, RestApiConstants.REST_API_ENDPOINT_REGISTRY_VERSION));
+
+        if (endpointRegistryAPIResourceMappings != null) {
+            return endpointRegistryAPIResourceMappings;
+        } else {
+            try {
+                String definition = IOUtils
+                        .toString(RestApiUtil.class.getResourceAsStream("/endpoint-registry-api.yaml"), "UTF-8");
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+                //Get URL templates from swagger content we created
+                endpointRegistryAPIResourceMappings = oasParser.getURITemplates(definition);
+            } catch (APIManagementException e) {
+                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
+            } catch (IOException e) {
+                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
+            }
+            return endpointRegistryAPIResourceMappings;
         }
     }
 
@@ -1667,8 +1712,12 @@ public class RestApiUtil {
             uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_0);
         } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_1)) {
             uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_1);
-        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
-            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping();
+        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT_FULL_1)) {
+            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION_1);
+        } else if (basePath.contains(RestApiConstants.REST_API_ENDPOINT_REGISTRY_CONTEXT)) {
+            uriTemplates = RestApiUtil.getEndpointRegistryAPIAppResourceMapping();
         }
         return uriTemplates;
     }

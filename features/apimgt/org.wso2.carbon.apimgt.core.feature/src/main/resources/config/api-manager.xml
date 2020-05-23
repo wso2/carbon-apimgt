@@ -49,6 +49,9 @@
              JWT. -->
         <!--ConsumerDialectURI>http://wso2.org/claims</ConsumerDialectURI-->
 
+        <!-- Whether to convert claims retrieved from AuthorizationGrantCache to ConsumerDialectURI -->
+        <!--ConvertClaimsToConsumerDialect>false</ConvertClaimsToConsumerDialect-->
+
         <!-- Signature algorithm. Accepts "SHA256withRSA" or "NONE". To disable signing explicitly specify "NONE". -->
         <!--SignatureAlgorithm>SHA256withRSA</SignatureAlgorithm-->
 
@@ -443,6 +446,10 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
             <WhiteListedURI>
+                <URI>/api/am/endpoint-registry/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
                 <URI>/api/am/store/{version}/apis</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
@@ -494,7 +501,11 @@
                 <URI>/api/am/publisher/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </WhiteListedURI>
-                        <WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/admin/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
                 <URI>/api/am/store/{version}/api-products</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
@@ -666,7 +677,7 @@
             <Password>${admin.password}</Password>
         </PolicyDeployer>
         <BlockCondition>
-            <ServiceURL>http://${carbon.local.ip}:${mgt.transport.http.port}/throttle/data/v1</ServiceURL>
+            <ServiceURL>http://${carbon.local.ip}:${mgt.transport.http.port}/internal/data/v1</ServiceURL>
             <Enabled>true</Enabled>
             <!--InitDelay>300000</InitDelay>
             <Period>3600000</Period-->

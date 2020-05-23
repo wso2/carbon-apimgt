@@ -24,6 +24,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.io.FileUtils;
@@ -43,6 +44,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -76,6 +78,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -101,6 +104,9 @@ import javax.xml.parsers.ParserConfigurationException;
 public final class APIImportUtil {
 
     private static final Log log = LogFactory.getLog(APIImportUtil.class);
+    private static final String IN = "in";
+    private static final String OUT = "out";
+    private static final String SOAPTOREST = "SoapToRest";
 
     /**
      * This method returns the lifecycle action which can be used to transit from currentStatus to targetStatus.
@@ -331,6 +337,9 @@ public final class APIImportUtil {
                 targetApi = apiProvider.getAPI(apiIdentifier);
                 // Store target API status
                 currentStatus = targetApi.getStatus();
+
+                // Since the overwrite should be done, the imported API Identifier should be equal to the target API Identifier
+                importedApi.setId(targetApi.getId());
             } else {
                 if (apiProvider.isAPIAvailable(importedApi.getId())
                         || apiProvider.isApiNameWithDifferentCaseExist(apiName)) {
@@ -388,6 +397,19 @@ public final class APIImportUtil {
             //Swagger definition will only be available of API type HTTP. Web socket API does not have it.
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(importedApi.getType())) {
                 String swaggerContent = loadSwaggerFile(pathToArchive);
+
+                // Check whether any of the resources should be removed from the API when updating,
+                // that has already been used in API Products
+                List<APIResource> resourcesToRemove = apiProvider.getResourcesToBeRemovedFromAPIProducts(importedApi.getId(),
+                        swaggerContent);
+                // Do not allow to remove resources from API Products, hence throw an exception
+                if (!resourcesToRemove.isEmpty()) {
+                    throw new APIImportExportException("Cannot remove following resource paths " +
+                            resourcesToRemove.toString() + " because they are used by one or more API Products");
+                }
+                //preProcess swagger definition
+                swaggerContent = OASParserUtil.preProcess(swaggerContent);
+
                 addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
                 //If graphQL API, import graphQL schema definition to registry
                 if (StringUtils.equals(importedApi.getType(), APIConstants.APITransportType.GRAPHQL.toString())) {
@@ -399,10 +421,11 @@ public final class APIImportUtil {
                     Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
                     for (URITemplate uriTemplate : uriTemplates) {
                         Scope scope = uriTemplate.getScope();
-                        if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))
-                                && apiProvider.isScopeKeyAssigned(importedApi.getId(), scope.getKey(), tenantId)) {
+                        if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey())) &&
+                                apiProvider.isScopeKeyAssignedLocally(importedApi.getId(), scope.getKey(), tenantId)) {
                             String errorMessage =
-                                    "Error in adding API. Scope " + scope.getKey() + " is already assigned by another API.";
+                                    "Error in adding API. Scope " + scope.getKey() +
+                                            " is already assigned by another API.";
                             log.error(errorMessage);
                             throw new APIImportExportException(errorMessage);
                         }
@@ -410,6 +433,9 @@ public final class APIImportUtil {
                     importedApi.setUriTemplates(uriTemplates);
                     Set<Scope> scopes = apiDefinition.getScopes(swaggerContent);
                     importedApi.setScopes(scopes);
+                    boolean isBasepathExtractedFromSwagger = true;
+                    //Setup vendor extensions to API when importing through CTL tool
+                    importedApi = OASParserUtil.setExtensionsToAPI(swaggerContent, importedApi, isBasepathExtractedFromSwagger);
                 }
             }
             // This is required to make url templates and scopes get effected
@@ -523,7 +549,22 @@ public final class APIImportUtil {
     private static void updateAPIWithThumbnail(File imageFile, API importedApi, APIProvider apiProvider) {
 
         APIIdentifier apiIdentifier = importedApi.getId();
-        String mimeType = URLConnection.guessContentTypeFromName(imageFile.getName());
+        String fileName = imageFile.getName();
+        String mimeType = URLConnection.guessContentTypeFromName(fileName);
+        if (StringUtils.isBlank(mimeType)) {
+            try {
+                // Check whether the icon is in .json format (UI icons are stored as .json)
+                new JsonParser().parse(new FileReader(imageFile));
+                mimeType = APIConstants.APPLICATION_JSON_MEDIA_TYPE;
+            } catch (JsonParseException e) {
+                // Here the exceptions were handled and logged that may arise when parsing the .json file,
+                // and this will not break the flow of importing the API.
+                // If the .json is wrong or cannot be found the API import process will still be carried out.
+                log.error("Failed to read the thumbnail file. ", e);
+            } catch (FileNotFoundException e) {
+                log.error("Failed to find the thumbnail file. ", e);
+            }
+        }
         try (FileInputStream inputStream = new FileInputStream(imageFile.getAbsolutePath())) {
             ResourceFile apiImage = new ResourceFile(inputStream, mimeType);
             String thumbPath = APIUtil.getIconPath(apiIdentifier);
@@ -971,8 +1012,8 @@ public final class APIImportUtil {
     private static void addSOAPToREST(String pathToArchive, API importedApi, Registry registry)
             throws APIImportExportException {
 
-        String inFlowFileLocation = pathToArchive + File.separator + "SoapToRest" + File.separator + "in";
-        String outFlowFileLocation = pathToArchive + File.separator + "SoapToRest" + File.separator + "out";
+        String inFlowFileLocation = pathToArchive + File.separator + SOAPTOREST + File.separator + IN;
+        String outFlowFileLocation = pathToArchive + File.separator + SOAPTOREST + File.separator + OUT;
 
         //Adding in-sequence, if any
         if (CommonUtil.checkFileExistence(inFlowFileLocation)) {
@@ -989,56 +1030,54 @@ public final class APIImportUtil {
                             + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE;
             try {
                 // Import inflow mediation logic
-                Path dir = Paths.get(inFlowFileLocation);
-                InputStream inFlowStream = null;
-                try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
-                    for (Path file : stream) {
-                        String fileName = file.getFileName().toString();
-                        String method = "";
-                        if (fileName.split(".xml").length != 0) {
-                            method = fileName.split(".xml")[0]
-                                    .substring(file.getFileName().toString().lastIndexOf("_") + 1);
-                        }
-                        inFlowStream = new FileInputStream(file.toFile());
-                        byte[] inSeqData = IOUtils.toByteArray(inFlowStream);
-                        Resource inSeqResource = (Resource) registry.newResource();
-                        inSeqResource.setContent(inSeqData);
-                        inSeqResource.addProperty(SOAPToRESTConstants.METHOD, method);
-                        inSeqResource.setMediaType("text/xml");
-                        registry.put(soapToRestLocationIn + RegistryConstants.PATH_SEPARATOR + file.getFileName(),
-                                inSeqResource);
-                    }
-                } finally {
-                    IOUtils.closeQuietly(inFlowStream);
-                }
+                Path inFlowDirectory = Paths.get(inFlowFileLocation);
+                ImportMediationLogic(inFlowDirectory, registry, soapToRestLocationIn);
+
                 // Import outflow mediation logic
-                dir = Paths.get(outFlowFileLocation);
-                InputStream outFlowStream = null;
-                try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
-                    for (Path file : stream) {
-                        String fileName = file.getFileName().toString();
-                        String method = "";
-                        if (fileName.split(".xml").length != 0) {
-                            method = fileName.split(".xml")[0]
-                                    .substring(file.getFileName().toString().lastIndexOf("_") + 1);
-                        }
-                        outFlowStream = new FileInputStream(file.toFile());
-                        byte[] inSeqData = IOUtils.toByteArray(outFlowStream);
-                        Resource inSeqResource = (Resource) registry.newResource();
-                        inSeqResource.setContent(inSeqData);
-                        inSeqResource.addProperty(SOAPToRESTConstants.METHOD, method);
-                        inSeqResource.setMediaType("text/xml");
-                        registry.put(soapToRestLocationOut + RegistryConstants.PATH_SEPARATOR + file.getFileName(),
-                                inSeqResource);
-                    }
-                } finally {
-                    IOUtils.closeQuietly(outFlowStream);
-                }
-            } catch (IOException | DirectoryIteratorException e) {
+                Path outFlowDirectory = Paths.get(outFlowFileLocation);
+                ImportMediationLogic(outFlowDirectory, registry, soapToRestLocationOut);
+
+            } catch (DirectoryIteratorException e) {
                 throw new APIImportExportException("Error in importing SOAP to REST mediation logic", e);
-            } catch (org.wso2.carbon.registry.api.RegistryException e) {
-                throw new APIImportExportException("Error in storing imported SOAP to REST mediation logic", e);
             }
+        }
+    }
+
+    /**
+     * Method created to add inflow and outflow mediation logic
+     *
+     * @param flowDirectory      inflow and outflow directory
+     * @param registry           Registry
+     * @param soapToRestLocation folder location
+     * @throws APIImportExportException
+     */
+    private static void ImportMediationLogic(Path flowDirectory, Registry registry, String soapToRestLocation)
+            throws APIImportExportException {
+        InputStream inputFlowStream = null;
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(flowDirectory)) {
+            for (Path file : stream) {
+                String fileName = file.getFileName().toString();
+                String method = "";
+                if (fileName.split(".xml").length != 0) {
+                    method = fileName.split(".xml")[0]
+                            .substring(file.getFileName().toString().lastIndexOf("_") + 1);
+                }
+                inputFlowStream = new FileInputStream(file.toFile());
+                byte[] inSeqData = IOUtils.toByteArray(inputFlowStream);
+                Resource inSeqResource = (Resource) registry.newResource();
+                inSeqResource.setContent(inSeqData);
+                inSeqResource.addProperty(SOAPToRESTConstants.METHOD, method);
+                inSeqResource.setMediaType("text/xml");
+                registry.put(soapToRestLocation + RegistryConstants.PATH_SEPARATOR + file.getFileName(),
+                        inSeqResource);
+                IOUtils.closeQuietly(inputFlowStream);
+            }
+        } catch (IOException | DirectoryIteratorException e) {
+            throw new APIImportExportException("Error in importing SOAP to REST mediation logic", e);
+        } catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
+            throw new APIImportExportException("Error in storing imported SOAP to REST mediation logic", e);
+        } finally {
+            IOUtils.closeQuietly(inputFlowStream);
         }
     }
 }

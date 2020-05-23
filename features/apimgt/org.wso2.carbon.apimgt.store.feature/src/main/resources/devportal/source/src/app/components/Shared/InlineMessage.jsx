@@ -12,15 +12,18 @@ import VerticalDivider from './VerticalDivider';
 const styles = theme => ({
     root: {
         display: 'flex',
-        height: 100,
+        minHeight: 100,
         alignItems: 'center',
         paddingLeft: theme.spacing(2),
         borderRadius: theme.shape.borderRadius,
-        border: 'none',
+        border: 'solid 1px #ddd',
         '& span.material-icons': {
             fontSize: 60,
-            color: theme.palette.primary.main,
-        }
+            color: theme.custom.info.color,
+        },
+        '& span, & h5, & label, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
     },
     iconItem: {
         paddingRight: theme.spacing(2),

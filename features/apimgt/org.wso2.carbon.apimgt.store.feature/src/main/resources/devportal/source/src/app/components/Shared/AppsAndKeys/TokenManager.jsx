@@ -45,9 +45,15 @@ import Progress from '../Progress';
 const styles = (theme) => ({
     root: {
         padding: theme.spacing(3),
+        '& span, & h5, & label, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
     },
     button: {
         marginLeft: 0,
+        '& span': {
+            color: theme.palette.getContrastText(theme.palette.primary.main),
+        }
     },
     cleanUpButton: {
         marginLeft: 15,
@@ -435,9 +441,6 @@ class TokenManager extends React.Component {
         if (key && (key.keyState === this.keyStates.CREATED || key.keyState === this.keyStates.REJECTED)) {
             return <WaitingForApproval keyState={key.keyState} states={this.keyStates} />;
         }
-        // todo replace use of localStorage with useContext
-        // const settingsData = localStorage.getItem('settings');
-        // const { mapExistingAuthApps } = JSON.parse(settingsData);
         const keyGrantTypes = key ? key.supportedGrantTypes : [];
         const settingsContext = this.context;
         const { mapExistingAuthApps } = settingsContext.settings;

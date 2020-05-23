@@ -303,7 +303,7 @@ class Operations extends React.Component {
                                     <Operation
                                         operation={item}
                                         handleUpdateList={this.handleUpdateList}
-                                        scopes={api.scopes}
+                                        scopes={api.scopes.map((apiScope) => { return apiScope.scope; })}
                                         isOperationRateLimiting={!apiThrottlingPolicy}
                                         apiPolicies={apiPolicies}
                                     />

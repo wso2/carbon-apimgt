@@ -21,8 +21,11 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApplicationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClaimDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -215,5 +218,29 @@ public class SubscriptionMappingUtil {
 
         application = apiProvider.getLightweightApplicationByUUID(application.getUUID());
         return ApplicationMappingUtil.fromApplicationToInfoDTO(application);
+    }
+
+    /**
+     * Convert Subscriber claims information into SubscriberInfoDTO
+     *
+     * @param subscriberClaims list of subscriber claims
+     * @param subscriberName   subscriber name
+     * @return SubscriberInfoDTO
+     * @throws APIManagementException If an error occurs when getting display name of claim
+     */
+    public static SubscriberInfoDTO fromSubscriberClaimsToDTO(Map<String, String> subscriberClaims,
+                                                              String subscriberName) throws APIManagementException {
+        SubscriberInfoDTO subscriberInfoDTO = new SubscriberInfoDTO();
+        subscriberInfoDTO.setName(subscriberName);
+        List<ClaimDTO> claimDTOList = new ArrayList<>();
+        for (String key : subscriberClaims.keySet()) {
+            ClaimDTO claimDTO = new ClaimDTO();
+            claimDTO.setName(APIUtil.getClaimDisplayName(key, subscriberName));
+            claimDTO.setURI(key);
+            claimDTO.setValue(subscriberClaims.get(key));
+            claimDTOList.add(claimDTO);
+        }
+        subscriberInfoDTO.setClaims(claimDTOList);
+        return subscriberInfoDTO;
     }
 }

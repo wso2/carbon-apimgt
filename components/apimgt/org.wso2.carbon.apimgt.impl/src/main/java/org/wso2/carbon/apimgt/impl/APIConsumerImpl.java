@@ -1346,7 +1346,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String generateApiKey(Application application, String userName, long validityPeriod) throws APIManagementException {
+    public String generateApiKey(Application application, String userName, long validityPeriod,
+                                 String permittedIP, String permittedReferer) throws APIManagementException {
 
         JwtTokenInfoDTO jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application, userName,
                 MultitenantUtils.getTenantDomain(userName));
@@ -1362,6 +1363,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         jwtTokenInfoDTO.setSubscriber(userName);
         jwtTokenInfoDTO.setExpirationTime(validityPeriod);
         jwtTokenInfoDTO.setKeyType(application.getKeyType());
+        jwtTokenInfoDTO.setPermittedIP(permittedIP);
+        jwtTokenInfoDTO.setPermittedReferer(permittedReferer);
 
         return ApiKeyGenerator.generateToken(jwtTokenInfoDTO);
     }
@@ -2672,8 +2675,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
             throws APIManagementException {
+
         Subscriber subscriber = new Subscriber(username);
-        return apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId);
+        Set<String> scopeKeySet = apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId);
+        return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, tenantDomain).values());
     }
 
     /*
@@ -2817,7 +2822,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         API api = null;
         APIProduct product = null;
         Identifier identifier = null;
-        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
         String state;
         String apiContext;
@@ -2835,10 +2839,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         WorkflowResponse workflowResponse = null;
+        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state)) {
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, applicationId,
-                    APIConstants.SubscriptionStatus.ON_HOLD);
+                    APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
 
             boolean isTenantFlowStarted = false;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -3207,7 +3212,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void updateSubscriptions(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
         API api = getAPI(identifier);
-        apiMgtDAO.updateSubscriptions(new ApiTypeWrapper(api), applicationId);
+        apiMgtDAO.updateSubscriptions(new ApiTypeWrapper(api), applicationId, userId);
     }
 
     /**
@@ -4477,10 +4482,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		return null;
 	}
 
-	public Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers)
-			throws APIManagementException {
-		return apiMgtDAO.getScopesBySubscribedAPIs(identifiers);
-	}
+    public Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers)
+            throws APIManagementException {
+
+        Set<String> scopeKeySet = apiMgtDAO.getScopesBySubscribedAPIs(identifiers);
+        return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, tenantDomain).values());
+    }
 
 	public String getScopesByToken(String accessToken) throws APIManagementException {
 		return null;
@@ -5778,6 +5785,29 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public String getRequestedTenant() {
 
         return requestedTenant;
+    }
+
+    /**
+     * To check whether the DevPortal Anonymous Mode is enabled. It can be either enabled globally or tenant vice.
+     *
+     * @param tenantDomain Tenant domain
+     * @return whether devportal anonymous mode is enabled or not
+     */
+
+    public boolean isDevPortalAnonymousEnabled(String tenantDomain) {
+
+        try {
+            org.json.simple.JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
+            Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_ANONYMOUS_MODE);
+            if (value != null) {
+                return Boolean.parseBoolean(value.toString());
+            } else {
+                return APIUtil.isDevPortalAnonymous();
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while retrieving Anonymous config from registry", e);
+        }
+        return true;
     }
 
     /**

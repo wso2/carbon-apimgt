@@ -15,7 +15,6 @@
  */
 package org.wso2.carbon.apimgt.gateway.internal;
 
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.commons.logging.Log;
@@ -40,10 +39,9 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.transformer.JWTTrans
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
-import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataServiceImpl;
-import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationService;
 import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationServiceImpl;
+import org.wso2.carbon.apimgt.gateway.service.RevokedTokenDataImpl;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
@@ -52,8 +50,11 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
+import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
@@ -67,6 +68,9 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 @Component(
          name = "org.wso2.carbon.apimgt.handlers", 
@@ -97,7 +101,8 @@ public class APIHandlerServiceComponent {
             }
             String filePath = getFilePath();
             configuration.load(filePath);
-            ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl(configuration));
+            ServiceReferenceHolder.getInstance()
+                    .setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl(configuration));
             ServiceReferenceHolder.getInstance().setThrottleProperties(configuration.getThrottleProperties());
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
             if ("Synapse".equalsIgnoreCase(gatewayType)) {
@@ -107,9 +112,9 @@ public class APIHandlerServiceComponent {
                 if (configuration.getThrottleProperties().isEnabled()) {
                     ServiceReferenceHolder.getInstance().setThrottleDataPublisher(new ThrottleDataPublisher());
                     ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
-                    APIThrottleDataServiceImpl throttleDataServiceImpl = new APIThrottleDataServiceImpl();
+                    APIThrottleDataServiceImpl throttleDataServiceImpl =
+                            new APIThrottleDataServiceImpl(throttleDataHolder);
                     CacheInvalidationService cacheInvalidationService = new CacheInvalidationServiceImpl();
-                    throttleDataServiceImpl.setThrottleDataHolder(throttleDataHolder);
                     // Register APIThrottleDataService so that ThrottleData maps are available to other components.
                     registration = context.getBundleContext().registerService(APIThrottleDataService.class.getName(),
                             throttleDataServiceImpl, null);
@@ -126,7 +131,8 @@ public class APIHandlerServiceComponent {
                         webServiceBlockConditionsRetriever.startKeyTemplateDataRetriever();
 
                         // Start web service based revoked JWT tokens retriever.
-                        // Advanced throttle properties & blocking conditions have to be enabled for JWT token retrieval due to the throttle config dependency for this feature.
+                        // Advanced throttle properties & blocking conditions have to be enabled for JWT token
+                        // retrieval due to the throttle config dependency for this feature.
                         RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
                         webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
                     }
@@ -135,24 +141,29 @@ public class APIHandlerServiceComponent {
                 // Set APIM Gateway JWT Generator
 
                 JWTConfigurationDto jwtConfigurationDto = configuration.getJwtConfigurationDto();
+                Properties defaultClaimMappings = new Properties();
+                InputStream resourceAsStream =
+                        this.getClass().getClassLoader().getResourceAsStream("default-claim-mapping.properties");
+                defaultClaimMappings.load(resourceAsStream);
 
-                JWTTransformer jwtTransformer = new DefaultJWTTransformer(jwtConfigurationDto);
+                JWTTransformer jwtTransformer = new DefaultJWTTransformer(jwtConfigurationDto, defaultClaimMappings);
                 registration = context.getBundleContext()
                         .registerService(JWTTransformer.class.getName(), jwtTransformer, null);
                 registration =
                         context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
-                                new APIMgtGatewayJWTGeneratorImpl(),null);
+                                new APIMgtGatewayJWTGeneratorImpl(), null);
                 registration =
                         context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
-                                new APIMgtGatewayUrlSafeJWTGeneratorImpl(),null);
-
+                                new APIMgtGatewayUrlSafeJWTGeneratorImpl(), null);
+                registration = context.getBundleContext().registerService(RevokedTokenService.class,
+                        new RevokedTokenDataImpl(),null);
                 // Start JWT revoked map cleaner.
                 RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
                 revokedJWTMapCleaner.startJWTRevokedMapCleaner();
                 ServiceReferenceHolder.getInstance().setTracer(ServiceReferenceHolder.getInstance().getTracingService()
                         .buildTracer(APIMgtGatewayConstants.SERVICE_NAME));
             }
-        } catch (AxisFault | APIManagementException e) {
+        } catch (APIManagementException | IOException e) {
             log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
         }
         // Create caches for the super tenant

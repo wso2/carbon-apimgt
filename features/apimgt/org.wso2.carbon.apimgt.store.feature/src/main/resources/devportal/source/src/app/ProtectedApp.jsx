@@ -21,9 +21,10 @@ import qs from 'qs';
 import { withTheme } from '@material-ui/core/styles';
 import Settings from 'Settings';
 import Tenants from 'AppData/Tenants';
-import SettingsContext from 'AppComponents/Shared/SettingsContext';
 import queryString from 'query-string';
 import PropTypes from 'prop-types';
+import SettingsContext from 'AppComponents/Shared/SettingsContext';
+import RedirectToLogin from 'AppComponents/Login/RedirectToLogin';
 import API from './data/api';
 import Base from './components/Base/index';
 import AuthManager from './data/AuthManager';
@@ -40,8 +41,6 @@ import LoginDenied from './LoginDenied';
  * Render protected application paths
  */
 class ProtectedApp extends Component {
-    static contextType = SettingsContext;
-
     /**
      *  constructor
      * @param {*} props props passed to constructor
@@ -69,7 +68,13 @@ class ProtectedApp extends Component {
         window.addEventListener('message', this.handleMessage);
         const { location: { search } } = this.props;
         const { setTenantDomain, setSettings } = this.context;
-        const { tenant } = queryString.parse(search);
+        const { app: { customUrl: { tenantDomain: customUrlEnabledDomain } } } = Settings;
+        let tenant = null;
+        if (customUrlEnabledDomain !== 'null') {
+            tenant = customUrlEnabledDomain;
+        } else {
+            tenant = queryString.parse(search).tenant;
+        }
         const tenantApi = new Tenants();
         tenantApi.getTenantsByState().then((response) => {
             const { list } = response.body;
@@ -79,7 +84,7 @@ class ProtectedApp extends Component {
                 if (tenant) {
                     this.setState({ tenantResolved: true, tenantList: list }, setTenantDomain(tenant));
                 } else {
-                    this.setState({ tenantResolved: true, tenantList: response.body.list });
+                    this.setState({ tenantResolved: true, tenantList: list });
                 }
             } else {
                 this.setState({ tenantResolved: true });
@@ -91,7 +96,6 @@ class ProtectedApp extends Component {
         ConfigManager.getConfigs()
             .environments.then((response) => {
                 this.environments = response.data.environments;
-                // this.handleEnvironmentQueryParam(); todo: do we really need to handle environment query params here ?
             })
             .catch((error) => {
                 console.error(
@@ -135,7 +139,7 @@ class ProtectedApp extends Component {
                                         error,
                                     );
                                 });
-                                this.checkSession();
+                            this.checkSession();
                         } else {
                             console.log('No relevant scopes found, redirecting to Anonymous View');
                             this.setState({ userResolved: true });
@@ -158,7 +162,7 @@ class ProtectedApp extends Component {
 
     handleMessage(e) {
         if (e.data === 'changed') {
-            window.location = Settings.app.context + '/services/configs?not-Login';
+            window.location = Settings.app.context + '/services/configs?loginPrompt=false';
         }
     }
 
@@ -166,14 +170,15 @@ class ProtectedApp extends Component {
      * Invoke checksession oidc endpoint.
      */
     checkSession() {
-        setInterval(() => {
-            const { clientId, sessionStateCookie } = this.state;
-            const msg = clientId + ' ' + sessionStateCookie; 
-            document.getElementById('iframeOP').contentWindow.postMessage(msg, 'https://' + window.location.host);
-        }, 2000);
+        if (Settings.app.singleLogout && Settings.app.singleLogout.enabled) {
+            setInterval(() => {
+                const { clientId, sessionStateCookie } = this.state;
+                const msg = clientId + ' ' + sessionStateCookie;
+                document.getElementById('iframeOP').contentWindow.postMessage(msg, Settings.idp.origin);
+            }, Settings.app.singleLogout.timeout);
+        }
     }
 
-   
 
     /**
      * Change the environment with "environment" query parameter
@@ -211,12 +216,12 @@ class ProtectedApp extends Component {
      */
     render() {
         const {
-            userResolved, tenantList, notEnoughPermission, tenantResolved, clientId
+            userResolved, tenantList, notEnoughPermission, tenantResolved, clientId,
         } = this.state;
-        const checkSessionURL = 'https://'+ window.location.host + '/oidc/checksession?client_id='
-        + clientId + '&redirect_uri=https://' + window.location.host
-        + Settings.app.context + '/services/auth/callback/login';
-        const { tenantDomain } = this.context;
+        const checkSessionURL = Settings.idp.checkSessionEndpoint + '?client_id='
+            + clientId + '&redirect_uri=' + window.location.origin
+            + Settings.app.context + '/services/auth/callback/login';
+        const { tenantDomain, settings } = this.context;
         if (!userResolved) {
             return <Loading />;
         }
@@ -227,7 +232,7 @@ class ProtectedApp extends Component {
             isAuthenticated = true;
         }
         if (notEnoughPermission) {
-            return <LoginDenied />;
+            return <LoginDenied IsAnonymousModeEnabled={settings.IsAnonymousModeEnabled} />;
         }
 
         // Waiting till the tenant list is retrieved
@@ -239,6 +244,31 @@ class ProtectedApp extends Component {
         // tenantDomain contains INVALID when the tenant does not exist
         if (tenantList.length > 0 && (tenantDomain === 'INVALID' || (!isAuthenticated && tenantDomain === null))) {
             return <TenantListing tenantList={tenantList} />;
+        }
+
+        if (!isAuthenticated && !settings.IsAnonymousModeEnabled && !sessionStorage.getItem(CONSTS.ISLOGINPERMITTED)) {
+            return <RedirectToLogin />;
+        }
+
+        if (settings.IsAnonymousModeEnabled && sessionStorage.getItem(CONSTS.ISLOGINPERMITTED)) {
+            sessionStorage.removeItem(CONSTS.ISLOGINPERMITTED);
+        }
+        // check for widget=true in the query params. If it's present we render without <Base> component.
+        const pageUrl = new URL(window.location);
+        const isWidget = pageUrl.searchParams.get('widget');
+        if (isWidget) {
+            return (
+                <>
+                    <iframe
+                        title='iframeOP'
+                        id='iframeOP'
+                        src={checkSessionURL}
+                        width='0px'
+                        height='0px'
+                    />
+                    <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
+                </>
+            );
         }
         /**
          * Note: AuthManager.getUser() method is a passive check, which simply
@@ -254,12 +284,13 @@ class ProtectedApp extends Component {
                     src={checkSessionURL}
                     width='0px'
                     height='0px'
-                />     
+                />
                 <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
             </Base>
         );
     }
 }
+ProtectedApp.contextType = SettingsContext;
 ProtectedApp.propTypes = {
     location: PropTypes.shape({
         search: PropTypes.string.isRequired,

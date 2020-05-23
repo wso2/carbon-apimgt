@@ -341,10 +341,15 @@
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">scope</span>
+                        <span class="class-name">Scopes</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-validateScope"><a href="#!/operations#Scope#validateScope">Check given scope name is already exist</a></li>
+                                        <li id="op-addSharedScope"><a href="#!/operations#Scopes#addSharedScope">Add a new Shared Scope</a></li>
+                                        <li id="op-deleteSharedScope"><a href="#!/operations#Scopes#deleteSharedScope">Delete a Shared Scope</a></li>
+                                        <li id="op-getSharedScope"><a href="#!/operations#Scopes#getSharedScope">Get a Shared Scope by Scope Id</a></li>
+                                        <li id="op-getSharedScopes"><a href="#!/operations#Scopes#getSharedScopes">Get all available Shared Scopes</a></li>
+                                        <li id="op-updateSharedScope"><a href="#!/operations#Scopes#updateSharedScope">Update a Shared Scope</a></li>
+                                        <li id="op-validateScope"><a href="#!/operations#Scopes#validateScope">Check given scope name is already exist</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -353,6 +358,13 @@
                             <ul class="nav nav-stacked">
                                         <li id="op-settingsGatewayEnvironmentsGet"><a href="#!/operations#Settings#settingsGatewayEnvironmentsGet">Get all gateway environments</a></li>
                                         <li id="op-settingsGet"><a href="#!/operations#Settings#settingsGet">Retreive publisher settings</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Subscriber</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-subscriptionsSubscriptionIdSubscriberInfoGet"><a href="#!/operations#Subscriber#subscriptionsSubscriptionIdSubscriberInfoGet">Get details of a user who subscribed an API</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -510,6 +522,11 @@
                         </li>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
+                                <li id="def-APIScope"><a href="#!/models#APIScope">APIScope</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
                                 <li id="def-API_threatProtectionPolicies"><a href="#!/models#API_threatProtectionPolicies">API_threatProtectionPolicies</a></li>
                             </ul>
                         </li>
@@ -596,6 +613,11 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-Certificates"><a href="#!/models#Certificates">Certificates</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Claim"><a href="#!/models#Claim">Claim</a></li>
                             </ul>
                         </li>
                         <li class="section-box">
@@ -845,16 +867,6 @@
                         </li>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                <li id="def-ScopeList_list"><a href="#!/models#ScopeList_list">ScopeList_list</a></li>
-                            </ul>
-                        </li>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                <li id="def-Scope_bindings"><a href="#!/models#Scope_bindings">Scope_bindings</a></li>
-                            </ul>
-                        </li>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
                                 <li id="def-SearchResult"><a href="#!/models#SearchResult">SearchResult</a></li>
                             </ul>
                         </li>
@@ -871,6 +883,11 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-Settings"><a href="#!/models#Settings">Settings</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-SubscriberInfo"><a href="#!/models#SubscriberInfo">SubscriberInfo</a></li>
                             </ul>
                         </li>
                         <li class="section-box">

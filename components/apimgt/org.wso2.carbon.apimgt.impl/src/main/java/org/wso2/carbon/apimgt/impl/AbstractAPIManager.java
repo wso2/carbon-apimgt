@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
@@ -126,6 +127,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.xml.namespace.QName;
@@ -488,12 +490,15 @@ public abstract class AbstractAPIManager implements APIManager {
      * @throws APIManagementException
      */
     public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+        boolean tenantFlowStarted = false;
         try {
             Registry registry;
             if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
                     (requestedTenantDomain)) {
                 int id = getTenantManager()
                         .getTenantId(requestedTenantDomain);
+                startTenantFlow(requestedTenantDomain);
+                tenantFlowStarted = true;
                 registry = getRegistryService().getGovernanceSystemRegistry(id);
             } else {
                 if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
@@ -531,6 +536,10 @@ public abstract class AbstractAPIManager implements APIManager {
             String msg = "Failed to get API";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
+        } finally {
+            if (tenantFlowStarted) {
+                endTenantFlow();
+            }
         }
     }
 
@@ -1614,23 +1623,65 @@ public abstract class AbstractAPIManager implements APIManager {
         return MultitenantUtils.getTenantDomainFromUrl(url);
     }
 
+    /**
+     * Check whether the given shared scope name exists in the tenant domain.
+     * If the scope does not exists in API-M (AM_DB) as a shared scope, check the existence of scope name in the KM.
+     *
+     * @param scopeKey     candidate scope key
+     * @param tenantid     tenant id
+     * @return true if the scope key is already available
+     * @throws APIManagementException if failed to check the context availability
+     */
+    @Override
     public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException {
-        if (System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES) != null && Boolean
-                .parseBoolean(System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES))) {
-            return false;
+
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantid);
+        if (!apiMgtDAO.isSharedScopeExists(scopeKey, tenantid)) {
+            return KeyManagerHolder.getKeyManagerInstance().isScopeExists(scopeKey, tenantDomain);
         }
-        return apiMgtDAO.isScopeKeyExist(scopeKey, tenantid);
+        if (log.isDebugEnabled()) {
+            log.debug("Scope name: " + scopeKey + " exists as a shared scope in tenant: " + tenantDomain);
+        }
+        return true;
     }
 
-    public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid)
+    /**
+     * Check whether the given scope key is already assigned to any API under given tenant.
+     *
+     * @param scopeKey     Scope Key
+     * @param tenantDomain Tenant Domain
+     * @return whether scope is assigned or not
+     * @throws APIManagementException if failed to check the scope assignment
+     */
+    @Override
+    public boolean isScopeKeyAssignedToAPI(String scopeKey, String tenantDomain) throws APIManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Checking whether the scope:" + scopeKey + " is attached to any API in tenant: " + tenantDomain);
+        }
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        return apiMgtDAO.isScopeKeyAssigned(scopeKey, tenantId);
+    }
+
+    /**
+     * Check whether the given scope key is already assigned to an API as local scope under given tenant.
+     * The different versions of the same API will not be take into consideration.
+     *
+     * @param apiIdentifier API Identifier
+     * @param scopeKey   candidate scope key
+     * @param tenantId   tenant id
+     * @return true if the scope key is already attached as a local scope in any API
+     * @throws APIManagementException if failed to check the local scope availability
+     */
+    public boolean isScopeKeyAssignedLocally(APIIdentifier apiIdentifier, String scopeKey, int tenantId)
             throws APIManagementException {
-        if (System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES) != null && Boolean
-                .parseBoolean(System.getProperty(APIConstants.ENABLE_DUPLICATE_SCOPES))) {
-            return false;
-        }
-        return apiMgtDAO.isScopeKeyAssigned(identifier, scopeKey, tenantid);
-    }
 
+        if (log.isDebugEnabled()) {
+            log.debug("Checking whether scope: " + scopeKey + " is assigned to another API as a local scope"
+                    + " in tenant: " + tenantId);
+        }
+        return apiMgtDAO.isScopeKeyAssignedLocally(apiIdentifier, scopeKey, tenantId);
+    }
 
     public boolean isApiNameExist(String apiName) throws APIManagementException {
         String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -1653,15 +1704,21 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Subscriber subscriber = new Subscriber(username);
         subscriber.setSubscribedDate(new Date());
-        //TODO : need to set the proper email
-        subscriber.setEmail("");
         try {
             int tenantId = getTenantManager()
                     .getTenantId(getTenantDomain(username));
+            SortedMap<String, String> claims = APIUtil.getClaims(username, tenantId, ClaimsRetriever
+                    .DEFAULT_DIALECT_URI);
+            String email = claims.get(APIConstants.EMAIL_CLAIM);
+            if (StringUtils.isNotEmpty(email)) {
+                subscriber.setEmail(email);
+            } else {
+                subscriber.setEmail(StringUtils.EMPTY);
+            }
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
             //Add a default application once subscriber is added
-            if (!APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)){
+            if (!APIUtil.isDefaultApplicationCreationDisabledForTenant(tenantId)) {
                 addDefaultApplicationForSubscriber(subscriber);
             }
         } catch (APIManagementException e) {
@@ -2247,7 +2304,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else if (searchQuery != null && searchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
                 result = searchPaginatedAPIsByContent(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad);
             } else {
-                result = searchPaginatedAPIs(userRegistry, searchQuery, start, end, isLazyLoad);
+                result = searchPaginatedAPIs(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad);
             }
 
         } catch (Exception e) {
@@ -2642,13 +2699,15 @@ public abstract class AbstractAPIManager implements APIManager {
      * search in multiple fields.
      *
      * @param registry
+     * @param tenantId
      * @param searchQuery Ex: provider=*admin*&version=*1*
      * @return API result
      * @throws APIManagementException
      */
 
-    public Map<String, Object> searchPaginatedAPIs(Registry registry, String searchQuery, int start, int end,
-                                                   boolean limitAttributes) throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIs(Registry registry, int tenantId, String searchQuery, int start,
+                                                   int end, boolean limitAttributes) throws APIManagementException {
+
         SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
         List<Object> apiList = new ArrayList<>();
         Map<String, Object> result = new HashMap<String, Object>();
@@ -2764,10 +2823,11 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             }
 
+            String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
             // setting scope
             if (!apiIdsString.isEmpty()) {
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-                Map<String, Set<Scope>> apiScopeSet = keyManager.getScopesForAPIS(apiIdsString);
+                Map<String, Set<Scope>> apiScopeSet = keyManager.getScopesForAPIS(apiIdsString, tenantDomain);
                 if (apiScopeSet.size() > 0) {
                     for (int i = 0; i < apiCount; i++) {
                         Object api = apiList.get(i);

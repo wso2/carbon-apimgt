@@ -5,7 +5,6 @@
 source/src/app/data/*
 /source/src/app/components/Apis/Details/*.jsx
 /source/src/app/components/Apis/Details/ApiConsole/PatchedSwaggerUIReact.jsx
-/source/src/app/components/Apis/Details/ApiConsole/SelectAppPanel.jsx
 /source/src/app/components/Apis/Details/Comments/*
 /source/src/app/components/Apis/Details/Credentials/*
 /source/src/app/components/Apis/Details/Documents/*
@@ -21,8 +20,6 @@ source/src/app/data/*
 /source/src/app/components/Base/*
 /source/src/app/AppRouts.jsx
 /source/src/app/LoginDenied.jsx
-/source/src/app/ProtectedApp.jsx
-/source/src/app/TenantListing.jsx
 /source/src/DevPortal.jsx
 /source/src/defaultTheme.js
 /source/Tests/*

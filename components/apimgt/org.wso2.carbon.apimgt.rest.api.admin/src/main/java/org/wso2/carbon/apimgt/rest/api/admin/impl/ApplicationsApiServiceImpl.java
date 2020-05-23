@@ -8,7 +8,9 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.ApplicationMappingUtil;
@@ -17,7 +19,6 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
-
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
@@ -46,8 +47,12 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     public Response applicationsGet(String user, Integer limit, Integer offset, String accept, String ifNoneMatch,
                                     String appTenantDomain) {
+
+        // To store the initial value of the user (specially if it is null or empty)
+        String givenUser = user;
+
         // if no username provided user associated with access token will be used
-        if (user == null || user.isEmpty()) {
+        if (user == null || StringUtils.isEmpty(user)) {
             user = RestApiUtil.getLoggedInUsername();
         }
 
@@ -65,8 +70,17 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
                 }
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(user);
-                allMatchedApps = apiConsumer.getApplicationsByOwner(user);
 
+                // If no user is passed, get the applications for the tenant (not only for the user)
+                if (givenUser == null || StringUtils.isEmpty(givenUser)) {
+                    APIAdmin apiAdmin = new APIAdminImpl();
+                    int tenantId = APIUtil.getTenantId(user);
+                    allMatchedApps = apiAdmin.getApplicationsByTenantIdWithPagination(tenantId, 0, limit,
+                            "", "", APIConstants.APPLICATION_NAME,
+                            RestApiConstants.DEFAULT_SORT_ORDER).toArray(new Application[0]);
+                } else {
+                    allMatchedApps = apiConsumer.getApplicationsByOwner(user);
+                }
             } else { // flow at migration process
                 if (StringUtils.isEmpty(appTenantDomain)) {
                     appTenantDomain = MultitenantUtils.getTenantDomain(user);

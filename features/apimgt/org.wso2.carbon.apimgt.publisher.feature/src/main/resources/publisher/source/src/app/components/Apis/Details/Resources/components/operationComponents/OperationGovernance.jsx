@@ -218,7 +218,7 @@ export default function OperationGovernance(props) {
                         value={getOperationScopes(operation, spec)[0]}
                         onChange={({ target: { value } }) => operationsDispatcher({
                             action: 'scopes',
-                            data: { target, verb, value: [value] },
+                            data: { target, verb, value: value ? [value] : [] },
                         })}
                         helperText={(
                             <FormattedMessage
@@ -241,13 +241,13 @@ export default function OperationGovernance(props) {
                             />
                         </MenuItem>
                         {api.scopes.length !== 0
-                            ? api.scopes.map((scope) => (
+                            ? api.scopes.map((apiScope) => (
                                 <MenuItem
-                                    key={scope.name}
-                                    value={scope.name}
+                                    key={apiScope.scope.name}
+                                    value={apiScope.scope.name}
                                     dense
                                 >
-                                    {scope.name}
+                                    {apiScope.scope.name}
                                 </MenuItem>
                             )) : (
                                 <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>

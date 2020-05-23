@@ -56,7 +56,6 @@ const styles = (theme) => ({
         height: 35,
     },
     selectedWrapper: {
-        background: theme.palette.grey[100],
         borderLeft: 'solid 2px ' + theme.palette.primary.main,
     },
 });
@@ -68,7 +67,7 @@ const subscriptionTableRow = (props) => {
     } = props;
     return (
         <>
-            <tr style={{ backgroundColor: index % 2 ? '' : '#ffffff' }}>
+            <tr>
                 <td className={classes.td}>{app.label}</td>
                 <td className={classes.td}>{app.policy}</td>
                 <td className={classes.td}>{app.status}</td>

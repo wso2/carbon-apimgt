@@ -28,6 +28,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Icon from '@material-ui/core/Icon';
 import { FormattedMessage } from 'react-intl';
 import ApiTagThumb from './ApiTagThumb';
+import classNames from 'classnames';
 
 const useStyles = makeStyles(theme => ({
     mainTitle: {
@@ -45,6 +46,9 @@ const useStyles = makeStyles(theme => ({
             color: theme.custom.tagCloud.leftMenu.color,
         },
     },
+    linkTextWrapper: {
+        color: theme.palette.primary.main,
+    },
     tagWiseThumbWrapper: {
         display: 'flex',
     },
@@ -57,6 +61,12 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'center',
         display: 'flex',
     },
+    mainPageList: {
+        display: 'flex',
+    },
+    mainPageAllApis: {
+        width: '100%',
+    }
 }));
 
 /**
@@ -79,7 +89,7 @@ function TagCloudListingTags(props) {
 
 
     const tagWiseURL = '/apis?offset=0&query=tag';
-    const { allTags } = props;
+    const { allTags, mainPage } = props;
     let apisTagCloudGroup = null;
 
     if (allTags.count !== 0) {
@@ -98,57 +108,62 @@ function TagCloudListingTags(props) {
      * @returns {React.Component} @inheritdoc
      * @memberof TagCloudListing
      */
-
     return apisTagCloudGroup && apisTagCloudGroup.length > 0 ? (
-        style === 'fixed-left' ? (
-            <React.Fragment>
-                <Typography variant='h6' gutterBottom className={classes.filterTitle}>
-                    <FormattedMessage defaultMessage='Api Groups' id='Apis.Listing.TagCloudListingTags.title' />
-                </Typography>
-                <List component='nav' aria-label='main mailbox folders'>
-                    {Object.keys(apisTagCloudGroup).map((key) => {
-                        return <ApiTagThumb key={key} tag={apisTagCloudGroup[key]} path={tagWiseURL} style={style} />;
-                    })}
-                    {showAllApis && (
-                        <React.Fragment>
-                            <Divider />
-
-                            <Link to='apis/' className={classes.textWrapper}>
-                                <ListItem button>
-                                    <ListItemIcon>
-                                        <Icon>label</Icon>
-                                    </ListItemIcon>
-                                    <ListItemText
-                                        primary={
-                                            <FormattedMessage
-                                                defaultMessage='All Apis'
-                                                id='Apis.Listing.TagCloudListingTags.allApis'
-                                            />
-                                        }
-                                    />
-                                </ListItem>
-                            </Link>
-                        </React.Fragment>
-                    )}
-                </List>
-            </React.Fragment>
-        ) : (
-            <div className={classes.tagWiseThumbWrapper}>
+        <>
+            {!mainPage && (<Typography variant='h6' gutterBottom className={classes.filterTitle}>
+                <FormattedMessage defaultMessage='Api Groups' id='Apis.Listing.TagCloudListingTags.title' />
+            </Typography>)}
+            <List component='nav' aria-label='main mailbox folders' className={classNames({ [classes.mainPageList]: mainPage })}>
                 {Object.keys(apisTagCloudGroup).map((key) => {
-                    return <ApiTagThumb key={key} tag={apisTagCloudGroup[key]} path={tagWiseURL} style={style} />;
+                    return <ApiTagThumb key={key} tag={apisTagCloudGroup[key]} path={tagWiseURL} style={style} mainPage={mainPage} />;
                 })}
-            </div>
-        )
+            </List>
+            {showAllApis && (
+                <div className={classNames({ [classes.mainPageAllApis]: mainPage })}>
+                    <Divider />
+
+                    <Link to='apis/' className={classes.textWrapper}>
+                        <ListItem button>
+                            <ListItemIcon>
+                                <Icon>label</Icon>
+                            </ListItemIcon>
+                            <ListItemText
+                                primary={
+                                    <FormattedMessage
+                                        defaultMessage='All Apis'
+                                        id='Apis.Listing.TagCloudListingTags.allApis'
+                                    />
+                                }
+                            />
+                        </ListItem>
+                    </Link>
+                </div>
+            )}
+        </>
+
     ) : (
-        <div className={classes.mainTitle}>
-            <Typography variant='subtitle1' gutterBottom align='center'>
-                <FormattedMessage
-                    defaultMessage='Tags cannot be found'
-                    id='Apis.Listing.TagCloudListingTags.tagsNotFound'
-                />
-            </Typography>
-        </div>
-    );
+            <>
+                {!mainPage && (<Typography variant='h6' gutterBottom className={classes.filterTitle}>
+                    <FormattedMessage defaultMessage='Api Groups' id='Apis.Listing.TagCloudListingTags.title' />
+                </Typography>)}
+                <div className={classes.mainTitle}>
+                    <Typography variant='subtitle1' gutterBottom align='center'>
+                        <FormattedMessage
+                            defaultMessage='API groups cannot be found'
+                            id='Apis.Listing.TagCloudListingTags.tagsNotFound'
+                        />
+                    </Typography>
+                    <Link to='apis/' className={classes.linkTextWrapper}>
+                        <Typography variant='subtitle1' gutterBottom align='center'>
+                            <FormattedMessage
+                                defaultMessage='All Apis'
+                                id='Apis.Listing.TagCloudListingTags.allApis'
+                            />
+                        </Typography>
+                    </Link>
+                </div>
+            </>
+        );
 }
 
 TagCloudListingTags.propTypes = {

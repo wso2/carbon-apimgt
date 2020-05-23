@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ ~ Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ ~
+ ~ Licensed under the Apache License, Version 2.0 (the "License");
+ ~ you may not use this file except in compliance with the License.
+ ~ You may obtain a copy of the License at
+ ~
+ ~      http://www.apache.org/licenses/LICENSE-2.0
+ ~
+ ~ Unless required by applicable law or agreed to in writing, software
+ ~ distributed under the License is distributed on an "AS IS" BASIS,
+ ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ~ See the License for the specific language governing permissions and
+ ~ limitations under the License.
+-->
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:cxf="http://cxf.apache.org/core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd">
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <context:property-placeholder/>
+    <context:annotation-config/>
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+	  <property name="environment">
+	    <bean class="org.springframework.web.context.support.StandardServletEnvironment" />
+	  </property>
+    </bean>
+    <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
+    <jaxrs:server id="services" address="/">
+        <jaxrs:serviceBeans>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.PoliciesApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ApplicationsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.BotDataApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.LabelsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ExportApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ImportApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.MonetizationApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.WorkflowsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.TenantInfoApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ApiCategoriesApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.CustomUrlsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.SwaggerYamlApi"/>
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper" />
+        </jaxrs:providers>
+        <jaxrs:properties>
+            <!-- This is added to catch interceptor level exceptions in GlobalThrowableMapper. -->
+            <entry key="map.cxf.interceptor.fault" value="true" />
+        </jaxrs:properties>
+    </jaxrs:server>
+
+    <bean id="URLValidationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor" />
+    <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
+    <bean id="TokenMergeInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor" />
+    <bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor" />
+    <bean id="BasicAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor" />
+    <bean id="PostAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor" />
+    <bean id="ValidationInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor"/>
+    <cxf:bus>
+        <cxf:inInterceptors>
+            <ref bean="URLValidationInterceptor"/>
+            <ref bean="TokenMergeInterceptor"/>
+            <ref bean="PreAuthenticationInterceptor"/>
+            <ref bean="AuthenticationInterceptor"/>
+            <ref bean="BasicAuthenticationInterceptor"/>
+            <ref bean="PostAuthenticationInterceptor"/>
+            <ref bean="ValidationInInterceptor"/>
+        </cxf:inInterceptors>
+    </cxf:bus>
+</beans>

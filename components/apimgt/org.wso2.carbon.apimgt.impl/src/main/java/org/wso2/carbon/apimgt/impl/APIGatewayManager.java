@@ -176,6 +176,10 @@ public class APIGatewayManager {
                     gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(apiLocalEntry,
                             gatewayAPIDTO.getLocalEntriesToBeAdd()));
                 }
+
+                // Retrieve ga-config from the registry and publish to gateway as a local entry
+                addGAConfigLocalEntry(gatewayAPIDTO, tenantDomain);
+
                 // If the API exists in the Gateway
                 // If the Gateway type is 'production' and a production url has
                 // not been specified
@@ -271,6 +275,20 @@ public class APIGatewayManager {
         }
 
         return failedEnvironmentsMap;
+    }
+
+    private void addGAConfigLocalEntry(GatewayAPIDTO gatewayAPIDTO, String tenantDomain)
+            throws APIManagementException {
+        String content = APIUtil.getGAConfigFromRegistry(tenantDomain);
+
+        if (StringUtils.isNotEmpty(content)) {
+            GatewayContentDTO apiLocalEntry = new GatewayContentDTO();
+            apiLocalEntry.setName(APIConstants.GA_CONF_KEY);
+            apiLocalEntry.setContent("<localEntry key=\"" + APIConstants.GA_CONF_KEY + "\">"
+                    + content + "</localEntry>");
+            gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(apiLocalEntry,
+                    gatewayAPIDTO.getLocalEntriesToBeAdd()));
+        }
     }
 
     private GatewayContentDTO[] addGatewayContentToList(GatewayContentDTO gatewayContentDTO,
@@ -423,6 +441,10 @@ public class APIGatewayManager {
                         + "</localEntry>");
                 productAPIDto.setLocalEntriesToBeAdd(addGatewayContentToList(productLocalEntry,
                         productAPIDto.getLocalEntriesToBeAdd()));
+
+                // Retrieve ga-config from the registry and publish to gateway as a local entry
+                addGAConfigLocalEntry(productAPIDto, tenantDomain);
+
                 // If the Gateway type is 'production' and a production url has
                 // not been specified
                 // Or if the Gateway type is 'sandbox' and a sandbox url has not
