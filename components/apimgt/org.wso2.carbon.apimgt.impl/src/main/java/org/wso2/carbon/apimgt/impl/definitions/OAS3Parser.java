@@ -178,12 +178,13 @@ public class OAS3Parser extends APIDefinition {
                                 genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
                             }
 //                            if(!queryParameter){
-                            responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "json")));
-//                            if(!setPayloadResponse) {
-                                if (responseCode == minResponseCode && !setPayloadResponse) {
+//                            responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "json")));
+                            if(!setPayloadResponse) {
+                                responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "json")));
+                                if (responseCode == minResponseCode) {
                                     minResponseType = ("json");
                                 }
-//                            }
+                            }
                             setPayloadResponse = true;
 //                            if (applicationXml != null) {
 ////                                    responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
@@ -200,12 +201,13 @@ public class OAS3Parser extends APIDefinition {
                                 genCode.append(getGeneratedResponseVar(responseEntry, xmlExample, "xml"));
                             }
 //                            if(!queryParameter){
-                            responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "xml")));
-//                            if(!setPayloadResponse) {
-                                if (responseCode == minResponseCode && !setPayloadResponse) {
+//                            responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "xml")));
+                            if (!setPayloadResponse) {
+                                responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "xml")));
+                                if (responseCode == minResponseCode) {
                                     minResponseType = "xml";
                                 }
-//                            }
+                            }
                             setPayloadResponse = true;
 //                            if (applicationJson == null) {
 //                                responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "xml")));
@@ -349,7 +351,7 @@ public class OAS3Parser extends APIDefinition {
      */
     private String getGeneratedSetResponse(String responseCode, String type) {
         return "  mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
-                "  mc.setPayloadJSON(response" + responseCode + type + ");";
+                "  mc.setPayload"+type.toUpperCase()+"(response" + responseCode + type + ");";
     }
 
     /**
@@ -385,7 +387,7 @@ public class OAS3Parser extends APIDefinition {
 
                 " if (responseCode == null) {\n\n"+
                 "  mc.setProperty('CONTENT_TYPE', 'application/"+minResponseType+"');\n"+
-                "  mc.setPayloadJSON(response"+minResponseCode+minResponseType+");\n\n"+
+                "  mc.setPayload"+minResponseType.toUpperCase()+"(response"+minResponseCode+minResponseType+");\n\n"+
                 "} else "+
 
                 "{\n\n"+

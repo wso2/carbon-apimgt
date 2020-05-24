@@ -260,7 +260,7 @@ public class OAS2Parser extends APIDefinition {
      */
     private String getGeneratedSetResponse(String responseCode, String type) {
         return "  mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
-                "  mc.setPayloadJSON(response" + responseCode + type + ");";
+                "  mc.setPayload"+type.toUpperCase()+"(response" + responseCode + type + ");";
     }
 
     /**
@@ -296,7 +296,7 @@ public class OAS2Parser extends APIDefinition {
 
                 " if (responseCode == null) {\n\n"+
                 "  mc.setProperty('CONTENT_TYPE', 'application/"+minResponseType+"');\n"+
-                "  mc.setPayloadJSON(response"+minResponseCode+minResponseType+");\n\n"+
+                "  mc.setPayload"+minResponseType.toUpperCase()+"(response"+minResponseCode+minResponseType+");\n\n"+
                 "} else "+
 
                 "{\n\n"+
