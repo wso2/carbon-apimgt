@@ -67,8 +67,6 @@ export default function CloudClusters(props) {
     const { api } = useContext(APIContext);
     const { getDeployments, selectedDeployments, setSelectedDeployments } = props;
 
-    console.log('get deployments', getDeployments);
-
     return (
         <>
             <Typography variant='h4' gutterBottom align='left' className={classes.mainTitle}>
@@ -109,7 +107,6 @@ export default function CloudClusters(props) {
                                                     setSelectedDeployments(
                                                         selectedDeployments.filter((env) => env !== name),
                                                     );
-                                                    console.log('selected dep else', selectedDeployments);
                                                 }
                                             }
                                         }
