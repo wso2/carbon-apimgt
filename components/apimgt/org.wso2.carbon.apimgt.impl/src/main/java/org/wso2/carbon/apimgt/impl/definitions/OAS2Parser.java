@@ -123,6 +123,7 @@ public class OAS2Parser extends APIDefinition {
         List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
         for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
             int responseCode = 0;
+            String minResponseType = "";
             int minResponseCode = 0;
             String path = entry.getKey();
             //initializing apiResourceMediationPolicyObject
@@ -156,23 +157,30 @@ public class OAS2Parser extends APIDefinition {
                         if (applicationJson != null) {
                             String jsonExample = Json.pretty(applicationJson);
                             genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
+                            responseSection.append(getGeneratedIFsforCodes(responseEntry,getGeneratedSetResponse(responseEntry, "json")));
                             if (responseCode == minResponseCode && !setPayloadResponse){
-                                responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
-                                setPayloadResponse = true;
-                                if (applicationXml != null) {
-                                    responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
-                                }
+//                                responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
+//                                setPayloadResponse = true;
+                                minResponseType = ("json");
+//                                setPayloadResponse = true;
                             }
+//                            if (applicationXml != null) {
+////                                responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
+//                                responseSection.append(getGeneratedIFsforCodes(responseEntry,getGeneratedSetResponse(responseEntry, "xml")));
+//                            }
+                            setPayloadResponse = true;
                         }
                         if (applicationXml != null) {
                             String xmlExample = applicationXml.toString();
                             genCode.append(getGeneratedResponseVar(responseEntry, xmlExample, "xml"));
                             if (responseCode == minResponseCode && !setPayloadResponse){
                                 if (applicationJson == null) {
-                                    responseSection.append(getGeneratedSetResponse(responseEntry, "xml"));
-                                    setPayloadResponse = true;
+                                    responseSection.append(getGeneratedIFsforCodes(responseEntry,getGeneratedSetResponse(responseEntry, "xml")));
+                                    minResponseType = ("xml");
+//                                    setPayloadResponse = true;
                                 }
                             }
+                            setPayloadResponse = true;
                         }
                         if (applicationJson == null && applicationXml == null) {
                             setDefaultGeneratedResponse(genCode);
@@ -182,15 +190,20 @@ public class OAS2Parser extends APIDefinition {
                         String schemaExample = getSchemaExample(model, definitions, new HashSet<String>());
                         genCode.append(getGeneratedResponseVar(responseEntry, schemaExample, "json"));
                         if (responseCode == minResponseCode && !setPayloadResponse){
-                            responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
-                            setPayloadResponse = true;
-                        }
-                    } else if (responseCode == minResponseCode && !setPayloadResponse) {
-                        setDefaultGeneratedResponse(genCode);
+                        responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "json")));
+                        minResponseType = "json";
                         setPayloadResponse = true;
+                        }
                     }
+//                    } else if (responseCode == minResponseCode && !setPayloadResponse) {
+//                        setDefaultGeneratedResponse(genCode);
+////                        setPayloadResponse = true;
+//                    }
                 }
-                genCode.append(responseSection);
+
+                String finalResponseSection = getGeneratedSetResponseForCodes(minResponseCode, minResponseType, responseSection.toString());
+
+                genCode.append(finalResponseSection);
                 String finalGenCode = genCode.toString();
                 apiResourceMediationPolicyObject.setContent(finalGenCode);
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
@@ -246,11 +259,215 @@ public class OAS2Parser extends APIDefinition {
      * @return manualCode
      */
     private String getGeneratedSetResponse(String responseCode, String type) {
-        return "mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
-                "mc.setPayloadJSON(response" + responseCode + type + ");";
+        return "  mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
+                "  mc.setPayloadJSON(response" + responseCode + type + ");";
     }
 
     /**
+     * Generates IF conditions for setting response code of mock payload
+     *
+     * @param responseCode response code of payload
+     * @param getGeneratedSetResponseString string returned from "getGeneratedSetResponse"
+     * @return if condition with "getGeneratedSetResponse" included
+     */
+    private String getGeneratedIFsforCodes(String responseCode, String getGeneratedSetResponseString){
+        return "if (responseCode == "+responseCode+") {\n\n" +
+                getGeneratedSetResponseString+
+                "\n\n} else ";
+    }
+
+    /**
+     * Generates Mock payload and set response for 501 response and null response code
+     * also includes getGeneratedIFsforCodes string of all included response codes
+     *
+     * @param minResponseCode minimum response code
+     * @param minResponseType type of minimum response code (json/xml)
+     * @param responseSectionString String of IF conditions of all response codes
+     * @return response section string with IF conditions and responses
+     */
+    private String getGeneratedSetResponseForCodes(int minResponseCode, String minResponseType, String responseSectionString){
+        return "\nvar response501json = {\n" +
+                "\"code\" : 501," +
+                "\n\"description\" : "+"\"Not Implemented\"\n"+
+                "}\n\n" +
+                "var responseCode = mc.getProperty('query.param.responseCode');\n\n" +
+
+                responseSectionString+
+
+                " if (responseCode == null) {\n\n"+
+                "  mc.setProperty('CONTENT_TYPE', 'application/"+minResponseType+"');\n"+
+                "  mc.setPayloadJSON(response"+minResponseCode+minResponseType+");\n\n"+
+                "} else "+
+
+                "{\n\n"+
+                "  mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
+                "  mc.setPayloadJSON(response501json);\n\n"+
+                "}";
+    }
+
+//
+//    /**
+//     * Models API definition using OAS (swagger 2.0) parser
+//     */
+//    public class OAS2Parser extends APIDefinition {
+//        private static final Log log = LogFactory.getLog(OAS2Parser.class);
+//        private static final String SWAGGER_SECURITY_SCHEMA_KEY = "default";
+//        private List<String> otherSchemes;
+//
+//        private List<String> getOtherSchemes() {
+//            return otherSchemes;
+//        }
+//
+//        private void setOtherSchemes(List<String> otherSchemes) {
+//            this.otherSchemes = otherSchemes;
+//        }
+//
+//        /**
+//         * This method  generates Sample/Mock payloads for Swagger (2.0) definitions
+//         *
+//         * @param swaggerDef Swagger Definition
+//         * @return Swagger Json
+//         */
+//        @Override
+//        public Map<String, Object> generateExample(String swaggerDef) {
+//            // create APIResourceMediationPolicy List = policyList
+//            SwaggerParser parser = new SwaggerParser();
+//            SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(swaggerDef);
+//            Swagger swagger = parseAttemptForV2.getSwagger();
+//            //return map
+//            Map<String, Object> returnMap = new HashMap<>();
+//            //List for APIResMedPolicyList
+//            List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
+//            for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
+//                int responseCode = 0;
+//                int minResponseCode = 0;
+//                String path = entry.getKey();
+//                //initializing apiResourceMediationPolicyObject
+//                APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
+//                //setting path for apiResourceMediationPolicyObject
+//                apiResourceMediationPolicyObject.setPath(path);
+//                Map<String, Model> definitions = swagger.getDefinitions();
+//                //operation map to get verb
+//                Map<HttpMethod, Operation> operationMap = entry.getValue().getOperationMap();
+//                List<Operation> operations = swagger.getPaths().get(path).getOperations();
+//                for (Operation op : operations) {
+//                    ArrayList<Integer> responseCodes = new ArrayList<Integer>();
+//                    //for each HTTP method get the verb
+//                    for (Map.Entry<HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
+//                        //add verb to apiResourceMediationPolicyObject
+//                        apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
+//                    }
+//                    StringBuilder genCode = new StringBuilder();
+//                    StringBuilder responseSection = new StringBuilder();
+//                    //for setting only one setPayload response
+//                    boolean setPayloadResponse = false;
+//                    for (String responseEntry : op.getResponses().keySet()) {
+//                        if (!responseEntry.equals("default")) {
+//                            responseCode = Integer.parseInt(responseEntry);
+//                            responseCodes.add(responseCode);
+//                            minResponseCode = Collections.min(responseCodes);
+//                        }
+//                        if (op.getResponses().get(responseEntry).getExamples() != null) {
+//                            Object applicationJson = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_JSON_MEDIA_TYPE);
+//                            Object applicationXml = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_XML_MEDIA_TYPE);
+//                            if (applicationJson != null) {
+//                                String jsonExample = Json.pretty(applicationJson);
+//                                genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
+//                                if (responseCode == minResponseCode && !setPayloadResponse){
+//                                    responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
+//                                    setPayloadResponse = true;
+//                                    if (applicationXml != null) {
+//                                        responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
+//                                    }
+//                                }
+//                            }
+//                            if (applicationXml != null) {
+//                                String xmlExample = applicationXml.toString();
+//                                genCode.append(getGeneratedResponseVar(responseEntry, xmlExample, "xml"));
+//                                if (responseCode == minResponseCode && !setPayloadResponse){
+//                                    if (applicationJson == null) {
+//                                        responseSection.append(getGeneratedSetResponse(responseEntry, "xml"));
+//                                        setPayloadResponse = true;
+//                                    }
+//                                }
+//                            }
+//                            if (applicationJson == null && applicationXml == null) {
+//                                setDefaultGeneratedResponse(genCode);
+//                            }
+//                        } else if (op.getResponses().get(responseEntry).getResponseSchema() != null) {
+//                            Model model = op.getResponses().get(responseEntry).getResponseSchema();
+//                            String schemaExample = getSchemaExample(model, definitions, new HashSet<String>());
+//                            genCode.append(getGeneratedResponseVar(responseEntry, schemaExample, "json"));
+//                            if (responseCode == minResponseCode && !setPayloadResponse){
+//                                responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
+//                                setPayloadResponse = true;
+//                            }
+//                        } else if (responseCode == minResponseCode && !setPayloadResponse) {
+//                            setDefaultGeneratedResponse(genCode);
+//                            setPayloadResponse = true;
+//                        }
+//                    }
+//                    genCode.append(responseSection);
+//                    String finalGenCode = genCode.toString();
+//                    apiResourceMediationPolicyObject.setContent(finalGenCode);
+//                    apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
+//                    op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
+//                }
+//                returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
+//                returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
+//            }
+//            return returnMap;
+//        }
+//
+//        /**
+//         * This method  generates Sample/Mock payloads of Schema Examples for operations in the swagger definition
+//         * @param model model
+//         * @param definitions definitions
+//         * @return Example Json
+//         */
+//        private String getSchemaExample(Model model, Map<String, Model> definitions, HashSet<String> strings) {
+//            Example example = ExampleBuilder.fromModel("Model", model, definitions, new HashSet<String>());
+//            SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
+//            Json.mapper().registerModule(simpleModule);
+//            return Json.pretty(example);
+//        }
+//
+//        /**
+//         *Sets default script
+//         *
+//         * @param genCode String builder
+//         */
+//        private void setDefaultGeneratedResponse(StringBuilder genCode) {
+//            genCode.append("/* mc.setProperty('CONTENT_TYPE', 'application/json');\n\t" +
+//                    "mc.setPayloadJSON('{ \"data\" : \"sample JSON\"}');*/\n" +
+//                    "/*Uncomment the above comment block to send a sample response.*/");
+//        }
+//
+//        /**
+//         * Generates string for variables in Payload Generation
+//         *
+//         * @param responseCode response Entry Code
+//         * @param example generated Example Json/Xml
+//         * @param type  mediaType (Json/Xml)
+//         * @return generatedString
+//         */
+//        private String getGeneratedResponseVar(String responseCode, String example, String type) {
+//            return "\nvar response" + responseCode + type + " = "+ example+"\n\n";
+//        }
+//
+//        /**
+//         * Generates string for methods in Payload Generation
+//         *
+//         * @param responseCode response Entry Code
+//         * @param type mediaType (Json/Xml)
+//         * @return manualCode
+//         */
+//        private String getGeneratedSetResponse(String responseCode, String type) {
+//            return "mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
+//                    "mc.setPayloadJSON(response" + responseCode + type + ");";
+//        }
+
+        /**
      * This method returns URI templates according to the given swagger file
      *
      * @param resourceConfigsJSON swaggerJSON

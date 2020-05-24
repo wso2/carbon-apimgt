@@ -121,6 +121,7 @@ public class OAS3Parser extends APIDefinition {
         List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
         for (Map.Entry<String, PathItem> entry : swagger.getPaths().entrySet()) {
             int minResponseCode = 0;
+            String minResponseType = "";
             int responseCode = 0;
             String path = entry.getKey();
             //initializing apiResourceMediationPolicyObject
@@ -131,17 +132,35 @@ public class OAS3Parser extends APIDefinition {
             //operation map to get verb
             Map<PathItem.HttpMethod, Operation> operationMap = entry.getValue().readOperationsMap();
             List<Operation> operations = swagger.getPaths().get(path).readOperations();
+
             for (Operation op : operations) {
                 ArrayList<Integer> responseCodes = new ArrayList<Integer>();
                 //for each HTTP method get the verb
+
+
+                StringBuilder genCode = new StringBuilder();
+                StringBuilder responseSection = new StringBuilder();
+//                StringBuilder responseSectionForCodes = new StringBuilder();
+
+                //for setting only one setPayload response
+                boolean setPayloadResponse = false;
+//                boolean queryParameter = false;
+
+
                 for (Map.Entry<PathItem.HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
                     //add verb to apiResourceMediationPolicyObject
                     apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
                 }
-                StringBuilder genCode = new StringBuilder();
-                StringBuilder responseSection = new StringBuilder();
-                //for setting only one setPayload response
-                boolean setPayloadResponse = false;
+
+//                if (op.getParameters() != null) {
+//                    for (int i = 0; i < op.getParameters().size(); i++) {
+//                        if (op.getParameters().get(i).getIn().equals("query") && op.getParameters().get(i).getName().equals("responseCode")) {
+//                            queryParameter = true;
+//                        }
+//                    }
+//                }
+
+
                 for (String responseEntry : op.getResponses().keySet()) {
                     if (!responseEntry.equals("default")) {
                         responseCode = Integer.parseInt(responseEntry);
@@ -151,20 +170,28 @@ public class OAS3Parser extends APIDefinition {
                     Content content = op.getResponses().get(responseEntry).getContent();
                     if (content != null) {
                         MediaType applicationJson = content.get(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-                        MediaType applicationXml = content.get(APPLICATION_XML_MEDIA_TYPE);
+                        MediaType applicationXml = content.get(APIConstants.APPLICATION_XML_MEDIA_TYPE);
                         if (applicationJson != null) {
                             Schema jsonSchema = applicationJson.getSchema();
                             if (jsonSchema != null) {
                                 String jsonExample = getJsonExample(jsonSchema, definitions);
                                 genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
                             }
-                            if (responseCode == minResponseCode && !setPayloadResponse){
-                                responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
-                                setPayloadResponse = true;
-                                if (applicationXml != null) {
-                                    responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
+//                            if(!queryParameter){
+                            responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "json")));
+//                            if(!setPayloadResponse) {
+                                if (responseCode == minResponseCode && !setPayloadResponse) {
+                                    minResponseType = ("json");
                                 }
-                            }
+//                            }
+                            setPayloadResponse = true;
+//                            if (applicationXml != null) {
+////                                    responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
+//                                responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "xml")));
+//                            }
+//                            }else{
+//                                responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "json")));
+//                            }
                         }
                         if (applicationXml != null) {
                             Schema xmlSchema = applicationXml.getSchema();
@@ -172,27 +199,60 @@ public class OAS3Parser extends APIDefinition {
                                 String xmlExample = getXmlExample(xmlSchema, definitions);
                                 genCode.append(getGeneratedResponseVar(responseEntry, xmlExample, "xml"));
                             }
-                            if (responseCode == minResponseCode && !setPayloadResponse) {
-                                if (applicationJson == null) {
-                                    responseSection.append(getGeneratedSetResponse(responseEntry, "xml"));
-                                    setPayloadResponse = true;
+//                            if(!queryParameter){
+                            responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "xml")));
+//                            if(!setPayloadResponse) {
+                                if (responseCode == minResponseCode && !setPayloadResponse) {
+                                    minResponseType = "xml";
                                 }
-                            }
+//                            }
+                            setPayloadResponse = true;
+//                            if (applicationJson == null) {
+//                                responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "xml")));
+//                                setPayloadResponse = true;
+
+
+//                                    if (!queryParameter) {
+//                                        responseSection.append(getGeneratedSetResponse(responseEntry, "xml"));
+//                                    } else {
+//                                        responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "xml")));
+//                                    }
+//                                    setPayloadResponse = true;
+//                            }
+//                            } else {
+//                                responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "xml")));
+//                            }
                         }
                         if (applicationJson == null && applicationXml == null) {
                             setDefaultGeneratedResponse(genCode);
                         }
-                    } else if (responseCode == minResponseCode && !setPayloadResponse) {
-                        setDefaultGeneratedResponse(genCode);
-                        setPayloadResponse = true;
                     }
+//                    } else if (responseCode == minResponseCode && !setPayloadResponse) {
+//                        setDefaultGeneratedResponse(genCode);
+//                        setPayloadResponse = true;
+//                    }
                 }
-                genCode.append(responseSection);
+
+
+                String finalResponseSection = getGeneratedSetResponseForCodes(minResponseCode, minResponseType, responseSection.toString());
+
+//                if (!queryParameter) {
+//                    genCode.append(responseSection);
+//                    String finalGenCode = genCode.toString();
+//                    apiResourceMediationPolicyObject.setContent(finalGenCode);
+//                    op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
+//                    apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
+//                } else {
+//                    String responseSectionForIFs = getGeneratedSetResponseForCodes(responseSection);
+
+                genCode.append(finalResponseSection);
                 String finalGenCode = genCode.toString();
                 apiResourceMediationPolicyObject.setContent(finalGenCode);
                 op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
+
             }
+
 
             checkAndSetEmptyScope(swagger);
             returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
@@ -213,7 +273,6 @@ public class OAS3Parser extends APIDefinition {
      *           authorizationUrl: 'https://test.com'
      *           scopes: {}
      *           x-scopes-bindings: {}
-     *
      *
      * @param swagger OpenAPI object
      */
@@ -289,8 +348,50 @@ public class OAS3Parser extends APIDefinition {
      * @return manualCode
      */
     private String getGeneratedSetResponse(String responseCode, String type) {
-        return "mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
-                "mc.setPayloadJSON(response" + responseCode + type + ");";
+        return "  mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
+                "  mc.setPayloadJSON(response" + responseCode + type + ");";
+    }
+
+    /**
+     * Generates IF conditions for setting response code of mock payload
+     *
+     * @param responseCode response code of payload
+     * @param getGeneratedSetResponseString string returned from "getGeneratedSetResponse"
+     * @return if condition with "getGeneratedSetResponse" included
+     */
+    private String getGeneratedIFsforCodes(String responseCode, String getGeneratedSetResponseString){
+        return "if (responseCode == "+responseCode+") {\n\n" +
+                getGeneratedSetResponseString+
+                "\n\n} else ";
+    }
+
+    /**
+     * Generates Mock payload and set response for 501 response and null response code
+     * also includes getGeneratedIFsforCodes string of all included response codes
+     *
+     * @param minResponseCode minimum response code
+     * @param minResponseType type of minimum response code (json/xml)
+     * @param responseSectionString String of IF conditions of all response codes
+     * @return response section string with IF conditions and responses
+     */
+    private String getGeneratedSetResponseForCodes(int minResponseCode, String minResponseType, String responseSectionString){
+        return "\nvar response501json = {\n" +
+                "\"code\" : 501," +
+                "\n\"description\" : "+"\"Not Implemented\"\n"+
+                "}\n\n" +
+                "var responseCode = mc.getProperty('query.param.responseCode');\n\n" +
+
+                responseSectionString+
+
+                " if (responseCode == null) {\n\n"+
+                "  mc.setProperty('CONTENT_TYPE', 'application/"+minResponseType+"');\n"+
+                "  mc.setPayloadJSON(response"+minResponseCode+minResponseType+");\n\n"+
+                "} else "+
+
+                "{\n\n"+
+                "  mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
+                "  mc.setPayloadJSON(response501json);\n\n"+
+                "}";
     }
 
     /**
