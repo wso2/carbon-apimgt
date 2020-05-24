@@ -676,16 +676,6 @@ public class OASParserUtil {
             masterSwagger = new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_YAML);
             return masterSwagger;
         } else {
-            File[] listOfFiles = archiveDirectory.listFiles(File::isDirectory);
-            if (listOfFiles != null) {
-                for (File file: listOfFiles) {
-                    masterSwagger = checkMasterSwagger(file);
-                }
-            }
-        }
-        if (masterSwagger != null) {
-            return masterSwagger;
-        } else {
             throw new APIManagementException("Could not find a master swagger file with the name of swagger.json " +
                     "/swagger.yaml");
         }
@@ -712,6 +702,7 @@ public class OASParserUtil {
             for (File file: listOfFiles) {
                 if (file.isDirectory()) {
                     archiveDirectory = file.getAbsoluteFile();
+                    break;
                 }
             }
         }
