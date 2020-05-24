@@ -50,13 +50,13 @@ paths:
           "prodServer" will match a registry entry if the name is exactly "prodServer".
         schema:
           type: string
-      - name: sortBy
+      - name: sortRegistryBy
         in: query
         schema:
           type: string
           enum:
             - registryName
-      - name: sortOrder
+      - name: sortRegistryOrder
         in: query
         schema:
           type: string
@@ -270,7 +270,7 @@ paths:
         - default:
           - registry:entry_view
       tags:
-        - Registries Entries
+        - Registry Entries
       parameters:
       - name: registryId
         in: path
@@ -280,25 +280,54 @@ paths:
         explode: false
         schema:
           type: string
-      - name: query
+      - name: serviceType
         in: query
         description: |
           **Search condition**.
 
-          You can search for a registry entry by specifying the entry name as "query" attribute.
-
-          Eg.
-          "pizzaServer" will match a registry entry if the name is exactly "pizzaServer".
+          Filter entries by serviceType
         schema:
           type: string
-      - name: sortBy
+          enum:
+          - REST
+          - SOAP_1_1
+          - GQL
+          - WS
+      - name: definitionType
+        in: query
+        description: |
+          Filter registry entries by definitionType
+        schema:
+          type: string
+          enum:
+          - OAS
+          - WSDL1
+          - WSDL2
+          - GQL_SDL
+      - name: name
+        in: query
+        description: |
+          Filter registry entries by the name of the Entry
+        schema:
+          type: string
+      - name: serviceCategory
+        in: query
+        description: |
+          Filter registry entries by the service category of the Entry
+        schema:
+          type: string
+          enum:
+          - UTILITY
+          - EDGE
+          - DOMAIN
+      - name: sortEntryBy
         in: query
         schema:
           type: string
           enum:
             - definitionType
             - serviceType
-      - name: sortOrder
+      - name: sortEntryOrder
         in: query
         schema:
           type: string
@@ -549,6 +578,63 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  #-----------------------------------------------------
+  # Retrieve definition file of an entry in Registry
+  #-----------------------------------------------------
+  /registries/{registryId}/entries/{entryId}/definition-file:
+    get:
+      summary: Retrieve the definition file of a specific Entry in a Registry
+      description: |
+        Using this operation, you can retrieve the definition file of a specific entry in a Registry using the EntryId and RegistryId.
+      security:
+        - default:
+          - registry:entry_view
+      operationId: getEndpointDefinition
+      tags:
+        - Registry Entries
+      parameters:
+      - name: registryId
+        in: path
+        description: uuid of the registry
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: entryId
+        in: path
+        description: uuid of the registry entry
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: |
+            Updated.
+            Successful response with the definition file as entity in the body.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: |
+            Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: |
+            Not Found.
+            Requested Registry or Entry does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   #-------------------------------------------------------
   # The security schemes of resources used by some of the APIs
@@ -559,7 +645,6 @@ components:
       flows:
         implicit:
           authorizationUrl: https://example.com/oauth/authorize
-          tokenUrl: https://example.com/oauth/token
           scopes:
             registry:view: view registry
             registry:write: write registry
@@ -632,9 +717,19 @@ components:
         entryName:
           type: string
           example: Pizzashack-Endpoint
-        serviceUrl:
+        productionServiceUrl:
           type: string
           example: http://localhost/pizzashack
+        sandboxServiceUrl:
+          type: string
+          example: http://localhost/pizzashack
+        serviceCategory:
+          type: string
+          description: "Business Category of the Endpoint"
+          enum:
+          - UTILITY
+          - EDGE
+          - DOMAIN
         serviceType:
           description: Type of the backend connecting to
           type: string
@@ -652,7 +747,7 @@ components:
           - OAS
           - WSDL1
           - WSDL2
-          - GQL-SDL
+          - GQL_SDL
         definitionUrl:
           type: string
           example: http://localhost/pizzashack?swagger.json

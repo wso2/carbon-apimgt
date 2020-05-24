@@ -38,8 +38,13 @@ import java.util.List;
  */
 public class EndpointRegistryImpl implements EndpointRegistry {
 
-    private static final Log log = LogFactory.getLog(APIAdminImpl.class);
-    ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+    private static final Log log = LogFactory.getLog(EndpointRegistryImpl.class);
+    private ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+    private String username;
+
+    public EndpointRegistryImpl(String username) {
+        this.username = username;
+    }
 
     /**
      * Adds a new Endpoint Registry
@@ -138,12 +143,25 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * Returns all entries belong to a given endpoint registry
      *
+     * @param sortBy     Name of the sorting field
+     * @param sortOrder  Order of sorting (asc or desc)
+     * @param limit      Limit
+     * @param offset     Offset
      * @param registryId UUID of the endpoint registry
+     * @param serviceType The endpoint service type
+     * @param definitionType Then endpoint definition type
+     * @param entryName The registry entry name
+     * @param serviceCategory The service category
      * @return A list of EndpointRegistryEntry objects
      * @throws APIManagementException if failed to get entries of an Endpoint Registry
      */
-    public List<EndpointRegistryEntry> getEndpointRegistryEntries(String registryId) throws APIManagementException {
-        return apiMgtDAO.getEndpointRegistryEntries(registryId);
+    public List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit,
+                                                                  int offset, String registryId, String serviceType,
+                                                                  String definitionType, String entryName,
+                                                                  String serviceCategory)
+            throws APIManagementException {
+        return apiMgtDAO.getEndpointRegistryEntries(sortBy, sortOrder, limit, offset, registryId, serviceType,
+                definitionType, entryName, serviceCategory);
     }
 
     /**
@@ -158,24 +176,24 @@ public class EndpointRegistryImpl implements EndpointRegistry {
             APIUtil.handleResourceAlreadyExistsException("Endpoint Registry Entry with name '"
                     + registryEntry.getName() + "' already exists");
         }
-        return apiMgtDAO.addEndpointRegistryEntry(registryEntry);
+        return apiMgtDAO.addEndpointRegistryEntry(registryEntry, username);
     }
 
     /**
      * Updates Registry Entry
      *
+     * @param entryName     original name of the registry entry
      * @param registryEntry EndpointRegistryEntry
      * @throws APIManagementException if failed to update EndpointRegistryEntry
      */
-    public void updateEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException {
-        EndpointRegistryEntry endpointRegistryEntry =
-                apiMgtDAO.getEndpointRegistryEntryByUUID(registryEntry.getEntryId());
-        if (!endpointRegistryEntry.getName().equals(registryEntry.getName()) &&
+    public void updateEndpointRegistryEntry(String entryName, EndpointRegistryEntry registryEntry)
+            throws APIManagementException {
+        if (!entryName.equals(registryEntry.getName()) &&
                 apiMgtDAO.isRegistryEntryNameExists(registryEntry)) {
             APIUtil.handleResourceAlreadyExistsException("Endpoint Registry Entry with name '"
                     + registryEntry.getName() + "' already exists");
         }
-        apiMgtDAO.updateEndpointRegistryEntry(registryEntry);
+        apiMgtDAO.updateEndpointRegistryEntry(registryEntry, username);
     }
 
     /**
@@ -191,10 +209,29 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * {@inheritDoc}
      */
-    public void updateEndpointRegistry(String registryId, EndpointRegistryInfo endpointRegistryInfo) throws
-            APIManagementException {
+    public void updateEndpointRegistry(String registryId, String registryName, EndpointRegistryInfo
+            endpointRegistryInfo) throws APIManagementException {
 
-        apiMgtDAO.updateEndpointRegistry(registryId, endpointRegistryInfo);
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(endpointRegistryInfo.getOwner()));
+        int tenantId;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            // if another registry with the updated name already exists, fail the operation.
+            if (!registryName.equals(endpointRegistryInfo.getName()) &&
+                    apiMgtDAO.isEndpointRegistryNameExists(endpointRegistryInfo.getName(), tenantId)) {
+                APIUtil.handleResourceAlreadyExistsException("Endpoint Registry with name '" + endpointRegistryInfo
+                        .getName() + "' already exists");
+            }
+            apiMgtDAO.updateEndpointRegistry(registryId, endpointRegistryInfo, username);
+        } catch (UserStoreException e) {
+            String msg = "Error while retrieving tenant information";
+            log.error(msg, e);
+            throw new APIManagementException("Error in retrieving Tenant Information while updating " +
+                    "endpoint registry with id :" + registryId, e);
+        }
+
     }
 
 }

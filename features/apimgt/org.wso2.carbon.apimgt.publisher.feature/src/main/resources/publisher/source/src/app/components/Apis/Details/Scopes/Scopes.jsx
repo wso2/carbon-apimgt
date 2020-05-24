@@ -223,14 +223,16 @@ class Scopes extends React.Component {
             viewColumns: false,
             customToolbar: false,
         };
-        const scopesList = api.scopes.map((scope) => {
+        const scopesList = api.scopes.filter((apiScope) => {
+            return !apiScope.shared;
+        }).map((apiScope) => {
             const aScope = [];
-            aScope.push(scope.name);
-            aScope.push(scope.description);
-            aScope.push(scope.bindings.values);
+            aScope.push(apiScope.scope.name);
+            aScope.push(apiScope.scope.description);
+            aScope.push(apiScope.scope.bindings);
             const resources = api.operations && api.operations
                 .filter((op) => {
-                    return op.scopes.includes(scope.name);
+                    return op.scopes.includes(apiScope.scope.name);
                 })
                 .map((op) => {
                     return op.target + ' ' + op.verb;

@@ -49,14 +49,14 @@ function Scopes(props) {
 
             {/* Scopes */}
             {api.scopes.length !== 0
-                && api.scopes.map((scope) => (
+                && api.scopes.map((apiScope) => (
                     // Without the `key`, React will fire a key warning
                     <>
                         <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                            {scope.name}
+                            {apiScope.scope.name}
                         </Typography>
                         <Typography component='p' variant='body1'>
-                            {scope.description}
+                            {apiScope.scope.description}
                         </Typography>
                     </>
                 ))}

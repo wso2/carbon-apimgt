@@ -129,6 +129,11 @@ export default function ProvideOpenAPI(props) {
                 }
                 onValidate(isValidURL);
                 setIsValidating(false);
+            }).catch((error) => {
+                setValidity({ url: { message: error.message } });
+                onValidate(false);
+                setIsValidating(false);
+                console.error(error);
             });
             // Valid URL string
             // TODO: Handle catch network or api call failures ~tmkb
@@ -299,7 +304,6 @@ export default function ProvideOpenAPI(props) {
                             // 'Give the URL of OpenAPI endpoint'
                             helperText={(isValid.url && isValid.url.message) || 'Click away to validate the URL'}
                             error={isInvalidURL}
-                            disabled={isValidating}
                         />
                     )}
                 </Grid>

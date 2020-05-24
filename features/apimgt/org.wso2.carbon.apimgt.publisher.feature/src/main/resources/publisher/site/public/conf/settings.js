@@ -17,7 +17,11 @@ const AppConfig = {
             enable: false,
             serviceURL: '', // Check `/source/src/app/components/Base/Footer/FeedbackForm.jsx` for details
         },
-    },
+        singleLogout: {
+            enabled: true, // If enabled, user will be logged out from the App when logged out from the IDP (eg: SSO logout from a different App).
+            timeout: 4000 // Defines the timeout for the above periodical session status check
+        }
+    }
 };
 
 if (typeof module !== 'undefined') {

@@ -369,6 +369,9 @@ public final class APIConstants {
     //This constant is used in Json schema validator
     public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
 
+    // This constant used in Endpoint Registry Entries
+    public static final String API_OVERVIEW_ENPOINT_REGISTRY_ENTRY = "overview_endpointRegistryEntry";
+
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME = "overview_name";
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
@@ -645,6 +648,22 @@ public final class APIConstants {
     public static final String KEY_MANAGER_USERNAME = "Username";
     public static final String KEY_MANAGER_PASSWORD = "Password";
     public static final String AUTHSERVER_URL = "ServerURL";
+    public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
+    public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
+    public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
+            + KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM;
+    public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_MGT_SCOPES[] = {"internal_application_mgt_create",
+            "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view"};
+    public static final String API_KEY_MANAGER_CONFIGURATION = "Configuration.";
+    public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
+    public static final String WSO2_IS_APP_MGT_REST_API_BASE_PATH = "/api/server/v1/applications";
+    public static final String WSO2_IS_APP_MGT_INBOUND_OIDC_SUFFIX = "/inbound-protocols/oidc";
+    public static final String WSO2_IS_APP_NAME = "name";
+    public static final String WSO2_IS_APP_INBOUND_CONFIG = "inboundProtocolConfiguration";
+    public static final String WSO2_IS_APP_INBOUND_OIDC = "oidc";
+    public static final String WSO2_IS_APP_INBOUND_OIDC_GRANT_TYPES = "grantTypes";
+    public static final String WSO2_IS_APP_CLIENT_ID = "clientId";
+    public static final String WSO2_IS_APP_CLIENT_SECRET = "clientSecret";
 
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
@@ -1387,6 +1406,8 @@ public final class APIConstants {
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
+    public static final String ENDPOINT_REGISTRY_TYPE = "Registry";
+    public static final String ENDPOINT_REGISTRY_ENTRY_ID = "endpoint_id";
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
@@ -1935,6 +1956,8 @@ public final class APIConstants {
         public static final String PUB_API_LIST_RESPONSE_PARAMS_LIST = "list";
         public static final String PUB_API_LIST_RESPONSE_PARAMS_COUNT = "count";
         public static final String PUB_API_RESPONSE_PARAMS_ID = "id";
+        public static final String DYNAMIC_CLIENT_REGISTRATION_URL_SUFFIX =
+                "/client-registration/" + REST_API_OLD_VERSION + "/register";
     }
 
     public static final int MAX_LENGTH_API_NAME = 50;

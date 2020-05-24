@@ -81,7 +81,7 @@ public class KeyManagerHolder {
 
                     // Iterating through the Configuration and seeing which elements are starting with APIKeyManager
                     // .Configuration. Values of those keys will be set in KeyManagerConfiguration object.
-                    String startKey = APIConstants.API_KEY_MANAGER + "Configuration.";
+                    String startKey = APIConstants.API_KEY_MANAGER + APIConstants.API_KEY_MANAGER_CONFIGURATION;
                     for (String configKey : configKeySet) {
                         if (configKey.startsWith(startKey)) {
                             keyManagerConfiguration.addParameter(configKey.replace(startKey, ""),

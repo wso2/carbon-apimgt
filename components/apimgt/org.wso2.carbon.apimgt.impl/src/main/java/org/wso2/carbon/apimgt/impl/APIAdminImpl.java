@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -309,6 +310,18 @@ public class APIAdminImpl implements APIAdmin {
 
     public List<APICategory> getAllAPICategoriesOfTenant(int tenantId) throws APIManagementException {
         return apiMgtDAO.getAllCategories(tenantId);
+    }
+
+    public List<APICategory> getAPICategoriesOfTenant(int tenantId) throws APIManagementException {
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        List<APICategory> categories = getAllAPICategoriesOfTenant(tenantId);
+        if (categories.size() > 0) {
+            for (APICategory category : categories) {
+                int length = isCategoryAttached(category, username);
+                category.setNumberOfAPIs(length);
+            }
+        }
+        return categories;
     }
 
     public List<APICategory> getAllAPICategoriesOfTenantForAdminListing(String username) throws APIManagementException{
