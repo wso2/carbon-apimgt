@@ -69,8 +69,8 @@ function Delete(props) {
             });
             return op;
         });
-        const scopes = api.scopes.filter((scope) => {
-            return scope.name !== scopeName;
+        const scopes = api.scopes.filter((apiScope) => {
+            return apiScope.scope.name !== scopeName;
         });
         const updateProperties = { scopes, operations };
         const setOpenLocal = setOpen; // Need to copy this to access inside the promise.then

@@ -117,6 +117,7 @@ import static org.junit.Assert.assertTrue;
 public class APIMgtDAOTest {
 
     public static ApiMgtDAO apiMgtDAO;
+    private KeyManager keyManager;
 
     @Before
     public void setUp() throws Exception {
@@ -131,7 +132,9 @@ public class APIMgtDAOTest {
         IdentityTenantUtil.setRealmService(new TestRealmService());
         String identityConfigPath = System.getProperty("IdentityConfigurationPath");
         IdentityConfigParser.getInstance(identityConfigPath);
-
+        keyManager = Mockito.mock(KeyManager.class);
+        PowerMockito.mockStatic(KeyManagerHolder.class);
+        BDDMockito.given(KeyManagerHolder.getKeyManagerInstance()).willReturn(keyManager);
     }
 
     private static void initializeDatabase(String configFilePath) {
@@ -243,7 +246,7 @@ public class APIMgtDAOTest {
         apiIdentifier.setTier("T1");
         API api = new API(apiIdentifier);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        apiMgtDAO.addSubscription(apiTypeWrapper, 100, "UNBLOCKED");
+        apiMgtDAO.addSubscription(apiTypeWrapper, 100, "UNBLOCKED", "admin");
     }
 
 
@@ -603,7 +606,7 @@ public class APIMgtDAOTest {
         api.setContextTemplate("/wso2utils/{version}");
         apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, applicationId, "UNBLOCKED");
+        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, applicationId, "UNBLOCKED", "sub_user1");
         String[] apiDetail = apiMgtDAO.getAPIDetailsByContext("/wso2utils");
         assertTrue(apiDetail.length == 2);
         assertEquals(apiDetail[0], "WSO2-Utils");
@@ -904,9 +907,9 @@ public class APIMgtDAOTest {
         apiMgtDAO.populateAppRegistrationWorkflowDTO(retrievedApplicationRegistrationWorkflowDTO);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         ApiTypeWrapper apiTypeWrapper1 = new ApiTypeWrapper(api1);
-        apiMgtDAO.addSubscription(apiTypeWrapper, application.getId(), APIConstants.SubscriptionStatus.ON_HOLD);
+        apiMgtDAO.addSubscription(apiTypeWrapper, application.getId(), APIConstants.SubscriptionStatus.ON_HOLD,subscriber.getName());
         int subsId = apiMgtDAO.addSubscription(apiTypeWrapper1, application.getId(),
-                APIConstants.SubscriptionStatus.ON_HOLD);
+                APIConstants.SubscriptionStatus.ON_HOLD, subscriber.getName());
         assertTrue(apiMgtDAO.isContextExist(api.getContext()));
         assertTrue(api.getContext().equals(apiMgtDAO.getAPIContext(apiId)));
         apiMgtDAO.removeSubscription(apiId, application.getId());
@@ -947,9 +950,7 @@ public class APIMgtDAOTest {
 
     @Test
     public void testDeleteSubscriptionsForapiId() throws Exception {
-        KeyManager keyManager = Mockito.mock(KeyManager.class);
-        PowerMockito.mockStatic(KeyManagerHolder.class);
-        BDDMockito.given(KeyManagerHolder.getKeyManagerInstance()).willReturn(keyManager);
+
         Subscriber subscriber = new Subscriber("testCreateApplicationRegistrationEntry");
         subscriber.setTenantId(-1234);
         subscriber.setEmail("abc@wso2.com");
@@ -979,7 +980,7 @@ public class APIMgtDAOTest {
         apiId.setTier(subscriptionPolicy.getPolicyName());
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, application.getId(),
-                APIConstants.SubscriptionStatus.ON_HOLD);
+                APIConstants.SubscriptionStatus.ON_HOLD, subscriber.getName());
         assertTrue(apiMgtDAO.getApplicationsByTier(subscriptionPolicy.getPolicyName()).length > 0);
         String subStatus = apiMgtDAO.getSubscriptionStatusById(subsId);
         assertEquals(subStatus, APIConstants.SubscriptionStatus.ON_HOLD);
@@ -1229,17 +1230,19 @@ public class APIMgtDAOTest {
 
     @Test
     public void testAddAndGetApi() throws Exception{
-        APIIdentifier apiId = new APIIdentifier("testAddAndGetApi",
+        APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi",
                 "testAddAndGetApi", "1.0.0");
-        API api = new API(apiId);
+        API api = new API(apiIdentifier);
         api.setContext("/testAddAndGetApi");
         api.setContextTemplate("/testAddAndGetApi/{version}");
         api.setUriTemplates(getUriTemplateSet());
         api.setScopes(getScopes());
         api.setStatus(APIConstants.PUBLISHED);
         api.setAsDefaultVersion(true);
-        apiMgtDAO.addAPI(api, -1234);
-        apiMgtDAO.updateAPI(api, -1234);
+        int apiID = apiMgtDAO.addAPI(api, -1234);
+        apiMgtDAO.addURITemplates(apiID, api, -1234);
+        apiMgtDAO.updateAPI(api);
+        apiMgtDAO.updateURITemplates(api, -1234);
         Set<APIStore> apiStoreSet = new HashSet<APIStore>();
         APIStore apiStore = new APIStore();
         apiStore.setDisplayName("wso2");
@@ -1247,20 +1250,20 @@ public class APIMgtDAOTest {
         apiStore.setName("wso2");
         apiStore.setType("wso2");
         apiStoreSet.add(apiStore);
-        apiMgtDAO.addExternalAPIStoresDetails(apiId,apiStoreSet);
-        assertTrue(apiMgtDAO.getExternalAPIStoresDetails(apiId).size()>0);
-        apiMgtDAO.deleteExternalAPIStoresDetails(apiId, apiStoreSet);
-        apiMgtDAO.updateExternalAPIStoresDetails(apiId, Collections.<APIStore>emptySet());
-        assertTrue(apiMgtDAO.getExternalAPIStoresDetails(apiId).size()==0);
-        apiMgtDAO.deleteAPI(apiId);
+        apiMgtDAO.addExternalAPIStoresDetails(apiIdentifier,apiStoreSet);
+        assertTrue(apiMgtDAO.getExternalAPIStoresDetails(apiIdentifier).size()>0);
+        apiMgtDAO.deleteExternalAPIStoresDetails(apiIdentifier, apiStoreSet);
+        apiMgtDAO.updateExternalAPIStoresDetails(apiIdentifier, Collections.<APIStore>emptySet());
+        assertTrue(apiMgtDAO.getExternalAPIStoresDetails(apiIdentifier).size()==0);
+        apiMgtDAO.deleteAPI(apiIdentifier);
     }
 
     @Test
     public void testAddAndConvertNullThrottlingTiers() throws APIManagementException {
 
         //Adding an API with a null THROTTLING_TIER should automatically convert it to Unlimited
-        APIIdentifier apiId = new APIIdentifier("testAddAndGetApi", "testAddAndGetApi", "1.0.0");
-        API api = new API(apiId);
+        APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi", "testAddAndGetApi", "1.0.0");
+        API api = new API(apiIdentifier);
         api.setContext("/testAddAndGetApi");
         api.setContextTemplate("/testAddAndGetApi/{version}");
         Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
@@ -1269,14 +1272,15 @@ public class APIMgtDAOTest {
         api.setScopes(getScopes());
         api.setStatus(APIConstants.PUBLISHED);
         api.setAsDefaultVersion(true);
-        apiMgtDAO.addAPI(api, -1234);
-        HashMap<String, String> result1 = apiMgtDAO.getURITemplatesPerAPIAsString(apiId);
+        int apiId = apiMgtDAO.addAPI(api, -1234);
+        apiMgtDAO.addURITemplates(apiId, api, -1234);
+        HashMap<String, String> result1 = apiMgtDAO.getURITemplatesPerAPIAsString(apiIdentifier);
         Assert.assertTrue(result1.containsKey("/abc::GET::Any::Unlimited::abcd defgh fff"));
 
         //Change the inserted throttling tier back to Null and test the convertNullThrottlingTier method
         updateThrottlingTierToNull();
         apiMgtDAO.convertNullThrottlingTiers();
-        HashMap<String, String> result2 = apiMgtDAO.getURITemplatesPerAPIAsString(apiId);
+        HashMap<String, String> result2 = apiMgtDAO.getURITemplatesPerAPIAsString(apiIdentifier);
         Assert.assertTrue(result2.containsKey("/abc::GET::Any::Unlimited::abcd defgh fff"));
    }
 
@@ -1473,18 +1477,19 @@ public class APIMgtDAOTest {
         uriTemplate.setMediationScript("abcd defgh fff");
         if (scope!= null){
             Scope scope1 = new Scope();
-            scope1.setId(0);
+            scope1.setId("0");
             scope1.setDescription("");
             scope1.setKey(scope);
             scope1.setName(scope);
             scope1.setRoles("admin");
             uriTemplate.setScope(scope1);
+            uriTemplate.setScopes(scope1);
         }
         return uriTemplate;
     }
     private Set<Scope> getScopes(){
         Scope scope1 = new Scope();
-        scope1.setId(1);
+        scope1.setId("1");
         scope1.setDescription("");
         scope1.setKey("read");
         scope1.setName("read");

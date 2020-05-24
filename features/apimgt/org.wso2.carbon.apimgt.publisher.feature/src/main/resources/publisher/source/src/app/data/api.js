@@ -1471,7 +1471,7 @@ class API extends Resource {
 
     validateScopeName(name) {
         const promise = this.client.then(client => {
-            return client.apis.scope.validateScope({ name: name });
+            return client.apis['Scopes'].validateScope({ scopeId: name });
         });
         return promise;
     }

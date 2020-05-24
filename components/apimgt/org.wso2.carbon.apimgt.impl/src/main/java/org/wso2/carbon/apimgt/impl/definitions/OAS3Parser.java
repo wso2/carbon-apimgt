@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -79,6 +80,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYPE;
@@ -324,7 +326,7 @@ public class OAS3Parser extends APIDefinition {
                             template.setScope(scope);
                             template.setScopes(scope);
                         } else {
-                            template = OASParserUtil.setScopesToTemplate(template, opScopes);
+                            template = OASParserUtil.setScopesToTemplate(template, opScopes, scopes);
                         }
                     }
                     Map<String, Object> extensios = operation.getExtensions();
@@ -783,10 +785,11 @@ public class OAS3Parser extends APIDefinition {
      * @return
      */
     private List<String> getScopeOfOperationsFromExtensions(Operation operation) {
+
         Map<String, Object> extensions = operation.getExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
             String scopeKey = (String) extensions.get(APIConstants.SWAGGER_X_SCOPE);
-            return Collections.singletonList(scopeKey);
+            return Stream.of(scopeKey.split(",")).collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
@@ -864,8 +867,8 @@ public class OAS3Parser extends APIDefinition {
         if (scopes != null && !scopes.isEmpty()) {
             Map<String, String> scopeBindings = new HashMap<>();
             for (Scope scope : scopes) {
-                oas3Scopes.put(scope.getName(), scope.getDescription());
-                scopeBindings.put(scope.getName(), scope.getRoles());
+                oas3Scopes.put(scope.getKey(), scope.getDescription());
+                scopeBindings.put(scope.getKey(), scope.getRoles());
             }
             oAuthFlow.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
         }
@@ -878,11 +881,7 @@ public class OAS3Parser extends APIDefinition {
      * @param openAPI
      */
     private void updateLegacyScopesFromSwagger(OpenAPI openAPI, SwaggerData swaggerData) {
-        if (isLegacyExtensionsPreserved()) {
-            log.debug("preserveLegacyExtensions is enabled.");
-            setLegacyScopeExtensionToSwagger(openAPI, swaggerData);
-            return;
-        }
+
         Map<String, Object> extensions = openAPI.getExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
             extensions.remove(APIConstants.SWAGGER_X_WSO2_SECURITY);
@@ -995,37 +994,34 @@ public class OAS3Parser extends APIDefinition {
         for (Map<String, List<String>> requirement : security) {
             if (requirement.get(OPENAPI_SECURITY_SCHEMA_KEY) != null) {
 
-                if (resource.getScope() == null) {
+                if (resource.getScopes().isEmpty()) {
                     requirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Collections.EMPTY_LIST);
                 } else {
-                    requirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Arrays.asList(resource.getScope().getKey()));
+                    requirement.put(OPENAPI_SECURITY_SCHEMA_KEY, resource.getScopes().stream().map(Scope::getKey)
+                            .collect(Collectors.toList()));
                 }
                 return;
             }
         }
         // if oauth2SchemeKey not present, add a new
         SecurityRequirement defaultRequirement = new SecurityRequirement();
-        if (resource.getScope() == null) {
+        if (resource.getScopes().isEmpty()) {
             defaultRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Collections.EMPTY_LIST);
         } else {
-            defaultRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Arrays.asList(resource.getScope().getKey()));
+            defaultRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, resource.getScopes().stream().map(Scope::getKey)
+                    .collect(Collectors.toList()));
         }
         security.add(defaultRequirement);
     }
 
     /**
-     * Remove legacy scope information from swagger operation
+     * Remove legacy scope information from swagger operation.
      *
-     * @param operation
+     * @param resource  Given Resource in the input
+     * @param operation Operation in APIDefinition
      */
     private void updateLegacyScopesFromOperation(SwaggerData.Resource resource, Operation operation) {
-        if (isLegacyExtensionsPreserved()) {
-            log.debug("preserveLegacyExtensions is enabled.");
-            if (resource.getScope() != null) {
-                operation.addExtension(APIConstants.SWAGGER_X_SCOPE, resource.getScope().getKey());
-            }
-            return;
-        }
+
         Map<String, Object> extensions = operation.getExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
             extensions.remove(APIConstants.SWAGGER_X_SCOPE);
@@ -1261,12 +1257,19 @@ public class OAS3Parser extends APIDefinition {
      */
     private boolean isDefaultGiven(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
-        boolean isDefaultIsGiven = true;
+        Components components = openAPI.getComponents();
+        if (components == null) {
+            return false;
+        }
+        Map<String, SecurityScheme> securitySchemes = components.getSecuritySchemes();
+        if (securitySchemes == null) {
+            return false;
+        }
         SecurityScheme checkDefault = openAPI.getComponents().getSecuritySchemes().get(OPENAPI_SECURITY_SCHEMA_KEY);
         if (checkDefault == null) {
-            isDefaultIsGiven = false;
+            return false;
         }
-        return isDefaultIsGiven;
+        return true;
     }
 
     /**
@@ -1456,6 +1459,76 @@ public class OAS3Parser extends APIDefinition {
         }
         openAPI.setPaths(paths);
         return openAPI;
+    }
+
+    /**
+     * This method returns api that is attached with api extensions related to micro-gw
+     *
+     * @param apiDefinition                  String
+     * @param api                            API
+     * @param isBasepathExtractedFromSwagger boolean
+     * @return URITemplate
+     */
+    @Override
+    public API setExtensionsToAPI(String apiDefinition, API api, boolean isBasepathExtractedFromSwagger) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(apiDefinition);
+        Map<String, Object> extensions = openAPI.getExtensions();
+        if (extensions == null) {
+            return api;
+        }
+
+        //Setup Custom auth header for API
+        String authHeader = OASParserUtil.getAuthorizationHeaderFromSwagger(extensions);
+        if (authHeader != null) {
+            api.setAuthorizationHeader(authHeader);
+        }
+        //Setup mutualSSL configuration
+        String mutualSSL = OASParserUtil.getMutualSSLEnabledFromSwagger(extensions);
+        if (StringUtils.isBlank(mutualSSL)) {
+            String securityList = api.getApiSecurity();
+            if (StringUtils.isBlank(securityList)) {
+                securityList = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+            }
+            if (APIConstants.OPTIONAL.equals(mutualSSL)) {
+                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
+            } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
+                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
+            }
+            api.setApiSecurity(securityList);
+        }
+        //Setup CORSConfigurations
+        CORSConfiguration corsConfiguration = OASParserUtil.getCorsConfigFromSwagger(extensions);
+        if (corsConfiguration != null) {
+            api.setCorsConfiguration(corsConfiguration);
+        }
+        //Setup Response cache enabling
+        boolean responseCacheEnable = OASParserUtil.getResponseCacheFromSwagger(extensions);
+        if (responseCacheEnable) {
+            api.setResponseCache(APIConstants.ENABLED);
+        }
+        //Setup cache timeOut
+        int cacheTimeOut = OASParserUtil.getCacheTimeOutFromSwagger(extensions);
+        if (cacheTimeOut != 0) {
+            api.setCacheTimeout(cacheTimeOut);
+        }
+        //Setup Transports
+        String transports = OASParserUtil.getTransportsFromSwagger(extensions);
+        if (transports != null) {
+            api.setTransports(transports);
+        }
+        //Setup Throttlingtiers
+        String throttleTier = OASParserUtil.getThrottleTierFromSwagger(extensions);
+        if (throttleTier != null) {
+            api.setApiLevelPolicy(throttleTier);
+        }
+        //Setup Basepath
+        String basePath = OASParserUtil.getBasePathFromSwagger(extensions);
+        if (basePath != null && isBasepathExtractedFromSwagger) {
+            basePath = basePath.replace("{version}", api.getId().getVersion());
+            api.setContextTemplate(basePath);
+            api.setContext(basePath);
+        }
+        return api;
     }
 
 }

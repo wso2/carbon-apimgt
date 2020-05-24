@@ -226,6 +226,10 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:shared_scope_manage",
+        "Roles": "admin"
+      },
+      {
         "Name": "registry:view",
         "Roles": "admin,Internal/registry_admin,Internal/registry_user,Internal/registry_browser,Internal/creator,Internal/publisher"
       },

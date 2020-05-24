@@ -33,6 +33,12 @@ public class EndpointRegistryInfo {
 
     private String owner = null;
 
+    private String updatedBy = null;
+
+    private String createdTime = null;
+
+    private String lastUpdatedTime = null;
+
     private int registryId = 0;
 
     public String getUuid() {
@@ -93,5 +99,29 @@ public class EndpointRegistryInfo {
     public void setRegistryId(int registryId) {
 
         this.registryId = registryId;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public String getLastUpdatedTime() {
+        return lastUpdatedTime;
+    }
+
+    public void setLastUpdatedTime(String lastUpdatedTime) {
+        this.lastUpdatedTime = lastUpdatedTime;
     }
 }

@@ -79,6 +79,7 @@ public final class RestApiConstants {
     public static final String DOCUMENTID_PARAM = "{documentId}";
     public static final String APICATEGORYID_PARAM = "{apiCategoryId}";
     public static final String API_VERSION_PARAM="{version}";
+    public static final String SHARED_SCOPE_ID_PARAM = "{scopeId}";
     public static final String URL_ENCODED_API_ID_DELIMITER = "%2D";
     public static final String CHARSET = "UTF-8";
 
@@ -88,6 +89,9 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
     public static final String RESOURCE_PATH_THROTTLING = "/throttling";
     public static final String RESOURCE_PATH_LABEL = "/labels";
+    public static final String RESOURCE_PATH_SHARED_SCOPES =  "/scopes";
+    public static final String RESOURCE_PATH_SHARED_SCOPES_SCOPE_ID =
+            RESOURCE_PATH_SHARED_SCOPES + "/" + SHARED_SCOPE_ID_PARAM;
     public static final String RESOURCE_PATH_THROTTLING_POLICIES = RESOURCE_PATH_THROTTLING + "/policies";
     public static final String RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS = RESOURCE_PATH_THROTTLING
             + "/blacklist";
@@ -191,6 +195,9 @@ public final class RestApiConstants {
     public static final String TAGS_GET_PAGINATION_URL =
             RESOURCE_PATH_TAGS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
+    public static final String SCOPES_GET_PAGINATION_URL =
+            RESOURCE_PATH_SHARED_SCOPES + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
     public static final String RESOURCE_PATH_PAGINATION_URL =
             RESOURCE_PATH_RESOURCE_PATHS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
@@ -210,6 +217,8 @@ public final class RestApiConstants {
 
     //Constants for endpoint registry sortBy
     public static final String ENDPOINT_REG_NAME = "registryName";
+    public static final String ENDPOINT_REG_ENTRY_DEFINITION_TYPE = "definitionType";
+    public static final String ENDPOINT_REG_ENTRY_SERVICE_TYPE = "serviceType";
 
     //default error messages
     public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";

@@ -300,7 +300,6 @@ class API extends Resource {
                 this._requestMetaData(),
             );
         });
-
         if (callback) {
             return promiseDeleteLabel.then(callback);
         } else {

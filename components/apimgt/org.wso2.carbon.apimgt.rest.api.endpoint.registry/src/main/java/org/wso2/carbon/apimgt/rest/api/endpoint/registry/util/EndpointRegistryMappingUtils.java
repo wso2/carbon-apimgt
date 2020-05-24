@@ -16,9 +16,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.endpoint.registry.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.impl.EndpointRegistryConstants;
+import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -77,7 +79,10 @@ public class EndpointRegistryMappingUtils {
         registryEntryDTO.setDefinitionUrl(registryEntry.getDefinitionURL());
         registryEntryDTO.setMetadata(registryEntry.getMetaData());
         registryEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.fromValue(registryEntry.getServiceType()));
-        registryEntryDTO.setServiceUrl(registryEntry.getServiceURL());
+        registryEntryDTO.setProductionServiceUrl(registryEntry.getProductionServiceURL());
+        registryEntryDTO.setSandboxServiceUrl(registryEntry.getSandboxServiceUrl());
+        registryEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.fromValue(registryEntry
+                .getServiceCategory()));
         return registryEntryDTO;
     }
 
@@ -99,21 +104,43 @@ public class EndpointRegistryMappingUtils {
         registryEntry.setEndpointDefinition(endpointDefinition);
         registryEntry.setMetaData(registryEntryDTO.getMetadata());
         registryEntry.setServiceType(registryEntryDTO.getServiceType().toString());
-        registryEntry.setServiceURL(registryEntryDTO.getServiceUrl());
+        registryEntry.setProductionServiceURL(registryEntryDTO.getProductionServiceUrl());
+        registryEntry.setSandboxServiceUrl(registryEntryDTO.getSandboxServiceUrl());
         registryEntry.setRegistryId(registryId);
+        registryEntry.setServiceCategory(registryEntryDTO.getServiceCategory().toString());
         return registryEntry;
     }
 
     /***
      * Converts the sort by object according to the input
      *
-     * @param sortBy
+     * @param sortBy Sort By field name
      * @return Updated sort by field
      */
-    public static String getRegistriesSortByField(String sortBy) {
-        String updatedSortBy = EndpointRegistryConstants.COLUMN_ID; // default sortBy field
-        if (RestApiConstants.ENDPOINT_REG_NAME.equals(sortBy)) {
+    public static String getRegistriesSortByField(RegistriesApi.SortRegistryByEnum sortBy) {
+        String updatedSortBy = StringUtils.EMPTY;
+        if (sortBy == null) {
+            updatedSortBy = EndpointRegistryConstants.COLUMN_ID; // default sortBy field
+        } else if (RestApiConstants.ENDPOINT_REG_NAME.equals(sortBy.toString())) {
             updatedSortBy = EndpointRegistryConstants.COLUMN_REG_NAME;
+        }
+        return updatedSortBy;
+    }
+
+    /***
+     * Converts the sort by object according to the input
+     *
+     * @param sortBy Sort By field name
+     * @return Updated sort by field
+     */
+    public static String getRegistryEntriesSortByField(RegistriesApi.SortEntryByEnum sortBy) {
+        String updatedSortBy = StringUtils.EMPTY;
+        if (sortBy == null) {
+            updatedSortBy = EndpointRegistryConstants.COLUMN_ENTRY_NAME; // default sortBy field
+        } else if (RestApiConstants.ENDPOINT_REG_ENTRY_DEFINITION_TYPE.equals(sortBy.toString())) {
+            updatedSortBy = EndpointRegistryConstants.COLUMN_DEFINITION_TYPE;
+        } else if (RestApiConstants.ENDPOINT_REG_ENTRY_SERVICE_TYPE.equals(sortBy.toString())) {
+            updatedSortBy = EndpointRegistryConstants.COLUMN_SERVICE_TYPE;
         }
         return updatedSortBy;
     }

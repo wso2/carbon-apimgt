@@ -220,6 +220,10 @@
       {
         "Name": "apim:tenantInfo",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:shared_scope_manage",
+        "Roles": "admin"
       }
     ]
   },
