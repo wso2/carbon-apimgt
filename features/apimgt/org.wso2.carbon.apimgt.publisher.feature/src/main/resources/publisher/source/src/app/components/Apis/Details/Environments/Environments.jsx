@@ -137,7 +137,9 @@ export default function Environments() {
                                     {console.log('gatewayEnvironments ', gatewayEnvironments)}
                                     {console.log('swlectefjhdsf', selectedDeployments)}
                                     {console.log(gatewayEnvironments.includes(row.name))}
-                                    {/* {console.log('kubernetes', selectedDeployments.map((clusters) => clusters.filter((e) => e.type === 'Kubernetes')))} */}
+                                    {/* {console.log('kubernetes',
+                                        selectedDeployments.map((clusters)
+                                             => clusters.filter((e) => e.type === 'Kubernetes')))} */}
                                     <Checkbox
                                         disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                         checked={gatewayEnvironments.includes(row.name)}
