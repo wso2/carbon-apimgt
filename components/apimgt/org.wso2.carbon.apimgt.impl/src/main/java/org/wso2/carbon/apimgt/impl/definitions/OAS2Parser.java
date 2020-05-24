@@ -143,9 +143,10 @@ public class OAS2Parser extends APIDefinition {
                 }
                 StringBuilder genCode = new StringBuilder();
                 StringBuilder responseSection = new StringBuilder();
-                //for setting only one setPayload response
-                boolean setPayloadResponse = false;
+
                 for (String responseEntry : op.getResponses().keySet()) {
+                    //for setting only one setPayload response
+                    boolean setPayloadResponse = false;
                     if (!responseEntry.equals("default")) {
                         responseCode = Integer.parseInt(responseEntry);
                         responseCodes.add(responseCode);
@@ -154,11 +155,15 @@ public class OAS2Parser extends APIDefinition {
                     if (op.getResponses().get(responseEntry).getExamples() != null) {
                         Object applicationJson = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_JSON_MEDIA_TYPE);
                         Object applicationXml = op.getResponses().get(responseEntry).getExamples().get(APPLICATION_XML_MEDIA_TYPE);
+
+
                         if (applicationJson != null) {
                             String jsonExample = Json.pretty(applicationJson);
                             genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
                             responseSection.append(getGeneratedIFsforCodes(responseEntry,getGeneratedSetResponse(responseEntry, "json")));
-                            if (responseCode == minResponseCode && !setPayloadResponse){
+
+
+                            if (responseCode == minResponseCode){
 //                                responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
 //                                setPayloadResponse = true;
                                 minResponseType = ("json");
@@ -179,8 +184,9 @@ public class OAS2Parser extends APIDefinition {
                                     minResponseType = ("xml");
 //                                    setPayloadResponse = true;
                                 }
+//                                setPayloadResponse = true;
                             }
-                            setPayloadResponse = true;
+
                         }
                         if (applicationJson == null && applicationXml == null) {
                             setDefaultGeneratedResponse(genCode);
@@ -189,10 +195,11 @@ public class OAS2Parser extends APIDefinition {
                         Model model = op.getResponses().get(responseEntry).getResponseSchema();
                         String schemaExample = getSchemaExample(model, definitions, new HashSet<String>());
                         genCode.append(getGeneratedResponseVar(responseEntry, schemaExample, "json"));
-                        if (responseCode == minResponseCode && !setPayloadResponse){
-                        responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "json")));
-                        minResponseType = "json";
-                        setPayloadResponse = true;
+//                        if (responseCode == minResponseCode && !setPayloadResponse){
+                        if (responseCode == minResponseCode) {
+                            responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "json")));
+                            minResponseType = "json";
+//                            setPayloadResponse = true;
                         }
                     }
 //                    } else if (responseCode == minResponseCode && !setPayloadResponse) {

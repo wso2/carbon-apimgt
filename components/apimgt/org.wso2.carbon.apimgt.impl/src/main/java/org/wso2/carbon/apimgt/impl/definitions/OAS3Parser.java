@@ -143,7 +143,7 @@ public class OAS3Parser extends APIDefinition {
 //                StringBuilder responseSectionForCodes = new StringBuilder();
 
                 //for setting only one setPayload response
-                boolean setPayloadResponse = false;
+//                boolean setPayloadResponse = false;
 //                boolean queryParameter = false;
 
 
@@ -162,6 +162,7 @@ public class OAS3Parser extends APIDefinition {
 
 
                 for (String responseEntry : op.getResponses().keySet()) {
+                    boolean setPayloadResponse = false;
                     if (!responseEntry.equals("default")) {
                         responseCode = Integer.parseInt(responseEntry);
                         responseCodes.add(responseCode);
@@ -179,13 +180,12 @@ public class OAS3Parser extends APIDefinition {
                             }
 //                            if(!queryParameter){
 //                            responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "json")));
-                            if(!setPayloadResponse) {
-                                responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "json")));
-                                if (responseCode == minResponseCode) {
-                                    minResponseType = ("json");
-                                }
+                            responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "json")));
+                            if (responseCode == minResponseCode) {
+                                minResponseType = ("json");
                             }
                             setPayloadResponse = true;
+
 //                            if (applicationXml != null) {
 ////                                    responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
 //                                responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "xml")));
@@ -207,8 +207,9 @@ public class OAS3Parser extends APIDefinition {
                                 if (responseCode == minResponseCode) {
                                     minResponseType = "xml";
                                 }
+//                                setPayloadResponse = true;
                             }
-                            setPayloadResponse = true;
+
 //                            if (applicationJson == null) {
 //                                responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "xml")));
 //                                setPayloadResponse = true;
