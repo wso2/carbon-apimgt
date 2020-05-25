@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -64,8 +65,9 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                 RestApiConstants.REGEX_BEARER_PATTERN, RestApiConstants.AUTH_HEADER_NAME);
         AccessTokenInfo tokenInfo = null;
 
+        RESTAPICacheConfiguration cacheConfiguration = APIUtil.getRESTAPICacheConfig();
         //validate the token from cache if it is enabled
-        if (APIUtil.getRESTAPICacheConfig().isTokenCacheEnabled()) {
+        if (cacheConfiguration.isTokenCacheEnabled()) {
             tokenInfo = (AccessTokenInfo)getRESTAPITokenCache().get(accessToken);
             if (tokenInfo != null) {
                 if (isAccessTokenExpired(tokenInfo)) {
@@ -99,7 +101,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
 
         // if we got valid access token we will proceed with next
         if (tokenInfo != null && tokenInfo.isTokenValid()) {
-            if (APIUtil.getRESTAPICacheConfig().isTokenCacheEnabled() && !retrievedFromTokenCache) {
+            if (cacheConfiguration.isTokenCacheEnabled() && !retrievedFromTokenCache) {
                 //put the token info into token cache
                 getRESTAPITokenCache().put(accessToken, tokenInfo);
             }
@@ -146,7 +148,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
             }
         } else {
             log.error(RestApiConstants.ERROR_TOKEN_INVALID);
-            if (APIUtil.getRESTAPICacheConfig().isTokenCacheEnabled() && !retrievedFromInvalidTokenCache) {
+            if (cacheConfiguration.isTokenCacheEnabled() && !retrievedFromInvalidTokenCache) {
                 getRESTAPIInvalidTokenCache().put(accessToken, tokenInfo);
             }
         }

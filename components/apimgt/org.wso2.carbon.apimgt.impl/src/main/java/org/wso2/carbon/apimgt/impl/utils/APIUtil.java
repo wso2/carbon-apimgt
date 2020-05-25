@@ -7587,7 +7587,7 @@ public final class APIUtil {
      *
      * @return Product REST APIs' cache configuration.
      */
-    public static RESTAPICacheConfiguration getRESTAPICacheConfig() throws APIManagementException {
+    public static RESTAPICacheConfiguration getRESTAPICacheConfig() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getRESTAPICacheConfig();
     }
