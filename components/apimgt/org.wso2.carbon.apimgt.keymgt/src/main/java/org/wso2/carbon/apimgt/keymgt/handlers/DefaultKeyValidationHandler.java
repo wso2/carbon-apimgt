@@ -261,4 +261,10 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         }
         return true;
     }
+
+    public boolean validateSubscription(TokenValidationContext tokenValidationContext)
+            throws APIKeyMgtException {
+        //todo validate using inmemory store
+        return true;
+    }
 }

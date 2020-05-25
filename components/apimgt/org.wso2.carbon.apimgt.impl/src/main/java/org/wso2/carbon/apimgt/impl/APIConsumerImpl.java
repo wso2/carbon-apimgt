@@ -5509,7 +5509,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
         String baseUrl = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
-                System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.UTILITY_WEB_APP_EP;
+                System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
         String apiKeyRevokeEp = baseUrl + APIConstants.API_KEY_REVOKE_PATH;
         HttpPost method = new HttpPost(apiKeyRevokeEp);
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);

@@ -1,18 +1,18 @@
 {
   "swagger" : "2.0",
   "info" : {
-    "description" : "This API allows you to find shops near you and get price estimation for products you need.",
+    "description" : "This API allows you to access internal data.",
     "version" : "1.0.0",
-    "title" : "Shop Around You API"
+    "title" : "Internal Utility API"
   },
-  "host" : "shop.wso2.com",
+  "host" : "apim.wso2.com",
   "basePath" : "/v1",
   "schemes" : [ "https" ],
   "produces" : [ "application/json" ],
   "paths" : {
     "/throttle" : {
       "get" : {
-        "tags" : [ "Shops" ],
+        "tags" : [ "Throttling" ],
         "summary" : "throttled events available",
         "description" : "This will provide access to throttled events in database.\n",
         "parameters" : [ {
@@ -24,7 +24,7 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "An array of shops around you",
+            "description" : "An array of Throttle Events",
             "schema" : {
               "type" : "array",
               "items" : {
@@ -43,7 +43,7 @@
     },
     "/throttleAsString" : {
       "get" : {
-        "tags" : [ "Shops" ],
+        "tags" : [ "Throttling" ],
         "summary" : "throttled events available",
         "description" : "This will provide access to throttled events in database.\n",
         "parameters" : [ {
@@ -55,7 +55,7 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "An array of shops around you",
+            "description" : "throttle events string",
             "schema" : {
               "type" : "string"
             }
@@ -71,7 +71,7 @@
     },
     "/isThrottled" : {
       "get" : {
-        "tags" : [ "Shops" ],
+        "tags" : [ "Throttling" ],
         "summary" : "throttled events available",
         "description" : "This will provide access to throttled events in database.\n",
         "parameters" : [ {
@@ -83,7 +83,7 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "An array of shops around you",
+            "description" : "Throttle Event",
             "schema" : {
               "$ref" : "#/definitions/ThrottledEvent"
             }
@@ -99,12 +99,13 @@
     },
     "/block" : {
       "get" : {
-        "summary" : "throttled events available",
+        "tags" : [ "Throttling" ],
+        "summary" : "blocking events available",
         "description" : "This will provide access to throttled events in database.\n",
         "parameters" : [ ],
         "responses" : {
           "200" : {
-            "description" : "An array of shops around you",
+            "description" : "Block Conditions",
             "schema" : {
               "type" : "object",
               "additionalProperties" : {
@@ -122,7 +123,7 @@
         "parameters" : [ ],
         "responses" : {
           "200" : {
-            "description" : "An array of shops around you",
+            "description" : "An array of Key Templates",
             "schema" : {
               "type" : "array",
               "items" : {
@@ -146,7 +147,7 @@
         "parameters" : [ ],
         "responses" : {
           "200" : {
-            "description" : "An array of shops around you",
+            "description" : "An array of revoke JWTs",
             "schema" : {
               "type" : "array",
               "items" : {
@@ -179,6 +180,391 @@
         "responses" : {
           "200" : {
             "description" : "OK.\nApi key revoked successfully.\n"
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all apis",
+        "description" : "This will provide access to apis in database.\n",
+        "parameters" : [ {
+          "name" : "X-WSO2-Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of APIs in the database",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/API"
+              }
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/applications" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all applications",
+        "description" : "This will provide access to applications in database.\n",
+        "parameters" : [ {
+          "name" : "X-WSO2-Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of applications in the database",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Application"
+              }
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all subscriptions",
+        "description" : "This will provide access to subscriptions in database.\n",
+        "parameters" : [ {
+          "name" : "X-WSO2-Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of subscriptions in the database",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Subscription"
+              }
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/subscribers" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all subscribers",
+        "description" : "This will provide access to subscribers in database.\n",
+        "parameters" : [ {
+          "name" : "X-WSO2-Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of subscribers in the database",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Subscriber"
+              }
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/application-key-mappings" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all application key mappings",
+        "description" : "This will provide access to application vs key mappings in database.\n",
+        "parameters" : [ {
+          "name" : "X-WSO2-Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of application key mappings in the database",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/ApplicationKeyMapping"
+              }
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/subscription-policies" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all subscription throttling policies",
+        "description" : "This will provide access to subscription level throttling policies in database.\n",
+        "parameters" : [ {
+          "name" : "X-WSO2-Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of subscription policies in the database",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/SubscriptionPolicy"
+              }
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/application-policies" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all application throttling policies",
+        "description" : "This will provide access to application level throttling policies in database.\n",
+        "parameters" : [ {
+          "name" : "X-WSO2-Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of application policies in the database",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/ApplicationPolicy"
+              }
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/{apiId}" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get the API",
+        "description" : "This will provide access to api in database.\n",
+        "parameters" : [ {
+          "name" : "apiId",
+          "in" : "path",
+          "description" : "**API ID** consisting of the **UUID** of the API.\n",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The API in the database",
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get an application",
+        "description" : "This will provide access to application in database.\n",
+        "parameters" : [ {
+          "name" : "applicationId",
+          "in" : "path",
+          "description" : "Application Identifier consisting of the UUID of the Application.\n",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Application in the database",
+            "schema" : {
+              "type" : "object"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get a subscription",
+        "description" : "This will provide access to subscription in database.\n",
+        "parameters" : [ {
+          "name" : "subscriptionId",
+          "in" : "path",
+          "description" : "Subscription Id\n",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A subscription in the database",
+            "schema" : {
+              "type" : "object"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/application-key-mappings/{consumerKey}" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get an application key mapping",
+        "description" : "This will provide access to application vs key mapping in database.\n",
+        "parameters" : [ {
+          "name" : "consumerKey",
+          "in" : "path",
+          "description" : "**key** consisting of the ***Consumer Key* of an application key mapping.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An application key mapping in the database",
+            "schema" : {
+              "type" : "object"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/subscription-policies/{policyId}" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all subscription throttling policies",
+        "description" : "This will provide access to subscription level throttling policy in database.\n",
+        "parameters" : [ {
+          "name" : "policyId",
+          "in" : "path",
+          "description" : "Policy Id represented as a UUID\n",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The subscription policy in the database",
+            "schema" : {
+              "type" : "object"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/application-policies/{policyId}" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all application throttling policies",
+        "description" : "This will provide access to application level throttling policy in database.\n",
+        "parameters" : [ {
+          "name" : "policyId",
+          "in" : "path",
+          "description" : "Policy Id represented as a UUID\n",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The application policy in the database",
+            "schema" : {
+              "type" : "object"
+            }
           },
           "default" : {
             "description" : "Unexpected error",
@@ -321,6 +707,190 @@
           "type" : "integer"
         }
       }
+    },
+    "API" : {
+      "properties" : {
+        "apiId" : {
+          "type" : "integer"
+        },
+        "provider" : {
+          "type" : "string",
+          "description" : "API Provider name."
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "Name of the API"
+        },
+        "version" : {
+          "type" : "string",
+          "description" : "Version of the API."
+        },
+        "context" : {
+          "type" : "string",
+          "description" : "Context of the API."
+        },
+        "policy" : {
+          "type" : "string",
+          "description" : "API level throttling policy."
+        }
+      }
+    },
+    "Application" : {
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "subId" : {
+          "type" : "integer"
+        },
+        "policy" : {
+          "type" : "string",
+          "description" : "Application level throtting policy."
+        },
+        "tokenType" : {
+          "type" : "string",
+          "example" : "JWT",
+          "description" : "type of the token."
+        }
+      }
+    },
+    "Subscription" : {
+      "properties" : {
+        "subscriptionId" : {
+          "type" : "integer"
+        },
+        "policyId" : {
+          "type" : "string"
+        },
+        "apiId" : {
+          "type" : "integer"
+        },
+        "appId" : {
+          "type" : "integer"
+        },
+        "subscriptionState" : {
+          "type" : "string"
+        }
+      }
+    },
+    "Subscriber" : {
+      "properties" : {
+        "tenantId" : {
+          "type" : "integer"
+        },
+        "subscriberId" : {
+          "type" : "integer"
+        }
+      }
+    },
+    "ApplicationKeyMapping" : {
+      "properties" : {
+        "applicationId" : {
+          "type" : "integer"
+        },
+        "consumerKey" : {
+          "type" : "string"
+        },
+        "keyType" : {
+          "type" : "string"
+        }
+      }
+    },
+    "Policy" : {
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "tenantId" : {
+          "type" : "integer"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "quotaType" : {
+          "type" : "string"
+        }
+      }
+    },
+    "SubscriptionPolicy" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/Policy"
+      } ]
+    },
+    "ApplicationPolicy" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/Policy"
+      } ]
+    },
+    "Condition" : {
+      "properties" : {
+        "conditionType" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "value" : {
+          "type" : "string"
+        },
+        "isInverted" : {
+          "type" : "boolean"
+        }
+      }
+    }
+  },
+  "parameters" : {
+    "requestedTenant" : {
+      "name" : "X-WSO2-Tenant",
+      "in" : "header",
+      "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+      "required" : true,
+      "type" : "string"
+    },
+    "apiId" : {
+      "name" : "apiId",
+      "in" : "path",
+      "description" : "**API ID** consisting of the **UUID** of the API.\n",
+      "required" : true,
+      "type" : "integer"
+    },
+    "applicationId" : {
+      "name" : "applicationId",
+      "in" : "path",
+      "description" : "Application Identifier consisting of the UUID of the Application.\n",
+      "required" : true,
+      "type" : "integer"
+    },
+    "subscriptionId" : {
+      "name" : "subscriptionId",
+      "in" : "path",
+      "description" : "Subscription Id\n",
+      "required" : true,
+      "type" : "integer"
+    },
+    "policyId" : {
+      "name" : "policyId",
+      "in" : "path",
+      "description" : "Policy Id represented as a UUID\n",
+      "required" : true,
+      "type" : "integer"
+    },
+    "subscrberId" : {
+      "name" : "subscriberId",
+      "in" : "path",
+      "description" : "**Subscriber ID** consisting of the **ID** of Subscriber.\n",
+      "required" : true,
+      "type" : "integer"
+    },
+    "consumerKey" : {
+      "name" : "consumerKey",
+      "in" : "path",
+      "description" : "**key** consisting of the ***Consumer Key* of an application key mapping.\n",
+      "required" : true,
+      "type" : "string"
     }
   }
 }

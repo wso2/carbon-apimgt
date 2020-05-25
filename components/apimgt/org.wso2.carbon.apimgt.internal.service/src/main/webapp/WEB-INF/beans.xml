@@ -20,6 +20,13 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.BlockApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.RevokedjwtApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApikeyApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.ApisApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.ApplicationKeyMappingsApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.ApplicationPoliciesApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.ApplicationsApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.SubscribersApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.SubscriptionsApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.SubscriptionPoliciesApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

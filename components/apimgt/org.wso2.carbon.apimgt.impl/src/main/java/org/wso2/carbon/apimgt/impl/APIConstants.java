@@ -434,6 +434,7 @@ public final class APIConstants {
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
     public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
+    public static final String HEADER_TENANT = "xWSO2Tenant";
     public static final String AUTHORIZATION_QUERY_PARAM_DEFAULT = "access_token";
     public static final String API_KEY_HEADER_QUERY_PARAM = "apikey";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
@@ -536,6 +537,8 @@ public final class APIConstants {
     public static final String GATEWAY_JWKS_CACHE = "JWKS_CACHE";
     public static final String BLOCKING_CONDITION_ID = "id";
 
+    public static String DELEM_COLON  = ":";
+
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
         public static final String BLOCKED = "BLOCKED";
@@ -631,6 +634,15 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_VALIDATOR
             + "ApplicationTokenDefaultValidityPeriod";
 
+    public static class ApiKeyValidator {
+        public static final String KEY_VALIDATION_HANDLER = "KeyValidationHandler";
+        public static final String KEY_VALIDATOR_HANDLER = "KeyValidationHandlerImpl";
+        public static final String IN_MEM_SUBSCRIPTION_STORE = "InMemorySubscriptionStore";
+        public static final String IN_MEM_SUBSCRIPTION_STORE_IMPL = "InMemorySubscriptionStoreImpl";
+        public static final String CONFIGURATION_ELEMENT = "Configuration";
+
+    }
+
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
     public static final String KEY_MANAGER_CLIENT = API_KEY_MANAGER + "KeyManagerClientImpl";
@@ -667,6 +679,14 @@ public final class APIConstants {
 
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
     public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";
+
+    public static final String IN_MEMORY_SUBSCRIPTION_VALIDATION = "InMemorySubscriptionValidation";
+    public static final String API_KEY_VALIDATOR_SUBS_VALIDATION = API_KEY_VALIDATOR + IN_MEMORY_SUBSCRIPTION_VALIDATION
+            + ".";
+    public static final String API_KEY_VALIDATOR_SUBS_VALIDATION_SERVICE_URL = "ServiceURL";
+    public static final String API_KEY_VALIDATOR_SUBS_VALIDATION_IS_ENABLED = "Enabled";
+    public static final String API_KEY_VALIDATOR_SUBS_VALIDATION_USERNAMEL = "username";
+    public static final String API_KEY_VALIDATOR_SUBS_VALIDATION_PW = "password";
     public static final String JWT_EXPIRY_TIME = API_KEY_VALIDATOR + "JWTExpiryTime";
 
     public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
@@ -1017,6 +1037,19 @@ public final class APIConstants {
         public static final String PAYLOAD_PARAM_TYPE = "body";
 
         private OperationParameter() {
+        }
+    }
+
+    public static class SubscriptionValidationResources {
+        public static final String APIS = "/apis";
+        public static final String APPLICATIONS = "/applications";
+        public static final String SUBSCRIPTIONS = "/subscriptions";
+        public static final String SUBSCRIBERS = "/subscribers";
+        public static final String APPLICATION_KEY_MAPPINGS = "/application-key-mappings";
+        public static final String APPLICATION_POLICIES = "/application-policies";
+        public static final String SUBSCRIPTION_POLICIES = "/subscription-policies";
+
+        private SubscriptionValidationResources() {
         }
     }
 
@@ -1941,7 +1974,7 @@ public final class APIConstants {
      * */
     public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
     public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
-    public static final String UTILITY_WEB_APP_EP = "/internal/data/v1";
+    public static final String INTERNAL_WEB_APP_EP = "/internal/data/v1";
     public static final String API_KEY_REVOKE_PATH = "/apikey/revoke";
 
     public static final String SKIP_ROLES_BY_REGEX = "skipRolesByRegex";

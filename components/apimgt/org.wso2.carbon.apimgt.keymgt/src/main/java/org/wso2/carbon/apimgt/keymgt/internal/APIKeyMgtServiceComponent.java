@@ -32,7 +32,9 @@ import org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.PermissionBasedScopeIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.RoleBasedScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.listeners.KeyManagerUserOperationListener;
+import org.wso2.carbon.apimgt.keymgt.listeners.ServerStartupListener;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
+import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
@@ -79,8 +81,9 @@ public class APIKeyMgtServiceComponent {
             if (tokenRevocationEnabled) {
                 // object creation for implemented OAuthEventInterceptor interface in IS
                 APIMOAuthEventInterceptor interceptor = new APIMOAuthEventInterceptor();
-                // registering the interceptor class to the bundle
+                    // registering the interceptor class to the bundle
                 serviceRegistration = ctxt.getBundleContext().registerService(OAuthEventInterceptor.class.getName(), interceptor, null);
+                ctxt.getBundleContext().registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
                 // Creating an event adapter to receive token revocation messages
                 configureTokenRevocationEventPublisher();
                 configureCacheInvalidationEventPublisher();

@@ -41,7 +41,7 @@ KeyTemplatesApiService delegate = new KeyTemplatesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "An Array of key templates according to custom policies", notes = "This will provide access to key templates define in custom policies ", response = String.class, responseContainer = "List", tags={  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "An array of shops around you", response = String.class, responseContainer = "List"),
+        @ApiResponse(code = 200, message = "An array of Key Templates", response = String.class, responseContainer = "List"),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
     public Response keyTemplatesGet() throws APIManagementException{
         return delegate.keyTemplatesGet(securityContext);
