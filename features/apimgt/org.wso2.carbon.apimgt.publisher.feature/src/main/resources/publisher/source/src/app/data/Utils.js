@@ -136,6 +136,29 @@ class Utils {
         return JSON.parse(environmentData);
     }
 
+
+    /**
+     * Get the current environment from local-storage
+     * @returns {Object} environment: {label, host, loginTokenPath}
+     */
+    static getEprEnvironment() {
+        if (Utils.eprEnvironment) {
+            return Utils.eprEnvironment;
+        }
+
+        const environmentData = localStorage.getItem(Utils.CONST.LOCAL_STORAGE_ENVIRONMENT_EPR);
+        if (!environmentData) {
+            return {
+                label: 'DefaultEpr',
+                host: window.location.host,
+                loginTokenPath: '/login/token',
+                refreshTokenPath: '/services/refresh/refresh.jag',
+            };
+        }
+
+        return JSON.parse(environmentData);
+    }
+
     /**
      * Get current environment's index from the given environment array
      * @param {Array} environments - Array of environments
@@ -174,14 +197,19 @@ class Utils {
     }
 
     /**
-     *
      * Get swagger definition URL
-     * @static
-     * @returns
-     * @memberof Utils
+     * @returns {string} The swagger url.
      */
     static getSwaggerURL() {
         return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SWAGGER_YAML;
+    }
+
+    /**
+     * Get swagger definition URL of Endpoint Registry
+     * @returns {string} The swagger url.
+     */
+    static getSwaggerURLEpr() {
+        return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SWAGGER_YAML_EPR;
     }
 
     /**
@@ -333,12 +361,14 @@ class Utils {
 
 Utils.CONST = {
     LOCAL_STORAGE_ENVIRONMENT: 'environment_publisher',
+    LOCAL_STORAGE_ENVIRONMENT_EPR: 'environment_publisher_epr',
     // TODO: fix/remove below wrong paths
     MULTI_ENVIRONMENT_OVERVIEW_ENABLED: 'multi_env_overview',
 
     LOGOUT_CALLBACK: '/services/auth/callback/logout',
     INTROSPECT: '/services/auth/introspect',
     SWAGGER_YAML: '/api/am/publisher/v1/swagger.yaml',
+    SWAGGER_YAML_EPR: '/api/am/store/v1/swagger.yaml',
     PROTOCOL: 'https://',
 };
 

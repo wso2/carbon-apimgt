@@ -45,7 +45,8 @@
     var loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
     var logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
     var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
-    var scopes = settingsResponse.data.scopes.join(" ");
+    var scopes = settingsResponse.data.scopes.join(" ") + " apim:api_key apim:app_manage apim:store_settings apim:sub_alert_manage apim:sub_manage apim:subscribe openid";
+    new Log("******").error(stringify(scopes));
     var referer = request.getHeader("Referer");
     var state = "";
     // get the pathname from query param 'referrer'

@@ -24,7 +24,6 @@ import PropTypes from 'prop-types';
 import { Link, withRouter } from 'react-router-dom';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { FormattedMessage } from 'react-intl';
-import classNames from 'classnames';
 import clsx from 'clsx';
 import AuthManager from 'AppData/AuthManager';
 import DnsIcon from '@material-ui/icons/Dns';
@@ -55,7 +54,7 @@ const styles = (theme) => ({
         },
     },
     itemPrimary: {
-        fontSize: 12,
+        fontSize: 13,
     },
     itemIcon: {
         minWidth: 'auto',
@@ -111,6 +110,10 @@ function GlobalNavLinks(props) {
             setSelected('api-products');
         } else if (/\/scopes$/g.test(pathname) || /\/scopes\//g.test(pathname)) {
             setSelected('scopes');
+        } else if (/\/settings$/g.test(pathname) || /\/settings\//g.test(pathname)) {
+            setSelected('settings');
+        } else if (/\/endpoint-registry$/g.test(pathname) || /\/endpoint-registry\//g.test(pathname)) {
+            setSelected('endpoint-registry');
         }
     };
     useEffect(() => {
@@ -198,11 +201,7 @@ function GlobalNavLinks(props) {
                             </ListItemIcon>
                             <ListItemText
                                 classes={{
-                                    primary: classNames({
-                                        [classes.selectedText]: selected === 'api-products',
-                                        [classes.listText]: selected !== 'api-products' && !smallView,
-                                        [classes.listTextSmall]: selected !== 'api-products' && smallView,
-                                    }),
+                                    primary: classes.itemPrimary,
                                 }}
                                 primary={(
                                     <FormattedMessage

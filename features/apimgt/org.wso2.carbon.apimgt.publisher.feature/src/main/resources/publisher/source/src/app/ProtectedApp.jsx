@@ -39,6 +39,7 @@ import SettingsBase from 'AppComponents/Apis/Settings/SettingsBase';
 import Progress from 'AppComponents/Shared/Progress';
 import Configurations from 'Config';
 import Scopes from 'AppComponents/Scopes/Scopes';
+import Epr from 'AppComponents/Apis/Epr';
 
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
 const DeferredAPIs = () => (
@@ -223,6 +224,7 @@ export default class Protected extends Component {
                                     <Route path='/api-products' component={DeferredAPIs} />
                                     <Route path='/scopes' component={Scopes} />
                                     <Route path='/settings' component={SettingsBase} />
+                                    <Route path='/endpoint-registry' component={Epr} />
                                     <Route component={ResourceNotFound} />
                                 </Switch>
                             </AppContextProvider>

@@ -31,15 +31,16 @@ import Utils from './Utils';
 class APIClient {
     /**
      * @param {Object} environment - Environment to get host for the swagger-client's spec property.
+     * @param {Object} registryApi - Boolean to get the endpoint registry api or not.
      * @param {{}} args - Accept as an optional argument for APIClient constructor.Merge the given args with
      *  default args.
      * @returns {APIClient}
      */
-    constructor(environment, args = {}) {
+    constructor(environment, registryApi, args = {}) {
         this.environment = environment || Utils.getCurrentEnvironment();
         SwaggerClient.http.withCredentials = true;
         const promisedResolve = SwaggerClient.resolve({
-            url: Utils.getSwaggerURL(),
+            url: registryApi ? Utils.getSwaggerURLEpr() : Utils.getSwaggerURL(),
             requestInterceptor: (request) => {
                 request.headers.Accept = 'text/yaml';
             },
