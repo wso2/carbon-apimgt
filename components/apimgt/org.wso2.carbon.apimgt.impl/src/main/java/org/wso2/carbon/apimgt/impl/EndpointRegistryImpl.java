@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EndpointRegistry;
 import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
@@ -143,25 +142,28 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * Returns all entries belong to a given endpoint registry
      *
-     * @param sortBy     Name of the sorting field
-     * @param sortOrder  Order of sorting (asc or desc)
-     * @param limit      Limit
-     * @param offset     Offset
-     * @param registryId UUID of the endpoint registry
-     * @param serviceType The endpoint service type
-     * @param definitionType Then endpoint definition type
-     * @param entryName The registry entry name
+     * @param sortBy          Name of the sorting field
+     * @param sortOrder       Order of sorting (asc or desc)
+     * @param limit           Limit
+     * @param offset          Offset
+     * @param registryId      UUID of the endpoint registry
+     * @param serviceType     The endpoint service type
+     * @param definitionType  Then endpoint definition type
+     * @param entryName       The registry entry name
      * @param serviceCategory The service category
+     * @param version         The version of registry entry
+     * @param exactNameMatch  Whether to perform exact search on name
      * @return A list of EndpointRegistryEntry objects
      * @throws APIManagementException if failed to get entries of an Endpoint Registry
      */
     public List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit,
                                                                   int offset, String registryId, String serviceType,
                                                                   String definitionType, String entryName,
-                                                                  String serviceCategory)
+                                                                  String serviceCategory, String version,
+                                                                  boolean exactNameMatch)
             throws APIManagementException {
         return apiMgtDAO.getEndpointRegistryEntries(sortBy, sortOrder, limit, offset, registryId, serviceType,
-                definitionType, entryName, serviceCategory);
+                definitionType, entryName, serviceCategory, version, exactNameMatch);
     }
 
     /**
@@ -174,7 +176,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     public String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException {
         if (apiMgtDAO.isRegistryEntryNameExists(registryEntry)) {
             APIUtil.handleResourceAlreadyExistsException("Endpoint Registry Entry with name '"
-                    + registryEntry.getName() + "' already exists");
+                    + registryEntry.getName() + "' and version '" + registryEntry.getVersion() + "' already exists");
         }
         return apiMgtDAO.addEndpointRegistryEntry(registryEntry, username);
     }
@@ -232,6 +234,25 @@ public class EndpointRegistryImpl implements EndpointRegistry {
                     "endpoint registry with id :" + registryId, e);
         }
 
+    }
+
+    /**
+     * Creates a new version of an Endpoint Registry Entry
+     *
+     * @param entryId       Registry Entry Identifier(UUID)
+     * @param registryEntry EndpointRegistryEntry
+     * @param version       New version of the Registry Entry
+     * @return entryID UUID of the created Registry Entry
+     * @throws APIManagementException if failed to delete the Endpoint Registry Entry
+     */
+    public String createNewEntryVersion(String entryId, EndpointRegistryEntry registryEntry, String version)
+            throws APIManagementException {
+        registryEntry.setVersion(version);
+        if (apiMgtDAO.isRegistryEntryNameAndVersionExists(registryEntry)) {
+            APIUtil.handleResourceAlreadyExistsException("Endpoint Registry Entry with name '"
+                    + registryEntry.getName() + "' and version '" + registryEntry.getVersion() + "' already exists");
+        }
+        return apiMgtDAO.addEndpointRegistryEntry(registryEntry, username);
     }
 
 }

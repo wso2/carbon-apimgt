@@ -89,6 +89,7 @@ paths:
         - Registries
       operationId: addRegistry
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -189,6 +190,7 @@ paths:
         schema:
           type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -278,6 +280,17 @@ paths:
         required: true
         style: simple
         explode: false
+        schema:
+          type: string
+      - name: exactNameMatch
+        in: query
+        description: Whether to perform exact search on name
+        schema:
+          type: boolean
+          default: false
+      - name: version
+        in: query
+        description: Version of the Registry Entry
         schema:
           type: string
       - name: serviceType
@@ -635,6 +648,80 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  #-----------------------------------------------------
+  # Create a new version of the entry
+  #-----------------------------------------------------
+  /registries/{registryId}/entries/{entryId}/new-version:
+    post:
+      summary: Create a new version of the entry
+      description: |
+        Using this operation, you can retrieve a specific entry in a single
+        Registry using the EntryId and RegistryId.
+      security:
+        - default:
+            - registry:entry_write
+      operationId: createNewEntryVersion
+      tags:
+        - Registry Entries
+      parameters:
+        - name: registryId
+          in: path
+          description: uuid of the registry
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: entryId
+          in: path
+          description: uuid of the registry entry
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: version
+          in: query
+          description: Version to be created
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: |
+            Requested Entry in Registry is returned.
+          headers:
+            Etag:
+              description: Entity Tag of the response resource.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistryEntry'
+        '400':
+          description: |
+            Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: |
+            Not Found.
+            Requested Registry or Entry does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: |
+            Resource already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   ######################################################
   # The Endpoint Registry settings List
   ######################################################
@@ -690,6 +777,8 @@ components:
     Registry:
       type: object
       title: Registry object
+      required:
+        - name
       properties:
         name:
           type: string
@@ -702,14 +791,6 @@ components:
           example: wso2
           enum:
           - wso2
-          - k8
-          - etcd
-        mode:
-          type: string
-          example: ReadOnly
-          enum:
-          - ReadOnly
-          - ReadWrite
         owner:
           type: string
           example: admin
@@ -738,6 +819,9 @@ components:
     RegistryEntry:
       type: object
       title: The Registry Entry object
+      required:
+        - entryName
+        - version
       properties:
         id:
           type: string
@@ -745,6 +829,9 @@ components:
         entryName:
           type: string
           example: Pizzashack-Endpoint
+        version:
+          type: string
+          example: v1
         productionServiceUrl:
           type: string
           example: http://localhost/pizzashack

@@ -73,22 +73,25 @@ public interface EndpointRegistry {
     /**
      * Returns all entries belong to a given endpoint registry
      *
-     * @param sortBy     Name of the sorting field
-     * @param sortOrder  Order of sorting (asc or desc)
-     * @param limit      Limit
-     * @param offset     Offset
-     * @param registryId UUID of the endpoint registry
-     * @param serviceType The endpoint service type
-     * @param definitionType Then endpoint definition type
-     * @param entryName The registry entry name
+     * @param sortBy          Name of the sorting field
+     * @param sortOrder       Order of sorting (asc or desc)
+     * @param limit           Limit
+     * @param offset          Offset
+     * @param registryId      UUID of the endpoint registry
+     * @param serviceType     The endpoint service type
+     * @param definitionType  Then endpoint definition type
+     * @param entryName       The registry entry name
      * @param serviceCategory The service category
+     * @param version         The version of registry entry
+     * @param exactNameMatch  Whether to perform exact search on name
      * @return A list of EndpointRegistryEntry objects
      * @throws APIManagementException if failed to get entries of an Endpoint Registry
      */
     List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit,
                                                            int offset, String registryId, String serviceType,
                                                            String definitionType, String entryName,
-                                                           String serviceCategory) throws APIManagementException;
+                                                           String serviceCategory, String version, boolean exactNameMatch)
+            throws APIManagementException;
 
     /**
      * Returns details of a specific Endpoint Registry Entry
@@ -135,5 +138,17 @@ public interface EndpointRegistry {
      * @throws APIManagementException if failed to update the endpoint registry
      */
     void updateEndpointRegistry(String registryId, String registryName, EndpointRegistryInfo endpointRegistryInfo)
+            throws APIManagementException;
+
+    /**
+     * Creates a new version of an Endpoint Registry Entry
+     *
+     * @param entryId       Registry Entry Identifier(UUID)
+     * @param registryEntry EndpointRegistryEntry
+     * @param version       New version of the Registry Entry
+     * @return entryID UUID of the created Registry Entry
+     * @throws APIManagementException if failed to delete the Endpoint Registry Entry
+     */
+    String createNewEntryVersion(String entryId, EndpointRegistryEntry registryEntry, String version)
             throws APIManagementException;
 }

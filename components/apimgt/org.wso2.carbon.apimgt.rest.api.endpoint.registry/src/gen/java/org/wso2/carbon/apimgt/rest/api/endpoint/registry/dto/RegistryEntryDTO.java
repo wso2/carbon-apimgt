@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.*;
 public class RegistryEntryDTO   {
     private String id = null;
     private String entryName = null;
+    private String version = null;
     private String productionServiceUrl = null;
     private String sandboxServiceUrl = null;
             @XmlType(name="ServiceCategoryEnum")
@@ -139,13 +140,33 @@ public class RegistryEntryDTO   {
 
     
     
-    @Schema(example = "Pizzashack-Endpoint", description = "")
+    @Schema(example = "Pizzashack-Endpoint", required = true, description = "")
     @JsonProperty("entryName")
-          public String getEntryName() {
+            @NotNull
+      public String getEntryName() {
     return entryName;
     }
     public void setEntryName(String entryName) {
     this.entryName = entryName;
+    }
+
+    /**
+    **/
+    public RegistryEntryDTO version(String version) {
+    this.version = version;
+    return this;
+    }
+
+    
+    
+    @Schema(example = "v1", required = true, description = "")
+    @JsonProperty("version")
+            @NotNull
+      public String getVersion() {
+    return version;
+    }
+    public void setVersion(String version) {
+    this.version = version;
     }
 
     /**
@@ -289,6 +310,7 @@ return false;
 RegistryEntryDTO registryEntry = (RegistryEntryDTO) o;
     return Objects.equals(id, registryEntry.id) &&
     Objects.equals(entryName, registryEntry.entryName) &&
+    Objects.equals(version, registryEntry.version) &&
     Objects.equals(productionServiceUrl, registryEntry.productionServiceUrl) &&
     Objects.equals(sandboxServiceUrl, registryEntry.sandboxServiceUrl) &&
     Objects.equals(serviceCategory, registryEntry.serviceCategory) &&
@@ -300,7 +322,7 @@ RegistryEntryDTO registryEntry = (RegistryEntryDTO) o;
 
 @Override
 public int hashCode() {
-return Objects.hash(id, entryName, productionServiceUrl, sandboxServiceUrl, serviceCategory, serviceType, definitionType, definitionUrl, metadata);
+return Objects.hash(id, entryName, version, productionServiceUrl, sandboxServiceUrl, serviceCategory, serviceType, definitionType, definitionUrl, metadata);
 }
 
 @Override
@@ -310,6 +332,7 @@ sb.append("class RegistryEntryDTO {\n");
 
 sb.append("    id: ").append(toIndentedString(id)).append("\n");
 sb.append("    entryName: ").append(toIndentedString(entryName)).append("\n");
+sb.append("    version: ").append(toIndentedString(version)).append("\n");
 sb.append("    productionServiceUrl: ").append(toIndentedString(productionServiceUrl)).append("\n");
 sb.append("    sandboxServiceUrl: ").append(toIndentedString(sandboxServiceUrl)).append("\n");
 sb.append("    serviceCategory: ").append(toIndentedString(serviceCategory)).append("\n");

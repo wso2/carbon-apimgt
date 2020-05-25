@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T12:22:45.951+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T01:44:40.992+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -74,11 +74,57 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
             schema = @Schema(implementation = ErrorDTO.class)))
      })
     public Response addRegistry(    
-    @Parameter(description = "" ) RegistryDTO body
+    @Parameter(description = "" ,required=true) RegistryDTO body
 
 
 ) throws APIManagementException{
         return delegate.addRegistry(body, securityContext);
+        }
+    @POST
+    @Path("/{registryId}/entries/{entryId}/new-version")
+
+    @Produces({ "application/json" })
+    @Operation(summary = "Create a new version of the entry", description = "Using this operation, you can retrieve a specific entry in a single Registry using the EntryId and RegistryId. ",
+        security = {  @SecurityRequirement(name = "default" , scopes = { "" })
+                 }, tags={ "Registry Entries" })
+
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200",
+            description = "Requested Entry in Registry is returned. ",
+            content = @Content(
+            schema = @Schema(implementation = RegistryEntryDTO.class))),
+
+        @ApiResponse(responseCode = "400",
+            description = "Invalid Request ",
+            content = @Content(
+            schema = @Schema(implementation = ErrorDTO.class))),
+
+        @ApiResponse(responseCode = "404",
+            description = "Not Found. Requested Registry or Entry does not exist. ",
+            content = @Content(
+            schema = @Schema(implementation = ErrorDTO.class))),
+
+        @ApiResponse(responseCode = "409",
+            description = "Resource already exists ",
+            content = @Content(
+            schema = @Schema(implementation = ErrorDTO.class)))
+     })
+    public Response createNewEntryVersion(
+
+@Parameter(description = "uuid of the registry",required=true) @PathParam("registryId") String registryId
+
+
+,
+
+@Parameter(description = "uuid of the registry entry",required=true) @PathParam("entryId") String entryId
+
+
+,      @NotNull        @Parameter(description = "Version to be created",required=true)
+        @QueryParam("version") String version
+
+
+) throws APIManagementException{
+        return delegate.createNewEntryVersion(registryId, entryId, version, securityContext);
         }
     @POST
     @Path("/{registryId}/entry")
@@ -210,6 +256,15 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the Registry",required=true) @PathParam("registryId") String registryId
 
 
+,             @Parameter(description = "Whether to perform exact search on name")
+            @DefaultValue("false")
+        @QueryParam("exactNameMatch") Boolean exactNameMatch
+
+
+,             @Parameter(description = "Version of the Registry Entry")
+        @QueryParam("version") String version
+
+
 ,             @Parameter(description = "**Search condition**.  Filter entries by serviceType ",     schema=@Schema(allowableValues={ "REST", "SOAP_1_1", "GQL", "WS" })
 ) 
         @QueryParam("serviceType") ServiceTypeEnum serviceType
@@ -250,7 +305,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 
 ) throws APIManagementException{
-        return delegate.getAllEntriesInRegistry(registryId, serviceType, definitionType, name, serviceCategory, sortEntryBy, sortEntryOrder, limit, offset, securityContext);
+        return delegate.getAllEntriesInRegistry(registryId, exactNameMatch, version, serviceType, definitionType, name, serviceCategory, sortEntryBy, sortEntryOrder, limit, offset, securityContext);
         }
     public enum ServiceTypeEnum {
     REST,SOAP_1_1,GQL,WS;
@@ -438,16 +493,16 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
             schema = @Schema(implementation = ErrorDTO.class)))
      })
     public Response updateRegistry(
+    @Parameter(description = "" ,required=true) RegistryDTO body
+
+
+,
 
 @Parameter(description = "ID of the Registry",required=true) @PathParam("registryId") String registryId
 
 
-,     
-    @Parameter(description = "" ) RegistryDTO body
-
-
 ) throws APIManagementException{
-        return delegate.updateRegistry(registryId, body, securityContext);
+        return delegate.updateRegistry(body, registryId, securityContext);
         }
     @PUT
     @Path("/{registryId}/entries/{entryId}")

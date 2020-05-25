@@ -33,15 +33,11 @@ public class EndpointRegistryConstants {
 
     public static final String COLUMN_REG_TYPE = "REG_TYPE";
 
-    public static final String COLUMN_REG_MODE = "REG_MODE";
-
     public static final String COLUMN_TENANT_ID = "TENANT_ID";
 
-    public static final String COLUMN_READ_ROLE = "READ_ROLE";
-
-    public static final String COLUMN_WRITE_ROLE = "WRITE_ROLE";
-
     public static final String COLUMN_ENTRY_NAME = "ENTRY_NAME";
+
+    public static final String COLUMN_ENTRY_VERSION = "ENTRY_VERSION";
 
     public static final String COLUMN_PRODUCTION_SERVICE_URL = "PRODUCTION_SERVICE_URL";
 
