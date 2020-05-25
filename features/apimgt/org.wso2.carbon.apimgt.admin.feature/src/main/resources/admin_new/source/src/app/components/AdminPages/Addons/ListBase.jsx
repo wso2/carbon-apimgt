@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
  * @param {JSON} props props passed from parent
  * @returns {JSX} Header AppBar components.
  */
-function ListLabels(props) {
+function ListBase(props) {
     const {
         EditComponent, editComponentProps, DeleteComponent, showActionColumn,
         columProps, pageProps, addButtonProps, addButtonOverride,
@@ -82,23 +82,28 @@ function ListLabels(props) {
     };
 
     const fetchData = () => {
-        // Fetch data from backend
+        // Fetch data from backend when an apiCall is provided
         setData(null);
-        const promiseAPICall = apiCall();
-        promiseAPICall.then((LocalData) => {
-            setData(LocalData);
-        })
-            .catch((e) => {
-                Alert.error(e);
-            });
+        if (apiCall) {
+            const promiseAPICall = apiCall();
+            promiseAPICall.then((LocalData) => {
+                setData(LocalData);
+            })
+                .catch((e) => {
+                    Alert.error(e);
+                });
+        }
     };
 
     useEffect(() => {
         fetchData();
     }, []);
-    const columns = [
-        ...columProps,
-    ];
+    let columns = [];
+    if (columProps) {
+        columns = [
+            ...columProps,
+        ];
+    }
     if (showActionColumn) {
         columns.push(
             {
@@ -141,7 +146,10 @@ function ListLabels(props) {
         responsive: 'stacked',
         searchText,
     };
-    if (data && data.length === 0) {
+
+    // If no apiCall is provided OR,
+    // retrieved data is empty, display an information card.
+    if (!apiCall || (data && data.length === 0)) {
         return (
             <ContentBase
                 {...pageProps}
@@ -163,7 +171,9 @@ function ListLabels(props) {
             </ContentBase>
         );
     }
-    if (!data) {
+
+    // If apiCall is provided and data is not retrieved yet, display progress component
+    if (apiCall && !data) {
         return (
             <ContentBase pageStyle='paperLess'>
                 <InlineProgress />
@@ -172,7 +182,6 @@ function ListLabels(props) {
         );
     }
     return (
-
         <>
             <ContentBase {...pageProps}>
                 {(searchActive || addButtonProps) && (
@@ -239,7 +248,9 @@ function ListLabels(props) {
         </>
     );
 }
-ListLabels.defaultProps = {
+const emptyReactObject = () => <></>;
+
+ListBase.defaultProps = {
     addButtonProps: {},
     addButtonOverride: null,
     searchProps: {
@@ -258,20 +269,25 @@ ListLabels.defaultProps = {
         />
     ),
     showActionColumn: true,
+    apiCall: null,
+    EditComponent: emptyReactObject,
+    DeleteComponent: emptyReactObject,
+    editComponentProps: {},
+    columProps: null,
 };
-ListLabels.propTypes = {
-    EditComponent: PropTypes.element.isRequired,
-    editComponentProps: PropTypes.shape({}).isRequired,
-    DeleteComponent: PropTypes.element.isRequired,
+ListBase.propTypes = {
+    EditComponent: PropTypes.element,
+    editComponentProps: PropTypes.shape({}),
+    DeleteComponent: PropTypes.element,
     showActionColumn: PropTypes.bool,
-    columProps: PropTypes.element.isRequired,
+    columProps: PropTypes.element,
     pageProps: PropTypes.shape({}).isRequired,
     addButtonProps: PropTypes.shape({}),
     searchProps: PropTypes.shape({
         searchPlaceholder: PropTypes.string.isRequired,
         active: PropTypes.bool.isRequired,
     }),
-    apiCall: PropTypes.func.isRequired,
+    apiCall: PropTypes.func,
     emptyBoxProps: PropTypes.shape({
         title: PropTypes.element.isRequired,
         content: PropTypes.element.isRequired,
@@ -284,4 +300,4 @@ ListLabels.propTypes = {
     noDataMessage: PropTypes.element,
     addButtonOverride: PropTypes.element,
 };
-export default ListLabels;
+export default ListBase;
