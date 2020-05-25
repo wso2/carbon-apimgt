@@ -40,6 +40,9 @@ class APIClient {
         SwaggerClient.http.withCredentials = true;
         const promisedResolve = SwaggerClient.resolve({
             url: Utils.getSwaggerURL(),
+            requestInterceptor: (request) => {
+                request.headers.Accept = 'text/yaml';
+            },
         });
         APIClient.spec = promisedResolve;
         this._client = promisedResolve.then((resolved) => {
