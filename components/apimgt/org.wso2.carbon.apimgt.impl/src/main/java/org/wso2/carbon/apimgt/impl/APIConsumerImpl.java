@@ -5843,14 +5843,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
             }
         } else {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            Map<String, Environment> allEnvironments = config.getApiGatewayEnvironments();
+            Map<String, Environment> allEnvironments = APIUtil.getEnvironments();
             Environment environment = allEnvironments.get(environmentName);
 
             if (environment == null) {
-                handleException(
-                        "Could not find provided environment '" + environmentName);
+                handleResourceNotFoundException("Could not find provided environment '" + environmentName + "'");
             }
 
             assert environment != null;
