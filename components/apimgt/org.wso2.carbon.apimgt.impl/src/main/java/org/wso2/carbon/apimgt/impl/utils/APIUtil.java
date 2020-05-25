@@ -1219,6 +1219,24 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA,
                     Boolean.toString(api.isEnabledSchemaValidation()));
 
+            JSONParser parser = new JSONParser();
+            String endpointConfig = api.getEndpointConfig();
+            if (StringUtils.isNotEmpty(endpointConfig)) {
+                try {
+                    JSONObject endpoint_config = (JSONObject) parser.parse(endpointConfig);
+                    if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpoint_config
+                            .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                        String registryEntryId = (String) endpoint_config.get(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID);
+                        artifact.setAttribute(APIConstants.API_OVERVIEW_ENPOINT_REGISTRY_ENTRY, registryEntryId);
+                    } else {
+                        artifact.setAttribute(APIConstants.API_OVERVIEW_ENPOINT_REGISTRY_ENTRY, StringUtils.EMPTY);
+                    }
+                } catch (ParseException e) {
+                    throw new APIManagementException("Error while parsing the endpoint config of API : "
+                            + api.getId().getApiName());
+                }
+            }
+
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {

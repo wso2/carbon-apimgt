@@ -36,7 +36,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,12 +73,7 @@ public class EndpointRegistryImplTest {
 
     @Test
     public void addEndpointRegistry() throws APIManagementException {
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode("ReadOnly");
-        endpointRegistryInfo.setType("wso2");
-        endpointRegistryInfo.setOwner(ADMIN_USERNAME);
-        endpointRegistryInfo.setUuid("abc1");
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
 
         Mockito.when(apiMgtDAO.isEndpointRegistryNameExists(endpointRegistryInfo.getName(), TENANT_ID))
                 .thenReturn(false);
@@ -92,12 +87,7 @@ public class EndpointRegistryImplTest {
 
     @Test(expected = APIMgtResourceAlreadyExistsException.class)
     public void addEndpointRegistry_existingEntryName() throws APIManagementException {
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode("ReadOnly");
-        endpointRegistryInfo.setType("wso2");
-        endpointRegistryInfo.setOwner(ADMIN_USERNAME);
-        endpointRegistryInfo.setUuid("abc1");
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
 
         Mockito.when(apiMgtDAO.isEndpointRegistryNameExists(endpointRegistryInfo.getName(), TENANT_ID))
                 .thenReturn(true);
@@ -107,12 +97,7 @@ public class EndpointRegistryImplTest {
 
     @Test
     public void updateEndpointRegistry() throws APIManagementException {
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode("ReadOnly");
-        endpointRegistryInfo.setType("wso2");
-        endpointRegistryInfo.setOwner(ADMIN_USERNAME);
-        endpointRegistryInfo.setUuid("abc1");
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
 
         endpointRegistry.updateEndpointRegistry(endpointRegistryInfo.getUuid(), endpointRegistryInfo.getName(),
                 endpointRegistryInfo);
@@ -122,17 +107,12 @@ public class EndpointRegistryImplTest {
 
     @Test(expected = APIMgtResourceAlreadyExistsException.class)
     public void updateEndpointRegistry_existingEntryName() throws APIManagementException {
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 2");
-        endpointRegistryInfo.setMode("ReadOnly");
-        endpointRegistryInfo.setType("wso2");
-        endpointRegistryInfo.setOwner(ADMIN_USERNAME);
-        endpointRegistryInfo.setUuid("abc1");
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
 
         Mockito.when(apiMgtDAO.isEndpointRegistryNameExists(endpointRegistryInfo.getName(), TENANT_ID))
                 .thenReturn(true);
 
-        endpointRegistry.updateEndpointRegistry(endpointRegistryInfo.getUuid(), "Endpoint Registry 1",
+        endpointRegistry.updateEndpointRegistry(endpointRegistryInfo.getUuid(), "Endpoint Registry 2",
                 endpointRegistryInfo);
     }
 
@@ -145,12 +125,7 @@ public class EndpointRegistryImplTest {
 
     @Test
     public void getEndpointRegistryByUUID() throws APIManagementException {
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode("ReadOnly");
-        endpointRegistryInfo.setType("wso2");
-        endpointRegistryInfo.setOwner(ADMIN_USERNAME);
-        endpointRegistryInfo.setUuid("abc1");
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
 
         Mockito.when(apiMgtDAO.getEndpointRegistryByUUID(endpointRegistryInfo.getUuid(), TENANT_ID))
                 .thenReturn(endpointRegistryInfo);
@@ -164,22 +139,12 @@ public class EndpointRegistryImplTest {
     public void getEndpointRegistries() throws APIManagementException {
         List<EndpointRegistryInfo> endpointRegistryInfoList = new ArrayList<>();
 
-        EndpointRegistryInfo endpointRegistryInfo1 = new EndpointRegistryInfo();
-        endpointRegistryInfo1.setName("Endpoint Registry 1");
-        endpointRegistryInfo1.setMode("ReadOnly");
-        endpointRegistryInfo1.setOwner("admin");
-        endpointRegistryInfo1.setRegistryId(1);
-        endpointRegistryInfo1.setType("wso2");
-        endpointRegistryInfo1.setUuid("abc1");
+        EndpointRegistryInfo endpointRegistryInfo1 = createRegistry("abc1", 1, "Endpoint Registry 1",
+                "ReadOnly", "wso2", "user1");
         endpointRegistryInfoList.add(endpointRegistryInfo1);
 
-        EndpointRegistryInfo endpointRegistryInfo2 = new EndpointRegistryInfo();
-        endpointRegistryInfo2.setName("Endpoint Registry 2");
-        endpointRegistryInfo2.setMode("ReadWrite");
-        endpointRegistryInfo2.setOwner("admin");
-        endpointRegistryInfo2.setRegistryId(1);
-        endpointRegistryInfo2.setType("etcd");
-        endpointRegistryInfo2.setUuid("abc2");
+        EndpointRegistryInfo endpointRegistryInfo2 = createRegistry("abc2", 2, "Endpoint Registry 2",
+                "ReadWrite", "etcd", "user2");
         endpointRegistryInfoList.add(endpointRegistryInfo2);
 
         Mockito.when(apiMgtDAO.getEndpointRegistries(EndpointRegistryConstants.COLUMN_REG_NAME, "ASC",
@@ -199,17 +164,7 @@ public class EndpointRegistryImplTest {
     public void getEndpointRegistryEntryByUUID() throws APIManagementException {
         String registryUUID = "reg1";
 
-        EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
-        endpointRegistryEntry.setEntryId("abc1");
-        endpointRegistryEntry.setName("Entry 1");
-        endpointRegistryEntry.setMetaData("{mutualTLS:true}");
-        endpointRegistryEntry.setRegistryId(1);
-        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
-        endpointRegistryEntry.setServiceType("REST");
-        endpointRegistryEntry.setServiceCategory("UTILITY");
-        endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
-        endpointRegistryEntry.setDefinitionType("OAS");
-        endpointRegistryEntry.setEndpointDefinition(new ByteArrayInputStream(new byte[]{}));
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
 
         Mockito.when(apiMgtDAO.getEndpointRegistryEntryByUUID(endpointRegistryEntry.getEntryId()))
                 .thenReturn(endpointRegistryEntry);
@@ -225,30 +180,14 @@ public class EndpointRegistryImplTest {
         List<EndpointRegistryEntry> endpointRegistryEntryList = new ArrayList<>();
         String registryUUID = "reg1";
 
-        EndpointRegistryEntry endpointRegistryEntry1 = new EndpointRegistryEntry();
-        endpointRegistryEntry1.setEntryId("abc1");
-        endpointRegistryEntry1.setName("Entry 1");
-        endpointRegistryEntry1.setMetaData("{mutualTLS:true}");
-        endpointRegistryEntry1.setRegistryId(1);
-        endpointRegistryEntry1.setProductionServiceURL("https://xyz.com");
-        endpointRegistryEntry1.setServiceType("REST");
-        endpointRegistryEntry1.setServiceCategory("UTILITY");
-        endpointRegistryEntry1.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
-        endpointRegistryEntry1.setDefinitionType("OAS");
-        endpointRegistryEntry1.setEndpointDefinition(new ByteArrayInputStream(new byte[]{}));
+        EndpointRegistryEntry endpointRegistryEntry1 = createRegistryEntry("abc1", "Entry 1",
+                "{mutualTLS:true}", "https://xyz.com", "REST", "UTILITY",
+                "https://petstore.swagger.io/v2/swagger.json", "OAS", null);
         endpointRegistryEntryList.add(endpointRegistryEntry1);
 
-        EndpointRegistryEntry endpointRegistryEntry2 = new EndpointRegistryEntry();
-        endpointRegistryEntry2.setEntryId("abc2");
-        endpointRegistryEntry2.setName("Entry 2");
-        endpointRegistryEntry2.setMetaData("{mutualTLS:true}");
-        endpointRegistryEntry2.setRegistryId(1);
-        endpointRegistryEntry2.setProductionServiceURL("https://xyz2.com");
-        endpointRegistryEntry2.setServiceType("REST");
-        endpointRegistryEntry2.setServiceCategory("UTILITY");
-        endpointRegistryEntry2.setDefinitionURL("https://petstore.swagger.io/v2/swagger2.json");
-        endpointRegistryEntry2.setDefinitionType("OAS");
-        endpointRegistryEntry2.setEndpointDefinition(new ByteArrayInputStream(new byte[]{}));
+        EndpointRegistryEntry endpointRegistryEntry2 = createRegistryEntry("abc2", "Entry 2",
+                "{mutualTLS:false}", "https://xyz2.com", "REST", "DOMAIN",
+                "https://petstore.swagger.io/v2/swagger.json", "WSDL1", null);
         endpointRegistryEntryList.add(endpointRegistryEntry2);
 
         Mockito.when(apiMgtDAO.getEndpointRegistryEntries(EndpointRegistryConstants.COLUMN_ENTRY_NAME,
@@ -267,17 +206,7 @@ public class EndpointRegistryImplTest {
 
     @Test
     public void addEndpointRegistryEntry() throws APIManagementException {
-        EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
-        endpointRegistryEntry.setEntryId("abc1");
-        endpointRegistryEntry.setName("Entry 1");
-        endpointRegistryEntry.setMetaData("{mutualTLS:true}");
-        endpointRegistryEntry.setRegistryId(1);
-        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
-        endpointRegistryEntry.setServiceType("REST");
-        endpointRegistryEntry.setServiceCategory("UTILITY");
-        endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
-        endpointRegistryEntry.setDefinitionType("OAS");
-        endpointRegistryEntry.setEndpointDefinition(new ByteArrayInputStream(new byte[]{}));
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
 
         Mockito.when(apiMgtDAO.addEndpointRegistryEntry(endpointRegistryEntry, ADMIN_USERNAME))
                 .thenReturn(endpointRegistryEntry.getEntryId());
@@ -289,29 +218,12 @@ public class EndpointRegistryImplTest {
 
     @Test
     public void updateEndpointRegistryEntry() throws APIManagementException {
-        EndpointRegistryEntry endpointRegistryEntryOld = new EndpointRegistryEntry();
-        endpointRegistryEntryOld.setEntryId("abc1");
-        endpointRegistryEntryOld.setName("Entry 1");
-        endpointRegistryEntryOld.setMetaData("{mutualTLS:true}");
-        endpointRegistryEntryOld.setRegistryId(1);
-        endpointRegistryEntryOld.setProductionServiceURL("https://xyz.com");
-        endpointRegistryEntryOld.setServiceType("REST");
-        endpointRegistryEntryOld.setServiceCategory("UTILITY");
-        endpointRegistryEntryOld.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
-        endpointRegistryEntryOld.setDefinitionType("OAS");
-        endpointRegistryEntryOld.setEndpointDefinition(new ByteArrayInputStream(new byte[]{}));
+        EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
 
-        EndpointRegistryEntry endpointRegistryEntryNew = new EndpointRegistryEntry();
-        endpointRegistryEntryNew.setEntryId("abc1");
-        endpointRegistryEntryNew.setName("Entry 2");
-        endpointRegistryEntryNew.setMetaData("{mutualTLS:flase}");
-        endpointRegistryEntryNew.setRegistryId(1);
-        endpointRegistryEntryNew.setProductionServiceURL("https://xyz2.com");
-        endpointRegistryEntryNew.setServiceType("REST");
-        endpointRegistryEntryNew.setServiceCategory("UTILITY");
-        endpointRegistryEntryNew.setDefinitionURL("https://petstore.swagger.io/v2/swagger2.json");
-        endpointRegistryEntryNew.setDefinitionType("WSDL1");
-        endpointRegistryEntryNew.setEndpointDefinition(new ByteArrayInputStream(new byte[]{}));
+        EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
+                "Entry 2", "{mutualTLS:false}", "https://xyz2.com", "REST",
+                "DOMAIN", "https://petstore.swagger.io/v2/swagger.json",
+                "WSDL1", null);
 
         Mockito.when(apiMgtDAO.getEndpointRegistryEntryByUUID(endpointRegistryEntryOld.getEntryId()))
                 .thenReturn(endpointRegistryEntryOld);
@@ -324,29 +236,12 @@ public class EndpointRegistryImplTest {
 
     @Test(expected = APIMgtResourceAlreadyExistsException.class)
     public void updateEndpointRegistryEntry_existingEntryName() throws APIManagementException {
-        EndpointRegistryEntry endpointRegistryEntryOld = new EndpointRegistryEntry();
-        endpointRegistryEntryOld.setEntryId("abc1");
-        endpointRegistryEntryOld.setName("Entry 1");
-        endpointRegistryEntryOld.setMetaData("{mutualTLS:true}");
-        endpointRegistryEntryOld.setRegistryId(1);
-        endpointRegistryEntryOld.setProductionServiceURL("https://xyz.com");
-        endpointRegistryEntryOld.setServiceType("REST");
-        endpointRegistryEntryOld.setServiceCategory("UTILITY");
-        endpointRegistryEntryOld.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
-        endpointRegistryEntryOld.setDefinitionType("OAS");
-        endpointRegistryEntryOld.setEndpointDefinition(new ByteArrayInputStream(new byte[]{}));
+        EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
 
-        EndpointRegistryEntry endpointRegistryEntryNew = new EndpointRegistryEntry();
-        endpointRegistryEntryNew.setEntryId("abc1");
-        endpointRegistryEntryNew.setName("Entry 2");
-        endpointRegistryEntryNew.setMetaData("{mutualTLS:flase}");
-        endpointRegistryEntryNew.setRegistryId(1);
-        endpointRegistryEntryNew.setProductionServiceURL("https://xyz2.com");
-        endpointRegistryEntryNew.setServiceType("REST");
-        endpointRegistryEntryNew.setServiceCategory("UTILITY");
-        endpointRegistryEntryNew.setDefinitionURL("https://petstore.swagger.io/v2/swagger2.json");
-        endpointRegistryEntryNew.setDefinitionType("WSDL1");
-        endpointRegistryEntryNew.setEndpointDefinition(new ByteArrayInputStream(new byte[]{}));
+        EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
+                "Entry 2", "{mutualTLS:false}", "https://xyz2.com", "REST",
+                "DOMAIN", "https://petstore.swagger.io/v2/swagger.json",
+                "WSDL1", null);
 
         Mockito.when(apiMgtDAO.getEndpointRegistryEntryByUUID(endpointRegistryEntryOld.getEntryId()))
                 .thenReturn(endpointRegistryEntryOld);
@@ -383,5 +278,63 @@ public class EndpointRegistryImplTest {
         Assert.assertEquals(expected.getDefinitionURL(), actual.getDefinitionURL());
         Assert.assertEquals(expected.getDefinitionType(), actual.getDefinitionType());
         Assert.assertEquals(expected.getEndpointDefinition(), actual.getEndpointDefinition());
+    }
+
+    private EndpointRegistryInfo createRegistryWithDefaultParams() {
+
+        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
+        endpointRegistryInfo.setUuid("abc1");
+        endpointRegistryInfo.setRegistryId(1);
+        endpointRegistryInfo.setName("Endpoint Registry 1");
+        endpointRegistryInfo.setMode("ReadOnly");
+        endpointRegistryInfo.setType("wso2");
+        endpointRegistryInfo.setOwner(ADMIN_USERNAME);
+
+        return endpointRegistryInfo;
+    }
+
+    private EndpointRegistryInfo createRegistry(String uuid, int id, String name, String mode,String type,
+                                                String owner) {
+        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
+        endpointRegistryInfo.setUuid(uuid);
+        endpointRegistryInfo.setRegistryId(id);
+        endpointRegistryInfo.setName(name);
+        endpointRegistryInfo.setMode(mode);
+        endpointRegistryInfo.setType(type);
+        endpointRegistryInfo.setOwner(owner);
+
+        return endpointRegistryInfo;
+    }
+
+    private EndpointRegistryEntry createRegistryEntryWithDefaultParams() {
+        EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
+        endpointRegistryEntry.setEntryId("entry1");
+        endpointRegistryEntry.setName("Entry Name 1");
+        endpointRegistryEntry.setMetaData("{mutualTLS: true}");
+        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
+        endpointRegistryEntry.setServiceType("REST");
+        endpointRegistryEntry.setServiceCategory("UTILITY");
+        endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
+        endpointRegistryEntry.setDefinitionType("OAS");
+
+        return endpointRegistryEntry;
+    }
+
+    private EndpointRegistryEntry createRegistryEntry(String id, String name, String metadata, String serviceUrl,
+                                                      String serviceType, String serviceCategory,
+                                                      String definitionUrl, String definitionType,
+                                                      InputStream definitionFile) {
+        EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
+        endpointRegistryEntry.setEntryId(id);
+        endpointRegistryEntry.setName(name);
+        endpointRegistryEntry.setMetaData(metadata);
+        endpointRegistryEntry.setProductionServiceURL(serviceUrl);
+        endpointRegistryEntry.setServiceType(serviceType);
+        endpointRegistryEntry.setServiceCategory(serviceCategory);
+        endpointRegistryEntry.setDefinitionURL(definitionUrl);
+        endpointRegistryEntry.setDefinitionType(definitionType);
+        endpointRegistryEntry.setEndpointDefinition(definitionFile);
+
+        return endpointRegistryEntry;
     }
 }

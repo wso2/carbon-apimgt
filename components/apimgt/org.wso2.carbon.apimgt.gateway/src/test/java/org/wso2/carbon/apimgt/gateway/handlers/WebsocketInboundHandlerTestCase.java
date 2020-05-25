@@ -180,7 +180,12 @@ public class WebsocketInboundHandlerTestCase {
         PowerMockito.when(DataPublisherUtil.getApiManagerAnalyticsConfiguration()).thenReturn(apiMngAnalyticsConfig);
         Mockito.when(apiMngAnalyticsConfig.getPublisherClass()).thenReturn(publisherClass);
         //test when the request is a handshake
-        WebsocketInboundHandler websocketInboundHandler = new WebsocketInboundHandler();
+        WebsocketInboundHandler websocketInboundHandler = new WebsocketInboundHandler() {
+            @Override
+            protected String getRemoteIP(ChannelHandlerContext ctx) {
+                return "192.168.0.100";
+            }
+        };
         ChannelHandlerContext channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
         FullHttpRequest fullHttpRequest = Mockito.mock(FullHttpRequest.class);
         try {
@@ -194,7 +199,12 @@ public class WebsocketInboundHandlerTestCase {
         Mockito.when(headers.get(org.apache.http.HttpHeaders.AUTHORIZATION)).thenReturn(AUTHORIZATION);
         Mockito.when(headers.get(org.apache.http.HttpHeaders.USER_AGENT)).thenReturn(USER_AGENT);
         Mockito.when(fullHttpRequest.headers()).thenReturn(headers);
-        WebsocketInboundHandler websocketInboundHandler1 = new WebsocketInboundHandler();
+        WebsocketInboundHandler websocketInboundHandler1 = new WebsocketInboundHandler() {
+            @Override
+            protected String getRemoteIP(ChannelHandlerContext ctx) {
+                return "192.168.0.100";
+            }
+        };
         CacheConfiguration.Duration duration = new CacheConfiguration.Duration(TimeUnit.SECONDS,
                 Long.parseLong(TOKEN_CACHE_EXPIRY));
         Mockito.when(gatewayCache.get(API_KEY)).thenReturn("fhgvjhhhjkghj");
@@ -316,7 +326,12 @@ public class WebsocketInboundHandlerTestCase {
         PowerMockito.when(DataPublisherUtil.getApiManagerAnalyticsConfiguration()).thenReturn(apiMngAnalyticsConfig);
         Mockito.when(apiMngAnalyticsConfig.getPublisherClass()).thenReturn(publisherClass);
         //test when the request is a handshake
-        WebsocketInboundHandler websocketInboundHandler = new WebsocketInboundHandler();
+        WebsocketInboundHandler websocketInboundHandler = new WebsocketInboundHandler() {
+            @Override
+            protected String getRemoteIP(ChannelHandlerContext ctx) {
+                return "192.168.0.100";
+            }
+        };
         PowerMockito.when(MultitenantUtils.getTenantDomainFromUrl(SUPER_TENANT_URL)).thenReturn(SUPER_TENANT_DOMAIN);
         try {
             websocketInboundHandler.channelRead(channelHandlerContext, fullHttpRequest);
@@ -325,7 +340,12 @@ public class WebsocketInboundHandlerTestCase {
 //            test for exception
         }
 
-        WebsocketInboundHandler websocketInboundHandler1 = new WebsocketInboundHandler();
+        WebsocketInboundHandler websocketInboundHandler1 = new WebsocketInboundHandler() {
+            @Override
+            protected String getRemoteIP(ChannelHandlerContext ctx) {
+                return "192.168.0.100";
+            }
+        };
         //test for Invalid Credentials error
         try {
             websocketInboundHandler1.channelRead(channelHandlerContext, fullHttpRequest);
@@ -409,6 +429,11 @@ public class WebsocketInboundHandlerTestCase {
                 info.setApiName("Phoneverify*1.0");
                 info.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
                 return info;
+            }
+
+            @Override
+            protected String getRemoteIP(ChannelHandlerContext ctx) {
+                return "192.168.0.100";
             }
         };
         PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);

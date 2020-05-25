@@ -29,6 +29,7 @@ public class Scope implements Serializable{
     String roles;
     String description;
     String id;
+    int usageCount;
 
     public String getKey() {
         return key;
@@ -68,6 +69,14 @@ public class Scope implements Serializable{
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public int getUsageCount() {
+        return usageCount;
+    }
+
+    public void setUsageCount(int usageCount) {
+        this.usageCount = usageCount;
     }
 
     @Override

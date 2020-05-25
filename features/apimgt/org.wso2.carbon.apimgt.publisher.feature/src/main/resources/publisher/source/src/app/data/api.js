@@ -529,6 +529,27 @@ class API extends Resource {
     }
 
     /**
+     * Get all the scopes
+     * @param offset {String} offset of the scopes list which needs to be retrieved
+     * @param limit {String} limit of the scopes list which needs to be retrieved
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getAllScopes(offset = null, limit = null, callback = null) {
+        const promise_scopes = this.client.then(client => {
+            return client.apis['Scopes'].getSharedScopes(
+                { limit, offset},
+                this._requestMetaData(),
+            );
+        });
+        if (callback) {
+            return promise_scopes.then(callback);
+        } else {
+            return promise_scopes;
+        }
+    }
+
+    /**
      * Get settings of an API
      */
     getSettings() {
@@ -632,6 +653,26 @@ class API extends Resource {
     }
 
     /**
+     * Get a particular scope
+     * @param scopeId {String} UUID of the scope
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getSharedScopeDetails(scopeId, callback = null) {
+        const promise_scopes = this.client.then(client => {
+            return client.apis['Scopes'].getSharedScope(
+                { scopeId },
+                this._requestMetaData(),
+            );
+        });
+        if (callback) {
+            return promise_scopes.then(callback);
+        } else {
+            return promise_scopes;
+        }
+    }
+
+    /**
      * Update a scope of an API
      * @param {String} api_id - UUID of the API in which the scopes is needed
      * @param {String} scopeName - Name of the scope
@@ -662,12 +703,63 @@ class API extends Resource {
         return promised_addScope;
     }
 
+    /**
+     * Add a shared scope
+     * @param body {any} body of the shared scope details
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    addSharedScope(body) {
+        const promised_addSharedScope = this.client.then(client => {
+            const payload = {
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Scopes'].addSharedScope(payload, this._requestMetaData());
+        });
+        return promised_addSharedScope;
+    }
+
+    /**
+     * Update a shared scope
+     * @param scopeId {String} UUID of the scope
+     * @param body {any} body of the shared scope details
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    updateSharedScope(scopeId, body) {
+        const promised_updateSharedScope = this.client.then(client => {
+            const payload = {
+                scopeId,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Scopes'].updateSharedScope(payload, this._requestMetaData());
+        });
+        return promised_updateSharedScope;
+    }
+
     deleteScope(api_id, scope_name) {
         const promise_deleteScope = this.client.then(client => {
             return client.apis['API Scopes'].delete_apis__apiId__scopes__name_(
                 {
                     apiId: api_id,
                     name: scope_name,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promise_deleteScope;
+    }
+
+    /**
+     * Delete a shared scope
+     * @param scopeId {String} UUID of the scope
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    deleteSharedScope(scopeId) {
+        const promise_deleteScope = this.client.then(client => {
+            return client.apis['Scopes'].deleteSharedScope(
+                {
+                    scopeId: scopeId,
                 },
                 this._requestMetaData(),
             );
