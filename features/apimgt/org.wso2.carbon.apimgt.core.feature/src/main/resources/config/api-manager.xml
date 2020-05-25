@@ -138,6 +138,12 @@
         <EnableRESTAPITokenCache>true</EnableRESTAPITokenCache>
         <!-- Expiry time for the apim REST API token cache -->
         <RESTAPITokenCacheExpiry>300</RESTAPITokenCacheExpiry>
+
+        <!-- Enable/Disable cache control headers of the Product REST APIs-->
+        <EnableRESTAPICacheControlHeaders>true</EnableRESTAPICacheControlHeaders>
+        <!-- Expiry time for the apim REST API token cache -->
+        <RESTAPICacheControlMaxAge>86400</RESTAPICacheControlMaxAge>
+
 	    <!-- JWT claims Cache expiry in seconds -->
         <!--JWTClaimCacheExpiry>900</JWTClaimCacheExpiry-->
         <!-- Expiry time for the apim key mgt validation info cache -->

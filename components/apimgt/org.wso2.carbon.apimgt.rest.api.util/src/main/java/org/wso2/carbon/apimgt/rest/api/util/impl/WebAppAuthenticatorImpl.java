@@ -65,7 +65,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         AccessTokenInfo tokenInfo = null;
 
         //validate the token from cache if it is enabled
-        if (APIUtil.isRESTAPITokenCacheEnabled()) {
+        if (APIUtil.getRESTAPICacheConfig().isTokenCacheEnabled()) {
             tokenInfo = (AccessTokenInfo)getRESTAPITokenCache().get(accessToken);
             if (tokenInfo != null) {
                 if (isAccessTokenExpired(tokenInfo)) {
@@ -99,7 +99,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
 
         // if we got valid access token we will proceed with next
         if (tokenInfo != null && tokenInfo.isTokenValid()) {
-            if (APIUtil.isRESTAPITokenCacheEnabled() && !retrievedFromTokenCache) {
+            if (APIUtil.getRESTAPICacheConfig().isTokenCacheEnabled() && !retrievedFromTokenCache) {
                 //put the token info into token cache
                 getRESTAPITokenCache().put(accessToken, tokenInfo);
             }
@@ -146,7 +146,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
             }
         } else {
             log.error(RestApiConstants.ERROR_TOKEN_INVALID);
-            if (APIUtil.isRESTAPITokenCacheEnabled() && !retrievedFromInvalidTokenCache) {
+            if (APIUtil.getRESTAPICacheConfig().isTokenCacheEnabled() && !retrievedFromInvalidTokenCache) {
                 getRESTAPIInvalidTokenCache().put(accessToken, tokenInfo);
             }
         }

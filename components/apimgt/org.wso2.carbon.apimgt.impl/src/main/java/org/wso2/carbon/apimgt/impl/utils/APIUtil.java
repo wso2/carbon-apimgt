@@ -120,6 +120,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
+import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
@@ -5042,23 +5043,6 @@ public final class APIUtil {
         return true;
     }
 
-    /**
-     * Returns whether Product REST APIs' token cache is enabled
-     *
-     * @return true if token cache is enabled
-     */
-    public static boolean isRESTAPITokenCacheEnabled() {
-        try {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            String cacheEnabled = config.getFirstProperty(APIConstants.REST_API_TOKEN_CACHE_ENABLED);
-            return Boolean.parseBoolean(cacheEnabled);
-        } catch (Exception e) {
-            log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e);
-        }
-        return true;
-    }
-
     public static Cache getAPIContextCache() {
         CacheManager contextCacheManager = Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).
                 getCache(APIConstants.API_CONTEXT_CACHE).getCacheManager();
@@ -7592,11 +7576,20 @@ public final class APIUtil {
      *  case, local server will be used as the IDP.
      *
      * @return configuration of the Identity Provider from the api-manager configuration
-     * @throws APIManagementException error when retrieving the configuration
      */
-    public static IDPConfiguration getIdentityProviderConfig() throws APIManagementException {
+    public static IDPConfiguration getIdentityProviderConfig() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getIdentityProviderConfig();
+    }
+
+    /**
+     * Returns Product REST APIs' cache configuration by reading from api-manager.xml
+     *
+     * @return Product REST APIs' cache configuration.
+     */
+    public static RESTAPICacheConfiguration getRESTAPICacheConfig() throws APIManagementException {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getRESTAPICacheConfig();
     }
 
     /**
