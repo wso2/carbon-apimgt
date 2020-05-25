@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.KMRegisterProfileDTO;
+import org.wso2.carbon.apimgt.impl.dto.TokenHandlingDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -44,6 +45,7 @@ import org.wso2.carbon.base.MultitenantConstants;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -164,6 +166,12 @@ public final class KeyMgtRegistrationService {
                             oAuthApplicationInfo.getClientSecret());
                 }
             }
+            TokenHandlingDto tokenHandlingDto = new TokenHandlingDto();
+            tokenHandlingDto.setEnable(true);
+            tokenHandlingDto.setType(TokenHandlingDto.TypeEnum.REFERENCE);
+            tokenHandlingDto.setValue(APIConstants.KeyManager.UUID_REGEX);
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.VALIDATION_VALUE,
+                    new Gson().toJson(Arrays.asList(tokenHandlingDto)));
             instance.addKeyManagerConfiguration(keyManagerConfigurationDTO);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 KeyManagerConfigurationDTO keyManagerConfiguration =

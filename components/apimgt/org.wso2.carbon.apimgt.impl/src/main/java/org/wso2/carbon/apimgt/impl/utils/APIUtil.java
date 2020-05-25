@@ -100,6 +100,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -134,7 +135,6 @@ import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
 import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -147,7 +147,6 @@ import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
-import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
@@ -274,7 +273,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10710,7 +10708,7 @@ public final class APIUtil {
         }
         if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                 APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION)) {
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION, false);
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION, true);
         }
         if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                 APIConstants.KeyManager.SELF_VALIDATE_JWT)) {
@@ -10753,17 +10751,9 @@ public final class APIUtil {
         }
     }
 
-    public static Map<String, KeyManagerConfigurationsDto.KeyManagerConfigurationDto> getKeyManagerConfigurations() {
+    public static Map<String, KeyManagerConnectorConfiguration> getKeyManagerConfigurations() {
 
-        APIManagerConfigurationService apiManagerConfigurationService =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
-        if (apiManagerConfigurationService != null &&
-                apiManagerConfigurationService.getAPIManagerConfiguration() != null &&
-                apiManagerConfigurationService.getAPIManagerConfiguration().getKeyManagerConfigurationsDto() != null) {
-            return apiManagerConfigurationService.getAPIManagerConfiguration().getKeyManagerConfigurationsDto()
-                    .getKeyManagerConfiguration();
-        }
-        return Collections.emptyMap();
+        return ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfigurations();
     }
 
     /**
@@ -10799,18 +10789,10 @@ public final class APIUtil {
         }
         return scopeToKeyMap;
     }
-    public static KeyManagerConfigurationsDto.KeyManagerConfigurationDto getKeyManagerConfigurationsByConnectorType(
-            String type) {
 
-        APIManagerConfigurationService apiManagerConfigurationService =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
-        if (apiManagerConfigurationService != null &&
-                apiManagerConfigurationService.getAPIManagerConfiguration() != null &&
-                apiManagerConfigurationService.getAPIManagerConfiguration().getKeyManagerConfigurationsDto() != null) {
-            return apiManagerConfigurationService.getAPIManagerConfiguration().getKeyManagerConfigurationsDto()
-                    .getKeyManagerConfiguration().get(type);
-        }
-        return null;
+    public static KeyManagerConnectorConfiguration getKeyManagerConnectorConfigurationsByConnectorType(String type) {
+
+        return ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfiguration(type);
     }
 
     public static List<ClaimMappingDto> getDefaultClaimMappings() {

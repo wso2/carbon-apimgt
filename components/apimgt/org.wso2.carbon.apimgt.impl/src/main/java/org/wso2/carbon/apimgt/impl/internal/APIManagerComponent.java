@@ -35,6 +35,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -795,6 +796,39 @@ public class APIManagerComponent {
      */
     protected void removeJWTTransformer(JWTTransformer jwtTransformer) {
         ServiceReferenceHolder.getInstance().removeJWTTransformer(jwtTransformer.getIssuer());
+    }
+
+    /**
+     * Initialize the KeyManager Connector configuration Service Service dependency
+     *
+     * @param keyManagerConnectorConfiguration {@link KeyManagerConnectorConfiguration} service reference.
+     */
+    @Reference(
+            name = "keyManager.connector.service",
+            service = KeyManagerConnectorConfiguration.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeKeyManagerConnectorConfiguration")
+    protected void addKeyManagerConnectorConfiguration(
+            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration,Map<String, Object> properties) {
+        if (properties.containsKey(APIConstants.KeyManager.KEY_MANAGER_TYPE)){
+            String type = (String) properties.get(APIConstants.KeyManager.KEY_MANAGER_TYPE);
+            ServiceReferenceHolder.getInstance().addKeyManagerConnectorConfiguration(type,
+                    keyManagerConnectorConfiguration);
+        }
+    }
+
+    /**
+     * De-reference the JWTTransformer service
+     *
+     * @param keyManagerConnectorConfiguration
+     */
+    protected void removeKeyManagerConnectorConfiguration(
+            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration, Map<String, Object> properties) {
+        if (properties.containsKey(APIConstants.KeyManager.KEY_MANAGER_TYPE)){
+            String type = (String) properties.get(APIConstants.KeyManager.KEY_MANAGER_TYPE);
+            ServiceReferenceHolder.getInstance().removeKeyManagerConnectorConfiguration(type);
+        }
     }
 
 

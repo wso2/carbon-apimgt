@@ -40,7 +40,7 @@ public class KeyManagerDTO   {
     private Boolean enableOAuthAppCreation = false;
     private Boolean enableSelfValidationJWT = true;
     private List<ClaimMappingEntryDTO> claimMapping = new ArrayList<>();
-    private TokenValidationDTO tokenValidation = null;
+    private List<TokenValidationDTO> tokenValidation = new ArrayList<>();
     private Boolean enabled = null;
     private Object additionalProperties = null;
 
@@ -405,7 +405,7 @@ public class KeyManagerDTO   {
 
   /**
    **/
-  public KeyManagerDTO tokenValidation(TokenValidationDTO tokenValidation) {
+  public KeyManagerDTO tokenValidation(List<TokenValidationDTO> tokenValidation) {
     this.tokenValidation = tokenValidation;
     return this;
   }
@@ -413,10 +413,10 @@ public class KeyManagerDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("tokenValidation")
-  public TokenValidationDTO getTokenValidation() {
+  public List<TokenValidationDTO> getTokenValidation() {
     return tokenValidation;
   }
-  public void setTokenValidation(TokenValidationDTO tokenValidation) {
+  public void setTokenValidation(List<TokenValidationDTO> tokenValidation) {
     this.tokenValidation = tokenValidation;
   }
 

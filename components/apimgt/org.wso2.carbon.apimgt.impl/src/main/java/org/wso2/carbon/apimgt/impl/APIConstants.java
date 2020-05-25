@@ -2099,24 +2099,8 @@ public final class APIConstants {
         public static final String AUTHORIZE_ENDPOINT = "authorize_endpoint";
         public static final String KEY_MANAGER_CONFIGURATIONS = "KeyManagerConfigurations";
         public static final String KEY_MANAGER = "KeyManager";
-        public static final String IMPLEMENTATION = "Implementation";
-        public static final String JWT_VALIDATOR_IMPLEMENTATION = "JWTValidatorImplementation";
-        public static final String ADDITIONAL_CONFIGURATION = "AdditionalConfigurations";
-        public static final String CONNECTION_CONFIGURATIONS = "ConnectionConfigurations";
-        public static final String CONNECTION_CONFIGURATION = "ConnectionConfiguration";
         public static final String APPLICATION_CONFIGURATIONS = "ApplicationConfigurations";
-        public static final String APPLICATION_CONFIGURATION = "ApplicationConfiguration";
         public static final String CONFIGURATION_RETRIEVER = "ConfigurationRetriever";
-        public static final String CONFIGURATION_NAME = "name";
-        public static final String CONFIGURATION_TYPE = "type";
-        public static final String CONFIGURATION_REQUIRED = "required";
-        public static final String CONFIGURATION_MASK = "mask";
-        public static final String CONFIGURATION_LABEL = "label";
-        public static final String CONFIGURATION_TOOL_TIP = "tooltip";
-        public static final String CONFIGURATION_DEFAULT = "default";
-        public static final String CONFIGURATION_MULTIPLE = "multiple";
-        public static final String CONFIGURATION_VALUES = "values";
-        public static final String CONFIGURATION_VALUE = "values";
 
         public static final String ENABLE = "Enable";
         public static final String USERNAME = "Username";
@@ -2133,6 +2117,9 @@ public final class APIConstants {
         public static final String API_LEVEL_ALL_KEY_MANAGERS = "all";
         public static final String REGISTERED_TENANT_DOMAIN = "tenantDomain";
         public static final String ENABLE_MAP_OAUTH_CONSUMER_APPS = "enable_map_oauth_consumer_apps";
+        public static final String KEY_MANAGER_TYPE = "type";
+        public static final String UUID_REGEX = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F" +
+                "]{3}-[0-9a-fA-F]{12}";
 
         public static class KeyManagerEvent {
 

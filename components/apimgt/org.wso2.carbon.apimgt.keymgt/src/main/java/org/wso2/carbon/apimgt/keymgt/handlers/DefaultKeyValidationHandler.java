@@ -88,25 +88,38 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 Map<String, KeyManagerDto>
                         tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(validationContext.getTenantDomain());
                 KeyManager keyManagerInstance = null;
-
-                if (validationContext.getKeyManagers().contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS)) {
-                    for (KeyManagerDto keyManagerDto : tenantKeyManagers.values()) {
-                        if (keyManagerDto.getKeyManager() != null &&
-                                keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
+                if (tenantKeyManagers.values().size() == 1){
+                    Map.Entry<String, KeyManagerDto> entry = tenantKeyManagers.entrySet().iterator().next();
+                    if (entry != null) {
+                        KeyManagerDto keyManagerDto = entry.getValue();
+                        if (keyManagerDto != null && (validationContext.getKeyManagers()
+                                .contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
+                                validationContext.getKeyManagers().contains(keyManagerDto.getName()))) {
                             keyManagerInstance = keyManagerDto.getKeyManager();
-                            break;
                         }
                     }
-                } else {
-                    for (String selectedKeyManager : validationContext.getKeyManagers()) {
-                        KeyManagerDto keyManagerDto = tenantKeyManagers.get(selectedKeyManager);
-                        if (keyManagerDto != null && keyManagerDto.getKeyManager() != null &&
-                                keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
-                            keyManagerInstance = keyManagerDto.getKeyManager();
-                            break;
+                } else if (tenantKeyManagers.values().size() > 1) {
+                    if (validationContext.getKeyManagers()
+                            .contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS)) {
+                        for (KeyManagerDto keyManagerDto : tenantKeyManagers.values()) {
+                            if (keyManagerDto.getKeyManager() != null &&
+                                    keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
+                                keyManagerInstance = keyManagerDto.getKeyManager();
+                                break;
+                            }
+                        }
+                    } else {
+                        for (String selectedKeyManager : validationContext.getKeyManagers()) {
+                            KeyManagerDto keyManagerDto = tenantKeyManagers.get(selectedKeyManager);
+                            if (keyManagerDto != null && keyManagerDto.getKeyManager() != null &&
+                                    keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
+                                keyManagerInstance = keyManagerDto.getKeyManager();
+                                break;
+                            }
                         }
                     }
                 }
+
 
                 if (keyManagerInstance != null) {
                     tokenInfo = keyManagerInstance.getTokenMetaData(validationContext.getAccessToken());

@@ -4932,7 +4932,6 @@ definitions:
     title: Application key provision request object
     required:
       - consumerKey
-      - consumerSecret
       - keyType
     properties:
       consumerKey:

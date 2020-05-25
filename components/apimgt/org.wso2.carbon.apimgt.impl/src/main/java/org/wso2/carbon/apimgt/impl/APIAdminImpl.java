@@ -28,20 +28,18 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.sql.SQLException;
@@ -61,7 +59,7 @@ import java.util.UUID;
 public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
-    ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+    protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     /**
      * Returns all labels associated with given tenant domain.
@@ -515,49 +513,38 @@ public class APIAdminImpl implements APIAdmin {
 
     private void validateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
-        if (StringUtils.isEmpty(keyManagerConfigurationDTO.getName())){
-            throw new APIManagementException("Key Manager Name can't be empty",ExceptionCodes.KEY_MANAGER_NAME_EMPTY);
+
+        if (StringUtils.isEmpty(keyManagerConfigurationDTO.getName())) {
+            throw new APIManagementException("Key Manager Name can't be empty", ExceptionCodes.KEY_MANAGER_NAME_EMPTY);
         }
-        APIManagerConfigurationService apiManagerConfigurationService =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
-        if (apiManagerConfigurationService != null) {
-            APIManagerConfiguration apiManagerConfiguration =
-                    apiManagerConfigurationService.getAPIManagerConfiguration();
-            KeyManagerConfigurationsDto keyManagerConfiguration =
-                    apiManagerConfiguration.getKeyManagerConfigurationsDto();
-            if (keyManagerConfiguration != null) {
-                if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
-                    Map<String, KeyManagerConfigurationsDto.KeyManagerConfigurationDto> keyManagerConfigurationDtoMap =
-                            keyManagerConfiguration.getKeyManagerConfiguration();
-                    KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerDeploymentConfiguration =
-                            keyManagerConfigurationDtoMap.get(keyManagerConfigurationDTO.getType());
-                    if (keyManagerDeploymentConfiguration == null) {
-                        throw new APIManagementException(
-                                "Key Manager Type " + keyManagerConfigurationDTO.getType() + " is invalid.",
-                                ExceptionCodes.INVALID_KEY_MANAGER_TYPE);
-                    }
-                    List<String> missingRequiredConfigurations = new ArrayList<>();
-                    for (KeyManagerConfigurationsDto.ConfigurationDto configurationDto :
-                            keyManagerDeploymentConfiguration
-                            .getConnectionConfigurationDtoList()) {
-                        if (configurationDto.isRequired()) {
-                            if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                                    .containsKey(configurationDto.getName())) {
-                                if (StringUtils.isNotEmpty(configurationDto.getDefaultValue())) {
-                                    keyManagerConfigurationDTO.getAdditionalProperties().put(configurationDto.getName(),
-                                            configurationDto.getDefaultValue());
-                                }
-                                missingRequiredConfigurations.add(configurationDto.getName());
+        KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
+                .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
+        if (keyManagerConnectorConfiguration != null) {
+            if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
+                List<String> missingRequiredConfigurations = new ArrayList<>();
+                for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration
+                        .getConnectionConfigurations()) {
+                    if (configurationDto.isRequired()) {
+                        if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                                .containsKey(configurationDto.getName())) {
+                            if (StringUtils.isNotEmpty(configurationDto.getDefaultValue())) {
+                                keyManagerConfigurationDTO.getAdditionalProperties().put(configurationDto.getName(),
+                                        configurationDto.getDefaultValue());
                             }
+                            missingRequiredConfigurations.add(configurationDto.getName());
                         }
                     }
-                    if (!missingRequiredConfigurations.isEmpty()){
-                        throw new APIManagementException("Key Manager Configuration value for " + String.join(",",
-                                missingRequiredConfigurations)  + " is/are required",
-                                ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING);
-                    }
+                }
+                if (!missingRequiredConfigurations.isEmpty()) {
+                    throw new APIManagementException("Key Manager Configuration value for " + String.join(",",
+                            missingRequiredConfigurations) + " is/are required",
+                            ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING);
                 }
             }
+        } else {
+            throw new APIManagementException(
+                    "Key Manager Type " + keyManagerConfigurationDTO.getType() + " is invalid.",
+                    ExceptionCodes.INVALID_KEY_MANAGER_TYPE);
         }
     }
 }

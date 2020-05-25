@@ -6,8 +6,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerApplicationConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerInfoDTO;
@@ -84,12 +85,11 @@ public class KeyManagerMappingUtil {
     private static List<KeyManagerApplicationConfigurationDTO> fromKeyManagerConfigurationDto(String type) {
 
         List<KeyManagerApplicationConfigurationDTO> keyManagerApplicationConfigurationDTOS = new ArrayList<>();
-        KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerConfigurationsByConnectorType =
-                APIUtil.getKeyManagerConfigurationsByConnectorType(type);
-        if (keyManagerConfigurationsByConnectorType != null &&
-                keyManagerConfigurationsByConnectorType.getApplicationConfigurationDtoList() != null) {
-            for (KeyManagerConfigurationsDto.ConfigurationDto configurationDto : keyManagerConfigurationsByConnectorType
-                    .getApplicationConfigurationDtoList()) {
+        KeyManagerConnectorConfiguration keyManagerConnectorConfiguration =
+                APIUtil.getKeyManagerConnectorConfigurationsByConnectorType(type);
+        if (keyManagerConnectorConfiguration != null &&
+                keyManagerConnectorConfiguration.getApplicationConfigurations() != null) {
+            for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration.getApplicationConfigurations()) {
                 KeyManagerApplicationConfigurationDTO keyManagerApplicationConfigurationDTO =
                         new KeyManagerApplicationConfigurationDTO();
                 keyManagerApplicationConfigurationDTO.setName(configurationDto.getName());

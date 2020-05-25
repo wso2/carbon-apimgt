@@ -149,8 +149,10 @@ public class JWTValidatorImpl implements JWTValidator {
         jwtValidationInfo.setIssuedTime(jwtClaimsSet.getIssueTime().getTime());
         jwtValidationInfo.setUser(jwtClaimsSet.getSubject());
         jwtValidationInfo.setJti(jwtClaimsSet.getJWTID());
-        jwtValidationInfo.setScopes(Arrays.asList(jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.SCOPE)
-                .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER)));
+        if(jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.SCOPE) != null){
+            jwtValidationInfo.setScopes(Arrays.asList(jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.SCOPE)
+                    .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER)));
+        }
     }
 
     protected Cache getJWKSCache() {
