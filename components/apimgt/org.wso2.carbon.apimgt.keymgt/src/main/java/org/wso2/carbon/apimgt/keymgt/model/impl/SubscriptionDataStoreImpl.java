@@ -77,10 +77,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.applicationKeyMappingMap = new ConcurrentHashMap<>();
         this.applicationMap = new ConcurrentHashMap<>();
         this.apiMap = new ConcurrentHashMap<>();
-//        this.policyMap = new ConcurrentHashMap<>();
         this.subscriptionPolicyMap = new ConcurrentHashMap<>();
         this.appPolicyMap = new ConcurrentHashMap<>();
-//        this.apiPolicyMap = new ConcurrentHashMap<>();
         this.subscriptionMap = new ConcurrentHashMap<>();
         this.subscriberMap = new ConcurrentHashMap<>();
         initializeLoadingTasks();

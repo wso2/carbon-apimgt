@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.api;
 
 public class InMemorySubscriptionValidationConstants {
 
-    public static final String APPLICATION_LOAD_SQL =
+    public static final String GET_ALL_APPLICATIONS_SQL =
             " SELECT " +
                     "   APP.APPLICATION_ID AS APP_ID," +
                     "   APP.NAME AS NAME," +
@@ -34,7 +34,7 @@ public class InMemorySubscriptionValidationConstants {
                     " WHERE " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID ";
 
-    public static final String SUBSCRIPTION_LOAD_SQL =
+    public static final String GET_ALL_SUBSCRIPTIONS_SQL =
             "SELECT " +
                     "   SUBSCRIPTION_ID AS SUB_ID," +
                     "   TIER_ID AS TIER," +
@@ -56,7 +56,7 @@ public class InMemorySubscriptionValidationConstants {
                     " WHERE " +
                     "   SUBSCRIPTION_ID = ? ";
 
-    public static final String SUBSCRIPTION_POLICY_LOAD_SQL =
+    public static final String GET_ALL_SUBSCRIPTION_POLICIES_SQL =
             "SELECT " +
                     "   POLICY_ID," +
                     "   NAME," +
@@ -68,7 +68,7 @@ public class InMemorySubscriptionValidationConstants {
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION";
 
-    public static final String APPLICATION_POLICY_LOAD_SQL =
+    public static final String GET_ALL_APPLICATION_POLICIES_SQL =
             "SELECT " +
                     "   POLICY_ID," +
                     "   NAME," +
@@ -77,7 +77,7 @@ public class InMemorySubscriptionValidationConstants {
                     "FROM " +
                     "   AM_POLICY_APPLICATION";
 
-    public static final String APIS_LOAD_SQL =
+    public static final String GET_ALL_APIS_SQL =
             "SELECT " +
                     " API_ID," +
                     " API_PROVIDER," +
@@ -88,7 +88,7 @@ public class InMemorySubscriptionValidationConstants {
                     " FROM " +
                     "   AM_API";
 
-    public static final String AM_KEY_MAPPINGS =
+    public static final String GET_ALL_AM_KEY_MAPPINGS_SQL =
             "SELECT " +
                     "   APPLICATION_ID," +
                     "   CONSUMER_KEY," +
@@ -97,7 +97,7 @@ public class InMemorySubscriptionValidationConstants {
                     " FROM " +
                     "   AM_APPLICATION_KEY_MAPPING";
 
-    public static final String AM_KEY_MAPPING =
+    public static final String GET_AM_KEY_MAPPING_SQL =
             "SELECT " +
                     "   APPLICATION_ID," +
                     "   CONSUMER_KEY," +
@@ -109,7 +109,7 @@ public class InMemorySubscriptionValidationConstants {
                     "APPLICATION_ID = ? " +
                     "AND KEY_TYPE = ? ";
 
-    public static final String AM_KEY_MAPPING_BY_CONSUMERKAY =
+    public static final String GET_AM_KEY_MAPPING_BY_CONSUMERKEY_SQL =
             "SELECT " +
                     "   APPLICATION_ID," +
                     "   CONSUMER_KEY," +
@@ -120,7 +120,7 @@ public class InMemorySubscriptionValidationConstants {
                     " WHERE " +
                     "CONSUMER_KEY = ? ";
 
-    public static final String TENANT_APPLICATION_LOAD_SQL =
+    public static final String GET_TENANT_APPLICATIONS_SQL =
             " SELECT " +
                     "   APP.APPLICATION_ID AS APP_ID," +
                     "   APP.NAME AS NAME," +
@@ -149,7 +149,7 @@ public class InMemorySubscriptionValidationConstants {
                     " WHERE " +
                     "   APPLICATION_ID = ? ";
 
-    public static final String TENANT_SUBSCRIPTION_LOAD_SQL =
+    public static final String GET_TENANT_SUBSCRIPTIONS_SQL =
             "SELECT " +
                     "   SUBS.SUBSCRIPTION_ID AS SUB_ID," +
                     "   SUBS.TIER_ID AS TIER," +
@@ -166,7 +166,7 @@ public class InMemorySubscriptionValidationConstants {
                     "   SUBS.SUBSCRIPTION_ID = APP.SUBSCRIPTION_ID AND " +
                     "   SUB.TENANT_ID = ? ";
 
-    public static final String TENANT_SUBSCRIPTION_POLICY_LOAD_SQL =
+    public static final String GET_TENANT_SUBSCRIPTION_POLICIES_SQL =
             "SELECT " +
                     "   POLICY_ID," +
                     "   NAME," +
@@ -193,7 +193,7 @@ public class InMemorySubscriptionValidationConstants {
                     " WHERE " +
                     "   POLICY_ID = ? ";
 
-    public static final String TENANT_APPLICATION_POLICY_LOAD_SQL =
+    public static final String GET_TENANT_APPLICATION_POLICIES_SQL =
             "SELECT " +
                     "   POLICY_ID," +
                     "   NAME," +
@@ -215,7 +215,7 @@ public class InMemorySubscriptionValidationConstants {
                     " WHERE " +
                     "   POLICY_ID = ? ";
 
-    public static final String TENANT_API_LOAD_SQL =
+    public static final String GET_TENANT_APIS_SQL =
             "SELECT " +
                     " API_ID," +
                     " API_PROVIDER," +
@@ -226,7 +226,7 @@ public class InMemorySubscriptionValidationConstants {
                     " FROM " +
                     "   AM_API";
 
-    public static final String API_LOAD_SQL =
+    public static final String GET_API_SQL =
             "SELECT " +
                     " API_ID," +
                     " API_PROVIDER," +
@@ -239,7 +239,7 @@ public class InMemorySubscriptionValidationConstants {
                     " WHERE " +
                     "API_ID = ?";
 
-    public static final String TENANT_AM_KEY_MAPPING =
+    public static final String GET_TENANT_AM_KEY_MAPPING_SQL =
             "SELECT " +
                     "   MAPPING.APPLICATION_ID," +
                     "   MAPPING.CONSUMER_KEY," +
