@@ -18,6 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class SettingsDTO   {
   
     private List<String> scopes = new ArrayList<>();
+    private Boolean analyticsEnabled = null;
 
   /**
    **/
@@ -36,6 +37,24 @@ public class SettingsDTO   {
     this.scopes = scopes;
   }
 
+  /**
+   * To determine whether analytics is enabled or not
+   **/
+  public SettingsDTO analyticsEnabled(Boolean analyticsEnabled) {
+    this.analyticsEnabled = analyticsEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "To determine whether analytics is enabled or not")
+  @JsonProperty("analyticsEnabled")
+  public Boolean isAnalyticsEnabled() {
+    return analyticsEnabled;
+  }
+  public void setAnalyticsEnabled(Boolean analyticsEnabled) {
+    this.analyticsEnabled = analyticsEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -46,12 +65,13 @@ public class SettingsDTO   {
       return false;
     }
     SettingsDTO settings = (SettingsDTO) o;
-    return Objects.equals(scopes, settings.scopes);
+    return Objects.equals(scopes, settings.scopes) &&
+        Objects.equals(analyticsEnabled, settings.analyticsEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes);
+    return Objects.hash(scopes, analyticsEnabled);
   }
 
   @Override
@@ -60,6 +80,7 @@ public class SettingsDTO   {
     sb.append("class SettingsDTO {\n");
     
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

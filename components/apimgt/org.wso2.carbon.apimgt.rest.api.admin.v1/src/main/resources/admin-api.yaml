@@ -2940,7 +2940,7 @@ paths:
 ######################################################
   /settings:
 #-----------------------------------------------------
-# Retrieve store settings
+# Retrieve admin settings
 #-----------------------------------------------------
     get:
       summary: Retreive admin settings
@@ -4099,6 +4099,10 @@ definitions:
         type: array
         items:
           type: string
+      analyticsEnabled:
+        type: boolean
+        description: To determine whether analytics is enabled or not
+        example: false
 
 #-----------------------------------------------------
 # END-OF-FILE

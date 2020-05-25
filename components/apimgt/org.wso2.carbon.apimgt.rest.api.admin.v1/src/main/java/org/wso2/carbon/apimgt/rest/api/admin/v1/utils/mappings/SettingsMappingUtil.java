@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -44,10 +45,9 @@ public class SettingsMappingUtil {
      * @throws APIManagementException
      */
     public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable) throws APIManagementException {
-        //TODO: Complete the function once the full requirement is obtained
-        //Currently returns only list of scopes
         SettingsDTO settingsDTO = new SettingsDTO();
         settingsDTO.setScopes(GetScopeList());
+        settingsDTO.setAnalyticsEnabled(APIUtil.isAnalyticsEnabled());
         return settingsDTO;
     }
 
