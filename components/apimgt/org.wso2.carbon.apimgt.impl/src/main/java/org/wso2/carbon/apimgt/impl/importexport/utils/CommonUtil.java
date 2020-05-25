@@ -28,7 +28,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
@@ -76,12 +76,12 @@ public class CommonUtil {
      *
      * @throws APIImportExportException If an error occurs while creating temporary location
      */
-    public static File createTempDirectory(API apiToReturn) throws APIImportExportException {
+    public static File createTempDirectory(Identifier identifier) throws APIImportExportException {
 
         String currentDirectory = System.getProperty(APIConstants.JAVA_IO_TMPDIR);
         String createdDirectories;
-        if (apiToReturn != null) {
-            createdDirectories = File.separator + apiToReturn.getId().toString() + File.separator;
+        if (identifier != null) {
+            createdDirectories = File.separator + identifier.toString() + File.separator;
         } else {
             createdDirectories = File.separator + RandomStringUtils
                     .randomAlphanumeric(APIImportExportConstants.TEMP_FILENAME_LENGTH) + File.separator;

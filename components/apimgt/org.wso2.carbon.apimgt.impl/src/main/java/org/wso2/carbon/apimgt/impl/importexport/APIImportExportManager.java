@@ -103,7 +103,7 @@ public class APIImportExportManager {
             throws APIImportExportException {
 
         //create temp location for storing API data
-        File exportFolder = CommonUtil.createTempDirectory(apiToReturn);
+        File exportFolder = CommonUtil.createTempDirectory(apiToReturn.getId());
         String exportAPIBasePath = exportFolder.toString();
         //Retrieve the API and related artifacts and populate the api folder in the temp location
         APIExportUtil.retrieveApiToExport(exportAPIBasePath, apiToReturn, apiProvider, loggedInUsername,
@@ -124,7 +124,7 @@ public class APIImportExportManager {
             throws APIImportExportException {
 
         // Create temp location for storing API Product data
-        File exportFolder = CommonUtil.createTempDirectory();
+        File exportFolder = CommonUtil.createTempDirectory(apiProductToReturn.getId());
         String exportAPIProductBasePath = exportFolder.toString();
         // Retrieve the API Product and related artifacts and populate the api folder in the temp location
         APIProductExportUtil.retrieveApiProductToExport(exportAPIProductBasePath, apiProductToReturn, apiProvider, loggedInUsername,
@@ -172,7 +172,7 @@ public class APIImportExportManager {
                                         Boolean overwriteAPIs, Boolean isImportAPIs)
             throws APIImportExportException {
         // Temporary directory is used to create the required folders
-        File importFolder = CommonUtil.createTempDirectory();
+        File importFolder = CommonUtil.createTempDirectory(null);
         String uploadFileName = APIImportExportConstants.UPLOAD_FILE_NAME;
         String absolutePath = importFolder.getAbsolutePath() + File.separator;
         CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
