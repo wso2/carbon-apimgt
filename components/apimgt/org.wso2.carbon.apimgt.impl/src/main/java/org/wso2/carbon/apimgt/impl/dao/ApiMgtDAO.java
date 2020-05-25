@@ -8626,7 +8626,7 @@ public class ApiMgtDAO {
                     .prepareStatement(SQLConstants.KeyManagerSqlConstants.DELETE_KEY_MANAGER)) {
                 preparedStatement.setString(1, id);
                 preparedStatement.setString(2, tenantDomain);
-                preparedStatement.executeUpdate();
+                preparedStatement.execute();
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();

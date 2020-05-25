@@ -1264,8 +1264,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (keyManager.equals(keyManagerConfigurationDTO.getName())) {
                         selectedKeyManager = keyManagerConfigurationDTO;
                         break;
-                    } else {
-                        configuredMissingKeyManagers.add(keyManager);
                     }
                 }
                 if (selectedKeyManager == null) {

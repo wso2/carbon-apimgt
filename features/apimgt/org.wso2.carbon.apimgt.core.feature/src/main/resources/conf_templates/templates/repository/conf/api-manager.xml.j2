@@ -1111,52 +1111,6 @@
          {% if apim.key_manager.connector.service_url is defined %}
         <InitDelay>{{apim.key_manager.connector.init_delay}}</InitDelay>
           {% endif %}
-     {% for key_manager in apim.key_manager.connector %}
-        <KeyManager type = "{{key_manager.type}}">
-        <Implementation>{{key_manager.implementation}}</Implementation>
-        {% if key_manager.jwt_validator is defined %}
-        <JWTValidatorImplementation>{{key_manager.jwt_validator}}</JWTValidatorImplementation>
-        {% endif %}
-        <AdditionalConfigurations>
-        <ConnectionConfigurations>
-        {% for connection_configuration in key_manager.configuration%}
-          <ConnectionConfiguration>
-            <name>{{connection_configuration.name}}</name>
-            <type>{{connection_configuration.type}}</type>
-            <required>{{connection_configuration.required}}</required>
-            <password>{{connection_configuration.mask}}</password>
-            <label>{{connection_configuration.label}}</label>
-            <default>{{connection_configuration.default}}</default>
-            <tooltip>{{connection_configuration.tooltip}}</tooltip>
-            <values>
-            {% for value in connection_configuration.values%}
-            <value>{{value}}</value>
-            {% endfor %}
-	    </values>
-          </ConnectionConfiguration>
-          {% endfor %}
-        </ConnectionConfigurations>
-        <ApplicationConfigurations>
-        {% for application_configuration in key_manager.application_configuration %}
-          <ApplicationConfiguration>
-            <name>{{application_configuration.name}}</name>
-            <type>{{application_configuration.type}}</type>
-            <required>{{application_configuration.required}}</required>
-            <password>{{application_configuratio.mask}}</password>
-            <label>{{application_configuration.label}}</label>
-            <default>{{application_configuration.default}}</default>
-            <tooltip>{{application_configuration.tooltip}}</tooltip>
-            <values>
-            {% for value in application_configuration.values %}
-            <value>{{value}}</value>
-            {% endfor %}
-	    </values>
-          </ApplicationConfiguration>
-          {% endfor %}
-         </ApplicationConfigurations>
-        </AdditionalConfigurations>
-        </KeyManager>
-          {% endfor %}
          <ConfigurationRetriever>
              <transport.jms.ConnectionFactoryJNDIName>keymanager</transport.jms.ConnectionFactoryJNDIName>
              <transport.jms.DestinationType>TopicConnectionFactory</transport.jms.DestinationType>

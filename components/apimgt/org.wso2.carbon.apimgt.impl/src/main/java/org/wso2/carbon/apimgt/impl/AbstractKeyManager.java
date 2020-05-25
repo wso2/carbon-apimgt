@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -35,10 +36,12 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
+import org.wso2.carbon.apimgt.impl.dto.TokenHandlingDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.util.ArrayList;
@@ -172,47 +175,63 @@ public abstract class AbstractKeyManager implements KeyManager {
     @Override
     public boolean canHandleToken(String accessToken) throws APIManagementException {
 
-        Object enabledTokenValidation = configuration.getParameter(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION);
-        if (enabledTokenValidation != null && (Boolean) enabledTokenValidation) {
-            Object tokenHandlingScript = configuration.getParameter(APIConstants.KeyManager.VALIDATION_VALUE);
-            Object tokenHandlingType = configuration.getParameter(APIConstants.KeyManager.VALIDATION_TYPE);
-            if (APIConstants.KeyManager.VALIDATION_REFERENCE.equals(tokenHandlingType)) {
-                if (tokenHandlingScript != null && StringUtils.isNotEmpty((CharSequence) tokenHandlingScript)) {
-                    Pattern pattern = Pattern.compile((String) tokenHandlingScript);
-                    Matcher matcher = pattern.matcher(accessToken);
-                    return matcher.find();
-                }
-            } else if (APIConstants.KeyManager.VALIDATION_JWT.equals(tokenHandlingType) &&
-                    accessToken.contains(APIConstants.DOT)) {
-                Map<String, Map<String, String>> validationJson = (Map) tokenHandlingScript;
-                try {
-                    SignedJWT signedJWT = SignedJWT.parse(accessToken);
-                    JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
-                    for (Map.Entry<String, Map<String, String>> entry : validationJson.entrySet()) {
-                        if (APIConstants.KeyManager.VALIDATION_ENTRY_JWT_BODY.equals(entry.getKey())) {
-                            for (Map.Entry<String, String> e : entry.getValue().entrySet()) {
-                                String key = e.getKey();
-                                String value = e.getValue();
-                                Object claimValue = jwtClaimsSet.getClaim(key);
-                                if (claimValue == null) {
-                                    return false;
-                                }
-                                Pattern pattern = Pattern.compile(value);
-                                Matcher matcher = pattern.matcher((String) claimValue);
-                                if (matcher.find()) {
-                                    return true;
+        boolean result = false;
+        boolean canHandle = false;
+        Object tokenHandlingScript = configuration.getParameter(APIConstants.KeyManager.VALIDATION_VALUE);
+        if (tokenHandlingScript != null && StringUtils.isNotEmpty((String) tokenHandlingScript)) {
+            TokenHandlingDto[] tokenHandlers = new Gson().fromJson(
+                    (String) tokenHandlingScript, TokenHandlingDto[].class);
+            if (tokenHandlers.length == 0) {
+                return true;
+            }
+            for (TokenHandlingDto tokenHandler : tokenHandlers) {
+                if (tokenHandler.getEnable().booleanValue()) {
+                    if (TokenHandlingDto.TypeEnum.REFERENCE.equals(tokenHandler.getType())) {
+                        if (tokenHandler.getValue() != null &&
+                                StringUtils.isNotEmpty(String.valueOf(tokenHandler.getValue()))) {
+                            Pattern pattern = Pattern.compile((String) tokenHandler.getValue());
+                            Matcher matcher = pattern.matcher(accessToken);
+                            canHandle = matcher.find();
+                        }
+                    } else if (TokenHandlingDto.TypeEnum.JWT.equals(tokenHandler.getType()) &&
+                            accessToken.contains(APIConstants.DOT)) {
+                        Map<String, Map<String, String>> validationJson =
+                                (Map<String, Map<String, String>>) tokenHandler.getValue();
+                        try {
+                            SignedJWT signedJWT = SignedJWT.parse(accessToken);
+                            JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
+                            for (Map.Entry<String, Map<String, String>> entry : validationJson.entrySet()) {
+                                if (APIConstants.KeyManager.VALIDATION_ENTRY_JWT_BODY.equals(entry.getKey())) {
+                                    boolean state = false;
+                                    for (Map.Entry<String, String> e : entry.getValue().entrySet()) {
+                                        String key = e.getKey();
+                                        String value = e.getValue();
+                                        Object claimValue = jwtClaimsSet.getClaim(key);
+                                        if (claimValue != null) {
+                                            Pattern pattern = Pattern.compile(value);
+                                            Matcher matcher = pattern.matcher((String) claimValue);
+                                            state = matcher.find();
+                                        } else {
+                                            state = false;
+                                        }
+                                    }
+                                    canHandle = state;
                                 }
                             }
+                        } catch (java.text.ParseException e) {
+                            log.warn("Error while parsing Token", e);
                         }
                     }
-                } catch (java.text.ParseException e) {
-                    throw new APIManagementException("Error while parsing jwt", e);
+                    if (canHandle) {
+                        result = true;
+                        break;
+                    }
                 }
             }
         } else {
-            return true;
+            result = true;
         }
-        return false;
+        return result;
     }
 
     @Override
@@ -234,41 +253,38 @@ public abstract class AbstractKeyManager implements KeyManager {
 
     protected void validateOAuthAppCreationProperties(OAuthApplicationInfo oAuthApplicationInfo)
             throws APIManagementException {
+
         String type = getType();
         if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(type)) {
-            APIManagerConfiguration apiManagerConfiguration =
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                            .getAPIManagerConfiguration();
-            if (apiManagerConfiguration != null) {
-                List<String> missedRequiredValues = new ArrayList<>();
-                KeyManagerConfigurationsDto keyManagerConfigurationsDto =
-                        apiManagerConfiguration.getKeyManagerConfigurationsDto();
-                if (keyManagerConfigurationsDto != null) {
-                    Map<String, KeyManagerConfigurationsDto.KeyManagerConfigurationDto> keyManagerConfiguration =
-                            keyManagerConfigurationsDto.getKeyManagerConfiguration();
-                    KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerConfigurationDto =
-                            keyManagerConfiguration.get(type);
-                    List<KeyManagerConfigurationsDto.ConfigurationDto> applicationConfigurationDtoList =
-                            keyManagerConfigurationDto.getApplicationConfigurationDtoList();
-                    Object additionalProperties = oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
-                    if (additionalProperties != null) {
-                        JsonObject additionalPropertiesJson = (JsonObject) new JsonParser().parse((String) additionalProperties);
-                        for (KeyManagerConfigurationsDto.ConfigurationDto configurationDto :
-                                applicationConfigurationDtoList) {
-                            JsonElement value = additionalPropertiesJson.get(configurationDto.getName());
-                            if (value == null) {
-                                if (configurationDto.isRequired()) {
-                                    missedRequiredValues.add(configurationDto.getName());
-                                }
+
+            List<String> missedRequiredValues = new ArrayList<>();
+            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration =
+                    ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfiguration(type);
+            if (keyManagerConnectorConfiguration != null) {
+                List<ConfigurationDto> applicationConfigurationDtoList =
+                        keyManagerConnectorConfiguration.getApplicationConfigurations();
+                Object additionalProperties =
+                        oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+                if (additionalProperties != null) {
+                    JsonObject additionalPropertiesJson =
+                            (JsonObject) new JsonParser().parse((String) additionalProperties);
+                    for (ConfigurationDto configurationDto : applicationConfigurationDtoList) {
+                        JsonElement value = additionalPropertiesJson.get(configurationDto.getName());
+                        if (value == null) {
+                            if (configurationDto.isRequired()) {
+                                missedRequiredValues.add(configurationDto.getName());
                             }
                         }
-                        if (!missedRequiredValues.isEmpty()) {
-                            throw new APIManagementException("Missing required properties to create/update oauth " +
-                                    "application",
-                                    ExceptionCodes.KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION);
-                        }
+                    }
+                    if (!missedRequiredValues.isEmpty()) {
+                        throw new APIManagementException("Missing required properties to create/update oauth " +
+                                "application",
+                                ExceptionCodes.KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION);
                     }
                 }
+            } else {
+                throw new APIManagementException("Invalid Key Manager Type " + type,
+                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
             }
         }
     }

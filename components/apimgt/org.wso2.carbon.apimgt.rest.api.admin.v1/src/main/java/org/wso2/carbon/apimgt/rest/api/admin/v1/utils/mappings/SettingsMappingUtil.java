@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
@@ -62,11 +64,11 @@ public class SettingsMappingUtil {
 
     private List<SettingsKeyManagerConfigurationDTO> getSettingsKeyManagerConfigurationDTOList() {
         List<SettingsKeyManagerConfigurationDTO> list = new ArrayList<>();
-        Map<String, KeyManagerConfigurationsDto.KeyManagerConfigurationDto> keyManagerConfigurations =
+        Map<String, KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap =
                 APIUtil.getKeyManagerConfigurations();
-        keyManagerConfigurations.forEach((keyManagerName, keyManagerConfiguration) -> {
+        keyManagerConnectorConfigurationMap.forEach((keyManagerName, keyManagerConfiguration) -> {
             list.add(fromKeyManagerConfigurationToSettingsKeyManagerConfigurationDTO(keyManagerName,
-                    keyManagerConfiguration.getConnectionConfigurationDtoList()));
+                    keyManagerConfiguration.getConnectionConfigurations()));
 
         });
         return list;
@@ -91,13 +93,13 @@ public class SettingsMappingUtil {
 
     private static SettingsKeyManagerConfigurationDTO fromKeyManagerConfigurationToSettingsKeyManagerConfigurationDTO(
             String keyManagerName,
-            List<KeyManagerConfigurationsDto.ConfigurationDto> connectionConfigurationDtoList) {
+            List<ConfigurationDto> connectionConfigurationDtoList) {
 
         SettingsKeyManagerConfigurationDTO settingsKeyManagerConfigurationDTO =
                 new SettingsKeyManagerConfigurationDTO();
         settingsKeyManagerConfigurationDTO.setType(keyManagerName);
         if (connectionConfigurationDtoList != null) {
-            for (KeyManagerConfigurationsDto.ConfigurationDto configurationDto : connectionConfigurationDtoList) {
+            for (ConfigurationDto configurationDto : connectionConfigurationDtoList) {
                 KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
                 keyManagerConfigurationDTO.setName(configurationDto.getName());
                 keyManagerConfigurationDTO.setLabel(configurationDto.getLabel());

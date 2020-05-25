@@ -6,7 +6,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -17,6 +16,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenValidationDTO;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,33 +132,12 @@ public class KeyManagerMappingUtil {
             jsonObject.remove(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
         }
         JsonElement selfValidateJWTElement = jsonObject.get(APIConstants.KeyManager.SELF_VALIDATE_JWT);
-        JsonElement validationEnableElement = jsonObject.get(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION);
-        JsonElement validationTypeElement = jsonObject.get(APIConstants.KeyManager.VALIDATION_TYPE);
         JsonElement validationValueElement = jsonObject.get(APIConstants.KeyManager.VALIDATION_VALUE);
-        TokenValidationDTO tokenValidationDTO = new TokenValidationDTO();
-        if (validationEnableElement != null) {
-            tokenValidationDTO.setEnable(validationEnableElement.getAsBoolean());
-            jsonObject.remove(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION);
-        }
-        if (validationTypeElement != null) {
-            if (APIConstants.KeyManager.VALIDATION_JWT.equals(validationTypeElement.getAsString())) {
-                tokenValidationDTO.setType(TokenValidationDTO.TypeEnum.JWT);
-            } else if (APIConstants.KeyManager.VALIDATION_REFERENCE.equals(validationTypeElement.getAsString())) {
-                tokenValidationDTO.setType(TokenValidationDTO.TypeEnum.REFERENCE);
-            } else if (APIConstants.KeyManager.VALIDATION_CUSTOM.equals(validationTypeElement.getAsString())) {
-                tokenValidationDTO.setType(TokenValidationDTO.TypeEnum.CUSTOM);
-            }
-            jsonObject.remove(APIConstants.KeyManager.VALIDATION_TYPE);
-        }
         if (validationValueElement instanceof JsonPrimitive) {
-            tokenValidationDTO.setValue(validationValueElement.getAsString());
-            jsonObject.remove(APIConstants.KeyManager.VALIDATION_VALUE);
-        }else if (validationValueElement instanceof JsonObject){
-            Map<String, Object> validationValue = new Gson().fromJson(validationValueElement, Map.class);
-            tokenValidationDTO.setValue(validationValue);
+            keyManagerDTO.setTokenValidation(Arrays.asList(new Gson().fromJson(validationValueElement.getAsString(),
+                    TokenValidationDTO[].class)));
             jsonObject.remove(APIConstants.KeyManager.VALIDATION_VALUE);
         }
-        keyManagerDTO.setTokenValidation(tokenValidationDTO);
         if (selfValidateJWTElement != null) {
             keyManagerDTO.setEnableSelfValidationJWT(selfValidateJWTElement.getAsBoolean());
         }
@@ -233,21 +212,10 @@ public class KeyManagerMappingUtil {
                 .put(APIConstants.KeyManager.ENABLE_TOKEN_ENCRYPTION, keyManagerDTO.isEnableTokenEncryption());
         additionalProperties
                 .put(APIConstants.KeyManager.SELF_VALIDATE_JWT, keyManagerDTO.isEnableSelfValidationJWT());
-        TokenValidationDTO tokenValidation = keyManagerDTO.getTokenValidation();
-        if (tokenValidation != null) {
+        List<TokenValidationDTO> tokenValidationDTOList = keyManagerDTO.getTokenValidation();
+        if (tokenValidationDTOList != null && !tokenValidationDTOList.isEmpty()) {
             additionalProperties
-                    .put(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION, tokenValidation.isEnable());
-            if (TokenValidationDTO.TypeEnum.JWT.equals(tokenValidation.getType())) {
-                additionalProperties
-                        .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_JWT);
-            } else if (TokenValidationDTO.TypeEnum.REFERENCE.equals(tokenValidation.getType())) {
-                additionalProperties
-                        .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_REFERENCE);
-            }else{
-                additionalProperties
-                        .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_CUSTOM);
-            }
-            additionalProperties.put(APIConstants.KeyManager.VALIDATION_VALUE,tokenValidation.getValue());
+                    .put(APIConstants.KeyManager.VALIDATION_VALUE, new Gson().toJson(tokenValidationDTOList));
         }
         List<ClaimMappingEntryDTO> claimMapping = keyManagerDTO.getClaimMapping();
         if (claimMapping != null){

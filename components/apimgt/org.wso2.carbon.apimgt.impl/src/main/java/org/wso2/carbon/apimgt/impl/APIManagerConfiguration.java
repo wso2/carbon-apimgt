@@ -1519,68 +1519,6 @@ public class APIManagerConfiguration {
                         .setPassword(getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray());
             }
 
-            Iterator keyManagerElements = omElement.getChildrenWithLocalName(APIConstants.KeyManager.KEY_MANAGER);
-            while (keyManagerElements.hasNext()) {
-                KeyManagerConfigurationsDto.KeyManagerConfigurationDto keyManagerConfigurationDto =
-                        new KeyManagerConfigurationsDto.KeyManagerConfigurationDto();
-                OMElement keyManagerElement = (OMElement) keyManagerElements.next();
-                String type = keyManagerElement.getAttributeValue(new QName("type"));
-                if (StringUtils.isNotEmpty(type)) {
-                    OMElement keyManagerImplementation =
-                            keyManagerElement.getFirstChildWithName(new QName(APIConstants.KeyManager.IMPLEMENTATION));
-                    if (keyManagerImplementation != null &&
-                            StringUtils.isNotEmpty(keyManagerImplementation.getText())) {
-                        keyManagerConfigurationDto.setImplementationClass(keyManagerImplementation.getText());
-                    }
-                    OMElement jwtValidatorImplementation =
-                            keyManagerElement.getFirstChildWithName(
-                                    new QName(APIConstants.KeyManager.JWT_VALIDATOR_IMPLEMENTATION));
-                    if (jwtValidatorImplementation != null &&
-                            StringUtils.isNotEmpty(jwtValidatorImplementation.getText())) {
-                        keyManagerConfigurationDto
-                                .setJwtValidatorImplementationClass(jwtValidatorImplementation.getText());
-                    }
-                    OMElement additionalConfigurationElement =
-                            keyManagerElement
-                                    .getFirstChildWithName(new QName(APIConstants.KeyManager.ADDITIONAL_CONFIGURATION));
-                    if (additionalConfigurationElement != null) {
-                        OMElement connectionConfigurationsElement =
-                                additionalConfigurationElement.getFirstChildWithName(
-                                        new QName(APIConstants.KeyManager.CONNECTION_CONFIGURATIONS));
-                        if (connectionConfigurationsElement != null) {
-                            Iterator connectionConfigurations =
-                                    connectionConfigurationsElement
-                                            .getChildrenWithLocalName(APIConstants.KeyManager.CONNECTION_CONFIGURATION);
-                            if (connectionConfigurations != null) {
-                                while (connectionConfigurations.hasNext()) {
-                                    OMElement connectionConfiguration = (OMElement) connectionConfigurations.next();
-                                    KeyManagerConfigurationsDto.ConfigurationDto configurationDto =
-                                            getConfigurationDto(connectionConfiguration);
-                                    keyManagerConfigurationDto.addConnectionConfigurationDtoList(configurationDto);
-                                }
-                            }
-                        }
-                        OMElement applicationConfigurationsElement =
-                                additionalConfigurationElement.getFirstChildWithName(
-                                        new QName(APIConstants.KeyManager.APPLICATION_CONFIGURATIONS));
-                        if (applicationConfigurationsElement != null) {
-                            Iterator applicationConfigurations =
-                                    applicationConfigurationsElement
-                                            .getChildrenWithLocalName(
-                                                    APIConstants.KeyManager.APPLICATION_CONFIGURATION);
-                            if (applicationConfigurations != null) {
-                                while (applicationConfigurations.hasNext()) {
-                                    OMElement connectionConfiguration = (OMElement) applicationConfigurations.next();
-                                    KeyManagerConfigurationsDto.ConfigurationDto configurationDto =
-                                            getConfigurationDto(connectionConfiguration);
-                                    keyManagerConfigurationDto.addApplicationConfigurationDtoList(configurationDto);
-                                }
-                            }
-                        }
-                    }
-                    keyManagerConfigurationsDto.putKeyManagerConfigurationDto(type, keyManagerConfigurationDto);
-                }
-            }
             OMElement configurationRetrieverElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.CONFIGURATION_RETRIEVER));
             if (configurationRetrieverElement != null) {
@@ -1599,66 +1537,6 @@ public class APIManagerConfiguration {
         }
 
         this.keyManagerConfigurationsDto = keyManagerConfigurationsDto;
-    }
-
-    private KeyManagerConfigurationsDto.ConfigurationDto getConfigurationDto(OMElement omElement) {
-
-        KeyManagerConfigurationsDto.ConfigurationDto configurationDto =
-                new KeyManagerConfigurationsDto.ConfigurationDto();
-        OMElement nameElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.CONFIGURATION_NAME));
-        if (nameElement != null) {
-            configurationDto.setName(nameElement.getText());
-        }
-        OMElement typeElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.CONFIGURATION_TYPE));
-        if (nameElement != null) {
-            configurationDto.setType(typeElement.getText());
-        }
-        OMElement requiredElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.CONFIGURATION_REQUIRED));
-        if (requiredElement != null) {
-            configurationDto.setRequired(Boolean.parseBoolean(requiredElement.getText()));
-        }
-
-        OMElement maskElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.CONFIGURATION_MASK));
-        if (maskElement != null) {
-            configurationDto.setMask(Boolean.parseBoolean(maskElement.getText()));
-        }
-        OMElement labelElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.CONFIGURATION_LABEL));
-        if (labelElement != null) {
-            configurationDto.setLabel(labelElement.getText());
-        }
-        OMElement tooltipElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.CONFIGURATION_TOOL_TIP));
-        if (labelElement != null) {
-            configurationDto.setTooltip(tooltipElement.getText());
-        }
-        OMElement defaultElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.CONFIGURATION_DEFAULT));
-        if (defaultElement != null) {
-            configurationDto.setDefaultValue(defaultElement.getText());
-        }
-        OMElement multipleElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.CONFIGURATION_MULTIPLE));
-        if (multipleElement != null) {
-            configurationDto.setMultiple(Boolean.parseBoolean(multipleElement.getText()));
-        }
-        OMElement valuesElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.CONFIGURATION_VALUES));
-        if (valuesElement != null) {
-            Iterator values =
-                    valuesElement.getChildrenWithName(new QName(APIConstants.KeyManager.CONFIGURATION_VALUE));
-            if (values != null) {
-                while (values.hasNext()) {
-                    OMElement value = (OMElement) values.next();
-                    configurationDto.addValue(value.getText());
-                }
-            }
-        }
-        return configurationDto;
     }
 
     public JWTConfigurationDto getJwtConfigurationDto() {

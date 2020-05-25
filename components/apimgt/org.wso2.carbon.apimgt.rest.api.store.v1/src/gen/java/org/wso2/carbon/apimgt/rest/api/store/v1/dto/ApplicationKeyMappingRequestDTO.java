@@ -81,9 +81,8 @@ public enum KeyTypeEnum {
   }
 
   
-  @ApiModelProperty(required = true, value = "Consumer secret of the application")
+  @ApiModelProperty(value = "Consumer secret of the application")
   @JsonProperty("consumerSecret")
-  @NotNull
   public String getConsumerSecret() {
     return consumerSecret;
   }

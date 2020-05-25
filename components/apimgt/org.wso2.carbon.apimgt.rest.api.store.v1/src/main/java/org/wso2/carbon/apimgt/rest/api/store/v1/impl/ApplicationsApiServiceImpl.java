@@ -1014,6 +1014,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     if (additionalProperties != null) {
                         applicationKeyDTO.setAdditionalProperties(additionalProperties);
                     }
+                    applicationKeyDTO.setKeyMappingId(body.getKeyMappingId());
+                    applicationKeyDTO.setKeyManager(body.getKeyManager());
                     return Response.ok().entity(applicationKeyDTO).build();
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);

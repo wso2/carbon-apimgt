@@ -16,9 +16,8 @@
 
 package org.wso2.carbon.apimgt.impl.internal;
 
-import org.osgi.framework.BundleContext;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
@@ -55,6 +54,7 @@ public class ServiceReferenceHolder {
     private KeyManagerConfigurationService keyManagerConfigurationService;
     private OAuthServerConfiguration oauthServerConfiguration;
     private Map<String,JWTTransformer> jwtTransformerMap = new HashMap<>();
+    private Map<String,KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap  = new HashMap<>();
     private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
 
     public static ConfigurationContextService getContextService() {
@@ -180,6 +180,24 @@ public class ServiceReferenceHolder {
         return jwtTransformerMap.get(issuer);
     }
 
+    public void addKeyManagerConnectorConfiguration(String type,
+                                                    KeyManagerConnectorConfiguration keyManagerConnectorConfiguration) {
+        keyManagerConnectorConfigurationMap.put(type,keyManagerConnectorConfiguration);
+    }
+
+    public void removeKeyManagerConnectorConfiguration(String type) {
+        keyManagerConnectorConfigurationMap.remove(type);
+    }
+
+    public KeyManagerConnectorConfiguration getKeyManagerConnectorConfiguration(String type) {
+
+        return keyManagerConnectorConfigurationMap.get(type);
+    }
+
+    public Map<String, KeyManagerConnectorConfiguration> getKeyManagerConnectorConfigurations() {
+
+        return keyManagerConnectorConfigurationMap;
+    }
 
     public Map<String, List<Notifier>> getNotifiersMap() {
 
