@@ -26,8 +26,9 @@ import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.Policy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -52,7 +53,7 @@ public class SubscriptionValidationDAO {
         Map<Integer, API> apiMap = new HashMap<>();
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_ALL_APIS_SQL);
+                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_APIS_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
 
@@ -84,7 +85,7 @@ public class SubscriptionValidationDAO {
         ArrayList<Subscription> subscriptions = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_ALL_SUBSCRIPTIONS_SQL);
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_SUBSCRIPTIONS_SQL);
              ResultSet resultSet = ps.executeQuery();) {
 
             while (resultSet.next()) {
@@ -113,7 +114,7 @@ public class SubscriptionValidationDAO {
 
         ArrayList<Application> applications = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_ALL_APPLICATIONS_SQL);
+             PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_APPLICATIONS_SQL);
              ResultSet resultSet = ps.executeQuery();
         ) {
 
@@ -146,7 +147,7 @@ public class SubscriptionValidationDAO {
 
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_ALL_AM_KEY_MAPPINGS_SQL);
+                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_AM_KEY_MAPPINGS_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
 
@@ -176,7 +177,7 @@ public class SubscriptionValidationDAO {
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
-                        conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_ALL_SUBSCRIPTION_POLICIES_SQL);
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_SUBSCRIPTION_POLICIES_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
 
@@ -215,7 +216,7 @@ public class SubscriptionValidationDAO {
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
-                        conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_ALL_APPLICATION_POLICIES_SQL);
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_APPLICATION_POLICIES_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
 
@@ -244,10 +245,11 @@ public class SubscriptionValidationDAO {
     public static Map<String, API> getAllApis(int tenantId) {
 
         Map<String, API> apiMap = new HashMap<>();
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_TENANT_APIS_SQL);) {
-            ps.setInt(1, tenantId);
+                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APIS_SQL);) {
+            ps.setString(1, "%" + tenantDomain + "%");
             ResultSet resultSet = ps.executeQuery();
 
             while (resultSet.next()) {
@@ -278,7 +280,7 @@ public class SubscriptionValidationDAO {
 
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_API_SQL);) {
+                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL);) {
             ps.setInt(1, apiId);
             ResultSet resultSet = ps.executeQuery();
 
@@ -311,7 +313,7 @@ public class SubscriptionValidationDAO {
         ArrayList<Subscription> subscriptions = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_TENANT_SUBSCRIPTIONS_SQL);
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTIONS_SQL);
         ) {
             ps.setInt(1, tenantId);
 
@@ -342,7 +344,7 @@ public class SubscriptionValidationDAO {
 
         ArrayList<Application> applications = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_TENANT_APPLICATIONS_SQL);
+             PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATIONS_SQL);
         ) {
             ps.setInt(1, tenantId);
             ResultSet resultSet = ps.executeQuery();
@@ -374,7 +376,7 @@ public class SubscriptionValidationDAO {
         ;
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_TENANT_AM_KEY_MAPPING_SQL);) {
+                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_AM_KEY_MAPPING_SQL);) {
             ps.setInt(1, tenantId);
             ResultSet resultSet = ps.executeQuery();
 
@@ -403,7 +405,7 @@ public class SubscriptionValidationDAO {
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
-                        conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_TENANT_SUBSCRIPTION_POLICIES_SQL);
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTION_POLICIES_SQL);
         ) {
             ps.setInt(1, tenantId);
             ResultSet resultSet = ps.executeQuery();
@@ -440,7 +442,7 @@ public class SubscriptionValidationDAO {
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
-                        conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_TENANT_APPLICATION_POLICIES_SQL);) {
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATION_POLICIES_SQL);) {
             ps.setInt(1, tenantId);
             ResultSet resultSet = ps.executeQuery();
 
@@ -469,7 +471,7 @@ public class SubscriptionValidationDAO {
         Subscription subscription = new Subscription();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_SUBSCRIPTION_SQL);
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_SUBSCRIPTION_SQL);
         ) {
             ps.setInt(1, subscriptionId);
 
@@ -498,7 +500,7 @@ public class SubscriptionValidationDAO {
         Application application = new Application();
 
         try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_APPLICATION_BY_ID_SQL);
+             PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATION_BY_ID_SQL);
         ) {
             ps.setInt(1, applicationId);
             ResultSet resultSet = ps.executeQuery();
@@ -529,7 +531,7 @@ public class SubscriptionValidationDAO {
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
-                        conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_APPLICATION_POLICY_SQL);
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATION_POLICY_SQL);
         ) {
             ps.setInt(1, policyId);
             ResultSet resultSet = ps.executeQuery();
@@ -559,7 +561,7 @@ public class SubscriptionValidationDAO {
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
-                        conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_SUBSCRIPTION_POLICY_BY_ID_SQL);
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_SUBSCRIPTION_POLICY_BY_ID_SQL);
         ) {
             ps.setInt(1, policyId);
             ResultSet resultSet = ps.executeQuery();
@@ -592,7 +594,7 @@ public class SubscriptionValidationDAO {
         ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(InMemorySubscriptionValidationConstants.GET_AM_KEY_MAPPING_SQL);
+                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_SQL);
         ) {
             ps.setInt(1, appId);
             ps.setString(2, keyType);
@@ -620,7 +622,7 @@ public class SubscriptionValidationDAO {
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps = conn.prepareStatement(
-                        InMemorySubscriptionValidationConstants.GET_AM_KEY_MAPPING_BY_CONSUMERKEY_SQL);
+                        SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_SQL);
         ) {
             ps.setString(1, consumerKey);
             ResultSet resultSet = ps.executeQuery();

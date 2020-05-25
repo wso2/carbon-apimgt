@@ -53,6 +53,10 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     private static final Log log = LogFactory.getLog(SubscriptionDataLoaderImpl.class);
     private static SubscriptionValidationConfig subscriptionValidationConfig;
 
+    public static final int retrievalTimeoutInSeconds = 15;
+    public static final int retrievalRetries = 15;
+    public static final String UTF8 = "UTF-8";
+
     public SubscriptionDataLoaderImpl() {
 
         this.subscriptionValidationConfig = ServiceReferenceHolder.getInstance()
@@ -448,13 +452,13 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                     retry = false;
                 } catch (IOException ex) {
                     retryCount++;
-                    if (retryCount < InMemorySubscriptionValidationConstants.retrievalRetries) {
+                    if (retryCount < retrievalRetries) {
                         retry = true;
                         log.warn("Failed retrieving " + path + " from remote endpoint: " + ex.getMessage()
-                                + ". Retrying after " + InMemorySubscriptionValidationConstants.retrievalTimeoutInSeconds +
+                                + ". Retrying after " + retrievalTimeoutInSeconds +
                                 " seconds.");
                         try {
-                            Thread.sleep(InMemorySubscriptionValidationConstants.retrievalTimeoutInSeconds * 1000);
+                            Thread.sleep(retrievalTimeoutInSeconds * 1000);
                         } catch (InterruptedException e) {
                             // Ignore
                         }
@@ -467,7 +471,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                 log.error("Could not retrieve subscriptions for tenantId : " + tenantId);
                 throw new DataLoadingException("Error while retrieving subscription from " + path);
             }
-            return EntityUtils.toString(httpResponse.getEntity(), InMemorySubscriptionValidationConstants.UTF8);
+            return EntityUtils.toString(httpResponse.getEntity(), UTF8);
         }
         return null;
 
