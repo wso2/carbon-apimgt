@@ -88,8 +88,13 @@ public class WebsocketHandlerTestCase {
         Mockito.when(msg.content()).thenReturn(content);
         WebsocketHandler websocketHandler = new WebsocketHandler() {
             @Override
-            protected boolean isThrottled(ChannelHandlerContext ctx, WebSocketFrame msg) throws APIManagementException {
+            protected boolean isAllowed(ChannelHandlerContext ctx, WebSocketFrame msg) throws APIManagementException {
                 return true;
+            }
+
+            @Override
+            protected String getClientIp(ChannelHandlerContext ctx) {
+                return "192.168.0.100";
             }
         };
         WebsocketInboundHandler websocketInboundHandler = Mockito.mock(WebsocketInboundHandler.class);

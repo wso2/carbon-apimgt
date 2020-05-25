@@ -210,7 +210,19 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                     registryEntry.getDefinitionType() == null) {
                 RestApiUtil.handleBadRequest("Missing definitionType parameter", log);
             }
-            if (definitionFileInputStream == null || definitionFileDetail == null) {
+            if (definitionFileInputStream != null) {
+                // Retrieve definition from the file
+                byte[] definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
+                if (!isValidEndpointDefinition(null, definitionFileByteArray,
+                        registryEntry.getDefinitionType().toString())) {
+                    RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
+                            "the new registry entry with registry id: " + registryId, log);
+                } else {
+                    definitionFileByteArray = transformDefinitionContent(definitionFileByteArray,
+                            registryEntry.getDefinitionType());
+                    definitionFile = new ByteArrayInputStream(definitionFileByteArray);
+                }
+            } else if (registryEntry.getDefinitionUrl() != null) {
                 // Retrieve the endpoint definition from URL
                 try {
                     URL definitionURL = new URL(registryEntry.getDefinitionUrl());
@@ -226,17 +238,6 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                     RestApiUtil.handleInternalServerError("Error while reaching the " +
                             "definition url: " + registryEntry.getDefinitionUrl() + " given for the new " +
                             "Endpoint Registry with Registry Id: " + registryId, e, log);
-                }
-            } else {
-                byte[] definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
-                if (!isValidEndpointDefinition(null, definitionFileByteArray,
-                        registryEntry.getDefinitionType().toString())) {
-                    RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
-                            "the new registry entry with registry id: " + registryId, log);
-                } else {
-                    definitionFileByteArray = transformDefinitionContent(definitionFileByteArray,
-                            registryEntry.getDefinitionType());
-                    definitionFile = new ByteArrayInputStream(definitionFileByteArray);
                 }
             }
             EndpointRegistryEntry entryToAdd = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
@@ -366,7 +367,18 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 RestApiUtil.handleBadRequest("Missing definitionType of the registry " +
                         "entry with id: " + entryId, log);
             }
-            if (definitionFileInputStream == null || definitionFileDetail == null) {
+            if (definitionFileInputStream != null) {
+                // Retrieve definition from the file
+                byte[] definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
+                if (!isValidEndpointDefinition(null, definitionFileByteArray,
+                        registryEntry.getDefinitionType().toString())) {
+                    RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
+                            "the registry entry with id: " + entryId, log);
+                }
+                definitionFileByteArray = transformDefinitionContent(definitionFileByteArray,
+                        registryEntry.getDefinitionType());
+                definitionFile = new ByteArrayInputStream(definitionFileByteArray);
+            } else if (registryEntry.getDefinitionUrl() != null) {
                 // Retrieve the endpoint definition from URL
                 try {
                     URL definitionURL = new URL(registryEntry.getDefinitionUrl());
@@ -383,16 +395,6 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                             + registryEntry.getDefinitionUrl() + " given for the Endpoint Registry Entry with Id: "
                             + entryId, e, log);
                 }
-            } else {
-                byte[] definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
-                if (!isValidEndpointDefinition(null, definitionFileByteArray,
-                        registryEntry.getDefinitionType().toString())) {
-                    RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
-                            "the registry entry with id: " + entryId, log);
-                }
-                definitionFileByteArray = transformDefinitionContent(definitionFileByteArray,
-                        registryEntry.getDefinitionType());
-                definitionFile = new ByteArrayInputStream(definitionFileByteArray);
             }
             EndpointRegistryEntry entryToUpdate = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
                     entryId, definitionFile, endpointRegistry.getRegistryId());

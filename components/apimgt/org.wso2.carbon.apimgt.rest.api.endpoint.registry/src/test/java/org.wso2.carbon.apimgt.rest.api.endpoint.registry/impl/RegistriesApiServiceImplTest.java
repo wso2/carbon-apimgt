@@ -137,15 +137,8 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void getRegistryByUUID() throws Exception {
-        final String REGISTRY_UUID = "abc1";
-
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo.setOwner("admin");
-        endpointRegistryInfo.setRegistryId(1);
-        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo.setUuid(REGISTRY_UUID);
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfo);
@@ -175,23 +168,11 @@ public class RegistriesApiServiceImplTest {
     public void getRegistries() throws APIManagementException {
         List<EndpointRegistryInfo> endpointRegistryInfoList = new ArrayList<>();
 
-        EndpointRegistryInfo endpointRegistryInfo1 = new EndpointRegistryInfo();
-        endpointRegistryInfo1.setName("Endpoint Registry 1");
-        endpointRegistryInfo1.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo1.setOwner("admin");
-        endpointRegistryInfo1.setRegistryId(1);
-        endpointRegistryInfo1.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo1.setUuid("abc1");
-        endpointRegistryInfoList.add(endpointRegistryInfo1);
+        EndpointRegistryInfo endpointRegistryInfo1 = createRegistry("abc1", 1, "Endpoint Registry 1",
+                RegistryDTO.ModeEnum.READONLY, RegistryDTO.TypeEnum.WSO2, ADMIN_USERNAME);
 
-        EndpointRegistryInfo endpointRegistryInfo2 = new EndpointRegistryInfo();
-        endpointRegistryInfo2.setName("Endpoint Registry 2");
-        endpointRegistryInfo2.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo2.setOwner("admin");
-        endpointRegistryInfo2.setRegistryId(1);
-        endpointRegistryInfo2.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo2.setUuid("abc2");
-        endpointRegistryInfoList.add(endpointRegistryInfo2);
+        EndpointRegistryInfo endpointRegistryInfo2 = createRegistry("abc2", 2, "Endpoint Registry 2",
+                RegistryDTO.ModeEnum.READWRITE, RegistryDTO.TypeEnum.ETCD, ADMIN_USERNAME);
 
         Mockito.when(registryProvider.getEndpointRegistries(EndpointRegistryConstants.COLUMN_ID,
                 RestApiConstants.DEFAULT_SORT_ORDER, RestApiConstants.PAGINATION_LIMIT_DEFAULT,
@@ -214,16 +195,8 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void addRegistry() throws APIManagementException {
-        RegistryDTO payloadDTO = new RegistryDTO();
-        payloadDTO.setName("Endpoint Registry 1");
-        payloadDTO.setMode(RegistryDTO.ModeEnum.READONLY);
-        payloadDTO.setType(RegistryDTO.TypeEnum.WSO2);
-        payloadDTO.setOwner(ADMIN_USERNAME);
-        payloadDTO.setId("abc1");
-
-        EndpointRegistryInfo endpointRegistryInfo =
-                EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(payloadDTO, ADMIN_USERNAME);
-        endpointRegistryInfo.setUuid("abc1");
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        RegistryDTO payloadDTO = EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfo);
 
         Mockito.when(registryProvider.addEndpointRegistry(Mockito.any(EndpointRegistryInfo.class)))
                 .thenReturn(endpointRegistryInfo.getUuid());
@@ -240,16 +213,8 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void addRegistry_ResourceNameExists() throws APIManagementException {
-        RegistryDTO payloadDTO = new RegistryDTO();
-        payloadDTO.setName("Endpoint Registry 1");
-        payloadDTO.setMode(RegistryDTO.ModeEnum.READONLY);
-        payloadDTO.setType(RegistryDTO.TypeEnum.WSO2);
-        payloadDTO.setOwner(ADMIN_USERNAME);
-        payloadDTO.setId("abc1");
-
-        EndpointRegistryInfo endpointRegistryInfo =
-                EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(payloadDTO, ADMIN_USERNAME);
-        endpointRegistryInfo.setUuid("abc1");
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        RegistryDTO payloadDTO = EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfo);
 
         APIMgtResourceAlreadyExistsException apiMgtResourceAlreadyExistsException
                 = Mockito.mock(APIMgtResourceAlreadyExistsException.class);
@@ -263,23 +228,12 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void updateRegistry() throws APIManagementException {
-        EndpointRegistryInfo endpointRegistryInfoOld = new EndpointRegistryInfo();
-        endpointRegistryInfoOld.setName("Endpoint Registry 1");
-        endpointRegistryInfoOld.setUuid("abc1");
-        endpointRegistryInfoOld.setMode(RegistryDTO.ModeEnum.READWRITE.toString());
-        endpointRegistryInfoOld.setType(RegistryDTO.TypeEnum.ETCD.toString());
-        endpointRegistryInfoOld.setOwner(ADMIN_USERNAME);
+        EndpointRegistryInfo endpointRegistryInfoOld = createRegistryWithDefaultParams();
+        EndpointRegistryInfo endpointRegistryInfoNew = createRegistry(endpointRegistryInfoOld.getUuid(), 2,
+                "Endpoint Registry 2", RegistryDTO.ModeEnum.READWRITE, RegistryDTO.TypeEnum.ETCD,
+                "user1");
 
-        RegistryDTO payloadDTO = new RegistryDTO();
-        payloadDTO.setName("Endpoint Registry 2");
-        payloadDTO.setId("abc1");
-        payloadDTO.setMode(RegistryDTO.ModeEnum.READONLY);
-        payloadDTO.setType(RegistryDTO.TypeEnum.WSO2);
-        payloadDTO.setOwner(ADMIN_USERNAME);
-
-        EndpointRegistryInfo endpointRegistryInfoNew =
-                EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(payloadDTO, ADMIN_USERNAME);
-        endpointRegistryInfoNew.setUuid("abc1");
+        RegistryDTO payloadDTO = EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfoNew);
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(payloadDTO.getId(), TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfoOld, endpointRegistryInfoNew);
@@ -297,23 +251,12 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void updateRegistry_existingName() throws APIManagementException {
-        EndpointRegistryInfo endpointRegistryInfoOld = new EndpointRegistryInfo();
-        endpointRegistryInfoOld.setName("Endpoint Registry 1");
-        endpointRegistryInfoOld.setUuid("abc1");
-        endpointRegistryInfoOld.setMode(RegistryDTO.ModeEnum.READWRITE.toString());
-        endpointRegistryInfoOld.setType(RegistryDTO.TypeEnum.ETCD.toString());
-        endpointRegistryInfoOld.setOwner(ADMIN_USERNAME);
+        EndpointRegistryInfo endpointRegistryInfoOld = createRegistryWithDefaultParams();
+        EndpointRegistryInfo endpointRegistryInfoNew = createRegistry(endpointRegistryInfoOld.getUuid(), 2,
+                "Endpoint Registry 2", RegistryDTO.ModeEnum.READWRITE, RegistryDTO.TypeEnum.ETCD,
+                "user1");
 
-        RegistryDTO payloadDTO = new RegistryDTO();
-        payloadDTO.setName("Endpoint Registry 2");
-        payloadDTO.setId("abc1");
-        payloadDTO.setMode(RegistryDTO.ModeEnum.READONLY);
-        payloadDTO.setType(RegistryDTO.TypeEnum.WSO2);
-        payloadDTO.setOwner(ADMIN_USERNAME);
-
-        EndpointRegistryInfo endpointRegistryInfoNew =
-                EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(payloadDTO, ADMIN_USERNAME);
-        endpointRegistryInfoNew.setUuid("abc1");
+        RegistryDTO payloadDTO = EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfoNew);
 
         APIMgtResourceAlreadyExistsException apiMgtResourceAlreadyExistsException
                 = Mockito.mock(APIMgtResourceAlreadyExistsException.class);
@@ -331,15 +274,8 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void deleteRegistry() throws APIManagementException {
-        final String REGISTRY_UUID = "abc1";
-
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo.setOwner("admin");
-        endpointRegistryInfo.setRegistryId(1);
-        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo.setUuid(REGISTRY_UUID);
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfo);
@@ -353,33 +289,15 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void createRegistryEntry_validOASV2Yaml() throws Exception {
-        final String REGISTRY_UUID = "reg1";
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo.setOwner("admin");
-        endpointRegistryInfo.setRegistryId(1);
-        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo.setUuid(REGISTRY_UUID);
-
-        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
-        payloadEntryDTO.setId("entry1");
-        payloadEntryDTO.setEntryName("Entry Name 1");
-        payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
-        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
-        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
-        payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
-        payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
-
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
         InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("oasV2-sample.yaml");
         Attachment definitionFileDetail = Mockito.mock(Attachment.class);
-
-        EndpointRegistryEntry endpointRegistryEntry =
-                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
-                        definitionFileStream, endpointRegistryInfo.getRegistryId());
+        endpointRegistryEntry.setEndpointDefinition(definitionFileStream);
+        RegistryEntryDTO payloadEntryDTO = EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry);
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfo);
@@ -398,33 +316,15 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void createRegistryEntry_validOASV2JSon() throws Exception {
-        final String REGISTRY_UUID = "reg1";
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo.setOwner("admin");
-        endpointRegistryInfo.setRegistryId(1);
-        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo.setUuid(REGISTRY_UUID);
-
-        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
-        payloadEntryDTO.setId("entry1");
-        payloadEntryDTO.setEntryName("Entry Name 1");
-        payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
-        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
-        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
-        payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
-        payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
-
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
         InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("oasV2-sample.json");
         Attachment definitionFileDetail = Mockito.mock(Attachment.class);
-
-        EndpointRegistryEntry endpointRegistryEntry =
-                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
-                        definitionFileStream, endpointRegistryInfo.getRegistryId());
+        endpointRegistryEntry.setEndpointDefinition(definitionFileStream);
+        RegistryEntryDTO payloadEntryDTO = EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry);
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfo);
@@ -443,33 +343,15 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void createRegistryEntry_validOASV3JSon() throws Exception {
-        final String REGISTRY_UUID = "reg1";
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo.setOwner("admin");
-        endpointRegistryInfo.setRegistryId(1);
-        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo.setUuid(REGISTRY_UUID);
-
-        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
-        payloadEntryDTO.setId("entry1");
-        payloadEntryDTO.setEntryName("Entry Name 1");
-        payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
-        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
-        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
-        payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
-        payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
-
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
         InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("oasV3-sample.json");
         Attachment definitionFileDetail = Mockito.mock(Attachment.class);
-
-        EndpointRegistryEntry endpointRegistryEntry =
-                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
-                        definitionFileStream, endpointRegistryInfo.getRegistryId());
+        endpointRegistryEntry.setEndpointDefinition(definitionFileStream);
+        RegistryEntryDTO payloadEntryDTO = EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry);
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfo);
@@ -488,33 +370,15 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void createRegistryEntry_validOASV3Yaml() throws Exception {
-        final String REGISTRY_UUID = "reg1";
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo.setOwner("admin");
-        endpointRegistryInfo.setRegistryId(1);
-        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo.setUuid(REGISTRY_UUID);
-
-        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
-        payloadEntryDTO.setId("entry1");
-        payloadEntryDTO.setEntryName("Entry Name 1");
-        payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
-        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
-        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
-        payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
-        payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
-
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
         InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("oasV3-sample.yaml");
         Attachment definitionFileDetail = Mockito.mock(Attachment.class);
-
-        EndpointRegistryEntry endpointRegistryEntry =
-                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
-                        definitionFileStream, endpointRegistryInfo.getRegistryId());
+        endpointRegistryEntry.setEndpointDefinition(definitionFileStream);
+        RegistryEntryDTO payloadEntryDTO = EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry);
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfo);
@@ -533,33 +397,16 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void createRegistryEntry_validWSDL1() throws APIManagementException {
-        final String REGISTRY_UUID = "reg1";
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo.setOwner("admin");
-        endpointRegistryInfo.setRegistryId(1);
-        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo.setUuid(REGISTRY_UUID);
-
-        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
-        payloadEntryDTO.setId("entry1");
-        payloadEntryDTO.setEntryName("Entry Name 1");
-        payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
-        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
-        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
-        payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
-        payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.WSDL1);
-
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
+        endpointRegistryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.WSDL1.toString());
         InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("wsdl1-sample.wsdl");
         Attachment definitionFileDetail = Mockito.mock(Attachment.class);
-
-        EndpointRegistryEntry endpointRegistryEntry =
-                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
-                        definitionFileStream, endpointRegistryInfo.getRegistryId());
+        endpointRegistryEntry.setEndpointDefinition(definitionFileStream);
+        RegistryEntryDTO payloadEntryDTO = EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry);
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfo);
@@ -578,33 +425,16 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void createRegistryEntry_validWSDL2() throws APIManagementException {
-        final String REGISTRY_UUID = "reg1";
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo.setOwner("admin");
-        endpointRegistryInfo.setRegistryId(1);
-        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo.setUuid(REGISTRY_UUID);
-
-        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
-        payloadEntryDTO.setId("entry1");
-        payloadEntryDTO.setEntryName("Entry Name 1");
-        payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
-        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
-        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
-        payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
-        payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.WSDL2);
-
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
+        endpointRegistryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.WSDL2.toString());
         InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("wsdl2-sample.wsdl");
         Attachment definitionFileDetail = Mockito.mock(Attachment.class);
-
-        EndpointRegistryEntry endpointRegistryEntry =
-                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
-                        definitionFileStream, endpointRegistryInfo.getRegistryId());
+        endpointRegistryEntry.setEndpointDefinition(definitionFileStream);
+        RegistryEntryDTO payloadEntryDTO = EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry);
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfo);
@@ -623,33 +453,16 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void createRegistryEntry_validGraphQL() throws APIManagementException {
-        final String REGISTRY_UUID = "reg1";
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo.setOwner("admin");
-        endpointRegistryInfo.setRegistryId(1);
-        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo.setUuid(REGISTRY_UUID);
-
-        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
-        payloadEntryDTO.setId("entry1");
-        payloadEntryDTO.setEntryName("Entry Name 1");
-        payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
-        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
-        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
-        payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
-        payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.GQL_SDL);
-
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
+        endpointRegistryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.GQL_SDL.toString());
         InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("graphql-sample.graphql");
         Attachment definitionFileDetail = Mockito.mock(Attachment.class);
-
-        EndpointRegistryEntry endpointRegistryEntry =
-                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
-                        definitionFileStream, endpointRegistryInfo.getRegistryId());
+        endpointRegistryEntry.setEndpointDefinition(definitionFileStream);
+        RegistryEntryDTO payloadEntryDTO = EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry);
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfo);
@@ -668,29 +481,37 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void createRegistryEntry_validOASUrl() throws APIManagementException {
-        final String REGISTRY_UUID = "reg1";
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo.setOwner("admin");
-        endpointRegistryInfo.setRegistryId(1);
-        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo.setUuid(REGISTRY_UUID);
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
+        endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
+        RegistryEntryDTO payloadEntryDTO = EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry);
 
-        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
-        payloadEntryDTO.setId("entry1");
-        payloadEntryDTO.setEntryName("Entry Name 1");
-        payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz.com");
-        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST);
-        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY);
-        payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
-        payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
+        Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
+                .thenReturn(endpointRegistryInfo);
+        Mockito.when(registryProvider.addEndpointRegistryEntry(Mockito.any(EndpointRegistryEntry.class)))
+                .thenReturn(endpointRegistryEntry.getEntryId());
+        Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
+                endpointRegistryEntry.getEntryId())).thenReturn(endpointRegistryEntry);
 
-        EndpointRegistryEntry endpointRegistryEntry =
-                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
-                        null, endpointRegistryInfo.getRegistryId());
+        Response response = registriesApiService.createRegistryEntry(REGISTRY_UUID, payloadEntryDTO,
+                null, null, messageContext);
+        Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        RegistryEntryDTO responseEntryDTO = (RegistryEntryDTO) response.getEntity();
+        compareRegistryEntryDTOs(payloadEntryDTO, responseEntryDTO);
+    }
+
+    @Test
+    public void createRegistryEntryWithNoDefinitionFileAndUrl() throws APIManagementException {
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
+
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
+        endpointRegistryEntry.setDefinitionURL(null);
+        endpointRegistryEntry.setEndpointDefinition(null);
+        RegistryEntryDTO payloadEntryDTO = EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry);
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfo);
@@ -709,43 +530,22 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void updateRegistryEntryWithDefinitionFile() throws APIManagementException {
-        final String REGISTRY_UUID = "reg1";
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo.setOwner(ADMIN_USERNAME);
-        endpointRegistryInfo.setRegistryId(1);
-        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo.setUuid(REGISTRY_UUID);
-
-        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
-        payloadEntryDTO.setId("entry1");
-        payloadEntryDTO.setEntryName("Entry Name 2");
-        payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz2.com");
-        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1);
-        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.DOMAIN);
-        payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
-        payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
+        EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
 
         InputStream definitionFileStream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("oasV2-sample.yaml");
         Attachment definitionFileDetail = Mockito.mock(Attachment.class);
 
-        EndpointRegistryEntry endpointRegistryEntryNew =
-                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
-                        definitionFileStream, endpointRegistryInfo.getRegistryId());
-
-        EndpointRegistryEntry endpointRegistryEntryOld = new EndpointRegistryEntry();
-        endpointRegistryEntryOld.setEntryId("entry1");
-        endpointRegistryEntryOld.setName("Entry Name 1");
-        endpointRegistryEntryOld.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntryOld.setProductionServiceURL("https://xyz.com");
-        endpointRegistryEntryOld.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
-        endpointRegistryEntryOld.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
-        endpointRegistryEntryOld.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
-        endpointRegistryEntryOld.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS.toString());
+        EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
+                "Entry Name 2", "{mutualTLS: false}", "https://xyz2.com",
+                RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1, RegistryEntryDTO.ServiceCategoryEnum.DOMAIN,
+                "https://petstore.swagger.io/v2/swagger.json", RegistryEntryDTO.DefinitionTypeEnum.OAS,
+                definitionFileStream);
+        RegistryEntryDTO payloadEntryDTO =
+                EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntryNew);
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfo);
@@ -766,39 +566,51 @@ public class RegistriesApiServiceImplTest {
 
     @Test
     public void updateRegistryEntryWithDefinitionUrl() throws APIManagementException {
-        final String REGISTRY_UUID = "reg1";
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
-        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
-        endpointRegistryInfo.setName("Endpoint Registry 1");
-        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        endpointRegistryInfo.setOwner(ADMIN_USERNAME);
-        endpointRegistryInfo.setRegistryId(1);
-        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
-        endpointRegistryInfo.setUuid(REGISTRY_UUID);
+        EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
 
-        RegistryEntryDTO payloadEntryDTO = new RegistryEntryDTO();
-        payloadEntryDTO.setId("entry1");
-        payloadEntryDTO.setEntryName("Entry Name 2");
-        payloadEntryDTO.setMetadata("{mutualTLS: true}");
-        payloadEntryDTO.setServiceUrl("https://xyz2.com");
-        payloadEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1);
-        payloadEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.DOMAIN);
-        payloadEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
-        payloadEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
+        EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
+                "Entry Name 2", "{mutualTLS: false}", "https://xyz2.com",
+                RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1, RegistryEntryDTO.ServiceCategoryEnum.DOMAIN,
+                "https://petstore.swagger.io/v2/swagger.json", RegistryEntryDTO.DefinitionTypeEnum.OAS,
+                null);
 
-        EndpointRegistryEntry endpointRegistryEntryNew =
-                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(payloadEntryDTO, payloadEntryDTO.getId(),
-                        null, endpointRegistryInfo.getRegistryId());
+        RegistryEntryDTO payloadEntryDTO =
+                EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntryNew);
 
-        EndpointRegistryEntry endpointRegistryEntryOld = new EndpointRegistryEntry();
-        endpointRegistryEntryOld.setEntryId("entry1");
-        endpointRegistryEntryOld.setName("Entry Name 1");
-        endpointRegistryEntryOld.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntryOld.setProductionServiceURL("https://xyz.com");
-        endpointRegistryEntryOld.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
-        endpointRegistryEntryOld.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
-        endpointRegistryEntryOld.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
-        endpointRegistryEntryOld.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS.toString());
+        Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
+                .thenReturn(endpointRegistryInfo);
+        Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
+                endpointRegistryEntryNew.getEntryId()))
+                .thenReturn(endpointRegistryEntryOld, endpointRegistryEntryNew);
+
+        Response response = registriesApiService.updateRegistryEntry(REGISTRY_UUID, payloadEntryDTO.getId(),
+                payloadEntryDTO, null, null, messageContext);
+
+        Mockito.verify(registryProvider).updateEndpointRegistryEntry(Mockito.eq(endpointRegistryEntryOld.getName()),
+                Mockito.any(EndpointRegistryEntry.class));
+        Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        RegistryEntryDTO responseEntryDTO = (RegistryEntryDTO) response.getEntity();
+        compareRegistryEntryDTOs(payloadEntryDTO, responseEntryDTO);
+    }
+
+    @Test
+    public void updateRegistryEntryWithNoDefinitionFileAndUrl() throws APIManagementException {
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
+        final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
+
+        EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
+
+        EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
+                "Entry Name 2", "{mutualTLS: false}", "https://xyz2.com",
+                RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1, RegistryEntryDTO.ServiceCategoryEnum.DOMAIN,
+                null, RegistryEntryDTO.DefinitionTypeEnum.OAS, null);
+
+        RegistryEntryDTO payloadEntryDTO =
+                EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntryNew);
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfo);
@@ -821,20 +633,8 @@ public class RegistriesApiServiceImplTest {
     public void getRegistryEntryByUuid() throws APIManagementException {
         final String REGISTRY_UUID = "reg1";
 
-        RegistryEntryDTO registryEntryDTO = new RegistryEntryDTO();
-        registryEntryDTO.setId("entry1");
-        registryEntryDTO.setEntryName("Entry Name 2");
-        registryEntryDTO.setMetadata("{mutualTLS: true}");
-        registryEntryDTO.setServiceUrl("https://xyz2.com");
-        registryEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1);
-        registryEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.DOMAIN);
-        registryEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
-        registryEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
-
-        EndpointRegistryEntry endpointRegistryEntry =
-                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntryDTO, registryEntryDTO.getId(),
-                        null, 1);
-        endpointRegistryEntry.setEntryId(registryEntryDTO.getId());
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
+        RegistryEntryDTO registryEntryDTO = EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry);
 
         Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
                 endpointRegistryEntry.getEntryId()))
@@ -852,28 +652,12 @@ public class RegistriesApiServiceImplTest {
     @Test
     public void getRegistryEntryByUuid_NonExistingResource() throws APIManagementException {
         final String REGISTRY_UUID = "reg1";
+        final String ENTRY_UUID = "entry1";
 
-        RegistryEntryDTO registryEntryDTO = new RegistryEntryDTO();
-        registryEntryDTO.setId("entry1");
-        registryEntryDTO.setEntryName("Entry Name 2");
-        registryEntryDTO.setMetadata("{mutualTLS: true}");
-        registryEntryDTO.setServiceUrl("https://xyz2.com");
-        registryEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1);
-        registryEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.DOMAIN);
-        registryEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
-        registryEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
-
-        EndpointRegistryEntry endpointRegistryEntry =
-                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntryDTO, registryEntryDTO.getId(),
-                        null, 1);
-        endpointRegistryEntry.setEntryId(registryEntryDTO.getId());
-
-        Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
-                endpointRegistryEntry.getEntryId()))
+        Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID, ENTRY_UUID))
                 .thenReturn(null);
 
-        Response response = registriesApiService.getRegistryEntryByUuid(REGISTRY_UUID,
-                endpointRegistryEntry.getEntryId(), messageContext);
+        Response response = registriesApiService.getRegistryEntryByUuid(REGISTRY_UUID, ENTRY_UUID, messageContext);
         Assert.assertNull("Endpoint Registry Entry retrieval succeeded for a wrong UUID", response);
     }
 
@@ -881,20 +665,7 @@ public class RegistriesApiServiceImplTest {
     public void deleteRegistryEntry() throws APIManagementException {
         final String REGISTRY_UUID = "reg1";
 
-        RegistryEntryDTO registryEntryDTO = new RegistryEntryDTO();
-        registryEntryDTO.setId("entry1");
-        registryEntryDTO.setEntryName("Entry Name 2");
-        registryEntryDTO.setMetadata("{mutualTLS: true}");
-        registryEntryDTO.setServiceUrl("https://xyz2.com");
-        registryEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1);
-        registryEntryDTO.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.DOMAIN);
-        registryEntryDTO.setDefinitionUrl("https://petstore.swagger.io/v2/swagger.json");
-        registryEntryDTO.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS);
-
-        EndpointRegistryEntry endpointRegistryEntry =
-                EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntryDTO, registryEntryDTO.getId(),
-                        null, 1);
-        endpointRegistryEntry.setEntryId(registryEntryDTO.getId());
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
 
         Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
                 endpointRegistryEntry.getEntryId()))
@@ -914,26 +685,18 @@ public class RegistriesApiServiceImplTest {
 
         List<EndpointRegistryEntry> endpointRegistryEntryList = new ArrayList<>();
 
-        EndpointRegistryEntry endpointRegistryEntry1 = new EndpointRegistryEntry();
-        endpointRegistryEntry1.setEntryId("entry1");
-        endpointRegistryEntry1.setName("Entry Name 1");
-        endpointRegistryEntry1.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntry1.setProductionServiceURL("https://xyz.com");
-        endpointRegistryEntry1.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
-        endpointRegistryEntry1.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
-        endpointRegistryEntry1.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
-        endpointRegistryEntry1.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS.toString());
+        EndpointRegistryEntry endpointRegistryEntry1 = createRegistryEntry("entry1", "Entry Name 1",
+                "{mutualTLS: true}", "https://xyz.com",
+                RegistryEntryDTO.ServiceTypeEnum.REST, RegistryEntryDTO.ServiceCategoryEnum.UTILITY,
+                "https://petstore.swagger.io/v2/swagger.json", RegistryEntryDTO.DefinitionTypeEnum.OAS,
+                null);
         endpointRegistryEntryList.add(endpointRegistryEntry1);
 
-        EndpointRegistryEntry endpointRegistryEntry2 = new EndpointRegistryEntry();
-        endpointRegistryEntry2.setEntryId("entry2");
-        endpointRegistryEntry2.setName("Entry Name 2");
-        endpointRegistryEntry2.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntry2.setProductionServiceURL("https://xyz2.com");
-        endpointRegistryEntry2.setServiceType(RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1.toString());
-        endpointRegistryEntry2.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.DOMAIN.toString());
-        endpointRegistryEntry2.setDefinitionURL("https://petstore.swagger.io/v2/swagger2.json");
-        endpointRegistryEntry2.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.GQL_SDL.toString());
+        EndpointRegistryEntry endpointRegistryEntry2 = createRegistryEntry("entry2", "Entry Name 2",
+                "{mutualTLS: false}", "https://xyz2.com",
+                RegistryEntryDTO.ServiceTypeEnum.REST, RegistryEntryDTO.ServiceCategoryEnum.DOMAIN,
+                "https://petstore.swagger.io/v2/swagger.json", RegistryEntryDTO.DefinitionTypeEnum.OAS,
+                null);
         endpointRegistryEntryList.add(endpointRegistryEntry2);
 
         Mockito.when(registryProvider.getEndpointRegistryEntries(EndpointRegistryConstants.COLUMN_ID,
@@ -959,14 +722,7 @@ public class RegistriesApiServiceImplTest {
     public void getEndpointDefinitionForOAS() throws APIManagementException {
         final String REGISTRY_UUID = "reg1";
 
-        EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
-        endpointRegistryEntry.setEntryId("entry1");
-        endpointRegistryEntry.setName("Entry Name 1");
-        endpointRegistryEntry.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
-        endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
-        endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
-        endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
         endpointRegistryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS.toString());
 
         InputStream definitionFileInputStream = Mockito.mock(InputStream.class);
@@ -990,14 +746,7 @@ public class RegistriesApiServiceImplTest {
     public void getEndpointDefinitionForWSDL1() throws APIManagementException {
         final String REGISTRY_UUID = "reg1";
 
-        EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
-        endpointRegistryEntry.setEntryId("entry1");
-        endpointRegistryEntry.setName("Entry Name 1");
-        endpointRegistryEntry.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
-        endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
-        endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
-        endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
         endpointRegistryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.WSDL1.toString());
 
         InputStream definitionFileInputStream = Mockito.mock(InputStream.class);
@@ -1021,14 +770,7 @@ public class RegistriesApiServiceImplTest {
     public void getEndpointDefinitionForWSDL2() throws APIManagementException {
         final String REGISTRY_UUID = "reg1";
 
-        EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
-        endpointRegistryEntry.setEntryId("entry1");
-        endpointRegistryEntry.setName("Entry Name 1");
-        endpointRegistryEntry.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
-        endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
-        endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
-        endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
         endpointRegistryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.WSDL2.toString());
 
         InputStream definitionFileInputStream = Mockito.mock(InputStream.class);
@@ -1052,14 +794,7 @@ public class RegistriesApiServiceImplTest {
     public void getEndpointDefinitionForGraphQL() throws APIManagementException {
         final String REGISTRY_UUID = "reg1";
 
-        EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
-        endpointRegistryEntry.setEntryId("entry1");
-        endpointRegistryEntry.setName("Entry Name 1");
-        endpointRegistryEntry.setMetaData("{mutualTLS: true}");
-        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
-        endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
-        endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
-        endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
+        EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
         endpointRegistryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.GQL_SDL.toString());
 
         InputStream definitionFileInputStream = Mockito.mock(InputStream.class);
@@ -1091,10 +826,71 @@ public class RegistriesApiServiceImplTest {
         Assert.assertEquals(expectedDTO.getId(), actualDTO.getId());
         Assert.assertEquals(expectedDTO.getEntryName(), actualDTO.getEntryName());
         Assert.assertEquals(expectedDTO.getMetadata(), actualDTO.getMetadata());
-        Assert.assertEquals(expectedDTO.getServiceUrl(), actualDTO.getServiceUrl());
+        Assert.assertEquals(expectedDTO.getProductionServiceUrl(), actualDTO.getProductionServiceUrl());
         Assert.assertEquals(expectedDTO.getServiceType(), actualDTO.getServiceType());
         Assert.assertEquals(expectedDTO.getServiceCategory(), actualDTO.getServiceCategory());
         Assert.assertEquals(expectedDTO.getDefinitionUrl(), actualDTO.getDefinitionUrl());
         Assert.assertEquals(expectedDTO.getDefinitionType(), actualDTO.getDefinitionType());
     }
+
+    private EndpointRegistryInfo createRegistryWithDefaultParams() {
+
+        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
+        endpointRegistryInfo.setUuid("abc1");
+        endpointRegistryInfo.setRegistryId(1);
+        endpointRegistryInfo.setName("Endpoint Registry 1");
+        endpointRegistryInfo.setMode(RegistryDTO.ModeEnum.READONLY.toString());
+        endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
+        endpointRegistryInfo.setOwner(ADMIN_USERNAME);
+
+        return endpointRegistryInfo;
+    }
+
+    private EndpointRegistryInfo createRegistry(String uuid, int id, String name, RegistryDTO.ModeEnum mode,
+                                                RegistryDTO.TypeEnum type, String owner) {
+        EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
+        endpointRegistryInfo.setUuid(uuid);
+        endpointRegistryInfo.setRegistryId(id);
+        endpointRegistryInfo.setName(name);
+        endpointRegistryInfo.setMode(mode.toString());
+        endpointRegistryInfo.setType(type.toString());
+        endpointRegistryInfo.setOwner(owner);
+
+        return endpointRegistryInfo;
+    }
+
+    private EndpointRegistryEntry createRegistryEntryWithDefaultParams() {
+        EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
+        endpointRegistryEntry.setEntryId("entry1");
+        endpointRegistryEntry.setName("Entry Name 1");
+        endpointRegistryEntry.setMetaData("{mutualTLS: true}");
+        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
+        endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
+        endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
+        endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
+        endpointRegistryEntry.setDefinitionType(RegistryEntryDTO.DefinitionTypeEnum.OAS.toString());
+
+        return endpointRegistryEntry;
+    }
+
+    private EndpointRegistryEntry createRegistryEntry(String id, String name, String metadata, String serviceUrl,
+                                                    RegistryEntryDTO.ServiceTypeEnum serviceType,
+                                                    RegistryEntryDTO.ServiceCategoryEnum serviceCategory,
+                                                      String definitionUrl,
+                                                      RegistryEntryDTO.DefinitionTypeEnum definitionType,
+                                                      InputStream definitionFile) {
+        EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
+        endpointRegistryEntry.setEntryId(id);
+        endpointRegistryEntry.setName(name);
+        endpointRegistryEntry.setMetaData(metadata);
+        endpointRegistryEntry.setProductionServiceURL(serviceUrl);
+        endpointRegistryEntry.setServiceType(serviceType.toString());
+        endpointRegistryEntry.setServiceCategory(serviceCategory.toString());
+        endpointRegistryEntry.setDefinitionURL(definitionUrl);
+        endpointRegistryEntry.setDefinitionType(definitionType.toString());
+        endpointRegistryEntry.setEndpointDefinition(definitionFile);
+
+        return endpointRegistryEntry;
+    }
+
 }

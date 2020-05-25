@@ -362,6 +362,9 @@ public final class APIConstants {
     //This constant is used in Json schema validator
     public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
 
+    // This constant used in Endpoint Registry Entries
+    public static final String API_OVERVIEW_ENPOINT_REGISTRY_ENTRY = "overview_endpointRegistryEntry";
+
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME = "overview_name";
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
@@ -381,6 +384,7 @@ public final class APIConstants {
     //tables columns for subscription
     public static final String SUBSCRIPTION_FIELD_SUBSCRIPTION_ID = "SUBSCRIPTION_ID";
     public static final String SUBSCRIPTION_FIELD_TIER_ID = "TIER_ID";
+    public static final String SUBSCRIPTION_FIELD_TIER_ID_PENDING = "TIER_ID_PENDING";
     public static final String SUBSCRIPTION_FIELD_API_ID = "API_ID";
     public static final String SUBSCRIPTION_FIELD_ACCESS_TOKEN = "ACCESS_TOKEN";
     public static final String SUBSCRIPTION_FIELD_SUB_STATUS = "SUB_STATUS";
@@ -552,6 +556,7 @@ public final class APIConstants {
         public static final String PROD_ONLY_BLOCKED = "PROD_ONLY_BLOCKED";
         public static final String UNBLOCKED = "UNBLOCKED";
         public static final String ON_HOLD = "ON_HOLD";
+        public static final String TIER_UPDATE_PENDING = "TIER_UPDATE_PENDING";
         public static final String REJECTED = "REJECTED";
 
         private SubscriptionStatus() {
@@ -1396,6 +1401,8 @@ public final class APIConstants {
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
+    public static final String ENDPOINT_REGISTRY_TYPE = "Registry";
+    public static final String ENDPOINT_REGISTRY_ENTRY_ID = "endpoint_id";
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";

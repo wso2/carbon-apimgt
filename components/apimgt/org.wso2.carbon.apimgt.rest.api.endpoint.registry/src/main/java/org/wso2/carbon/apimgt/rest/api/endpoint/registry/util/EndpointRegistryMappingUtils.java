@@ -43,8 +43,16 @@ public class EndpointRegistryMappingUtils {
         EndpointRegistryInfo registry = new EndpointRegistryInfo();
         registry.setName(registryDTO.getName());
         registry.setOwner(owner);
-        registry.setType(registryDTO.getType().toString());
-        registry.setMode(registryDTO.getMode().toString());
+        if (registryDTO.getType() != null) {
+            registry.setType(registryDTO.getType().toString());
+        } else {
+            registry.setType(RegistryDTO.TypeEnum.WSO2.toString());
+        }
+        if (registryDTO.getMode() != null) {
+            registry.setMode(registryDTO.getMode().toString());
+        } else {
+            registry.setMode(RegistryDTO.ModeEnum.READONLY.toString());
+        }
         return registry;
     }
 
@@ -99,15 +107,21 @@ public class EndpointRegistryMappingUtils {
         EndpointRegistryEntry registryEntry = new EndpointRegistryEntry();
         registryEntry.setEntryId(entryUUID);
         registryEntry.setName(registryEntryDTO.getEntryName());
-        registryEntry.setDefinitionType(registryEntryDTO.getDefinitionType().toString());
+        if (registryEntryDTO.getDefinitionType() != null) {
+            registryEntry.setDefinitionType(registryEntryDTO.getDefinitionType().toString());
+        }
         registryEntry.setDefinitionURL(registryEntryDTO.getDefinitionUrl());
         registryEntry.setEndpointDefinition(endpointDefinition);
         registryEntry.setMetaData(registryEntryDTO.getMetadata());
-        registryEntry.setServiceType(registryEntryDTO.getServiceType().toString());
+        if (registryEntryDTO.getServiceType() != null) {
+            registryEntry.setServiceType(registryEntryDTO.getServiceType().toString());
+        }
         registryEntry.setProductionServiceURL(registryEntryDTO.getProductionServiceUrl());
         registryEntry.setSandboxServiceUrl(registryEntryDTO.getSandboxServiceUrl());
         registryEntry.setRegistryId(registryId);
-        registryEntry.setServiceCategory(registryEntryDTO.getServiceCategory().toString());
+        if (registryEntryDTO.getServiceCategory() != null) {
+            registryEntry.setServiceCategory(registryEntryDTO.getServiceCategory().toString());
+        }
         return registryEntry;
     }
 
