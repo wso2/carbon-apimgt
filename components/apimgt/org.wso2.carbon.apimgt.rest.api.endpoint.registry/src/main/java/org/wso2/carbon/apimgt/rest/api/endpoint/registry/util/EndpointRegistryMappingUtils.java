@@ -48,11 +48,6 @@ public class EndpointRegistryMappingUtils {
         } else {
             registry.setType(RegistryDTO.TypeEnum.WSO2.toString());
         }
-        if (registryDTO.getMode() != null) {
-            registry.setMode(registryDTO.getMode().toString());
-        } else {
-            registry.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        }
         return registry;
     }
 
@@ -67,7 +62,6 @@ public class EndpointRegistryMappingUtils {
         registryDTO.setId(registry.getUuid());
         registryDTO.setName(registry.getName());
         registryDTO.setType(RegistryDTO.TypeEnum.fromValue(registry.getType()));
-        registryDTO.setMode(RegistryDTO.ModeEnum.fromValue(registry.getMode()));
         registryDTO.setOwner(registry.getOwner());
         return registryDTO;
     }
@@ -82,6 +76,7 @@ public class EndpointRegistryMappingUtils {
         RegistryEntryDTO registryEntryDTO = new RegistryEntryDTO();
         registryEntryDTO.setId(registryEntry.getEntryId());
         registryEntryDTO.setEntryName(registryEntry.getName());
+        registryEntryDTO.setVersion(registryEntry.getVersion());
         registryEntryDTO.setDefinitionType(
                 RegistryEntryDTO.DefinitionTypeEnum.fromValue(registryEntry.getDefinitionType()));
         registryEntryDTO.setDefinitionUrl(registryEntry.getDefinitionURL());
@@ -107,6 +102,7 @@ public class EndpointRegistryMappingUtils {
         EndpointRegistryEntry registryEntry = new EndpointRegistryEntry();
         registryEntry.setEntryId(entryUUID);
         registryEntry.setName(registryEntryDTO.getEntryName());
+        registryEntry.setVersion(registryEntryDTO.getVersion());
         if (registryEntryDTO.getDefinitionType() != null) {
             registryEntry.setDefinitionType(registryEntryDTO.getDefinitionType().toString());
         }

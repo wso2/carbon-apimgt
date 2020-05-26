@@ -31,6 +31,8 @@ public class EndpointRegistryEntry {
 
     private String name = null;
 
+    private String version = null;
+
     private String productionServiceURL = null;
 
     private String sandboxServiceUrl = null;
@@ -68,6 +70,14 @@ public class EndpointRegistryEntry {
     public String getName() {
 
         return name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public String getProductionServiceURL() {

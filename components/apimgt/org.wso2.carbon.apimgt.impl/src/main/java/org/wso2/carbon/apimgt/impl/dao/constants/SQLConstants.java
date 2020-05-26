@@ -1435,16 +1435,13 @@ public class SQLConstants {
             "   API_ID ";
 
     public static final String ADD_ENDPOINT_REGISTRY_SQL =
-            "INSERT INTO ENDPOINT_REG (UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, READ_ROLE, WRITE_ROLE, " +
-                    "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO ENDPOINT_REG (UUID, REG_NAME, REG_TYPE, TENANT_ID, " +
+                    "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     public static final String UPDATE_ENDPOINT_REGISTRY_SQL =
             "UPDATE ENDPOINT_REG " +
                     "SET REG_NAME = ?, " +
                     "REG_TYPE = ?, " +
-                    "REG_MODE = ?, " +
-                    "READ_ROLE = ?, " +
-                    "WRITE_ROLE = ?, " +
                     "UPDATED_BY = ?, " +
                     "UPDATED_TIME = ? " +
                     "WHERE UUID = ?";
@@ -1452,24 +1449,25 @@ public class SQLConstants {
     public static final String DELETE_ENDPOINT_REGISTRY_SQL = "DELETE FROM ENDPOINT_REG WHERE UUID = ?";
 
     public static final String GET_ENDPOINT_REGISTRY_BY_UUID =
-            " SELECT UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, READ_ROLE, WRITE_ROLE, ID, " +
+            " SELECT UUID, REG_NAME, REG_TYPE, TENANT_ID, ID, " +
                     "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME FROM " +
                     "ENDPOINT_REG WHERE UUID = ? AND TENANT_ID = ?";
 
     public static final String GET_ENDPOINT_REGISTRY_ENTRY_BY_UUID =
-            " SELECT UUID, ENTRY_NAME, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, SERVICE_CATEGORY, " +
-                    "PRODUCTION_SERVICE_URL, SANDBOX_SERVICE_URL, ENDPOINT_DEFINITION, METADATA, CREATED_BY, UPDATED_BY," +
-                    " CREATED_TIME, UPDATED_TIME FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
+            " SELECT UUID, ENTRY_NAME, ENTRY_VERSION, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, " +
+                    "SERVICE_CATEGORY, PRODUCTION_SERVICE_URL, SANDBOX_SERVICE_URL, ENDPOINT_DEFINITION, METADATA, " +
+                    "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME, REG_ID FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
 
     public static final String ADD_ENDPOINT_REGISTRY_ENTRY_SQL =
-            "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, PRODUCTION_SERVICE_URL, SANDBOX_SERVICE_URL, " +
-                    "DEFINITION_TYPE, DEFINITION_URL, METADATA, SERVICE_TYPE, SERVICE_CATEGORY, ENDPOINT_DEFINITION, " +
-                    "REG_ID, CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, ENTRY_VERSION, PRODUCTION_SERVICE_URL, " +
+                    "SANDBOX_SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, METADATA, SERVICE_TYPE, SERVICE_CATEGORY, " +
+                    "ENDPOINT_DEFINITION, REG_ID, CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public static final String UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL =
             "UPDATE ENDPOINT_REG_ENTRY SET " +
                     "ENTRY_NAME = ?, " +
+                    "ENTRY_VERSION = ?, " +
                     "PRODUCTION_SERVICE_URL = ?, " +
                     "SANDBOX_SERVICE_URL = ?, " +
                     "DEFINITION_TYPE = ?, " +
@@ -1489,6 +1487,11 @@ public class SQLConstants {
 
     public static final String IS_ENDPOINT_REGISTRY_ENTRY_NAME_EXISTS = "SELECT COUNT(UUID) AS REGISTRY_ENTRY_COUNT" +
             " FROM ENDPOINT_REG_ENTRY WHERE LOWER(ENTRY_NAME) = LOWER(?) AND REG_ID = ?";
+
+    public static final String IS_ENDPOINT_REGISTRY_ENTRY_NAME_AND_VERSION_EXISTS = "SELECT COUNT(UUID) AS" +
+            " REGISTRY_ENTRY_COUNT" +
+            " FROM ENDPOINT_REG_ENTRY WHERE LOWER(ENTRY_NAME) = LOWER(?) AND LOWER(ENTRY_VERSION) = LOWER(?)" +
+            " AND REG_ID = ?";
 
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +

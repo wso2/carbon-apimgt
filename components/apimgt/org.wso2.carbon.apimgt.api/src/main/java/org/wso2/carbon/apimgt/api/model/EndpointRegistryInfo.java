@@ -29,8 +29,6 @@ public class EndpointRegistryInfo {
 
     private String type = null;
 
-    private String mode = null;
-
     private String owner = null;
 
     private String updatedBy = null;
@@ -56,11 +54,6 @@ public class EndpointRegistryInfo {
         return type;
     }
 
-    public String getMode() {
-
-        return mode;
-    }
-
     public String getOwner() {
 
         return owner;
@@ -84,11 +77,6 @@ public class EndpointRegistryInfo {
     public void setType(String type) {
 
         this.type = type;
-    }
-
-    public void setMode(String mode) {
-
-        this.mode = mode;
     }
 
     public void setOwner(String owner) {

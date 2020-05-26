@@ -18,7 +18,7 @@ public class RegistryDTO   {
             @XmlEnum(String.class)
             public enum TypeEnum {
             
-                @XmlEnumValue("wso2") WSO2(String.valueOf("wso2")), @XmlEnumValue("k8") K8(String.valueOf("k8")), @XmlEnumValue("etcd") ETCD(String.valueOf("etcd"));
+                @XmlEnumValue("wso2") WSO2(String.valueOf("wso2"));
             
             
             private String value;
@@ -45,37 +45,6 @@ public class RegistryDTO   {
             return null;
             }
             }    private TypeEnum type = null;
-            @XmlType(name="ModeEnum")
-            @XmlEnum(String.class)
-            public enum ModeEnum {
-            
-                @XmlEnumValue("ReadOnly") READONLY(String.valueOf("ReadOnly")), @XmlEnumValue("ReadWrite") READWRITE(String.valueOf("ReadWrite"));
-            
-            
-            private String value;
-            
-            ModeEnum (String v) {
-            value = v;
-            }
-            
-            public String value() {
-            return value;
-            }
-            
-            @Override
-            public String toString() {
-            return String.valueOf(value);
-            }
-            
-            public static ModeEnum fromValue(String v) {
-            for (ModeEnum b : ModeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-            return b;
-            }
-            }
-            return null;
-            }
-            }    private ModeEnum mode = null;
     private String owner = null;
 
     /**
@@ -87,9 +56,10 @@ public class RegistryDTO   {
 
     
     
-    @Schema(example = "Dev Registry", description = "")
+    @Schema(example = "Dev Registry", required = true, description = "")
     @JsonProperty("name")
-          public String getName() {
+            @NotNull
+      public String getName() {
     return name;
     }
     public void setName(String name) {
@@ -134,24 +104,6 @@ public class RegistryDTO   {
 
     /**
     **/
-    public RegistryDTO mode(ModeEnum mode) {
-    this.mode = mode;
-    return this;
-    }
-
-    
-    
-    @Schema(example = "ReadOnly", description = "")
-    @JsonProperty("mode")
-          public ModeEnum getMode() {
-    return mode;
-    }
-    public void setMode(ModeEnum mode) {
-    this.mode = mode;
-    }
-
-    /**
-    **/
     public RegistryDTO owner(String owner) {
     this.owner = owner;
     return this;
@@ -181,13 +133,12 @@ RegistryDTO registry = (RegistryDTO) o;
     return Objects.equals(name, registry.name) &&
     Objects.equals(id, registry.id) &&
     Objects.equals(type, registry.type) &&
-    Objects.equals(mode, registry.mode) &&
     Objects.equals(owner, registry.owner);
 }
 
 @Override
 public int hashCode() {
-return Objects.hash(name, id, type, mode, owner);
+return Objects.hash(name, id, type, owner);
 }
 
 @Override
@@ -198,7 +149,6 @@ sb.append("class RegistryDTO {\n");
 sb.append("    name: ").append(toIndentedString(name)).append("\n");
 sb.append("    id: ").append(toIndentedString(id)).append("\n");
 sb.append("    type: ").append(toIndentedString(type)).append("\n");
-sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
 sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
 sb.append("}");
 return sb.toString();

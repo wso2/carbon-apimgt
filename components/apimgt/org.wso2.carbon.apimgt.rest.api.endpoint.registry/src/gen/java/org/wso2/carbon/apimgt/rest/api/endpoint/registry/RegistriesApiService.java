@@ -25,16 +25,17 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi.*;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T12:22:45.951+05:30[Asia/Colombo]")public interface RegistriesApiService {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T13:05:49.851+05:30[Asia/Colombo]")public interface RegistriesApiService {
         public Response addRegistry(RegistryDTO body, MessageContext messageContext) throws APIManagementException;
+        public Response createNewEntryVersion(String registryId, String entryId, String version, MessageContext messageContext) throws APIManagementException;
         public Response createRegistryEntry(String registryId, RegistryEntryDTO registryEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
         public Response deleteRegistry(String registryId, MessageContext messageContext) throws APIManagementException;
         public Response deleteRegistryEntry(String registryId, String entryId, MessageContext messageContext) throws APIManagementException;
-        public Response getAllEntriesInRegistry(String registryId, ServiceTypeEnum serviceType, DefinitionTypeEnum definitionType, String name, ServiceCategoryEnum serviceCategory, SortEntryByEnum sortEntryBy, SortEntryOrderEnum sortEntryOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
+        public Response getAllEntriesInRegistry(String registryId, Boolean exactNameMatch, String version, ServiceTypeEnum serviceType, DefinitionTypeEnum definitionType, String name, ServiceCategoryEnum serviceCategory, SortEntryByEnum sortEntryBy, SortEntryOrderEnum sortEntryOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
         public Response getEndpointDefinition(String registryId, String entryId, MessageContext messageContext) throws APIManagementException;
         public Response getRegistries(String query, SortRegistryByEnum sortRegistryBy, SortRegistryOrderEnum sortRegistryOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
         public Response getRegistryByUUID(String registryId, MessageContext messageContext) throws APIManagementException;
         public Response getRegistryEntryByUuid(String registryId, String entryId, MessageContext messageContext) throws APIManagementException;
-        public Response updateRegistry(String registryId, RegistryDTO body, MessageContext messageContext) throws APIManagementException;
+        public Response updateRegistry(RegistryDTO body, String registryId, MessageContext messageContext) throws APIManagementException;
         public Response updateRegistryEntry(String registryId, String entryId, RegistryEntryDTO registryEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
 }
