@@ -311,23 +311,20 @@ public class OAS3Parser extends APIDefinition {
      * @param responseSectionString String of IF conditions of all response codes
      * @return response section string with IF conditions and responses
      */
-    private String getGeneratedSetResponseForCodes(int minResponseCode, String minResponseType, String responseSectionString){
+    private String getGeneratedSetResponseForCodes(int minResponseCode, String minResponseType, String responseSectionString) {
         return "\nvar response501json = {\n" +
                 "\"code\" : 501," +
-                "\n\"description\" : "+"\"Not Implemented\"\n"+
+                "\n\"description\" : " + "\"Not Implemented\"\n" +
                 "}\n\n" +
                 "var responseCode = mc.getProperty('query.param.responseCode');\n\n" +
-
-                responseSectionString+
-
-                " if (responseCode == null) {\n\n"+
-                "  mc.setProperty('CONTENT_TYPE', 'application/"+minResponseType+"');\n"+
-                "  mc.setPayload"+minResponseType.toUpperCase()+"(response"+minResponseCode+minResponseType+");\n\n"+
-                "} else "+
-
-                "{\n\n"+
+                responseSectionString +
+                " if (responseCode == null) {\n\n" +
+                "  mc.setProperty('CONTENT_TYPE', 'application/" + minResponseType + "');\n" +
+                "  mc.setPayload" + minResponseType.toUpperCase() + "(response" + minResponseCode + minResponseType + ");\n\n" +
+                "} else " +
+                "{\n\n" +
                 "  mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
-                "  mc.setPayloadJSON(response501json);\n\n"+
+                "  mc.setPayloadJSON(response501json);\n\n" +
                 "}";
     }
 
