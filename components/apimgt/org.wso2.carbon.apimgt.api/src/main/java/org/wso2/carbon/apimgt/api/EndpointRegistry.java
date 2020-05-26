@@ -90,8 +90,8 @@ public interface EndpointRegistry {
     List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit,
                                                            int offset, String registryId, String serviceType,
                                                            String definitionType, String entryName,
-                                                           String serviceCategory, String version, boolean exactNameMatch)
-            throws APIManagementException;
+                                                           String serviceCategory, String version,
+                                                           boolean exactNameMatch) throws APIManagementException;
 
     /**
      * Returns details of a specific Endpoint Registry Entry
@@ -99,7 +99,8 @@ public interface EndpointRegistry {
      * @return an EndpointRegistryEntry object
      * @throws APIManagementException if failed get details of an Endpoint Registry Entry
      */
-    EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryId, String registryEntryUuid) throws APIManagementException;
+    EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryId, String registryEntryUuid)
+            throws APIManagementException;
 
     /**
      * Adds a new Registry Entry
@@ -145,10 +146,9 @@ public interface EndpointRegistry {
      *
      * @param entryId       Registry Entry Identifier(UUID)
      * @param registryEntry EndpointRegistryEntry
-     * @param version       New version of the Registry Entry
      * @return entryID UUID of the created Registry Entry
      * @throws APIManagementException if failed to delete the Endpoint Registry Entry
      */
-    String createNewEntryVersion(String entryId, EndpointRegistryEntry registryEntry, String version)
+    String createNewEntryVersion(String entryId, EndpointRegistryEntry registryEntry)
             throws APIManagementException;
 }

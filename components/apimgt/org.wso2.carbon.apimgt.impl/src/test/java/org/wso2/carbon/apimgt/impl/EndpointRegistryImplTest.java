@@ -266,14 +266,15 @@ public class EndpointRegistryImplTest {
         final String NEW_VERSION = "v2";
         final String NEW_ENTRY_ID = "abc1";
         EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
+        endpointRegistryEntryOld.setVersion(NEW_VERSION);
 
         Mockito.when(apiMgtDAO.addEndpointRegistryEntry(endpointRegistryEntryOld, ADMIN_USERNAME))
                 .thenReturn(NEW_ENTRY_ID);
-        Mockito.when(apiMgtDAO.isRegistryEntryNameExists(endpointRegistryEntryOld))
+        Mockito.when(apiMgtDAO.isRegistryEntryNameAndVersionExists(endpointRegistryEntryOld))
                 .thenReturn(false);
 
         String newEntryId = endpointRegistry.createNewEntryVersion(endpointRegistryEntryOld.getEntryId(),
-                endpointRegistryEntryOld, NEW_VERSION);
+                endpointRegistryEntryOld);
 
         Assert.assertEquals(NEW_ENTRY_ID, newEntryId);
     }
@@ -282,12 +283,13 @@ public class EndpointRegistryImplTest {
     public void createNewEntryVersion_withExistingVersion() throws APIManagementException {
         final String NEW_VERSION = "v2";
         EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
+        endpointRegistryEntryOld.setVersion(NEW_VERSION);
 
         Mockito.when(apiMgtDAO.isRegistryEntryNameAndVersionExists(endpointRegistryEntryOld))
                 .thenReturn(true);
 
         endpointRegistry.createNewEntryVersion(endpointRegistryEntryOld.getEntryId(),
-                endpointRegistryEntryOld, NEW_VERSION);
+                endpointRegistryEntryOld);
     }
 
     private void compareRegistryInfo(EndpointRegistryInfo expected, EndpointRegistryInfo actual) {

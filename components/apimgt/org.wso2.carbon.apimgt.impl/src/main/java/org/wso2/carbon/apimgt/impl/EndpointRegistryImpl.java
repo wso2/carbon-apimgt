@@ -241,13 +241,11 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      *
      * @param entryId       Registry Entry Identifier(UUID)
      * @param registryEntry EndpointRegistryEntry
-     * @param version       New version of the Registry Entry
      * @return entryID UUID of the created Registry Entry
      * @throws APIManagementException if failed to delete the Endpoint Registry Entry
      */
-    public String createNewEntryVersion(String entryId, EndpointRegistryEntry registryEntry, String version)
+    public String createNewEntryVersion(String entryId, EndpointRegistryEntry registryEntry)
             throws APIManagementException {
-        registryEntry.setVersion(version);
         if (apiMgtDAO.isRegistryEntryNameAndVersionExists(registryEntry)) {
             APIUtil.handleResourceAlreadyExistsException("Endpoint Registry Entry with name '"
                     + registryEntry.getName() + "' and version '" + registryEntry.getVersion() + "' already exists");

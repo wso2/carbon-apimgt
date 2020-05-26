@@ -466,8 +466,9 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 RestApiUtil.handleResourceNotFoundError("Endpoint registry entry with the id: " + entryId +
                         " is not found", log);
             }
+            endpointRegistryEntry.setVersion(version);
             String newEntryID =
-                    registryProvider.createNewEntryVersion(entryId, endpointRegistryEntry, version);
+                    registryProvider.createNewEntryVersion(entryId, endpointRegistryEntry);
             audit.info("Successfully created new version: '" + version + "' of endpoint registry entry with id :"
                     + entryId + " in :" + registryId + " by:" + user);
             EndpointRegistryEntry endpointRegistryEntryNewVersion

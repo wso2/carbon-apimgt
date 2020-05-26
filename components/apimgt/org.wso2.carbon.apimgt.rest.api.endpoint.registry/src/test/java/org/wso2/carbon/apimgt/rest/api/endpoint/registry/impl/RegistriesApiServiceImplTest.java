@@ -829,9 +829,12 @@ public class RegistriesApiServiceImplTest {
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfo);
+
+        endpointRegistryEntryOldVersion.setVersion(NEW_VERSION);
         Mockito.when(registryProvider.createNewEntryVersion(endpointRegistryEntryOldVersion.getEntryId(),
-                endpointRegistryEntryOldVersion, NEW_VERSION))
+                endpointRegistryEntryOldVersion))
                 .thenReturn(endpointRegistryEntryNewVersion.getEntryId());
+
         Mockito.when(registryProvider.getEndpointRegistryEntryByUUID(REGISTRY_UUID,
                 endpointRegistryEntryOldVersion.getEntryId()))
                 .thenReturn(endpointRegistryEntryOldVersion);
@@ -863,11 +866,12 @@ public class RegistriesApiServiceImplTest {
                 endpointRegistryEntryOldVersion.getEntryId()))
                 .thenReturn(endpointRegistryEntryOldVersion);
 
+        endpointRegistryEntryOldVersion.setVersion(NEW_VERSION);
         APIMgtResourceAlreadyExistsException apiMgtResourceAlreadyExistsException
                 = Mockito.mock(APIMgtResourceAlreadyExistsException.class);
         Mockito.doThrow(apiMgtResourceAlreadyExistsException).when(registryProvider)
                 .createNewEntryVersion(endpointRegistryEntryOldVersion.getEntryId(),
-                        endpointRegistryEntryOldVersion, NEW_VERSION);
+                        endpointRegistryEntryOldVersion);
 
         Response response = registriesApiService.createNewEntryVersion(REGISTRY_UUID,
                 endpointRegistryEntryOldVersion.getEntryId(), NEW_VERSION, messageContext);
