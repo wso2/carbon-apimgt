@@ -271,6 +271,14 @@ class API extends Resource {
         });
     }
 
+    getSubscritionPolicyList() {
+        return this.client.then((client) => {
+            return client.apis['Subscription Policy (Collection)'].get_throttling_policies_subscription(
+                this._requestMetaData(),
+            );
+        });
+    }
+
      /**
      * Update an application's owner
      */

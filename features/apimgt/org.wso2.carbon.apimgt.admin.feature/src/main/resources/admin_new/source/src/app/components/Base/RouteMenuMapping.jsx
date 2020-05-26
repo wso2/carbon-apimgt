@@ -29,6 +29,7 @@ import HomeIcon from '@material-ui/icons/Home';
 import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
 import DemoTable from 'AppComponents/AdminPages/Microgateways/List';
 import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
+import SubscriptionThrottlingPolicies from 'AppComponents/Throttling/Subscription/index';
 import APICategories from 'AppComponents/APICategories/ListApiCategories';
 import BlacklistThrottlingPolicies from 'AppComponents/Throttling/Blacklist/List';
 import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom/List';
@@ -206,7 +207,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Subscription Policies',
                 }),
                 path: '/throttling/subscription',
-                component: () => <DemoTable />,
+                component: () => <SubscriptionThrottlingPolicies />,
                 icon: <PhonelinkSetupIcon />,
             },
             {
