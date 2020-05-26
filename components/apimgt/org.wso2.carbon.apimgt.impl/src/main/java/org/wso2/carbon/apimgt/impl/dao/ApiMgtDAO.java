@@ -15205,8 +15205,14 @@ public class ApiMgtDAO {
             throws APIManagementException {
         List<EndpointRegistryEntry> endpointRegistryEntryList = new ArrayList<>();
         String query;
-        if (exactNameMatch) {
+        boolean versionMatch = StringUtils.isEmpty(version) ? false : true;
+        if (exactNameMatch && versionMatch) {
+            query = SQLConstantManagerFactory
+                    .getSQlString("GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_EXACT_NAME_WITH_VERSION");
+        } else if (exactNameMatch && !versionMatch) {
             query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_EXACT_NAME");
+        } else if (!exactNameMatch && versionMatch) {
+            query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_VERSION");
         } else {
             query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY");
         }
@@ -15224,9 +15230,14 @@ public class ApiMgtDAO {
             ps.setString(3, "%" + definitionType + "%");
             ps.setString(4, "%" + serviceType + "%");
             ps.setString(5, "%" + serviceCategory + "%");
-            ps.setString(6, "%" + version + "%");
-            ps.setInt(7, offset);
-            ps.setInt(8, limit);
+            if (versionMatch) {
+                ps.setString(6, version);
+                ps.setInt(7, offset);
+                ps.setInt(8, limit);
+            } else {
+                ps.setInt(6, offset);
+                ps.setInt(7, limit);
+            }
             ps.executeQuery();
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
