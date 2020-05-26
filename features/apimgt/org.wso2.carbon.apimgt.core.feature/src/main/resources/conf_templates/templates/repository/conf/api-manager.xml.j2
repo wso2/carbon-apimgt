@@ -209,6 +209,10 @@
         {% if apim.cache.restapi_token.expiry_time is defined %}
         <RESTAPITokenCacheExpiry>{{apim.cache.restapi_token.expiry_time}}</RESTAPITokenCacheExpiry>
         {% endif %}
+        <!-- Enable/Disable cache control headers of the Product REST APIs-->
+        <EnableRESTAPICacheControlHeaders>{{apim.cache.restapi_cache_control_headers.enable}}</EnableRESTAPICacheControlHeaders>
+        <!-- MaxAge for the cache control headers of the Product REST APIs -->
+        <RESTAPICacheControlHeadersMaxAge>{{apim.cache.restapi_cache_control_headers.max_age}}</RESTAPICacheControlHeadersMaxAge>
         <!-- This parameter specifies the expiration time of the TagCache. TagCache will
              only be created when this element is uncommented. When the specified
              time duration gets elapsed ,tag cache will get re-generated. -->

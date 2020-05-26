@@ -70,6 +70,10 @@
         </property>
         <property name="allowCredentials" value="true" />
     </bean>
+
+    <!-- Out interceptors -->
+    <bean id="gZipInterceptor" class="org.apache.cxf.transport.common.gzip.GZIPOutInterceptor" />
+
     <cxf:bus>
         <cxf:inInterceptors>
             <ref bean="URLValidationInterceptor"/>
@@ -80,5 +84,8 @@
             <ref bean="PostAuthenticationInterceptor"/>
             <ref bean="ValidationInInterceptor"/>
         </cxf:inInterceptors>
+        <cxf:outInterceptors>
+            <ref bean="gZipInterceptor"/>
+        </cxf:outInterceptors>
     </cxf:bus>
 </beans>
