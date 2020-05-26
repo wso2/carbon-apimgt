@@ -752,6 +752,21 @@
           "default" : [ "registry:entry_view" ]
         } ]
       }
+    },
+    "/settings" : {
+      "get" : {
+        "tags" : [ "Settings" ],
+        "summary" : "Retrieve endpoint registry settings",
+        "description" : "Retrieve Endpoint Registry settings\n",
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nSettings returned\n"
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested Settings does not exist.\n"
+          }
+        }
+      }
     }
   },
   "components" : {
@@ -856,6 +871,17 @@
           "definitionFile" : {
             "type" : "string",
             "format" : "binary"
+          }
+        }
+      },
+      "Settings" : {
+        "title" : "SettingsDTO",
+        "properties" : {
+          "scopes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },

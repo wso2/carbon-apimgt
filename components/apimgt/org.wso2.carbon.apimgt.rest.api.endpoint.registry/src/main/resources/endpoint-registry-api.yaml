@@ -635,6 +635,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  ######################################################
+  # The Endpoint Registry settings List
+  ######################################################
+  /settings:
+    #-----------------------------------------------------
+    # Retrieve Endpoint Registry settings
+    #-----------------------------------------------------
+    get:
+      summary: Retrieve endpoint registry settings
+      description: |
+        Retrieve Endpoint Registry settings
+      tags:
+        - Settings
+      responses:
+        200:
+          description: |
+            OK.
+            Settings returned
+          schema:
+            $ref: '#/definitions/Settings'
+        404:
+          description: |
+            Not Found.
+            Requested Settings does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
 components:
   #-------------------------------------------------------
   # The security schemes of resources used by some of the APIs
@@ -770,6 +797,17 @@ components:
         definitionFile:
           type: string
           format: binary
+
+    #-----------------------------------------------------
+    # The settings resource
+    #-----------------------------------------------------
+    Settings:
+      title: SettingsDTO
+      properties:
+        scopes:
+          type: array
+          items:
+            type: string
 
     #-----------------------------------------------------
     # The Error resource
