@@ -1256,7 +1256,7 @@ public class APIConsumerImplTest {
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
-        Mockito.when(apiMgtDAO.isMappingExistsforConsumerKey(Mockito.anyString())).thenReturn(true, false);
+        Mockito.when(apiMgtDAO.isMappingExistsforConsumerKey(Mockito.anyString(),Mockito.anyString())).thenReturn(true, false);
         Mockito.when(keyManager.mapOAuthApplication((OAuthAppRequest) Mockito.any())).thenReturn(oAuthApplicationInfo);
         Mockito.doNothing().when(apiMgtDAO).createApplicationKeyTypeMappingForManualClients(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),Mockito.anyString());

@@ -200,7 +200,7 @@ public class KeyManagerHolder {
         }
         return keyManagerDto.getKeyManager();
     }
-    public static KeyManagerDto getKeyManagerNameByIssuer(String tenantDomain, String issuer) {
+    public static KeyManagerDto getKeyManagerByIssuer(String tenantDomain, String issuer) {
 
         TenantKeyManagerDto tenantKeyManagerDto = tenantWiseMap.get(tenantDomain);
         if (tenantKeyManagerDto != null) {

@@ -762,8 +762,8 @@ public class APIKeyValidator {
     }
 
     public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
-                                                        String tenantDomain)
+                                                        String tenantDomain, String keyManager)
             throws APISecurityException {
-        return dataStore.validateSubscription(context, version, consumerKey,tenantDomain);
+        return dataStore.validateSubscription(context, version, consumerKey,tenantDomain, keyManager);
     }
 }
