@@ -59,6 +59,14 @@ public class JMSMessageListener implements MessageListener {
     public static final int RESOURCE_PATTERN_GROUPS = 4;
     public static final int RESOURCE_PATTERN_CONDITION_INDEX = 3;
 
+    private Pattern productResourcePattern = Pattern.compile("/.*/(.*):[A-Z]{0,5}_(condition_(\\d*)|default)");
+    private static final int PRODUCT_RESOURCE_PATTERN_GROUPS = 3;
+    private static final int PRODUCT_RESOURCE_CONDITION_INDEX = 2;
+
+    private Pattern productAPIPattern = Pattern.compile("/.*:.*(condition_(\\d*)|default)");
+    private static final int PRODUCT_API_PATTERN_GROUPS = 2;
+    private static final int PRODUCT_API_CONDITION_INDEX = 1;
+
     public void onMessage(Message message) {
 
         try {
@@ -263,11 +271,11 @@ public class JMSMessageListener implements MessageListener {
         if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(condition)) {
             if (APIConstants.AdvancedThrottleConstants.TRUE.equals(conditionState)) {
                 ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
-                        .addBlockingCondition(APIConstants.BLOCKING_CONDITIONS_APPLICATION,conditionValue,
+                        .addBlockingCondition(APIConstants.BLOCKING_CONDITIONS_APPLICATION, conditionValue,
                                 conditionValue);
             } else {
                 ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
-                        .removeBlockCondition(APIConstants.BLOCKING_CONDITIONS_APPLICATION,conditionValue);
+                        .removeBlockCondition(APIConstants.BLOCKING_CONDITIONS_APPLICATION, conditionValue);
             }
         } else if (APIConstants.BLOCKING_CONDITIONS_API.equals(condition)) {
             if (APIConstants.AdvancedThrottleConstants.TRUE.equals(conditionState)) {
@@ -311,6 +319,24 @@ public class JMSMessageListener implements MessageListener {
             if (m.matches()) {
                 if (m.groupCount() == API_PATTERN_GROUPS) {
                     String condition = m.group(API_PATTERN_CONDITION_INDEX);
+                    String resourceKey = throttleKey.substring(0, throttleKey.indexOf("_" + condition));
+                    return new APICondition(resourceKey, condition);
+                }
+            }
+        }
+        // For API Products
+        m = productResourcePattern.matcher(throttleKey);
+        if (m.matches()) {
+            if (m.groupCount() == PRODUCT_RESOURCE_PATTERN_GROUPS) {
+                String condition = m.group(PRODUCT_RESOURCE_CONDITION_INDEX);
+                String resourceKey = throttleKey.substring(0, throttleKey.indexOf("_" + condition));
+                return new APICondition(resourceKey, condition);
+            }
+        } else {
+            m = productAPIPattern.matcher(throttleKey);
+            if (m.matches()) {
+                if (m.groupCount() == PRODUCT_API_PATTERN_GROUPS) {
+                    String condition = m.group(PRODUCT_API_CONDITION_INDEX);
                     String resourceKey = throttleKey.substring(0, throttleKey.indexOf("_" + condition));
                     return new APICondition(resourceKey, condition);
                 }
