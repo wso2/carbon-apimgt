@@ -313,14 +313,47 @@
             "type" : "string"
           }
         }, {
-          "name" : "query",
+          "name" : "serviceType",
           "in" : "query",
-          "description" : "**Search condition**.\n\nYou can search for a registry entry by specifying the entry name as \"query\" attribute.\n\nEg.\n\"pizzaServer\" will match a registry entry if the name is exactly \"pizzaServer\".\n",
+          "description" : "**Search condition**.\n\nFilter entries by serviceType\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "REST", "SOAP_1_1", "GQL", "WS" ]
+          }
+        }, {
+          "name" : "definitionType",
+          "in" : "query",
+          "description" : "Filter registry entries by definitionType\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "OAS", "WSDL1", "WSDL2", "GQL_SDL" ]
+          }
+        }, {
+          "name" : "name",
+          "in" : "query",
+          "description" : "Filter registry entries by the name of the Entry\n",
           "required" : false,
           "style" : "form",
           "explode" : true,
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name" : "serviceCategory",
+          "in" : "query",
+          "description" : "Filter registry entries by the service category of the Entry\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "UTILITY", "EDGE", "DOMAIN" ]
           }
         }, {
           "name" : "sortEntryBy",
@@ -719,6 +752,22 @@
           "default" : [ "registry:entry_view" ]
         } ]
       }
+    },
+    "/settings" : {
+      "get" : {
+        "tags" : [ "Settings" ],
+        "summary" : "Retrieve endpoint registry settings",
+        "description" : "Retrieve Endpoint Registry settings\n",
+        "operationId" : "getSettings",
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nSettings returned\n"
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested Settings does not exist.\n"
+          }
+        }
+      }
     }
   },
   "components" : {
@@ -777,7 +826,11 @@
             "type" : "string",
             "example" : "Pizzashack-Endpoint"
           },
-          "serviceUrl" : {
+          "productionServiceUrl" : {
+            "type" : "string",
+            "example" : "http://localhost/pizzashack"
+          },
+          "sandboxServiceUrl" : {
             "type" : "string",
             "example" : "http://localhost/pizzashack"
           },
@@ -796,7 +849,7 @@
             "type" : "string",
             "description" : "The type of the provided API definition",
             "example" : "OAS",
-            "enum" : [ "OAS", "WSDL1", "WSDL2", "GQL-SDL" ]
+            "enum" : [ "OAS", "WSDL1", "WSDL2", "GQL_SDL" ]
           },
           "definitionUrl" : {
             "type" : "string",
@@ -819,6 +872,17 @@
           "definitionFile" : {
             "type" : "string",
             "format" : "binary"
+          }
+        }
+      },
+      "Settings" : {
+        "title" : "SettingsDTO",
+        "properties" : {
+          "scopes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },

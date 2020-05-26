@@ -73,6 +73,7 @@ public class SubscriptionMappingUtil {
         subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());
         subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
         subscriptionDTO.setThrottlingPolicy(subscription.getTier().getName());
+        subscriptionDTO.setRequestedThrottlingPolicy(subscription.getRequestedTier().getName());
 
 
         ApplicationInfoDTO applicationInfoDTO = ApplicationMappingUtil.fromApplicationToInfoDTO(application);

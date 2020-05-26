@@ -150,7 +150,8 @@ public class SQLConstants {
                     "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
-                    "   AND SP.SUB_STATUS = '"+ APIConstants.SubscriptionStatus.UNBLOCKED +"'" + 
+                    "   AND (SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.UNBLOCKED +
+                    "' OR SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING + "')" +
                     "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND APP.APPLICATION_ID = ?";
 
@@ -171,7 +172,8 @@ public class SQLConstants {
                     "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
-                    "   AND SP.SUB_STATUS = '"+ APIConstants.SubscriptionStatus.UNBLOCKED +"'" + 
+                    "   AND (SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.UNBLOCKED +
+                    "' OR SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING + "')" +
                     "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND APP.APPLICATION_ID = ?";
 
@@ -466,11 +468,25 @@ public class SQLConstants {
             "   API_ID = ? " +
             "   AND APPLICATION_ID = ?";
 
+    public static final String RETRIEVE_SUBSCRIPTION_ID_SQL =
+            " SELECT " +
+            "   SUBSCRIPTION_ID " +
+            " FROM " +
+            "   AM_SUBSCRIPTION " +
+            " WHERE " +
+            "   UUID = ? ";
+
     public static final String ADD_SUBSCRIPTION_SQL =
             " INSERT INTO " +
             "   AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME, " +
-                    "UPDATED_TIME, UUID) " +
-            " VALUES (?,?,?,?,?,?,?,?,?)";
+            "   UPDATED_TIME, UUID, TIER_ID_PENDING) " +
+            " VALUES (?,?,?,?,?,?,?,?,?,?)";
+
+    public static final String UPDATE_SINGLE_SUBSCRIPTION_SQL =
+            " UPDATE AM_SUBSCRIPTION " +
+            " SET TIER_ID_PENDING = ? " +
+            " , SUB_STATUS = ? " +
+            " WHERE UUID = ?";
     
     public static final String GET_SUBSCRIPTION_UUID_SQL =
             " SELECT UUID " +
@@ -519,6 +535,7 @@ public class SQLConstants {
             "   API.API_TYPE AS API_TYPE, " +
             "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
+            "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   SUBS.UUID AS UUID, " +
@@ -539,6 +556,7 @@ public class SQLConstants {
             "   API.API_TYPE AS API_TYPE, " +
             "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
+            "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   SUBS.UUID AS UUID, " +
@@ -698,6 +716,7 @@ public class SQLConstants {
             "   API.API_NAME AS API_NAME, " +
             "   API.API_VERSION AS API_VERSION, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
+            "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
             "   APP.APPLICATION_ID AS APP_ID, " +
             "   APP.UUID AS APP_UUID, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
@@ -724,6 +743,7 @@ public class SQLConstants {
                     "   API.API_NAME AS API_NAME, " +
                     "   API.API_VERSION AS API_VERSION, " +
                     "   SUBS.TIER_ID AS TIER_ID, " +
+                    "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
                     "   APP.APPLICATION_ID AS APP_ID, " +
                     "   SUBS.SUB_STATUS AS SUB_STATUS, " +
                     "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
@@ -750,6 +770,7 @@ public class SQLConstants {
             "   API.API_NAME AS API_NAME, " +
             "   API.API_VERSION AS API_VERSION, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
+            "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
             "   APP.APPLICATION_ID AS APP_ID, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
@@ -1131,6 +1152,13 @@ public class SQLConstants {
             " SET SUB_STATUS = ? " +
             " WHERE SUBSCRIPTION_ID = ?";
 
+    public static final String UPDATE_SUBSCRIPTION_STATUS_AND_TIER_SQL =
+            " UPDATE AM_SUBSCRIPTION " +
+                    " SET TIER_ID_PENDING = ? " +
+                    " , TIER_ID = ? " +
+                    " , SUB_STATUS = ? " +
+                    " WHERE SUBSCRIPTION_ID = ?";
+
     public static final String UPDATE_REFRESHED_APPLICATION_ACCESS_TOKEN_PREFIX = "UPDATE ";
 
     public static final String UPDATE_REFRESHED_APPLICATION_ACCESS_TOKEN_SUFFIX =
@@ -1407,42 +1435,51 @@ public class SQLConstants {
             "   API_ID ";
 
     public static final String ADD_ENDPOINT_REGISTRY_SQL =
-            "INSERT INTO ENDPOINT_REG (UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, REG_OWNER, READ_ROLE," +
-                    " WRITE_ROLE) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO ENDPOINT_REG (UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, READ_ROLE, WRITE_ROLE, " +
+                    "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public static final String UPDATE_ENDPOINT_REGISTRY_SQL =
             "UPDATE ENDPOINT_REG " +
                     "SET REG_NAME = ?, " +
                     "REG_TYPE = ?, " +
                     "REG_MODE = ?, " +
-                    "READ_ROLE = ? ," +
-                    "WRITE_ROLE = ? " +
+                    "READ_ROLE = ?, " +
+                    "WRITE_ROLE = ?, " +
+                    "UPDATED_BY = ?, " +
+                    "UPDATED_TIME = ? " +
                     "WHERE UUID = ?";
 
     public static final String DELETE_ENDPOINT_REGISTRY_SQL = "DELETE FROM ENDPOINT_REG WHERE UUID = ?";
 
     public static final String GET_ENDPOINT_REGISTRY_BY_UUID =
-            " SELECT UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, REG_OWNER, READ_ROLE, WRITE_ROLE, ID FROM " +
+            " SELECT UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, READ_ROLE, WRITE_ROLE, ID, " +
+                    "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME FROM " +
                     "ENDPOINT_REG WHERE UUID = ? AND TENANT_ID = ?";
 
     public static final String GET_ENDPOINT_REGISTRY_ENTRY_BY_UUID =
-            " SELECT UUID, ENTRY_NAME, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, SERVICE_CATEGORY, SERVICE_URL," +
-                    " ENDPOINT_DEFINITION, METADATA FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
+            " SELECT UUID, ENTRY_NAME, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, SERVICE_CATEGORY, " +
+                    "PRODUCTION_SERVICE_URL, SANDBOX_SERVICE_URL, ENDPOINT_DEFINITION, METADATA, CREATED_BY, UPDATED_BY," +
+                    " CREATED_TIME, UPDATED_TIME FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
 
     public static final String ADD_ENDPOINT_REGISTRY_ENTRY_SQL =
-            "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, METADATA," +
-                    "SERVICE_TYPE, SERVICE_CATEGORY, ENDPOINT_DEFINITION, REG_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, PRODUCTION_SERVICE_URL, SANDBOX_SERVICE_URL, " +
+                    "DEFINITION_TYPE, DEFINITION_URL, METADATA, SERVICE_TYPE, SERVICE_CATEGORY, ENDPOINT_DEFINITION, " +
+                    "REG_ID, CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public static final String UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL =
             "UPDATE ENDPOINT_REG_ENTRY SET " +
                     "ENTRY_NAME = ?, " +
-                    "SERVICE_URL = ?, " +
+                    "PRODUCTION_SERVICE_URL = ?, " +
+                    "SANDBOX_SERVICE_URL = ?, " +
                     "DEFINITION_TYPE = ?, " +
                     "DEFINITION_URL = ?, " +
                     "METADATA = ?, " +
                     "SERVICE_TYPE = ?, " +
                     "SERVICE_CATEGORY = ?, " +
-                    "ENDPOINT_DEFINITION = ? " +
+                    "ENDPOINT_DEFINITION = ?, " +
+                    "UPDATED_BY = ?, " +
+                    "UPDATED_TIME = ? " +
                     "WHERE UUID = ?";
 
     public static final String DELETE_ENDPOINT_REGISTRY_ENTRY_SQL = "DELETE FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
@@ -3412,6 +3449,11 @@ public class SQLConstants {
             "WHERE TENANT_ID = ? AND NAME = ?";
     public static final String GET_ALL_SHARED_SCOPES_BY_TENANT = "SELECT UUID, NAME FROM AM_SHARED_SCOPE " +
             "WHERE TENANT_ID = ?";
+    public static final String GET_SHARED_SCOPE_USAGE_COUNT_BY_TENANT =
+            "SELECT SS.NAME, SS.UUID, "
+                    + "(SELECT COUNT(*) FROM AM_API_RESOURCE_SCOPE_MAPPING RSM WHERE RSM.SCOPE_NAME=SS.NAME ) usage "
+                    + "FROM AM_SHARED_SCOPE SS "
+                    + "WHERE SS.TENANT_ID = ?";
 
     //Resource Scope related constants
     public static final String ADD_API_RESOURCE_SCOPE_MAPPING =

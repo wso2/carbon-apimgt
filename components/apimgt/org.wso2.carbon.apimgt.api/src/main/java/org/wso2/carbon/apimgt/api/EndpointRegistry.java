@@ -78,11 +78,17 @@ public interface EndpointRegistry {
      * @param limit      Limit
      * @param offset     Offset
      * @param registryId UUID of the endpoint registry
+     * @param serviceType The endpoint service type
+     * @param definitionType Then endpoint definition type
+     * @param entryName The registry entry name
+     * @param serviceCategory The service category
      * @return A list of EndpointRegistryEntry objects
      * @throws APIManagementException if failed to get entries of an Endpoint Registry
      */
-    List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit, int offset,
-                                                           String registryId) throws APIManagementException;
+    List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit,
+                                                           int offset, String registryId, String serviceType,
+                                                           String definitionType, String entryName,
+                                                           String serviceCategory) throws APIManagementException;
 
     /**
      * Returns details of a specific Endpoint Registry Entry
@@ -104,10 +110,12 @@ public interface EndpointRegistry {
     /**
      * Updates Registry Entry
      *
+     * @param entryName     original name of the registry entry
      * @param registryEntry EndpointRegistryEntry
      * @throws APIManagementException if failed to update EndpointRegistryEntry
      */
-    void updateEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException;
+    void updateEndpointRegistryEntry(String entryName, EndpointRegistryEntry registryEntry)
+            throws APIManagementException;
 
     /**
      * Deletes an Endpoint Registry Entry

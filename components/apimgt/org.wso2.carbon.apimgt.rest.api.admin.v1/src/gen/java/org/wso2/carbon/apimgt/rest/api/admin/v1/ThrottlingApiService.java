@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyDTO
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
@@ -32,6 +33,7 @@ import javax.ws.rs.core.SecurityContext;
 public interface ThrottlingApiService {
       public Response throttlingBlacklistConditionIdDelete(String conditionId, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
       public Response throttlingBlacklistConditionIdGet(String conditionId, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingBlacklistConditionIdPatch(String conditionId, BlockingConditionStatusDTO body, String contentType, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
       public Response throttlingBlacklistGet(String accept, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
       public Response throttlingBlacklistPost(BlockingConditionDTO body, String contentType, MessageContext messageContext) throws APIManagementException;
       public Response throttlingPoliciesAdvancedGet(String accept, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;

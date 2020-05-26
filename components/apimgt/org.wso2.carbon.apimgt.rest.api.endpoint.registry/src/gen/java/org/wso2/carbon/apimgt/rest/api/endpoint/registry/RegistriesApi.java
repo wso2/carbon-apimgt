@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-18T16:04:10.682+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T12:22:45.951+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -210,8 +210,23 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the Registry",required=true) @PathParam("registryId") String registryId
 
 
-,             @Parameter(description = "**Search condition**.  You can search for a registry entry by specifying the entry name as \"query\" attribute.  Eg. \"pizzaServer\" will match a registry entry if the name is exactly \"pizzaServer\". ") 
-        @QueryParam("query") String query
+,             @Parameter(description = "**Search condition**.  Filter entries by serviceType ",     schema=@Schema(allowableValues={ "REST", "SOAP_1_1", "GQL", "WS" })
+) 
+        @QueryParam("serviceType") ServiceTypeEnum serviceType
+
+
+,             @Parameter(description = "Filter registry entries by definitionType ",     schema=@Schema(allowableValues={ "OAS", "WSDL1", "WSDL2", "GQL_SDL" })
+) 
+        @QueryParam("definitionType") DefinitionTypeEnum definitionType
+
+
+,             @Parameter(description = "Filter registry entries by the name of the Entry ") 
+        @QueryParam("name") String name
+
+
+,             @Parameter(description = "Filter registry entries by the service category of the Entry ",     schema=@Schema(allowableValues={ "UTILITY", "EDGE", "DOMAIN" })
+) 
+        @QueryParam("serviceCategory") ServiceCategoryEnum serviceCategory
 
 
 ,             @Parameter(description = "",     schema=@Schema(allowableValues={ "definitionType", "serviceType" })
@@ -235,9 +250,15 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 
 ) throws APIManagementException{
-        return delegate.getAllEntriesInRegistry(registryId, query, sortEntryBy, sortEntryOrder, limit, offset, securityContext);
+        return delegate.getAllEntriesInRegistry(registryId, serviceType, definitionType, name, serviceCategory, sortEntryBy, sortEntryOrder, limit, offset, securityContext);
         }
-    public enum SortEntryByEnum {
+    public enum ServiceTypeEnum {
+    REST,SOAP_1_1,GQL,WS;
+    }    public enum DefinitionTypeEnum {
+    OAS,WSDL1,WSDL2,GQL_SDL;
+    }    public enum ServiceCategoryEnum {
+    UTILITY,EDGE,DOMAIN;
+    }    public enum SortEntryByEnum {
     definitionType,serviceType;
     }    public enum SortEntryOrderEnum {
     asc,desc;

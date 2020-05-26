@@ -30,5 +30,6 @@ public interface SubscriptionsApiService {
       public Response subscriptionsPost(SubscriptionDTO body, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsSubscriptionIdPut(SubscriptionDTO body, String subscriptionId, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsSubscriptionIdUsageGet(String subscriptionId, MessageContext messageContext) throws APIManagementException;
 }

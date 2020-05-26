@@ -25,12 +25,12 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi.*;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-18T16:04:10.682+05:30[Asia/Colombo]")public interface RegistriesApiService {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T12:22:45.951+05:30[Asia/Colombo]")public interface RegistriesApiService {
         public Response addRegistry(RegistryDTO body, MessageContext messageContext) throws APIManagementException;
         public Response createRegistryEntry(String registryId, RegistryEntryDTO registryEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
         public Response deleteRegistry(String registryId, MessageContext messageContext) throws APIManagementException;
         public Response deleteRegistryEntry(String registryId, String entryId, MessageContext messageContext) throws APIManagementException;
-        public Response getAllEntriesInRegistry(String registryId, String query, SortEntryByEnum sortEntryBy, SortEntryOrderEnum sortEntryOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
+        public Response getAllEntriesInRegistry(String registryId, ServiceTypeEnum serviceType, DefinitionTypeEnum definitionType, String name, ServiceCategoryEnum serviceCategory, SortEntryByEnum sortEntryBy, SortEntryOrderEnum sortEntryOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
         public Response getEndpointDefinition(String registryId, String entryId, MessageContext messageContext) throws APIManagementException;
         public Response getRegistries(String query, SortRegistryByEnum sortRegistryBy, SortRegistryOrderEnum sortRegistryOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
         public Response getRegistryByUUID(String registryId, MessageContext messageContext) throws APIManagementException;

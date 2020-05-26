@@ -236,9 +236,12 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   REG_TYPE, " +
                     "   REG_MODE, " +
                     "   TENANT_ID, " +
-                    "   REG_OWNER, " +
                     "   READ_ROLE, " +
-                    "   WRITE_ROLE " +
+                    "   WRITE_ROLE, " +
+                    "   CREATED_BY, " +
+                    "   UPDATED_BY, " +
+                    "   CREATED_TIME, " +
+                    "   UPDATED_TIME " +
                     " FROM " +
                     "   ENDPOINT_REG " +
                     " WHERE " +
@@ -254,14 +257,27 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.DEFINITION_URL, " +
                     "   E.METADATA, " +
                     "   E.SERVICE_TYPE, " +
-                    "   E.SERVICE_URL," +
-                    "   E.SERVICE_CATEGORY " +
+                    "   E.PRODUCTION_SERVICE_URL, " +
+                    "   E.SANDBOX_SERVICE_URL, " +
+                    "   E.SERVICE_CATEGORY, " +
+                    "   E.CREATED_BY, " +
+                    "   E.UPDATED_BY, " +
+                    "   E.CREATED_TIME, " +
+                    "   E.UPDATED_TIME " +
                     " FROM " +
                     "   ENDPOINT_REG_ENTRY AS E, " +
                     "   ENDPOINT_REG AS R " +
                     " WHERE " +
                     "   E.REG_ID=R.ID AND " +
                     "   R.UUID=? " +
+                    "   AND " +
+                    "       ENTRY_NAME like ?" +
+                    "   AND " +
+                    "       DEFINITION_TYPE like ?" +
+                    "   AND " +
+                    "       SERVICE_TYPE like ?" +
+                    "   AND " +
+                    "       SERVICE_CATEGORY like ?" +
                     " ORDER BY $1 $2 " +
                     " LIMIT ?, ? ";
 

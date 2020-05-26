@@ -255,6 +255,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                         endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
                         body.setEndpointConfig(endpointConfig);
                     }
+                } else if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig
+                        .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
+                        !endpointConfig.containsKey(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID)){
+                    RestApiUtil.handleBadRequest("Parameter endpoint_id should be provided", log);
                 }
             }
 
@@ -576,6 +580,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                             body.setEndpointConfig(endpointConfig);
                         }
                     }
+                } else if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig
+                        .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
+                        !endpointConfig.containsKey(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID)){
+                    RestApiUtil.handleBadRequest("Parameter endpoint_id should be provided", log);
                 }
             }
 
@@ -3202,6 +3210,16 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
         }
 
+        if (apiDTOFromProperties.getEndpointConfig() != null) {
+            LinkedHashMap endpointConfig = (LinkedHashMap) apiDTOFromProperties.getEndpointConfig();
+            if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig
+                    .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
+                    !endpointConfig.containsKey(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID)) {
+                RestApiUtil.handleBadRequest("Parameter endpoint_id should be provided to create API from " +
+                        "Registry Entry", log);
+            }
+        }
+
         // Only HTTP type APIs should be allowed
         if (!APIDTO.TypeEnum.HTTP.equals(apiDTOFromProperties.getType())) {
             throw RestApiUtil.buildBadRequestException("The API's type should only be HTTP when " +
@@ -3362,6 +3380,15 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Minimum requirement name, version, context and endpointConfig.
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            if (additionalPropertiesAPI.getEndpointConfig() != null) {
+                LinkedHashMap endpointConfig = (LinkedHashMap) additionalPropertiesAPI.getEndpointConfig();
+                if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig
+                        .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
+                        !endpointConfig.containsKey(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID)) {
+                    RestApiUtil.handleBadRequest("Parameter endpoint_id should be provided to create API from " +
+                            "Registry Entry", log);
+                }
+            }
             additionalPropertiesAPI.setProvider(RestApiUtil.getLoggedInUsername());
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.fromValue(implementationType));
             API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
@@ -3764,6 +3791,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            if (additionalPropertiesAPI.getEndpointConfig() != null) {
+                LinkedHashMap endpointConfig = (LinkedHashMap) additionalPropertiesAPI.getEndpointConfig();
+                if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig
+                        .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
+                        !endpointConfig.containsKey(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID)) {
+                    RestApiUtil.handleBadRequest("Parameter endpoint_id should be provided to create API from " +
+                            "Endpoint Registry", log);
+                }
+            }
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
