@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -492,7 +490,7 @@ public class ApiMgtDAO {
     }
 
 
-    public boolean validateSubscriptionDetails(String context, String version, String consumerKey,
+    public boolean validateSubscriptionDetails(String context, String version, String consumerKey,String keyManager,
                                                APIKeyValidationInfoDTO infoDTO) throws APIManagementException {
         boolean defaultVersionInvoked = false;
         String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
@@ -507,7 +505,7 @@ public class ApiMgtDAO {
             version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
         }
 
-        validateSubscriptionDetails(infoDTO, context, version, consumerKey, defaultVersionInvoked);
+        validateSubscriptionDetails(infoDTO, context, version, consumerKey, keyManager, defaultVersionInvoked);
         return infoDTO.isAuthorized();
     }
 
@@ -9800,7 +9798,7 @@ public class ApiMgtDAO {
      * @param consumerKey
      * @return
      */
-    public boolean isMappingExistsforConsumerKey(String consumerKey) throws APIManagementException {
+    public boolean isMappingExistsforConsumerKey(String keyManager, String consumerKey) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -9810,7 +9808,7 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, consumerKey);
-
+            ps.setString(2,keyManager);
             resultSet = ps.executeQuery();
             // We only expect one result.
             if (resultSet.next()) {
@@ -12931,7 +12929,7 @@ public class ApiMgtDAO {
      */
     public APIKeyValidationInfoDTO validateSubscriptionDetails(APIKeyValidationInfoDTO infoDTO,
                                                                String context, String version,
-                                                               String consumerKey,
+                                                               String consumerKey, String keyManager,
                                                                boolean defaultVersionInvoked)
             throws APIManagementException {
         String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
@@ -12965,14 +12963,15 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
             ps.setString(2, consumerKey);
+            ps.setString(3,keyManager);
             if (!isAdvancedThrottleEnabled) {
                 if (!defaultVersionInvoked) {
-                    ps.setString(3, version);
+                    ps.setString(4, version);
                 }
             } else {
-                ps.setInt(3, apiOwnerTenantId);
+                ps.setInt(4, apiOwnerTenantId);
                 if (!defaultVersionInvoked) {
-                    ps.setString(4, version);
+                    ps.setString(5, version);
                 }
             }
             rs = ps.executeQuery();

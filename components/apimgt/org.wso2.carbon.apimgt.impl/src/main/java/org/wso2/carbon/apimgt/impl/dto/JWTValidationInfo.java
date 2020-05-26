@@ -19,6 +19,7 @@ public class JWTValidationInfo implements Serializable {
     private String jti;
     private int validationCode;
     private String rawPayload;
+    private String keyManager;
     public String getUser() {
 
         return user;
@@ -127,5 +128,15 @@ public class JWTValidationInfo implements Serializable {
     public void setRawPayload(String rawPayload) {
 
         this.rawPayload = rawPayload;
+    }
+
+    public String getKeyManager() {
+
+        return keyManager;
+    }
+
+    public void setKeyManager(String keyManager) {
+
+        this.keyManager = keyManager;
     }
 }

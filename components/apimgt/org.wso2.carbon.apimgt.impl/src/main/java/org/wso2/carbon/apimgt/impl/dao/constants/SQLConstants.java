@@ -275,6 +275,7 @@ public class SQLConstants {
             " WHERE " +
             "   API.CONTEXT = ? " +
             "   AND AKM.CONSUMER_KEY = ? " +
+            "   AND AKM.KEY_MANAGER = ? " +
             "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUB.API_ID" +
@@ -301,6 +302,7 @@ public class SQLConstants {
             " WHERE " +
             "   API.CONTEXT = ? " +
             "   AND AKM.CONSUMER_KEY = ? " +
+            "   AND AKM.KEY_MANAGER = ? " +
             "   AND API.API_VERSION = ? " +
             "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
@@ -334,6 +336,7 @@ public class SQLConstants {
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
+                    "   AND AKM.KEY_MANAGER = ? " +
                     "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
                     "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
                     "   AND API.API_ID = SUB.API_ID" +
@@ -368,6 +371,7 @@ public class SQLConstants {
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
+                    "   AND AKM.KEY_MANAGER = ? " +
                     "   AND APS.TENANT_ID = ? " +
                     "   AND API.API_VERSION = ? " +
                     "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
@@ -2571,7 +2575,7 @@ public class SQLConstants {
             "SELECT API_VERSION FROM AM_API WHERE CONTEXT_TEMPLATE = ? AND API_NAME = ?";
 
     public static final String GET_APPLICATION_MAPPING_FOR_CONSUMER_KEY_SQL =
-            "SELECT APPLICATION_ID FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY   = ?";
+            "SELECT APPLICATION_ID FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ? AND KEY_MANAGER = ?";
 
     public static final String GET_CONSUMER_KEY_BY_APPLICATION_AND_KEY_SQL =
             " SELECT " +

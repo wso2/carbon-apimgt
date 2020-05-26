@@ -482,9 +482,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         assignLabelsToDTO(body, apiToAdd);
         if (body.getKeyManagers() instanceof List) {
             apiToAdd.setKeyManagers((List<String>) body.getKeyManagers());
-        } else {
+        } else if (body.getKeyManagers() == null) {
             apiToAdd.setKeyManagers(
                     Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
+        } else {
+            throw new APIManagementException("KeyManagers value need to be an array");
         }
         return apiToAdd;
     }

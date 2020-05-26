@@ -42,9 +42,11 @@ public class JWTValidationServiceImpl implements JWTValidationService {
         try {
             String issuer = signedJWT.getJWTClaimsSet().getIssuer();
             if (StringUtils.isNotEmpty(issuer)) {
-                JWTValidator jwtValidator = KeyManagerHolder.getJWTValidator(tenantDomain, issuer);
-                if (jwtValidator != null) {
-                    return jwtValidator.validateToken(signedJWT);
+                KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByIssuer(tenantDomain, issuer);
+                if (keyManagerDto != null && keyManagerDto.getJwtValidator() != null) {
+                    JWTValidationInfo validationInfo = keyManagerDto.getJwtValidator().validateToken(signedJWT);
+                    validationInfo.setKeyManager(keyManagerDto.getName());
+                    return validationInfo;
                 }
             }
             jwtValidationInfo.setValid(false);
@@ -64,7 +66,7 @@ public class JWTValidationServiceImpl implements JWTValidationService {
 
         try {
             String issuer = signedJWT.getJWTClaimsSet().getIssuer();
-            KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerNameByIssuer(tenantDomain, issuer);
+            KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByIssuer(tenantDomain, issuer);
             if (keyManagerDto != null && keyManagerDto.getJwtValidator() != null) {
                 return keyManagerDto.getName();
             }else{

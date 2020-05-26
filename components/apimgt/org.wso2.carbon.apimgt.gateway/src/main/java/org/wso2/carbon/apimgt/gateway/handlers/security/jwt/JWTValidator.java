@@ -159,8 +159,7 @@ public class JWTValidator {
                             .getFirstProperty(APIConstants.JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION));
                     if (validateSubscriptionViaKM) {
                         log.debug("Begin subscription validation via Key Manager");
-                        apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(synCtx,
-                                jwtValidationInfo);
+                        apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(synCtx, jwtValidationInfo);
 
                         if (log.isDebugEnabled()) {
                             log.debug("Subscription validation via Key Manager. Status: " +
@@ -263,9 +262,10 @@ public class JWTValidator {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
 
-        String consumerkey = jwtValidationInfo.getConsumerKey();
-        if (consumerkey != null) {
-            return apiKeyValidator.validateSubscription(apiContext, apiVersion, consumerkey, tenantDomain);
+        String consumerKey = jwtValidationInfo.getConsumerKey();
+        String keyManager = jwtValidationInfo.getKeyManager();
+        if (consumerKey != null && keyManager != null) {
+            return apiKeyValidator.validateSubscription(apiContext, apiVersion, consumerKey, tenantDomain, keyManager);
         }
         log.debug("Cannot call Key Manager to validate subscription. " +
                 "Payload of the token does not contain the Authorized party - the party to which the ID Token was " +

@@ -2559,15 +2559,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param applicationName this is the APIM appication name.
      * @param keyType
      * @param tokenType this is theApplication Token Type. This can be either default or jwt.
-     * @param keyManagerName
+     * @param keyManagerName key Manager name
      * @return
      * @throws APIManagementException
      */
     @Override
     public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
                                                       String applicationName, String keyType, String tokenType,
-                                                      String keyManagerName)
-                                                                        throws APIManagementException {
+                                                      String keyManagerName) throws APIManagementException {
 
         String callBackURL = null;
         if (StringUtils.isNotEmpty(keyManagerName) &&
@@ -2579,14 +2578,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 .createOauthAppRequest(applicationName, clientId, callBackURL, "default", jsonString, tokenType,
                 this.tenantDomain,keyManagerName);
 
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain,keyManagerName);
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
         if (keyManager == null) {
             throw new APIManagementException(
                     "Key Manager " + keyManagerName + "Couldn't initialized in tenant " + tenantDomain + ".",
                     ExceptionCodes.KEY_MANAGER_NOT_FOUND);
         }
         // Checking if clientId is mapped with another application.
-        if (apiMgtDAO.isMappingExistsforConsumerKey(clientId)) {
+        if (apiMgtDAO.isMappingExistsforConsumerKey(keyManagerName, clientId)) {
             String message = "Consumer Key " + clientId + " is used for another Application.";
             log.error(message);
             throw new APIManagementException(message);
@@ -4071,13 +4070,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             KeyManagerConfigurationDTO keyManagerConfiguration =
                     apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
             if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
-                throw new APIManagementException("Key Manager " + keyManagerName + " doesn't exist in Tenant",
+                throw new APIManagementException(
+                        "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
                         ExceptionCodes.KEY_MANAGER_NOT_FOUND);
             }
             Object enableOauthAppCreation =
                     keyManagerConfiguration.getProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION);
             if (enableOauthAppCreation != null && !(Boolean) enableOauthAppCreation){
-                throw new APIManagementException("Key Manager " + keyManagerName + " Didn't support to generate " +
+                throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate " +
                         "Client Application",ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
             }
         }

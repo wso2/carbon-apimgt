@@ -120,7 +120,7 @@ public class WebsocketWSClient {
 	 * @return
 	 * @throws APISecurityException
 	 */
-	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,String tenantDomain)
+	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey, String tenantDomain)
 			throws APISecurityException {
 
 		CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());

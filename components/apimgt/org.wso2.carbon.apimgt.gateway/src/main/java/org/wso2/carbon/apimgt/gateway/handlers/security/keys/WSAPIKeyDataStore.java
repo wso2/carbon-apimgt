@@ -119,12 +119,13 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
 
     @Override
     public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
-                                                        String tenantDomain) throws APISecurityException {
+                                                        String tenantDomain, String keyManager)
+            throws APISecurityException {
 
         APIKeyValidatorClient client = null;
         try {
             client = clientPool.get();
-            return client.validateSubscription(context, version, consumerKey,tenantDomain);
+            return client.validateSubscription(context, version, consumerKey,tenantDomain, keyManager);
         } catch (APISecurityException ex) {
             throw new APISecurityException(ex.getErrorCode(),
                     "Resource forbidden", ex);

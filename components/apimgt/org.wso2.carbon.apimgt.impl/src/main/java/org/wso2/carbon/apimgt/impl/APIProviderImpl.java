@@ -793,7 +793,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
-
+        validateKeyManagers(api);
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
         //Add default API LC if it is not there
@@ -1254,27 +1254,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!isValid) {
             throw new APIManagementException(" User doesn't have permission for update");
         }
-        List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
-                apiMgtDAO.getKeyManagerConfigurationsByTenant(tenantDomain);
-        List<String> configuredMissingKeyManagers = new ArrayList<>();
-        for (String keyManager : api.getKeyManagers()) {
-            if (!APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManager)) {
-                KeyManagerConfigurationDTO selectedKeyManager = null;
-                for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
-                    if (keyManager.equals(keyManagerConfigurationDTO.getName())) {
-                        selectedKeyManager = keyManagerConfigurationDTO;
-                        break;
-                    }
-                }
-                if (selectedKeyManager == null) {
-                    configuredMissingKeyManagers.add(keyManager);
-                }
-            }
-        }
-        if (!configuredMissingKeyManagers.isEmpty()) {
-            throw new APIManagementException("Configured Key Managers didn't exist",
-                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
-        }
+        validateKeyManagers(api);
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<>();
         API oldApi = getAPI(api.getId());
         Gson gson = new Gson();
@@ -1511,6 +1491,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
                 api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+    }
+
+    private void validateKeyManagers(API api) throws APIManagementException {
+
+        List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
+                apiMgtDAO.getKeyManagerConfigurationsByTenant(tenantDomain);
+        List<String> configuredMissingKeyManagers = new ArrayList<>();
+        for (String keyManager : api.getKeyManagers()) {
+            if (!APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManager)) {
+                KeyManagerConfigurationDTO selectedKeyManager = null;
+                for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
+                    if (keyManager.equals(keyManagerConfigurationDTO.getName())) {
+                        selectedKeyManager = keyManagerConfigurationDTO;
+                        break;
+                    }
+                }
+                if (selectedKeyManager == null) {
+                    configuredMissingKeyManagers.add(keyManager);
+                }
+            }
+        }
+        if (!configuredMissingKeyManagers.isEmpty()) {
+            throw new APIManagementException(
+                    "Key Manager(s) Not found :" + String.join(" , ", configuredMissingKeyManagers),
+                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+        }
     }
 
     /**

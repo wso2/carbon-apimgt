@@ -371,6 +371,7 @@ public class APIKeyValidationService extends AbstractAdmin {
             info.setAuthorized(true);
             info.setValidityPeriod(validationContext.getTokenInfo().getValidityPeriod());
             info.setIssuedTime(validationContext.getTokenInfo().getIssuedTime());
+            info.setKeyManager(validationContext.getValidationInfoDTO().getKeyManager());
             String def_version = isDefaultVersionInvoked(validationContext.getContext());
             if (def_version != null) {
                 defaultVersionInvoked = true;
@@ -379,9 +380,9 @@ public class APIKeyValidationService extends AbstractAdmin {
                 validationContext.setVersion(version);
                 validationContext.setContext(context);
             }
-            info = dao.validateSubscriptionDetails(info, validationContext.getContext(),
-                                               validationContext.getVersion(),
-                                               validationContext.getTokenInfo().getConsumerKey(), defaultVersionInvoked);
+            info = dao.validateSubscriptionDetails(info, validationContext.getContext(), validationContext.getVersion(),
+                    validationContext.getTokenInfo().getConsumerKey(), info.getKeyManager(),
+                    defaultVersionInvoked);
 
             if (defaultVersionInvoked) {
                 info.setApiName(info.getApiName() + "*" + version);
@@ -433,11 +434,11 @@ public class APIKeyValidationService extends AbstractAdmin {
      * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
     public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
-                                                        String tenantDomain)
+                                                        String tenantDomain,String keyManager)
             throws APIKeyMgtException, APIManagementException {
 
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
-        return keyValidationHandler.validateSubscription(context, version, consumerKey);
+        return keyValidationHandler.validateSubscription(context, version, consumerKey,keyManager);
     }
 }

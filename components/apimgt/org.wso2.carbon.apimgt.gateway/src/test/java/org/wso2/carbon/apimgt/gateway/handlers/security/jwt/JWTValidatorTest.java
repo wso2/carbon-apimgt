@@ -64,7 +64,7 @@ public class JWTValidatorTest {
     @Before
     public void setup() {
 
-        System.setProperty("carbon.home", "jhkjn");
+        System.setProperty("carbon.home", "");
         PowerMockito.mockStatic(MultitenantUtils.class);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
@@ -109,6 +109,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setExpiryTime(System.currentTimeMillis() + 5000L);
         jwtValidationInfo.setConsumerKey(UUID.randomUUID().toString());
         jwtValidationInfo.setUser("user1");
+        jwtValidationInfo.setKeyManager("Default");
         Mockito.when(jwtValidationService.validateJWTToken(signedJWT)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator
                 = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
@@ -137,11 +138,11 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setApiTier("Unlimited");
         apiKeyValidationInfoDTO.setAuthorized(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
+                Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
         Mockito.verify(apiKeyValidator, Mockito.only())
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString());
+                        Mockito.anyString(), Mockito.anyString());
         Assert.assertNotNull(authenticate);
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
@@ -199,6 +200,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setExpiryTime(System.currentTimeMillis() + 5L);
         jwtValidationInfo.setConsumerKey(UUID.randomUUID().toString());
         jwtValidationInfo.setUser("user1");
+        jwtValidationInfo.setKeyManager("Default");
         Mockito.when(jwtValidationService.validateJWTToken(signedJWT)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator
                 = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
@@ -227,11 +229,11 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setApiTier("Unlimited");
         apiKeyValidationInfoDTO.setAuthorized(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
+                Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
         Mockito.verify(apiKeyValidator, Mockito.only())
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString());
+                        Mockito.anyString(), Mockito.anyString());
         Assert.assertNotNull(authenticate);
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
@@ -294,6 +296,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setExpiryTime(System.currentTimeMillis() + 5L);
         jwtValidationInfo.setConsumerKey(UUID.randomUUID().toString());
         jwtValidationInfo.setUser("user1");
+        jwtValidationInfo.setKeyManager("Default");
         Mockito.when(jwtValidationService.validateJWTToken(signedJWT)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator
                 = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
@@ -322,11 +325,11 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setApiTier("Unlimited");
         apiKeyValidationInfoDTO.setAuthorized(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
+                Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
         Mockito.verify(apiKeyValidator, Mockito.only())
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString());
+                        Mockito.anyString(), Mockito.anyString());
         Assert.assertNotNull(authenticate);
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
@@ -388,6 +391,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setExpiryTime(System.currentTimeMillis() + 5000L);
         jwtValidationInfo.setConsumerKey(UUID.randomUUID().toString());
         jwtValidationInfo.setUser("user1");
+        jwtValidationInfo.setKeyManager("Default");
         Mockito.when(jwtValidationService.validateJWTToken(signedJWT)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator
                 = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
@@ -416,11 +420,11 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setApiTier("Unlimited");
         apiKeyValidationInfoDTO.setAuthorized(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
+                Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
         Mockito.verify(apiKeyValidator, Mockito.only())
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString());
+                        Mockito.anyString(), Mockito.anyString());
         Assert.assertNotNull(authenticate);
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
@@ -477,6 +481,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setConsumerKey(UUID.randomUUID().toString());
         jwtValidationInfo.setValidationCode(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
         jwtValidationInfo.setUser("user1");
+        jwtValidationInfo.setKeyManager("Default");
         Mockito.when(jwtValidationService.validateJWTToken(signedJWT)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator
                 = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
@@ -521,7 +526,7 @@ public class JWTValidatorTest {
         }
         Mockito.verify(apiKeyValidator, Mockito.never())
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString());
+                        Mockito.anyString(), Mockito.anyString());
         Mockito.verify(gatewayTokenCache, Mockito.atLeast(2)).get(signedJWT.getSignature().toString());
         Mockito.verify(gatewayKeyCache, Mockito.never()).get(cacheKey);
     }
@@ -563,6 +568,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setJti(UUID.randomUUID().toString());
         jwtValidationInfo.setConsumerKey(UUID.randomUUID().toString());
         jwtValidationInfo.setUser("user1");
+        jwtValidationInfo.setKeyManager("Default");
         Mockito.when(jwtValidationService.validateJWTToken(signedJWT)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator
                 = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
@@ -590,7 +596,7 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setValidationStatus(
                 APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()
-                , Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
+                , Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         try {
             jwtValidator.authenticate(signedJWT, messageContext, openAPI);
             Assert.fail("JWT get Authenticated");
@@ -657,6 +663,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setExpiryTime(System.currentTimeMillis() + 5000L);
         jwtValidationInfo.setConsumerKey(UUID.randomUUID().toString());
         jwtValidationInfo.setUser("user1");
+        jwtValidationInfo.setKeyManager("Default");
         Mockito.when(jwtValidationService.validateJWTToken(signedJWT)).thenReturn(jwtValidationInfo);
         JWTValidationInfo temperedJWTValidationInfo = new JWTValidationInfo();
         temperedJWTValidationInfo.setValidationCode(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
@@ -689,11 +696,11 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setApiTier("Unlimited");
         apiKeyValidationInfoDTO.setAuthorized(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
+                Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
         Mockito.verify(apiKeyValidator, Mockito.only())
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString());
+                        Mockito.anyString(), Mockito.anyString());
         Assert.assertNotNull(authenticate);
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");
@@ -779,6 +786,7 @@ public class JWTValidatorTest {
         jwtValidationInfo.setExpiryTime(System.currentTimeMillis() + 5000L);
         jwtValidationInfo.setConsumerKey(UUID.randomUUID().toString());
         jwtValidationInfo.setUser("user1");
+        jwtValidationInfo.setKeyManager("Default");
         Mockito.when(jwtValidationService.validateJWTToken(signedJWT)).thenReturn(jwtValidationInfo);
         JWTValidationInfo temperedJWTValidationInfo = new JWTValidationInfo();
         temperedJWTValidationInfo.setValidationCode(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
@@ -811,11 +819,11 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setApiTier("Unlimited");
         apiKeyValidationInfoDTO.setAuthorized(true);
         Mockito.when(apiKeyValidator.validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
+                Mockito.anyString(), Mockito.anyString())).thenReturn(apiKeyValidationInfoDTO);
         AuthenticationContext authenticate = jwtValidator.authenticate(signedJWT, messageContext, openAPI);
         Mockito.verify(apiKeyValidator, Mockito.only())
                 .validateSubscription(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString());
+                        Mockito.anyString(), Mockito.anyString());
         Assert.assertNotNull(authenticate);
         Assert.assertEquals(authenticate.getApiName(), "api1");
         Assert.assertEquals(authenticate.getApiPublisher(), "admin");

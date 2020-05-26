@@ -82,7 +82,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         AccessTokenInfo tokenInfo = null;
 
         try {
-
+            String electedKeyManager = null;
             // Obtaining details about the token.
             if (StringUtils.isNotEmpty(validationContext.getTenantDomain())) {
                 Map<String, KeyManagerDto>
@@ -96,15 +96,17 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                                 .contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
                                 validationContext.getKeyManagers().contains(keyManagerDto.getName()))) {
                             keyManagerInstance = keyManagerDto.getKeyManager();
+                            electedKeyManager = entry.getKey();
                         }
                     }
                 } else if (tenantKeyManagers.values().size() > 1) {
                     if (validationContext.getKeyManagers()
                             .contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS)) {
-                        for (KeyManagerDto keyManagerDto : tenantKeyManagers.values()) {
-                            if (keyManagerDto.getKeyManager() != null &&
-                                    keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
-                                keyManagerInstance = keyManagerDto.getKeyManager();
+                        for (Map.Entry<String,KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
+                            if (keyManagerDtoEntry.getValue().getKeyManager() != null &&
+                                    keyManagerDtoEntry.getValue().getKeyManager().canHandleToken(validationContext.getAccessToken())) {
+                                keyManagerInstance = keyManagerDtoEntry.getValue().getKeyManager();
+                                electedKeyManager = keyManagerDtoEntry.getKey();
                                 break;
                             }
                         }
@@ -114,6 +116,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                             if (keyManagerDto != null && keyManagerDto.getKeyManager() != null &&
                                     keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
                                 keyManagerInstance = keyManagerDto.getKeyManager();
+                                electedKeyManager = selectedKeyManager;
                                 break;
                             }
                         }
@@ -153,7 +156,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 }
                 return false;
             }
-
+            apiKeyValidationInfoDTO.setKeyManager(electedKeyManager);
             apiKeyValidationInfoDTO.setAuthorized(tokenInfo.isTokenValid());
             apiKeyValidationInfoDTO.setEndUserName(tokenInfo.getEndUserName());
             apiKeyValidationInfoDTO.setConsumerKey(tokenInfo.getConsumerKey());

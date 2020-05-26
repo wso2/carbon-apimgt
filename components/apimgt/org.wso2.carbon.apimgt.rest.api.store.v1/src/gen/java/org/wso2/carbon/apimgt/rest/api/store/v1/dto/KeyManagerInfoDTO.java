@@ -27,7 +27,7 @@ public class KeyManagerInfoDTO   {
     private String tokenEndpoint = null;
     private String revokeEndpoint = null;
     private String userInfoEndpoint = null;
-    private Boolean enableTokenGneration = null;
+    private Boolean enableTokenGeneration = null;
     private Boolean enableTokenEncryption = false;
     private Boolean enableTokenHashing = false;
     private Boolean enableOAuthAppCreation = true;
@@ -192,19 +192,19 @@ public class KeyManagerInfoDTO   {
 
   /**
    **/
-  public KeyManagerInfoDTO enableTokenGneration(Boolean enableTokenGneration) {
-    this.enableTokenGneration = enableTokenGneration;
+  public KeyManagerInfoDTO enableTokenGeneration(Boolean enableTokenGeneration) {
+    this.enableTokenGeneration = enableTokenGeneration;
     return this;
   }
 
   
   @ApiModelProperty(example = "true", value = "")
-  @JsonProperty("enableTokenGneration")
-  public Boolean isEnableTokenGneration() {
-    return enableTokenGneration;
+  @JsonProperty("enableTokenGeneration")
+  public Boolean isEnableTokenGeneration() {
+    return enableTokenGeneration;
   }
-  public void setEnableTokenGneration(Boolean enableTokenGneration) {
-    this.enableTokenGneration = enableTokenGneration;
+  public void setEnableTokenGeneration(Boolean enableTokenGeneration) {
+    this.enableTokenGeneration = enableTokenGeneration;
   }
 
   /**
@@ -328,7 +328,7 @@ public class KeyManagerInfoDTO   {
         Objects.equals(tokenEndpoint, keyManagerInfo.tokenEndpoint) &&
         Objects.equals(revokeEndpoint, keyManagerInfo.revokeEndpoint) &&
         Objects.equals(userInfoEndpoint, keyManagerInfo.userInfoEndpoint) &&
-        Objects.equals(enableTokenGneration, keyManagerInfo.enableTokenGneration) &&
+        Objects.equals(enableTokenGeneration, keyManagerInfo.enableTokenGeneration) &&
         Objects.equals(enableTokenEncryption, keyManagerInfo.enableTokenEncryption) &&
         Objects.equals(enableTokenHashing, keyManagerInfo.enableTokenHashing) &&
         Objects.equals(enableOAuthAppCreation, keyManagerInfo.enableOAuthAppCreation) &&
@@ -339,7 +339,7 @@ public class KeyManagerInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, description, enabled, availableGrantTypes, tokenEndpoint, revokeEndpoint, userInfoEndpoint, enableTokenGneration, enableTokenEncryption, enableTokenHashing, enableOAuthAppCreation, enableMapOAuthConsumerApps, applicationConfiguration, additionalProperties);
+    return Objects.hash(id, name, type, description, enabled, availableGrantTypes, tokenEndpoint, revokeEndpoint, userInfoEndpoint, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableOAuthAppCreation, enableMapOAuthConsumerApps, applicationConfiguration, additionalProperties);
   }
 
   @Override
@@ -356,7 +356,7 @@ public class KeyManagerInfoDTO   {
     sb.append("    tokenEndpoint: ").append(toIndentedString(tokenEndpoint)).append("\n");
     sb.append("    revokeEndpoint: ").append(toIndentedString(revokeEndpoint)).append("\n");
     sb.append("    userInfoEndpoint: ").append(toIndentedString(userInfoEndpoint)).append("\n");
-    sb.append("    enableTokenGneration: ").append(toIndentedString(enableTokenGneration)).append("\n");
+    sb.append("    enableTokenGeneration: ").append(toIndentedString(enableTokenGeneration)).append("\n");
     sb.append("    enableTokenEncryption: ").append(toIndentedString(enableTokenEncryption)).append("\n");
     sb.append("    enableTokenHashing: ").append(toIndentedString(enableTokenHashing)).append("\n");
     sb.append("    enableOAuthAppCreation: ").append(toIndentedString(enableOAuthAppCreation)).append("\n");
