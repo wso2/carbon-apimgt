@@ -31,15 +31,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
-import org.wso2.carbon.apimgt.api.EndpointRegistry;
-import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
-import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
-import org.wso2.carbon.apimgt.impl.EndpointRegistryConstants;
-import org.wso2.carbon.apimgt.impl.EndpointRegistryImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistry;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.impl.EndpointRegistryImpl;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryEntry;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryException;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi;
@@ -113,7 +114,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 registryEntryArray.add(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry));
             }
             return Response.ok().entity(registryEntryArray).build();
-        } catch (APIManagementException e) {
+        } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving entries of endpoint registry " +
                     "given by id: " + registryId, e, log);
         }
@@ -135,7 +136,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 RestApiUtil.handleResourceNotFoundError("Endpoint Registry with the id: " + registryId +
                         " is not found", log);
             }
-        } catch (APIManagementException e) {
+        } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving details of endpoint registry by id: "
                     + registryId, e, log);
         }
@@ -164,7 +165,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 registryDTOList.add(EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfo));
             }
             return Response.ok().entity(registryDTOList).build();
-        } catch (APIManagementException e) {
+        } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving details of endpoint registries", e, log);
         }
         return null;
@@ -185,10 +186,10 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             return Response.ok()
                     .entity(EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(createdRegistry))
                     .build();
-        } catch (APIMgtResourceAlreadyExistsException e) {
+        } catch (EndpointRegistryResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry with name '" + body.getName()
                     + "' already exists", e, log);
-        } catch (APIManagementException e) {
+        } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while adding new endpoint registry: "
                     + registry.getName(), e, log);
         }
@@ -250,10 +251,10 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             audit.info("Successfully created endpoint registry entry with id :" + createdEntry.getEntryId() +
                     " in :" + registryId + " by:" + user);
             return Response.ok().entity(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(createdEntry)).build();
-        } catch (APIMgtResourceAlreadyExistsException e) {
+        } catch (EndpointRegistryResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry Entry with name '"
                     + registryEntry.getEntryName() + "' already exists", e, log);
-        } catch (APIManagementException e) {
+        } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while adding new entry for the endpoint registry " +
                     "with id: " + registryId, e, log);
         } catch (IOException e) {
@@ -284,10 +285,10 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                     + " by :" + user);
             return Response.ok()
                     .entity(EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(updatedEndpointRegistry)).build();
-        } catch (APIMgtResourceAlreadyExistsException e) {
+        } catch (EndpointRegistryResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry with name '"
                     + endpointRegistry.getName() + "' already exists", e, log);
-        } catch (APIManagementException e) {
+        } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while updating the endpoint registry " +
                     "with id: " + registryId, e, log);
         }
@@ -309,7 +310,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             registryProvider.deleteEndpointRegistry(registryId);
             audit.info("Successfully deleted endpoint registry of id :" + registryId + " by :" + user);
             return Response.ok().entity("Successfully deleted the endpoint registry").build();
-        } catch (APIManagementException e) {
+        } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while deleting the endpoint registry " +
                     "with id: " + registryId, e, log);
         }
@@ -337,7 +338,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 return Response.ok().entity(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry))
                         .build();
             }
-        } catch (APIManagementException e) {
+        } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while fetching endpoint registry entry: "
                     + entryId, e, log);
         }
@@ -407,10 +408,10 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             audit.info("Successfully updated endpoint registry entry with id :" + entryId +
                     " in :" + registryId + " by:" + user);
             return Response.ok().entity(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(updatedEntry)).build();
-        } catch (APIMgtResourceAlreadyExistsException e) {
+        } catch (EndpointRegistryResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry Entry with name '"
                     + registryEntry.getEntryName() + "' already exists", e, log);
-        } catch (APIManagementException e) {
+        } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while updating the endpoint registry entry " +
                     "with id: " + entryId, e, log);
         } catch (IOException e) {
@@ -440,7 +441,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             audit.info("Successfully deleted endpoint registry entry with id :" + entryId +
                     " in :" + registryId + " by:" + user);
             return Response.ok().entity("Successfully deleted the endpoint registry entry").build();
-        } catch (APIManagementException e) {
+        } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while deleting the endpoint registry entry " +
                     "with id: " + registryId, e, log);
         }
@@ -449,7 +450,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
     @Override
     public Response createNewEntryVersion(String registryId, String entryId, String version,
-                                          MessageContext messageContext) throws APIManagementException {
+                                          MessageContext messageContext) throws EndpointRegistryException {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         String user = RestApiUtil.getLoggedInUsername();
         EndpointRegistry registryProvider = new EndpointRegistryImpl(user);
@@ -482,10 +483,10 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             return Response.ok()
                     .entity(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntryNewVersion))
                     .build();
-        } catch (APIMgtResourceAlreadyExistsException e) {
+        } catch (EndpointRegistryResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry Entry with version '"
                     + version + "' already exists for the entry with id: " + entryId, e, log);
-        } catch (APIManagementException e) {
+        } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while creating the new version of the " +
                     "endpoint registry entry with id: " + registryId, e, log);
         }
@@ -585,7 +586,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             } else {
                 return Response.ok(endpointDefinition).type(contentType).build();
             }
-        } catch (APIManagementException e) {
+        } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving the endpoint definition of registry " +
                     "entry with id: " + entryId, e, log);
         }

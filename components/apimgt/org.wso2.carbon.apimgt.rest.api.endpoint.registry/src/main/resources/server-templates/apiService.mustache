@@ -7,7 +7,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryException;
 
 {{#imports}}import {{import}};
 {{/imports}}
@@ -25,7 +25,7 @@ import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi.*;
 {{#operations}}
 public interface {{classname}}Service {
     {{#operation}}
-        public Response {{nickname}}({{#allParams}}{{>serviceQueryParams}}{{>servicePathParams}}{{>serviceHeaderParams}}{{>serviceBodyParams}}{{>serviceFormParams}}, {{/allParams}}MessageContext messageContext) throws APIManagementException;
+        public Response {{nickname}}({{#allParams}}{{>serviceQueryParams}}{{>servicePathParams}}{{>serviceHeaderParams}}{{>serviceBodyParams}}{{>serviceFormParams}}, {{/allParams}}MessageContext messageContext) throws EndpointRegistryException;
     {{/operation}}
 }
 {{/operations}}
