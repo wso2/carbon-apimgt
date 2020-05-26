@@ -776,11 +776,11 @@
         } ]
       }
     },
-    "/registries/{registryId}/entries/{entryId}/new-version" : {
+    "/registries/{registryId}/entries/{entryId}/copy-entry" : {
       "post" : {
         "tags" : [ "Registry Entries" ],
         "summary" : "Create a new version of the entry",
-        "description" : "Using this operation, you can retrieve a specific entry in a single\nRegistry using the EntryId and RegistryId.\n",
+        "description" : "Using this operation, you can create a new version of an existing entry\n",
         "operationId" : "createNewEntryVersion",
         "parameters" : [ {
           "name" : "registryId",
@@ -815,7 +815,7 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "Requested Entry in Registry is returned.\n",
+            "description" : "Created.\nSuccessful response with the newly created Registry Entry as entity in the body.\n",
             "headers" : {
               "Etag" : {
                 "description" : "Entity Tag of the response resource.",

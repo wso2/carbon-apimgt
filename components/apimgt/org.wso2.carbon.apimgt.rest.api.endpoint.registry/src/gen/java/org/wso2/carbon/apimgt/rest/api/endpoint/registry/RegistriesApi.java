@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T01:44:40.992+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T13:05:49.851+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -81,29 +81,29 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
         return delegate.addRegistry(body, securityContext);
         }
     @POST
-    @Path("/{registryId}/entries/{entryId}/new-version")
-
+    @Path("/{registryId}/entries/{entryId}/copy-entry")
+    
     @Produces({ "application/json" })
-    @Operation(summary = "Create a new version of the entry", description = "Using this operation, you can retrieve a specific entry in a single Registry using the EntryId and RegistryId. ",
+    @Operation(summary = "Create a new version of the entry", description = "Using this operation, you can create a new version of an existing entry ",
         security = {  @SecurityRequirement(name = "default" , scopes = { "" })
                  }, tags={ "Registry Entries" })
 
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(responseCode = "200",
-            description = "Requested Entry in Registry is returned. ",
+            description = "Created. Successful response with the newly created Registry Entry as entity in the body. ",
             content = @Content(
             schema = @Schema(implementation = RegistryEntryDTO.class))),
-
+    
         @ApiResponse(responseCode = "400",
             description = "Invalid Request ",
             content = @Content(
             schema = @Schema(implementation = ErrorDTO.class))),
-
+    
         @ApiResponse(responseCode = "404",
             description = "Not Found. Requested Registry or Entry does not exist. ",
             content = @Content(
             schema = @Schema(implementation = ErrorDTO.class))),
-
+    
         @ApiResponse(responseCode = "409",
             description = "Resource already exists ",
             content = @Content(
@@ -114,12 +114,12 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the registry",required=true) @PathParam("registryId") String registryId
 
 
-,
+, 
 
 @Parameter(description = "uuid of the registry entry",required=true) @PathParam("entryId") String entryId
 
 
-,      @NotNull        @Parameter(description = "Version to be created",required=true)
+,      @NotNull        @Parameter(description = "Version to be created",required=true) 
         @QueryParam("version") String version
 
 
@@ -256,12 +256,12 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the Registry",required=true) @PathParam("registryId") String registryId
 
 
-,             @Parameter(description = "Whether to perform exact search on name")
+,             @Parameter(description = "Whether to perform exact search on name") 
             @DefaultValue("false")
         @QueryParam("exactNameMatch") Boolean exactNameMatch
 
 
-,             @Parameter(description = "Version of the Registry Entry")
+,             @Parameter(description = "Version of the Registry Entry") 
         @QueryParam("version") String version
 
 
@@ -492,11 +492,11 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
             content = @Content(
             schema = @Schema(implementation = ErrorDTO.class)))
      })
-    public Response updateRegistry(
+    public Response updateRegistry(    
     @Parameter(description = "" ,required=true) RegistryDTO body
 
 
-,
+, 
 
 @Parameter(description = "ID of the Registry",required=true) @PathParam("registryId") String registryId
 

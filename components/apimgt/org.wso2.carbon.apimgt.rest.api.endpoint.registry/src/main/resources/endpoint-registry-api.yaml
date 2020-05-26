@@ -651,12 +651,11 @@ paths:
   #-----------------------------------------------------
   # Create a new version of the entry
   #-----------------------------------------------------
-  /registries/{registryId}/entries/{entryId}/new-version:
+  /registries/{registryId}/entries/{entryId}/copy-entry:
     post:
       summary: Create a new version of the entry
       description: |
-        Using this operation, you can retrieve a specific entry in a single
-        Registry using the EntryId and RegistryId.
+        Using this operation, you can create a new version of an existing entry
       security:
         - default:
             - registry:entry_write
@@ -689,7 +688,8 @@ paths:
       responses:
         '200':
           description: |
-            Requested Entry in Registry is returned.
+            Created.
+            Successful response with the newly created Registry Entry as entity in the body.
           headers:
             Etag:
               description: Entity Tag of the response resource.

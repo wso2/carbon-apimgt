@@ -25,7 +25,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi.*;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T01:44:40.992+05:30[Asia/Colombo]")public interface RegistriesApiService {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T13:05:49.851+05:30[Asia/Colombo]")public interface RegistriesApiService {
         public Response addRegistry(RegistryDTO body, MessageContext messageContext) throws APIManagementException;
         public Response createNewEntryVersion(String registryId, String entryId, String version, MessageContext messageContext) throws APIManagementException;
         public Response createRegistryEntry(String registryId, RegistryEntryDTO registryEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
