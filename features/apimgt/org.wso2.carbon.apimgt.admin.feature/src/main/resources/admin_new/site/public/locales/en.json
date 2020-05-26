@@ -58,6 +58,7 @@
   "AdminPages.BotDetection.detected.data.table.header.label.message.body": "Message Body",
   "AdminPages.BotDetection.detected.data.table.header.label.message.id": "Message ID",
   "AdminPages.BotDetection.detected.data.table.header.label.record.time": "Record Time",
+  "AdminPages.BotDetection.detected.data.table.row.empty.message.body.default.message": "Empty Message Body",
   "AdminPages.Microgateway.AddEdit.form.info.add.successful": "microgateway Label added successfully",
   "AdminPages.Microgateway.AddEdit.form.info.edit.successful": "Microgateway Label edited successfully",
   "AdminPages.Microgateway.AddEdit.form.name": "Name",

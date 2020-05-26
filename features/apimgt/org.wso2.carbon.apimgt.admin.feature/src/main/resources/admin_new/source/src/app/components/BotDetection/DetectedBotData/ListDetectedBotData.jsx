@@ -100,6 +100,11 @@ export default function ListMGLabels() {
             }),
             options: {
                 sort: true,
+                customBodyRender: (value) => {
+                    return (
+                        value.join(', ')
+                    );
+                },
             },
         },
         {
@@ -110,6 +115,19 @@ export default function ListMGLabels() {
             }),
             options: {
                 sort: true,
+                customBodyRender: (value) => {
+                    const emptyMessageBodyText = intl.formatMessage({
+                        id: 'AdminPages.BotDetection.detected.data.table.row.empty.message.body.default.message',
+                        defaultMessage: 'Empty Message Body',
+                    });
+                    if (value) {
+                        if (value === '') {
+                            return emptyMessageBodyText;
+                        }
+                        return value;
+                    }
+                    return emptyMessageBodyText;
+                },
             },
         },
         {
@@ -259,6 +277,7 @@ export default function ListMGLabels() {
                 searchProps={searchProps}
                 emptyBoxProps={emptyBoxProps}
                 apiCall={apiCall}
+                showActionColumn={false}
             />
         ) : (
             <ListBase
