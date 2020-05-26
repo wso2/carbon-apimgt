@@ -37,7 +37,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
     private static final Log log = LogFactory.getLog(SettingsApiServiceImpl.class);
 
     @Override
-    public Response settingsGet(MessageContext messageContext) {
+    public Response getSettings(MessageContext messageContext) {
         try {
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingsToDTO();

@@ -758,6 +758,7 @@
         "tags" : [ "Settings" ],
         "summary" : "Retrieve endpoint registry settings",
         "description" : "Retrieve Endpoint Registry settings\n",
+        "operationId" : "getSettings",
         "responses" : {
           "200" : {
             "description" : "OK.\nSettings returned\n"

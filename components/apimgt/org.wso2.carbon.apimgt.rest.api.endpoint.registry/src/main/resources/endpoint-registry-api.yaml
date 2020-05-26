@@ -646,6 +646,7 @@ paths:
       summary: Retrieve endpoint registry settings
       description: |
         Retrieve Endpoint Registry settings
+      operationId: getSettings
       tags:
         - Settings
       responses:

@@ -36,7 +36,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T12:10:23.945+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T12:22:45.951+05:30[Asia/Colombo]")
 public class SettingsApi  {
 
 @Context MessageContext securityContext;
@@ -56,7 +56,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
         @ApiResponse(responseCode = "404",
             description = "Not Found. Requested Settings does not exist. ")
      })
-    public Response settingsGet() throws APIManagementException{
-        return delegate.settingsGet(securityContext);
+    public Response getSettings() throws APIManagementException{
+        return delegate.getSettings(securityContext);
         }
 }
