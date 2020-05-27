@@ -103,11 +103,10 @@ export default function ListBlacklistThrottlingPolicies() {
  * @returns {Promise}.
  */
     function apiCall() {
-        let policyList;
-        let incrementId = 0;
         return new Promise(((resolve, reject) => {
             restApi.blacklistPoliciesGet().then((result) => {
-                policyList = result.body.list;
+                const policyList = result.body.list;
+                let incrementId = 0;
                 const blacklistPolicies = policyList.map((obj) => {
                     let array = [];
                     incrementId++;
