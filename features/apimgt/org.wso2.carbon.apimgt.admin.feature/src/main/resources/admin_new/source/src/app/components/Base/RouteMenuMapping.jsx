@@ -36,6 +36,7 @@ import ListApplications from 'AppComponents/ApplicationSettings/ListApplications
 import MicrogatewayLabels from 'AppComponents/MicrogatewayLabels/ListMGLabels';
 import TenantTheme from 'AppComponents/TenantTheme/UploadTheme';
 import ListDetectedBotData from 'AppComponents/BotDetection/DetectedBotData/ListDetectedBotData';
+import ListEmails from 'AppComponents/BotDetection/EmailConfig/ListEmails';
 
 const RouteMenuMapping = (intl) => [
     {
@@ -134,7 +135,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Configure Emails',
                 }),
                 path: '/settings/bot-detection/bot-detection-email-configuration',
-                component: () => <DemoTable />,
+                component: () => <ListEmails />,
                 icon: <PhonelinkSetupIcon />,
             },
         ],

@@ -505,8 +505,55 @@ class API extends Resource {
     }
 
     /**
-     * Mock api call with delay
-     * todo: Replace with the rest api when available
+     * Get list of emails configured at Bot Detection --> Configure Emails
+     */
+    botDetectionNotifyingEmailsGet() {
+        return this.client.then((client) => {
+            return client.apis['default'].get_botData_getEmailList(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    addBotDetectionNotifyingEmail(email, callback = null) {
+        const promiseAddEmail = this.client.then((client) => {
+            const data = {
+                email: email,
+            };
+            const payload = {
+                body: data,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['default'].post_botData_addEmail(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+
+        if (callback) {
+            return promiseAddEmail.then(callback);
+        } else {
+            return promiseAddEmail;
+        }
+    }
+
+    deleteBotDetectionNotifyingEmail(id, callback = null) {
+        const promiseDeleteEmail = this.client.then((client) => {
+            return client.apis['default'].delete_botData_deleteEmail(
+                { uuid: id },
+                this._requestMetaData(),
+            );
+        });
+
+        if (callback) {
+            return promiseDeleteEmail.then(callback);
+        } else {
+            return promiseDeleteEmail;
+        }
+    }
+
+    /**
+     * Get Analytics Enabled setting
      */
     getAnalyticsEnabled(){ 
         return this.client.then((client) => {
