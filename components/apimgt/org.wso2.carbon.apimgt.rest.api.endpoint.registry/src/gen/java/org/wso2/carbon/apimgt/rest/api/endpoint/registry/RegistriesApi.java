@@ -8,7 +8,7 @@ import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryArrayD
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApiService;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.impl.RegistriesApiServiceImpl;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryException;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T13:05:49.851+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-27T08:36:18.796+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -77,7 +77,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     @Parameter(description = "" ,required=true) RegistryDTO body
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.addRegistry(body, securityContext);
         }
     @POST
@@ -123,7 +123,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
         @QueryParam("version") String version
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.createNewEntryVersion(registryId, entryId, version, securityContext);
         }
     @POST
@@ -159,7 +159,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 ,  @Multipart(value = "definitionFile", required = false) InputStream definitionFileInputStream, @Multipart(value = "definitionFile" , required = false) Attachment definitionFileDetail
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.createRegistryEntry(registryId, registryEntry, definitionFileInputStream, definitionFileDetail, securityContext);
         }
     @DELETE
@@ -189,7 +189,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the Registry",required=true) @PathParam("registryId") String registryId
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.deleteRegistry(registryId, securityContext);
         }
     @DELETE
@@ -224,7 +224,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the registry entry",required=true) @PathParam("entryId") String entryId
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.deleteRegistryEntry(registryId, entryId, securityContext);
         }
     @GET
@@ -304,7 +304,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
         @QueryParam("offset") Integer offset
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.getAllEntriesInRegistry(registryId, exactNameMatch, version, serviceType, definitionType, name, serviceCategory, sortEntryBy, sortEntryOrder, limit, offset, securityContext);
         }
     public enum ServiceTypeEnum {
@@ -351,7 +351,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the registry entry",required=true) @PathParam("entryId") String entryId
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.getEndpointDefinition(registryId, entryId, securityContext);
         }
     @GET
@@ -392,7 +392,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
         @QueryParam("offset") Integer offset
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.getRegistries(query, sortRegistryBy, sortRegistryOrder, limit, offset, securityContext);
         }
     public enum SortRegistryByEnum {
@@ -428,7 +428,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "ID of the Registry",required=true) @PathParam("registryId") String registryId
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.getRegistryByUUID(registryId, securityContext);
         }
     @GET
@@ -465,7 +465,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the registry entry",required=true) @PathParam("entryId") String entryId
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.getRegistryEntryByUuid(registryId, entryId, securityContext);
         }
     @PUT
@@ -501,7 +501,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "ID of the Registry",required=true) @PathParam("registryId") String registryId
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.updateRegistry(body, registryId, securityContext);
         }
     @PUT
@@ -542,7 +542,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 ,  @Multipart(value = "definitionFile", required = false) InputStream definitionFileInputStream, @Multipart(value = "definitionFile" , required = false) Attachment definitionFileDetail
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.updateRegistryEntry(registryId, entryId, registryEntry, definitionFileInputStream, definitionFileDetail, securityContext);
         }
 }

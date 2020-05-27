@@ -15,11 +15,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.carbon.apimgt.impl.endpoint.registry.api;
 
-package org.wso2.carbon.apimgt.api;
-
-import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
-import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryEntry;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryInfo;
 
 import java.util.List;
 
@@ -33,9 +32,9 @@ public interface EndpointRegistry {
      *
      * @param endpointRegistry EndpointRegistryInfo
      * @return registryId UUID of the created Endpoint Registry ID
-     * @throws APIManagementException if failed to add EndpointRegistryInfo
+     * @throws EndpointRegistryException if failed to add EndpointRegistryInfo
      */
-    String addEndpointRegistry(EndpointRegistryInfo endpointRegistry) throws APIManagementException;
+    String addEndpointRegistry(EndpointRegistryInfo endpointRegistry) throws EndpointRegistryException;
 
     /**
      * Returns details of an Endpoint Registry
@@ -43,18 +42,18 @@ public interface EndpointRegistry {
      * @param registryId   Registry Identifier
      * @param tenantDomain
      * @return An EndpointRegistryInfo object related to the given identifier or null
-     * @throws APIManagementException if failed to get details of an Endpoint Registry
+     * @throws EndpointRegistryException if failed to get details of an Endpoint Registry
      */
     EndpointRegistryInfo getEndpointRegistryByUUID(String registryId, String tenantDomain)
-            throws APIManagementException;
+            throws EndpointRegistryException;
 
     /**
      * Deletes an Endpoint Registry
      *
      * @param registryUUID Registry Identifier(UUID)
-     * @throws APIManagementException if failed to delete the Endpoint Registry
+     * @throws EndpointRegistryException if failed to delete the Endpoint Registry
      */
-    void deleteEndpointRegistry(String registryUUID) throws APIManagementException;
+    void deleteEndpointRegistry(String registryUUID) throws EndpointRegistryException;
 
     /**
      * Returns details of all Endpoint Registries belong to a given tenant
@@ -65,10 +64,10 @@ public interface EndpointRegistry {
      * @param offset       Offset
      * @param tenantDomain
      * @return A list of EndpointRegistryInfo objects
-     * @throws APIManagementException if failed to get details of Endpoint Registries
+     * @throws EndpointRegistryException if failed to get details of Endpoint Registries
      */
     List<EndpointRegistryInfo> getEndpointRegistries(String sortBy, String sortOrder, int limit, int offset,
-                                                     String tenantDomain) throws APIManagementException;
+                                                     String tenantDomain) throws EndpointRegistryException;
 
     /**
      * Returns all entries belong to a given endpoint registry
@@ -85,49 +84,49 @@ public interface EndpointRegistry {
      * @param version         The version of registry entry
      * @param exactNameMatch  Whether to perform exact search on name
      * @return A list of EndpointRegistryEntry objects
-     * @throws APIManagementException if failed to get entries of an Endpoint Registry
+     * @throws EndpointRegistryException if failed to get entries of an Endpoint Registry
      */
     List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit,
                                                            int offset, String registryId, String serviceType,
                                                            String definitionType, String entryName,
                                                            String serviceCategory, String version,
-                                                           boolean exactNameMatch) throws APIManagementException;
+                                                           boolean exactNameMatch) throws EndpointRegistryException;
 
     /**
      * Returns details of a specific Endpoint Registry Entry
      *
      * @return an EndpointRegistryEntry object
-     * @throws APIManagementException if failed get details of an Endpoint Registry Entry
+     * @throws EndpointRegistryException if failed get details of an Endpoint Registry Entry
      */
-    EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryId, String registryEntryUuid)
-            throws APIManagementException;
+    EndpointRegistryEntry getEndpointRegistryEntryByUUID(String registryId, String registryEntryUuid) throws
+            EndpointRegistryException;
 
     /**
      * Adds a new Registry Entry
      *
      * @param registryEntry EndpointRegistryEntry
      * @return entryID UUID of the created Registry Entry
-     * @throws APIManagementException if failed to add EndpointRegistryEntry
+     * @throws EndpointRegistryException if failed to add EndpointRegistryEntry
      */
-    String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws APIManagementException;
+    String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws EndpointRegistryException;
 
     /**
      * Updates Registry Entry
      *
      * @param entryName     original name of the registry entry
      * @param registryEntry EndpointRegistryEntry
-     * @throws APIManagementException if failed to update EndpointRegistryEntry
+     * @throws EndpointRegistryException if failed to update EndpointRegistryEntry
      */
     void updateEndpointRegistryEntry(String entryName, EndpointRegistryEntry registryEntry)
-            throws APIManagementException;
+            throws EndpointRegistryException;
 
     /**
      * Deletes an Endpoint Registry Entry
      *
      * @param entryId Registry Entry Identifier(UUID)
-     * @throws APIManagementException if failed to delete the Endpoint Registry Entry
+     * @throws EndpointRegistryException if failed to delete the Endpoint Registry Entry
      */
-    void deleteEndpointRegistryEntry(String entryId) throws APIManagementException;
+    void deleteEndpointRegistryEntry(String entryId) throws EndpointRegistryException;
 
     /**
      * Updates an existing endpoint registry
@@ -136,10 +135,10 @@ public interface EndpointRegistry {
      * @param registryName         original name of the registry for the given registryId
      * @param endpointRegistryInfo EndpointRegistryInfo object with details to be updated
      * @return uuid of the endpoint registry
-     * @throws APIManagementException if failed to update the endpoint registry
+     * @throws EndpointRegistryException if failed to update the endpoint registry
      */
     void updateEndpointRegistry(String registryId, String registryName, EndpointRegistryInfo endpointRegistryInfo)
-            throws APIManagementException;
+            throws EndpointRegistryException;
 
     /**
      * Creates a new version of an Endpoint Registry Entry
@@ -147,8 +146,9 @@ public interface EndpointRegistry {
      * @param entryId       Registry Entry Identifier(UUID)
      * @param registryEntry EndpointRegistryEntry
      * @return entryID UUID of the created Registry Entry
-     * @throws APIManagementException if failed to delete the Endpoint Registry Entry
+     * @throws EndpointRegistryException if failed to delete the Endpoint Registry Entry
      */
     String createNewEntryVersion(String entryId, EndpointRegistryEntry registryEntry)
-            throws APIManagementException;
+            throws EndpointRegistryException;
 }
+
