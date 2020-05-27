@@ -221,7 +221,7 @@ export default function ListBlacklistThrottlingPolicies() {
                                 checked={blacklistPolicyList.find((x) => x.conditionUUID === conditionUUID)
                                     .conditionStatus}
                                 onChange={(event) => handleConditionStatus(conditionUUID, event)}
-                                name='invert'
+                                name='conditionStatus'
                                 color='primary'
                             />
                         </div>
