@@ -144,13 +144,14 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     }
 
     @Override
-    public Response getRegistries(String query, RegistriesApi.SortRegistryByEnum sortByRegistry, RegistriesApi
+    public Response getRegistries(String name, RegistriesApi.SortRegistryByEnum sortByRegistry, RegistriesApi
             .SortRegistryOrderEnum sortOrder, Integer limit, Integer offset, MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         String user = RestApiUtil.getLoggedInUsername();
         EndpointRegistry registryProvider = new EndpointRegistryImpl(user);
         RegistryArrayDTO registryDTOList = new RegistryArrayDTO();
 
+        name = name == null ? StringUtils.EMPTY : name;
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         String sortOrderStr = sortOrder != null ? sortOrder.toString() :
@@ -160,7 +161,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
 
         try {
             List<EndpointRegistryInfo> endpointRegistryInfoList =
-                    registryProvider.getEndpointRegistries(sortBy, sortOrderStr, limit, offset, tenantDomain);
+                    registryProvider.getEndpointRegistries(name, sortBy, sortOrderStr, limit, offset, tenantDomain);
             for (EndpointRegistryInfo endpointRegistryInfo : endpointRegistryInfoList) {
                 registryDTOList.add(EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfo));
             }

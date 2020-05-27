@@ -18,9 +18,9 @@
         "description" : "This operation provides you an array of available Registries.\n",
         "operationId" : "getRegistries",
         "parameters" : [ {
-          "name" : "query",
+          "name" : "name",
           "in" : "query",
-          "description" : "**Search condition**.\nYou can search for a registry by specifying the registry name as \"query\" attribute.\n\nEg.\n\"prodServer\" will match a registry entry if the name is exactly \"prodServer\".\n",
+          "description" : "**Search condition**.\nYou can search for a registry by specifying the registry name as \"name\" attribute.\n\nEg.\n\"prodServer\" will match a registry entry if the name is exactly \"prodServer\".\n",
           "required" : false,
           "style" : "form",
           "explode" : true,

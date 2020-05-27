@@ -176,7 +176,7 @@ public class RegistriesApiServiceImplTest {
                 RegistryDTO.TypeEnum.WSO2, ADMIN_USERNAME);
         endpointRegistryInfoList.add(endpointRegistryInfo2);
 
-        Mockito.when(registryProvider.getEndpointRegistries(EndpointRegistryConstants.COLUMN_ID,
+        Mockito.when(registryProvider.getEndpointRegistries(null, EndpointRegistryConstants.COLUMN_ID,
                 RestApiConstants.DEFAULT_SORT_ORDER, RestApiConstants.PAGINATION_LIMIT_DEFAULT,
                 RestApiConstants.PAGINATION_OFFSET_DEFAULT, TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfoList);

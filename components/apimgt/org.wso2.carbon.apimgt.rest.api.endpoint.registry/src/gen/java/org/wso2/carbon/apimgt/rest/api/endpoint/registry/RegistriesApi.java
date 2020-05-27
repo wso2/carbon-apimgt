@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-27T08:36:18.796+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-27T16:17:53.418+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -368,8 +368,8 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
             content = @Content(
             schema = @Schema(implementation = RegistryArrayDTO.class)))
      })
-    public Response getRegistries(            @Parameter(description = "**Search condition**. You can search for a registry by specifying the registry name as \"query\" attribute.  Eg. \"prodServer\" will match a registry entry if the name is exactly \"prodServer\". ") 
-        @QueryParam("query") String query
+    public Response getRegistries(            @Parameter(description = "**Search condition**. You can search for a registry by specifying the registry name as \"name\" attribute.  Eg. \"prodServer\" will match a registry entry if the name is exactly \"prodServer\". ") 
+        @QueryParam("name") String name
 
 
 ,             @Parameter(description = "",     schema=@Schema(allowableValues={ "registryName" })
@@ -393,7 +393,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 
 ) throws EndpointRegistryException {
-        return delegate.getRegistries(query, sortRegistryBy, sortRegistryOrder, limit, offset, securityContext);
+        return delegate.getRegistries(name, sortRegistryBy, sortRegistryOrder, limit, offset, securityContext);
         }
     public enum SortRegistryByEnum {
     registryName;
