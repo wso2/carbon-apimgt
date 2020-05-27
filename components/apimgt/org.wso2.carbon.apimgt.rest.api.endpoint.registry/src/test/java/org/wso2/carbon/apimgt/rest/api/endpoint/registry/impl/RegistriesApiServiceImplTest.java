@@ -37,13 +37,13 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
-import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
-import org.wso2.carbon.apimgt.impl.EndpointRegistryConstants;
-import org.wso2.carbon.apimgt.impl.EndpointRegistryImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryException;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.impl.EndpointRegistryImpl;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryEntry;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -154,7 +154,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void getRegistryByUUID_NonExistingUUID() throws APIManagementException {
+    public void getRegistryByUUID_NonExistingUUID() throws EndpointRegistryException {
         final String REGISTRY_UUID = "abc-1";
 
         Mockito.when(registryProvider.getEndpointRegistryByUUID(REGISTRY_UUID, TENANT_DOMAIN)).thenReturn(null);
@@ -165,7 +165,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void getRegistries() throws APIManagementException {
+    public void getRegistries() throws EndpointRegistryException {
         List<EndpointRegistryInfo> endpointRegistryInfoList = new ArrayList<>();
 
         EndpointRegistryInfo endpointRegistryInfo1 = createRegistry("abc1", 1, "Endpoint Registry 1",
@@ -196,7 +196,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void addRegistry() throws APIManagementException {
+    public void addRegistry() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
         RegistryDTO payloadDTO = EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfo);
 
@@ -214,14 +214,14 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void addRegistry_ResourceNameExists() throws APIManagementException {
+    public void addRegistry_ResourceNameExists() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
         RegistryDTO payloadDTO = EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfo);
 
-        APIMgtResourceAlreadyExistsException apiMgtResourceAlreadyExistsException
-                = Mockito.mock(APIMgtResourceAlreadyExistsException.class);
+        EndpointRegistryResourceAlreadyExistsException resourceAlreadyExistsException
+                = Mockito.mock(EndpointRegistryResourceAlreadyExistsException.class);
         Mockito.when(registryProvider.addEndpointRegistry(Mockito.any(EndpointRegistryInfo.class)))
-                .thenThrow(apiMgtResourceAlreadyExistsException);
+                .thenThrow(resourceAlreadyExistsException);
 
         Response response = registriesApiService.addRegistry(payloadDTO, messageContext);
 
@@ -229,7 +229,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void updateRegistry() throws APIManagementException {
+    public void updateRegistry() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfoOld = createRegistryWithDefaultParams();
         EndpointRegistryInfo endpointRegistryInfoNew = createRegistry(endpointRegistryInfoOld.getUuid(), 2,
                 "Endpoint Registry 2", RegistryDTO.TypeEnum.WSO2, "user1");
@@ -251,16 +251,16 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void updateRegistry_existingName() throws APIManagementException {
+    public void updateRegistry_existingName() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfoOld = createRegistryWithDefaultParams();
         EndpointRegistryInfo endpointRegistryInfoNew = createRegistry(endpointRegistryInfoOld.getUuid(), 2,
                 "Endpoint Registry 2", RegistryDTO.TypeEnum.WSO2, "user1");
 
         RegistryDTO payloadDTO = EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfoNew);
 
-        APIMgtResourceAlreadyExistsException apiMgtResourceAlreadyExistsException
-                = Mockito.mock(APIMgtResourceAlreadyExistsException.class);
-        Mockito.doThrow(apiMgtResourceAlreadyExistsException).when(registryProvider)
+        EndpointRegistryResourceAlreadyExistsException resourceAlreadyExistsException
+                = Mockito.mock(EndpointRegistryResourceAlreadyExistsException.class);
+        Mockito.doThrow(resourceAlreadyExistsException).when(registryProvider)
                 .updateEndpointRegistry(Mockito.eq(endpointRegistryInfoOld.getUuid()),
                         Mockito.eq(endpointRegistryInfoOld.getName()),
                         Mockito.any(EndpointRegistryInfo.class));
@@ -273,7 +273,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void deleteRegistry() throws APIManagementException {
+    public void deleteRegistry() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
         final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
@@ -396,7 +396,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void createRegistryEntry_validWSDL1() throws APIManagementException {
+    public void createRegistryEntry_validWSDL1() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
         final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
@@ -424,7 +424,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void createRegistryEntry_validWSDL2() throws APIManagementException {
+    public void createRegistryEntry_validWSDL2() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
         final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
@@ -452,7 +452,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void createRegistryEntry_validGraphQL() throws APIManagementException {
+    public void createRegistryEntry_validGraphQL() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
         final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
@@ -480,7 +480,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void createRegistryEntry_validOASUrl() throws APIManagementException {
+    public void createRegistryEntry_validOASUrl() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
         final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
@@ -504,7 +504,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void createRegistryEntryWithNoDefinitionFileAndUrl() throws APIManagementException {
+    public void createRegistryEntryWithNoDefinitionFileAndUrl() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
         final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
@@ -529,7 +529,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void updateRegistryEntryWithDefinitionFile() throws APIManagementException {
+    public void updateRegistryEntryWithDefinitionFile() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
         final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
@@ -565,7 +565,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void updateRegistryEntryWithDefinitionUrl() throws APIManagementException {
+    public void updateRegistryEntryWithDefinitionUrl() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
         final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
@@ -598,7 +598,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void updateRegistryEntryWithNoDefinitionFileAndUrl() throws APIManagementException {
+    public void updateRegistryEntryWithNoDefinitionFileAndUrl() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
         final String REGISTRY_UUID = endpointRegistryInfo.getUuid();
 
@@ -630,7 +630,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void getRegistryEntryByUuid() throws APIManagementException {
+    public void getRegistryEntryByUuid() throws EndpointRegistryException {
         final String REGISTRY_UUID = "reg1";
 
         EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
@@ -650,7 +650,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void getRegistryEntryByUuid_NonExistingResource() throws APIManagementException {
+    public void getRegistryEntryByUuid_NonExistingResource() throws EndpointRegistryException {
         final String REGISTRY_UUID = "reg1";
         final String ENTRY_UUID = "entry1";
 
@@ -662,7 +662,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void deleteRegistryEntry() throws APIManagementException {
+    public void deleteRegistryEntry() throws EndpointRegistryException {
         final String REGISTRY_UUID = "reg1";
 
         EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
@@ -680,7 +680,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void getAllEntriesInRegistry() throws APIManagementException {
+    public void getAllEntriesInRegistry() throws EndpointRegistryException {
         final String REGISTRY_UUID = "reg1";
 
         List<EndpointRegistryEntry> endpointRegistryEntryList = new ArrayList<>();
@@ -720,7 +720,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void getEndpointDefinitionForOAS() throws APIManagementException {
+    public void getEndpointDefinitionForOAS() throws EndpointRegistryException {
         final String REGISTRY_UUID = "reg1";
 
         EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
@@ -744,7 +744,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void getEndpointDefinitionForWSDL1() throws APIManagementException {
+    public void getEndpointDefinitionForWSDL1() throws EndpointRegistryException {
         final String REGISTRY_UUID = "reg1";
 
         EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
@@ -768,7 +768,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void getEndpointDefinitionForWSDL2() throws APIManagementException {
+    public void getEndpointDefinitionForWSDL2() throws EndpointRegistryException {
         final String REGISTRY_UUID = "reg1";
 
         EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
@@ -792,7 +792,7 @@ public class RegistriesApiServiceImplTest {
     }
 
     @Test
-    public void getEndpointDefinitionForGraphQL() throws APIManagementException {
+    public void getEndpointDefinitionForGraphQL() throws EndpointRegistryException {
         final String REGISTRY_UUID = "reg1";
 
         EndpointRegistryEntry endpointRegistryEntry = createRegistryEntryWithDefaultParams();
@@ -867,9 +867,9 @@ public class RegistriesApiServiceImplTest {
                 .thenReturn(endpointRegistryEntryOldVersion);
 
         endpointRegistryEntryOldVersion.setVersion(NEW_VERSION);
-        APIMgtResourceAlreadyExistsException apiMgtResourceAlreadyExistsException
-                = Mockito.mock(APIMgtResourceAlreadyExistsException.class);
-        Mockito.doThrow(apiMgtResourceAlreadyExistsException).when(registryProvider)
+        EndpointRegistryResourceAlreadyExistsException resourceAlreadyExistsException
+                = Mockito.mock(EndpointRegistryResourceAlreadyExistsException.class);
+        Mockito.doThrow(resourceAlreadyExistsException).when(registryProvider)
                 .createNewEntryVersion(endpointRegistryEntryOldVersion.getEntryId(),
                         endpointRegistryEntryOldVersion);
 
