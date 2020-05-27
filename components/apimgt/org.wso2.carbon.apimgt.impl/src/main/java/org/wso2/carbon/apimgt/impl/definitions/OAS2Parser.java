@@ -244,8 +244,7 @@ public class OAS2Parser extends APIDefinition {
      * @return manualCode
      */
     private String getGeneratedSetResponse(String responseCode, String type) {
-        return
-//                "  mc.setProperty('HTTP_SC', \""+responseCode+"\");\n" +
+        return "  mc.setProperty('HTTP_SC', \"" + responseCode + "\");\n" +
                 "  mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
                 "  mc.setPayload" + type.toUpperCase() + "(response" + responseCode + type + ");";
     }
@@ -280,7 +279,7 @@ public class OAS2Parser extends APIDefinition {
                 "var responseCode = mc.getProperty('query.param.responseCode');\n\n" +
                 responseSectionString +
                 " if (responseCode == null) {\n\n" +
-//                "  mc.setProperty('HTTP_SC', \"" + minResponseCode + "\");\n" +
+                "  mc.setProperty('HTTP_SC', \"" + minResponseCode + "\");\n" +
                 "  mc.setProperty('CONTENT_TYPE', 'application/" + minResponseType + "');\n" +
                 "  mc.setPayload" + minResponseType.toUpperCase() + "(response" + minResponseCode + minResponseType + ");\n\n" +
                 "} else " +
