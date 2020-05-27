@@ -1595,15 +1595,6 @@ public abstract class AbstractAPIManager implements APIManager {
         apiMgtDAO.updateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
     }
 
-    public GraphqlMaxDepthMaxComplexityInfo getMaxDepthMaxComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
-        return apiMgtDAO.getMaxDepthMaxComplexityDetails(apiIdentifier);
-    }
-
-
-    public void updateMaxDepthMaxComplexityDetails(APIIdentifier apiIdentifier, GraphqlMaxDepthMaxComplexityInfo graphqlDepthInfo) throws APIManagementException {
-        apiMgtDAO.updateMaxDepthMaxComplexityDetails(apiIdentifier, graphqlDepthInfo);
-    }
-
 
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException {
         return null;

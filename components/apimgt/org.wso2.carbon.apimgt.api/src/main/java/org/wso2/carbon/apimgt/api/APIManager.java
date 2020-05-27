@@ -267,25 +267,6 @@ public interface APIManager {
     void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
             throws APIManagementException;
 
-    /**
-     * Returns a list of GraphqlDepthInfo objects for a given API ID
-     *
-     * @param apiIdentifier APIIdentifier
-     * @return GraphqlDepthInfo object
-     * @throws APIManagementException if failed to retrieve depth related details of the given API
-     */
-    GraphqlMaxDepthMaxComplexityInfo getMaxDepthMaxComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException;
-
-    /**
-     * Updates the complexity details given the GraphqlComplexityInfo object
-     *
-     * @param apiIdentifier         APIIdentifier
-     * @param graphqlMaxDepthMaxComplexityInfo GraphqlDepthInfo object
-     * @throws APIManagementException if failed to update complexity details
-     */
-    void updateMaxDepthMaxComplexityDetails(APIIdentifier apiIdentifier, GraphqlMaxDepthMaxComplexityInfo graphqlMaxDepthMaxComplexityInfo)
-            throws APIManagementException;
-
 
     /**
      * Retrieves the subscriber from the given access token

@@ -8354,6 +8354,72 @@ definitions:
         example: "admin--HackerNewsAPI.graphql"
       schemaDefinition:
         type: string
+  #-----------------------------------------------------
+  # The GraphQL Query Complexity Info resource
+  #-----------------------------------------------------
+  GraphQLQueryComplexityInfo:
+    title: GraphQL Query Complexity Info
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/GraphQLCustomComplexityInfo'
+
+  #-----------------------------------------------------
+  # The GraphQL Custom Complexity Info resource
+  #-----------------------------------------------------
+  GraphQLCustomComplexityInfo:
+    title: GraphQL Custom Complexity Info
+    required:
+      - type
+      - field
+      - complexityValue
+    properties:
+      type:
+        type: string
+        description: |
+          The type found within the schema of the API
+        example: "Country"
+      field:
+        type: string
+        description: |
+          The field which is found under the type within the schema of the API
+        example: "name"
+      complexityValue:
+        type: integer
+        description: |
+          The complexity value allocated for the associated field under the specified type
+        example: 1
+
+  #-----------------------------------------------------
+  # The GraphQL Schema Type List resource
+  #-----------------------------------------------------
+  GraphQLSchemaTypeList:
+    title: List of types and corresponding fields of the GraphQL Schema
+    properties:
+      typeList:
+        type: array
+        items:
+          $ref: '#/definitions/GraphQLSchemaType'
+
+  #-----------------------------------------------------
+  # The GraphQL Schema Type resource
+  #-----------------------------------------------------
+  GraphQLSchemaType:
+    title: Single type and corresponding fields found within the GraphQL Schema
+    properties:
+      type:
+        type: string
+        description: |
+          Type found within the GraphQL Schema
+        example: "Country"
+      fieldList:
+        type: array
+        description: |
+          Array of fields under current type
+        items:
+          type: string
+        example: ["code","name"]
 
 
   #-----------------------------------------------------

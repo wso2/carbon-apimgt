@@ -298,14 +298,6 @@ public interface APIProvider extends APIManager {
      */
     void addAPI(API api) throws APIManagementException;
 
-    /**
-     * Adds query analysis basic info. This method is used to set depth and complexity as false at API creation
-     *
-     * @param apiIdentifier APIIdentifier
-     * @throws APIManagementException if failed to add initial query analysis info
-     */
-    void addQueryAnalysisInfo(APIIdentifier apiIdentifier) throws APIManagementException;
-
     public boolean isAPIUpdateValid(API api) throws APIManagementException;
 
     /**

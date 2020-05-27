@@ -19,7 +19,8 @@
 import React, { lazy, Suspense } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import MenuIcon from '@material-ui/icons/Menu';
+import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
+import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import {
     Route, Switch, Redirect, Link, withRouter,
 } from 'react-router-dom';
@@ -479,12 +480,19 @@ class Details extends React.Component {
                             />
                         </div>
                     )}
-                    {!open && (
-                        <div onClick={this.handleDrawerOpen}
-                            style={{ paddingLeft: '15px', width: 45 }}
+                    {open ? (
+                        <div onClick={this.handleDrawerClose}
+                            style={{ paddingLeft: '15px', position: 'absolute', bottom: 0 }}
                         >
-                            <MenuIcon fontSize='medium' style={{ color: 'white' }} />
+                            <ArrowBackIosIcon fontSize='medium' style={{ color: 'white' }} />
                         </div>
+                    ) : (
+                        <div onClick={this.handleDrawerOpen}
+                            style={{ paddingLeft: '15px', position: 'absolute', bottom: 0 }}
+                        >
+                            <ArrowForwardIosIcon fontSize='medium' style={{ color: 'white' }} />
+                        </div>
+
                     )}
 
                 </div>

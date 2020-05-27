@@ -10305,7 +10305,9 @@ public class ApiMgtDAO {
         Connection conn = null;
         PreparedStatement policyStatement = null;
         boolean hasCustomAttrib = false;
+        ResultSet rs = null;
 
+        int policyId = 0;
         try {
             if (policy.getCustomAttributes() != null) {
                 hasCustomAttrib = true;
@@ -10316,7 +10318,7 @@ public class ApiMgtDAO {
             if (hasCustomAttrib) {
                 addQuery = SQLConstants.INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL;
             }
-            policyStatement = conn.prepareStatement(addQuery);
+            policyStatement = conn.prepareStatement(addQuery, new String[]{"POLICY_ID"});
             setCommonParametersForPolicy(policyStatement, policy);
             policyStatement.setInt(12, policy.getRateLimitCount());
             policyStatement.setString(13, policy.getRateLimitTimeUnit());
@@ -10335,10 +10337,15 @@ public class ApiMgtDAO {
                 policyStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
                 policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
                 policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-
             }
             policyStatement.executeUpdate();
-
+            rs = policyStatement.getGeneratedKeys();
+            if (rs.next()) {
+                policyId = Integer.parseInt(rs.getString(1));
+            }
+            if(policy.getGraphQLMaxDepth() != 0 && policy.getGraphQLMaxComplexity() != 0){
+                addGraphQLQueryAnalysisInfo(conn, policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity(), policyId);
+            }
             conn.commit();
         } catch (SQLIntegrityConstraintViolationException e) {
             boolean isSubscriptionPolicyExists = isPolicyExist(conn, PolicyConstants.POLICY_LEVEL_SUB, policy.getTenantId(),
@@ -10373,7 +10380,27 @@ public class ApiMgtDAO {
                 handleException("Failed to add Subscription Policy: " + policy, e);
             }
         } finally {
-            APIMgtDBUtil.closeAllConnections(policyStatement, conn, null);
+            APIMgtDBUtil.closeAllConnections(policyStatement, conn, rs);
+        }
+    }
+
+    private void addGraphQLQueryAnalysisInfo(Connection conn, int maxDepth, int maxComplexity, int policyId)
+            throws APIManagementException {
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try{
+            String query = SQLConstants.ADD_QUERY_ANALYSIS_SQL;
+            ps = conn.prepareStatement(query);
+            ps.setInt(1,policyId);
+            ps.setInt(2,maxDepth);
+            ps.setInt(3,maxComplexity);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            handleException("Failed to add Subscription Policy: " , e);
+
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
         }
     }
 
@@ -10976,6 +11003,7 @@ public class ApiMgtDAO {
         }
         return policies.toArray(new SubscriptionPolicy[policies.size()]);
     }
+
 
     /**
      * Get subscription level policies specified by tier names belonging to a specific tenant
@@ -11851,6 +11879,7 @@ public class ApiMgtDAO {
      */
     public void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
         Connection connection = null;
+        ResultSet rs = null;
         PreparedStatement updateStatement = null;
         boolean hasCustomAttrib = false;
         String updateQuery;
@@ -11880,7 +11909,7 @@ public class ApiMgtDAO {
 
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-            updateStatement = connection.prepareStatement(updateQuery);
+            updateStatement = connection.prepareStatement(updateQuery, new String[]{"POLICY_ID"});
             if (!StringUtils.isEmpty(policy.getDisplayName())) {
                 updateStatement.setString(1, policy.getDisplayName());
             } else {
@@ -11946,6 +11975,14 @@ public class ApiMgtDAO {
                 }
             }
             updateStatement.executeUpdate();
+            int policyId = 0;
+            rs = updateStatement.getGeneratedKeys();
+            if (rs.next()) {
+                policyId = Integer.parseInt(rs.getString(1));
+            }
+            if(policy.getGraphQLMaxDepth() != 0 && policy.getGraphQLMaxComplexity() != 0){
+                updateGraphQLQueryAnalysisInfo(connection, policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity(), policyId);
+            }
             connection.commit();
         } catch (SQLException e) {
             if (connection != null) {
@@ -11960,7 +11997,27 @@ public class ApiMgtDAO {
             handleException(
                     "Failed to update subscription policy: " + policy.getPolicyName() + '-' + policy.getTenantId(), e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(updateStatement, connection, null);
+            APIMgtDBUtil.closeAllConnections(updateStatement, connection, rs);
+        }
+    }
+
+    private void updateGraphQLQueryAnalysisInfo(Connection conn, int maxDepth, int maxComplexity, int policyId)
+            throws APIManagementException {
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try{
+            String query = SQLConstants.UPDATE_QUERY_ANALYSIS_SQL;
+            ps = conn.prepareStatement(query);
+            ps.setInt(1,maxComplexity);
+            ps.setInt(2,maxDepth);
+            ps.setInt(3,policyId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            handleException("Failed to update Subscription Policy: " , e);
+
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
         }
     }
 
@@ -14232,27 +14289,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Add complexity and depth as disabled at API creation
-     *
-     * @param apiIdentifier APIIdentifier object to retrieve API ID
-     * @throws APIManagementException
-     */
-    public void addQueryAnalysisInfo(APIIdentifier apiIdentifier) throws APIManagementException {
-        String query = SQLConstants.ADD_INITIAL_QUERY_ANALYSIS_SQL;
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-            conn.setAutoCommit(false);
-            int apiId = getAPIID(apiIdentifier, conn);
-            ps.setInt(1, apiId);
-            ps.setInt(2, 0);
-            ps.setInt(3,0);
-            ps.executeUpdate();
-            conn.commit();
-        } catch (SQLException ex) {
-            handleException("Error while adding query analysis info: ", ex);
-        }
-    }
-    /**
      * Add complexity details
      *
      * @param apiIdentifier         APIIdentifier object to retrieve API ID
@@ -14341,66 +14377,6 @@ public class ApiMgtDAO {
             handleException("Error while retrieving custom complexity details: ", ex);
         }
         return graphqlComplexityInfo;
-    }
-
-    /**
-     * Get role-depth mappings of a given API
-     *
-     * @param apiIdentifier APIIdentifier object to retrieve API ID
-     * @return list of GraphqlDepthInfo objects which contains depth related information
-     * @throws APIManagementException
-     */
-    public GraphqlMaxDepthMaxComplexityInfo getMaxDepthMaxComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
-        GraphqlMaxDepthMaxComplexityInfo graphqlMaxDepthMaxComplexityInfo = new GraphqlMaxDepthMaxComplexityInfo();
-        String getMaxDepthMaxComplexityDetailsQuery = SQLConstants.GET_DEPTH_COMPLEXITY_DETAILS_SQL;
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(getMaxDepthMaxComplexityDetailsQuery)) {
-            int apiId = getAPIID(apiIdentifier, conn);
-            ps.setInt(1, apiId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    graphqlMaxDepthMaxComplexityInfo.setMaxComplexity(rs.getInt("MAX_COMPLEXITY"));
-                    graphqlMaxDepthMaxComplexityInfo.setMaxDepth(rs.getInt("MAX_DEPTH"));
-                }
-            }
-        } catch (SQLException ex) {
-            handleException("Error while retrieving max-depth and max-complexity value: ", ex);
-        }
-        return graphqlMaxDepthMaxComplexityInfo;
-    }
-
-    /**
-     * Updates a max_depth value and max_complexity value
-     *
-     * @param apiIdentifier APIIdentifier object to retrieve API ID
-     * @param graphqlDepthInfo GraphqlDepthInfo object
-     * @throws APIManagementException
-     */
-    public void updateMaxDepthMaxComplexityDetails(APIIdentifier apiIdentifier, GraphqlMaxDepthMaxComplexityInfo graphqlDepthInfo)
-            throws APIManagementException {
-        String depthQuery = SQLConstants.UPDATE_DEPTH_DETAILS_SQL;
-        String complexityQuery = SQLConstants.UPDATE_COMPLEXITY_DETAILS_SQL;;
-        try (Connection conn = APIMgtDBUtil.getConnection()) {
-            conn.setAutoCommit(false);
-            int apiId = getAPIID(apiIdentifier, conn);
-            try (PreparedStatement ps = conn.prepareStatement(depthQuery)) {
-                ps.setInt(1, graphqlDepthInfo.getMaxDepth());
-                ps.setInt(2, apiId);
-                ps.executeUpdate();
-            } catch (SQLException e) {
-                handleException("Error while updating max-depth value of API : " + apiId, e);
-            }
-            try (PreparedStatement ps = conn.prepareStatement(complexityQuery)) {
-                ps.setInt(1, graphqlDepthInfo.getMaxComplexity());
-                ps.setInt(2, apiId);
-                ps.executeUpdate();
-            } catch (SQLException e) {
-                handleException("Error while updating max-complexity value of API : " + apiId, e);
-            }
-            conn.commit();
-        } catch (SQLException e) {
-            handleException("Error in updating the max-depth and max-complexity value of API: " + e.getMessage(), e);
-        }
     }
 
 

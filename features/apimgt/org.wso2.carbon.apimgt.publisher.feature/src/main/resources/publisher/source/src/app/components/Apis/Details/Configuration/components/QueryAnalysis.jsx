@@ -130,6 +130,8 @@ export default function AlertDialog(props) {
         });
         setTypeList(array);
     }
+
+
     useEffect(() => {
         const apiId = api.id;
         const apiClient = new Api();
@@ -147,6 +149,8 @@ export default function AlertDialog(props) {
                 }
             });
     }, []);
+
+
     /**
     * Edit Custom Complexity Values
     */
