@@ -225,6 +225,7 @@ public class EndpointRegistryDAO {
     /**
      * Returns details of all Endpoint Registries belong to a given tenant
      *
+     * @param name      Registry name
      * @param sortBy    Name of the sorting field
      * @param sortOrder Order of sorting (asc or desc)
      * @param limit     Limit
@@ -233,21 +234,35 @@ public class EndpointRegistryDAO {
      * @return A list of EndpointRegistryInfo objects
      * @throws EndpointRegistryException if failed to get details of Endpoint Registries
      */
-    public List<EndpointRegistryInfo> getEndpointRegistries(String sortBy, String sortOrder, int limit, int offset,
+    public List<EndpointRegistryInfo> getEndpointRegistries(String name, String sortBy, String sortOrder,
+                                                            int limit, int offset,
                                                             int tenantID) throws EndpointRegistryException {
 
         List<EndpointRegistryInfo> endpointRegistryInfoList = new ArrayList<>();
 
         try {
-            String query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENDPOINT_REGISTRIES_OF_TENANT");
+            boolean nameMatch = !StringUtils.isEmpty(name);
+            String query;
+            if (nameMatch) {
+                query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENDPOINT_REGISTRIES_OF_TENANT_WITH_NAME");
+            } else {
+                query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENDPOINT_REGISTRIES_OF_TENANT");
+            }
             query = query.replace("$1", sortBy);
             query = query.replace("$2", sortOrder);
 
             try (Connection connection = APIMgtDBUtil.getConnection();
                  PreparedStatement ps = connection.prepareStatement(query)) {
-                ps.setInt(1, tenantID);
-                ps.setInt(2, offset);
-                ps.setInt(3, limit);
+                if (nameMatch) {
+                    ps.setString(1, name);
+                    ps.setInt(2, tenantID);
+                    ps.setInt(3, offset);
+                    ps.setInt(4, limit);
+                } else {
+                    ps.setInt(1, tenantID);
+                    ps.setInt(2, offset);
+                    ps.setInt(3, limit);
+                }
                 ps.executeQuery();
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -358,7 +373,7 @@ public class EndpointRegistryDAO {
 
         List<EndpointRegistryEntry> endpointRegistryEntryList = new ArrayList<>();
         String query;
-        boolean versionMatch = StringUtils.isEmpty(version) ? false : true;
+        boolean versionMatch = !StringUtils.isEmpty(version);
         try {
             if (exactNameMatch && versionMatch) {
                 query = SQLConstantManagerFactory

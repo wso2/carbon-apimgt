@@ -149,13 +149,13 @@ public class EndpointRegistryImplTest {
                 "ReadWrite", "etcd", "user2");
         endpointRegistryInfoList.add(endpointRegistryInfo2);
 
-        Mockito.when(endpointRegistryDAO.getEndpointRegistries(EndpointRegistryConstants.COLUMN_REG_NAME, "ASC",
-                25, 0, TENANT_ID))
+        Mockito.when(endpointRegistryDAO.getEndpointRegistries(null, EndpointRegistryConstants.COLUMN_REG_NAME,
+                "ASC", 25, 0, TENANT_ID))
                 .thenReturn(endpointRegistryInfoList);
 
         List<EndpointRegistryInfo> endpointRegistryInfoListResponse
-                = endpointRegistry.getEndpointRegistries(EndpointRegistryConstants.COLUMN_REG_NAME, "ASC",
-                25, 0, TENANT_DOMAIN);
+                = endpointRegistry.getEndpointRegistries(null, EndpointRegistryConstants.COLUMN_REG_NAME,
+                "ASC", 25, 0, TENANT_DOMAIN);
 
         for (int i = 0; i < endpointRegistryInfoListResponse.size(); i++) {
             compareRegistryInfo(endpointRegistryInfoList.get(i), endpointRegistryInfoListResponse.get(i));

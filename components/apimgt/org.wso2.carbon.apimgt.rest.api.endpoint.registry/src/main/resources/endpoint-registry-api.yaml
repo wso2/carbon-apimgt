@@ -40,11 +40,11 @@ paths:
           - registry:view
       operationId: getRegistries
       parameters:
-      - name: query
+      - name: name
         in: query
         description: |
           **Search condition**.
-          You can search for a registry by specifying the registry name as "query" attribute.
+          You can search for a registry by specifying the registry name as "name" attribute.
 
           Eg.
           "prodServer" will match a registry entry if the name is exactly "prodServer".
