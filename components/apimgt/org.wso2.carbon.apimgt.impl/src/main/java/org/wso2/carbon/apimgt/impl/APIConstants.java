@@ -2271,4 +2271,12 @@ public final class APIConstants {
         SUBSCRIPTIONS_UPDATE,
         SUBSCRIPTIONS_DELETE
     }
+
+    public static class GatewayArtifactSynchronizer{
+
+        public static final String SYNC_GATEWAY_ARTIFACTS_CONFIG  = "SyncGatewayArtifacts";
+        public static final String PUBLISHER_CONFIG  = "Publisher";
+        public static final String RETRIEVER_CONFIG = "Retriever";
+        public static final String SKIP_LOCAL_COPY_CONFIG  = "SkipLocalCopy";
+    }
 }

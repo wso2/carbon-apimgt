@@ -15450,4 +15450,37 @@ public class ApiMgtDAO {
         }
     }
 
+    public void addAPIBlob(String APIId, String APIName, String gatewayLabel, ByteArrayInputStream bais,
+                           int streamLength) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_API_BLOB)) {
+            statement.setString(1, APIId);
+            statement.setString(2, APIName);
+            statement.setString(3, gatewayLabel);
+            statement.setBinaryStream(4, bais, streamLength);
+            statement.setBinaryStream(5, bais, streamLength);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to add blob for " + APIName , e);
+        }
+    }
+
+    public ByteArrayInputStream getAPIBlob(String APIId, String APIName, String label) throws APIManagementException {
+        ByteArrayInputStream baip = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_BLOB)) {
+            statement.setString(1, APIId);
+            statement.setString(2, APIName);
+            statement.setString(3, label);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                byte[] st = (byte[]) rs.getObject(1);
+                baip = new ByteArrayInputStream(st);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API Blob user ID for " + APIName , e);
+        }
+        return baip;
+    }
+
 }

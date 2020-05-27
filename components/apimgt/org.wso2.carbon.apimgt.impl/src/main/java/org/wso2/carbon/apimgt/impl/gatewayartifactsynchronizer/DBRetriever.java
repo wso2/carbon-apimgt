@@ -10,13 +10,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
-public class DBDeployer implements ArtifactDeployer {
+public class DBRetriever implements ArtifactRetriever {
 
-    private static final Log log = LogFactory.getLog(DBDeployer.class);
+    private static final Log log = LogFactory.getLog(DBRetriever.class);
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     @Override
-    public GatewayAPIDTO deployArtifact (String APIId, String APIName, String label) {
+    public GatewayAPIDTO retrieveArtifacts(String APIId, String APIName, String label) {
 
         GatewayAPIDTO gatewayAPIDTO = null;
         try {
@@ -24,7 +24,7 @@ public class DBDeployer implements ArtifactDeployer {
             ObjectInputStream objectStream = new ObjectInputStream(byteStream);
             gatewayAPIDTO = (GatewayAPIDTO) objectStream.readObject();
         } catch (APIManagementException | IOException | ClassNotFoundException e) {
-            log.error("Error deploying Artifact of " + APIName + " API", e);
+            log.error("Error retrieving Artifact of " + APIName + " API from DB", e);
         }
         return gatewayAPIDTO;
     }

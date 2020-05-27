@@ -3159,6 +3159,12 @@ public class SQLConstants {
     public static final String GET_KEY_MAPPING_INFO_FROM_APP_ID = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE," +
             "STATE,APP_INFO FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
 
+    public static final String ADD_API_BLOB = "INSERT INTO AM_API_BLOB (API_ID, API_NAME, LABEL, ARTIFACTS) VALUES " +
+            "(?,?,?,?) ON DUPLICATE KEY UPDATE ARTIFACTS = ?";
+
+    public static final String GET_API_BLOB = "SELECT ARTIFACTS FROM AM_API_BLOB WHERE API_ID =? AND API_NAME=? AND " +
+            "LABEL=?";
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

@@ -30,7 +30,7 @@ public class DBPublisher implements ArtifactPublisher {
                     byteArrayInputStream, gatewayAPIDTOAsBytes.length);
 
         } catch (IOException | APIManagementException e) {
-            log.error("Error publishing Artifact of " + gatewayAPIDTO.getName() + " API", e);
+            log.error("Error publishing Artifact of " + gatewayAPIDTO.getName() + " API from DB", e);
         }
 
     }
