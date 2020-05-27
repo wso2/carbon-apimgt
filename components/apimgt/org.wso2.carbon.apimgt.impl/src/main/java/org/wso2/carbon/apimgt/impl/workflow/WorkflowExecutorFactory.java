@@ -113,6 +113,9 @@ public class WorkflowExecutorFactory {
         }else if(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(wfType)){
             workflowDTO = new SubscriptionWorkflowDTO();
             workflowDTO.setWorkflowType(wfType);
+        } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE.equals(wfType)) {
+            workflowDTO = new SubscriptionWorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
         }else if(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP.equals(wfType)){
             workflowDTO = new WorkflowDTO();
             workflowDTO.setWorkflowType(wfType);

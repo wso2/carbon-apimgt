@@ -38,6 +38,7 @@ import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import SettingsBase from 'AppComponents/Apis/Settings/SettingsBase';
 import Progress from 'AppComponents/Shared/Progress';
 import Configurations from 'Config';
+import Scopes from 'AppComponents/Scopes/Scopes';
 
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
 const DeferredAPIs = () => (
@@ -155,6 +156,7 @@ export default class Protected extends Component {
                                     <Redirect exact from='/' to='/apis' />
                                     <Route path='/apis' component={DeferredAPIs} />
                                     <Route path='/api-products' component={DeferredAPIs} />
+                                    <Route path='/scopes' component={Scopes} />
                                     <Route path='/settings' component={SettingsBase} />
                                     <Route component={ResourceNotFound} />
                                 </Switch>

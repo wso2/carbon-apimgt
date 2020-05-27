@@ -159,7 +159,7 @@ class AuthManager {
      * @param {*} scopesAllowedToEdit
      * @param {*} api
      */
-    static isRestricted(scopesAllowedToEdit, api) {
+    static isRestricted(scopesAllowedToEdit, api = {}) {
         // determines whether the apiType is API PRODUCT and user has publisher role, then allow access.
         if (api.apiType === 'APIProduct') {
             if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
@@ -173,7 +173,8 @@ class AuthManager {
         // if (scopesAllowedToEdit.filter(element => AuthManager.getUser().scopes.includes(element)).length > 0) {
         if (scopesAllowedToEdit.find((element) => AuthManager.getUser().scopes.includes(element))) {
             // if the user has publisher role, no need to consider the api LifeCycleStatus
-            if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
+            if ((Object.keys(api).length === 0 && api.constructor === Object)
+            || AuthManager.getUser().scopes.includes('apim:api_publish')) {
                 return false;
             } else if (
                 // if the user has creator role, but not the publisher role

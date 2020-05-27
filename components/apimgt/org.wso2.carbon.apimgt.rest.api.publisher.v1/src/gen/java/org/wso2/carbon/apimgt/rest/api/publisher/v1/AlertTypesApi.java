@@ -42,7 +42,7 @@ AlertTypesApiService delegate = new AlertTypesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the list of API Publisher alert types. ", notes = "This operation is used to get the list of supportd alert types for the 'publisher' agent. ", response = AlertTypesListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:pub_alert_manage", description = "Get/ subscribe/ configure publisher alerts.")
+            @AuthorizationScope(scope = "apim:pub_alert_manage", description = "Get/ subscribe/ configure publisher alerts")
         })
     }, tags={ "Alerts" })
     @ApiResponses(value = { 

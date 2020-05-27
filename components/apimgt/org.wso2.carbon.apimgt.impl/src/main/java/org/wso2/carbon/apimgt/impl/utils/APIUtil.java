@@ -121,6 +121,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
+import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
@@ -141,6 +142,8 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
+import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
@@ -242,8 +245,6 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -251,19 +252,15 @@ import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateNotYetValidException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -538,6 +535,23 @@ public final class APIUtil {
                 usedByProduct.setUUID(apiProductPath);
             }
         }
+    }
+
+    /**
+     * This method used to send Notifications
+     *
+     * @param event        Event object
+     * @param notifierType eventType
+     */
+    public static void sendNotification(org.wso2.carbon.apimgt.impl.notifier.events.Event event, String notifierType) {
+        List<Notifier> notifierList = ServiceReferenceHolder.getInstance().getNotifiersMap().get(notifierType);
+        notifierList.forEach((notifier) -> {
+            try {
+                notifier.publishEvent(event);
+            } catch (NotifierException e) {
+                log.error("Error when publish " + event + " through notifier:" + notifierType + ". Error:" + e);
+            }
+        });
     }
 
     /**
@@ -1219,24 +1233,6 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, api.getApiSecurity());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA,
                     Boolean.toString(api.isEnabledSchemaValidation()));
-
-            JSONParser parser = new JSONParser();
-            String endpointConfig = api.getEndpointConfig();
-            if (StringUtils.isNotEmpty(endpointConfig)) {
-                try {
-                    JSONObject endpoint_config = (JSONObject) parser.parse(endpointConfig);
-                    if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpoint_config
-                            .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                        String registryEntryId = (String) endpoint_config.get(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID);
-                        artifact.setAttribute(APIConstants.API_OVERVIEW_ENPOINT_REGISTRY_ENTRY, registryEntryId);
-                    } else {
-                        artifact.setAttribute(APIConstants.API_OVERVIEW_ENPOINT_REGISTRY_ENTRY, StringUtils.EMPTY);
-                    }
-                } catch (ParseException e) {
-                    throw new APIManagementException("Error while parsing the endpoint config of API : "
-                            + api.getId().getApiName());
-                }
-            }
 
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -5055,23 +5051,6 @@ public final class APIUtil {
         return true;
     }
 
-    /**
-     * Returns whether Product REST APIs' token cache is enabled
-     *
-     * @return true if token cache is enabled
-     */
-    public static boolean isRESTAPITokenCacheEnabled() {
-        try {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            String cacheEnabled = config.getFirstProperty(APIConstants.REST_API_TOKEN_CACHE_ENABLED);
-            return Boolean.parseBoolean(cacheEnabled);
-        } catch (Exception e) {
-            log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e);
-        }
-        return true;
-    }
-
     public static Cache getAPIContextCache() {
         CacheManager contextCacheManager = Caching.getCacheManager(APIConstants.API_CONTEXT_CACHE_MANAGER).
                 getCache(APIConstants.API_CONTEXT_CACHE).getCacheManager();
@@ -7605,11 +7584,20 @@ public final class APIUtil {
      *  case, local server will be used as the IDP.
      *
      * @return configuration of the Identity Provider from the api-manager configuration
-     * @throws APIManagementException error when retrieving the configuration
      */
-    public static IDPConfiguration getIdentityProviderConfig() throws APIManagementException {
+    public static IDPConfiguration getIdentityProviderConfig() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getIdentityProviderConfig();
+    }
+
+    /**
+     * Returns Product REST APIs' cache configuration by reading from api-manager.xml
+     *
+     * @return Product REST APIs' cache configuration.
+     */
+    public static RESTAPICacheConfiguration getRESTAPICacheConfig() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getRESTAPICacheConfig();
     }
 
     /**

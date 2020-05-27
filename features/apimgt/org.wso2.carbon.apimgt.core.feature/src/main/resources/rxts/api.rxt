@@ -78,9 +78,6 @@
 		<field type="text" url="true">
             <name>Endpoint Password</name>
         </field>
-        <field type="text">
-            <name>Endpoint Registry Entry</name>
-        </field>
 	<field type="text">
             <name>InSequence</name>
         </field>

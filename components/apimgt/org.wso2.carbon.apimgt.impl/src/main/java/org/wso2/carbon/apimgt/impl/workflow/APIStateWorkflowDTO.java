@@ -32,6 +32,8 @@ public class APIStateWorkflowDTO extends WorkflowDTO{
     private String apiProvider;
     private String apiVersion;
     private String invoker;
+    private String apiContext;
+    private String apiType;
     
     public String getInvoker() {
         return invoker;
@@ -93,8 +95,20 @@ public class APIStateWorkflowDTO extends WorkflowDTO{
     public void setApiVersion(String apiVersion) {
         this.apiVersion = apiVersion;
     }
-    
-    
-	
 
+    public String getApiContext() {
+        return apiContext;
+    }
+
+    public void setApiContext(String apiContext) {
+        this.apiContext = apiContext;
+    }
+
+    public String getApiType() {
+        return apiType;
+    }
+
+    public void setApiType(String apiType) {
+        this.apiType = apiType;
+    }
 }
