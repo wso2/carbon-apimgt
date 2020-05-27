@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 /**
  * Top level entity for representing a Throttling Policy.
  */
-public class Policy implements CachableEntity<String> {
+public class Policy implements CacheableEntity<String> {
 
     private int id = -1;
     private int tenantId = -1;

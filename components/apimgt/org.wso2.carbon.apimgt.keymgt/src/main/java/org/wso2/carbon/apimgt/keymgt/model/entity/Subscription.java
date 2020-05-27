@@ -18,13 +18,13 @@
 
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
-import org.wso2.carbon.apimgt.api.model.subscription.CachableEntity;
+import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
 
 /**
  * Entity for representing a SubscriptionDTO in APIM
  */
-public class Subscription implements CachableEntity<String> {
+public class Subscription implements CacheableEntity<String> {
 
     private String subscriptionId = null;
     private String policyId = null;

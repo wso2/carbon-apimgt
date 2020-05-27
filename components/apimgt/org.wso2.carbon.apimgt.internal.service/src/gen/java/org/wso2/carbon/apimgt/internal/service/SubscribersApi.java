@@ -44,7 +44,7 @@ SubscribersApiService delegate = new SubscribersApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of subscribers in the database", response = SubscriberDTO.class, responseContainer = "List"),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response subscribersGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retirieved from. " ,required=true)@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+    public Response subscribersGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
         return delegate.subscribersGet(xWSO2Tenant, securityContext);
     }
 }

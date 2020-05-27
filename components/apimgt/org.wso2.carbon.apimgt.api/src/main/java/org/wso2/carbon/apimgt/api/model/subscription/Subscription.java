@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
 /**
  * Entity for representing a SubscriptionDTO in APIM
  */
-public class Subscription implements CachableEntity<String> {
+public class Subscription implements CacheableEntity<String> {
 
     private int subscriptionId;
     private String policyId = null;

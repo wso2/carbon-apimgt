@@ -56,7 +56,7 @@ ApplicationKeyMappingsApiService delegate = new ApplicationKeyMappingsApiService
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of application key mappings in the database", response = ApplicationKeyMappingDTO.class, responseContainer = "List"),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response applicationKeyMappingsGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retirieved from. " ,required=true)@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+    public Response applicationKeyMappingsGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
         return delegate.applicationKeyMappingsGet(xWSO2Tenant, securityContext);
     }
 }

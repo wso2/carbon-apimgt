@@ -19,13 +19,13 @@
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.api.model.subscription.CachableEntity;
+import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
 
 /**
  * Top level entity for representing a Throttling Policy.
  */
-public class Policy implements CachableEntity<String> {
+public class Policy implements CacheableEntity<String> {
 
     private Integer id = null;
     private Integer tenantId = null;

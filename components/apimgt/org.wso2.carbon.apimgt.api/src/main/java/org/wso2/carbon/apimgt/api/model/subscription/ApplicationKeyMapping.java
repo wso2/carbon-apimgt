@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
 /**
  * Entity for keeping mapping between Application and Consumer key.
  */
-public class ApplicationKeyMapping implements CachableEntity<String> {
+public class ApplicationKeyMapping implements CacheableEntity<String> {
 
     private String consumerKey;
     private String keyType;

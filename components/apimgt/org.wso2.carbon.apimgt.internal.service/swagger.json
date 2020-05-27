@@ -198,7 +198,7 @@
         "parameters" : [ {
           "name" : "X-WSO2-Tenant",
           "in" : "header",
-          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
           "type" : "string"
         } ],
@@ -229,7 +229,7 @@
         "parameters" : [ {
           "name" : "X-WSO2-Tenant",
           "in" : "header",
-          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
           "type" : "string"
         } ],
@@ -260,7 +260,7 @@
         "parameters" : [ {
           "name" : "X-WSO2-Tenant",
           "in" : "header",
-          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
           "type" : "string"
         } ],
@@ -291,7 +291,7 @@
         "parameters" : [ {
           "name" : "X-WSO2-Tenant",
           "in" : "header",
-          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
           "type" : "string"
         } ],
@@ -322,7 +322,7 @@
         "parameters" : [ {
           "name" : "X-WSO2-Tenant",
           "in" : "header",
-          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
           "type" : "string"
         } ],
@@ -353,7 +353,7 @@
         "parameters" : [ {
           "name" : "X-WSO2-Tenant",
           "in" : "header",
-          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
           "type" : "string"
         } ],
@@ -384,7 +384,7 @@
         "parameters" : [ {
           "name" : "X-WSO2-Tenant",
           "in" : "header",
-          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
           "type" : "string"
         } ],
@@ -562,6 +562,62 @@
         "responses" : {
           "200" : {
             "description" : "The application policy in the database",
+            "schema" : {
+              "type" : "object"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/url-mappings" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all url mappings",
+        "description" : "This will provide access to url mappings in database.\n",
+        "parameters" : [ {
+          "name" : "X-WSO2-Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The url mappings in the database",
+            "schema" : {
+              "type" : "object"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/url-mappings/{mappingId}" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all url mappings",
+        "description" : "This will provide access to url mappings in database.\n",
+        "parameters" : [ {
+          "name" : "mappingId",
+          "in" : "path",
+          "description" : "**ID** of the ***URL Mapping * of an api.\n",
+          "required" : true,
+          "type" : "integer"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The url mappings in the database",
             "schema" : {
               "type" : "object"
             }
@@ -840,13 +896,29 @@
           "type" : "boolean"
         }
       }
+    },
+    "URLMapping" : {
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "apiId" : {
+          "type" : "integer"
+        },
+        "authScheme" : {
+          "type" : "string"
+        },
+        "throttlingPolicy" : {
+          "type" : "string"
+        }
+      }
     }
   },
   "parameters" : {
     "requestedTenant" : {
       "name" : "X-WSO2-Tenant",
       "in" : "header",
-      "description" : "This is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n",
+      "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
       "required" : true,
       "type" : "string"
     },
@@ -891,6 +963,13 @@
       "description" : "**key** consisting of the ***Consumer Key* of an application key mapping.\n",
       "required" : true,
       "type" : "string"
+    },
+    "mappingId" : {
+      "name" : "mappingId",
+      "in" : "path",
+      "description" : "**ID** of the ***URL Mapping * of an api.\n",
+      "required" : true,
+      "type" : "integer"
     }
   }
 }

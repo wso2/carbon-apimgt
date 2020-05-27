@@ -18,13 +18,13 @@
 
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
-import org.wso2.carbon.apimgt.api.model.subscription.CachableEntity;
+import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
 
 /**
  * Entity for keeping mapping between Application and Consumer key.
  */
-public class ApplicationKeyMapping implements CachableEntity<String> {
+public class ApplicationKeyMapping implements CacheableEntity<String> {
 
     private String consumerKey;
     private String keyType;

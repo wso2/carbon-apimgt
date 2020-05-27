@@ -18,12 +18,12 @@
 
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
-import org.wso2.carbon.apimgt.api.model.subscription.CachableEntity;
+import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 
 /**
  * Entity for keeping Application related information. Represents an Application in APIM.
  */
-public class Application implements CachableEntity<Integer> {
+public class Application implements CacheableEntity<Integer> {
 
     private Integer id = null;
     private String name = null;

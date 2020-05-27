@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
-import org.wso2.carbon.apimgt.api.model.subscription.CachableEntity;
+import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * Entity for representing a REST resource (in the API)
  */
-public class Resource implements CachableEntity<String> {
+public class Resource implements CacheableEntity<String> {
 
     private String urlPattern;
 

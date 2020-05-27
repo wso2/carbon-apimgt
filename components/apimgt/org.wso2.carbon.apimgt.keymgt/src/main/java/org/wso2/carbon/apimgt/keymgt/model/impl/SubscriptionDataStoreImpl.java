@@ -21,7 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
-import org.wso2.carbon.apimgt.api.model.subscription.CachableEntity;
+import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
@@ -236,7 +236,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         return policyMap.get(SubscriptionDataStoreUtil.getPolicyCacheKey(policyName, tenantId));
     }
 
-    private class PopulateTask<K, V extends CachableEntity<K>> implements Runnable {
+    private class PopulateTask<K, V extends CacheableEntity<K>> implements Runnable {
 
         private Map<K, V> entityMap;
         private Supplier<List<V>> supplier;

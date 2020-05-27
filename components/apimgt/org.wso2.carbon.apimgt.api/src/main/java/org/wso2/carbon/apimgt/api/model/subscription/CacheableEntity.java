@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.api.model.subscription;
  *
  * @param <K> Type of the CacheKey
  */
-public interface CachableEntity<K> {
+public interface CacheableEntity<K> {
 
     /**
      * Gets the Cache Key of an entity.

@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
-import org.wso2.carbon.apimgt.api.model.subscription.CachableEntity;
+import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
 
 import java.util.Arrays;
@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * Entity for keeping API related information.
  */
-public class API implements CachableEntity<String> {
+public class API implements CacheableEntity<String> {
 
     private Integer apiId = null;
     private String provider = null;

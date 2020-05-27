@@ -431,6 +431,48 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+
+  /url-mappings:
+    get:
+      summary: Get all url mappings
+      description: |
+        This will provide access to url mappings in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+      tags:
+        - Subscription Validation
+      responses:
+        200:
+          description: The url mappings in the database
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/URLMapping'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /url-mappings/{mappingId}:
+    get:
+      summary: Get all url mappings
+      description: |
+        This will provide access to url mappings in database.
+      parameters:
+        - $ref: '#/parameters/mappingId'
+      tags:
+        - Subscription Validation
+      responses:
+        200:
+          description: The url mappings in the database
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/URLMapping'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -441,7 +483,7 @@ parameters:
     in: header
     description: |
       This is used to specify the tenant domain, where the resource need to be
-        retirieved from.
+        retrieved from.
     required: true
     type: string
 
@@ -500,6 +542,14 @@ parameters:
       **key** consisting of the ***Consumer Key* of an application key mapping.
     required: true
     type: string
+
+  mappingId:
+    name: mappingId
+    in: path
+    description: |
+      **ID** of the ***URL Mapping * of an api.
+    required: true
+    type: integer
 
 ######################################################################
 # The resources used by some of the APIs above within the message body
@@ -725,3 +775,16 @@ definitions:
         type: string
       isInverted:
         type: boolean
+  #-----------------------------------------------------
+  # The URL Mapping resource
+  #-----------------------------------------------------
+  URLMapping:
+    properties:
+      id:
+        type: integer
+      apiId:
+        type: integer
+      authScheme:
+        type: string
+      throttlingPolicy:
+        type: string

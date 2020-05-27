@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.ApisApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -13,6 +14,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdGet(Integer apiId, MessageContext messageContext) throws APIManagementException {
 
+        API api = SubscriptionValidationDAO.getApi(apiId);
+        if (api != null) {
+            return Response.ok().entity(api).build();
+        }
         return null;
     }
 

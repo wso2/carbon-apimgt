@@ -17,10 +17,9 @@
  */
 package org.wso2.carbon.apimgt.api.model.subscription;
 
-import org.wso2.carbon.apimgt.api.model.subscription.CachableEntity;
 import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
 
-public class Subscriber extends Object implements CachableEntity<String> {
+public class Subscriber extends Object implements CacheableEntity<String> {
 
     private int tenantId = -1;
     private int subscriberId = -1;

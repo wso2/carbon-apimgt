@@ -26,9 +26,11 @@ import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.Policy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -277,6 +279,7 @@ public class SubscriptionValidationDAO {
      * @return {@link API}
      * */
     public static API getApi(int apiId) {
+        API api = new API();
 
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
@@ -285,21 +288,19 @@ public class SubscriptionValidationDAO {
             ResultSet resultSet = ps.executeQuery();
 
             while (resultSet.next()) {
-                API api = new API();
                 api.setApiId(resultSet.getInt("API_ID"));
                 api.setProvider(resultSet.getString("API_PROVIDER"));
                 api.setName(resultSet.getString("API_NAME"));
                 api.setPolicy(resultSet.getString("API_TIER"));
                 api.setVersion(resultSet.getString("API_VERSION"));
                 api.setContext(resultSet.getString("CONTEXT"));
-                return api;
             }
 
         } catch (SQLException e) {
             log.error("Error in loading API for apiId : " + apiId, e);
         }
 
-        return null;
+        return api;
     }
 
     /*
@@ -434,7 +435,7 @@ public class SubscriptionValidationDAO {
 
     /*
      * @param subscriptionId : unique identifier of a subscription
-     * @return {@link Subscription}
+     * @return {@link List<ApplicationPolicy>}
      * */
     public static List<ApplicationPolicy> getAllApplicationPolicies(int tenantId) {
 
@@ -467,8 +468,6 @@ public class SubscriptionValidationDAO {
      * @return {@link Subscription}
      * */
     public static Subscription getSubscriptionById(int subscriptionId) {
-
-        Subscription subscription = new Subscription();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_SUBSCRIPTION_SQL);
@@ -478,17 +477,21 @@ public class SubscriptionValidationDAO {
             try (ResultSet resultSet = ps.executeQuery();) {
 
                 while (resultSet.next()) {
+                    Subscription subscription = new Subscription();
+
                     subscription.setSubscriptionId(resultSet.getInt("SUB_ID"));
                     subscription.setPolicyId(resultSet.getString("TIER"));
                     subscription.setApiId(resultSet.getInt("API_ID"));
                     subscription.setAppId(resultSet.getInt("APP_ID"));
                     subscription.setSubscriptionState(resultSet.getString("STATUS"));
+                    return subscription;
+
                 }
             }
         } catch (SQLException e) {
             log.error("Error in loading Subscription by subscriptionId : " + subscriptionId, e);
         }
-        return subscription;
+        return null;
     }
 
     /*
@@ -496,9 +499,6 @@ public class SubscriptionValidationDAO {
      * @return {@link Application}
      * */
     public static Application getApplicationById(int applicationId) {
-
-        Application application = new Application();
-
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATION_BY_ID_SQL);
         ) {
@@ -506,18 +506,21 @@ public class SubscriptionValidationDAO {
             ResultSet resultSet = ps.executeQuery();
 
             while (resultSet.next()) {
+                Application application = new Application();
+
                 application.setId(resultSet.getInt("APPLICATION_ID"));
                 application.setName(resultSet.getString("NAME"));
                 application.setPolicy(resultSet.getString("APPLICATION_TIER"));
                 application.setSubId(resultSet.getInt("SUBSCRIBER_ID"));
                 application.setTokenType(resultSet.getString("TOKEN_TYPE"));
                 application.setGroupId(resultSet.getString("GROUP_ID"));
+                return application;
+
             }
         } catch (SQLException e) {
-            log.error("Error in loading Application by applicationId : " + application, e);
+            log.error("Error in loading Application by applicationId : " + applicationId, e);
         }
-
-        return application;
+        return null;
     }
 
     /*
@@ -525,8 +528,6 @@ public class SubscriptionValidationDAO {
      * @return {@link ApplicationPolicy}
      * */
     public static ApplicationPolicy getApplicationPolicyById(int policyId) {
-
-        ApplicationPolicy applicationPolicyDTO = new ApplicationPolicy();
 
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
@@ -537,18 +538,19 @@ public class SubscriptionValidationDAO {
             ResultSet resultSet = ps.executeQuery();
 
             while (resultSet.next()) {
+                ApplicationPolicy applicationPolicy = new ApplicationPolicy();
 
-                applicationPolicyDTO.setId(resultSet.getInt("POLICY_ID"));
-                applicationPolicyDTO.setName(resultSet.getString("NAME"));
-                applicationPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                applicationPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
+                applicationPolicy.setId(resultSet.getInt("POLICY_ID"));
+                applicationPolicy.setName(resultSet.getString("NAME"));
+                applicationPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
+                applicationPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
             }
 
         } catch (SQLException e) {
             log.error("Error in loading application policies by policyId : " + policyId, e);
         }
 
-        return applicationPolicyDTO;
+        return null;
     }
 
     /*
@@ -556,8 +558,6 @@ public class SubscriptionValidationDAO {
      * @return {@link SubscriptionPolicy}
      * */
     public static SubscriptionPolicy getSubscriptionPolicy(int policyId) {
-
-        SubscriptionPolicy subscriptionPolicyDTO = new SubscriptionPolicy();
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
@@ -567,22 +567,24 @@ public class SubscriptionValidationDAO {
             ResultSet resultSet = ps.executeQuery();
 
             while (resultSet.next()) {
+                SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
 
-                subscriptionPolicyDTO.setId(resultSet.getInt("POLICY_ID"));
-                subscriptionPolicyDTO.setName(resultSet.getString("NAME"));
-                subscriptionPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                subscriptionPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
+                subscriptionPolicy.setId(resultSet.getInt("POLICY_ID"));
+                subscriptionPolicy.setName(resultSet.getString("NAME"));
+                subscriptionPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
+                subscriptionPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
 
-                subscriptionPolicyDTO.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
-                subscriptionPolicyDTO.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
-                subscriptionPolicyDTO.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
+                subscriptionPolicy.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
+                subscriptionPolicy.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
+                subscriptionPolicy.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
+                return subscriptionPolicy;
             }
 
         } catch (SQLException e) {
             log.error("Error in retrieving Subscription policy by id : " + policyId, e);
         }
 
-        return subscriptionPolicyDTO;
+        return null;
     }
 
     /*
@@ -591,7 +593,6 @@ public class SubscriptionValidationDAO {
      * */
     public static ApplicationKeyMapping getApplicationKeyMapping(int appId, String keyType) {
 
-        ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_SQL);
@@ -601,15 +602,17 @@ public class SubscriptionValidationDAO {
             ResultSet resultSet = ps.executeQuery();
 
             while (resultSet.next()) {
+                ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
                 keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
                 keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
                 keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
+                return keyMapping;
             }
 
         } catch (SQLException e) {
-            log.error("Error in loading  Applicatio Key Mapping for appId : " + appId + " type : " + keyType, e);
+            log.error("Error in loading  Application Key Mapping for appId : " + appId + " type : " + keyType, e);
         }
-        return keyMapping;
+        return null;
     }
 
     /*
@@ -618,7 +621,6 @@ public class SubscriptionValidationDAO {
      * */
     public static ApplicationKeyMapping getApplicationKeyMapping(String consumerKey) {
 
-        ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps = conn.prepareStatement(
@@ -628,15 +630,122 @@ public class SubscriptionValidationDAO {
             ResultSet resultSet = ps.executeQuery();
 
             while (resultSet.next()) {
+                ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
                 keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
                 keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
                 keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
+                return keyMapping;
             }
 
         } catch (SQLException e) {
             log.error("Error in loading Application Key Mappinghsacfrgtghf54trtjkl;{786754w `13457868789[-876re7w4wertyi875 for consumer key : " + consumerKey, e);
         }
-        return keyMapping;
+        return null;
+    }
+
+    /*
+     * This method can be used to retrieve all the URLMappings in the database
+     *
+     * @return {@link List<URLMapping>}
+     * */
+    public static List<URLMapping> getAllURLMappings() {
+
+        ArrayList<URLMapping> urlMappings = new ArrayList<>();
+        String sql = SubscriptionValidationSQLConstants.GET_ALL_API_URL_MAPPING_SQL;
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+        ) {
+            ResultSet resultSet = ps.executeQuery();
+
+            while (resultSet.next()) {
+                URLMapping urlMapping = new URLMapping();
+                urlMapping.setId(resultSet.getInt("URL_MAPPING_ID"));
+                urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
+                urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
+                urlMapping.setThrottlingPolicy(resultSet.getString("POLICY"));
+                urlMapping.setApiId(resultSet.getInt("API_ID"));
+                urlMappings.add(urlMapping);
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading URLMappings : ", e);
+        }
+
+        return urlMappings;
+    }
+
+    /*
+     * This method can be used to retrieve all the URLMappings of a given tenant in the database
+     *
+     * @param tenantId : tenant Id
+     * @return {@link List<URLMapping>}
+     * */
+    public static List<URLMapping> getAllURLMappings(int tenantId) {
+
+        List<URLMapping> urlMappings = new ArrayList<>();
+        String sql = SubscriptionValidationSQLConstants.GET_TENANT_API_URL_MAPPING_SQL;
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        String contextParam = null;
+        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+            sql = SubscriptionValidationSQLConstants.GET_ST_API_URL_MAPPING_SQL;
+            contextParam = "%/t/%";
+        } else if (tenantId > 0) {
+            contextParam = "%" + tenantDomain + "%";
+        } else {
+            sql = SubscriptionValidationSQLConstants.GET_ALL_API_URL_MAPPING_SQL;
+        }
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+        ) {
+            if (contextParam != null) {
+                ps.setString(1, contextParam);
+            }
+            ResultSet resultSet = ps.executeQuery();
+
+            while (resultSet.next()) {
+                URLMapping urlMapping = new URLMapping();
+                urlMapping.setId(resultSet.getInt("URL_MAPPING_ID"));
+                urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
+                urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
+                urlMapping.setThrottlingPolicy(resultSet.getString("POLICY"));
+                urlMapping.setApiId(resultSet.getInt("API_ID"));
+                urlMappings.add(urlMapping);
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading URLMappings for tenantId : " + tenantId, e);
+        }
+
+        return urlMappings;
+    }
+
+    /*
+     * This method can be used to retrieve all the URLMappings of a given tenant in the database
+     *
+     * @param tenantId : tenant Id
+     * @return {@link URLMapping}
+     * */
+    public static URLMapping getURLMapping(int mappingId) {
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     SubscriptionValidationSQLConstants.GET_API_URL_MAPPING_SQL);
+        ) {
+            ps.setInt(1, mappingId);
+            ResultSet resultSet = ps.executeQuery();
+
+            while (resultSet.next()) {
+                URLMapping urlMapping = new URLMapping();
+                urlMapping.setId(resultSet.getInt("URL_MAPPING_ID"));
+                urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
+                urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
+                urlMapping.setThrottlingPolicy(resultSet.getString("POLICY"));
+                urlMapping.setApiId(resultSet.getInt("API_ID"));
+                return urlMapping;
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading URLMapping for mappingId : " + mappingId, e);
+        }
+        return null;
     }
 
 }

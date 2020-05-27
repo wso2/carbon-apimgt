@@ -257,4 +257,56 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   SUB.TENANT_ID = ?";
 
+    public static final String GET_ALL_API_URL_MAPPING_SQL =
+            "SELECT " +
+                    "   URL_MAPPING_ID," +
+                    "   API_ID," +
+                    "   HTTP_METHOD," +
+                    "   AUTH_SCHEME," +
+                    "   URL_PATTERN," +
+                    "   THROTTLING_TIER AS POLICY" +
+                    " FROM "+
+                    "   AM_API_URL_MAPPING";
+
+    public static final String GET_TENANT_API_URL_MAPPING_SQL =
+            "SELECT " +
+                    "   URL.URL_MAPPING_ID AS URL_MAPPING_ID," +
+                    "   URL.API_ID AS API_ID," +
+                    "   URL.HTTP_METHOD AS HTTP_METHOD," +
+                    "   URL.AUTH_SCHEME AS AUTH_SCHEME," +
+                    "   URL.THROTTLING_TIER AS POLICY" +
+                    " FROM "+
+                    "   AM_API_URL_MAPPING AS URL," +
+                    "   AM_API AS API" +
+                    " WHERE " +
+                    "   URL.API_ID = API.API_ID AND " +
+                    "   API.CONTEXT LIKE ? ";
+
+    public static final String GET_ST_API_URL_MAPPING_SQL =
+            "SELECT " +
+                    "   URL.URL_MAPPING_ID AS URL_MAPPING_ID," +
+                    "   URL.API_ID AS API_ID," +
+                    "   URL.HTTP_METHOD AS HTTP_METHOD," +
+                    "   URL.AUTH_SCHEME AS AUTH_SCHEME," +
+                    "   URL.THROTTLING_TIER AS POLICY" +
+                    " FROM "+
+                    "   AM_API_URL_MAPPING AS URL," +
+                    "   AM_API AS API" +
+                    " WHERE " +
+                    "   URL.API_ID = API.API_ID AND " +
+                    "   API.CONTEXT NOT LIKE ? ";
+
+    public static final String GET_API_URL_MAPPING_SQL =
+            "SELECT " +
+                    "   URL_MAPPING_ID," +
+                    "   API_ID," +
+                    "   HTTP_METHOD," +
+                    "   AUTH_SCHEME," +
+                    "   URL_PATTERN," +
+                    "   THROTTLING_TIER AS POLICY" +
+                    " FROM "+
+                    "   AM_API_URL_MAPPING" +
+                    " WHERE " +
+                    "   URL_MAPPING_ID = ?";
+
 }

@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.ApplicationKeyMappingsApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -13,7 +14,11 @@ public class ApplicationKeyMappingsApiServiceImpl implements ApplicationKeyMappi
     @Override
     public Response applicationKeyMappingsConsumerKeyGet(String consumerKey, MessageContext messageContext) throws APIManagementException {
 
-        return Response.ok().entity(SubscriptionValidationDAO.getApplicationKeyMapping(consumerKey)).build();
+        ApplicationKeyMapping applicationKeyMapping = SubscriptionValidationDAO.getApplicationKeyMapping(consumerKey);
+        if (applicationKeyMapping != null) {
+            return Response.ok().entity(applicationKeyMapping).build();
+        }
+        return null;
     }
 
     @Override
