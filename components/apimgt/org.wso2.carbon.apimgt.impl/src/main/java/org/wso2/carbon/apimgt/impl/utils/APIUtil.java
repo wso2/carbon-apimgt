@@ -141,6 +141,8 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
+import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
@@ -242,8 +244,6 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -251,19 +251,15 @@ import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateNotYetValidException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -538,6 +534,23 @@ public final class APIUtil {
                 usedByProduct.setUUID(apiProductPath);
             }
         }
+    }
+
+    /**
+     * This method used to send Notifications
+     *
+     * @param event        Event object
+     * @param notifierType eventType
+     */
+    public static void sendNotification(org.wso2.carbon.apimgt.impl.notifier.events.Event event, String notifierType) {
+        List<Notifier> notifierList = ServiceReferenceHolder.getInstance().getNotifiersMap().get(notifierType);
+        notifierList.forEach((notifier) -> {
+            try {
+                notifier.publishEvent(event);
+            } catch (NotifierException e) {
+                log.error("Error when publish " + event + " through notifier:" + notifierType + ". Error:" + e);
+            }
+        });
     }
 
     /**

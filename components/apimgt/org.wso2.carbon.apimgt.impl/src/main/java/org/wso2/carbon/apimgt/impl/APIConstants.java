@@ -2088,4 +2088,31 @@ public final class APIConstants {
 
         public static String ReceiverConnectionDetails  = "ReceiverConnectionDetails";
     }
+
+    // Supported Notifier Types
+    public enum NotifierType {
+        API,
+        APPLICATION,
+        APPLICATION_REGISTRATION,
+        POLICY,
+        SUBSCRIPTIONS
+    }
+
+    // Supported Event Types
+    public enum EventType {
+        API_CREATE,
+        API_UPDATE,
+        API_DELETE,
+        API_LIFECYCLE_CHANGE,
+        APPLICATION_CREATE,
+        APPLICATION_UPDATE,
+        APPLICATION_DELETE,
+        APPLICATION_REGISTRATION_CREATE,
+        POLICY_CREATE,
+        POLICY_UPDATE,
+        POLICY_DELETE,
+        SUBSCRIPTIONS_CREATE,
+        SUBSCRIPTIONS_UPDATE,
+        SUBSCRIPTIONS_DELETE
+    }
 }

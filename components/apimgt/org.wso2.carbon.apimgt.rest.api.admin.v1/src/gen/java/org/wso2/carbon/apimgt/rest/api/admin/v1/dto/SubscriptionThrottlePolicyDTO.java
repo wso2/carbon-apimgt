@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GraphQLQueryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitTypeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
@@ -21,6 +22,8 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   
+    private Integer graphQLMaxComplexity = null;
+    private Integer graphQLMaxDepth = null;
     private ThrottleLimitTypeDTO defaultLimit = null;
     private MonetizationInfoDTO monetization = null;
     private Integer rateLimitCount = null;
@@ -28,6 +31,42 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     private List<CustomAttributeDTO> customAttributes = new ArrayList<>();
     private Boolean stopOnQuotaReach = false;
     private String billingPlan = null;
+
+  /**
+   * Maximum Complexity of the GraphQL query
+   **/
+  public SubscriptionThrottlePolicyDTO graphQLMaxComplexity(Integer graphQLMaxComplexity) {
+    this.graphQLMaxComplexity = graphQLMaxComplexity;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "400", value = "Maximum Complexity of the GraphQL query")
+  @JsonProperty("graphQLMaxComplexity")
+  public Integer getGraphQLMaxComplexity() {
+    return graphQLMaxComplexity;
+  }
+  public void setGraphQLMaxComplexity(Integer graphQLMaxComplexity) {
+    this.graphQLMaxComplexity = graphQLMaxComplexity;
+  }
+
+  /**
+   * Maximum Depth of the GraphQL query
+   **/
+  public SubscriptionThrottlePolicyDTO graphQLMaxDepth(Integer graphQLMaxDepth) {
+    this.graphQLMaxDepth = graphQLMaxDepth;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "10", value = "Maximum Depth of the GraphQL query")
+  @JsonProperty("graphQLMaxDepth")
+  public Integer getGraphQLMaxDepth() {
+    return graphQLMaxDepth;
+  }
+  public void setGraphQLMaxDepth(Integer graphQLMaxDepth) {
+    this.graphQLMaxDepth = graphQLMaxDepth;
+  }
 
   /**
    **/
@@ -163,7 +202,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
       return false;
     }
     SubscriptionThrottlePolicyDTO subscriptionThrottlePolicy = (SubscriptionThrottlePolicyDTO) o;
-    return Objects.equals(defaultLimit, subscriptionThrottlePolicy.defaultLimit) &&
+    return Objects.equals(graphQLMaxComplexity, subscriptionThrottlePolicy.graphQLMaxComplexity) &&
+        Objects.equals(graphQLMaxDepth, subscriptionThrottlePolicy.graphQLMaxDepth) &&
+        Objects.equals(defaultLimit, subscriptionThrottlePolicy.defaultLimit) &&
         Objects.equals(monetization, subscriptionThrottlePolicy.monetization) &&
         Objects.equals(rateLimitCount, subscriptionThrottlePolicy.rateLimitCount) &&
         Objects.equals(rateLimitTimeUnit, subscriptionThrottlePolicy.rateLimitTimeUnit) &&
@@ -174,7 +215,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
 
   @Override
   public int hashCode() {
-    return Objects.hash(defaultLimit, monetization, rateLimitCount, rateLimitTimeUnit, customAttributes, stopOnQuotaReach, billingPlan);
+    return Objects.hash(graphQLMaxComplexity, graphQLMaxDepth, defaultLimit, monetization, rateLimitCount, rateLimitTimeUnit, customAttributes, stopOnQuotaReach, billingPlan);
   }
 
   @Override
@@ -182,6 +223,8 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class SubscriptionThrottlePolicyDTO {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    sb.append("    graphQLMaxComplexity: ").append(toIndentedString(graphQLMaxComplexity)).append("\n");
+    sb.append("    graphQLMaxDepth: ").append(toIndentedString(graphQLMaxDepth)).append("\n");
     sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");

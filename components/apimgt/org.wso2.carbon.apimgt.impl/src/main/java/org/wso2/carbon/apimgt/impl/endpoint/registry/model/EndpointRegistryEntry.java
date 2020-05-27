@@ -15,8 +15,7 @@
  *  limitations under the License.
  *
  */
-
-package org.wso2.carbon.apimgt.api.model;
+package org.wso2.carbon.apimgt.impl.endpoint.registry.model;
 
 import java.io.InputStream;
 
@@ -30,6 +29,8 @@ public class EndpointRegistryEntry {
     private int registryId;
 
     private String name = null;
+
+    private String version = null;
 
     private String productionServiceURL = null;
 
@@ -68,6 +69,11 @@ public class EndpointRegistryEntry {
     public String getName() {
 
         return name;
+    }
+
+    public String getVersion() {
+
+        return version;
     }
 
     public String getProductionServiceURL() {
@@ -115,6 +121,11 @@ public class EndpointRegistryEntry {
         this.name = name;
     }
 
+    public void setVersion(String version) {
+
+        this.version = version;
+    }
+
     public void setProductionServiceURL(String productionServiceURL) {
 
         this.productionServiceURL = productionServiceURL;
@@ -156,34 +167,42 @@ public class EndpointRegistryEntry {
     }
 
     public String getOwner() {
+
         return owner;
     }
 
     public void setOwner(String owner) {
+
         this.owner = owner;
     }
 
     public String getUpdatedBy() {
+
         return updatedBy;
     }
 
     public void setUpdatedBy(String updatedBy) {
+
         this.updatedBy = updatedBy;
     }
 
     public String getCreatedTime() {
+
         return createdTime;
     }
 
     public void setCreatedTime(String createdTime) {
+
         this.createdTime = createdTime;
     }
 
     public String getLastUpdatedTime() {
+
         return lastUpdatedTime;
     }
 
     public void setLastUpdatedTime(String lastUpdatedTime) {
+
         this.lastUpdatedTime = lastUpdatedTime;
     }
 

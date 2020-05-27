@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.endpoint.registry;
 
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.SettingsApiService;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.impl.SettingsApiServiceImpl;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryException;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -36,7 +36,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-26T12:22:45.951+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-27T08:36:18.796+05:30[Asia/Colombo]")
 public class SettingsApi  {
 
 @Context MessageContext securityContext;
@@ -56,7 +56,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
         @ApiResponse(responseCode = "404",
             description = "Not Found. Requested Settings does not exist. ")
      })
-    public Response getSettings() throws APIManagementException{
+    public Response getSettings() throws EndpointRegistryException {
         return delegate.getSettings(securityContext);
         }
 }
