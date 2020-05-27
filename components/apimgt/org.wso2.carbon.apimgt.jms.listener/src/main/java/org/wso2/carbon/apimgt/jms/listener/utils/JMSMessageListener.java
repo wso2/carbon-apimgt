@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.jms.listener.utils;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -126,6 +127,19 @@ public class JMSMessageListener implements MessageListener {
                                 handleUserCacheInvalidationMessage(map);
                             }
 
+                        }
+                    } else if (JMSConstants.TOPIC_NOTIFICATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
+                        if (map.get(APIConstants.EVENT_TYPE) !=
+                                null) {
+                            /*
+                             * This message contains notification
+                             * eventType - type of the event
+                             * timestamp - system time of the event published
+                             * event - event data
+                             */
+                            handleNotificationMessage((String) map.get(APIConstants.EVENT_TYPE),
+                                    (Long) map.get(APIConstants.EVENT_TIMESTAMP),
+                                    (String) map.get(APIConstants.EVENT_PAYLOAD));
                         }
                     }
                 } else {
@@ -353,5 +367,11 @@ public class JMSMessageListener implements MessageListener {
         }
         ServiceReferenceHolder.getInstance().getRevokedTokenService()
                 .removeTokenFromGatewayCache(revokedToken, isJwtToken);
+    }
+
+    private void handleNotificationMessage(String eventType, long timestamp, String event) {
+
+        byte[] eventDecoded = Base64.decodeBase64(event);
+
     }
 }
