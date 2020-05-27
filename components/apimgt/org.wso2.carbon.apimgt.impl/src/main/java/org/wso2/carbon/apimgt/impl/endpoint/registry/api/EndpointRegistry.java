@@ -18,7 +18,6 @@
 package org.wso2.carbon.apimgt.impl.endpoint.registry.api;
 
 import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryEntry;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryException;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryInfo;
 
 import java.util.List;

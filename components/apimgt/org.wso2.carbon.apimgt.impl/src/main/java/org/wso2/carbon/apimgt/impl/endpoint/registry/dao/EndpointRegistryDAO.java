@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryEntry;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryException;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryException;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;

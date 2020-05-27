@@ -15,11 +15,11 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.impl.endpoint.registry.impl;
+package org.wso2.carbon.apimgt.impl.endpoint.registry.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
 
 public class EndpointRegistryUtil {
 
