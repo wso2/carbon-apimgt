@@ -35,7 +35,7 @@
     cookie = {
         'name': 'AM_ACC_TOKEN_DEFAULT_P2',
         'value': '',
-        'path': "/api/am/publisher/",
+        'path': "/api/am" + app.context + "/",
         "httpOnly": true,
         "secure": true,
         "maxAge": 2
