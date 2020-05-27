@@ -176,13 +176,10 @@ public class RegistriesApiServiceImplTest {
                 RegistryDTO.TypeEnum.WSO2, ADMIN_USERNAME);
         endpointRegistryInfoList.add(endpointRegistryInfo2);
 
-        Mockito.when(registryProvider.getEndpointRegistries(null, EndpointRegistryConstants.COLUMN_ID,
-                RestApiConstants.DEFAULT_SORT_ORDER, RestApiConstants.PAGINATION_LIMIT_DEFAULT,
-                RestApiConstants.PAGINATION_OFFSET_DEFAULT, TENANT_DOMAIN))
+        Mockito.when(registryProvider.getEndpointRegistries(TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfoList);
 
-        Response response = registriesApiService.getRegistries(null, null, null,
-                null, null, messageContext);
+        Response response = registriesApiService.getRegistries(messageContext);
 
         Assert.assertNotNull("Endpoint Registries retrieval failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());

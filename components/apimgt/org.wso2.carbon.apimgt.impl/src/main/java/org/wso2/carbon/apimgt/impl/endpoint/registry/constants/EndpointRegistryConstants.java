@@ -62,5 +62,10 @@ public class EndpointRegistryConstants {
 
     public static final String COLUMN_UPDATED_TIME = "UPDATED_TIME";
 
+    public static final String REGISTRY_TYPE_WSO2 = "wso2";
+
+    public static final String DEFAULT_REGISTRY_NAME = "Default Registry";
+
+    public static final String SYSTEM_USER_NAME = "SYSTEM_USER";
 }
 
