@@ -47,27 +47,23 @@ function Delete({ updateList, dataRow }) {
             return false;
         }
 
-        const promiseAPICall = new Promise((resolve, reject) => {
-            const restApi = new API();
-            restApi
-                .deleteAPICategory(id)
-                .then(() => {
-                    resolve(
-                        <FormattedMessage
-                            id='AdminPages.ApiCategories.Delete.form.delete.successful'
-                            defaultMessage='API Category deleted successfully'
-                        />,
-                    );
-                })
-                .catch((error) => {
-                    reject(error.response.body.description);
-                })
-                .finally(() => {
-                    updateList();
-                });
-        });
-
-        return promiseAPICall;
+        const restApi = new API();
+        return restApi
+            .deleteAPICategory(id)
+            .then(() => {
+                return (
+                    <FormattedMessage
+                        id='AdminPages.ApiCategories.Delete.form.delete.successful'
+                        defaultMessage='API Category deleted successfully'
+                    />
+                );
+            })
+            .catch((error) => {
+                throw error.response.body.description;
+            })
+            .finally(() => {
+                updateList();
+            });
     };
 
     return (
