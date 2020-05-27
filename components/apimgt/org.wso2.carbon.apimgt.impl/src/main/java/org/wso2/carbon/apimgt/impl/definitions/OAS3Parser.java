@@ -214,7 +214,7 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param swagger OpenAPI object
      */
-    private void checkAndSetEmptyScope (OpenAPI swagger) {
+    private void checkAndSetEmptyScope(OpenAPI swagger) {
         Components comp = swagger.getComponents();
         Map<String, SecurityScheme> securitySchemeMap;
         SecurityScheme securityScheme;
@@ -235,8 +235,8 @@ public class OAS3Parser extends APIDefinition {
      * @param definitions definition
      * @return JsonExample
      */
-    private String getJsonExample(Schema model, Map<String, Schema> definitions){
-        Example example = ExampleBuilder.fromSchema(model,  definitions);
+    private String getJsonExample(Schema model, Map<String, Schema> definitions) {
+        Example example = ExampleBuilder.fromSchema(model, definitions);
         SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
         Json.mapper().registerModule(simpleModule);
         return Json.pretty(example);
@@ -249,8 +249,8 @@ public class OAS3Parser extends APIDefinition {
      * @param definitions definition
      * @return XmlExample
      */
-    private String getXmlExample(Schema model, Map<String, Schema> definitions){
-        Example example = ExampleBuilder.fromSchema(model,  definitions);
+    private String getXmlExample(Schema model, Map<String, Schema> definitions) {
+        Example example = ExampleBuilder.fromSchema(model, definitions);
         return new XmlExampleSerializer().serialize(example);
     }
 
@@ -285,8 +285,10 @@ public class OAS3Parser extends APIDefinition {
      * @return manualCode
      */
     private String getGeneratedSetResponse(String responseCode, String type) {
-        return "  mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
-                "  mc.setPayload"+type.toUpperCase()+"(response" + responseCode + type + ");";
+        return
+//                "  mc.setProperty('HTTP_SC', \""+responseCode+"\");\n" +
+                "  mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
+                "  mc.setPayload" + type.toUpperCase() + "(response" + responseCode + type + ");";
     }
 
     /**
@@ -296,9 +298,9 @@ public class OAS3Parser extends APIDefinition {
      * @param getGeneratedSetResponseString string returned from "getGeneratedSetResponse"
      * @return if condition with "getGeneratedSetResponse" included
      */
-    private String getGeneratedIFsforCodes(String responseCode, String getGeneratedSetResponseString){
-        return "if (responseCode == "+responseCode+") {\n\n" +
-                getGeneratedSetResponseString+
+    private String getGeneratedIFsforCodes(String responseCode, String getGeneratedSetResponseString) {
+        return "if (responseCode == " + responseCode + ") {\n\n" +
+                getGeneratedSetResponseString +
                 "\n\n} else ";
     }
 
@@ -319,6 +321,7 @@ public class OAS3Parser extends APIDefinition {
                 "var responseCode = mc.getProperty('query.param.responseCode');\n\n" +
                 responseSectionString +
                 " if (responseCode == null) {\n\n" +
+//                "  mc.setProperty('HTTP_SC', \"" + minResponseCode + "\");\n" +
                 "  mc.setProperty('CONTENT_TYPE', 'application/" + minResponseType + "');\n" +
                 "  mc.setPayload" + minResponseType.toUpperCase() + "(response" + minResponseCode + minResponseType + ");\n\n" +
                 "} else " +
