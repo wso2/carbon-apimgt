@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:cxf="http://cxf.apache.org/core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd">
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <context:property-placeholder/>
+    <context:annotation-config/>
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+        <property name="environment">
+            <bean class="org.springframework.web.context.support.StandardServletEnvironment" />
+        </property>
+    </bean>
+    <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
+    <jaxrs:server id="services" address="/">
+        <jaxrs:serviceBeans>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.v1.SwaggerYamlApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.v1.DeployApiApi"/>
+
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper" />
+            <ref bean="cors-filter" />
+        </jaxrs:providers>
+    </jaxrs:server>
+
+    <bean id="URLValidationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor" />
+    <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
+    <bean id="TokenMergeInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor" />
+
+    <!-- For Basic Authentication scheme please comment the AuthenticationInterceptor which contains "OAuthAuthenticationInterceptor"
+            and uncomment the AuthenticationInterceptor which contains "BasicAuthenticationInterceptor"-->
+    <bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor" />
+    <bean id="BasicAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor" />
+    <bean id="PostAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor" />
+    <bean id="ValidationInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor"/>
+    <bean id="gZipInterceptor" class="org.apache.cxf.transport.common.gzip.GZIPOutInterceptor" />
+
+    <bean id="cors-filter" class="org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter">
+        <property name="allowHeaders">
+            <list>
+                <value>Authorization</value>
+                <value>X-WSO2-Tenant</value>
+                <value>content-type</value>
+            </list>
+        </property>
+        <property name="exposeHeaders">
+            <list>
+                <value>Content-Disposition</value>
+            </list>
+        </property>
+        <property name="allowCredentials" value="true"/>
+    </bean>
+    <cxf:bus>
+        <cxf:inInterceptors>
+            <ref bean="URLValidationInterceptor"/>
+            <ref bean="TokenMergeInterceptor"/>
+            <ref bean="PreAuthenticationInterceptor"/>
+            <ref bean="AuthenticationInterceptor"/>
+            <ref bean="BasicAuthenticationInterceptor"/>
+            <ref bean="PostAuthenticationInterceptor"/>
+            <ref bean="ValidationInInterceptor"/>
+        </cxf:inInterceptors>
+        <cxf:outInterceptors>
+            <ref bean="gZipInterceptor"/>
+        </cxf:outInterceptors>
+    </cxf:bus>
+</beans>

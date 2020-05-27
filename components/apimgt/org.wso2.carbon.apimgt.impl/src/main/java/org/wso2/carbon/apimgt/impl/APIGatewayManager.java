@@ -285,6 +285,19 @@ public class APIGatewayManager {
         return failedEnvironmentsMap;
     }
 
+    public boolean deployAPI (GatewayAPIDTO gatewayAPIDTO){
+        String environmentName = gatewayAPIDTO.getEnvironment();
+        Environment environment = environments.get(environmentName);
+        APIGatewayAdminClient client;
+        try {
+            client = new APIGatewayAdminClient(environment);
+            client.deployAPI(gatewayAPIDTO);
+        } catch (AxisFault axisFault) {
+            log.error(axisFault);
+        }
+        return true;
+    }
+
     private void addGAConfigLocalEntry(GatewayAPIDTO gatewayAPIDTO, String tenantDomain)
             throws APIManagementException {
         String content = APIUtil.getGAConfigFromRegistry(tenantDomain);

@@ -1,0 +1,225 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "This document specifies a **RESTful API** for WSO2 **API Manager** - Gateway.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.5.176/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
+    "version" : "v1",
+    "title" : "WSO2 API Manager - Gateway",
+    "contact" : {
+      "name" : "WSO2",
+      "url" : "http://wso2.com/products/api-manager/",
+      "email" : "architecture@wso2.com"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host" : "apis.wso2.com",
+  "basePath" : "/api/am/gateway/v1",
+  "schemes" : [ "https" ],
+  "consumes" : [ "application/json" ],
+  "produces" : [ "application/json" ],
+  "paths" : {
+    "/deploy-api" : {
+      "post" : {
+        "tags" : [ "API Lifecycle" ],
+        "summary" : "Deploy the API in the gateway",
+        "description" : "This operation is used to deploy and API in the gateway.\n",
+        "parameters" : [ {
+          "name" : "apiName",
+          "in" : "query",
+          "description" : "Name of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "environment",
+          "in" : "query",
+          "description" : "Environement of the API Gateway\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nAPI successfully deployed in the Gateway.\n",
+            "schema" : {
+              "$ref" : "#/definitions/WorkflowResponse"
+            }
+          },
+          "202" : {
+            "description" : "Accepted.\nThe request has been accepted.\n",
+            "schema" : {
+              "$ref" : "#/definitions/WorkflowResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested API does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "409" : {
+            "description" : "Conflict.\nPending workflow task exists.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "412" : {
+            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "security" : [ {
+          "OAuth2Security" : [ "apim:api_publish" ]
+        } ],
+        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/deploy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&environment=Production\"",
+        "x-wso2-request" : "POST https://127.0.0.1:9443/api/am/gateway/v1/deploy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&environment=Production\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response" : "HTTP/1.1 200 OK"
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "OAuth2Security" : {
+      "type" : "oauth2",
+      "tokenUrl" : "https://localhost:9443/oauth2/token",
+      "flow" : "password",
+      "scopes" : {
+        "apim:api_publish" : "Publish API"
+      }
+    }
+  },
+  "definitions" : {
+    "WorkflowResponse" : {
+      "required" : [ "workflowStatus" ],
+      "properties" : {
+        "workflowStatus" : {
+          "type" : "string",
+          "example" : "APPROVED",
+          "description" : "This attribute declares whether this workflow task is approved or rejected.\n",
+          "enum" : [ "CREATED", "APPROVED", "REJECTED", "REGISTERED" ]
+        },
+        "jsonPayload" : {
+          "type" : "string",
+          "description" : "Attributes that returned after the workflow execution\n"
+        },
+        "lifecycleState" : {
+          "$ref" : "#/definitions/LifecycleState"
+        }
+      },
+      "title" : "workflow Response"
+    },
+    "LifecycleState" : {
+      "properties" : {
+        "state" : {
+          "type" : "string",
+          "example" : "Created"
+        },
+        "checkItems" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "properties" : {
+              "name" : {
+                "type" : "string",
+                "example" : "Deprecate old versions after publish the API"
+              },
+              "value" : {
+                "type" : "boolean",
+                "example" : false
+              },
+              "requiredStates" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "availableTransitions" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "properties" : {
+              "event" : {
+                "type" : "string",
+                "example" : "Promote"
+              },
+              "targetState" : {
+                "type" : "string",
+                "example" : "Created"
+              }
+            }
+          }
+        }
+      },
+      "title" : "Lifecycle State"
+    },
+    "Error" : {
+      "required" : [ "code", "message" ],
+      "properties" : {
+        "code" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Error code"
+        },
+        "message" : {
+          "type" : "string",
+          "description" : "Error message."
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "A detail description about the error message.\n"
+        },
+        "moreInfo" : {
+          "type" : "string",
+          "description" : "Preferably an url with more details about the error.\n"
+        },
+        "error" : {
+          "type" : "array",
+          "description" : "If there are more than one error list them out.\nFor example, list out validation errors by each field.\n",
+          "items" : {
+            "$ref" : "#/definitions/ErrorListItem"
+          }
+        }
+      },
+      "title" : "Error object returned with 4XX HTTP status"
+    },
+    "ErrorListItem" : {
+      "required" : [ "code", "message" ],
+      "properties" : {
+        "code" : {
+          "type" : "string",
+          "description" : "Error code"
+        },
+        "message" : {
+          "type" : "string",
+          "description" : "Description about individual errors occurred\n"
+        }
+      },
+      "title" : "Description of individual errors that may have occurred during a request."
+    }
+  },
+  "parameters" : {
+    "apiId-Q" : {
+      "name" : "apiId",
+      "in" : "query",
+      "description" : "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
+      "required" : true,
+      "type" : "string"
+    }
+  }
+}

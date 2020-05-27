@@ -1,0 +1,196 @@
+<div class="main-content">
+    <h1><a name="API Lifecycle"></a>API Lifecycle</h1>
+
+            <hr/>
+            <h4 class="operation-heading"><a name="deployApiPost"></a>Deploy the API in the gateway</h4> <code>POST https://apis.wso2.com/api/am/gateway/v1/deploy-api</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation is used to deploy and API in the gateway.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_publish</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiName</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Name of the API
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>environment</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Environement of the API Gateway
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
+Should be formatted as **provider-name-version**.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. API successfully deployed in the Gateway. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#WorkflowResponse">WorkflowResponse</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">202</p></td>
+                        <td class="parameter"><p class="marked">Accepted. The request has been accepted. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#WorkflowResponse">WorkflowResponse</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">409</p></td>
+                        <td class="parameter"><p class="marked">Conflict. Pending workflow task exists. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>
