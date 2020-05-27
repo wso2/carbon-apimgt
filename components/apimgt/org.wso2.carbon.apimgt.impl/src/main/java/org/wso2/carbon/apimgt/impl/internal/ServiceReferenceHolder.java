@@ -22,6 +22,8 @@ import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactPublisher;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -55,6 +57,8 @@ public class ServiceReferenceHolder {
     private OAuthServerConfiguration oauthServerConfiguration;
     private Map<String,JWTTransformer> jwtTransformerMap = new HashMap<>();
     private Map<String,KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap  = new HashMap<>();
+    private ArtifactPublisher artifactPublisher;
+    private ArtifactRetriever artifactRetriever;
     private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
 
     public static ConfigurationContextService getContextService() {
@@ -202,5 +206,21 @@ public class ServiceReferenceHolder {
     public Map<String, List<Notifier>> getNotifiersMap() {
 
         return notifiersMap;
+    }
+
+    public ArtifactPublisher getArtifactPublisher() {
+        return artifactPublisher;
+    }
+
+    public void setArtifactPublisher(ArtifactPublisher artifactPublisher) {
+        this.artifactPublisher = artifactPublisher;
+    }
+
+    public ArtifactRetriever getArtifactRetriever() {
+        return artifactRetriever;
+    }
+
+    public void setArtifactRetriever(ArtifactRetriever artifactRetriever) {
+        this.artifactRetriever = artifactRetriever;
     }
 }

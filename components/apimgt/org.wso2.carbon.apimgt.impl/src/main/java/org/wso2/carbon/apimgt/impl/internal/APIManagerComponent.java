@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
@@ -68,6 +69,10 @@ import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactPublisher;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBPublisher;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
@@ -190,6 +195,11 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),  new ApplicationNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new ApplicationRegistrationNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(),new PolicyNotifier(), null);
+
+            ArtifactPublisher artifactPublisher = new DBPublisher();
+            ArtifactRetriever artifactRetriever = new DBRetriever();
+            bundleContext.registerService(ArtifactPublisher.class.getName(), artifactPublisher, null);
+            bundleContext.registerService(ArtifactRetriever.class.getName(), artifactRetriever, null);
 
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
@@ -687,6 +697,48 @@ public class APIManagerComponent {
 
     protected void unsetTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
         this.tenantRegistryLoader = null;
+    }
+
+    @Reference(
+            name = "gateway.artifact.publisher",
+            service = ArtifactPublisher.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetArtifactPublisher")
+    protected void setArtifactPublisher(ArtifactPublisher artifactPublisher) {
+
+        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                        .getGatewayArtifactSynchronizerProperties();
+
+        if (gatewayArtifactSynchronizerProperties.getPublisher().equals(artifactPublisher.getClass().getName())) {
+            ServiceReferenceHolder.getInstance().setArtifactPublisher(artifactPublisher);
+        }
+    }
+
+    protected void unsetArtifactPublisher(ArtifactPublisher artifactPublisher) {
+        ServiceReferenceHolder.getInstance().setArtifactPublisher(null);
+    }
+
+    @Reference(
+            name = "gateway.artifact.retriever",
+            service = ArtifactRetriever.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetArtifactRetriever")
+    protected void setArtifactRetriever(ArtifactRetriever artifactRetriever) {
+
+        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                        .getGatewayArtifactSynchronizerProperties();
+
+        if (gatewayArtifactSynchronizerProperties.getRetriever().equals(artifactRetriever.getClass().getName())) {
+            ServiceReferenceHolder.getInstance().setArtifactRetriever(artifactRetriever);
+        }
+    }
+
+    protected void unsetArtifactRetriever(ArtifactRetriever artifactRetriever) {
+        ServiceReferenceHolder.getInstance().setArtifactRetriever(null);
     }
 
     public static TenantRegistryLoader getTenantRegistryLoader() {
