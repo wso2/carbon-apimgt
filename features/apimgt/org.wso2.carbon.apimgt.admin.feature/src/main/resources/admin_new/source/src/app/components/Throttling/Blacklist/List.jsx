@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -26,11 +26,14 @@ import Typography from '@material-ui/core/Typography';
 import HelpBase from 'AppComponents/AdminPages/Addons/HelpBase';
 import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
 import DescriptionIcon from '@material-ui/icons/Description';
+import Switch from '@material-ui/core/Switch';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
 import AddEdit from 'AppComponents/Throttling/Blacklist/AddEdit';
 import Delete from 'AppComponents/Throttling/Blacklist/Delete';
 import API from 'AppData/api';
+import cloneDeep from 'lodash.clonedeep';
+import Alert from 'AppComponents/Shared/Alert';
 
 /**
  * Render a list
@@ -39,7 +42,7 @@ import API from 'AppData/api';
 export default function ListBlacklistThrottlingPolicies() {
     const intl = useIntl();
     const restApi = new API();
-    let blacklistPolicyList;
+    const [blacklistPolicyList, setBlacklistPolicyList] = useState([]);
 
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
@@ -95,6 +98,77 @@ export default function ListBlacklistThrottlingPolicies() {
         }),
     };
 
+    /**
+ * Mock API call
+ * @returns {Promise}.
+ */
+    function apiCall() {
+        let policyList;
+        let incrementId = 0;
+        return new Promise(((resolve, reject) => {
+            restApi.blacklistPoliciesGet().then((result) => {
+                policyList = result.body.list;
+                const blacklistPolicies = policyList.map((obj) => {
+                    let array = [];
+                    incrementId++;
+                    if (obj.conditionValue === Object(obj.conditionValue)) {
+                        Object.keys(obj.conditionValue);
+                        Object.values(obj.conditionValue);
+                        array = Object.entries(obj.conditionValue);
+                    } else {
+                        array.push(obj.conditionValue);
+                    }
+                    return {
+                        conditionId: incrementId,
+                        conditionUUID: obj.conditionId,
+                        conditionType: obj.conditionType,
+                        conditionValue: array,
+                        conditionStatus: obj.conditionStatus,
+                    };
+                });
+                setBlacklistPolicyList(blacklistPolicies);
+                resolve(blacklistPolicies);
+            }).catch((error) => {
+                reject(error);
+            });
+        }));
+    }
+
+    const handleConditionStatus = (conditionUUID, event) => {
+        let editedConditionId;
+        let editedConditionStatus;
+        const blacklistPolicyListNew = cloneDeep(blacklistPolicyList);
+        blacklistPolicyListNew.map((res) => {
+            if (res.conditionUUID === conditionUUID) {
+                res.conditionStatus = event.target.checked;
+                editedConditionId = conditionUUID;
+                editedConditionStatus = event.target.checked;
+            }
+            return res.conditionStatus;
+        });
+        setBlacklistPolicyList(blacklistPolicyListNew);
+        const promisedUpdateBlacklistPolicy = restApi.updateBlacklistPolicy(
+            editedConditionId, editedConditionStatus,
+        );
+        return promisedUpdateBlacklistPolicy
+            .then(() => {
+                Alert.success(intl.formatMessage({
+                    id: 'Throttling.Blacklist.Policy.policy.update.success',
+                    defaultMessage: 'Condition status has been updated successfully.',
+                }));
+            })
+            .catch((error) => {
+                const { response } = error;
+                if (response.body) {
+                    Alert.error(response.body.description);
+                }
+                return null;
+            })
+            .finally(() => {
+                apiCall();
+            });
+    };
+
     const columProps = [
         {
             name: 'conditionId',
@@ -132,7 +206,32 @@ export default function ListBlacklistThrottlingPolicies() {
                 sort: false,
             },
         },
-        // TODO : Condition Status
+        {
+            name: 'conditionStatus',
+            label: intl.formatMessage({
+                id: 'Admin.Throttling.Blacklist.Throttling.policy.table.header.condition.status',
+                defaultMessage: 'Condition Status',
+            }),
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    const dataRow = blacklistPolicyList[tableMeta.rowIndex];
+                    const { conditionUUID } = dataRow;
+                    return (
+                        <div>
+                            <Switch
+                                checked={blacklistPolicyList.find((x) => x.conditionUUID === conditionUUID)
+                                    .conditionStatus}
+                                onChange={(event) => handleConditionStatus(conditionUUID, event)}
+                                name='invert'
+                                color='primary'
+                            />
+                        </div>
+                    );
+                },
+                filter: true,
+                sort: false,
+            },
+        },
     ];
 
     const emptyBoxProps = {
@@ -150,43 +249,8 @@ export default function ListBlacklistThrottlingPolicies() {
                     id='Throttling.Blacklist.Policy.List.empty.title.blacklist.policies'
                     defaultMessage='Blacklist Policies'
                 />
-
             </Typography>),
     };
-
-    /**
- * Mock API call
- * @returns {Promise}.
- */
-    function apiCall() {
-        let policyList;
-        let incrementId = 0;
-        return new Promise(((resolve, reject) => {
-            restApi.blacklistPoliciesGet().then((result) => {
-                policyList = result.body.list;
-                blacklistPolicyList = policyList.map((obj) => {
-                    let array = [];
-                    incrementId++;
-                    if (obj.conditionValue === Object(obj.conditionValue)) {
-                        Object.keys(obj.conditionValue);
-                        Object.values(obj.conditionValue);
-                        array = Object.entries(obj.conditionValue);
-                    } else {
-                        array.push(obj.conditionValue);
-                    }
-                    return {
-                        conditionId: incrementId,
-                        conditionUUID: obj.conditionId,
-                        conditionType: obj.conditionType,
-                        conditionValue: array,
-                    };
-                });
-                resolve(blacklistPolicyList);
-            }).catch((error) => {
-                reject(error);
-            });
-        }));
-    }
 
     return (
         <ListBase
