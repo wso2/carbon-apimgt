@@ -20,10 +20,12 @@
 
 package org.wso2.carbon.apimgt.api.gateway;
 
+import java.io.Serializable;
+
 /**
  * This Contains the API Related data to deploy in Gateway.
  */
-public class GatewayAPIDTO {
+public class GatewayAPIDTO implements Serializable {
 
     private String name;
     private String version;
@@ -43,6 +45,7 @@ public class GatewayAPIDTO {
     private String[] endpointEntriesToBeRemove;
     private CredentialDto[] credentialsToBeAdd ;
     private String[] credentialsToBeRemove;
+    private String environment;
 
     public String getName() {
 
@@ -222,5 +225,15 @@ public class GatewayAPIDTO {
     public void setCredentialsToBeRemove(String[] credentialsToBeRemove) {
 
         this.credentialsToBeRemove = credentialsToBeRemove;
+    }
+
+    public String getEnvironment() {
+
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+
+        this.environment = environment;
     }
 }
