@@ -3316,6 +3316,7 @@ definitions:
       - defaultLimit
     allOf:
       - $ref: '#/definitions/ThrottlePolicy'
+      - $ref: '#/definitions/GraphQLQuery'
       - properties:
           defaultLimit:
             $ref: '#/definitions/ThrottleLimitType'
@@ -3347,6 +3348,21 @@ definitions:
             type: string
             description: |
               define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL.
+
+#-----------------------------------------------------
+# The GraphQL Query resource
+#-----------------------------------------------------
+  GraphQLQuery:
+    title: GraphQL Query
+    properties:
+      graphQLMaxComplexity:
+        type: integer
+        description: Maximum Complexity of the GraphQL query
+        example: 400
+      graphQLMaxDepth:
+        type: integer
+        description: Maximum Depth of the GraphQL query
+        example: 10
 #-----------------------------------------------------
 # The Subscription Throttling Policy List resource
 #-----------------------------------------------------
