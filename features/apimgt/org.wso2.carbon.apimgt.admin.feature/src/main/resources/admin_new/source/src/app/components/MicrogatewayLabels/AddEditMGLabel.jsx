@@ -19,6 +19,7 @@
 import React, { useReducer } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
+import Joi from '@hapi/joi';
 import TextField from '@material-ui/core/TextField';
 import { FormattedMessage } from 'react-intl';
 import FormControl from '@material-ui/core/FormControl';
@@ -86,6 +87,22 @@ function AddEditMGLabel(props) {
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
     };
+
+    const handleHostValidation = (hostName) => {
+        const schema = Joi.string().uri().empty();
+        const validationError = schema.validate(hostName).error;
+
+        if (validationError) {
+            const errorType = validationError.details[0].type;
+            if (errorType === 'any.empty') {
+                return 'Host is empty';
+            } else if (errorType === 'string.uri') {
+                return 'Invalid Host';
+            }
+        }
+        return false;
+    };
+
     const hasErrors = (fieldName, value) => {
         let error;
         switch (fieldName) {
@@ -101,10 +118,11 @@ function AddEditMGLabel(props) {
                 }
                 break;
             case 'hosts':
-                if (value && value.length === 0) {
-                    error = 'Please add at least one host';
-                } else {
-                    error = false;
+                for (const h in value) {
+                    if (handleHostValidation(value[h])) {
+                        error = handleHostValidation(value[h]);
+                        break;
+                    }
                 }
                 break;
             default:
@@ -167,7 +185,7 @@ function AddEditMGLabel(props) {
         });
     };
 
-    const onHostChange = (userHosts) => {
+    const handleHostChange = (userHosts) => {
         dispatch({ field: 'hosts', value: userHosts });
     };
 
@@ -217,19 +235,21 @@ function AddEditMGLabel(props) {
                 {(id)
                     ? (
                         <ListInput
-                            onInputListChange={onHostChange}
+                            onInputListChange={handleHostChange}
                             initialList={hosts}
                             inputLabelPrefix='Host'
                             helperText='Enter Host'
                             addButtonLabel='Add Host'
+                            onValidation={handleHostValidation}
                         />
                     )
                     : (
                         <ListInput
-                            onInputListChange={onHostChange}
+                            onInputListChange={handleHostChange}
                             inputLabelPrefix='Host'
                             helperText='Enter Host'
                             addButtonLabel='Add Host'
+                            onValidation={handleHostValidation}
                         />
                     )}
             </FormControl>
