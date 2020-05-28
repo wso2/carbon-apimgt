@@ -15,8 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.wso2.carbon.apimgt.impl;
+package org.wso2.carbon.apimgt.impl.endpoint.registry.constants;
 
 /**
  * Defines constant properties used for endpoint registry
@@ -25,7 +24,7 @@ public class EndpointRegistryConstants {
 
     public static final String COLUMN_ID = "ID";
 
-    public static final String COLUMN_REG_ID= "REG_ID";
+    public static final String COLUMN_REG_ID = "REG_ID";
 
     public static final String COLUMN_UUID = "UUID";
 
@@ -33,15 +32,11 @@ public class EndpointRegistryConstants {
 
     public static final String COLUMN_REG_TYPE = "REG_TYPE";
 
-    public static final String COLUMN_REG_MODE = "REG_MODE";
-
     public static final String COLUMN_TENANT_ID = "TENANT_ID";
 
-    public static final String COLUMN_READ_ROLE = "READ_ROLE";
-
-    public static final String COLUMN_WRITE_ROLE = "WRITE_ROLE";
-
     public static final String COLUMN_ENTRY_NAME = "ENTRY_NAME";
+
+    public static final String COLUMN_ENTRY_VERSION = "ENTRY_VERSION";
 
     public static final String COLUMN_PRODUCTION_SERVICE_URL = "PRODUCTION_SERVICE_URL";
 
@@ -67,4 +62,10 @@ public class EndpointRegistryConstants {
 
     public static final String COLUMN_UPDATED_TIME = "UPDATED_TIME";
 
+    public static final String REGISTRY_TYPE_WSO2 = "wso2";
+
+    public static final String DEFAULT_REGISTRY_NAME = "Default Registry";
+
+    public static final String SYSTEM_USER_NAME = "SYSTEM_USER";
 }
+

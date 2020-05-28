@@ -62,6 +62,10 @@
     <bean id="BasicAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor" />
     <bean id="PostAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor" />
     <bean id="ValidationInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor"/>
+
+    <!-- Out interceptors -->
+    <bean id="gZipInterceptor" class="org.apache.cxf.transport.common.gzip.GZIPOutInterceptor" />
+
     <cxf:bus>
         <cxf:inInterceptors>
             <ref bean="URLValidationInterceptor"/>
@@ -72,5 +76,8 @@
             <ref bean="PostAuthenticationInterceptor"/>
             <ref bean="ValidationInInterceptor"/>
         </cxf:inInterceptors>
+        <cxf:outInterceptors>
+            <ref bean="gZipInterceptor"/>
+        </cxf:outInterceptors>
     </cxf:bus>
 </beans>

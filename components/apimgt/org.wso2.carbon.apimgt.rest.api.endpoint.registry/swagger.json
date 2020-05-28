@@ -17,59 +17,6 @@
         "summary" : "Retrieve all Registries\n",
         "description" : "This operation provides you an array of available Registries.\n",
         "operationId" : "getRegistries",
-        "parameters" : [ {
-          "name" : "query",
-          "in" : "query",
-          "description" : "**Search condition**.\nYou can search for a registry by specifying the registry name as \"query\" attribute.\n\nEg.\n\"prodServer\" will match a registry entry if the name is exactly \"prodServer\".\n",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "sortRegistryBy",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "registryName" ]
-          }
-        }, {
-          "name" : "sortRegistryOrder",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "asc", "desc" ]
-          }
-        }, {
-          "name" : "limit",
-          "in" : "query",
-          "description" : "Maximum limit of items to return.\n",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "type" : "integer",
-            "default" : 25
-          }
-        }, {
-          "name" : "offset",
-          "in" : "query",
-          "description" : "Starting point within the complete list of items qualified.\n",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "type" : "integer",
-            "default" : 0
-          }
-        } ],
         "responses" : {
           "200" : {
             "description" : "OK.\nArray of Registries is returned.\n",
@@ -98,7 +45,8 @@
                 "$ref" : "#/components/schemas/Registry"
               }
             }
-          }
+          },
+          "required" : true
         },
         "responses" : {
           "201" : {
@@ -213,7 +161,8 @@
                 "$ref" : "#/components/schemas/Registry"
               }
             }
-          }
+          },
+          "required" : true
         },
         "responses" : {
           "200" : {
@@ -309,6 +258,27 @@
           "required" : true,
           "style" : "simple",
           "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "exactNameMatch",
+          "in" : "query",
+          "description" : "Whether to perform exact search on name",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "Version of the Registry Entry",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
           "schema" : {
             "type" : "string"
           }
@@ -752,12 +722,123 @@
           "default" : [ "registry:entry_view" ]
         } ]
       }
+    },
+    "/registries/{registryId}/entries/{entryId}/copy-entry" : {
+      "post" : {
+        "tags" : [ "Registry Entries" ],
+        "summary" : "Create a new version of the entry",
+        "description" : "Using this operation, you can create a new version of an existing entry\n",
+        "operationId" : "createNewEntryVersion",
+        "parameters" : [ {
+          "name" : "registryId",
+          "in" : "path",
+          "description" : "uuid of the registry",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "entryId",
+          "in" : "path",
+          "description" : "uuid of the registry entry",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "Version to be created",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Created.\nSuccessful response with the newly created Registry Entry as entity in the body.\n",
+            "headers" : {
+              "Etag" : {
+                "description" : "Entity Tag of the response resource.",
+                "style" : "simple",
+                "explode" : false,
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RegistryEntry"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid Request\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested Registry or Entry does not exist.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Resource already exists\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "default" : [ "registry:entry_write" ]
+        } ]
+      }
+    },
+    "/settings" : {
+      "get" : {
+        "tags" : [ "Settings" ],
+        "summary" : "Retrieve endpoint registry settings",
+        "description" : "Retrieve Endpoint Registry settings\n",
+        "operationId" : "getSettings",
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nSettings returned\n"
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested Settings does not exist.\n"
+          }
+        }
+      }
     }
   },
   "components" : {
     "schemas" : {
       "Registry" : {
         "title" : "Registry object",
+        "required" : [ "name" ],
         "type" : "object",
         "properties" : {
           "name" : {
@@ -771,12 +852,7 @@
           "type" : {
             "type" : "string",
             "example" : "wso2",
-            "enum" : [ "wso2", "k8", "etcd" ]
-          },
-          "mode" : {
-            "type" : "string",
-            "example" : "ReadOnly",
-            "enum" : [ "ReadOnly", "ReadWrite" ]
+            "enum" : [ "wso2" ]
           },
           "owner" : {
             "type" : "string",
@@ -800,6 +876,7 @@
       },
       "RegistryEntry" : {
         "title" : "The Registry Entry object",
+        "required" : [ "entryName", "version" ],
         "type" : "object",
         "properties" : {
           "id" : {
@@ -809,6 +886,10 @@
           "entryName" : {
             "type" : "string",
             "example" : "Pizzashack-Endpoint"
+          },
+          "version" : {
+            "type" : "string",
+            "example" : "v1"
           },
           "productionServiceUrl" : {
             "type" : "string",
@@ -856,6 +937,17 @@
           "definitionFile" : {
             "type" : "string",
             "format" : "binary"
+          }
+        }
+      },
+      "Settings" : {
+        "title" : "SettingsDTO",
+        "properties" : {
+          "scopes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },
