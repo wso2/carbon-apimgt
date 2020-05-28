@@ -175,12 +175,12 @@ public class EndpointRegistryImplTest {
         String registryUUID = "reg1";
 
         EndpointRegistryEntry endpointRegistryEntry1 = createRegistryEntry("abc1", "Entry 1", "v1",
-                "An Registry Entry that exposes a REST endpoint", "https://xyz.com", "REST", "UTILITY",
+                "A Registry Entry that exposes a REST endpoint", "https://xyz.com", "REST", "UTILITY",
                 "https://petstore.swagger.io/v2/swagger.json", "OAS", null);
         endpointRegistryEntryList.add(endpointRegistryEntry1);
 
         EndpointRegistryEntry endpointRegistryEntry2 = createRegistryEntry("abc2", "Entry 2", "v1",
-                "An Registry Entry that exposes a REST endpoint", "https://xyz2.com", "REST", "DOMAIN",
+                "A Registry Entry that exposes a REST endpoint", "https://xyz2.com", "REST", "DOMAIN",
                 "https://petstore.swagger.io/v2/swagger.json", "WSDL1", null);
         endpointRegistryEntryList.add(endpointRegistryEntry2);
 
@@ -216,7 +216,7 @@ public class EndpointRegistryImplTest {
         EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
 
         EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
-                "Entry 2", "v1", "An Registry Entry that exposes a REST endpoint", "https://xyz2.com",
+                "Entry 2", "v1", "A Registry Entry that exposes a REST endpoint", "https://xyz2.com",
                 "REST",
                 "DOMAIN", "https://petstore.swagger.io/v2/swagger.json",
                 "WSDL1", null);
@@ -235,7 +235,7 @@ public class EndpointRegistryImplTest {
         EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
 
         EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
-                "Entry 2", "v1", "An Registry Entry that exposes a REST endpoint", "https://xyz2.com",
+                "Entry 2", "v1", "A Registry Entry that exposes a REST endpoint", "https://xyz2.com",
                 "REST",
                 "DOMAIN", "https://petstore.swagger.io/v2/swagger.json",
                 "WSDL1", null);
@@ -337,7 +337,7 @@ public class EndpointRegistryImplTest {
         endpointRegistryEntry.setEntryId("entry1");
         endpointRegistryEntry.setName("Entry Name 1");
         endpointRegistryEntry.setVersion("v1");
-        endpointRegistryEntry.setDescription("An Registry Entry that exposes a REST endpoint");
+        endpointRegistryEntry.setDescription("A Registry Entry that exposes a REST endpoint");
         endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
         endpointRegistryEntry.setServiceType("REST");
         endpointRegistryEntry.setServiceCategory("UTILITY");

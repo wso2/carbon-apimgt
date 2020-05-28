@@ -889,7 +889,7 @@
           },
           "description" : {
             "type" : "string",
-            "example" : "An Registry Entry that exposes a REST endpoint"
+            "example" : "A Registry Entry that exposes a REST endpoint"
           },
           "version" : {
             "type" : "string",

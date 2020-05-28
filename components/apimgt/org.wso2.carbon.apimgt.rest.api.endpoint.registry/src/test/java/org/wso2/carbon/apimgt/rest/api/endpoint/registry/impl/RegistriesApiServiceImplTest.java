@@ -683,14 +683,14 @@ public class RegistriesApiServiceImplTest {
         List<EndpointRegistryEntry> endpointRegistryEntryList = new ArrayList<>();
 
         EndpointRegistryEntry endpointRegistryEntry1 = createRegistryEntry("entry1", "Entry Name 1",
-                "v1", "An Registry Entry that exposes a REST endpoint", "https://xyz.com",
+                "v1", "A Registry Entry that exposes a REST endpoint", "https://xyz.com",
                 RegistryEntryDTO.ServiceTypeEnum.REST, RegistryEntryDTO.ServiceCategoryEnum.UTILITY,
                 "https://petstore.swagger.io/v2/swagger.json", RegistryEntryDTO.DefinitionTypeEnum.OAS,
                 null);
         endpointRegistryEntryList.add(endpointRegistryEntry1);
 
         EndpointRegistryEntry endpointRegistryEntry2 = createRegistryEntry("entry2", "Entry Name 2",
-                "v1", "An Registry Entry that exposes a REST endpoint", "https://xyz2.com",
+                "v1", "A Registry Entry that exposes a REST endpoint", "https://xyz2.com",
                 RegistryEntryDTO.ServiceTypeEnum.REST, RegistryEntryDTO.ServiceCategoryEnum.DOMAIN,
                 "https://petstore.swagger.io/v2/swagger.json", RegistryEntryDTO.DefinitionTypeEnum.OAS,
                 null);
@@ -923,7 +923,7 @@ public class RegistriesApiServiceImplTest {
         EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
         endpointRegistryEntry.setEntryId("entry1");
         endpointRegistryEntry.setName("Entry Name 1");
-        endpointRegistryEntry.setDescription("An Registry Entry that exposes a REST endpoint");
+        endpointRegistryEntry.setDescription("A Registry Entry that exposes a REST endpoint");
         endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
         endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
         endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());

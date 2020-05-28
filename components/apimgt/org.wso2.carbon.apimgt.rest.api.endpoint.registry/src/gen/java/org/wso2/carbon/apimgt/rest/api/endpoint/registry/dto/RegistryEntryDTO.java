@@ -159,7 +159,7 @@ public class RegistryEntryDTO   {
 
     
     
-    @Schema(example = "An Registry Entry that exposes a REST endpoint", description = "")
+    @Schema(example = "A Registry Entry that exposes a REST endpoint", description = "")
     @JsonProperty("description")
           public String getDescription() {
     return description;
