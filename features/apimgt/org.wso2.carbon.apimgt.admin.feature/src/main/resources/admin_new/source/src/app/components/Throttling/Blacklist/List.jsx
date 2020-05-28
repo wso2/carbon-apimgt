@@ -131,21 +131,17 @@ export default function ListBlacklistThrottlingPolicies() {
         }));
     }
 
-    const handleConditionStatus = (conditionUUID, event) => {
-        let editedConditionId;
-        let editedConditionStatus;
+    const handleConditionStatus = (event) => {
         const blacklistPolicyListNew = cloneDeep(blacklistPolicyList);
         blacklistPolicyListNew.map((res) => {
-            if (res.conditionUUID === conditionUUID) {
+            if (res.conditionUUID === event.target.id) {
                 res.conditionStatus = event.target.checked;
-                editedConditionId = conditionUUID;
-                editedConditionStatus = event.target.checked;
             }
             return res.conditionStatus;
         });
         setBlacklistPolicyList(blacklistPolicyListNew);
         const promisedUpdateBlacklistPolicy = restApi.updateBlacklistPolicy(
-            editedConditionId, editedConditionStatus,
+            event.target.id, event.target.checked,
         );
         return promisedUpdateBlacklistPolicy
             .then(() => {
@@ -218,7 +214,8 @@ export default function ListBlacklistThrottlingPolicies() {
                             <Switch
                                 checked={blacklistPolicyList.find((x) => x.conditionUUID === conditionUUID)
                                     .conditionStatus}
-                                onChange={(event) => handleConditionStatus(conditionUUID, event)}
+                                onChange={handleConditionStatus}
+                                id={conditionUUID}
                                 name='conditionStatus'
                                 color='primary'
                             />
