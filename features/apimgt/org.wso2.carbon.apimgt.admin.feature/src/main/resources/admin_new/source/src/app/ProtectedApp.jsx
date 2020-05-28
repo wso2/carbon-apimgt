@@ -39,6 +39,8 @@ import Configurations from 'Config';
 import Navigator from 'AppComponents/Base/Navigator';
 import RouteMenuMapping from 'AppComponents/Base/RouteMenuMapping';
 import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
+import Api from 'AppData/api';
+import Progress from 'AppComponents/Shared/Progress';
 
 const drawerWidth = 256;
 
@@ -176,6 +178,7 @@ class Protected extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            settings: null,
             clientId: Utils.getCookieWithoutEnvironment(User.CONST.ADMIN_CLIENT_ID),
             sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.ADMIN_SESSION_STATE),
             mobileOpen: false,
@@ -203,9 +206,12 @@ class Protected extends Component {
      */
     componentDidMount() {
         const user = AuthManager.getUser();
+        const api = new Api();
+        const settingPromise = api.getSettings();
         window.addEventListener('message', this.handleMessage);
         if (user) {
             this.setState({ user });
+            settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
             this.checkSession();
         } else {
             // If no user data available , Get the user info from existing token information
@@ -213,6 +219,7 @@ class Protected extends Component {
             // user information via redirection
             const userPromise = AuthManager.getUserFromToken();
             userPromise.then((loggedUser) => this.setState({ user: loggedUser }));
+            settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
         }
     }
 
@@ -252,7 +259,7 @@ class Protected extends Component {
                 }}
             />
         );
-        const { clientId } = this.state;
+        const { clientId, settings } = this.state;
         const checkSessionURL = 'https://' + window.location.host + '/oidc/checksession?client_id='
             + clientId + '&redirect_uri=https://' + window.location.host
             + Configurations.app.context + '/services/auth/callback/login';
@@ -285,18 +292,23 @@ class Protected extends Component {
         return (
             <MuiThemeProvider theme={theme}>
                 <AppErrorBoundary>
-
                     <Base header={header} leftMenu={leftMenu}>
-                        <Route>
-                            <Switch>
-                                <Redirect exact from='/' to='/dashboard' />
-                                <Route path='/dashboard' component={Dashboard} />
-                                {allRoutes.map((r) => {
-                                    return <Route path={r.path} component={r.component} />;
-                                })}
-                                <Route component={ResourceNotFound} />
-                            </Switch>
-                        </Route>
+                        {settings ? (
+                            <AppContextProvider value={{ settings, user }}>
+                                <Route>
+                                    <Switch>
+                                        <Redirect exact from='/' to='/dashboard' />
+                                        <Route path='/dashboard' component={Dashboard} />
+                                        {allRoutes.map((r) => {
+                                            return <Route path={r.path} component={r.component} />;
+                                        })}
+                                        <Route component={ResourceNotFound} />
+                                    </Switch>
+                                </Route>
+                            </AppContextProvider>
+                        ) : (
+                            <Progress message='Loading Settings ...' />
+                        )}
                     </Base>
                     <iframe
                         title='iframeOP'
