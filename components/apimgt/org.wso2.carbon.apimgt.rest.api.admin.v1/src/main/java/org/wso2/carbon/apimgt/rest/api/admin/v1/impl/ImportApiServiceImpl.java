@@ -26,6 +26,7 @@ import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -38,9 +39,11 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.ImportApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.FileBasedApplicationImportExportManager;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.TenantThemeImportManager;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -55,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
 import javax.ws.rs.core.Response;
 
 public class ImportApiServiceImpl implements ImportApiService {
@@ -297,6 +301,37 @@ public class ImportApiServiceImpl implements ImportApiService {
         } catch (UnsupportedEncodingException e) {
             String errorMessage = "Error while Decoding apiId";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Import an Tenant Theme for a particular tenant by uploading an archive file.
+     *
+     * @param fileInputStream content relevant to the tenant theme
+     * @param fileDetail      file details as Attachment
+     * @param tenantDomain    tenant to which the theme is imported
+     * @return Theme import response
+     */
+    @Override
+    public Response importTenantThemePost(InputStream fileInputStream, Attachment fileDetail,
+                                          String tenantDomain, MessageContext messageContext) {
+
+        try {
+            boolean isTenantAvailable = APIUtil.isTenantAvailable(tenantDomain);
+            if (!isTenantAvailable) {
+                // tenant does not exist
+                String errorDescription = "The tenant " + tenantDomain + " does not exist";
+                ErrorDTO errorObject = RestApiUtil
+                        .getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404L,
+                                errorDescription);
+                return Response.ok().entity(errorObject).build();
+            }
+
+            TenantThemeImportManager.deployTenantTheme(fileInputStream, tenantDomain);
+            return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
+        } catch (UserStoreException | APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while importing tenant theme", e, log);
         }
         return null;
     }

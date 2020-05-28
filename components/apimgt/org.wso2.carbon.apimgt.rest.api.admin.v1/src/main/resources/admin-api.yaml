@@ -88,6 +88,7 @@ securityDefinitions:
       apim:api_workflow: Manage workflows #TODO: Verify Description
       apim:bot_data: Manage emails  #TODO: Verify Description
       apim:tenantInfo: Retrieve tenant related information  #TODO: Verify Description
+      apim:tenant_theme_manage: Manage tenant themes
       apim:admin_operations: Manage API categories
       apim:admin_settings: Retrieve admin settings
 
@@ -3125,6 +3126,64 @@ paths:
           description: |
             Not Found.
             Requested Settings does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The Tenant Theme resource APIs
+######################################################
+  /import/tenant-theme:
+
+    post:
+      security:
+        - OAuth2Security:
+            - apim:tenant_theme_manage
+      consumes:
+        - multipart/form-data
+      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer
+      ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v1/import/tenant-theme?tenantDomain=abc
+      .com"
+      x-wso2-request: |
+        POST https://localhost:9443/api/am/admin/v1/import/tenant-theme
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nTenant Theme imported successfully."
+      summary: Import a DevPortal Tenant Theme
+      description: |
+        This operation can be used to import a DevPortal tenant theme.
+      parameters:
+        - name: file
+          in: formData
+          description: |
+            Zip archive consisting of tenant theme configuration
+          required: true
+          type: file
+        - name: tenantDomain
+          in: query
+          description: |
+            The tenant domain name
+          required: true
+          type: string
+      responses:
+        200:
+          description: |
+            Ok.
+            Theme Imported Successfully.
+        403:
+          description: |
+            Forbidden.
+            Not Authorized to import.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Tenant does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error.
+            Error in importing Theme.
           schema:
             $ref: '#/definitions/Error'
 

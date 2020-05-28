@@ -84,7 +84,7 @@ ImportApiService delegate = new ImportApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications")
         })
-    }, tags={ "Application (Individual)" })
+    }, tags={ "Application (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with the updated object information as entity in the body. ", response = ApplicationInfoDTO.class),
         @ApiResponse(code = 207, message = "Multi Status. Partially successful response with skipped APIs information object as entity in the body. ", response = APIInfoListDTO.class),
@@ -92,5 +92,22 @@ ImportApiService delegate = new ImportApiServiceImpl();
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
     public Response importApplicationsPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Preserve Original Creator of the Application ")  @QueryParam("preserveOwner") Boolean preserveOwner,  @ApiParam(value = "Skip importing Subscriptions of the Application ")  @QueryParam("skipSubscriptions") Boolean skipSubscriptions,  @ApiParam(value = "Expected Owner of the Application in the Import Environment ")  @QueryParam("appOwner") String appOwner,  @ApiParam(value = "Skip importing Keys of the Application ")  @QueryParam("skipApplicationKeys") Boolean skipApplicationKeys,  @ApiParam(value = "Update if application exists ")  @QueryParam("update") Boolean update) throws APIManagementException{
         return delegate.importApplicationsPost(fileInputStream, fileDetail, preserveOwner, skipSubscriptions, appOwner, skipApplicationKeys, update, securityContext);
+    }
+
+    @POST
+    @Path("/tenant-theme")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Import a DevPortal Tenant Theme", notes = "This operation can be used to import a DevPortal tenant theme. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:tenant_theme_manage", description = "Manage tenant themes")
+        })
+    }, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Ok. Theme Imported Successfully. ", response = Void.class),
+        @ApiResponse(code = 403, message = "Not Found Tenant does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error. Error in importing Theme. ", response = ErrorDTO.class) })
+    public Response importTenantThemePost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @NotNull @ApiParam(value = "The tenant domain name ",required=true)  @QueryParam("tenantDomain") String tenantDomain) throws APIManagementException{
+        return delegate.importTenantThemePost(fileInputStream, fileDetail, tenantDomain, securityContext);
     }
 }
