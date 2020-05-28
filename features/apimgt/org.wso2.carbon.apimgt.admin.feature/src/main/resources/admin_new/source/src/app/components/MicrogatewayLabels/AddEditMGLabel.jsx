@@ -87,6 +87,23 @@ function AddEditMGLabel(props) {
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
     };
+
+    const handleHostValidation = (hostName) => {
+        const schema = Joi.string().uri().empty();
+        const validationError = schema.validate(hostName).error;
+
+        if (validationError) {
+            const errorType = validationError.details[0].type;
+            if (errorType === 'any.empty') {
+                return 'Host is empty';
+            }
+            if (errorType === 'string.uri') {
+                return 'Invalid Host';
+            }
+        }
+        return false;
+    };
+
     const hasErrors = (fieldName, value) => {
         let error;
         switch (fieldName) {
@@ -102,10 +119,11 @@ function AddEditMGLabel(props) {
                 }
                 break;
             case 'hosts':
-                if (value && value.length === 0) {
-                    error = 'Please add at least one host';
-                } else {
-                    error = false;
+                for (const h in value) {
+                    if (handleHostValidation(value[h])) {
+                        error = handleHostValidation(value[h]);
+                        break;
+                    }
                 }
                 break;
             default:
@@ -170,22 +188,6 @@ function AddEditMGLabel(props) {
 
     const handleHostChange = (userHosts) => {
         dispatch({ field: 'hosts', value: userHosts });
-    };
-
-    const handleHostValidation = (hostName) => {
-        const schema = Joi.string().uri().empty();
-        const validationError = schema.validate(hostName).error;
-
-        if (validationError) {
-            const errorType = validationError.details[0].type;
-            if (errorType === 'any.empty') {
-                return 'Host is empty';
-            }
-            if (errorType === 'string.uri') {
-                return 'Invalid Host';
-            }
-        }
-        return false;
     };
 
     return (

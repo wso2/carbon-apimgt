@@ -80,10 +80,10 @@ const InputList = (props) => {
                                     label={inputLabelPrefix + ' ' + labelCounter++}
                                     value={item.value}
                                     helperText={
-                                        userInputItems.filter((obj) => obj.key === item.key)[0].error || helperText
+                                        userInputItems.find((obj) => obj.key === item.key).error || helperText
                                     }
                                     variant='outlined'
-                                    error={userInputItems.filter((obj) => obj.key === item.key)[0].error}
+                                    error={userInputItems.find((obj) => obj.key === item.key).error}
                                 />
                                 <Box mt={1}>
                                     <Button
