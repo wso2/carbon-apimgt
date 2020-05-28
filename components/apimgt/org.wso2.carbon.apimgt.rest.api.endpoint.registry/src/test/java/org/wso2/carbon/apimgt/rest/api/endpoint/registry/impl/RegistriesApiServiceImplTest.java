@@ -240,7 +240,7 @@ public class RegistriesApiServiceImplTest {
 
         Mockito.verify(registryProvider)
                 .updateEndpointRegistry(Mockito.eq(payloadDTO.getId()), Mockito.eq(endpointRegistryInfoOld.getName()),
-                        Mockito.any(EndpointRegistryInfo.class));
+                        Mockito.eq(endpointRegistryInfoOld.getType()), Mockito.any(EndpointRegistryInfo.class));
         Assert.assertNotNull("Endpoint Registry update failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         RegistryDTO responseDTO = (RegistryDTO) response.getEntity();
@@ -259,7 +259,7 @@ public class RegistriesApiServiceImplTest {
                 = Mockito.mock(EndpointRegistryResourceAlreadyExistsException.class);
         Mockito.doThrow(resourceAlreadyExistsException).when(registryProvider)
                 .updateEndpointRegistry(Mockito.eq(endpointRegistryInfoOld.getUuid()),
-                        Mockito.eq(endpointRegistryInfoOld.getName()),
+                        Mockito.eq(endpointRegistryInfoOld.getName()), Mockito.eq(endpointRegistryInfoOld.getType()),
                         Mockito.any(EndpointRegistryInfo.class));
         Mockito.when(registryProvider.getEndpointRegistryByUUID(payloadDTO.getId(), TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfoOld, endpointRegistryInfoNew);
