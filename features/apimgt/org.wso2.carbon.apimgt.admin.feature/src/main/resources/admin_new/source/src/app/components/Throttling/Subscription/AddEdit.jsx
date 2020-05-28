@@ -38,7 +38,6 @@ import Select from '@material-ui/core/Select';
 import Switch from '@material-ui/core/Switch';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-// import ConditionalGroups from 'AppComponents/Throttling/Advanced/ConditionalGroups';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -244,7 +243,6 @@ function AddEdit() {
 
                                 name='requestCount'
                                 label='Request Count'
-                                // value={requestCount}
                                 multiline
                                 fullWidth
                                 type='number'
@@ -258,7 +256,6 @@ function AddEdit() {
                                         validate('requestCount', value);
                                     },
                                 }}
-                            // error={validationError.requestCountValue}
                             />
                         ) : (
                             <Box display='flex' flexDirection='row' alignItems='left' mt={1}>
@@ -270,7 +267,6 @@ function AddEdit() {
                                         required
                                         type='number'
                                         variant='outlined'
-                                        // value={dataAmount}
                                         onChange={onChange}
                                         InputProps={{
                                             id: 'dataAmount',
@@ -279,7 +275,6 @@ function AddEdit() {
                                                 validate('dataAmount', value);
                                             },
                                         }}
-                                    // error={validationError.dataAmount}
                                     />
                                 </Box>
                                 <Box flex='1' mt={1}>
@@ -287,7 +282,6 @@ function AddEdit() {
                                         <Select
                                             labelId='demo-simple-select-label'
                                             name='dataUnit'
-                                            // value={dataUnit}
                                             onChange={onChange}
                                             align='center'
                                             variant='outlined'
@@ -310,7 +304,6 @@ function AddEdit() {
                                     type='number'
                                     multiline
                                     variant='outlined'
-                                    // value={unitTime}
                                     onChange={onChange}
                                     InputProps={{
                                         id: 'unitTime',
@@ -319,8 +312,6 @@ function AddEdit() {
                                             validate('unitTime', value);
                                         },
                                     }}
-                                // error={validationError.unitTime}
-                                // helperText={validationError.unitTime && 'Unit Time is empty'}
                                 />
                             </Box>
                             <Box flex='1' mt={1}>
@@ -332,7 +323,6 @@ function AddEdit() {
                                     margin='dense'
                                     align='center'
                                     multiline
-                                    // value={timeUnit}
                                     onChange={onChange}
                                 >
                                     <MenuItem value='min'>Minute(s)</MenuItem>
@@ -395,7 +385,6 @@ function AddEdit() {
                                                 variant='outlined'
                                                 align='center'
                                                 multiline
-                                                // value={timeUnit}
                                                 onChange={onChange}
                                             >
                                                 <MenuItem value='fixedRate'>Fixed Rate</MenuItem>

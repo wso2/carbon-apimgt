@@ -228,32 +228,6 @@ export default function ListSubscriptionThrottlingPolicies() {
         </RouterLink>
     );
 
-    /* *************************************************************** */
-    /* To override the no data message send the following with the props to ListBase
-    const noDataMessage = (
-        <FormattedMessage
-            id='AdminPages.Addons.ListBase.nodata.message'
-            defaultMessage='No items yet'
-        />
-    )
-    /* **************************************************************** */
-    /*
-    Send the following props to ListBase to override the action column.
-
-    Following imports needs to go to the header.
-    import { Link as RouterLink } from 'react-router-dom';
-    import EditIcon from '@material-ui/icons/Edit';
-
-    const actionColumnProps = {
-        editIconShow: true,
-        editIconOverride: (
-            <RouterLink to='/'>
-                <EditIcon />
-            </RouterLink>
-        ),
-        deleteIconShow: false,
-    }; */
-
     /**
  * Mock API call
  * @returns {Promise}.
