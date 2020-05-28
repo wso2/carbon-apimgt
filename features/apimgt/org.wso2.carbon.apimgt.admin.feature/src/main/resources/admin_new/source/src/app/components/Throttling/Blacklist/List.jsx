@@ -111,8 +111,6 @@ export default function ListBlacklistThrottlingPolicies() {
                     let array = [];
                     incrementId++;
                     if (obj.conditionValue === Object(obj.conditionValue)) {
-                        Object.keys(obj.conditionValue);
-                        Object.values(obj.conditionValue);
                         array = Object.entries(obj.conditionValue);
                     } else {
                         array.push(obj.conditionValue);
