@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyDTO
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
@@ -112,7 +113,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             try {
                 Policy policyIfExists = apiProvider.getAPIPolicy(userName, apiPolicy.getPolicyName());
                 if (policyIfExists != null) {
-                    RestApiUtil.handleResourceAlreadyExistsError("Advanced Policy with name " + apiPolicy.getPolicyName() + " already exists", log);
+                    RestApiUtil.handleResourceAlreadyExistsError("Advanced Policy with name "
+                            + apiPolicy.getPolicyName() + " already exists", log);
                 }
             } catch (PolicyNotFoundException ignore) {
             }
@@ -123,7 +125,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             APIPolicy newApiPolicy = apiProvider.getAPIPolicy(userName, body.getPolicyName());
             AdvancedThrottlePolicyDTO policyDTO =
                     AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyToDTO(newApiPolicy);
-            return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_ADVANCED + "/" + policyDTO.getPolicyId())).entity(policyDTO).build();
+            return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_ADVANCED + "/"
+                    + policyDTO.getPolicyId())).entity(policyDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding an Advanced level policy: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -300,7 +303,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             try {
                 Policy policyIfExists = apiProvider.getApplicationPolicy(username, appPolicy.getPolicyName());
                 if (policyIfExists != null) {
-                    RestApiUtil.handleResourceAlreadyExistsError("Application Policy with name " + appPolicy.getPolicyName() + " already exists", log);
+                    RestApiUtil.handleResourceAlreadyExistsError("Application Policy with name "
+                            + appPolicy.getPolicyName() + " already exists", log);
                 }
             } catch (PolicyNotFoundException ignore) {
             }
@@ -311,7 +315,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             ApplicationPolicy newAppPolicy = apiProvider.getApplicationPolicy(username, body.getPolicyName());
             ApplicationThrottlePolicyDTO policyDTO =
                     ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyToDTO(newAppPolicy);
-            return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_APPLICATION + "/" + policyDTO.getPolicyId())).entity(policyDTO).build();
+            return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_APPLICATION + "/"
+                    + policyDTO.getPolicyId())).entity(policyDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding an Application level policy: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -490,7 +495,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             try {
                 Policy policyIfExists = apiProvider.getSubscriptionPolicy(username, subscriptionPolicy.getPolicyName());
                 if (policyIfExists != null) {
-                    RestApiUtil.handleResourceAlreadyExistsError("Subscription Policy with name " + subscriptionPolicy.getPolicyName() + " already exists", log);
+                    RestApiUtil.handleResourceAlreadyExistsError("Subscription Policy with name "
+                            + subscriptionPolicy.getPolicyName() + " already exists", log);
                 }
             } catch (PolicyNotFoundException ignore) {
             }
@@ -502,7 +508,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     body.getPolicyName());
             SubscriptionThrottlePolicyDTO policyDTO =
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(newSubscriptionPolicy);
-            return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_SUBSCRIPTION + "/" + policyDTO.getPolicyId())).entity(policyDTO).build();
+            return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_SUBSCRIPTION + "/"
+                    + policyDTO.getPolicyId())).entity(policyDTO).build();
         } catch (APIManagementException | ParseException e) {
             String errorMessage = "Error while adding a Subscription level policy: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -874,32 +881,38 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //Add the block condition. It will throw BlockConditionAlreadyExistsException if the condition already
             //  exists in the system
             String uuid = null;
-            if (APIConstants.BLOCKING_CONDITIONS_API.equals(body.getConditionType()) || APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(body.getConditionType()) || APIConstants.BLOCKING_CONDITIONS_USER.equals(body.getConditionType())) {
-                uuid = apiProvider.addBlockCondition(body.getConditionType(), (String) body.getConditionValue());
-            } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(body.getConditionType()) || APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(body.getConditionType())) {
+            if (APIConstants.BLOCKING_CONDITIONS_API.equals(body.getConditionType()) ||
+                    APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(body.getConditionType()) ||
+                    APIConstants.BLOCKING_CONDITIONS_USER.equals(body.getConditionType())) {
+                uuid = apiProvider.addBlockCondition(body.getConditionType(), (String) body.getConditionValue(),
+                        body.isConditionStatus());
+            } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(body.getConditionType()) ||
+                    APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(body.getConditionType())) {
                 if (body.getConditionValue() instanceof Map) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.putAll((Map) body.getConditionValue());
-                    uuid = apiProvider.addBlockCondition(body.getConditionType(), jsonObject.toJSONString());
+                    uuid = apiProvider.addBlockCondition(body.getConditionType(), jsonObject.toJSONString(),
+                            body.isConditionStatus());
                 }
             }
 
             //retrieve the new blocking condition and send back as the response
             BlockConditionsDTO newBlockingCondition = apiProvider.getBlockConditionByUUID(uuid);
             BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(newBlockingCondition);
-            return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS + "/" + uuid)).entity(dto).build();
+            return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS + "/"
+                    + uuid)).entity(dto).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
-                RestApiUtil.handleResourceAlreadyExistsError("A black list item with type: " + body.getConditionType() + ", value: " + body.getConditionValue() + " already exists", e, log);
+                RestApiUtil.handleResourceAlreadyExistsError("A black list item with type: "
+                        + body.getConditionType() + ", value: " + body.getConditionValue() + " already exists", e, log);
             } else {
-                String errorMessage =
-                        "Error while adding Blocking Condition. Condition type: " + body.getConditionType() + ", " +
-                                "value: " + body.getConditionValue();
+                String errorMessage = "Error while adding Blocking Condition. Condition type: "
+                        + body.getConditionType() + ", " + "value: " + body.getConditionValue() + ". " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (URISyntaxException | ParseException e) {
-            String errorMessage =
-                    "Error while retrieving Blocking Condition resource location. Condition type: " + body.getConditionType() + ", value: " + body.getConditionValue();
+            String errorMessage = "Error while retrieving Blocking Condition resource location: Condition type: "
+                    + body.getConditionType() + ", " + "value: " + body.getConditionValue() + ". " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -968,6 +981,48 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId, e, log);
             } else {
                 String errorMessage = "Error while deleting Block Condition. Id : " + conditionId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Updates an existing condition status of a blocking condition
+     *
+     * @param conditionId       Id of the block condition
+     * @param body              content to update
+     * @param contentType       Content-Type header
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return 200 response if successful
+     */
+    @Override
+    public Response throttlingBlacklistConditionIdPatch(String conditionId, BlockingConditionStatusDTO body,
+                                                        String contentType, String ifMatch, String ifUnmodifiedSince,
+                                                        MessageContext messageContext) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String username = RestApiUtil.getLoggedInUsername();
+
+            //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
+            BlockConditionsDTO existingCondition = apiProvider.getBlockConditionByUUID(conditionId);
+            if (!RestApiAdminUtils.isBlockConditionAccessibleToUser(username, existingCondition)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId, log);
+            }
+
+            //update the status
+            apiProvider.updateBlockConditionByUUID(conditionId, String.valueOf(body.isConditionStatus()));
+
+            //retrieve the new blocking condition and send back as the response
+            BlockConditionsDTO newBlockingCondition = apiProvider.getBlockConditionByUUID(conditionId);
+            BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(newBlockingCondition);
+            return Response.ok().entity(dto).build();
+        } catch (APIManagementException | ParseException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId, e, log);
+            } else {
+                String errorMessage = "Error while updating Block Condition Status. Id : " + conditionId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }

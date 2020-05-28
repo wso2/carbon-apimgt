@@ -176,6 +176,15 @@ public interface APIAdmin  {
     List<APICategory> getAllAPICategoriesOfTenant(int tenantID) throws APIManagementException;
 
     /**
+     * Returns all api categories of the tenant with number of APIs for each category
+     *
+     * @param tenantID
+     * @return
+     * @throws APIManagementException
+     */
+    List<APICategory> getAPICategoriesOfTenant(int tenantID) throws APIManagementException;
+
+    /**
      * Returns all api categories of the tenant along with the count of attached APIs
      *
      * @param username

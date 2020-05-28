@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
@@ -27,6 +28,9 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.security.KeyStore;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ServiceReferenceHolder {
 
@@ -41,6 +45,7 @@ public class ServiceReferenceHolder {
     private APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher;
     private KeyStore trustStore;
     private AccessTokenGenerator accessTokenGenerator;
+    private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
 
     public static ConfigurationContextService getContextService() {
         return contextService;
@@ -130,5 +135,10 @@ public class ServiceReferenceHolder {
             AccessTokenGenerator accessTokenGenerator) {
 
         this.accessTokenGenerator = accessTokenGenerator;
+    }
+
+    public Map<String, List<Notifier>> getNotifiersMap() {
+
+        return notifiersMap;
     }
 }

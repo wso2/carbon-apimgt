@@ -15,8 +15,9 @@
  *  limitations under the License.
  *
  */
+package org.wso2.carbon.apimgt.impl.endpoint.registry.model;
 
-package org.wso2.carbon.apimgt.api.model;
+import java.io.InputStream;
 
 /**
  * Endpoint Registry Entry Object.
@@ -29,17 +30,31 @@ public class EndpointRegistryEntry {
 
     private String name = null;
 
-    private String serviceURL = null;
+    private String version = null;
+
+    private String productionServiceURL = null;
+
+    private String sandboxServiceUrl = null;
 
     private String serviceType = null;
+
+    private String serviceCategory = null;
 
     private String definitionType = null;
 
     private String definitionURL = null;
 
-    private ResourceFile endpointDefinition = null;
+    private InputStream endpointDefinition = null;
 
     private String metaData = null;
+
+    private String owner = null;
+
+    private String updatedBy = null;
+
+    private String createdTime = null;
+
+    private String lastUpdatedTime = null;
 
     public String getEntryId() {
 
@@ -56,9 +71,14 @@ public class EndpointRegistryEntry {
         return name;
     }
 
-    public String getServiceURL() {
+    public String getVersion() {
 
-        return serviceURL;
+        return version;
+    }
+
+    public String getProductionServiceURL() {
+
+        return productionServiceURL;
     }
 
     public String getServiceType() {
@@ -76,7 +96,7 @@ public class EndpointRegistryEntry {
         return definitionURL;
     }
 
-    public ResourceFile getEndpointDefinition() {
+    public InputStream getEndpointDefinition() {
 
         return endpointDefinition;
     }
@@ -101,9 +121,14 @@ public class EndpointRegistryEntry {
         this.name = name;
     }
 
-    public void setServiceURL(String serviceURL) {
+    public void setVersion(String version) {
 
-        this.serviceURL = serviceURL;
+        this.version = version;
+    }
+
+    public void setProductionServiceURL(String productionServiceURL) {
+
+        this.productionServiceURL = productionServiceURL;
     }
 
     public void setServiceType(String serviceType) {
@@ -121,7 +146,7 @@ public class EndpointRegistryEntry {
         this.definitionURL = definitionURL;
     }
 
-    public void setEndpointDefinition(ResourceFile endpointDefinition) {
+    public void setEndpointDefinition(InputStream endpointDefinition) {
 
         this.endpointDefinition = endpointDefinition;
     }
@@ -129,5 +154,65 @@ public class EndpointRegistryEntry {
     public void setMetaData(String metaData) {
 
         this.metaData = metaData;
+    }
+
+    public String getServiceCategory() {
+
+        return serviceCategory;
+    }
+
+    public void setServiceCategory(String serviceCategory) {
+
+        this.serviceCategory = serviceCategory;
+    }
+
+    public String getOwner() {
+
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+
+        this.owner = owner;
+    }
+
+    public String getUpdatedBy() {
+
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+
+        this.updatedBy = updatedBy;
+    }
+
+    public String getCreatedTime() {
+
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+
+        this.createdTime = createdTime;
+    }
+
+    public String getLastUpdatedTime() {
+
+        return lastUpdatedTime;
+    }
+
+    public void setLastUpdatedTime(String lastUpdatedTime) {
+
+        this.lastUpdatedTime = lastUpdatedTime;
+    }
+
+    public String getSandboxServiceUrl() {
+
+        return sandboxServiceUrl;
+    }
+
+    public void setSandboxServiceUrl(String sandboxServiceUrl) {
+
+        this.sandboxServiceUrl = sandboxServiceUrl;
     }
 }

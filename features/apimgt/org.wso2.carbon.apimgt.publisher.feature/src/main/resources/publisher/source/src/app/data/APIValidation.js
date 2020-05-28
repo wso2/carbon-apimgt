@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -140,7 +141,7 @@ const definition = {
         }),
     role: roleSchema.systemRole().role(),
     scope: scopeSchema.scopes().scope(),
-    url: Joi.string().uri().error((errors) => {
+    url: Joi.string().uri({ scheme: ['http', 'https'] }).error((errors) => {
         const tmpErrors = [...errors];
         errors.forEach((err, index) => {
             const tmpError = { ...err };

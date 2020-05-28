@@ -124,6 +124,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
@@ -254,6 +255,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                         endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
                         body.setEndpointConfig(endpointConfig);
                     }
+                } else if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig
+                        .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
+                        !endpointConfig.containsKey(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID)){
+                    RestApiUtil.handleBadRequest("Parameter endpoint_id should be provided", log);
                 }
             }
 
@@ -575,6 +580,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                             body.setEndpointConfig(endpointConfig);
                         }
                     }
+                } else if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig
+                        .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
+                        !endpointConfig.containsKey(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID)){
+                    RestApiUtil.handleBadRequest("Parameter endpoint_id should be provided", log);
                 }
             }
 
@@ -3201,6 +3210,16 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
         }
 
+        if (apiDTOFromProperties.getEndpointConfig() != null) {
+            LinkedHashMap endpointConfig = (LinkedHashMap) apiDTOFromProperties.getEndpointConfig();
+            if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig
+                    .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
+                    !endpointConfig.containsKey(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID)) {
+                RestApiUtil.handleBadRequest("Parameter endpoint_id should be provided to create API from " +
+                        "Registry Entry", log);
+            }
+        }
+
         // Only HTTP type APIs should be allowed
         if (!APIDTO.TypeEnum.HTTP.equals(apiDTOFromProperties.getType())) {
             throw RestApiUtil.buildBadRequestException("The API's type should only be HTTP when " +
@@ -3219,6 +3238,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             SwaggerData swaggerData;
             String definitionToAdd = validationResponse.getJsonContent();
             if (syncOperations) {
+                validateScopes(apiToAdd);
                 swaggerData = new SwaggerData(apiToAdd);
                 definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
             }
@@ -3227,12 +3247,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
             apiToAdd.setUriTemplates(uriTemplates);
             apiToAdd.setScopes(scopes);
+            //Set x-wso2-extensions to API when importing through API publisher
+            boolean isBasepathExtractedFromSwagger = false;
+            apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd, isBasepathExtractedFromSwagger);
             if (!syncOperations) {
+                validateScopes(apiToAdd);
                 swaggerData = new SwaggerData(apiToAdd);
                 definitionToAdd = apiDefinition
                         .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
             }
-            validateScopes(apiToAdd);
 
             // adding the API and definition
             apiProvider.addAPI(apiToAdd);
@@ -3357,6 +3380,15 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Minimum requirement name, version, context and endpointConfig.
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            if (additionalPropertiesAPI.getEndpointConfig() != null) {
+                LinkedHashMap endpointConfig = (LinkedHashMap) additionalPropertiesAPI.getEndpointConfig();
+                if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig
+                        .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
+                        !endpointConfig.containsKey(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID)) {
+                    RestApiUtil.handleBadRequest("Parameter endpoint_id should be provided to create API from " +
+                            "Registry Entry", log);
+                }
+            }
             additionalPropertiesAPI.setProvider(RestApiUtil.getLoggedInUsername());
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.fromValue(implementationType));
             API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
@@ -3759,6 +3791,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            if (additionalPropertiesAPI.getEndpointConfig() != null) {
+                LinkedHashMap endpointConfig = (LinkedHashMap) additionalPropertiesAPI.getEndpointConfig();
+                if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig
+                        .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
+                        !endpointConfig.containsKey(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID)) {
+                    RestApiUtil.handleBadRequest("Parameter endpoint_id should be provided to create API from " +
+                            "Endpoint Registry", log);
+                }
+            }
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
@@ -4129,19 +4170,34 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         APIIdentifier apiId = api.getId();
         String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        APIProvider apiProvider = RestApiUtil.getProvider(username);
+        Set<Scope> sharedAPIScopes = new HashSet<>();
 
         for (Scope scope : api.getScopes()) {
-            if (!(APIUtil.isWhiteListedScope(scope.getName()))) {
-                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-                int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-                APIProvider apiProvider = RestApiUtil.getProvider(username);
-
-                if (apiProvider.isScopeKeyAssigned(apiId, scope.getName(), tenantId)) {
+            String scopeName = scope.getKey();
+            if (!(APIUtil.isWhiteListedScope(scopeName))) {
+                // Check if each scope key is already assigned as a local scope to a different API which is also not a
+                // different version of the same API. If true, return error.
+                // If false, check if the scope key is already defined as a shared scope. If so, do not honor the
+                // other scope attributes (description, role bindings) in the request payload, replace them with
+                // already defined values for the existing shared scope.
+                if (apiProvider.isScopeKeyAssignedLocally(apiId, scopeName, tenantId)) {
                     RestApiUtil
-                            .handleBadRequest("Scope " + scope.getName() + " is already assigned by another API",
-                                    log);
+                            .handleBadRequest("Scope " + scopeName + " is already assigned locally by another "
+                                    + "API", log);
+                } else if (apiProvider.isSharedScopeNameExists(scopeName, tenantDomain)) {
+                    sharedAPIScopes.add(scope);
+                    continue;
                 }
             }
+
+            //set display name as empty if it is not provided
+            if (StringUtils.isBlank(scope.getName())) {
+                scope.setName(scopeName);
+            }
+
             //set description as empty if it is not provided
             if (StringUtils.isBlank(scope.getDescription())) {
                 scope.setDescription("");
@@ -4156,6 +4212,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
         }
+
+        apiProvider.validateSharedScopes(sharedAPIScopes, tenantDomain);
     }
 
     /**

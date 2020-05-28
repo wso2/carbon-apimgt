@@ -381,6 +381,7 @@ public final class APIConstants {
     //tables columns for subscription
     public static final String SUBSCRIPTION_FIELD_SUBSCRIPTION_ID = "SUBSCRIPTION_ID";
     public static final String SUBSCRIPTION_FIELD_TIER_ID = "TIER_ID";
+    public static final String SUBSCRIPTION_FIELD_TIER_ID_PENDING = "TIER_ID_PENDING";
     public static final String SUBSCRIPTION_FIELD_API_ID = "API_ID";
     public static final String SUBSCRIPTION_FIELD_ACCESS_TOKEN = "ACCESS_TOKEN";
     public static final String SUBSCRIPTION_FIELD_SUB_STATUS = "SUB_STATUS";
@@ -552,6 +553,7 @@ public final class APIConstants {
         public static final String PROD_ONLY_BLOCKED = "PROD_ONLY_BLOCKED";
         public static final String UNBLOCKED = "UNBLOCKED";
         public static final String ON_HOLD = "ON_HOLD";
+        public static final String TIER_UPDATE_PENDING = "TIER_UPDATE_PENDING";
         public static final String REJECTED = "REJECTED";
 
         private SubscriptionStatus() {
@@ -615,6 +617,11 @@ public final class APIConstants {
     public static final String TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "TokenCacheExpiry";
     public static final String REST_API_TOKEN_CACHE_ENABLED = CACHE_CONFIGS + "EnableRESTAPITokenCache";
     public static final String REST_API_TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "RESTAPITokenCacheExpiry";
+    public static final String REST_API_CACHE_CONTROL_HEADERS_ENABLED = CACHE_CONFIGS
+            + "EnableRESTAPICacheControlHeaders";
+    public static final String REST_API_CACHE_CONTROL_HEADERS_MAX_AGE = CACHE_CONFIGS
+            + "RESTAPICacheControlHeadersMaxAge";
+
     public static final String STORE_TAG_CACHE_DURATION = CACHE_CONFIGS + "TagCacheDuration";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = CACHE_CONFIGS + "EnableRecentlyAddedAPICache";
     public static final String SCOPE_CACHE_ENABLED = CACHE_CONFIGS + "EnableScopeCache";
@@ -638,6 +645,22 @@ public final class APIConstants {
     public static final String KEY_MANAGER_USERNAME = "Username";
     public static final String KEY_MANAGER_PASSWORD = "Password";
     public static final String AUTHSERVER_URL = "ServerURL";
+    public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
+    public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
+    public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
+            + KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM;
+    public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_MGT_SCOPES[] = {"internal_application_mgt_create",
+            "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view"};
+    public static final String API_KEY_MANAGER_CONFIGURATION = "Configuration.";
+    public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
+    public static final String WSO2_IS_APP_MGT_REST_API_BASE_PATH = "/api/server/v1/applications";
+    public static final String WSO2_IS_APP_MGT_INBOUND_OIDC_SUFFIX = "/inbound-protocols/oidc";
+    public static final String WSO2_IS_APP_NAME = "name";
+    public static final String WSO2_IS_APP_INBOUND_CONFIG = "inboundProtocolConfiguration";
+    public static final String WSO2_IS_APP_INBOUND_OIDC = "oidc";
+    public static final String WSO2_IS_APP_INBOUND_OIDC_GRANT_TYPES = "grantTypes";
+    public static final String WSO2_IS_APP_CLIENT_ID = "clientId";
+    public static final String WSO2_IS_APP_CLIENT_SECRET = "clientSecret";
 
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
@@ -1380,6 +1403,8 @@ public final class APIConstants {
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
+    public static final String ENDPOINT_REGISTRY_TYPE = "Registry";
+    public static final String ENDPOINT_REGISTRY_ENTRY_ID = "endpoint_id";
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
@@ -1928,6 +1953,8 @@ public final class APIConstants {
         public static final String PUB_API_LIST_RESPONSE_PARAMS_LIST = "list";
         public static final String PUB_API_LIST_RESPONSE_PARAMS_COUNT = "count";
         public static final String PUB_API_RESPONSE_PARAMS_ID = "id";
+        public static final String DYNAMIC_CLIENT_REGISTRATION_URL_SUFFIX =
+                "/client-registration/" + REST_API_OLD_VERSION + "/register";
     }
 
     public static final int MAX_LENGTH_API_NAME = 50;
@@ -2060,5 +2087,32 @@ public final class APIConstants {
         public static final String EXCLUDED_CACHES = "ExcludedCaches";
 
         public static String ReceiverConnectionDetails  = "ReceiverConnectionDetails";
+    }
+
+    // Supported Notifier Types
+    public enum NotifierType {
+        API,
+        APPLICATION,
+        APPLICATION_REGISTRATION,
+        POLICY,
+        SUBSCRIPTIONS
+    }
+
+    // Supported Event Types
+    public enum EventType {
+        API_CREATE,
+        API_UPDATE,
+        API_DELETE,
+        API_LIFECYCLE_CHANGE,
+        APPLICATION_CREATE,
+        APPLICATION_UPDATE,
+        APPLICATION_DELETE,
+        APPLICATION_REGISTRATION_CREATE,
+        POLICY_CREATE,
+        POLICY_UPDATE,
+        POLICY_DELETE,
+        SUBSCRIPTIONS_CREATE,
+        SUBSCRIPTIONS_UPDATE,
+        SUBSCRIPTIONS_DELETE
     }
 }

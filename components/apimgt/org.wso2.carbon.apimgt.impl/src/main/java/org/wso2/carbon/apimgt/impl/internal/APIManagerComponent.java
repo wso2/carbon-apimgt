@@ -49,8 +49,15 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
+import org.wso2.carbon.apimgt.impl.notifier.Notifier;
+import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
+import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
@@ -103,6 +110,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,6 +174,16 @@ public class APIManagerComponent {
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver, null);
             TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), tenantLoadMessageSender, null);
+            KeyMgtConfigDeployer keyMgtConfigDeployer = new KeyMgtConfigDeployer();
+            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), keyMgtConfigDeployer, null);
+
+            //Registering Notifiers
+            bundleContext.registerService(Notifier.class.getName(), new SubscriptionsNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new ApisNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(),  new ApplicationNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new ApplicationRegistrationNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(),new PolicyNotifier(), null);
+
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
@@ -727,6 +745,26 @@ public class APIManagerComponent {
                     recommendationEnvironment.getConsumerSecret());
             ServiceReferenceHolder.getInstance().setAccessTokenGenerator(accessTokenGenerator);
         }
+    }
+
+    @Reference(
+            name = "notifier.component",
+            service = Notifier.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeNotifiers")
+    protected void addNotifier(Notifier notifier) {
+        List<Notifier> notifierList = ServiceReferenceHolder.getInstance().getNotifiersMap().get(notifier.getType());
+        if (notifierList == null) {
+            notifierList = new ArrayList<>();
+        }
+        notifierList.add(notifier);
+        ServiceReferenceHolder.getInstance().getNotifiersMap().put(notifier.getType(), notifierList);
+    }
+
+    protected void removeNotifiers(Notifier notifier) {
+
+        ServiceReferenceHolder.getInstance().getNotifiersMap().remove(notifier.getType());
     }
 }
 

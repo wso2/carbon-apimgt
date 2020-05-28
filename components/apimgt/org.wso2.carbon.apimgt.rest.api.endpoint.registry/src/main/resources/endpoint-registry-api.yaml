@@ -1,4 +1,4 @@
-#   Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#   Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ info:
   title: WSO2 API Manager - Endpoint Registry
   description: |
     This specifies a **RESTful API** for Enpoint Registry.
-  version: "0.1"
+  version: "1.0"
 servers:
   - url: 'https://apis.wso2.com/api/am/endpoint-registry/v1'
   - url: 'http://apis.wso2.com/api/am/endpoint-registry/v1'
@@ -36,26 +36,27 @@ paths:
       tags:
         - Registries
       security:
-      - ReadRegistry: [registry:view]
+        - default:
+          - registry:view
       operationId: getRegistries
       parameters:
-      - name: query
+      - name: name
         in: query
         description: |
           **Search condition**.
-          You can search for a registry by specifying the registry name as "query" attribute.
+          You can search for a registry by specifying the registry name as "name" attribute.
 
           Eg.
           "prodServer" will match a registry entry if the name is exactly "prodServer".
         schema:
           type: string
-      - name: sortBy
+      - name: sortRegistryBy
         in: query
         schema:
           type: string
           enum:
             - registryName
-      - name: sortOrder
+      - name: sortRegistryOrder
         in: query
         schema:
           type: string
@@ -82,11 +83,13 @@ paths:
       description: |
         This operation can be used to create a new Registry specifying the details of the Registry in the payload.
       security:
-      - WriteRegistry: [registry:write]
+        - default:
+          - registry:write
       tags:
         - Registries
       operationId: addRegistry
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -126,7 +129,8 @@ paths:
       description: |
         Using this operation, you can retrieve complete details of a single Registry using the RegistryId.
       security:
-      - ReadRegistry: [registry:view]
+        - default:
+          - registry:view
       tags:
         - Registries
       operationId: getRegistryByUUID
@@ -171,7 +175,8 @@ paths:
       description: |
         This operation can be used to update an existing Endpoint Registry
       security:
-      - WriteRegistry: [registry:write]
+        - default:
+          - registry:write
       tags:
         - Registries
       operationId: updateRegistry
@@ -185,6 +190,7 @@ paths:
         schema:
           type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -221,7 +227,8 @@ paths:
       description: |
         This operation can be used to delete an existing Registry proving the Id of the Registry.
       security:
-      - WriteRegistry: [registry:write]
+        - default:
+          - registry:write
       tags:
        - Registries
       operationId: deleteRegistry
@@ -262,9 +269,10 @@ paths:
       summary: Get All entries in the registry
       operationId: getAllEntriesInRegistry
       security:
-      - ReadRegistryEntry: [registry:entry_view]
+        - default:
+          - registry:entry_view
       tags:
-        - Registries Entries
+        - Registry Entries
       parameters:
       - name: registryId
         in: path
@@ -274,31 +282,73 @@ paths:
         explode: false
         schema:
           type: string
-      - name: query
+      - name: exactNameMatch
+        in: query
+        description: Whether to perform exact search on name
+        schema:
+          type: boolean
+          default: false
+      - name: version
+        in: query
+        description: Version of the Registry Entry
+        schema:
+          type: string
+      - name: serviceType
         in: query
         description: |
           **Search condition**.
 
-          You can search for a registry entry by specifying the entry name as "query" attribute.
-
-          Eg.
-          "pizzaServer" will match a registry entry if the name is exactly "pizzaServer".
+          Filter entries by serviceType
         schema:
           type: string
-      - name: sortBy
+          enum:
+          - REST
+          - SOAP_1_1
+          - GQL
+          - WS
+      - name: definitionType
+        in: query
+        description: |
+          Filter registry entries by definitionType
+        schema:
+          type: string
+          enum:
+          - OAS
+          - WSDL1
+          - WSDL2
+          - GQL_SDL
+      - name: name
+        in: query
+        description: |
+          Filter registry entries by the name of the Entry
+        schema:
+          type: string
+      - name: serviceCategory
+        in: query
+        description: |
+          Filter registry entries by the service category of the Entry
+        schema:
+          type: string
+          enum:
+          - UTILITY
+          - EDGE
+          - DOMAIN
+      - name: sortEntryBy
         in: query
         schema:
           type: string
           enum:
             - definitionType
             - serviceType
-      - name: sortOrder
+      - name: sortEntryOrder
         in: query
         schema:
           type: string
           enum:
             - asc
             - desc
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
       responses:
         "200":
           description: |
@@ -332,7 +382,8 @@ paths:
       description: |
         This operation can be used to create a new Registry Entry specifying the details of the Entry in the payload.
       security:
-        - WriteRegistryEntry: [registry:entry_write]
+        - default:
+          - registry:entry_write
       tags:
         - Registry Entries
       operationId: createRegistryEntry
@@ -385,7 +436,8 @@ paths:
       description: |
         Using this operation, you can retrieve a specific entry in a single Registry using the EntryId and RegistryId.
       security:
-      - ReadRegistryEntry: [registry:entry_view]
+        - default:
+          - registry:entry_view
       operationId: getRegistryEntryByUuid
       tags:
         - Registry Entries
@@ -438,7 +490,8 @@ paths:
       description: |
         This operation can be used to update an existing Entry in Registry with the details of the Entry in the payload.
       security:
-        - WriteRegistryEntry: [registry:entry_write]
+        - default:
+          - registry:entry_write
       operationId: updateRegistryEntry
       tags:
         - Registry Entries
@@ -496,7 +549,8 @@ paths:
       description: |
         This operation can be used to delete an existing Entry in Registry by specifying the registryId and entryId.
       security:
-        - WriteRegistryEntry: [registry:entry_write]
+        - default:
+          - registry:entry_write
       operationId: deleteRegistryEntry
       tags:
         - Registry Entries
@@ -537,43 +591,180 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  #-----------------------------------------------------
+  # Retrieve definition file of an entry in Registry
+  #-----------------------------------------------------
+  /registries/{registryId}/entries/{entryId}/definition-file:
+    get:
+      summary: Retrieve the definition file of a specific Entry in a Registry
+      description: |
+        Using this operation, you can retrieve the definition file of a specific entry in a Registry using the EntryId and RegistryId.
+      security:
+        - default:
+          - registry:entry_view
+      operationId: getEndpointDefinition
+      tags:
+        - Registry Entries
+      parameters:
+      - name: registryId
+        in: path
+        description: uuid of the registry
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: entryId
+        in: path
+        description: uuid of the registry entry
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: |
+            Updated.
+            Successful response with the definition file as entity in the body.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: |
+            Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: |
+            Not Found.
+            Requested Registry or Entry does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  #-----------------------------------------------------
+  # Create a new version of the entry
+  #-----------------------------------------------------
+  /registries/{registryId}/entries/{entryId}/copy-entry:
+    post:
+      summary: Create a new version of the entry
+      description: |
+        Using this operation, you can create a new version of an existing entry
+      security:
+        - default:
+            - registry:entry_write
+      operationId: createNewEntryVersion
+      tags:
+        - Registry Entries
+      parameters:
+        - name: registryId
+          in: path
+          description: uuid of the registry
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: entryId
+          in: path
+          description: uuid of the registry entry
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: version
+          in: query
+          description: Version to be created
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: |
+            Created.
+            Successful response with the newly created Registry Entry as entity in the body.
+          headers:
+            Etag:
+              description: Entity Tag of the response resource.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistryEntry'
+        '400':
+          description: |
+            Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: |
+            Not Found.
+            Requested Registry or Entry does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: |
+            Resource already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  ######################################################
+  # The Endpoint Registry settings List
+  ######################################################
+  /settings:
+    #-----------------------------------------------------
+    # Retrieve Endpoint Registry settings
+    #-----------------------------------------------------
+    get:
+      summary: Retrieve endpoint registry settings
+      description: |
+        Retrieve Endpoint Registry settings
+      operationId: getSettings
+      tags:
+        - Settings
+      responses:
+        200:
+          description: |
+            OK.
+            Settings returned
+          schema:
+            $ref: '#/definitions/Settings'
+        404:
+          description: |
+            Not Found.
+            Requested Settings does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
 components:
   #-------------------------------------------------------
   # The security schemes of resources used by some of the APIs
   #-------------------------------------------------------
   securitySchemes:
-    ReadRegistry:
+    default:
       type: oauth2
       flows:
-        authorizationCode:
+        implicit:
           authorizationUrl: https://example.com/oauth/authorize
-          tokenUrl: https://example.com/oauth/token
           scopes:
-            scope: registry:view
-    WriteRegistry:
-      type: oauth2
-      flows:
-        authorizationCode:
-          authorizationUrl: https://example.com/oauth/authorize
-          tokenUrl: https://example.com/oauth/token
-          scopes:
-            scope: registry:write
-    ReadRegistryEntry:
-      type: oauth2
-      flows:
-        authorizationCode:
-          authorizationUrl: https://example.com/oauth/authorize
-          tokenUrl: https://example.com/oauth/token
-          scopes:
-            scope: registry:entry_view
-    WriteRegistryEntry:
-      type: oauth2
-      flows:
-        authorizationCode:
-          authorizationUrl: https://example.com/oauth/authorize
-          tokenUrl: https://example.com/oauth/token
-          scopes:
-            scope: registry:entry_write
+            registry:view: view registry
+            registry:write: write registry
+            registry:entry_view: view reg entry
+            registry:entry_write: write reg entry
 
   #-------------------------------------------------------
   # The definitions of resources used by some of the APIs
@@ -586,6 +777,8 @@ components:
     Registry:
       type: object
       title: Registry object
+      required:
+        - name
       properties:
         name:
           type: string
@@ -598,14 +791,6 @@ components:
           example: wso2
           enum:
           - wso2
-          - k8
-          - etcd
-        mode:
-          type: string
-          example: ReadOnly
-          enum:
-          - ReadOnly
-          - ReadWrite
         owner:
           type: string
           example: admin
@@ -634,6 +819,9 @@ components:
     RegistryEntry:
       type: object
       title: The Registry Entry object
+      required:
+        - entryName
+        - version
       properties:
         id:
           type: string
@@ -641,9 +829,22 @@ components:
         entryName:
           type: string
           example: Pizzashack-Endpoint
-        serviceUrl:
+        version:
+          type: string
+          example: v1
+        productionServiceUrl:
           type: string
           example: http://localhost/pizzashack
+        sandboxServiceUrl:
+          type: string
+          example: http://localhost/pizzashack
+        serviceCategory:
+          type: string
+          description: "Business Category of the Endpoint"
+          enum:
+          - UTILITY
+          - EDGE
+          - DOMAIN
         serviceType:
           description: Type of the backend connecting to
           type: string
@@ -661,7 +862,7 @@ components:
           - OAS
           - WSDL1
           - WSDL2
-          - GQL-SDL
+          - GQL_SDL
         definitionUrl:
           type: string
           example: http://localhost/pizzashack?swagger.json
@@ -684,6 +885,17 @@ components:
         definitionFile:
           type: string
           format: binary
+
+    #-----------------------------------------------------
+    # The settings resource
+    #-----------------------------------------------------
+    Settings:
+      title: SettingsDTO
+      properties:
+        scopes:
+          type: array
+          items:
+            type: string
 
     #-----------------------------------------------------
     # The Error resource
