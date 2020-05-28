@@ -403,6 +403,21 @@ class API extends Resource {
     }
 
     /**
+     * Update the Condition Status of a Blacklist Policy
+     */
+    updateBlacklistPolicy(policyId, conditionStatus) {
+        return this.client.then((client) => {
+            const payload = {
+                conditionStatus: conditionStatus,
+            };
+            return client.apis['Blacklist (Individual)'].patch_throttling_blacklist__conditionId_(
+                { conditionId: policyId, body: payload, 'Content-Type': 'application/json', },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
      * Get Custom Policies
      */
     customPoliciesGet() {

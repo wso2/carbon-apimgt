@@ -109,6 +109,7 @@ function AddEdit(props) {
             invert: false,
             fixedIp: '',
         },
+        conditionStatus: true,
     });
     const [state, dispatch] = useReducer(reducer, initialState);
     const {
@@ -135,6 +136,7 @@ function AddEdit(props) {
                 invert: false,
                 fixedIp: '',
             },
+            conditionStatus: true,
         });
     }, [conditionType]);
 
