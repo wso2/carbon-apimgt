@@ -151,21 +151,23 @@ export default function ListCustomThrottlingPolicies() {
  * @returns {Promise}.
  */
     function apiCall() {
-        return new Promise(((resolve, reject) => {
-            restApi.customPoliciesGet().then((result) => {
-                const customPolicies = result.body.list.map((obj) => {
-                    return {
-                        policyId: obj.policyId,
-                        policyName: obj.policyName,
-                        description: obj.description,
-                        keyTemplate: obj.keyTemplate,
-                    };
-                });
-                resolve(customPolicies);
-            }).catch((error) => {
-                reject(error);
+        return restApi.customPoliciesGet().then((result) => {
+            const customPolicies = result.body.list.map((obj) => {
+                return {
+                    policyId: obj.policyId,
+                    policyName: obj.policyName,
+                    description: obj.description,
+                    keyTemplate: obj.keyTemplate,
+                };
             });
-        }));
+            return (customPolicies);
+        }).catch((error) => {
+            const { response } = error;
+            if (response.body) {
+                throw (response.body.description);
+            }
+            return null;
+        });
     }
 
     return (
