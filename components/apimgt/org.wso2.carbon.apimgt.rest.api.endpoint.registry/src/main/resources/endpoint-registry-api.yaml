@@ -39,32 +39,6 @@ paths:
         - default:
           - registry:view
       operationId: getRegistries
-      parameters:
-      - name: name
-        in: query
-        description: |
-          **Search condition**.
-          You can search for a registry by specifying the registry name as "name" attribute.
-
-          Eg.
-          "prodServer" will match a registry entry if the name is exactly "prodServer".
-        schema:
-          type: string
-      - name: sortRegistryBy
-        in: query
-        schema:
-          type: string
-          enum:
-            - registryName
-      - name: sortRegistryOrder
-        in: query
-        schema:
-          type: string
-          enum:
-            - asc
-            - desc
-      - $ref: '#/components/parameters/limit'
-      - $ref: '#/components/parameters/offset'
       responses:
         200:
           description: |

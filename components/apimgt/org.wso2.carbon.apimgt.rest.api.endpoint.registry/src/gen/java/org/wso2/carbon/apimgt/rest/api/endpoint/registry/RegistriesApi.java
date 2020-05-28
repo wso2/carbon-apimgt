@@ -368,38 +368,10 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
             content = @Content(
             schema = @Schema(implementation = RegistryArrayDTO.class)))
      })
-    public Response getRegistries(            @Parameter(description = "**Search condition**. You can search for a registry by specifying the registry name as \"name\" attribute.  Eg. \"prodServer\" will match a registry entry if the name is exactly \"prodServer\". ") 
-        @QueryParam("name") String name
-
-
-,             @Parameter(description = "",     schema=@Schema(allowableValues={ "registryName" })
-) 
-        @QueryParam("sortRegistryBy") SortRegistryByEnum sortRegistryBy
-
-
-,             @Parameter(description = "",     schema=@Schema(allowableValues={ "asc", "desc" })
-) 
-        @QueryParam("sortRegistryOrder") SortRegistryOrderEnum sortRegistryOrder
-
-
-,             @Parameter(description = "Maximum limit of items to return. ") 
-            @DefaultValue("25")
-        @QueryParam("limit") Integer limit
-
-
-,             @Parameter(description = "Starting point within the complete list of items qualified. ") 
-            @DefaultValue("0")
-        @QueryParam("offset") Integer offset
-
-
-) throws EndpointRegistryException {
-        return delegate.getRegistries(name, sortRegistryBy, sortRegistryOrder, limit, offset, securityContext);
+    public Response getRegistries() throws EndpointRegistryException {
+        return delegate.getRegistries(securityContext);
         }
-    public enum SortRegistryByEnum {
-    registryName;
-    }    public enum SortRegistryOrderEnum {
-    asc,desc;
-    }    @GET
+    @GET
     @Path("/{registryId}")
     
     @Produces({ "application/json" })

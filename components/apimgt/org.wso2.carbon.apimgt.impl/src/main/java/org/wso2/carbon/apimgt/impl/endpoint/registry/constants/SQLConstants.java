@@ -32,6 +32,22 @@ public class SQLConstants {
                     "UPDATED_TIME = ? " +
                     "WHERE UUID = ?";
 
+    public static final String GET_ENDPOINT_REGISTRY_OF_TENANT_WITH_TYPE =
+            " SELECT " +
+                    "   UUID, " +
+                    "   REG_NAME, " +
+                    "   REG_TYPE, " +
+                    "   TENANT_ID, " +
+                    "   CREATED_BY, " +
+                    "   UPDATED_BY, " +
+                    "   CREATED_TIME, " +
+                    "   UPDATED_TIME " +
+                    " FROM " +
+                    "   ENDPOINT_REG " +
+                    " WHERE " +
+                    "   REG_TYPE = ? AND " +
+                    "   TENANT_ID = ?";
+
     public static final String GET_ENDPOINT_REGISTRY_BY_UUID = " SELECT UUID, REG_NAME, REG_TYPE, TENANT_ID, ID, " +
             "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME FROM " +
             "ENDPOINT_REG WHERE UUID = ? AND TENANT_ID = ?";
@@ -40,6 +56,9 @@ public class SQLConstants {
 
     public static final String IS_ENDPOINT_REGISTRY_NAME_EXISTS = "SELECT COUNT(UUID) AS ENDPOINT_REGISTRY_COUNT" +
             " FROM ENDPOINT_REG WHERE LOWER(REG_NAME) = LOWER(?) AND TENANT_ID = ?";
+
+    public static final String IS_ENDPOINT_REGISTRY_TYPE_EXISTS = "SELECT COUNT(UUID) AS ENDPOINT_REGISTRY_COUNT" +
+            " FROM ENDPOINT_REG WHERE REG_TYPE = ? AND TENANT_ID = ?";
 
     public static final String GET_ENDPOINT_REGISTRY_ENTRY_BY_UUID =
             " SELECT UUID, ENTRY_NAME, ENTRY_VERSION, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, " +

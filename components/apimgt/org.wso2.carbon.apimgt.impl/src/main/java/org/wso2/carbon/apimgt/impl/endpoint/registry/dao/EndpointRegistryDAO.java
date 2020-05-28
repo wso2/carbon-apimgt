@@ -223,74 +223,75 @@ public class EndpointRegistryDAO {
     }
 
     /**
-     * Returns details of all Endpoint Registries belong to a given tenant
+     * Checks whether an endpoint registry of given type is already available under given tenant domain
      *
-     * @param name      Registry name
-     * @param sortBy    Name of the sorting field
-     * @param sortOrder Order of sorting (asc or desc)
-     * @param limit     Limit
-     * @param offset    Offset
-     * @param tenantID
-     * @return A list of EndpointRegistryInfo objects
-     * @throws EndpointRegistryException if failed to get details of Endpoint Registries
+     * @param registryType Registry type
+     * @param tenantID     Tenant Identifier
+     * @return boolean
+     * @throws EndpointRegistryException
      */
-    public List<EndpointRegistryInfo> getEndpointRegistries(String name, String sortBy, String sortOrder,
-                                                            int limit, int offset,
-                                                            int tenantID) throws EndpointRegistryException {
+    public boolean isEndpointRegistryTypeExists(String registryType, int tenantID) throws EndpointRegistryException {
 
-        List<EndpointRegistryInfo> endpointRegistryInfoList = new ArrayList<>();
-
-        try {
-            boolean nameMatch = !StringUtils.isEmpty(name);
-            String query;
-            if (nameMatch) {
-                query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENDPOINT_REGISTRIES_OF_TENANT_WITH_NAME");
-            } else {
-                query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENDPOINT_REGISTRIES_OF_TENANT");
-            }
-            query = query.replace("$1", sortBy);
-            query = query.replace("$2", sortOrder);
-
-            try (Connection connection = APIMgtDBUtil.getConnection();
-                 PreparedStatement ps = connection.prepareStatement(query)) {
-                if (nameMatch) {
-                    ps.setString(1, name);
-                    ps.setInt(2, tenantID);
-                    ps.setInt(3, offset);
-                    ps.setInt(4, limit);
-                } else {
-                    ps.setInt(1, tenantID);
-                    ps.setInt(2, offset);
-                    ps.setInt(3, limit);
+        String sql = SQLConstants.IS_ENDPOINT_REGISTRY_TYPE_EXISTS;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, registryType);
+            statement.setInt(2, tenantID);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt("ENDPOINT_REGISTRY_COUNT");
+                if (count > 0) {
+                    return true;
                 }
-                ps.executeQuery();
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        EndpointRegistryInfo endpointRegistry = new EndpointRegistryInfo();
-                        endpointRegistry.setUuid(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
-                        endpointRegistry.setName(rs.getString(EndpointRegistryConstants.COLUMN_REG_NAME));
-                        endpointRegistry.setType(rs.getString(EndpointRegistryConstants.COLUMN_REG_TYPE));
-                        endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
-                        endpointRegistry.setUpdatedBy(rs.getString(EndpointRegistryConstants.COLUMN_UPDATED_BY));
-
-                        Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_TIME);
-                        endpointRegistry.setCreatedTime(
-                                createdTime == null ? null : String.valueOf(createdTime.getTime()));
-
-                        Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_TIME);
-                        endpointRegistry.setLastUpdatedTime(
-                                updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
-
-                        endpointRegistryInfoList.add(endpointRegistry);
-                    }
-                }
-            } catch (SQLException e) {
-                handleException("Error while retrieving details of endpoint registries", e);
             }
-        } catch (APIManagementException e) {
-            handleException("Error while retrieving the SQL string", e);
+        } catch (SQLException e) {
+            handleException("Failed to check the existence of Endpoint Registry with type: " + registryType, e);
         }
-        return endpointRegistryInfoList;
+        return false;
+    }
+
+    /**
+     * Return the details of the Endpoint Registry of the given tenant OF WSO2 type
+     *
+     * @param tenantID
+     * @return A EndpointRegistryInfo object
+     * @throws EndpointRegistryException if failed to get details of Endpoint Registry
+     */
+    public EndpointRegistryInfo getEndpointRegistry(int tenantID) throws EndpointRegistryException {
+
+        String query = SQLConstants.GET_ENDPOINT_REGISTRY_OF_TENANT_WITH_TYPE;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            // Currently retrieve the registry of WSO2 type only
+            ps.setString(1, EndpointRegistryConstants.REGISTRY_TYPE_WSO2);
+            ps.setInt(2, tenantID);
+
+            ps.executeQuery();
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    EndpointRegistryInfo endpointRegistry = new EndpointRegistryInfo();
+                    endpointRegistry.setUuid(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
+                    endpointRegistry.setName(rs.getString(EndpointRegistryConstants.COLUMN_REG_NAME));
+                    endpointRegistry.setType(rs.getString(EndpointRegistryConstants.COLUMN_REG_TYPE));
+                    endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
+                    endpointRegistry.setUpdatedBy(rs.getString(EndpointRegistryConstants.COLUMN_UPDATED_BY));
+
+                    Timestamp createdTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_CREATED_TIME);
+                    endpointRegistry.setCreatedTime(
+                            createdTime == null ? null : String.valueOf(createdTime.getTime()));
+
+                    Timestamp updatedTime = rs.getTimestamp(EndpointRegistryConstants.COLUMN_UPDATED_TIME);
+                    endpointRegistry.setLastUpdatedTime(
+                            updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
+
+                    return endpointRegistry;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving details of endpoint registries", e);
+        }
+        return null;
     }
 
     /**

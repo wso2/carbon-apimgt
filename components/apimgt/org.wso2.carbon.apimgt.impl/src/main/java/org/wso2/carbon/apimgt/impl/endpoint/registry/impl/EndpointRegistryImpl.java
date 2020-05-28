@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.endpoint.registry.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistry;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.dao.EndpointRegistryDAO;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryEntry;
@@ -31,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -62,7 +64,11 @@ public class EndpointRegistryImpl implements EndpointRegistry {
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
-            if (registryDAO.isEndpointRegistryNameExists(endpointRegistry.getName(), tenantId)) {
+            // if another registry with the given name or type already exists, fail the operation.
+            if (registryDAO.isEndpointRegistryTypeExists(endpointRegistry.getType(), tenantId)) {
+                EndpointRegistryUtil.handleResourceAlreadyExistsException("Endpoint Registry of type '"
+                        + endpointRegistry.getType() + "' already exists");
+            } else if (registryDAO.isEndpointRegistryNameExists(endpointRegistry.getName(), tenantId)) {
                 EndpointRegistryUtil.handleResourceAlreadyExistsException("Endpoint Registry with name '"
                         + endpointRegistry.getName() + "' already exists");
             }
@@ -113,24 +119,34 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * Returns details of all Endpoint Registries belong to a given tenant
      *
-     * @param name         Registry name
-     * @param sortBy       Name of the sorting field
-     * @param sortOrder    Order of sorting (asc or desc)
-     * @param limit        Limit
-     * @param offset       Offset
      * @param tenantDomain
      * @return A list of EndpointRegistryInfo objects
      * @throws EndpointRegistryException if failed to get details of an Endpoint Registries
      */
-    public List<EndpointRegistryInfo> getEndpointRegistries(String name, String sortBy, String sortOrder,
-                                                            int limit, int offset,
-                                                            String tenantDomain) throws EndpointRegistryException {
+    public List<EndpointRegistryInfo> getEndpointRegistries(String tenantDomain) throws EndpointRegistryException {
 
         int tenantId;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
-            return registryDAO.getEndpointRegistries(name, sortBy, sortOrder, limit, offset, tenantId);
+            EndpointRegistryInfo endpointRegistryInfo = registryDAO.getEndpointRegistry(tenantId);
+            if (endpointRegistryInfo == null) {
+                // Create the default registry if no registry found
+                EndpointRegistryInfo defaultRegistry = new EndpointRegistryInfo();
+                defaultRegistry.setName(EndpointRegistryConstants.DEFAULT_REGISTRY_NAME);
+                defaultRegistry.setType(EndpointRegistryConstants.REGISTRY_TYPE_WSO2);
+                defaultRegistry.setOwner(EndpointRegistryConstants.SYSTEM_USER_NAME);
+                String regId = registryDAO.addEndpointRegistry(defaultRegistry, tenantId);
+                log.info("Successfully created the default endpoint registry " + defaultRegistry.getName() +
+                        " of type :" + defaultRegistry.getType() + " with id :" + regId + " by :" +
+                        EndpointRegistryConstants.SYSTEM_USER_NAME);
+                endpointRegistryInfo = registryDAO.getEndpointRegistry(tenantId);
+            }
+            List<EndpointRegistryInfo> endpointRegistryInfoList = new ArrayList<>();
+            if (endpointRegistryInfo != null) {
+                endpointRegistryInfoList.add(endpointRegistryInfo);
+            }
+            return endpointRegistryInfoList;
         } catch (UserStoreException e) {
             String msg = "Error while retrieving tenant information";
             log.error(msg, e);
@@ -234,8 +250,11 @@ public class EndpointRegistryImpl implements EndpointRegistry {
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
-            // if another registry with the updated name already exists, fail the operation.
-            if (!registryName.equals(endpointRegistryInfo.getName()) &&
+            // if another registry with the updated name or type already exists, fail the operation.
+            if (registryDAO.isEndpointRegistryTypeExists(endpointRegistryInfo.getType(), tenantId)) {
+                EndpointRegistryUtil.handleResourceAlreadyExistsException("Endpoint Registry of type '"
+                        + endpointRegistryInfo.getType() + "' already exists");
+            } else if (!registryName.equals(endpointRegistryInfo.getName()) &&
                     registryDAO.isEndpointRegistryNameExists(endpointRegistryInfo.getName(), tenantId)) {
                 EndpointRegistryUtil.handleResourceAlreadyExistsException("Endpoint Registry with name '"
                         + endpointRegistryInfo.getName() + "' already exists");

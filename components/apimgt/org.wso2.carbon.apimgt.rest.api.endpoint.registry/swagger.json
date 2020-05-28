@@ -17,59 +17,6 @@
         "summary" : "Retrieve all Registries\n",
         "description" : "This operation provides you an array of available Registries.\n",
         "operationId" : "getRegistries",
-        "parameters" : [ {
-          "name" : "name",
-          "in" : "query",
-          "description" : "**Search condition**.\nYou can search for a registry by specifying the registry name as \"name\" attribute.\n\nEg.\n\"prodServer\" will match a registry entry if the name is exactly \"prodServer\".\n",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "sortRegistryBy",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "registryName" ]
-          }
-        }, {
-          "name" : "sortRegistryOrder",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "asc", "desc" ]
-          }
-        }, {
-          "name" : "limit",
-          "in" : "query",
-          "description" : "Maximum limit of items to return.\n",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "type" : "integer",
-            "default" : 25
-          }
-        }, {
-          "name" : "offset",
-          "in" : "query",
-          "description" : "Starting point within the complete list of items qualified.\n",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "type" : "integer",
-            "default" : 0
-          }
-        } ],
         "responses" : {
           "200" : {
             "description" : "OK.\nArray of Registries is returned.\n",
