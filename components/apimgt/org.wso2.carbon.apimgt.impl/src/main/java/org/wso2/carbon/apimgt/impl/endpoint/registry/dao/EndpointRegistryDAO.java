@@ -325,7 +325,6 @@ public class EndpointRegistryDAO {
                             COLUMN_PRODUCTION_SERVICE_URL));
                     endpointRegistryEntry.setSandboxServiceUrl(rs.getString(EndpointRegistryConstants.
                             COLUMN_SANDBOX_SERVICE_URL));
-                    endpointRegistryEntry.setMetaData(rs.getString(EndpointRegistryConstants.COLUMN_METADATA));
                     endpointRegistryEntry.setEndpointDefinition(
                             rs.getBinaryStream(EndpointRegistryConstants.COLUMN_ENDPOINT_DEFINITION));
                     endpointRegistryEntry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
@@ -425,7 +424,6 @@ public class EndpointRegistryDAO {
                         endpointRegistryEntry.setServiceType(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_TYPE));
                         endpointRegistryEntry.setServiceCategory(rs.getString(EndpointRegistryConstants
                                 .COLUMN_SERVICE_CATEGORY));
-                        endpointRegistryEntry.setMetaData(rs.getString(EndpointRegistryConstants.COLUMN_METADATA));
                         endpointRegistryEntry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
                         endpointRegistryEntry.setUpdatedBy(rs.getString(EndpointRegistryConstants.COLUMN_UPDATED_BY));
 
@@ -470,7 +468,7 @@ public class EndpointRegistryDAO {
             ps.setString(5, registryEntry.getSandboxServiceUrl());
             ps.setString(6, registryEntry.getDefinitionType());
             ps.setString(7, registryEntry.getDefinitionURL());
-            ps.setString(8, registryEntry.getMetaData());
+            ps.setString(8, registryEntry.getDescription());
             ps.setString(9, registryEntry.getServiceType());
             ps.setString(10, registryEntry.getServiceCategory());
             ps.setBlob(11, registryEntry.getEndpointDefinition());
@@ -508,7 +506,7 @@ public class EndpointRegistryDAO {
             ps.setString(4, registryEntry.getSandboxServiceUrl());
             ps.setString(5, registryEntry.getDefinitionType());
             ps.setString(6, registryEntry.getDefinitionURL());
-            ps.setString(7, registryEntry.getMetaData());
+            ps.setString(7, registryEntry.getDescription());
             ps.setString(8, registryEntry.getServiceType());
             ps.setString(9, registryEntry.getServiceCategory());
             ps.setBlob(10, registryEntry.getEndpointDefinition());

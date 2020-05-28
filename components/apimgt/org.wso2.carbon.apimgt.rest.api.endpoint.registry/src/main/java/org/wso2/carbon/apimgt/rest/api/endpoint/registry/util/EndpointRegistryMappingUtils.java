@@ -77,10 +77,10 @@ public class EndpointRegistryMappingUtils {
         registryEntryDTO.setId(registryEntry.getEntryId());
         registryEntryDTO.setEntryName(registryEntry.getName());
         registryEntryDTO.setVersion(registryEntry.getVersion());
+        registryEntryDTO.setDescription(registryEntry.getDescription());
         registryEntryDTO.setDefinitionType(
                 RegistryEntryDTO.DefinitionTypeEnum.fromValue(registryEntry.getDefinitionType()));
         registryEntryDTO.setDefinitionUrl(registryEntry.getDefinitionURL());
-        registryEntryDTO.setMetadata(registryEntry.getMetaData());
         registryEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.fromValue(registryEntry.getServiceType()));
         registryEntryDTO.setProductionServiceUrl(registryEntry.getProductionServiceURL());
         registryEntryDTO.setSandboxServiceUrl(registryEntry.getSandboxServiceUrl());
@@ -103,12 +103,12 @@ public class EndpointRegistryMappingUtils {
         registryEntry.setEntryId(entryUUID);
         registryEntry.setName(registryEntryDTO.getEntryName());
         registryEntry.setVersion(registryEntryDTO.getVersion());
+        registryEntry.setDescription(registryEntryDTO.getDescription());
         if (registryEntryDTO.getDefinitionType() != null) {
             registryEntry.setDefinitionType(registryEntryDTO.getDefinitionType().toString());
         }
         registryEntry.setDefinitionURL(registryEntryDTO.getDefinitionUrl());
         registryEntry.setEndpointDefinition(endpointDefinition);
-        registryEntry.setMetaData(registryEntryDTO.getMetadata());
         if (registryEntryDTO.getServiceType() != null) {
             registryEntry.setServiceType(registryEntryDTO.getServiceType().toString());
         }

@@ -271,7 +271,6 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.ENTRY_VERSION, " +
                     "   E.DEFINITION_TYPE, " +
                     "   E.DEFINITION_URL, " +
-                    "   E.METADATA, " +
                     "   E.SERVICE_TYPE, " +
                     "   E.PRODUCTION_SERVICE_URL, " +
                     "   E.SANDBOX_SERVICE_URL, " +
@@ -304,7 +303,6 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.ENTRY_VERSION, " +
                     "   E.DEFINITION_TYPE, " +
                     "   E.DEFINITION_URL, " +
-                    "   E.METADATA, " +
                     "   E.SERVICE_TYPE, " +
                     "   E.PRODUCTION_SERVICE_URL, " +
                     "   E.SANDBOX_SERVICE_URL, " +
@@ -339,7 +337,6 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.ENTRY_VERSION, " +
                     "   E.DEFINITION_TYPE, " +
                     "   E.DEFINITION_URL, " +
-                    "   E.METADATA, " +
                     "   E.SERVICE_TYPE, " +
                     "   E.PRODUCTION_SERVICE_URL, " +
                     "   E.SANDBOX_SERVICE_URL, " +
@@ -372,7 +369,6 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.ENTRY_VERSION, " +
                     "   E.DEFINITION_TYPE, " +
                     "   E.DEFINITION_URL, " +
-                    "   E.METADATA, " +
                     "   E.SERVICE_TYPE, " +
                     "   E.PRODUCTION_SERVICE_URL, " +
                     "   E.SANDBOX_SERVICE_URL, " +

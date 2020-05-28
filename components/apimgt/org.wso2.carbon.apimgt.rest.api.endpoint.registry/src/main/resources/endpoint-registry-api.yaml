@@ -829,6 +829,9 @@ components:
         entryName:
           type: string
           example: Pizzashack-Endpoint
+        description:
+          type: string
+          example: An Registry Entry that exposes a REST endpoint
         version:
           type: string
           example: v1
@@ -866,9 +869,6 @@ components:
         definitionUrl:
           type: string
           example: http://localhost/pizzashack?swagger.json
-        metadata:
-          type: string
-          example: '{ "mutualTLS" : true }'
 
     #-----------------------------------------------------
     # The Registry Entry Schema resource

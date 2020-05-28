@@ -43,13 +43,13 @@ public class SQLConstants {
 
     public static final String GET_ENDPOINT_REGISTRY_ENTRY_BY_UUID =
             " SELECT UUID, ENTRY_NAME, ENTRY_VERSION, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, " +
-                    "SERVICE_CATEGORY, PRODUCTION_SERVICE_URL, SANDBOX_SERVICE_URL, ENDPOINT_DEFINITION, METADATA, " +
+                    "SERVICE_CATEGORY, PRODUCTION_SERVICE_URL, SANDBOX_SERVICE_URL, ENDPOINT_DEFINITION, " +
                     "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME, REG_ID FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
 
     public static final String ADD_ENDPOINT_REGISTRY_ENTRY_SQL =
             "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, ENTRY_VERSION, PRODUCTION_SERVICE_URL, " +
-                    "SANDBOX_SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, METADATA, SERVICE_TYPE, SERVICE_CATEGORY," +
-                    " ENDPOINT_DEFINITION, REG_ID, CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) " +
+                    "SANDBOX_SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, SERVICE_TYPE, SERVICE_CATEGORY,"
+                    + " ENDPOINT_DEFINITION, REG_ID, CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public static final String UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL =
@@ -60,7 +60,7 @@ public class SQLConstants {
                     "SANDBOX_SERVICE_URL = ?, " +
                     "DEFINITION_TYPE = ?, " +
                     "DEFINITION_URL = ?, " +
-                    "METADATA = ?, " +
+                    "DESCRIPTION = ?, " +
                     "SERVICE_TYPE = ?, " +
                     "SERVICE_CATEGORY = ?, " +
                     "ENDPOINT_DEFINITION = ?, " +
