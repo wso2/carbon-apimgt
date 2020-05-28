@@ -207,9 +207,8 @@ class Listing extends React.Component {
      * @memberof ScopesTable
      */
     fetchScopeData() {
-        const restApi = new API();
         const { page, rowsPerPage } = this.state;
-        const promisedScopes = restApi.getAllScopes(page * rowsPerPage, rowsPerPage);
+        const promisedScopes = API.getAllScopes(page * rowsPerPage, rowsPerPage);
 
         promisedScopes
             .then((response) => {
