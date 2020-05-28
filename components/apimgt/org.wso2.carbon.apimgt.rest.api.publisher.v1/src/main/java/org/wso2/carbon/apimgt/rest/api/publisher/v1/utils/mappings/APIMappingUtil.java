@@ -1226,9 +1226,6 @@ public class APIMappingUtil {
 
         boolean isHttpVerbDefined = false;
         Set<URITemplate> uriTemplates = new LinkedHashSet<>();
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        List<Scope> allSharedScopes = apiProvider.getAllSharedScopes(tenantDomain);
 
         if (operations == null || operations.isEmpty()) {
             operations = getDefaultOperationsList(model.getType());
@@ -1247,13 +1244,6 @@ public class APIMappingUtil {
                         if (definedScope.getKey().equalsIgnoreCase(scopeKey)) {
                             template.setScopes(definedScope);
                             template.setScope(definedScope);
-                            break;
-                        }
-                    }
-                    for (Scope sharedScope : allSharedScopes) {
-                        if (sharedScope.getKey().equalsIgnoreCase(scopeKey)) {
-                            template.setScopes(sharedScope);
-                            template.setScope(sharedScope);
                             break;
                         }
                     }

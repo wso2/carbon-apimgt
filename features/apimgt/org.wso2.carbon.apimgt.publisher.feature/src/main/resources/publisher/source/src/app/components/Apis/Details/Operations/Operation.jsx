@@ -152,7 +152,7 @@ class Operation extends React.Component {
 
     /**
      *
-     * @param {*} e event triggered for handle  Scope Change
+     * @param {*} operationAction event triggered for handle  Scope Change
      */
     handleScopeChange(operationAction) {
         const { operation } = this.props;
