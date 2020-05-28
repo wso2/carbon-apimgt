@@ -138,28 +138,20 @@ public class EndpointRegistryImplTest {
     }
 
     @Test
-    public void getEndpointRegistries() throws EndpointRegistryException {
-        List<EndpointRegistryInfo> endpointRegistryInfoList = new ArrayList<>();
+    public void getEndpointRegistry() throws EndpointRegistryException {
 
-        EndpointRegistryInfo endpointRegistryInfo1 = createRegistry("abc1", 1, "Endpoint Registry 1",
-                "ReadOnly", "wso2", "user1");
-        endpointRegistryInfoList.add(endpointRegistryInfo1);
+        EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
 
-        EndpointRegistryInfo endpointRegistryInfo2 = createRegistry("abc2", 2, "Endpoint Registry 2",
-                "ReadWrite", "etcd", "user2");
-        endpointRegistryInfoList.add(endpointRegistryInfo2);
-
-        Mockito.when(endpointRegistryDAO.getEndpointRegistries(null, EndpointRegistryConstants.COLUMN_REG_NAME,
-                "ASC", 25, 0, TENANT_ID))
-                .thenReturn(endpointRegistryInfoList);
+        Mockito.when(endpointRegistryDAO.getEndpointRegistry(TENANT_ID))
+                .thenReturn(endpointRegistryInfo);
+        Mockito.when(endpointRegistryDAO.isEndpointRegistryTypeExists(
+                EndpointRegistryConstants.REGISTRY_TYPE_WSO2, TENANT_ID))
+                .thenReturn(true);
 
         List<EndpointRegistryInfo> endpointRegistryInfoListResponse
-                = endpointRegistry.getEndpointRegistries(null, EndpointRegistryConstants.COLUMN_REG_NAME,
-                "ASC", 25, 0, TENANT_DOMAIN);
+                = endpointRegistry.getEndpointRegistries(TENANT_DOMAIN);
 
-        for (int i = 0; i < endpointRegistryInfoListResponse.size(); i++) {
-            compareRegistryInfo(endpointRegistryInfoList.get(i), endpointRegistryInfoListResponse.get(i));
-        }
+        compareRegistryInfo(endpointRegistryInfo, endpointRegistryInfoListResponse.get(0));
     }
 
     @Test

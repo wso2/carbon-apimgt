@@ -25,7 +25,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi.*;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-27T16:17:53.418+05:30[Asia/Colombo]")public interface RegistriesApiService {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-27T22:20:01.896+05:30[Asia/Colombo]")public interface RegistriesApiService {
         public Response addRegistry(RegistryDTO body, MessageContext messageContext) throws EndpointRegistryException;
         public Response createNewEntryVersion(String registryId, String entryId, String version, MessageContext messageContext) throws EndpointRegistryException;
         public Response createRegistryEntry(String registryId, RegistryEntryDTO registryEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws EndpointRegistryException;
@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi.*;
         public Response deleteRegistryEntry(String registryId, String entryId, MessageContext messageContext) throws EndpointRegistryException;
         public Response getAllEntriesInRegistry(String registryId, Boolean exactNameMatch, String version, ServiceTypeEnum serviceType, DefinitionTypeEnum definitionType, String name, ServiceCategoryEnum serviceCategory, SortEntryByEnum sortEntryBy, SortEntryOrderEnum sortEntryOrder, Integer limit, Integer offset, MessageContext messageContext) throws EndpointRegistryException;
         public Response getEndpointDefinition(String registryId, String entryId, MessageContext messageContext) throws EndpointRegistryException;
-        public Response getRegistries(String name, SortRegistryByEnum sortRegistryBy, SortRegistryOrderEnum sortRegistryOrder, Integer limit, Integer offset, MessageContext messageContext) throws EndpointRegistryException;
+        public Response getRegistries(MessageContext messageContext) throws EndpointRegistryException;
         public Response getRegistryByUUID(String registryId, MessageContext messageContext) throws EndpointRegistryException;
         public Response getRegistryEntryByUuid(String registryId, String entryId, MessageContext messageContext) throws EndpointRegistryException;
         public Response updateRegistry(RegistryDTO body, String registryId, MessageContext messageContext) throws EndpointRegistryException;

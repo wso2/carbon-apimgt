@@ -229,41 +229,6 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " limit ? , ? "+
                     " )x ";
 
-    public static final String GET_ALL_ENDPOINT_REGISTRIES_OF_TENANT =
-            " SELECT " +
-                    "   UUID, " +
-                    "   REG_NAME, " +
-                    "   REG_TYPE, " +
-                    "   TENANT_ID, " +
-                    "   CREATED_BY, " +
-                    "   UPDATED_BY, " +
-                    "   CREATED_TIME, " +
-                    "   UPDATED_TIME " +
-                    " FROM " +
-                    "   ENDPOINT_REG " +
-                    " WHERE " +
-                    "   TENANT_ID = ?" +
-                    " ORDER BY $1 $2 " +
-                    " LIMIT ?, ? ";
-
-    public static final String GET_ALL_ENDPOINT_REGISTRIES_OF_TENANT_WITH_NAME =
-            " SELECT " +
-                    "   UUID, " +
-                    "   REG_NAME, " +
-                    "   REG_TYPE, " +
-                    "   TENANT_ID, " +
-                    "   CREATED_BY, " +
-                    "   UPDATED_BY, " +
-                    "   CREATED_TIME, " +
-                    "   UPDATED_TIME " +
-                    " FROM " +
-                    "   ENDPOINT_REG " +
-                    " WHERE " +
-                    "   REG_NAME = ? AND " +
-                    "   TENANT_ID = ?" +
-                    " ORDER BY $1 $2 " +
-                    " LIMIT ?, ? ";
-
     public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY =
             " SELECT " +
                     "   E.UUID, " +
