@@ -120,6 +120,16 @@ class API extends Resource {
     }
 
     /**
+     * Get settings of an API
+     */
+    getSettings() {
+        const promisedSettings = this.client.then(client => {
+            return client.apis['Settings'].get_settings();
+        });
+        return promisedSettings.then(response => response.body);
+    }
+
+    /**
      * Get list of api categories
      */
     apiCategoriesListGet() {
