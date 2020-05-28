@@ -21,13 +21,13 @@ const AppConfig = {
         singleLogout: {
             enabled: true, // If enabled, user will be logged out
             // from the App when logged out from the IDP (eg: SSO logout from a different App).
-            timeout: 4000, // Defines the timeout for the above periodical session status check
+            timeout: 2000, // Defines the timeout for the above periodical session status check
         },
         docUrl: 'https://apim.docs.wso2.com/en/latest/',
     },
     idp: {
         origin: 'https://localhost:9443',
-        checkSessionEndpoint: 'https://localhost:9443/checksession/endpoint',
+        checkSessionEndpoint: 'https://localhost:9443/oidc/checksession',
     },
 };
 

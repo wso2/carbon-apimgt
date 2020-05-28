@@ -226,18 +226,6 @@ class Protected extends Component {
         }
     }
 
-    // /**
-    //  * Invoke checksession oidc endpoint.
-    //  */
-    // checkSession() {
-    //     setInterval(() => {
-    //         const { clientId, sessionStateCookie } = this.state;
-    //         const msg = clientId + ' ' + sessionStateCookie;
-    //         document.getElementById('iframeOP').contentWindow.postMessage(msg, 'https://' + window.location.host);
-    //     }, 2000);
-    // }
-
-
     /**
      * Invoke checksession oidc endpoint.
      */
@@ -268,8 +256,8 @@ class Protected extends Component {
         );
         const { clientId } = this.state;
         const checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
-        + clientId + '&redirect_uri=https://' + window.location.host
-        + Configurations.app.context + '/services/auth/callback/login';
+            + clientId + '&redirect_uri=https://' + Configurations.idp.origin
+            + Configurations.app.context + '/services/auth/callback/login';
         if (!user) {
             return (
                 <IntlProvider locale={language} messages={messages}>
