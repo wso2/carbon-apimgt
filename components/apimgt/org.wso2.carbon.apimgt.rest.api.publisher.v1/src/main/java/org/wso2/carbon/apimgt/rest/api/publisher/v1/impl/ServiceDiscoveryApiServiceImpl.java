@@ -12,13 +12,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.Endpoint;
-import org.wso2.carbon.apimgt.api.model.ServiceDiscoveryConf;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIMRegistryService;
-import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.*;
 //import org.wso2.carbon.apimgt.impl.APIProviderImpl;
 import org.wso2.carbon.apimgt.impl.containermgt.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -36,7 +31,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.ServiceDiscov
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -53,16 +48,8 @@ public class ServiceDiscoveryApiServiceImpl implements ServiceDiscoveryApiServic
 
       private static final Log log = LogFactory.getLog(ServiceDiscoveryApiServiceImpl.class);
 
-    Services serviceListObj = new Services();
-    ServiceDiscoveryEndpoints endpointObj = new ServiceDiscoveryEndpoints();
     ServiceDiscoveryEndpoints subEndpointObj = new ServiceDiscoveryEndpoints();
-
-   private List<Object> innerService;
-   private List<Services> services;
-
-
-    public Response serviceDiscoveryEndpointsTypeGet(String type, Integer limit, Integer offset,MessageContext messageContext) {
-        ServiceDiscoveriesInfoDTO serviceDTO = new ServiceDiscoveriesInfoDTO();
+    public Response serviceDiscoveryEndpointsTypeGet(String type, Integer limit, Integer offset,MessageContext messageContext)  {
         ServiceDiscoveriesInfoListDTO serviceListDTO = new ServiceDiscoveriesInfoListDTO();
 
 
@@ -71,83 +58,58 @@ public class ServiceDiscoveryApiServiceImpl implements ServiceDiscoveryApiServic
          limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
             offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
               try{
-                 // String newSearchQuery = APIUtil.constructApisGetQuery(type);
                   APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
                   String username = RestApiUtil.getLoggedInUsername();
-                  String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-                  String id = RestApiUtil.getLoggedInUserGroupId();
 
-                  Map<String, Object> serviceDiscoveryConfig = null;
-                  K8sServiceDiscovery obj1 = new K8sServiceDiscovery();
-                  serviceDiscoveryConfig = verifyTenant(tenantDomain);
-                  endpointObj = obj1.getServices(serviceDiscoveryConfig);
-                  int length = endpointObj.getServices().size();
-
-
-
-
-                  List<ServiceDiscoveriesInfoDTO> list = new ArrayList<>();
+                  subEndpointObj = apiProvider.getServiceDiscoveryEndpoints(type,username,offset,limit);
+                  int length =apiProvider.getNumberOfAllServices(type);
                   ServiceDiscoveryMappingUtil.setPaginationParams(serviceListDTO,  offset, limit, length);
-
-
-
-                  subEndpointObj.setType(endpointObj.getType());
-
-                  List<Services> services = endpointObj.getServices();
-                  List<Services> subServices = new ArrayList<>();
-
-                  for(int i = offset ; i< offset+limit ; i++ ){
-                     subServices.add(services.get(i));
-                  }
-
-                  subEndpointObj.setServices(subServices);
-
-
 
 
                   ServiceDiscoveryMappingUtil.listToDTO(serviceListDTO,subEndpointObj);
 
 
-
-
-
               } catch (Exception e) {
                   e.printStackTrace();
               }
-
-
-
-
-
           return Response.ok().entity(serviceListDTO).build();
   }
 
+    public Response serviceDiscoveryEndpointsGet(Integer limit, Integer offset, MessageContext messageContext)  {
+        ServiceDiscoverySystemTypeListDTO typeListDTO = new ServiceDiscoverySystemTypeListDTO();
+        APIProvider apiProvider = null;
+        try {
+            apiProvider = RestApiUtil.getLoggedInUserProvider();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occured while retriving the tenant details";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
 
+        }
+        String username = RestApiUtil.getLoggedInUsername();
+        List<String> types = new ArrayList<>();
+        try {
+            try {
+                types = apiProvider.getServiceDiscoveryTypes(username);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error occured while retriving the user name";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (RegistryException e) {
+            String errorMessage = "Error occurred while retrieving the user details from registry";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (ParseException e) {
+            String errorMessage = "Error occured while parsing the value";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occured while reading the API configuration";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        ServiceDiscoveryMappingUtil.typeListToDTO(typeListDTO,types);
 
-
-
-  public  Map<String, Object> verifyTenant ( String tenantDomain) throws APIManagementException, UserStoreException, RegistryException, ParseException {
-      //String tenantDomain = MultitenantUtils.getTenantDomain(userId);
-      Map<String, Object> serviceDiscoveryConfig = null;
-
-      if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-          serviceDiscoveryConfig = APIUtil.getServiceDiscoveryConfigurationFromXML();
-
-
-      }
-      else{
-          APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-          String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
-          JSONParser jsonParser = new JSONParser();
-        JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
-       Map<String, Map<String, Object>> allServiceDiscoverySystems = APIUtil.getServiceDiscoveryTypesFromConfig(tenantConf);
-          serviceDiscoveryConfig = allServiceDiscoverySystems.get("implParameters");
-
-      }
-      return serviceDiscoveryConfig;
-  }
-
-
+        return Response.ok().entity(typeListDTO).build();
+    }
 
 
 

@@ -33,6 +33,8 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 
+
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
@@ -1497,4 +1499,12 @@ public interface APIProvider extends APIManager {
      * @return a list of Deploymentstatus objects in different cloud environments
      */
     List <DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException ;
-}
+
+    ServiceDiscoveryEndpoints getServiceDiscoveryEndpoints(String type, String username, int offset , int limit) throws UserStoreException,
+            RegistryException, ParseException, APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException;
+
+    int getNumberOfAllServices (String type) throws UserStoreException, RegistryException, ParseException, APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException;
+
+     List<String> getServiceDiscoveryTypes(String username) throws UserStoreException, RegistryException, ParseException, APIManagementException ,ClassNotFoundException;
+
+    }

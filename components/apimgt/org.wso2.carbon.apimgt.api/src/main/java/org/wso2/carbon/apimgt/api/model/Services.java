@@ -1,9 +1,4 @@
-package org.wso2.carbon.apimgt.impl.containermgt;
-
-import org.wso2.carbon.apimgt.api.model.Endpoint;
-import org.wso2.carbon.apimgt.api.model.ServiceDiscoveryConf;
-
-import java.util.List;
+package org.wso2.carbon.apimgt.api.model;
 
 public class Services {
     private String type;
@@ -19,7 +14,6 @@ public class Services {
         this.type = type;
     }
 
-
     public String getServiceName() {
         return serviceName;
     }
@@ -27,7 +21,6 @@ public class Services {
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
     }
-
 
     public String getServiceURL() {
         return serviceURL;
@@ -45,11 +38,9 @@ public class Services {
         this.properties = properties;
     }
 
-
-
     @Override
     public String toString() {
-        return "Services{" +
+        return "Service{" +
                 "type='" + type + '\'' +
                 ", serviceName='" + serviceName + '\'' +
                 ", serviceURL='" + serviceURL + '\'' +

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -25,8 +27,10 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.entity.ContentType;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -34,6 +38,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -56,6 +61,8 @@ import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.containermgt.K8sServiceDiscovery;
+import org.wso2.carbon.apimgt.impl.containermgt.ServiceDiscovery;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
@@ -131,6 +138,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_URI;
 
+
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor("org.wso2.carbon.context.PrivilegedCarbonContext")
 @PrepareForTest({ ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, APIGatewayManager.class,
@@ -151,6 +159,9 @@ public class APIProviderImplTest {
     private GenericArtifact artifact;
     private CertificateManagerImpl certificateManager;
     private APIManagerConfiguration config;
+    private ServiceDiscoveryEndpoints testsubEndpointObj;
+    private List<Services> servicesList ;
+    private Services services;
 
     @Before
     public void init() throws Exception {
@@ -168,6 +179,16 @@ public class APIProviderImplTest {
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(APIGatewayManager.class);
         PowerMockito.mockStatic(CertificateManagerImpl.class);
+        PowerMockito.mock(ServiceDiscoveryEndpoints.class);
+        PowerMockito.mock(Services.class);
+        testsubEndpointObj = Mockito.mock(ServiceDiscoveryEndpoints.class);
+        services = Mockito.mock(Services.class);
+
+        services.setServiceName("my-service");
+        services.setServiceURL("");
+
+        testsubEndpointObj.setType("Kubernetes");
+        testsubEndpointObj.setServices(servicesList);
 
         apimgtDAO = Mockito.mock(ApiMgtDAO.class);
         keyManager = Mockito.mock(KeyManager.class);
@@ -4866,5 +4887,107 @@ public class APIProviderImplTest {
         JSONObject jsonObject2 = apiProvider.getSecurityAuditAttributesFromConfig("admin");
         Assert.assertEquals(jsonObject2.get(APIConstants.SECURITY_AUDIT_API_TOKEN), apiToken);
         Assert.assertEquals(jsonObject2.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID), collectionId);
+    }
+
+    @Test
+    public void testGetServiceDiscoveryEndpoints() throws UserStoreException, RegistryException, ParseException,
+            APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException {
+        String type = "Kubernetes";
+        String username = "admin";
+        int offset = 0;
+        int limit = 25;
+        ServiceDiscoveryEndpoints subEndpointObj =Mockito.mock(ServiceDiscoveryEndpoints.class);
+
+
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfiguration(tenantDomain, type);
+
+
+        for(Map.Entry mapElement :serviceDiscoveryConfMap.entrySet() ){
+            ServiceDiscoveryConfigurations confi = (ServiceDiscoveryConfigurations) mapElement.getValue();
+            ServiceDiscovery serviceDiscovery ;
+            serviceDiscovery = APIUtil.generateClassObject(type);
+            ServiceDiscoveryConf implParameters = confi.getImplParameters();
+
+            Map<String,String> implParametersDetails = new HashMap<>();
+
+            String masterURL =implParameters.getMasterURL();
+            String saToken = implParameters.getSaToken();
+            implParametersDetails.put("MasterURL", masterURL);
+            implParametersDetails.put("SAToken" , saToken);
+
+            serviceDiscovery.initManager(implParametersDetails);
+            subEndpointObj = serviceDiscovery.listSubSetOfServices( offset,  limit);
+            Assert.assertNotNull(implParameters);
+
+        }
+        Assert.assertNotNull(serviceDiscoveryConfMap);
+        Assert.assertNotNull(subEndpointObj.getServices());
+    }
+
+    @Test
+    public void getNumberOfAllServices( ) throws UserStoreException, RegistryException, ParseException,
+            APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException {
+        String type = "Kubernetes";
+        String username = "admin";
+
+        int totalNumberOfServices = 0;
+        ServiceDiscovery serviceDiscovery ;
+        serviceDiscovery = APIUtil.generateClassObject(type);
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
+
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfiguration(tenantDomain, type);
+
+
+        for(Map.Entry mapElement :serviceDiscoveryConfMap.entrySet() ){
+            ServiceDiscoveryConfigurations confi = (ServiceDiscoveryConfigurations) mapElement.getValue();
+            ServiceDiscoveryConf implParameters = confi.getImplParameters();
+            String masterURL =implParameters.getMasterURL();
+            String saToken = implParameters.getSaToken();
+            Map<String,String> implParametersDetails = new HashMap<>();
+            implParametersDetails.put("MasterURL", masterURL);
+            implParametersDetails.put("SAToken" , saToken);
+
+            serviceDiscovery.initManager(implParametersDetails);
+            totalNumberOfServices = serviceDiscovery.getNumberOfServices();
+
+        }
+        Assert.assertNotNull(serviceDiscoveryConfMap);
+        Assert.assertNotNull(totalNumberOfServices);
+
+    }
+
+
+    @Test
+    public void testGetServiceDiscoveryTypesForSuperTenant() throws UserStoreException, RegistryException, ParseException,
+            APIManagementException {
+        String username = "admin";
+        List<String> testTypes = new ArrayList<>();
+        testTypes.add("Kubernets"); testTypes.add("ETCD"); testTypes.add("EETTC");
+        PowerMockito.mockStatic(APIUtil.class);
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+
+        Mockito.when(APIUtil.getTypesServiceDiscoveryConfiguration(tenantDomain)).thenReturn(testTypes);
+        List <String> types = new ArrayList<>();
+        types= APIUtil.getTypesServiceDiscoveryConfiguration(tenantDomain);
+        Assert.assertEquals(testTypes,types);
+    }
+
+    @Test
+    public void testGetServiceDiscoveryTypesForTenant() throws UserStoreException, RegistryException, ParseException,
+            APIManagementException {
+        String username = "wso2user@wso2.com";
+        List<String> testTypes = new ArrayList<>();
+        testTypes.add("Kubernets"); testTypes.add("ETCD"); testTypes.add("EETTC");
+        PowerMockito.mockStatic(APIUtil.class);
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+
+        Mockito.when(APIUtil.getTypesServiceDiscoveryConfiguration(tenantDomain)).thenReturn(testTypes);
+        List <String> types = new ArrayList<>();
+        types= APIUtil.getTypesServiceDiscoveryConfiguration(tenantDomain);
+        Assert.assertEquals(testTypes,types);
     }
 }

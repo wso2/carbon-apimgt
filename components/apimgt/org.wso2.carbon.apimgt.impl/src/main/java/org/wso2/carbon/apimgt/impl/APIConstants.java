@@ -2057,6 +2057,8 @@ public final class APIConstants {
         public static final String PUB_API_RESPONSE_PARAMS_ID = "id";
         public static final String DYNAMIC_CLIENT_REGISTRATION_URL_SUFFIX =
                 "/client-registration/" + REST_API_OLD_VERSION + "/register";
+        public static final int PAGINATION_OFFSET_DEFAULT = 0 ;
+        public static final int PAGINATION_LIMIT_DEFAULT = 25;
     }
 
     public static final int MAX_LENGTH_API_NAME = 50;

@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.collections.SetUtils;
 import org.apache.commons.io.FileUtils;
@@ -50,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
@@ -94,16 +96,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.Matchers.eq;
@@ -2003,4 +1996,190 @@ public class APIUtilTest {
         Assert.assertFalse(APIUtil.isRoleExistForUser(userName, "test"));
         */
     }
+
+
+
+    @Test
+    public void  testGetServiceDiscoveryConfigurationForSuperTenant () throws APIManagementException, UserStoreException, org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException {
+        String tenantDomain ="carbon.super";
+        String type ="Kubernetes";
+        PowerMockito.mockStatic(APIUtil.class);
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
+
+        if (tenantDomain.equals(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfigurationFromXML(type);
+        }
+        else {
+
+            APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
+            serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryTypesFromConfig(tenantConf, type);
+
+        }
+        Assert.assertNotNull(serviceDiscoveryConfMap);
+    }
+
+    @Test
+    public void   testGetServiceDiscoveryConfigurationForTenant () throws APIManagementException, UserStoreException, org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException {
+        String tenantDomain ="wso2user@wso2.com";
+        String type ="Kubernetes";
+        PowerMockito.mockStatic(APIUtil.class);
+
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
+
+        if (tenantDomain.equals(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfigurationFromXML(type);
+        }
+        else {
+            String testContent = "{\n" +
+                    "  \"EnableMonetization\" : false,\n" +
+                    "  \"IsUnlimitedTierPaid\" : false,\n" +
+                    "  \"ContainerMgtInfo\": {\n" +
+                    "    \"Type\": \"Kubernetes\",\n" +
+                    "    \"ClassName\": \"org.wso2.carbon.apimgt.impl.containermgt.K8sManager\",\n" +
+                    "    \"ClusterInfo\": [\n" +
+                    "      {\n" +
+                    "        \"Name\": \"\",\n" +
+                    "        \"Properties\": {\n" +
+                    "          \"MasterURL\": \"\",\n" +
+                    "          \"SAToken\": \"\",\n" +
+                    "          \"Namespace\": \"default\",\n" +
+                    "          \"Replicas\": 1,\n" +
+                    "          \"BasicSecurityCustomResourceName\": \"\",\n" +
+                    "          \"OauthSecurityCustomResourceName\": \"\",\n" +
+                    "          \"JWTSecurityCustomResourceName\": \"\"\n" +
+                    "        }\n" +
+                    "      }\n" +
+                    "    ]\n" +
+                    "  },\n" +
+                    "  \"ServiceDiscovery\":{\n" +
+                    "    \"enable\":\"true\",\n" +
+                    "    \"ServiceDiscoveryTypes\":[\n" +
+                    "      {\n" +
+                    "        \"Type\":\"Kubernetes\",\n" +
+                    "        \"DisplayName\":\"K8s\",\n" +
+                    "        \"ImplParameters\":{\n" +
+                    "          \"MasterURL\":\"https://192.168.99.104:8443\u200B\",\n" +
+                    "          \"SAToken\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Im15c2VydmljZWFjYy10b2tlbi1scTJ6OCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJteXNlcnZpY2VhY2MiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1OTFkM2VlZS01NTNiLTRjZjctYjA3NS01M2RmYzAzMWUxZGQiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDpteXNlcnZpY2VhY2MifQ.Ga_LgtM5iUg5LNgJygmCPZh3wBOy42JU3oUjtV6ctbkoFWCVtszNO3c2flnnzlZkFUVVdohMrYUcKxGWqWh_Pt5uAFuUgOWb16qoC-2suugRRXRtqxH21yWiVjoTUDi65JHTC1iIpkKk997ib0WZ5X_aac9txkETgOAF098bcSPWzjTZNEdSpZvwz5iBeNlTLM2lrGg2ofUXYZpQaCuF473ygihHIEgHu8ZQQNJsS54tQ0wXfSq6SI01NdXwo_8DXT6UQU_1iT9ChGXhvPNc0JS-qfbeSEBfVn94PN1Ror8SI_UsXS2oyA7WSVJ3bMylQHV4Hzp8fZGpSAdlvJDYQA\",\n" +
+                    "          \"Namespace\":\"default\"\n" +
+                    "        }\n" +
+                    "      },\n" +
+                    "    ]\n" +
+                    "  }, \n" +
+                    "}";
+
+            APIMRegistryService apimRegistryService = Mockito.mock(APIMRegistryServiceImpl.class); //new APIMRegistryServiceImpl();
+            Mockito.when(apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(testContent);
+
+            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
+            serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryTypesFromConfig(tenantConf, type);
+
+        }
+        Assert.assertNotNull(serviceDiscoveryConfMap);
+    }
+
+    @Test
+    public void   testGetTypesServiceDiscoveryConfigurationForSuperTenant ( ) throws APIManagementException, UserStoreException, org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException {
+        String tenantDomain ="carbon.super";
+        List <String> types = new ArrayList<>();
+        PowerMockito.mockStatic(APIUtil.class);
+        if (tenantDomain.equals(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            types = APIUtil.getTypesOfServiceDiscoveryConfigurationFromXML();
+        }
+        else {
+
+            APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
+            types = APIUtil.getTypesOfServiceDiscoveryFromConfig(tenantConf);
+
+        }
+        Assert.assertNotNull(types);
+
+    }
+
+    @Test
+    public void  testGetTypesServiceDiscoveryConfigurationForTenant ( ) throws APIManagementException, UserStoreException, org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException {
+        String tenantDomain ="wso2user@wso2.com";
+        List <String> types = new ArrayList<>();
+        PowerMockito.mockStatic(APIUtil.class);
+
+        if (tenantDomain.equals(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            types = APIUtil.getTypesOfServiceDiscoveryConfigurationFromXML();
+        }
+        else {
+            String testContent = "{\n" +
+                    "  \"EnableMonetization\" : false,\n" +
+                    "  \"IsUnlimitedTierPaid\" : false,\n" +
+                    "  \"ContainerMgtInfo\": {\n" +
+                    "    \"Type\": \"Kubernetes\",\n" +
+                    "    \"ClassName\": \"org.wso2.carbon.apimgt.impl.containermgt.K8sManager\",\n" +
+                    "    \"ClusterInfo\": [\n" +
+                    "      {\n" +
+                    "        \"Name\": \"\",\n" +
+                    "        \"Properties\": {\n" +
+                    "          \"MasterURL\": \"\",\n" +
+                    "          \"SAToken\": \"\",\n" +
+                    "          \"Namespace\": \"default\",\n" +
+                    "          \"Replicas\": 1,\n" +
+                    "          \"BasicSecurityCustomResourceName\": \"\",\n" +
+                    "          \"OauthSecurityCustomResourceName\": \"\",\n" +
+                    "          \"JWTSecurityCustomResourceName\": \"\"\n" +
+                    "        }\n" +
+                    "      }\n" +
+                    "    ]\n" +
+                    "  },\n" +
+                    "  \"ServiceDiscovery\":{\n" +
+                    "    \"enable\":\"true\",\n" +
+                    "    \"ServiceDiscoveryTypes\":[\n" +
+                    "      {\n" +
+                    "        \"Type\":\"Kubernetes\",\n" +
+                    "        \"DisplayName\":\"K8s\",\n" +
+                    "        \"ImplParameters\":{\n" +
+                    "          \"MasterURL\":\"https://192.168.99.104:8443\u200B\",\n" +
+                    "          \"SAToken\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Im15c2VydmljZWFjYy10b2tlbi1scTJ6OCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJteXNlcnZpY2VhY2MiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI1OTFkM2VlZS01NTNiLTRjZjctYjA3NS01M2RmYzAzMWUxZGQiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDpteXNlcnZpY2VhY2MifQ.Ga_LgtM5iUg5LNgJygmCPZh3wBOy42JU3oUjtV6ctbkoFWCVtszNO3c2flnnzlZkFUVVdohMrYUcKxGWqWh_Pt5uAFuUgOWb16qoC-2suugRRXRtqxH21yWiVjoTUDi65JHTC1iIpkKk997ib0WZ5X_aac9txkETgOAF098bcSPWzjTZNEdSpZvwz5iBeNlTLM2lrGg2ofUXYZpQaCuF473ygihHIEgHu8ZQQNJsS54tQ0wXfSq6SI01NdXwo_8DXT6UQU_1iT9ChGXhvPNc0JS-qfbeSEBfVn94PN1Ror8SI_UsXS2oyA7WSVJ3bMylQHV4Hzp8fZGpSAdlvJDYQA\",\n" +
+                    "          \"Namespace\":\"default\"\n" +
+                    "        }\n" +
+                    "      },\n" +
+                    "    ]\n" +
+                    "  }, \n" +
+                    "}";
+
+            APIMRegistryService apimRegistryService = Mockito.mock(APIMRegistryServiceImpl.class); //new APIMRegistryServiceImpl();
+            Mockito.when(apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(testContent);
+
+            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
+            types = APIUtil.getTypesOfServiceDiscoveryFromConfig(tenantConf);
+
+        }
+        Assert.assertNotNull(types);
+    }
+
+
+    @Test
+    public  void testGenerateClassObjectForSuperTenant() throws UserStoreException, org.wso2.carbon.registry.core.exceptions.RegistryException, ParseException, APIManagementException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+        PowerMockito.mockStatic(APIUtil.class);
+        String type = "Kubernetes";
+        String testImplCkassName ="org.wso2.carbon.apimgt.impl.containermgt.K8sServiceDiscovery";
+        Class testImplClass = Class.forName(testImplCkassName);
+        ServiceDiscovery testServiceDiscovery =(ServiceDiscovery)testImplClass.newInstance();
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
+        serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfiguration("carbon.super",type);
+        for(Map.Entry mapElement :serviceDiscoveryConfMap.entrySet() ) {
+            ServiceDiscoveryConfigurations confi = (ServiceDiscoveryConfigurations) mapElement.getValue();
+            String implClassName = confi.getClassName();
+            Class implClass = Class.forName(implClassName);
+            ServiceDiscovery serviceDiscovery = (ServiceDiscovery) implClass.newInstance();
+            Assert.assertEquals(testServiceDiscovery,serviceDiscovery);
+
+        }
+    }
+
 }

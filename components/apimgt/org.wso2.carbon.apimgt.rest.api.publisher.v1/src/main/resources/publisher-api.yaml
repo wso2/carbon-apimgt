@@ -6804,6 +6804,62 @@ paths:
 
 
  #------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  /service-discovery/endpoints:
+
+  #########################################################
+  # Retriving the list of available types
+  #########################################################
+    get:
+      x-scope: apim:serviceEndpoints_view
+      x-wso2-curl: ""
+      summary: Get list of services discovery system.
+      description: |
+        Using this operation, you can retrieve complete list of available services discovery system.
+      parameters:
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      tags:
+        - Service Discovery Types
+      responses:
+        200:
+          description: |
+            Ok.
+            List of service discovery system is returned.
+          headers:
+            Content-type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests
+                (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+          schema:
+            $ref: '#/definitions/ServiceDiscoverySystemTypeList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested
+            resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            No services discovery systems are available .
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
 
 ######################################################
 # The "Service Discovery" resource API
@@ -10709,6 +10765,36 @@ definitions:
           $ref: '#/definitions/ServiceDiscoveriesInfo'
       pagination:
         $ref: '#/definitions/Pagination'
+
+
+  #-----------------------------------------------------
+  # service_discoveriesResponse list definition.
+  #-----------------------------------------------------
+  ServiceDiscoverySystemTypeList:
+    title: type list
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of types returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/TypeInfo'
+        description: |
+          Type of the service discovery system
+        example: Kubernetes
+
+
+
+  TypeInfo:
+    title: Type info with details.
+    properties:
+      name:
+        type: string
+        example: Kubernetes
+
 
 
 

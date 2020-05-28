@@ -1,31 +1,23 @@
 package org.wso2.carbon.apimgt.api.model;
 
 public class ServiceDiscoveryConf {
-    private String serviceName;
-    private String serviceURL;
-    private String properties;
 
-    public String getServiceName() {
-        return serviceName;
+    private String masterURL;
+    private String saToken;
+
+    public String getMasterURL() {
+        return masterURL;
     }
 
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
+    public void setMasterURL(String masterURL) {
+        this.masterURL = masterURL;
     }
 
-    public String getServiceURL() {
-        return serviceURL;
+    public String getSaToken() {
+        return saToken;
     }
 
-    public void setServiceURL(String serviceURL) {
-        this.serviceURL = serviceURL;
-    }
-
-    public String getProperties() {
-        return properties;
-    }
-
-    public void setProperties(String properties) {
-        this.properties = properties;
+    public void setSaToken(String saToken) {
+        this.saToken = saToken;
     }
 }

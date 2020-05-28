@@ -132,6 +132,7 @@ import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
+import org.wso2.carbon.apimgt.impl.containermgt.ServiceDiscovery;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -297,8 +298,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-
-import static org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants.*;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -11094,55 +11093,185 @@ public final class APIUtil {
     }
 
 
-    public static Map<String, Map<String, Object>> getServiceDiscoveryTypesFromConfig(JSONObject tenantConf) {
+
+
+    public static Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryTypesFromConfig(JSONObject tenantConf, String type)  {
 
         JSONArray serviceDiscoveryTypes = (JSONArray) ((JSONObject) tenantConf.get(ContainerBasedConstants.SERVICE_DISCOVERY))
                 .get(ContainerBasedConstants.SERVICE_DISCOVERY_TYPES);
-        Map<String, Map<String, Object>> serviceDiscoverySystems = new HashMap<String, Map<String, Object>>();
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
+
         for (Object types : serviceDiscoveryTypes) {
-
-            JSONObject implParameters = (JSONObject) ((JSONObject) types).get(ContainerBasedConstants.IMPL_PARAMETERS);
-            String serviceSystemType = ((JSONObject) types).get(ContainerBasedConstants.SYSTEM_TYPE).toString();
+            JSONObject implParametersJsonObj = (JSONObject) ((JSONObject) types).get(ContainerBasedConstants.IMPL_PARAMETERS);
+            String sType = ((JSONObject) types).get(ContainerBasedConstants.SYSTEM_TYPE).toString();
             String displayName = ((JSONObject) types).get(ContainerBasedConstants.DISPLAY_NAME).toString();
-            Iterator<String> iterator = implParameters.keySet().iterator();
-            Map<String, Object> implParametersMap = new HashMap<String, Object>();
-            while (iterator.hasNext()) {
+            ServiceDiscoveryConfigurations serviceConfObj = new ServiceDiscoveryConfigurations();
+            ServiceDiscoveryConf implParametersObj = new ServiceDiscoveryConf();
 
-                String key = iterator.next();
-                String value = implParameters.get(key).toString();
-                implParameters.put(key, value);
+            serviceConfObj.setType(sType);
+            if(type.equalsIgnoreCase(sType)){
+                serviceConfObj.setDisplayName(displayName);
+                Iterator<String> iterator = implParametersJsonObj.keySet().iterator();
+                Map<String, Object> implParametersMap = new HashMap<String, Object>();
+                while (iterator.hasNext()) {
+
+                    String key = iterator.next();
+                    String value = implParametersJsonObj.get(key).toString();
+                    implParametersMap.put(key, value);
+                }
+                String saToken = implParametersMap.get("SAToken").toString();
+                String url = (String) implParametersMap.get("MasterURL");
+                String masterURL = url.replaceAll("\u200B", "");
+
+                implParametersObj.setSaToken(saToken);
+                implParametersObj.setMasterURL(masterURL);
+
+                serviceConfObj.setImplParameters(implParametersObj);
+                serviceDiscoveryConfMap.put(sType, serviceConfObj);
             }
-            serviceDiscoverySystems.put(serviceSystemType, implParameters);
+
         }
-        return serviceDiscoverySystems;
+        return serviceDiscoveryConfMap;
     }
 
 
-    public static JSONObject getServiceDiscoveryTypesFromConfig(String tenantConfigContent) throws ParseException {
 
-        JSONParser jsonParser = new JSONParser();
-        JSONObject tenantConf = (JSONObject) jsonParser.parse(tenantConfigContent);
-        JSONArray serviceDiscoveryTypes = (JSONArray) tenantConf.get(ContainerBasedConstants.SERVICE_DISCOVERY_TYPES);
-        JSONObject serviceDiscoverySystems = new JSONObject();
-        for (int i = 0; i < serviceDiscoveryTypes.size(); i++) {
 
-            JSONObject clusterPropertiesService = (JSONObject) ((JSONObject) serviceDiscoveryTypes.get(i)).get(ContainerBasedConstants.IMPL_PARAMETERS);
-            String type = ((JSONObject) serviceDiscoveryTypes.get(i)).get(ContainerBasedConstants.SYSTEM_TYPE).toString();
-            serviceDiscoverySystems.put(type, clusterPropertiesService);
+
+
+
+
+
+public static  Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryConfigurationFromXML(String type){
+    ServiceDiscoveryConfigurations serviceConfObj = new ServiceDiscoveryConfigurations();
+    ServiceDiscoveryConf implParametersObj = new ServiceDiscoveryConf();
+
+    JSONArray serviceDiscovery;
+    APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+            .getAPIManagerConfiguration();
+    serviceDiscovery= configuration.getServiceDiscoveryConf();
+
+    Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
+    Map<String, Object> serviceDiscoveryConfig = null;
+    for (int i = 0; i < serviceDiscovery.size(); i++){
+        serviceDiscoveryConfig = new ObjectMapper().convertValue(serviceDiscovery.get(i),
+                Map.class);
+
+//        String enabled = (String) serviceDiscoveryConfig.get("enabled");
+        String sType = (String)serviceDiscoveryConfig.get("type");
+//        System.out.println("enable\n\n " + enabled);
+//        System.out.println("\n\n" +enable.equalsIgnoreCase("true") );
+//        if(enable.equalsIgnoreCase("true")){
+            if(type.equalsIgnoreCase(sType)){
+                String className =(String)serviceDiscoveryConfig.get("ClassName");
+                String displayName = (String)serviceDiscoveryConfig.get("DisplayName");
+
+                Map<String, Object>  impl = (Map<String, Object>) serviceDiscoveryConfig.get("ImplParameters");
+
+                String saToken = (String)impl.get("SAToken");
+                String masterURL = (String)impl.get("MasterURL");
+
+                implParametersObj.setSaToken(saToken);
+                implParametersObj.setMasterURL(masterURL);
+
+                serviceConfObj.setType(sType);
+                serviceConfObj.setClassName(className);
+                serviceConfObj.setDisplayName(displayName);
+                serviceConfObj.setImplParameters(implParametersObj);
+
+                serviceDiscoveryConfMap.put(sType,serviceConfObj);
+
+            }
+//        }
+
+    }
+    return serviceDiscoveryConfMap;
+}
+
+
+
+    public static  Map<String, ServiceDiscoveryConfigurations> getServiceDiscoveryConfiguration ( String tenantDomain, String type) throws APIManagementException, UserStoreException, RegistryException, ParseException {
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
+
+        if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfigurationFromXML(type);
         }
-        return serviceDiscoverySystems;
+        else {
+
+            APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
+            serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryTypesFromConfig(tenantConf, type);
+
+        }
+        return serviceDiscoveryConfMap;
     }
 
-    public static  Map<String, Object> getServiceDiscoveryConfigurationFromXML(){
+    public static  List<String> getTypesServiceDiscoveryConfiguration ( String tenantDomain) throws APIManagementException, UserStoreException, RegistryException, ParseException {
+        List <String> types = new ArrayList<>();
+
+        if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            types = APIUtil.getTypesOfServiceDiscoveryConfigurationFromXML();
+        }
+        else {
+
+            APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+            String content= apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
+            types = APIUtil.getTypesOfServiceDiscoveryFromConfig(tenantConf);
+
+        }
+        return types;
+    }
+
+
+        public static ServiceDiscovery generateClassObject(String type) throws UserStoreException, RegistryException, ParseException, APIManagementException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
+        serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfiguration("carbon.super",type);
+        for(Map.Entry mapElement :serviceDiscoveryConfMap.entrySet() ) {
+            ServiceDiscoveryConfigurations confi = (ServiceDiscoveryConfigurations) mapElement.getValue();
+            String implClassName = confi.getClassName();
+            Class implClass = Class.forName(implClassName);
+            ServiceDiscovery serviceDiscovery = (ServiceDiscovery) implClass.newInstance();
+            return serviceDiscovery ;
+
+        }
+        return null ;
+    }
+
+
+    public static  List<String> getTypesOfServiceDiscoveryConfigurationFromXML(){
+
         JSONArray serviceDiscovery;
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         serviceDiscovery= configuration.getServiceDiscoveryConf();
-        Map<String, Object> serviceDiscoveryConfig = new ObjectMapper().convertValue(serviceDiscovery.get(0),
-                Map.class);
-        return serviceDiscoveryConfig;
+
+        Map<String, Object> serviceDiscoveryConfig = null;
+        List <String> types = new ArrayList<>();
+        for (int i = 0; i < serviceDiscovery.size(); i++){
+            serviceDiscoveryConfig = new ObjectMapper().convertValue(serviceDiscovery.get(i),
+                    Map.class);
+            String type = (String)serviceDiscoveryConfig.get("type");
+            types.add(type);
+
+        }
+        return types;
     }
 
+    public static List<String> getTypesOfServiceDiscoveryFromConfig(JSONObject tenantConf)  {
+
+        JSONArray serviceDiscoveryTypes = (JSONArray) ((JSONObject) tenantConf.get(ContainerBasedConstants.SERVICE_DISCOVERY))
+                .get(ContainerBasedConstants.SERVICE_DISCOVERY_TYPES);
+        List <String> types = new ArrayList<>();
+        for (Object config : serviceDiscoveryTypes) {
+            String type = ((JSONObject) config).get(ContainerBasedConstants.SYSTEM_TYPE).toString();
+            types.add(type);
+        }
+        return types;
+    }
 
 
 

@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ServiceDiscoveriesInfoListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ServiceDiscoverySystemTypeListDTO;
 
 import java.util.List;
 
@@ -21,5 +22,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ServiceDiscoveryApiService {
+      public Response serviceDiscoveryEndpointsGet(Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
       public Response serviceDiscoveryEndpointsTypeGet(String type, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
 }

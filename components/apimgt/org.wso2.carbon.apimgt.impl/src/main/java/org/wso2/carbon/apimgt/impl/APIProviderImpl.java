@@ -110,6 +110,8 @@ import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerManager;
 import org.wso2.carbon.apimgt.impl.containermgt.K8sManager;
+import org.wso2.carbon.apimgt.impl.containermgt.*;
+
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -216,6 +218,7 @@ import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.ws.Service;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
 
@@ -8860,12 +8863,75 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // catch APIManagementException inside again to capture validation error
             log.error("Swagger validation error");
         }
-        if(uriTemplates == null || uriTemplates.isEmpty()) {
+        if (uriTemplates == null || uriTemplates.isEmpty()) {
             log.error("No resources found");
         }
 
         List<APIResource> removedProductResources = getRemovedProductResources(uriTemplates, existingAPI);
         return removedProductResources;
+    }
+
+    public ServiceDiscoveryEndpoints getServiceDiscoveryEndpoints(String type, String username, int offset, int limit) throws UserStoreException, RegistryException, ParseException, APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException {
+        ServiceDiscoveryEndpoints subEndpointObj = new ServiceDiscoveryEndpoints();
+
+
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfiguration(tenantDomain, type);
+
+
+        for(Map.Entry mapElement :serviceDiscoveryConfMap.entrySet() ){
+            ServiceDiscoveryConfigurations confi = (ServiceDiscoveryConfigurations) mapElement.getValue();
+            ServiceDiscovery serviceDiscovery ;
+            serviceDiscovery = APIUtil.generateClassObject(type);
+            ServiceDiscoveryConf implParameters = confi.getImplParameters();
+
+            Map<String,String> implParametersDetails = new HashMap<>();
+
+            String masterURL =implParameters.getMasterURL();
+            String saToken = implParameters.getSaToken();
+            implParametersDetails.put("MasterURL", masterURL);
+            implParametersDetails.put("SAToken" , saToken);
+
+            serviceDiscovery.initManager(implParametersDetails);
+            subEndpointObj = serviceDiscovery.listSubSetOfServices( offset,  limit);
+        }
+        return subEndpointObj;
+    }
+
+
+    public int getNumberOfAllServices(String type) throws UserStoreException, RegistryException, ParseException, APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException {
+        int totalNumberOfServices = 0;
+        ServiceDiscovery serviceDiscovery ;
+        serviceDiscovery = APIUtil.generateClassObject(type);
+        Map<String, ServiceDiscoveryConfigurations> serviceDiscoveryConfMap = new HashMap<>();
+
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        serviceDiscoveryConfMap = APIUtil.getServiceDiscoveryConfiguration(tenantDomain, type);
+
+
+        for(Map.Entry mapElement :serviceDiscoveryConfMap.entrySet() ){
+            ServiceDiscoveryConfigurations confi = (ServiceDiscoveryConfigurations) mapElement.getValue();
+            ServiceDiscoveryConf implParameters = confi.getImplParameters();
+            String masterURL =implParameters.getMasterURL();
+            String saToken = implParameters.getSaToken();
+            Map<String,String> implParametersDetails = new HashMap<>();
+            implParametersDetails.put("MasterURL", masterURL);
+            implParametersDetails.put("SAToken" , saToken);
+
+            serviceDiscovery.initManager(implParametersDetails);
+            totalNumberOfServices = serviceDiscovery.getNumberOfServices();
+
+        }
+        return totalNumberOfServices;
+    }
+
+    public List<String> getServiceDiscoveryTypes(String username) throws UserStoreException, RegistryException, ParseException, APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+         List <String> types = new ArrayList<>();
+        types= APIUtil.getTypesServiceDiscoveryConfiguration(tenantDomain);
+        return types;
     }
 
     @Override

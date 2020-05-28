@@ -1,10 +1,8 @@
-package org.wso2.carbon.apimgt.impl.containermgt;
+package org.wso2.carbon.apimgt.api.model;
 
 import java.util.List;
-// ServiceListDTO
 
 public class ServiceDiscoveryEndpoints {
-
     private String type;
     List<Services> services;
 

@@ -1,21 +1,10 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.model.ServiceDiscoveryConf;
-import org.wso2.carbon.apimgt.impl.*;
-import org.wso2.carbon.apimgt.impl.containermgt.ServiceDiscoveryEndpoints;
-import org.wso2.carbon.apimgt.impl.containermgt.Services;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.api.model.ServiceDiscoveryEndpoints;
+import org.wso2.carbon.apimgt.api.model.Services;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,6 +93,62 @@ public static void setPaginationParams(Object serviceListDTO, int offset, int li
         for(Services s : services){
             ServiceDiscoveriesInfoDTO serviceDTO = fromServicesToServiceDiscoveriesInfoDTO(s);
             list.add(serviceDTO);
+        }
+        //serviceListDTO.setList(list);
+        return list;
+    }
+
+
+//    public static void setPaginationParamsToTypes(Object typeListDTO, int offset, int limit, int size) {
+//
+//        //acquiring pagination parameters and setting pagination urls
+//        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+//        String paginatedPrevious = "";
+//        String paginatedNext = "";
+//
+//        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+//            paginatedPrevious = RestApiUtil
+//                    .getServiceDiscoveryPaginatedServices(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+//                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
+//        }
+//
+//        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+//            paginatedNext = RestApiUtil.getServiceDiscoveryPaginatedServices(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+//                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
+//        }
+//
+//        PaginationDTO paginationDTO = CommonMappingUtil
+//                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+//        if (typeListDTO instanceof ServiceDiscoverySystemTypeListDTO) {
+//            ((ServiceDiscoverySystemTypeListDTO)typeListDTO).setPagination(paginationDTO);
+//        }
+////    else if (serviceListDTO instanceof APIListExpandedDTO) {
+////        ((APIListExpandedDTO)serviceListDTO).setPagination(paginationDTO);
+////    }
+//    }
+
+    public static void typeListToDTO(ServiceDiscoverySystemTypeListDTO typeListDTO, List<String> types) {
+
+
+        List<TypeInfoDTO> list = ServiceDiscoveryMappingUtil.fromTypeListToServiceDiscoverySystemTypeDTOList(types);
+        typeListDTO.setList(list);
+        typeListDTO.setCount(list.size());
+    }
+
+    //fromServiceToServiceDTO
+    public static TypeInfoDTO fromTypesToTypeInfoDTO(String type){
+//        ServiceDiscoveryEndpoints endpointsObj = new ServiceDiscoveryEndpoints();
+        TypeInfoDTO typeDTO = new TypeInfoDTO();
+        typeDTO.setName(type);
+        return typeDTO;
+
+    }
+    //fromServiceListTOServicesListDTO
+    public static List<TypeInfoDTO> fromTypeListToServiceDiscoverySystemTypeDTOList(List<String> types){
+        List<TypeInfoDTO> list = new ArrayList<>();
+        for(String s : types){
+            TypeInfoDTO typeDTO = fromTypesToTypeInfoDTO(s);
+            list.add(typeDTO);
         }
         //serviceListDTO.setList(list);
         return list;

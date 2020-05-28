@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ServiceDiscoveriesInfoListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ServiceDiscoverySystemTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ServiceDiscoveryApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.ServiceDiscoveryApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -35,6 +36,24 @@ public class ServiceDiscoveryApi  {
 
 ServiceDiscoveryApiService delegate = new ServiceDiscoveryApiServiceImpl();
 
+
+    @GET
+    @Path("/endpoints")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get list of services discovery system.", notes = "Using this operation, you can retrieve complete list of available services discovery system. ", response = ServiceDiscoverySystemTypeListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "Service Discovery Types",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Ok. List of service discovery system is returned. ", response = ServiceDiscoverySystemTypeListDTO.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. No services discovery systems are available . ", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
+    public Response serviceDiscoveryEndpointsGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
+        return delegate.serviceDiscoveryEndpointsGet(limit, offset, securityContext);
+    }
 
     @GET
     @Path("/endpoints/{type}")

@@ -30,7 +30,7 @@
         "Type":"Kubernetes",
         "DisplayName":"K8s",
         "ImplParameters":{
-          "MasterURL":"​",
+          "MasterURL":"",
           "SAToken":"",
           "Namespace":"default"
         }

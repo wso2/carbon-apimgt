@@ -1,11 +1,11 @@
 <div class="main-content">
-    <h1><a name="Service Discovery"></a>Service Discovery</h1>
+    <h1><a name="Service Discovery Types"></a>Service Discovery Types</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="serviceDiscoveryEndpointsTypeGet"></a>Get list of services in the cluster.</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1/service-discovery/endpoints/{type}</code>
+            <h4 class="operation-heading"><a name="serviceDiscoveryEndpointsGet"></a>Get list of services discovery system.</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1/service-discovery/endpoints</code>
             <p class="marked"></p>
 
-            <p class="marked">Using this operation, you can retrieve complete list of available services in the clusters.
+            <p class="marked">Using this operation, you can retrieve complete list of available services discovery system.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -33,34 +33,6 @@
                     <th>Default</th>
                 </tr>
                 </thead>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            <span class="param-in">Path </span>
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>type</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Service discovery system type
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
                     <tr>
                         <td class="parameter">
                             
@@ -137,10 +109,10 @@
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">Ok. List of services for requested type is returned. </p></td>
+                        <td class="parameter"><p class="marked">Ok. List of service discovery system is returned. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#ServiceDiscoveriesInfoList">ServiceDiscoveriesInfoList</a>
+                                    <a href="#!/models#ServiceDiscoverySystemTypeList">ServiceDiscoverySystemTypeList</a>
                             </span>
                         </td>
                     </tr>
@@ -155,7 +127,7 @@
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. No services are available in the cluster in requested namespace or type. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. No services discovery systems are available . </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
