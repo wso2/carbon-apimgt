@@ -189,16 +189,25 @@ export default function ListApplicationThrottlingPolicies() {
         return new Promise(((resolve, reject) => {
             restApi.applicationThrottlingPoliciesGet().then((result) => {
                 const applicationPolicies = result.body.list.map((obj) => {
-                    return {
-                        policyName: obj.policyName,
-                        quotaPolicy: obj.defaultLimit.type,
-                        quota: obj.defaultLimit.requestCount
-                || obj.defaultLimit.dataAmount + ' ' + obj.defaultLimit.dataUnit,
-                        unitTime: obj.defaultLimit.unitTime + ' ' + obj.defaultLimit.timeUnit,
-                        policyId: obj.policyId,
-                    };
+                    if (obj.defaultLimit.requestCount !== null) {
+                        return {
+                            policyName: obj.policyName,
+                            quotaPolicy: obj.defaultLimit.requestCount.type,
+                            quota: obj.defaultLimit.requestCount.requestCount,
+                            unitTime: obj.defaultLimit.requestCount.unitTime + ' '
+                            + obj.defaultLimit.requestCount.timeUnit,
+                            policyId: obj.policyId,
+                        };
+                    } else {
+                        return {
+                            policyName: obj.policyName,
+                            quotaPolicy: obj.defaultLimit.bandwidth.type,
+                            quota: obj.defaultLimit.bandwidth.dataAmount + ' ' + obj.defaultLimit.bandwidth.dataUnit,
+                            unitTime: obj.defaultLimit.bandwidth.unitTime + ' ' + obj.defaultLimit.bandwidth.timeUnit,
+                            policyId: obj.policyId,
+                        };
+                    }
                 });
-
                 applicationThrottlingvalues = applicationPolicies
                     .filter((policy) => policy.policyName !== 'Unlimited')
                     .map((obj) => {

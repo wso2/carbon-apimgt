@@ -20,7 +20,6 @@ import React, { useReducer } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
@@ -31,11 +30,6 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.error.dark,
     },
 }));
-
-let initialState = {
-    name: '',
-    owner: '',
-};
 
 /**
  * Reducer
@@ -60,6 +54,10 @@ function Edit(props) {
         updateList, dataRow, icon, triggerButtonText, title, applicationList,
     } = props;
     let id = null;
+    let initialState = {
+        name: '',
+        owner: '',
+    };
 
     if (dataRow) {
         const { name: originalName, owner: originalOwner } = dataRow;
@@ -92,7 +90,6 @@ function Edit(props) {
         return valid;
     };
 
-
     const getAllFormErrors = () => {
         let errorText = '';
         const valid = validateOwner(applicationList);
@@ -108,30 +105,26 @@ function Edit(props) {
             Alert.error(formErrors);
             return false;
         }
-        const restApi = new API();
 
-        const promiseAPICall = new Promise((resolve, reject) => {
-            restApi.updateApplicationOwner(id, owner)
-                .then(() => {
-                    resolve(
-                        <FormattedMessage
-                            id='AdminPages.ApplicationSettings.Edit.form.edit.successful'
-                            defaultMessage='Application owner changed successfully'
-                        />,
-                    );
-                })
-                .catch((error) => {
-                    const { response } = error;
-                    if (response.body) {
-                        const { errorBody } = response.body;
-                        reject(errorBody);
-                    }
-                })
-                .finally(() => {
-                    updateList();
-                });
-        });
-        return promiseAPICall;
+        const restApi = new API();
+        return restApi.updateApplicationOwner(id, owner)
+            .then(() => {
+                return (
+                    <FormattedMessage
+                        id='AdminPages.ApplicationSettings.Edit.form.edit.successful'
+                        defaultMessage='Application owner changed successfully'
+                    />
+                );
+            })
+            .catch((error) => {
+                const { response } = error;
+                if (response.body) {
+                    throw response.body.description;
+                }
+            })
+            .finally(() => {
+                updateList();
+            });
     };
 
     return (
@@ -142,12 +135,6 @@ function Edit(props) {
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
         >
-            <DialogContentText>
-                <FormattedMessage
-                    id='AdminPages.ApplicationSettings.Edit.form.info'
-                    defaultMessage='Change the owner of the selected Application'
-                />
-            </DialogContentText>
             <TextField
                 margin='dense'
                 name='name'
@@ -182,7 +169,6 @@ function Edit(props) {
 
 Edit.defaultProps = {
     icon: null,
-    dataRow: null,
 };
 
 Edit.propTypes = {
@@ -191,7 +177,7 @@ Edit.propTypes = {
         applicationId: PropTypes.string.isRequired,
         owner: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired,
-    }),
+    }).isRequired,
     icon: PropTypes.element,
     triggerButtonText: PropTypes.shape({}).isRequired,
     title: PropTypes.shape({}).isRequired,

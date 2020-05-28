@@ -117,7 +117,7 @@ function AddEdit(props) {
             requestCount: '',
             timeUnit: 'min',
             unitTime: '',
-            type: 'RequestCountLimit',
+            type: 'REQUESTCOUNTLIMIT',
             dataAmount: '',
             dataUnit: 'KB',
         },
@@ -141,16 +141,12 @@ function AddEdit(props) {
                 requestCount: '',
                 timeUnit: 'min',
                 unitTime: '',
-                type: 'RequestCountLimit',
+                type: 'REQUESTCOUNTLIMIT',
                 dataAmount: '',
                 dataUnit: 'KB',
             },
         });
     }, []);
-
-    const onChange = (e) => {
-        dispatch({ field: e.target.name, value: e.target.value });
-    };
 
     const validate = (fieldName, value) => {
         let error = '';
@@ -183,6 +179,10 @@ function AddEdit(props) {
         return error;
     };
 
+    const onChange = (e) => {
+        dispatch({ field: e.target.name, value: e.target.value });
+    };
+
     const getAllFormErrors = () => {
         let errorText = '';
         const policyNameErrors = validate('policyName', policyName);
@@ -190,7 +190,7 @@ function AddEdit(props) {
         const dataAmounttErrors = validate('dataAmount', dataAmount);
         const unitTimeErrors = validate('unitTime', unitTime);
 
-        if (type === 'BandwidthLimit') {
+        if (type === 'BANDWIDTHLIMIT') {
             errorText += policyNameErrors + dataAmounttErrors + unitTimeErrors;
         } else {
             errorText += policyNameErrors + requestCountErrors + unitTimeErrors;
@@ -207,13 +207,33 @@ function AddEdit(props) {
         let applicationThrottlingPolicy;
         let promisedAddApplicationPolicy;
 
-        if (type === 'BandwidthLimit') {
-            delete (state.defaultLimit.requestCount);
-            applicationThrottlingPolicy = state;
+        if (type === 'REQUESTCOUNTLIMIT') {
+            applicationThrottlingPolicy = {
+                policyName: state.policyName,
+                description: state.description,
+                defaultLimit: {
+                    requestCount: {
+                        type: state.defaultLimit.type,
+                        requestCount: state.defaultLimit.requestCount,
+                        timeUnit: state.defaultLimit.timeUnit,
+                        unitTime: state.defaultLimit.unitTime,
+                    },
+                },
+            };
         } else {
-            applicationThrottlingPolicy = delete (state.defaultLimit.dataUnit);
-            applicationThrottlingPolicy = delete (state.defaultLimit.dataAmount);
-            applicationThrottlingPolicy = state;
+            applicationThrottlingPolicy = {
+                policyName: state.policyName,
+                description: state.description,
+                defaultLimit: {
+                    bandwidth: {
+                        type: state.defaultLimit.type,
+                        dataAmount: state.defaultLimit.dataAmount,
+                        dataUnit: state.defaultLimit.dataUnit,
+                        timeUnit: state.defaultLimit.timeUnit,
+                        unitTime: state.defaultLimit.unitTime,
+                    },
+                },
+            };
         }
 
         if (dataRow) {
@@ -269,19 +289,35 @@ function AddEdit(props) {
         if (dataRow) {
             setIsEditMode(true);
             const policyId = dataRow[4];
+            let editState;
             restApi.applicationThrottlingPolicyGet(policyId).then((result) => {
-                const editState = {
-                    policyName: result.body.policyName,
-                    description: result.body.description,
-                    defaultLimit: {
-                        requestCount: result.body.defaultLimit.requestCount,
-                        timeUnit: result.body.defaultLimit.timeUnit,
-                        unitTime: result.body.defaultLimit.unitTime,
-                        type: result.body.defaultLimit.type,
-                        dataAmount: result.body.defaultLimit.dataAmount,
-                        dataUnit: result.body.defaultLimit.dataUnit,
-                    },
-                };
+                if (result.body.defaultLimit.requestCount !== null) {
+                    editState = {
+                        policyName: result.body.policyName,
+                        description: result.body.description,
+                        defaultLimit: {
+                            requestCount: result.body.defaultLimit.requestCount.requestCount,
+                            timeUnit: result.body.defaultLimit.requestCount.timeUnit,
+                            unitTime: result.body.defaultLimit.requestCount.unitTime,
+                            type: result.body.defaultLimit.requestCount.type,
+                            dataAmount: '',
+                            dataUnit: 'KB',
+                        },
+                    };
+                } else {
+                    editState = {
+                        policyName: result.body.policyName,
+                        description: result.body.description,
+                        defaultLimit: {
+                            requestCount: '',
+                            timeUnit: result.body.defaultLimit.bandwidth.timeUnit,
+                            unitTime: result.body.defaultLimit.bandwidth.unitTime,
+                            type: result.body.defaultLimit.bandwidth.type,
+                            dataAmount: result.body.defaultLimit.bandwidth.dataAmount,
+                            dataUnit: result.body.defaultLimit.bandwidth.dataUnit,
+                        },
+                    };
+                }
                 dispatch(editState);
             });
         }
@@ -351,19 +387,19 @@ function AddEdit(props) {
                     value={type}
                 >
                     <FormControlLabel
-                        value='RequestCountLimit'
+                        value='REQUESTCOUNTLIMIT'
                         control={<Radio color='primary' />}
                         label='Request Count '
                         labelPlacement='end'
                     />
                     <FormControlLabel
-                        value='BandwidthLimit'
+                        value='BANDWIDTHLIMIT'
                         control={<Radio color='primary' />}
                         label='Request Bandwidth'
                         labelPlacement='end'
                     />
                 </RadioGroup>
-                {type === 'RequestCountLimit' ? (
+                {type === 'REQUESTCOUNTLIMIT' ? (
                     <TextField
                         margin='dense'
                         name='requestCount'

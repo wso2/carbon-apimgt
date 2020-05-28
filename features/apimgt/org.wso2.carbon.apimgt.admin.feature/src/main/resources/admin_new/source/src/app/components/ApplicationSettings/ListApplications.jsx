@@ -44,18 +44,16 @@ export default function ListApplications() {
     * @returns {Promise}.
     */
     function apiCall() {
-        return new Promise((resolve, reject) => {
-            const restApi = new API();
-            restApi
-                .getApplicationList()
-                .then((result) => {
-                    setApplicationList(result.body.list);
-                    resolve(result.body.list);
-                })
-                .catch((error) => {
-                    reject(error);
-                });
-        });
+        const restApi = new API();
+        return restApi
+            .getApplicationList()
+            .then((result) => {
+                setApplicationList(result.body.list);
+                return result.body.list;
+            })
+            .catch((error) => {
+                throw error;
+            });
     }
     const columProps = [
         { name: 'applicationId', options: { display: false } },
