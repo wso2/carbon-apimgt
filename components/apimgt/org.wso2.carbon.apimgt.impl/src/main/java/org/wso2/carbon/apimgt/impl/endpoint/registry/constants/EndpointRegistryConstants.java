@@ -52,7 +52,7 @@ public class EndpointRegistryConstants {
 
     public static final String COLUMN_ENDPOINT_DEFINITION = "ENDPOINT_DEFINITION";
 
-    public static final String COLUMN_METADATA = "METADATA";
+    public static final String COLUMN_DESCRIPTION = "DESCRIPTION";
 
     public static final String COLUMN_CREATED_BY = "CREATED_BY";
 

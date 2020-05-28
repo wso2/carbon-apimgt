@@ -234,6 +234,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.UUID, " +
                     "   E.ENTRY_NAME, " +
                     "   E.ENTRY_VERSION, " +
+                    "   E.DESCRIPTION, " +
                     "   E.DEFINITION_TYPE, " +
                     "   E.DEFINITION_URL, " +
                     "   E.SERVICE_TYPE, " +
@@ -266,6 +267,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.UUID, " +
                     "   E.ENTRY_NAME, " +
                     "   E.ENTRY_VERSION, " +
+                    "   E.DESCRIPTION, " +
                     "   E.DEFINITION_TYPE, " +
                     "   E.DEFINITION_URL, " +
                     "   E.SERVICE_TYPE, " +
@@ -300,6 +302,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.UUID, " +
                     "   E.ENTRY_NAME, " +
                     "   E.ENTRY_VERSION, " +
+                    "   E.DESCRIPTION, " +
                     "   E.DEFINITION_TYPE, " +
                     "   E.DEFINITION_URL, " +
                     "   E.SERVICE_TYPE, " +
@@ -332,6 +335,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.UUID, " +
                     "   E.ENTRY_NAME, " +
                     "   E.ENTRY_VERSION, " +
+                    "   E.DESCRIPTION, " +
                     "   E.DEFINITION_TYPE, " +
                     "   E.DEFINITION_URL, " +
                     "   E.SERVICE_TYPE, " +
