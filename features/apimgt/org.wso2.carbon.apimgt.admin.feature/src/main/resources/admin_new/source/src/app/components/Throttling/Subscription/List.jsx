@@ -264,15 +264,27 @@ export default function ListSubscriptionThrottlingPolicies() {
             restApi.getSubscritionPolicyList().then((result) => {
                 setSubscriptionThrottlingPolicyList(result.body.list);
                 const subscriptionPolicies = result.body.list.map((obj) => {
-                    return {
-                        policyName: obj.policyName,
-                        quotaPolicy: obj.defaultLimit.type,
-                        quota: obj.defaultLimit.requestCount
-                || obj.defaultLimit.dataAmount + ' ' + obj.defaultLimit.dataUnit,
-                        unitTime: obj.defaultLimit.unitTime + ' ' + obj.defaultLimit.timeUnit,
-                        rateLimit: obj.rateLimitCount,
-                        timeUnit: obj.rateLimitTimeUnit,
-                    };
+                    if (obj.defaultLimit.requestCount !== null) {
+                        return {
+                            policyName: obj.policyName,
+                            quotaPolicy: obj.defaultLimit.requestCount.type,
+                            quota: obj.defaultLimit.requestCount.requestCount,
+                            unitTime: obj.defaultLimit.requestCount.unitTime + ' '
+                            + obj.defaultLimit.requestCount.timeUnit,
+                            rateLimit: obj.rateLimitCount,
+                            timeUnit: obj.rateLimitTimeUnit,
+                        };
+                    } else {
+                        return {
+                            policyName: obj.policyName,
+                            quotaPolicy: obj.defaultLimit.bandwidth.type,
+                            quota: obj.defaultLimit.bandwidth.requestCount,
+                            unitTime: obj.defaultLimit.bandwidth.unitTime + ' '
+                            + obj.defaultLimit.requestCount.timeUnit,
+                            rateLimit: obj.rateLimitCount,
+                            timeUnit: obj.rateLimitTimeUnit,
+                        };
+                    }
                 });
 
                 subscriptionThrottlingvalues = subscriptionPolicies

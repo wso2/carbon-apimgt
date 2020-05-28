@@ -30,20 +30,15 @@ import { Link as RouterLink } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
 import MenuItem from '@material-ui/core/MenuItem';
-import Checkbox from '@material-ui/core/Checkbox';
-import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Select from '@material-ui/core/Select';
 import Switch from '@material-ui/core/Switch';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
-//import ConditionalGroups from 'AppComponents/Throttling/Advanced/ConditionalGroups';
+// import ConditionalGroups from 'AppComponents/Throttling/Advanced/ConditionalGroups';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -57,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-    }
+    },
 }));
 
 
@@ -109,7 +104,12 @@ function AddEdit() {
     }, []);
 
     const [state, dispatch] = useReducer(reducer, initialState);
-    const { label, description, type, plan } = state;
+    const {
+        label,
+        description,
+        type,
+        plan,
+    } = state;
 
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
@@ -137,6 +137,7 @@ function AddEdit() {
         return errorText;
     };
 
+    // eslint-disable-next-line consistent-return
     const formSave = () => {
         setValidating(true);
         const formErrors = getAllFormErrors();
@@ -158,7 +159,6 @@ function AddEdit() {
     };
 
     return (
-
         <ContentBase
             pageStyle='half'
             title={
@@ -215,8 +215,6 @@ function AddEdit() {
                         </Box>
                         {/* Default limits */}
 
-
-
                         <Box>
                             <Typography color='inherit' variant='subtitle2' component='div'>
                                 <FormattedMessage
@@ -226,9 +224,19 @@ function AddEdit() {
                             </Typography>
                         </Box>
                         <Box display='flex' flexDirection='row' alignItems='left' m={1}>
-                            <RadioGroup aria-label="position" name="type" value={type} onChange={onChange} className={classes.radioGroup}>
-                                <FormControlLabel value="RequestCountLimit" control={<Radio />} label="Request Count" />
-                                <FormControlLabel value="BandwidthLimit" control={<Radio />} label="Request Bandwidth" />
+                            <RadioGroup
+                                aria-label='position'
+                                name='type'
+                                value={type}
+                                onChange={onChange}
+                                className={classes.radioGroup}
+                            >
+                                <FormControlLabel value='RequestCountLimit' control={<Radio />} label='Request Count' />
+                                <FormControlLabel
+                                    value='BandwidthLimit'
+                                    control={<Radio />}
+                                    label='Request Bandwidth'
+                                />
                             </RadioGroup>
                         </Box>
                         {type === 'RequestCountLimit' ? (
@@ -236,7 +244,7 @@ function AddEdit() {
 
                                 name='requestCount'
                                 label='Request Count'
-                                //value={requestCount}
+                                // value={requestCount}
                                 multiline
                                 fullWidth
                                 type='number'
@@ -246,76 +254,76 @@ function AddEdit() {
                                 InputProps={{
                                     id: 'requestCount',
                                     onBlur: ({ target: { value } }) => {
+                                        // eslint-disable-next-line no-undef
                                         validate('requestCount', value);
                                     },
                                 }}
-                            //error={validationError.requestCountValue}
+                            // error={validationError.requestCountValue}
                             />
                         ) : (
-                                <Box display='flex' flexDirection='row' alignItems='left' mt={1}>
-                                    <Box flex='1'>
-                                        <TextField
-
-                                            name='dataAmount'
-                                            label='Data Bandwith'
-                                            multiline
-                                            required
-                                            type='number'
-                                            variant='outlined'
-                                            //value={dataAmount}
-                                            onChange={onChange}
-                                            InputProps={{
-                                                id: 'dataAmount',
-                                                onBlur: ({ target: { value } }) => {
-                                                    validate('dataAmount', value);
-                                                },
-                                            }}
-                                        //error={validationError.dataAmount}
-                                        /></Box>
-                                    <Box flex='1' mt={1}>
-                                        <Box  >
-                                            <Select
-                                                labelId='demo-simple-select-label'
-                                                name='dataUnit'
-                                                //value={dataUnit}
-                                                onChange={onChange}
-                                                align='center'
-                                                variant='outlined'
-                                                margin='dense'
-                                                fullWidth
-                                            >
-                                                <MenuItem value='KB'>KB</MenuItem>
-                                                <MenuItem value='MB'>MB</MenuItem>
-                                            </Select>
-                                        </Box>
-                                    </Box>
-
+                            <Box display='flex' flexDirection='row' alignItems='left' mt={1}>
+                                <Box flex='1'>
+                                    <TextField
+                                        name='dataAmount'
+                                        label='Data Bandwith'
+                                        multiline
+                                        required
+                                        type='number'
+                                        variant='outlined'
+                                        // value={dataAmount}
+                                        onChange={onChange}
+                                        InputProps={{
+                                            id: 'dataAmount',
+                                            onBlur: ({ target: { value } }) => {
+                                                // eslint-disable-next-line no-undef
+                                                validate('dataAmount', value);
+                                            },
+                                        }}
+                                    // error={validationError.dataAmount}
+                                    />
                                 </Box>
-                            )}<Box display='flex' flexDirection='row' alignItems='left' mt={1}>
+                                <Box flex='1' mt={1}>
+                                    <Box>
+                                        <Select
+                                            labelId='demo-simple-select-label'
+                                            name='dataUnit'
+                                            // value={dataUnit}
+                                            onChange={onChange}
+                                            align='center'
+                                            variant='outlined'
+                                            margin='dense'
+                                            fullWidth
+                                        >
+                                            <MenuItem value='KB'>KB</MenuItem>
+                                            <MenuItem value='MB'>MB</MenuItem>
+                                        </Select>
+                                    </Box>
+                                </Box>
 
-                            <Box flex='1' >
+                            </Box>
+                        )}
+                        <Box display='flex' flexDirection='row' alignItems='left' mt={1}>
+                            <Box flex='1'>
                                 <TextField
-
-
                                     name='unitTime'
                                     label='Unit Time'
                                     type='number'
                                     multiline
                                     variant='outlined'
-                                    //value={unitTime}
+                                    // value={unitTime}
                                     onChange={onChange}
                                     InputProps={{
                                         id: 'unitTime',
                                         onBlur: ({ target: { value } }) => {
+                                            // eslint-disable-next-line no-undef
                                             validate('unitTime', value);
                                         },
                                     }}
                                 // error={validationError.unitTime}
                                 // helperText={validationError.unitTime && 'Unit Time is empty'}
-                                /></Box>
-
+                                />
+                            </Box>
                             <Box flex='1' mt={1}>
-
                                 <Select
                                     labelId='demo-simple-select-label'
                                     name='timeUnit'
@@ -324,7 +332,7 @@ function AddEdit() {
                                     margin='dense'
                                     align='center'
                                     multiline
-                                    //value={timeUnit}
+                                    // value={timeUnit}
                                     onChange={onChange}
                                 >
                                     <MenuItem value='min'>Minute(s)</MenuItem>
@@ -337,8 +345,6 @@ function AddEdit() {
 
                             </Box>
                         </Box>
-
-
                         <Box component='div' m={1}>
                             <Box flex='1'>
                                 <Typography color='inherit' variant='subtitle2' component='div'>
@@ -358,14 +364,19 @@ function AddEdit() {
                                     </Typography>
                                 </Box>
                                 <Box flex='1'>
-                                    <RadioGroup aria-label="position" name="plan" value={plan} onChange={onChange} className={classes.radioGroup}>
-                                        <FormControlLabel value="Free" control={<Radio />} label="Free" />
-                                        <FormControlLabel value="Commercial" control={<Radio />} label="Commercial" />
-                                    </RadioGroup></Box>
-
+                                    <RadioGroup
+                                        aria-label='position'
+                                        name='plan'
+                                        value={plan}
+                                        onChange={onChange}
+                                        className={classes.radioGroup}
+                                    >
+                                        <FormControlLabel value='Free' control={<Radio />} label='Free' />
+                                        <FormControlLabel value='Commercial' control={<Radio />} label='Commercial' />
+                                    </RadioGroup>
+                                </Box>
                             </Box>
                             {plan === 'Commercial' && (
-
                                 <div>
                                     <Box display='flex' flexDirection='row' alignItems='center' mt={1}>
                                         <Box flex='1'>
@@ -384,15 +395,15 @@ function AddEdit() {
                                                 variant='outlined'
                                                 align='center'
                                                 multiline
-                                                //value={timeUnit}
+                                                // value={timeUnit}
                                                 onChange={onChange}
                                             >
                                                 <MenuItem value='fixedRate'>Fixed Rate</MenuItem>
                                                 <MenuItem value='usage'>Dynamic Usage</MenuItem>
 
                                             </Select>
-                                        </Box></Box>
-
+                                        </Box>
+                                    </Box>
 
                                     <Box display='flex' flexDirection='row' alignItems='center' mt={1}>
                                         <Box flex='1'>
@@ -405,7 +416,6 @@ function AddEdit() {
                                         </Box>
                                         <Box flex='1'>
                                             <TextField
-
                                                 name='description'
                                                 value={description}
                                                 onChange={onChange}
@@ -418,9 +428,8 @@ function AddEdit() {
                                                 })}
                                                 variant='outlined'
                                             />
-                                        </Box></Box>
-
-
+                                        </Box>
+                                    </Box>
 
                                     <Box display='flex' flexDirection='row' alignItems='center' mt={1}>
                                         <Box flex='1'>
@@ -446,9 +455,8 @@ function AddEdit() {
                                                 })}
                                                 variant='outlined'
                                             />
-                                        </Box></Box>
-
-
+                                        </Box>
+                                    </Box>
 
                                     <Box display='flex' flexDirection='row' alignItems='center' mt={1}>
                                         <Box flex='1'>
@@ -467,14 +475,15 @@ function AddEdit() {
                                                 variant='outlined'
                                                 align='center'
                                                 multiline
-                                                //value={timeUnit}
+                                                // value={timeUnit}
                                                 onChange={onChange}
                                             >
                                                 <MenuItem value='week'>Week</MenuItem>
                                                 <MenuItem value='month'>Month</MenuItem>
                                                 <MenuItem value='year'>Year</MenuItem>
                                             </Select>
-                                        </Box></Box>
+                                        </Box>
+                                    </Box>
                                 </div>
                             )}
                             <Box display='flex' flexDirection='row' alignItems='center'>
@@ -489,22 +498,15 @@ function AddEdit() {
 
                                 <Box flex='1'>
                                     <Switch
-
                                         onChange={onchange}
-                                        color="primary"
-                                        name="checkedB"
+                                        color='primary'
+                                        name='checkedB'
                                         inputProps={{ 'aria-label': 'primary checkbox' }}
-                                    /></Box>
-
-                            </Box></Box>
-
-
-
-
-
+                                    />
+                                </Box>
+                            </Box>
+                        </Box>
                     </Grid>
-
-
                     <Box component='div' m={1}>
                         <Box flex='1'>
                             <Typography color='inherit' variant='subtitle2' component='div'>
@@ -516,11 +518,7 @@ function AddEdit() {
                         </Box>
 
                         <Grid item xs={12}>
-                            <Button
-                                variant="outlined"
-
-
-                            >
+                            <Button variant='outlined'>
                                 <FormattedMessage
                                     id='Throttling.Subscription.Properties.add'
                                     defaultMessage='Add Attribute'
@@ -555,6 +553,7 @@ function AddEdit() {
                                                     required
                                                     id='outlined-required'
                                                     label={intl.formatMessage({
+                                                        // eslint-disable-next-line max-len
                                                         id: 'Throttling.Subscription.Properties.Properties.property.value',
                                                         defaultMessage: 'Value',
                                                     })}
@@ -565,7 +564,7 @@ function AddEdit() {
                                             </TableCell>
                                             <TableCell align='right'>
                                                 <Button
-                                                    variant="outlined"
+                                                    variant='outlined'
 
                                                 >
                                                     <FormattedMessage
@@ -582,9 +581,7 @@ function AddEdit() {
                                             <Typography variant='caption'>
                                                 <FormattedMessage
                                                     id='Throttling.Subscription.Properties.Properties.help'
-                                                    defaultMessage={
-                                                        'Property name should be unique.'
-                                                    }
+                                                    defaultMessage='Property name should be unique.'
                                                 />
                                             </Typography>
 
@@ -597,8 +594,6 @@ function AddEdit() {
 
                         </Grid>
                     </Box>
-
-
 
                     <Grid item md={12} lg={6}>
 
@@ -634,10 +629,18 @@ function AddEdit() {
                                             defaultMessage: 'Enter Permission',
                                         })}
                                         variant='outlined'
-                                    /></Box></Box>
-                            <RadioGroup aria-label="gender" name="gender1" value={description} onChange={onChange} className={classes.radioGroup}>
-                                <FormControlLabel value="female" control={<Radio />} label="Allow" />
-                                <FormControlLabel value="male" control={<Radio />} label="Denied" />
+                                    />
+                                </Box>
+                            </Box>
+                            <RadioGroup
+                                aria-label='gender'
+                                name='gender1'
+                                value={description}
+                                onChange={onChange}
+                                className={classes.radioGroup}
+                            >
+                                <FormControlLabel value='female' control={<Radio />} label='Allow' />
+                                <FormControlLabel value='male' control={<Radio />} label='Denied' />
                             </RadioGroup>
                         </Box>
                         <Box component='div' m={1}>
@@ -672,8 +675,10 @@ function AddEdit() {
                                             defaultMessage: 'Max Complexity',
                                         })}
                                         variant='outlined'
-                                    /></Box></Box>
-                              <Box display='flex' flexDirection='row' alignItems='center'>
+                                    />
+                                </Box>
+                            </Box>
+                            <Box display='flex' flexDirection='row' alignItems='center'>
                                 <Box flex='1'>
                                     <Typography color='inherit' variant='body1' component='div'>
                                         <FormattedMessage
@@ -696,15 +701,15 @@ function AddEdit() {
                                             defaultMessage: 'Max Depth',
                                         })}
                                         variant='outlined'
-                                    /></Box></Box>
+                                    />
+                                </Box>
+                            </Box>
                         </Box>
                     </Grid>
 
                 </Grid>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-
-
                         {/* Submit buttons */}
                         <Box component='span' m={1}>
                             <Button variant='contained' color='primary' onClick={formSave}>
@@ -722,7 +727,8 @@ function AddEdit() {
                                 />
                             </Button>
                         </RouterLink>
-                    </Grid></Grid>
+                    </Grid>
+                </Grid>
             </Box>
         </ContentBase>
     );
