@@ -96,8 +96,7 @@ function AddEditMGLabel(props) {
             const errorType = validationError.details[0].type;
             if (errorType === 'any.empty') {
                 return 'Host is empty';
-            }
-            if (errorType === 'string.uri') {
+            } else if (errorType === 'string.uri') {
                 return 'Invalid Host';
             }
         }
