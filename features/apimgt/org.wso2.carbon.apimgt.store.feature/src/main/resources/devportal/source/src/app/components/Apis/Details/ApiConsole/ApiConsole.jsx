@@ -375,6 +375,14 @@ class ApiConsole extends React.Component {
         const downloadLink = 'data:text/json;charset=utf-8, ' + encodeURIComponent(downloadSwagger);
         const fileName = 'swagger.json';
 
+        if (serverError) {
+            return (
+                <Typography variant='h4' className={classes.titleSub}>
+                    {serverError}
+                </Typography>
+            );
+        }
+
         if (api == null || swagger == null) {
             return <Progress />;
         }
