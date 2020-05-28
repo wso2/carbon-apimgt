@@ -129,6 +129,7 @@ class Operations extends React.Component {
             apiThrottlingPolicy: api.apiThrottlingPolicy,
             filterKeyWord: '',
             isSaving: false,
+            sharedScopes: [],
         };
 
         this.newApi = new Api();
@@ -157,6 +158,7 @@ class Operations extends React.Component {
                     doRedirectToLogin();
                 }
             });
+        this.getAllSharedScopes();
     }
 
     /**
@@ -165,6 +167,26 @@ class Operations extends React.Component {
      */
     setFilterByKeyWord(event) {
         this.setState({ filterKeyWord: event.target.value.toLowerCase() });
+    }
+
+    /**
+     * @memberof Operations
+     */
+    getAllSharedScopes() {
+        Api.getAllScopes()
+            .then((response) => {
+                if (response.body && response.body.list) {
+                    const sharedScopesList = [];
+                    const shared = true;
+                    for (const scope of response.body.list) {
+                        const modifiedScope = {};
+                        modifiedScope.scope = scope;
+                        modifiedScope.shared = shared;
+                        sharedScopesList.push(modifiedScope);
+                    }
+                    this.setState({ sharedScopes: sharedScopesList });
+                }
+            });
     }
 
     /**
@@ -206,7 +228,7 @@ class Operations extends React.Component {
     render() {
         const { api, resourceNotFoundMessage } = this.props;
         const {
-            operations, apiPolicies, apiThrottlingPolicy, isSaving, filterKeyWord, notFound,
+            operations, apiPolicies, apiThrottlingPolicy, isSaving, filterKeyWord, notFound, sharedScopes,
         } = this.state;
         if (notFound) {
             return <ResourceNotFound message={resourceNotFoundMessage} />;
@@ -303,7 +325,8 @@ class Operations extends React.Component {
                                     <Operation
                                         operation={item}
                                         handleUpdateList={this.handleUpdateList}
-                                        scopes={api.scopes.map((apiScope) => { return apiScope.scope; })}
+                                        scopes={api.scopes}
+                                        sharedScopes={sharedScopes}
                                         isOperationRateLimiting={!apiThrottlingPolicy}
                                         apiPolicies={apiPolicies}
                                     />
