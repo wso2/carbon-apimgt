@@ -103,8 +103,8 @@ export default function ListBlacklistThrottlingPolicies() {
  * @returns {Promise}.
  */
     function apiCall() {
-        return new Promise(((resolve, reject) => {
-            restApi.blacklistPoliciesGet().then((result) => {
+        return restApi.blacklistPoliciesGet()
+            .then((result) => {
                 const policyList = result.body.list;
                 let incrementId = 0;
                 const blacklistPolicies = policyList.map((obj) => {
@@ -124,11 +124,15 @@ export default function ListBlacklistThrottlingPolicies() {
                     };
                 });
                 setBlacklistPolicyList(blacklistPolicies);
-                resolve(blacklistPolicies);
-            }).catch((error) => {
-                reject(error);
+                return (blacklistPolicies);
+            })
+            .catch((error) => {
+                const { response } = error;
+                if (response.body) {
+                    throw (response.body.description);
+                }
+                return null;
             });
-        }));
     }
 
     const handleConditionStatus = (event) => {
