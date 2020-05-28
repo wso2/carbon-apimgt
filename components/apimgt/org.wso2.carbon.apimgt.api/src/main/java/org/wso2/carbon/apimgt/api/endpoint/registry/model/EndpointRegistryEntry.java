@@ -15,7 +15,7 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.impl.endpoint.registry.model;
+package org.wso2.carbon.apimgt.api.endpoint.registry.model;
 
 import java.io.InputStream;
 

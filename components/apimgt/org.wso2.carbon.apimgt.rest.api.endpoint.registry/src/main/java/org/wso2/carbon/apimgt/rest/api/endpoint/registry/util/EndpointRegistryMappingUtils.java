@@ -18,8 +18,8 @@ package org.wso2.carbon.apimgt.rest.api.endpoint.registry.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryEntry;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntry;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryDTO;

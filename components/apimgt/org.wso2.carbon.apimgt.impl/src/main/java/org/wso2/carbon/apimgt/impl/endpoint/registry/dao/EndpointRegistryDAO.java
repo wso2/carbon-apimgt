@@ -23,9 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryEntry;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryException;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntry;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
@@ -315,6 +315,7 @@ public class EndpointRegistryDAO {
                     endpointRegistryEntry.setEntryId(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
                     endpointRegistryEntry.setName(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_NAME));
                     endpointRegistryEntry.setVersion(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_VERSION));
+                    endpointRegistryEntry.setDescription(rs.getString(EndpointRegistryConstants.COLUMN_DESCRIPTION));
                     endpointRegistryEntry.setDefinitionType(
                             rs.getString(EndpointRegistryConstants.COLUMN_DEFINITION_TYPE));
                     endpointRegistryEntry.setDefinitionURL(
@@ -414,6 +415,8 @@ public class EndpointRegistryDAO {
                         endpointRegistryEntry.setEntryId(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
                         endpointRegistryEntry.setName(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_NAME));
                         endpointRegistryEntry.setVersion(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_VERSION));
+                        endpointRegistryEntry.setDescription(rs.getString(EndpointRegistryConstants.
+                                COLUMN_DESCRIPTION));
                         endpointRegistryEntry.setProductionServiceURL(rs.getString(EndpointRegistryConstants.
                                 COLUMN_PRODUCTION_SERVICE_URL));
                         endpointRegistryEntry.setSandboxServiceUrl(rs.getString(EndpointRegistryConstants.

@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.endpoint.registry;
 
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.SettingsApiService;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.impl.SettingsApiServiceImpl;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -36,7 +36,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-28T10:45:00.026+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-28T12:57:10.924+05:30[Asia/Colombo]")
 public class SettingsApi  {
 
 @Context MessageContext securityContext;

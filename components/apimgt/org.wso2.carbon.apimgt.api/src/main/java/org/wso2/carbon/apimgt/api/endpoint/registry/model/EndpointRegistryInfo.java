@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.endpoint.registry.model;
+package org.wso2.carbon.apimgt.api.endpoint.registry.model;
 
 /**
  * Endpoint Registry Info Object.

@@ -20,12 +20,12 @@ package org.wso2.carbon.apimgt.impl.endpoint.registry.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistry;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistry;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.dao.EndpointRegistryDAO;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryInfo;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryEntry;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntry;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.util.EndpointRegistryUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
