@@ -46,7 +46,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO(isUserAvailable);
             return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving Publisher Settings";
+            String errorMessage = "Error while retrieving Admin Settings";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;

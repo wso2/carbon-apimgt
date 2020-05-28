@@ -1,6 +1,6 @@
 <div class="main-content">
 
-        <h2>ScopeList_list</h2>
+        <h2>APIScope</h2>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -21,33 +21,33 @@
                 <tbody>
                     <tr>
                         <td class="parameter">
-                            <p>name</p>
+                            <p>scope</p>
                             <p class="param-required">
+                                required
                                 
-                                optional
                             </p>
                         </td>
                         <td class="parameter"><p class="marked"></p></td>
                         <td class="parameter">
-                                <a href="#!/models#string">string</a>
+                                <a href="#!/models#Scope">Scope</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">apim:api_view</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>description</p>
+                            <p>shared</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">States whether scope is shared. This will not be honored when updating/adding scopes to APIs or when adding/updating Shared Scopes. </p></td>
                         <td class="parameter">
-                                <a href="#!/models#string">string</a>
+                                <a href="#!/models#boolean">boolean</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">Scope for Api view</p></td>
+                        <td class="parameter"> <p class="marked">true</p></td>
                     </tr>
                 </tbody>
             </table>

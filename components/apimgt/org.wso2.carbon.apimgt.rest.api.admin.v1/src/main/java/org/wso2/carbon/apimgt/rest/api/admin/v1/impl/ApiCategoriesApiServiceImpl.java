@@ -46,7 +46,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
             APIAdmin apiAdmin = new APIAdminImpl();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-            List<APICategory> categoryList = apiAdmin.getAllAPICategoriesOfTenant(tenantID);
+            List<APICategory> categoryList = apiAdmin.getAPICategoriesOfTenant(tenantID);
             APICategoryListDTO categoryListDTO = APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
             return Response.ok().entity(categoryListDTO).build();
         } catch (APIManagementException e) {

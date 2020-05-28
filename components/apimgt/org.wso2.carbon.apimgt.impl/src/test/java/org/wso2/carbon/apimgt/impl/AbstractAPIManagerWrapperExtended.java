@@ -56,8 +56,8 @@ public class AbstractAPIManagerWrapperExtended extends AbstractAPIManagerWrapper
         return new ResourceImpl("/apimgt/apis", new ResourceDO());
     }
 
-    public Map<String, Object> searchPaginatedAPIs(Registry registry, String searchQuery, int start, int end,
-            boolean limitAttributes) throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIs(Registry registry, int tenantId, String searchQuery, int start,
+                                                   int end, boolean limitAttributes) throws APIManagementException {
         if (searchQuery.equalsIgnoreCase("api_meta.secured=*true*")) {
             return new HashMap<String, Object>() {{
                 put("apis", new ArrayList() {{
@@ -74,7 +74,7 @@ public class AbstractAPIManagerWrapperExtended extends AbstractAPIManagerWrapper
             }};
 
         } else {
-            return super.searchPaginatedAPIs(registry, searchQuery, start, end, limitAttributes);
+            return super.searchPaginatedAPIs(registry, tenantId, searchQuery, start, end, limitAttributes);
         }
     }
 }

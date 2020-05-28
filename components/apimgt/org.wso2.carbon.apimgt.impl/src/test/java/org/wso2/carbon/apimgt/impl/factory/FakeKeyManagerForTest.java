@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.impl.factory;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -24,11 +25,21 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * KeyManageImplementation Wrapper for KeyManagerHolder unit tests.
+ */
 public class FakeKeyManagerForTest implements KeyManager {
+
+    @Override
+    public void deleteScope(String scopeName, String tenantDomain) throws APIManagementException {
+
+    }
+
     @Override public OAuthApplicationInfo createApplication(OAuthAppRequest oAuthAppRequest)
             throws APIManagementException {
         return null;
@@ -128,7 +139,37 @@ public class FakeKeyManagerForTest implements KeyManager {
     }
 
     @Override
-    public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
+    public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString, String tenantDomain)
+            throws APIManagementException {
+
         return null;
+    }
+
+    @Override
+    public void registerScope(Scope scope, String tenantDomain) throws APIManagementException {
+
+    }
+
+    @Override
+    public Scope getScopeByName(String name, String tenantDomain) throws APIManagementException {
+
+        return null;
+    }
+
+    @Override
+    public Map<String, Scope> getAllScopes(String tenantDomain) throws APIManagementException {
+
+        return null;
+    }
+
+    @Override
+    public void updateScope(Scope scope, String tenantDomain) throws APIManagementException {
+
+    }
+
+    @Override
+    public boolean isScopeExists(String scopeName, String tenantDomain) throws APIManagementException {
+
+        return false;
     }
 }

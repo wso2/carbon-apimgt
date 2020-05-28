@@ -82,6 +82,7 @@ public class APICategoryMappingUtil {
             categoryDTO.setId(category.getId());
             categoryDTO.setName(category.getName());
             categoryDTO.setDescription(category.getDescription());
+            categoryDTO.setNumberOfAPIs(category.getNumberOfAPIs());
             categoryDTOs.add(categoryDTO);
         }
         return categoryDTOs;

@@ -112,12 +112,12 @@ class EditScope extends React.Component {
         // this.api = new Api();
         this.api_uuid = props.match.params.api_uuid;
         const { api, location } = this.props;
-        const thisScope = api.scopes.find((scope) => {
-            return scope.name === location.state.scopeName;
+        const thisScope = api.scopes.find((apiScope) => {
+            return apiScope.scope.name === location.state.scopeName;
         });
         this.state = {
             apiScope: { ...thisScope },
-            validRoles: thisScope.bindings.values,
+            validRoles: thisScope.scope.bindings,
             invalidRoles: [],
             roleValidity: true,
         };
@@ -150,7 +150,7 @@ class EditScope extends React.Component {
     handleInputs(event) {
         if (Array.isArray(event)) {
             const { apiScope } = this.state;
-            apiScope.bindings.values = event;
+            apiScope.scope.bindings = event;
             this.setState({
                 apiScope,
             });
@@ -173,16 +173,19 @@ class EditScope extends React.Component {
         const {
             intl, api, history, updateAPI,
         } = this.props;
-        apiScope.bindings = {
-            type: 'role',
-            values: validRoles,
+        const originalScope = apiScope.scope;
+        apiScope.scope = {
+            id: originalScope.id,
+            name: originalScope.name,
+            description: originalScope.description,
+            bindings: validRoles,
         };
         const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
-        const scopes = api.scopes.map((scope) => {
-            if (scope.name === apiScope.name) {
+        const scopes = api.scopes.map((scopeObj) => {
+            if (scopeObj.scope.name === apiScope.scope.name) {
                 return apiScope;
             } else {
-                return scope;
+                return scopeObj;
             }
         });
         const updateProperties = { scopes };
@@ -227,9 +230,15 @@ class EditScope extends React.Component {
             });
     }
 
-    validateScopeDescription({ target: { id, value } }) {
+    validateScopeDescription({ target: { value } }) {
         const { apiScope } = this.state;
-        apiScope[id] = value;
+        const originalScope = apiScope.scope;
+        apiScope.scope = {
+            id: originalScope.id,
+            name: originalScope.name,
+            description: value,
+            bindings: originalScope.bindings,
+        };
         this.setState({
             apiScope,
         });
@@ -283,7 +292,7 @@ class EditScope extends React.Component {
                                         InputLabelProps={{
                                             shrink: true,
                                         }}
-                                        value={apiScope.name}
+                                        value={apiScope.scope.name}
                                         onChange={this.handleScopeNameInput}
                                         disabled
                                     />
@@ -305,7 +314,7 @@ class EditScope extends React.Component {
                                             shrink: true,
                                         }}
                                         onChange={this.validateScopeDescription}
-                                        value={apiScope.description || ''}
+                                        value={apiScope.scope.description || ''}
                                         multiline
                                     />
                                 </FormControl>

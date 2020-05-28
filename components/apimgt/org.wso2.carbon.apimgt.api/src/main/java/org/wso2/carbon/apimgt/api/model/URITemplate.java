@@ -405,6 +405,11 @@ public class URITemplate implements Serializable{
         return this.scopes;
     }
 
+    public void addAllScopes(List<Scope> scopes) {
+
+        this.scopes = scopes;
+    }
+
     public Set<APIProductIdentifier> retrieveUsedByProducts() {
         return usedByProducts;
     }

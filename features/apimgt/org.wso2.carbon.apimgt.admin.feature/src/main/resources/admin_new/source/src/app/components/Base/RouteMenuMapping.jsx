@@ -34,6 +34,7 @@ import BlacklistThrottlingPolicies from 'AppComponents/Throttling/Blacklist/List
 import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom/List';
 import ListApplications from 'AppComponents/ApplicationSettings/ListApplications';
 import MicrogatewayLabels from 'AppComponents/MicrogatewayLabels/ListMGLabels';
+import TenantTheme from 'AppComponents/TenantTheme/UploadTheme';
 
 
 const RouteMenuMapping = (intl) => [
@@ -147,11 +148,11 @@ const RouteMenuMapping = (intl) => [
             },
             {
                 id: intl.formatMessage({
-                    id: 'Base.RouteMenuMapping.devportal.theme',
-                    defaultMessage: 'Devportal Theme',
+                    id: 'Base.RouteMenuMapping.tenant.theme',
+                    defaultMessage: 'Tenant Theme',
                 }),
                 path: '/settings/devportal-theme',
-                component: () => <DemoTable />,
+                component: () => <TenantTheme />,
                 icon: <PhonelinkSetupIcon />,
             },
         ],

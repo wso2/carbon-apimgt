@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer, useState } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import DialogContentText from '@material-ui/core/DialogContentText';
@@ -51,19 +51,6 @@ const useStyles = makeStyles((theme) => ({
         minWidth: theme.spacing(15),
     },
 }));
-
-let initialState = {
-    policyName: '',
-    description: '',
-    defaultLimit: {
-        requestCount: '',
-        timeUnit: 'min',
-        unitTime: '',
-        type: 'RequestCountLimit',
-        dataAmount: '',
-        dataUnit: 'KB',
-    },
-};
 
 
 /**
@@ -122,6 +109,20 @@ function AddEdit(props) {
     const {
         updateList, icon, triggerButtonText, title, dataRow,
     } = props;
+
+    const [initialState, setInitialState] = useState({
+        policyName: '',
+        description: '',
+        defaultLimit: {
+            requestCount: '',
+            timeUnit: 'min',
+            unitTime: '',
+            type: 'REQUESTCOUNTLIMIT',
+            dataAmount: '',
+            dataUnit: 'KB',
+        },
+    });
+
     const [state, dispatch] = useReducer(reducer, initialState);
     const {
         policyName, description, defaultLimit: {
@@ -132,33 +133,54 @@ function AddEdit(props) {
     const [editMode, setIsEditMode] = useState(false);
     const restApi = new API();
 
-    const onChange = (e) => {
-        dispatch({ field: e.target.name, value: e.target.value });
-    };
+    useEffect(() => {
+        setInitialState({
+            policyName: '',
+            description: '',
+            defaultLimit: {
+                requestCount: '',
+                timeUnit: 'min',
+                unitTime: '',
+                type: 'REQUESTCOUNTLIMIT',
+                dataAmount: '',
+                dataUnit: 'KB',
+            },
+        });
+    }, []);
 
     const validate = (fieldName, value) => {
         let error = '';
         switch (fieldName) {
             case 'policyName':
-                error = value === '' ? (fieldName + ' is Empty') : '';
+                if (value === '') {
+                    error = 'Name is Empty';
+                } else if (value.indexOf(' ') !== -1) {
+                    error = 'Name contains spaces';
+                } else {
+                    error = '';
+                }
                 setValidationError({ policyName: error });
                 break;
             case 'requestCount':
-                error = value === '' ? (fieldName + ' is Empty') : '';
+                error = value === '' ? 'Request Count is Empty' : '';
                 setValidationError({ requestCount: error });
                 break;
             case 'dataAmount':
-                error = value === '' ? (fieldName + ' is Empty') : '';
+                error = value === '' ? 'Data Amount is Empty' : '';
                 setValidationError({ dataAmount: error });
                 break;
             case 'unitTime':
-                error = value === '' ? (fieldName + ' is Empty') : '';
+                error = value === '' ? 'Unit Time is Empty' : '';
                 setValidationError({ unitTime: error });
                 break;
             default:
                 break;
         }
         return error;
+    };
+
+    const onChange = (e) => {
+        dispatch({ field: e.target.name, value: e.target.value });
     };
 
     const getAllFormErrors = () => {
@@ -168,7 +190,7 @@ function AddEdit(props) {
         const dataAmounttErrors = validate('dataAmount', dataAmount);
         const unitTimeErrors = validate('unitTime', unitTime);
 
-        if (type === 'BandwidthLimit') {
+        if (type === 'BANDWIDTHLIMIT') {
             errorText += policyNameErrors + dataAmounttErrors + unitTimeErrors;
         } else {
             errorText += policyNameErrors + requestCountErrors + unitTimeErrors;
@@ -185,85 +207,118 @@ function AddEdit(props) {
         let applicationThrottlingPolicy;
         let promisedAddApplicationPolicy;
 
-        if (type === 'BandwidthLimit') {
-            delete (state.defaultLimit.requestCount);
-            applicationThrottlingPolicy = state;
+        if (type === 'REQUESTCOUNTLIMIT') {
+            applicationThrottlingPolicy = {
+                policyName: state.policyName,
+                description: state.description,
+                defaultLimit: {
+                    requestCount: {
+                        type: state.defaultLimit.type,
+                        requestCount: state.defaultLimit.requestCount,
+                        timeUnit: state.defaultLimit.timeUnit,
+                        unitTime: state.defaultLimit.unitTime,
+                    },
+                },
+            };
         } else {
-            applicationThrottlingPolicy = delete (state.defaultLimit.dataUnit);
-            applicationThrottlingPolicy = delete (state.defaultLimit.dataAmount);
-            applicationThrottlingPolicy = state;
+            applicationThrottlingPolicy = {
+                policyName: state.policyName,
+                description: state.description,
+                defaultLimit: {
+                    bandwidth: {
+                        type: state.defaultLimit.type,
+                        dataAmount: state.defaultLimit.dataAmount,
+                        dataUnit: state.defaultLimit.dataUnit,
+                        timeUnit: state.defaultLimit.timeUnit,
+                        unitTime: state.defaultLimit.unitTime,
+                    },
+                },
+            };
         }
 
         if (dataRow) {
             const policyId = dataRow[4];
             promisedAddApplicationPolicy = restApi.updateApplicationThrottlingPolicy(policyId,
                 applicationThrottlingPolicy);
-            promisedAddApplicationPolicy = new Promise((resolve, reject) => {
-                promisedAddApplicationPolicy
-                    .then(() => {
-                        resolve(
-                            <FormattedMessage
-                                id='Throttling.Application.Policy.policy.edit.success'
-                                defaultMessage='Application Rate Limiting Policy edited successfully.'
-                            />,
-                        );
-                    })
-                    .catch((error) => {
-                        const { response } = error;
-                        if (response.body) {
-                            reject(response.body.description);
-                        }
-                    })
-                    .finally(() => {
-                        updateList();
-                    });
-            });
+            return promisedAddApplicationPolicy
+                .then(() => {
+                    return (
+                        <FormattedMessage
+                            id='Throttling.Application.Policy.policy.edit.success'
+                            defaultMessage='Application Rate Limiting Policy edited successfully.'
+                        />
+                    );
+                })
+                .catch((error) => {
+                    const { response } = error;
+                    if (response.body) {
+                        throw (response.body.description);
+                    }
+                    return null;
+                })
+                .finally(() => {
+                    updateList();
+                });
         } else {
             promisedAddApplicationPolicy = restApi.addApplicationThrottlingPolicy(
                 applicationThrottlingPolicy,
             );
-            promisedAddApplicationPolicy = new Promise((resolve, reject) => {
-                promisedAddApplicationPolicy
-                    .then(() => {
-                        resolve(
-                            <FormattedMessage
-                                id='Throttling.Application.Policy.policy.add.success'
-                                defaultMessage='Application Rate Limiting Policy added successfully.'
-                            />,
-                        );
-                    })
-                    .catch((error) => {
-                        const { response } = error;
-                        if (response.body) {
-                            reject(response.body.description);
-                        }
-                    })
-                    .finally(() => {
-                        updateList();
-                    });
-            });
+            return promisedAddApplicationPolicy
+                .then(() => {
+                    return (
+                        <FormattedMessage
+                            id='Throttling.Application.Policy.policy.add.success'
+                            defaultMessage='Application Rate Limiting Policy added successfully.'
+                        />
+                    );
+                })
+                .catch((error) => {
+                    const { response } = error;
+                    if (response.body) {
+                        throw (response.body.description);
+                    }
+                    return null;
+                })
+                .finally(() => {
+                    updateList();
+                });
         }
-        return (promisedAddApplicationPolicy);
     };
 
     const dialogOpenCallback = () => {
         if (dataRow) {
             setIsEditMode(true);
             const policyId = dataRow[4];
+            let editState;
             restApi.applicationThrottlingPolicyGet(policyId).then((result) => {
-                initialState = {
-                    policyName: result.body.policyName,
-                    description: result.body.description,
-                    defaultLimit: {
-                        requestCount: result.body.defaultLimit.requestCount,
-                        timeUnit: result.body.defaultLimit.timeUnit,
-                        unitTime: result.body.defaultLimit.unitTime,
-                        type: result.body.defaultLimit.type,
-                        dataAmount: result.body.defaultLimit.dataAmount,
-                        dataUnit: result.body.defaultLimit.dataUnit,
-                    },
-                };
-                dispatch(initialState);
+                if (result.body.defaultLimit.requestCount !== null) {
+                    editState = {
+                        policyName: result.body.policyName,
+                        description: result.body.description,
+                        defaultLimit: {
+                            requestCount: result.body.defaultLimit.requestCount.requestCount,
+                            timeUnit: result.body.defaultLimit.requestCount.timeUnit,
+                            unitTime: result.body.defaultLimit.requestCount.unitTime,
+                            type: result.body.defaultLimit.requestCount.type,
+                            dataAmount: '',
+                            dataUnit: 'KB',
+                        },
+                    };
+                } else {
+                    editState = {
+                        policyName: result.body.policyName,
+                        description: result.body.description,
+                        defaultLimit: {
+                            requestCount: '',
+                            timeUnit: result.body.defaultLimit.bandwidth.timeUnit,
+                            unitTime: result.body.defaultLimit.bandwidth.unitTime,
+                            type: result.body.defaultLimit.bandwidth.type,
+                            dataAmount: result.body.defaultLimit.bandwidth.dataAmount,
+                            dataUnit: result.body.defaultLimit.bandwidth.dataUnit,
+                        },
+                    };
+                }
+                dispatch(editState);
             });
         }
     };
@@ -303,10 +358,9 @@ function AddEdit(props) {
                     },
                 }}
                 error={validationError.policyName}
-                helperText={validationError.policyName && 'Application Policy Name is empty'}
+                helperText={validationError.policyName && validationError.policyName}
             />
             <TextField
-                autoFocus
                 margin='dense'
                 name='description'
                 label='Description'
@@ -333,21 +387,20 @@ function AddEdit(props) {
                     value={type}
                 >
                     <FormControlLabel
-                        value='RequestCountLimit'
+                        value='REQUESTCOUNTLIMIT'
                         control={<Radio color='primary' />}
                         label='Request Count '
                         labelPlacement='end'
                     />
                     <FormControlLabel
-                        value='BandwidthLimit'
+                        value='BANDWIDTHLIMIT'
                         control={<Radio color='primary' />}
                         label='Request Bandwidth'
                         labelPlacement='end'
                     />
                 </RadioGroup>
-                {type === 'RequestCountLimit' ? (
+                {type === 'REQUESTCOUNTLIMIT' ? (
                     <TextField
-                        autoFocus
                         margin='dense'
                         name='requestCount'
                         label='Request Count'
@@ -364,11 +417,11 @@ function AddEdit(props) {
                             },
                         }}
                         error={validationError.requestCountValue}
+                        helperText={validationError.requestCountValue && validationError.requestCountValue}
                     />
                 ) : (
                     <Grid className={classes.unitTime}>
                         <TextField
-                            autoFocus
                             margin='dense'
                             name='dataAmount'
                             label='Data Bandwith'
@@ -385,6 +438,7 @@ function AddEdit(props) {
                                 },
                             }}
                             error={validationError.dataAmount}
+                            helperText={validationError.dataAmount && validationError.dataAmount}
                         />
                         <FormControl className={classes.unitTimeSelection}>
                             <Select
@@ -404,7 +458,6 @@ function AddEdit(props) {
                 )}
                 <Grid className={classes.unitTime}>
                     <TextField
-                        autoFocus
                         margin='dense'
                         name='unitTime'
                         label='Unit Time'
@@ -420,7 +473,7 @@ function AddEdit(props) {
                             },
                         }}
                         error={validationError.unitTime}
-                        helperText={validationError.unitTime && 'Unit Time is empty'}
+                        helperText={validationError.unitTime && validationError.unitTime}
                     />
                     <FormControl className={classes.unitTimeSelection}>
                         <Select

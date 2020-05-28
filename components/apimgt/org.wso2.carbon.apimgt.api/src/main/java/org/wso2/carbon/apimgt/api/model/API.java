@@ -366,6 +366,10 @@ public class API implements Serializable {
         return id;
     }
 
+    public void setId(APIIdentifier id) {
+        this.id = id;
+    }
+
     public String getTransports() {
         return transports;
     }

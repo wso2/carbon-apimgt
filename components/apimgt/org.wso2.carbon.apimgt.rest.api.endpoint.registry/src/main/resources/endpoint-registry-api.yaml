@@ -50,13 +50,13 @@ paths:
           "prodServer" will match a registry entry if the name is exactly "prodServer".
         schema:
           type: string
-      - name: sortBy
+      - name: sortRegistryBy
         in: query
         schema:
           type: string
           enum:
             - registryName
-      - name: sortOrder
+      - name: sortRegistryOrder
         in: query
         schema:
           type: string
@@ -280,25 +280,54 @@ paths:
         explode: false
         schema:
           type: string
-      - name: query
+      - name: serviceType
         in: query
         description: |
           **Search condition**.
 
-          You can search for a registry entry by specifying the entry name as "query" attribute.
-
-          Eg.
-          "pizzaServer" will match a registry entry if the name is exactly "pizzaServer".
+          Filter entries by serviceType
         schema:
           type: string
-      - name: sortBy
+          enum:
+          - REST
+          - SOAP_1_1
+          - GQL
+          - WS
+      - name: definitionType
+        in: query
+        description: |
+          Filter registry entries by definitionType
+        schema:
+          type: string
+          enum:
+          - OAS
+          - WSDL1
+          - WSDL2
+          - GQL_SDL
+      - name: name
+        in: query
+        description: |
+          Filter registry entries by the name of the Entry
+        schema:
+          type: string
+      - name: serviceCategory
+        in: query
+        description: |
+          Filter registry entries by the service category of the Entry
+        schema:
+          type: string
+          enum:
+          - UTILITY
+          - EDGE
+          - DOMAIN
+      - name: sortEntryBy
         in: query
         schema:
           type: string
           enum:
             - definitionType
             - serviceType
-      - name: sortOrder
+      - name: sortEntryOrder
         in: query
         schema:
           type: string
@@ -688,7 +717,10 @@ components:
         entryName:
           type: string
           example: Pizzashack-Endpoint
-        serviceUrl:
+        productionServiceUrl:
+          type: string
+          example: http://localhost/pizzashack
+        sandboxServiceUrl:
           type: string
           example: http://localhost/pizzashack
         serviceCategory:
@@ -715,7 +747,7 @@ components:
           - OAS
           - WSDL1
           - WSDL2
-          - GQL-SDL
+          - GQL_SDL
         definitionUrl:
           type: string
           example: http://localhost/pizzashack?swagger.json
