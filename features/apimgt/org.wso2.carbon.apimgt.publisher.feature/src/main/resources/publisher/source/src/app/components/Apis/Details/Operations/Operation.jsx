@@ -26,7 +26,7 @@ import PropTypes from 'prop-types';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import ListSubheader from '@material-ui/core/ListSubheader';
-import { injectIntl, FormattedMessage, useIntl } from 'react-intl';
+import { injectIntl, FormattedMessage } from 'react-intl';
 import TextField from '@material-ui/core/TextField';
 import { Typography } from '@material-ui/core';
 import Switch from '@material-ui/core/Switch';
