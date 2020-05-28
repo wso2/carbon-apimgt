@@ -15,7 +15,7 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.impl.endpoint.registry.model;
+package org.wso2.carbon.apimgt.api.endpoint.registry.model;
 
 import java.io.InputStream;
 
@@ -32,6 +32,8 @@ public class EndpointRegistryEntry {
 
     private String version = null;
 
+    private String description = null;
+
     private String productionServiceURL = null;
 
     private String sandboxServiceUrl = null;
@@ -45,8 +47,6 @@ public class EndpointRegistryEntry {
     private String definitionURL = null;
 
     private InputStream endpointDefinition = null;
-
-    private String metaData = null;
 
     private String owner = null;
 
@@ -76,6 +76,11 @@ public class EndpointRegistryEntry {
         return version;
     }
 
+    public String getDescription() {
+
+        return description;
+    }
+
     public String getProductionServiceURL() {
 
         return productionServiceURL;
@@ -101,11 +106,6 @@ public class EndpointRegistryEntry {
         return endpointDefinition;
     }
 
-    public String getMetaData() {
-
-        return metaData;
-    }
-
     public void setEntryId(String entryUUID) {
 
         this.entryUUID = entryUUID;
@@ -124,6 +124,11 @@ public class EndpointRegistryEntry {
     public void setVersion(String version) {
 
         this.version = version;
+    }
+
+    public void setDescription(String description) {
+
+        this.description = description;
     }
 
     public void setProductionServiceURL(String productionServiceURL) {
@@ -149,11 +154,6 @@ public class EndpointRegistryEntry {
     public void setEndpointDefinition(InputStream endpointDefinition) {
 
         this.endpointDefinition = endpointDefinition;
-    }
-
-    public void setMetaData(String metaData) {
-
-        this.metaData = metaData;
     }
 
     public String getServiceCategory() {

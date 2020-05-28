@@ -887,6 +887,10 @@
             "type" : "string",
             "example" : "Pizzashack-Endpoint"
           },
+          "description" : {
+            "type" : "string",
+            "example" : "A Registry Entry that exposes a REST endpoint"
+          },
           "version" : {
             "type" : "string",
             "example" : "v1"
@@ -919,10 +923,6 @@
           "definitionUrl" : {
             "type" : "string",
             "example" : "http://localhost/pizzashack?swagger.json"
-          },
-          "metadata" : {
-            "type" : "string",
-            "example" : "{ \"mutualTLS\" : true }"
           }
         }
       },
