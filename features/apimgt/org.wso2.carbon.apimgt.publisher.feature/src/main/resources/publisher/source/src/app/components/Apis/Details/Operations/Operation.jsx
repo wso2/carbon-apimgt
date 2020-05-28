@@ -262,12 +262,10 @@ class Operation extends React.Component {
                         }}
                         fullWidth
                         label={dropdownScopes.length !== 0 || sharedScopes ? intl.formatMessage({
-                            id: 'Apis.Details.Resources.components.operationComponents.'
-                            + 'OperationGovernance.operation.scope.label.default',
+                            id: 'Apis.Details.Operations.Operation.operation.scope.label.default',
                             defaultMessage: 'Operation scope',
                         }) : intl.formatMessage({
-                            id: 'Apis.Details.Resources.components.operationComponents.'
-                            + 'OperationGovernance.operation.scope.label.notAvailable',
+                            id: 'Apis.Details.Operations.Operation.operation.scope.label.notAvailable',
                             defaultMessage: 'No scope available',
                         })}
                         value={operation.scopes}
@@ -276,8 +274,7 @@ class Operation extends React.Component {
                         })}
                         helperText={(
                             <FormattedMessage
-                                id={'Apis.Details.Resources.components.operationComponents.'
-                                + 'OperationGovernance.operation.scope.helperText'}
+                                id='Apis.Details.Operations.Operation.operation.scope.helperText'
                                 defaultMessage='Select a scope to control permissions to this operation'
                             />
                         )}
@@ -286,8 +283,7 @@ class Operation extends React.Component {
                     >
                         <ListSubheader>
                             <FormattedMessage
-                                id={'Apis.Details.Resources.components.operationComponents.'
-                                + 'OperationGovernance.operation.scope.select.local'}
+                                id='Apis.Details.Operations.Operation.operation.scope.select.local'
                                 defaultMessage='API Scopes'
                             />
                         </ListSubheader>
@@ -307,8 +303,7 @@ class Operation extends React.Component {
                             >
                                 <em>
                                     <FormattedMessage
-                                        id={'Apis.Details.Resources.components.operationComponents.'
-                                    + 'OperationGovernance.operation.no.api.scope.available'}
+                                        id='Apis.Details.Operations.Operation.operation.no.api.scope.available'
                                         defaultMessage='No API scopes available'
                                     />
                                 </em>
@@ -316,8 +311,7 @@ class Operation extends React.Component {
                         )}
                         <ListSubheader>
                             <FormattedMessage
-                                id={'Apis.Details.Resources.components.operationComponents.'
-                                + 'OperationGovernance.operation.scope.select.shared'}
+                                id='Apis.Details.Operations.Operation.operation.scope.select.shared'
                                 defaultMessage='Shared Scopes'
                             />
                         </ListSubheader>
@@ -337,8 +331,7 @@ class Operation extends React.Component {
                             >
                                 <em>
                                     <FormattedMessage
-                                        id={'Apis.Details.Resources.components.operationComponents.'
-                                    + 'OperationGovernance.operation.no.sharedpi.scope.available'}
+                                        id='Apis.Details.Operations.Operation.operation.no.sharedpi.scope.available'
                                         defaultMessage='No shared scopes available'
                                     />
                                 </em>
