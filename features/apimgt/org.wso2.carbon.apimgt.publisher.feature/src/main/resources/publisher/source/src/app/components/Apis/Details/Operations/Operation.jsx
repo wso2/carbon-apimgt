@@ -163,7 +163,6 @@ class Operation extends React.Component {
             ...operation,
             scopes: [...operation.scopes],
         };
-        // const scope = (e.target.value === 'none' ? '' : e.target.value);
         newoperation.scopes = defValue;
         this.props.handleUpdateList(newoperation);
     }
