@@ -102,7 +102,7 @@ public class EndpointRegistryImplTest {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
 
         endpointRegistry.updateEndpointRegistry(endpointRegistryInfo.getUuid(), endpointRegistryInfo.getName(),
-                endpointRegistryInfo);
+                endpointRegistryInfo.getType(), endpointRegistryInfo);
         Mockito.verify(endpointRegistryDAO).updateEndpointRegistry(endpointRegistryInfo.getUuid(), endpointRegistryInfo,
                 ADMIN_USERNAME);
     }
@@ -115,7 +115,7 @@ public class EndpointRegistryImplTest {
                 .thenReturn(true);
 
         endpointRegistry.updateEndpointRegistry(endpointRegistryInfo.getUuid(), "Endpoint Registry 2",
-                endpointRegistryInfo);
+                "wso2", endpointRegistryInfo);
     }
 
     @Test

@@ -129,11 +129,13 @@ public interface EndpointRegistry {
      *
      * @param registryId           uuid of the endpoint registry which needs to be updated
      * @param registryName         original name of the registry for the given registryId
+     * @param registryType         original type of the registry for the given registryId
      * @param endpointRegistryInfo EndpointRegistryInfo object with details to be updated
      * @return uuid of the endpoint registry
      * @throws EndpointRegistryException if failed to update the endpoint registry
      */
-    void updateEndpointRegistry(String registryId, String registryName, EndpointRegistryInfo endpointRegistryInfo)
+    void updateEndpointRegistry(String registryId, String registryName, String registryType,
+                                EndpointRegistryInfo endpointRegistryInfo)
             throws EndpointRegistryException;
 
     /**
