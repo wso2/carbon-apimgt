@@ -3132,7 +3132,7 @@ paths:
 ######################################################
 # The Tenant Theme resource APIs
 ######################################################
-  /import/tenant-theme:
+  /tenant-theme/import:
 
     post:
       security:
@@ -3141,10 +3141,10 @@ paths:
       consumes:
         - multipart/form-data
       x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer
-      ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v1/import/tenant-theme?tenantDomain=abc
+      ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v1/tenant-theme/import?tenantDomain=abc
       .com"
       x-wso2-request: |
-        POST https://localhost:9443/api/am/admin/v1/import/tenant-theme
+        POST https://localhost:9443/api/am/admin/v1/tenant-theme/import
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\nTenant Theme imported successfully."
       summary: Import a DevPortal Tenant Theme

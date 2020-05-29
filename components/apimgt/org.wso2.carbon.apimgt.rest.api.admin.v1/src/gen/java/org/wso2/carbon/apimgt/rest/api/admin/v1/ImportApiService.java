@@ -26,5 +26,4 @@ public interface ImportApiService {
       public Response importApiPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean overwrite, MessageContext messageContext) throws APIManagementException;
       public Response importApiProductPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean importAPIs, Boolean overwriteAPIProduct, Boolean overwriteAPIs, MessageContext messageContext) throws APIManagementException;
       public Response importApplicationsPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveOwner, Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys, Boolean update, MessageContext messageContext) throws APIManagementException;
-      public Response importTenantThemePost(InputStream fileInputStream, Attachment fileDetail, String tenantDomain, MessageContext messageContext) throws APIManagementException;
 }
