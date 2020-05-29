@@ -38,6 +38,8 @@ import MUIDataTable from 'mui-datatables';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
 import Alert from 'AppComponents/Shared/Alert';
+import { Link as RouterLink } from 'react-router-dom';
+import EditIcon from '@material-ui/icons/Edit';
 
 const useStyles = makeStyles((theme) => ({
     searchBar: {
@@ -114,13 +116,32 @@ function ListBase(props) {
                     sort: false,
                     customBodyRender: (value, tableMeta) => {
                         const dataRow = data[tableMeta.rowIndex];
+                        if (editComponentProps && editComponentProps.routeTo) {
+                            if (typeof tableMeta.rowData === 'object') {
+                                const artifactId = tableMeta.rowData[tableMeta.rowData.length - 2];
+                                return (
+                                    <>
+                                        <RouterLink to={editComponentProps.routeTo + artifactId}>
+                                            <IconButton color='primary' component='span'>
+                                                <EditIcon />
+                                            </IconButton>
+                                        </RouterLink>
+                                        <DeleteComponent dataRow={dataRow} updateList={fetchData} />
+                                    </>
+                                );
+                            } else {
+                                return (<div />);
+                            }
+                        }
                         return (
                             <>
-                                <EditComponent
-                                    dataRow={dataRow}
-                                    updateList={fetchData}
-                                    {...editComponentProps}
-                                />
+                                {EditComponent && (
+                                    <EditComponent
+                                        dataRow={dataRow}
+                                        updateList={fetchData}
+                                        {...editComponentProps}
+                                    />
+                                )}
                                 <DeleteComponent dataRow={dataRow} updateList={fetchData} />
                             </>
                         );
@@ -164,7 +185,7 @@ function ListBase(props) {
                     </CardActionArea>
                     <CardActions>
                         {addButtonOverride || (
-                            <EditComponent updateList={fetchData} {...addButtonProps} />
+                            EditComponent && (<EditComponent updateList={fetchData} {...addButtonProps} />)
                         )}
                     </CardActions>
                 </Card>
@@ -207,10 +228,12 @@ function ListBase(props) {
                                 </Grid>
                                 <Grid item>
                                     {addButtonOverride || (
-                                        <EditComponent
-                                            updateList={fetchData}
-                                            {...addButtonProps}
-                                        />
+                                        EditComponent && (
+                                            <EditComponent
+                                                updateList={fetchData}
+                                                {...addButtonProps}
+                                            />
+                                        )
                                     )}
                                     <Tooltip title={(
                                         <FormattedMessage
