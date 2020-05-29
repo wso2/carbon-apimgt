@@ -15,8 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.wso2.carbon.apimgt.api.model;
+package org.wso2.carbon.apimgt.api.endpoint.registry.model;
 
 /**
  * Endpoint Registry Info Object.
@@ -28,8 +27,6 @@ public class EndpointRegistryInfo {
     private String name = null;
 
     private String type = null;
-
-    private String mode = null;
 
     private String owner = null;
 
@@ -54,11 +51,6 @@ public class EndpointRegistryInfo {
     public String getType() {
 
         return type;
-    }
-
-    public String getMode() {
-
-        return mode;
     }
 
     public String getOwner() {
@@ -86,11 +78,6 @@ public class EndpointRegistryInfo {
         this.type = type;
     }
 
-    public void setMode(String mode) {
-
-        this.mode = mode;
-    }
-
     public void setOwner(String owner) {
 
         this.owner = owner;
@@ -102,26 +89,33 @@ public class EndpointRegistryInfo {
     }
 
     public String getUpdatedBy() {
+
         return updatedBy;
     }
 
     public void setUpdatedBy(String updatedBy) {
+
         this.updatedBy = updatedBy;
     }
 
     public String getCreatedTime() {
+
         return createdTime;
     }
 
     public void setCreatedTime(String createdTime) {
+
         this.createdTime = createdTime;
     }
 
     public String getLastUpdatedTime() {
+
         return lastUpdatedTime;
     }
 
     public void setLastUpdatedTime(String lastUpdatedTime) {
+
         this.lastUpdatedTime = lastUpdatedTime;
     }
 }
+

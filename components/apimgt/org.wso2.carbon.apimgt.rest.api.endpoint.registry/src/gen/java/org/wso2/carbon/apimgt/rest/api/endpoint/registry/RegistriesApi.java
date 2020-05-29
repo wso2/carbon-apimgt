@@ -8,7 +8,7 @@ import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryArrayD
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApiService;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.impl.RegistriesApiServiceImpl;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-22T14:14:59.940+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-05-28T14:18:24.625+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -74,11 +74,57 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
             schema = @Schema(implementation = ErrorDTO.class)))
      })
     public Response addRegistry(    
-    @Parameter(description = "" ) RegistryDTO body
+    @Parameter(description = "" ,required=true) RegistryDTO body
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.addRegistry(body, securityContext);
+        }
+    @POST
+    @Path("/{registryId}/entries/{entryId}/copy-entry")
+    
+    @Produces({ "application/json" })
+    @Operation(summary = "Create a new version of the entry", description = "Using this operation, you can create a new version of an existing entry ",
+        security = {  @SecurityRequirement(name = "default" , scopes = { "" })
+                 }, tags={ "Registry Entries" })
+
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "200",
+            description = "Created. Successful response with the newly created Registry Entry as entity in the body. ",
+            content = @Content(
+            schema = @Schema(implementation = RegistryEntryDTO.class))),
+    
+        @ApiResponse(responseCode = "400",
+            description = "Invalid Request ",
+            content = @Content(
+            schema = @Schema(implementation = ErrorDTO.class))),
+    
+        @ApiResponse(responseCode = "404",
+            description = "Not Found. Requested Registry or Entry does not exist. ",
+            content = @Content(
+            schema = @Schema(implementation = ErrorDTO.class))),
+    
+        @ApiResponse(responseCode = "409",
+            description = "Resource already exists ",
+            content = @Content(
+            schema = @Schema(implementation = ErrorDTO.class)))
+     })
+    public Response createNewEntryVersion(
+
+@Parameter(description = "uuid of the registry",required=true) @PathParam("registryId") String registryId
+
+
+, 
+
+@Parameter(description = "uuid of the registry entry",required=true) @PathParam("entryId") String entryId
+
+
+,      @NotNull        @Parameter(description = "Version to be created",required=true) 
+        @QueryParam("version") String version
+
+
+) throws EndpointRegistryException {
+        return delegate.createNewEntryVersion(registryId, entryId, version, securityContext);
         }
     @POST
     @Path("/{registryId}/entry")
@@ -113,7 +159,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 ,  @Multipart(value = "definitionFile", required = false) InputStream definitionFileInputStream, @Multipart(value = "definitionFile" , required = false) Attachment definitionFileDetail
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.createRegistryEntry(registryId, registryEntry, definitionFileInputStream, definitionFileDetail, securityContext);
         }
     @DELETE
@@ -143,7 +189,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the Registry",required=true) @PathParam("registryId") String registryId
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.deleteRegistry(registryId, securityContext);
         }
     @DELETE
@@ -178,7 +224,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the registry entry",required=true) @PathParam("entryId") String entryId
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.deleteRegistryEntry(registryId, entryId, securityContext);
         }
     @GET
@@ -208,6 +254,15 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     public Response getAllEntriesInRegistry(
 
 @Parameter(description = "uuid of the Registry",required=true) @PathParam("registryId") String registryId
+
+
+,             @Parameter(description = "Whether to perform exact search on name") 
+            @DefaultValue("false")
+        @QueryParam("exactNameMatch") Boolean exactNameMatch
+
+
+,             @Parameter(description = "Version of the Registry Entry") 
+        @QueryParam("version") String version
 
 
 ,             @Parameter(description = "**Search condition**.  Filter entries by serviceType ",     schema=@Schema(allowableValues={ "REST", "SOAP_1_1", "GQL", "WS" })
@@ -249,8 +304,8 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
         @QueryParam("offset") Integer offset
 
 
-) throws APIManagementException{
-        return delegate.getAllEntriesInRegistry(registryId, serviceType, definitionType, name, serviceCategory, sortEntryBy, sortEntryOrder, limit, offset, securityContext);
+) throws EndpointRegistryException {
+        return delegate.getAllEntriesInRegistry(registryId, exactNameMatch, version, serviceType, definitionType, name, serviceCategory, sortEntryBy, sortEntryOrder, limit, offset, securityContext);
         }
     public enum ServiceTypeEnum {
     REST,SOAP_1_1,GQL,WS;
@@ -296,7 +351,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the registry entry",required=true) @PathParam("entryId") String entryId
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.getEndpointDefinition(registryId, entryId, securityContext);
         }
     @GET
@@ -313,38 +368,10 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
             content = @Content(
             schema = @Schema(implementation = RegistryArrayDTO.class)))
      })
-    public Response getRegistries(            @Parameter(description = "**Search condition**. You can search for a registry by specifying the registry name as \"query\" attribute.  Eg. \"prodServer\" will match a registry entry if the name is exactly \"prodServer\". ") 
-        @QueryParam("query") String query
-
-
-,             @Parameter(description = "",     schema=@Schema(allowableValues={ "registryName" })
-) 
-        @QueryParam("sortRegistryBy") SortRegistryByEnum sortRegistryBy
-
-
-,             @Parameter(description = "",     schema=@Schema(allowableValues={ "asc", "desc" })
-) 
-        @QueryParam("sortRegistryOrder") SortRegistryOrderEnum sortRegistryOrder
-
-
-,             @Parameter(description = "Maximum limit of items to return. ") 
-            @DefaultValue("25")
-        @QueryParam("limit") Integer limit
-
-
-,             @Parameter(description = "Starting point within the complete list of items qualified. ") 
-            @DefaultValue("0")
-        @QueryParam("offset") Integer offset
-
-
-) throws APIManagementException{
-        return delegate.getRegistries(query, sortRegistryBy, sortRegistryOrder, limit, offset, securityContext);
+    public Response getRegistries() throws EndpointRegistryException {
+        return delegate.getRegistries(securityContext);
         }
-    public enum SortRegistryByEnum {
-    registryName;
-    }    public enum SortRegistryOrderEnum {
-    asc,desc;
-    }    @GET
+    @GET
     @Path("/{registryId}")
     
     @Produces({ "application/json" })
@@ -373,7 +400,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "ID of the Registry",required=true) @PathParam("registryId") String registryId
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.getRegistryByUUID(registryId, securityContext);
         }
     @GET
@@ -410,7 +437,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the registry entry",required=true) @PathParam("entryId") String entryId
 
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.getRegistryEntryByUuid(registryId, entryId, securityContext);
         }
     @PUT
@@ -437,17 +464,17 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
             content = @Content(
             schema = @Schema(implementation = ErrorDTO.class)))
      })
-    public Response updateRegistry(
+    public Response updateRegistry(    
+    @Parameter(description = "" ,required=true) RegistryDTO body
+
+
+, 
 
 @Parameter(description = "ID of the Registry",required=true) @PathParam("registryId") String registryId
 
 
-,     
-    @Parameter(description = "" ) RegistryDTO body
-
-
-) throws APIManagementException{
-        return delegate.updateRegistry(registryId, body, securityContext);
+) throws EndpointRegistryException {
+        return delegate.updateRegistry(body, registryId, securityContext);
         }
     @PUT
     @Path("/{registryId}/entries/{entryId}")
@@ -487,7 +514,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 ,  @Multipart(value = "definitionFile", required = false) InputStream definitionFileInputStream, @Multipart(value = "definitionFile" , required = false) Attachment definitionFileDetail
 
-) throws APIManagementException{
+) throws EndpointRegistryException {
         return delegate.updateRegistryEntry(registryId, entryId, registryEntry, definitionFileInputStream, definitionFileDetail, securityContext);
         }
 }

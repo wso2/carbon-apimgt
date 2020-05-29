@@ -26,7 +26,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
@@ -34,6 +36,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 
 @Path("/swagger.yaml")
@@ -73,7 +76,15 @@ public class SwaggerYamlApi {
                     }
                 }
             }
-            return Response.ok().entity(openAPIDef).build();
+            RESTAPICacheConfiguration restapiCacheConfiguration = APIUtil.getRESTAPICacheConfig();
+            if (restapiCacheConfiguration.isCacheControlHeadersEnabled()) {
+                CacheControl cacheControl = new CacheControl();
+                cacheControl.setMaxAge(restapiCacheConfiguration.getCacheControlHeadersMaxAge());
+                cacheControl.setPrivate(true);
+                return Response.ok().entity(openAPIDef).cacheControl(cacheControl).build();
+            } else {
+                return Response.ok().entity(openAPIDef).build();
+            }
         } catch (IOException e) { 
             String errorMessage = "Error while retrieving the swagger definition of the Publisher API";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);

@@ -15,8 +15,7 @@
  *  limitations under the License.
  *
  */
-
-package org.wso2.carbon.apimgt.api.model;
+package org.wso2.carbon.apimgt.api.endpoint.registry.model;
 
 import java.io.InputStream;
 
@@ -31,6 +30,10 @@ public class EndpointRegistryEntry {
 
     private String name = null;
 
+    private String version = null;
+
+    private String description = null;
+
     private String productionServiceURL = null;
 
     private String sandboxServiceUrl = null;
@@ -44,8 +47,6 @@ public class EndpointRegistryEntry {
     private String definitionURL = null;
 
     private InputStream endpointDefinition = null;
-
-    private String metaData = null;
 
     private String owner = null;
 
@@ -68,6 +69,16 @@ public class EndpointRegistryEntry {
     public String getName() {
 
         return name;
+    }
+
+    public String getVersion() {
+
+        return version;
+    }
+
+    public String getDescription() {
+
+        return description;
     }
 
     public String getProductionServiceURL() {
@@ -95,11 +106,6 @@ public class EndpointRegistryEntry {
         return endpointDefinition;
     }
 
-    public String getMetaData() {
-
-        return metaData;
-    }
-
     public void setEntryId(String entryUUID) {
 
         this.entryUUID = entryUUID;
@@ -113,6 +119,16 @@ public class EndpointRegistryEntry {
     public void setName(String name) {
 
         this.name = name;
+    }
+
+    public void setVersion(String version) {
+
+        this.version = version;
+    }
+
+    public void setDescription(String description) {
+
+        this.description = description;
     }
 
     public void setProductionServiceURL(String productionServiceURL) {
@@ -140,11 +156,6 @@ public class EndpointRegistryEntry {
         this.endpointDefinition = endpointDefinition;
     }
 
-    public void setMetaData(String metaData) {
-
-        this.metaData = metaData;
-    }
-
     public String getServiceCategory() {
 
         return serviceCategory;
@@ -156,34 +167,42 @@ public class EndpointRegistryEntry {
     }
 
     public String getOwner() {
+
         return owner;
     }
 
     public void setOwner(String owner) {
+
         this.owner = owner;
     }
 
     public String getUpdatedBy() {
+
         return updatedBy;
     }
 
     public void setUpdatedBy(String updatedBy) {
+
         this.updatedBy = updatedBy;
     }
 
     public String getCreatedTime() {
+
         return createdTime;
     }
 
     public void setCreatedTime(String createdTime) {
+
         this.createdTime = createdTime;
     }
 
     public String getLastUpdatedTime() {
+
         return lastUpdatedTime;
     }
 
     public void setLastUpdatedTime(String lastUpdatedTime) {
+
         this.lastUpdatedTime = lastUpdatedTime;
     }
 

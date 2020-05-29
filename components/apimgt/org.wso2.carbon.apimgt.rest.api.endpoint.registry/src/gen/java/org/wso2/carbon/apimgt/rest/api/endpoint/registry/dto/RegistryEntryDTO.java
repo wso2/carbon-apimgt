@@ -14,6 +14,8 @@ import javax.xml.bind.annotation.*;
 public class RegistryEntryDTO   {
     private String id = null;
     private String entryName = null;
+    private String description = null;
+    private String version = null;
     private String productionServiceUrl = null;
     private String sandboxServiceUrl = null;
             @XmlType(name="ServiceCategoryEnum")
@@ -110,7 +112,6 @@ public class RegistryEntryDTO   {
             }
             }    private DefinitionTypeEnum definitionType = null;
     private String definitionUrl = null;
-    private String metadata = null;
 
     /**
     **/
@@ -139,13 +140,51 @@ public class RegistryEntryDTO   {
 
     
     
-    @Schema(example = "Pizzashack-Endpoint", description = "")
+    @Schema(example = "Pizzashack-Endpoint", required = true, description = "")
     @JsonProperty("entryName")
-          public String getEntryName() {
+            @NotNull
+      public String getEntryName() {
     return entryName;
     }
     public void setEntryName(String entryName) {
     this.entryName = entryName;
+    }
+
+    /**
+    **/
+    public RegistryEntryDTO description(String description) {
+    this.description = description;
+    return this;
+    }
+
+    
+    
+    @Schema(example = "A Registry Entry that exposes a REST endpoint", description = "")
+    @JsonProperty("description")
+          public String getDescription() {
+    return description;
+    }
+    public void setDescription(String description) {
+    this.description = description;
+    }
+
+    /**
+    **/
+    public RegistryEntryDTO version(String version) {
+    this.version = version;
+    return this;
+    }
+
+    
+    
+    @Schema(example = "v1", required = true, description = "")
+    @JsonProperty("version")
+            @NotNull
+      public String getVersion() {
+    return version;
+    }
+    public void setVersion(String version) {
+    this.version = version;
     }
 
     /**
@@ -259,24 +298,6 @@ public class RegistryEntryDTO   {
     this.definitionUrl = definitionUrl;
     }
 
-    /**
-    **/
-    public RegistryEntryDTO metadata(String metadata) {
-    this.metadata = metadata;
-    return this;
-    }
-
-    
-    
-    @Schema(example = "{ \"mutualTLS\" : true }", description = "")
-    @JsonProperty("metadata")
-          public String getMetadata() {
-    return metadata;
-    }
-    public void setMetadata(String metadata) {
-    this.metadata = metadata;
-    }
-
 
 @Override
 public boolean equals(java.lang.Object o) {
@@ -289,18 +310,19 @@ return false;
 RegistryEntryDTO registryEntry = (RegistryEntryDTO) o;
     return Objects.equals(id, registryEntry.id) &&
     Objects.equals(entryName, registryEntry.entryName) &&
+    Objects.equals(description, registryEntry.description) &&
+    Objects.equals(version, registryEntry.version) &&
     Objects.equals(productionServiceUrl, registryEntry.productionServiceUrl) &&
     Objects.equals(sandboxServiceUrl, registryEntry.sandboxServiceUrl) &&
     Objects.equals(serviceCategory, registryEntry.serviceCategory) &&
     Objects.equals(serviceType, registryEntry.serviceType) &&
     Objects.equals(definitionType, registryEntry.definitionType) &&
-    Objects.equals(definitionUrl, registryEntry.definitionUrl) &&
-    Objects.equals(metadata, registryEntry.metadata);
+    Objects.equals(definitionUrl, registryEntry.definitionUrl);
 }
 
 @Override
 public int hashCode() {
-return Objects.hash(id, entryName, productionServiceUrl, sandboxServiceUrl, serviceCategory, serviceType, definitionType, definitionUrl, metadata);
+return Objects.hash(id, entryName, description, version, productionServiceUrl, sandboxServiceUrl, serviceCategory, serviceType, definitionType, definitionUrl);
 }
 
 @Override
@@ -310,13 +332,14 @@ sb.append("class RegistryEntryDTO {\n");
 
 sb.append("    id: ").append(toIndentedString(id)).append("\n");
 sb.append("    entryName: ").append(toIndentedString(entryName)).append("\n");
+sb.append("    description: ").append(toIndentedString(description)).append("\n");
+sb.append("    version: ").append(toIndentedString(version)).append("\n");
 sb.append("    productionServiceUrl: ").append(toIndentedString(productionServiceUrl)).append("\n");
 sb.append("    sandboxServiceUrl: ").append(toIndentedString(sandboxServiceUrl)).append("\n");
 sb.append("    serviceCategory: ").append(toIndentedString(serviceCategory)).append("\n");
 sb.append("    serviceType: ").append(toIndentedString(serviceType)).append("\n");
 sb.append("    definitionType: ").append(toIndentedString(definitionType)).append("\n");
 sb.append("    definitionUrl: ").append(toIndentedString(definitionUrl)).append("\n");
-sb.append("    metadata: ").append(toIndentedString(metadata)).append("\n");
 sb.append("}");
 return sb.toString();
 }
