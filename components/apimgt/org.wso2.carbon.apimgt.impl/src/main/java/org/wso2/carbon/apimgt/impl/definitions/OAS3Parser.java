@@ -144,7 +144,10 @@ public class OAS3Parser extends APIDefinition {
                     apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
                 }
                 for (String responseEntry : op.getResponses().keySet()) {
+                    //for setting only one setPayload response
                     boolean setPayloadResponse = false;
+                    //to set string of mc.SetProperty and mc.SetPayload for each condition
+                    String mcPropertyAndPayloadSection = "";
                     if (!responseEntry.equals("default")) {
                         responseCode = Integer.parseInt(responseEntry);
                         responseCodes.add(responseCode);
@@ -160,9 +163,10 @@ public class OAS3Parser extends APIDefinition {
                                 String jsonExample = getJsonExample(jsonSchema, definitions);
                                 genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
                             }
-                            responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "json")));
+                            mcPropertyAndPayloadSection = getGeneratedSetResponse(responseEntry, "json");
+                            responseSection.append(getGeneratedConditionsForResponseCodes(responseEntry, mcPropertyAndPayloadSection));
                             if (responseCode == minResponseCode) {
-                                minResponseType = ("json");
+                                minResponseType = "json";
                             }
                             setPayloadResponse = true;
                         }
@@ -173,7 +177,8 @@ public class OAS3Parser extends APIDefinition {
                                 genCode.append(getGeneratedResponseVar(responseEntry, xmlExample, "xml"));
                             }
                             if (!setPayloadResponse) {
-                                responseSection.append(getGeneratedIFsforCodes(responseEntry, getGeneratedSetResponse(responseEntry, "xml")));
+                                mcPropertyAndPayloadSection = getGeneratedSetResponse(responseEntry, "xml");
+                                responseSection.append(getGeneratedConditionsForResponseCodes(responseEntry, mcPropertyAndPayloadSection));
                                 if (responseCode == minResponseCode) {
                                     minResponseType = "xml";
                                 }
@@ -291,13 +296,13 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
-     * Generates IF conditions for setting response code of mock payload
+     * Generates conditions for setting response code of mock payloads
      *
-     * @param responseCode response code of payload
+     * @param responseCode responseCode response code of payload
      * @param getGeneratedSetResponseString string returned from "getGeneratedSetResponse"
-     * @return if condition with "getGeneratedSetResponse" included
+     * @return if conditions with "getGeneratedSetResponse" included
      */
-    private String getGeneratedIFsforCodes(String responseCode, String getGeneratedSetResponseString) {
+    private String getGeneratedConditionsForResponseCodes(String responseCode, String getGeneratedSetResponseString) {
         return "if (responseCode == " + responseCode + ") {\n\n" +
                 getGeneratedSetResponseString +
                 "\n\n} else ";
@@ -323,8 +328,7 @@ public class OAS3Parser extends APIDefinition {
                 "  mc.setProperty('HTTP_SC', \"" + minResponseCode + "\");\n" +
                 "  mc.setProperty('CONTENT_TYPE', 'application/" + minResponseType + "');\n" +
                 "  mc.setPayload" + minResponseType.toUpperCase() + "(response" + minResponseCode + minResponseType + ");\n\n" +
-                "} else " +
-                "{\n\n" +
+                "} else {\n\n" +
                 "  mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
                 "  mc.setPayloadJSON(response501json);\n\n" +
                 "}";
