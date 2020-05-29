@@ -145,7 +145,7 @@ function UploadTheme() {
                                 <FormattedMessage
                                     id='TenantTheme.Upload.Theme.info.message'
                                     defaultMessage={'The theme should be a zip file containing CSS'
-                                    + 'and images compliant with the API Manager theme format'}
+                                    + ' and images compliant with the API Manager theme format'}
                                 />
                             </Typography>
                         </div>

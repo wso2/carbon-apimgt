@@ -106,19 +106,28 @@ export default function ListBlacklistThrottlingPolicies() {
         return restApi.blacklistPoliciesGet()
             .then((result) => {
                 const policyList = result.body.list;
-                let incrementId = 0;
                 const blacklistPolicies = policyList.map((obj) => {
                     let array = [];
-                    incrementId++;
+                    let conditionTypeValue;
                     if (obj.conditionValue === Object(obj.conditionValue)) {
                         array = Object.entries(obj.conditionValue);
                     } else {
                         array.push(obj.conditionValue);
                     }
+                    switch (obj.conditionType) {
+                        case 'APPLICATION':
+                            conditionTypeValue = 'Application';
+                            break;
+                        case 'IPRANGE':
+                            conditionTypeValue = 'IP Range';
+                            break;
+                        default:
+                            conditionTypeValue = obj.conditionType;
+                            break;
+                    }
                     return {
-                        conditionId: incrementId,
-                        conditionUUID: obj.conditionId,
-                        conditionType: obj.conditionType,
+                        conditionId: obj.conditionId,
+                        conditionType: conditionTypeValue,
                         conditionValue: array,
                         conditionStatus: obj.conditionStatus,
                     };
@@ -138,7 +147,7 @@ export default function ListBlacklistThrottlingPolicies() {
     const handleConditionStatus = (event) => {
         const blacklistPolicyListNew = cloneDeep(blacklistPolicyList);
         blacklistPolicyListNew.map((res) => {
-            if (res.conditionUUID === event.target.id) {
+            if (res.conditionId === event.target.id) {
                 res.conditionStatus = event.target.checked;
             }
             return res.conditionStatus;
@@ -167,17 +176,6 @@ export default function ListBlacklistThrottlingPolicies() {
     };
 
     const columProps = [
-        {
-            name: 'conditionId',
-            label: intl.formatMessage({
-                id: 'Admin.Throttling.Blacklist.Throttling.policy.table.header.condition.id',
-                defaultMessage: 'Condition ID',
-            }),
-            options: {
-                filter: true,
-                sort: true,
-            },
-        },
         {
             name: 'conditionType',
             label: intl.formatMessage({
@@ -212,14 +210,14 @@ export default function ListBlacklistThrottlingPolicies() {
             options: {
                 customBodyRender: (value, tableMeta) => {
                     const dataRow = blacklistPolicyList[tableMeta.rowIndex];
-                    const { conditionUUID } = dataRow;
+                    const { conditionId } = dataRow;
                     return (
                         <div>
                             <Switch
-                                checked={blacklistPolicyList.find((x) => x.conditionUUID === conditionUUID)
+                                checked={blacklistPolicyList.find((x) => x.conditionId === conditionId)
                                     .conditionStatus}
                                 onChange={handleConditionStatus}
-                                id={conditionUUID}
+                                id={conditionId}
                                 name='conditionStatus'
                                 color='primary'
                             />

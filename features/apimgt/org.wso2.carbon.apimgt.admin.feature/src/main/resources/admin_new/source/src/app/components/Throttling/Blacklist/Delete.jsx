@@ -36,7 +36,7 @@ function Delete(props) {
     } = props;
 
     const formSaveCallback = () => {
-        const policyId = dataRow.conditionUUID;
+        const policyId = dataRow.conditionId;
         const promiseAPICall = restApi
             .deleteBlacklistPolicy(policyId)
             .then(() => {
@@ -82,7 +82,7 @@ Delete.propTypes = {
         name: PropTypes.number.isRequired,
     }).isRequired,
     dataRow: PropTypes.shape({
-        conditionUUID: PropTypes.number.isRequired,
+        conditionId: PropTypes.number.isRequired,
     }).isRequired,
 };
 export default injectIntl(Delete);

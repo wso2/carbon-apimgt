@@ -127,17 +127,6 @@ export default function ListApplicationThrottlingPolicies() {
             },
         },
         {
-            name: 'quotaPolicy',
-            label: intl.formatMessage({
-                id: 'Admin.Throttling.Application.Throttling.policy.table.header.quota.policy',
-                defaultMessage: 'Quota Policy',
-            }),
-            options: {
-                filter: true,
-                sort: false,
-            },
-        },
-        {
             name: 'quota',
             label: intl.formatMessage({
                 id: 'Admin.Throttling.Application.Throttling.policy.table.header.quota',
@@ -191,18 +180,18 @@ export default function ListApplicationThrottlingPolicies() {
                 if (obj.defaultLimit.requestCount !== null) {
                     return {
                         policyName: obj.policyName,
-                        quotaPolicy: obj.defaultLimit.requestCount.type,
                         quota: obj.defaultLimit.requestCount.requestCount,
                         unitTime: obj.defaultLimit.requestCount.unitTime + ' '
                             + obj.defaultLimit.requestCount.timeUnit,
+                        quotaPolicy: obj.defaultLimit.requestCount.type,
                         policyId: obj.policyId,
                     };
                 } else {
                     return {
                         policyName: obj.policyName,
-                        quotaPolicy: obj.defaultLimit.bandwidth.type,
                         quota: obj.defaultLimit.bandwidth.dataAmount + ' ' + obj.defaultLimit.bandwidth.dataUnit,
                         unitTime: obj.defaultLimit.bandwidth.unitTime + ' ' + obj.defaultLimit.bandwidth.timeUnit,
+                        quotaPolicy: obj.defaultLimit.bandwidth.type,
                         policyId: obj.policyId,
                     };
                 }
