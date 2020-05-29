@@ -27,10 +27,14 @@ import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class SettingsMappingUtil {
@@ -66,5 +70,28 @@ public class SettingsMappingUtil {
             scopeList.add(entry.getKey());
         }
         return scopeList;
+    }
+
+    public List<String> GetRoleScopeList(String[] userRoles, String username) {
+        List<String> userRoleList;
+        List<String> authorizedScopes = new ArrayList<>();
+
+        if (userRoles == null || userRoles.length == 0) {
+            userRoles = new String[0];
+        }
+
+        userRoleList = Arrays.asList(userRoles);
+        Map<String, String> scopeRoleMapping =
+                APIUtil.getRESTAPIScopesForTenant(MultitenantUtils.getTenantDomain(username));
+        Iterator<Map.Entry<String, String>> iterator = scopeRoleMapping.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            for (String aRole : entry.getValue().split(",")) {
+                if (userRoleList.contains(aRole)) {
+                    authorizedScopes.add(entry.getKey());
+                }
+            }
+        }
+        return authorizedScopes;
     }
 }

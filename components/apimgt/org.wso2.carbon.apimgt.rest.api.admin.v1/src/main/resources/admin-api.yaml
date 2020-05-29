@@ -2965,10 +2965,74 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /settings/scopes:
+    #-----------------------------------------------------
+    # Retrieve scope settings
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:admin_settings
+      x-wso2-curl: "curl -k -X GET \"https://localhost:9443/api/am/admin/v1/settings/scopes?username=john&scope=apim:subscribe\" -H \"accept: application/json\" -H \"Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
+      x-wso2-request: "GET https://localhost:9443/api/am/admin/v1/settings/scopes?username=john&scope=apim:subscribe Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
+      x-wso2-response: "{\n  \"scopes\":[\"apim:subscribe\" \n] \n}\n"
+      summary: Retrieve scopes for a particular user
+      description: |
+        This operation will return the scope list of particular user
+        In order to get it, we need to pass the userId as a query parameter
+      parameters:
+        - name: username
+          in: query
+          type: string
+          required: true
+        - name: scope
+          in: query
+          type: string
+          required: true
+      tags:
+        - Settings
+      responses:
+        200:
+          description: |
+            OK.
+            Particular scope exists for the given user.
+          schema:
+            $ref: '#/definitions/Settings'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested user does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
+
+# Group Identifier of the application
+  username:
+    name: username
+    in: query
+    description: |
+      username of the new application owner
+    required: true
+    type: string
+
+# Group Identifier of the application
+  scope:
+    name: scope
+    in: query
+    description: |
+      scope name to be validated
+    required: true
+    type: string
 
 # Label Id
 # Specified as part of the path expression
