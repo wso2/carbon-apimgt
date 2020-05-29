@@ -28,7 +28,6 @@ import Create from '@material-ui/icons/Create';
 import GetApp from '@material-ui/icons/GetApp';
 import { PropTypes } from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import { useAppContext } from 'AppComponents/Shared/AppContext';
 
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
@@ -134,7 +133,6 @@ class SampleAPI extends Component {
      * @memberof SampleAPI
      */
     createSampleAPI() {
-        const { settings } = useAppContext();
         const data = {
             name: 'PizzaShackAPI',
             description: 'This is a simple API for Pizza Shack online pizza delivery store.',
@@ -145,8 +143,7 @@ class SampleAPI extends Component {
             policies: ['Unlimited'],
             securityScheme: ['oauth2'],
             visibility: 'PUBLIC',
-            gatewayEnvironments: Array.isArray(settings.environment)
-                && settings.environment.length > 0 ? settings.environment[0] : [],
+            gatewayEnvironments: ['Production and Sandbox'],
             businessInformation: {
                 businessOwner: 'Jane Roe',
                 businessOwnerEmail: 'marketing@pizzashack.com',

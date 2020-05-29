@@ -140,7 +140,7 @@ export default function ApiCreateOpenAPI(props) {
             };
         }
         additionalProperties.gatewayEnvironments = Array.isArray(settings.environment)
-            && settings.environment.length > 0 ? settings.environment[0] : [];
+            && settings.environment.length > 0 ? [settings.environment[0].name] : [];
         const newAPI = new API(additionalProperties);
         const promisedResponse = inputType === 'file'
             ? newAPI.importOpenAPIByFile(inputValue) : newAPI.importOpenAPIByUrl(inputValue);
