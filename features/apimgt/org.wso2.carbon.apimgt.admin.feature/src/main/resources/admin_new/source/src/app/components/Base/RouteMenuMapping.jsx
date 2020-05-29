@@ -34,6 +34,7 @@ import BlacklistThrottlingPolicies from 'AppComponents/Throttling/Blacklist/List
 import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom/List';
 import ListApplications from 'AppComponents/ApplicationSettings/ListApplications';
 import MicrogatewayLabels from 'AppComponents/MicrogatewayLabels/ListMGLabels';
+import AdvancedThrottlePolicies from 'AppComponents/Throttling/Advanced';
 import TenantTheme from 'AppComponents/TenantTheme/UploadTheme';
 
 
@@ -169,7 +170,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Advanced Policies',
                 }),
                 path: '/throttling/advanced',
-                component: () => <DemoTable />,
+                component: () => <AdvancedThrottlePolicies />,
                 icon: <SettingsIcon />,
             },
             {
