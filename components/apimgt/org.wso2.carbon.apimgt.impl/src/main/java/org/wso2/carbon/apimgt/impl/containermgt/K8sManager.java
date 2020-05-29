@@ -59,15 +59,15 @@ public class K8sManager implements ContainerManager {
 
     private static final Logger log = LoggerFactory.getLogger(K8sManager.class);
 
-    protected String masterURL;
-    protected String saToken;
-    protected String namespace;
+    private String masterURL;
+    private String saToken;
+    private String namespace;
     private int replicas;
     private String clusterName;
     private String jwtSecurityCRName;
     private String oauthSecurityCRName;
     private String basicAuthSecurityCRName;
-    protected OpenShiftClient openShiftClient;
+    private OpenShiftClient openShiftClient;
 
     /**
      * This would initialize the class
