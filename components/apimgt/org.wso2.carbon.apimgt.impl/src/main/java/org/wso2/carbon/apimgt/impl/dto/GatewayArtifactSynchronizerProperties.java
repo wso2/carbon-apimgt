@@ -6,6 +6,7 @@ public class GatewayArtifactSynchronizerProperties {
     private boolean skipLocalCopy = false;
     private String publisher;
     private String retriever;
+    private String gatewayLabel = "DefaultGateway";
 
     public boolean isSyncArtifacts() {
 
@@ -45,5 +46,15 @@ public class GatewayArtifactSynchronizerProperties {
     public void setRetriever(String retriever) {
 
         this.retriever = retriever;
+    }
+
+    public String getGatewayLabel() {
+
+        return gatewayLabel;
+    }
+
+    public void setGatewayLabel(String gatewayLabel) {
+
+        this.gatewayLabel = gatewayLabel;
     }
 }

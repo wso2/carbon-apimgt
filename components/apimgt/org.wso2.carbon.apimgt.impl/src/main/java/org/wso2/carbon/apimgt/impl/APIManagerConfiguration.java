@@ -1584,6 +1584,15 @@ public class APIManagerConfiguration {
         } else {
             log.debug("GatewayArtifactsSynchronizer SkipLocalCopy Element is not set. Set to default false");
         }
+
+        OMElement gatewayLabelElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.GATEWAY_LABEL_CONFIG));
+        if (gatewayLabelElement != null) {
+            String gatewayLabel = gatewayLabelElement.getText();
+            gatewayArtifactSynchronizerProperties.setGatewayLabel(gatewayLabel);
+        } else {
+            log.debug("GatewayArtifactsSynchronizer Gateway Label Element is not set. Set to default");
+        }
     }
 
     public GatewayArtifactSynchronizerProperties getGatewayArtifactSynchronizerProperties() {

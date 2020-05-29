@@ -1132,5 +1132,11 @@
              {% endif %}
          </ConfigurationRetriever>
      </KeyManagerConfigurations>
+     <SyncGatewayArtifacts>
+             <GatewayLabel>Gateway1</GatewayLabel>
+             <Pubisher>org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBDPublisher</Pubisher>
+             <Retriever>org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever</Retriever>
+             <SkipLocalCopy>false</SkipLocalCopy>
+    </SyncGatewayArtifacts>
 
 </APIManager>
