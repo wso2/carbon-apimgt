@@ -81,6 +81,7 @@ securityDefinitions:
       apim:app_owner_change: Retrieve and manage applications #TODO: Verify Description
       apim:app_import_export: Import and export applications
       apim:api_import_export: Import and export APIs
+      apim:api_product_import_export: Import and export API Products
       apim:label_manage: Manage labels
       apim:label_read: Retrieve labels
       apim:monetization_usage_publish: Retrieve and publish Monetization related usage records #TODO: Verify Description
@@ -2252,7 +2253,7 @@ paths:
           enum:
             - JSON
             - YAML
-          required: true
+          required: false
         - name: preserveStatus
           in: query
           description: |
@@ -2286,7 +2287,169 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-####################################################
+######################################################
+# Import Resource API Product
+######################################################
+  /import/api-product:
+
+    post:
+      security:
+        - OAuth2Security:
+            - apim:api_product_import_export
+      consumes:
+        - multipart/form-data
+      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v1/import/api-product?preserveProvider=false&overwriteAPIs=false&overwriteAPIProduct=false"
+      x-wso2-request: |
+        POST https://localhost:9443/api/am/admin/v1/import/api-product
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nAPI Product imported successfully."
+      summary: Import an API Product
+      description: |
+        This operation can be used to import an API Product.
+      parameters:
+        - name: file
+          in: formData
+          description: |
+            Zip archive consisting on exported API Product configuration
+          required: true
+          type: file
+        - name: preserveProvider
+          in: query
+          description: |
+            Preserve Original Provider of the API Product. This is the user choice to keep or replace the API Product provider.
+          required: false
+          type: boolean
+        - name: importAPIs
+          in: query
+          description: |
+            Whether to import the dependent APIs or not.
+          required: false
+          type: boolean
+        - name: overwriteAPIProduct
+          in: query
+          description: |
+            Whether to update the API Product or not. This is used when updating already existing API Products.
+          required: false
+          type: boolean
+        - name: overwriteAPIs
+          in: query
+          description: |
+            Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product.
+          required: false
+          type: boolean
+      tags:
+        - API Product (Individual)
+      responses:
+        200:
+          description: |
+            Created.
+            API Product Imported Successfully.
+        403:
+          description: |
+            Forbidden
+            Not Authorized to import.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API Product to update not found.
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: |
+            Conflict.
+            API Product to import already exists.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error.
+            Error in importing API Product.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# Export Resource API Product
+######################################################
+  /export/api-product:
+
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_product_import_export
+      produces:
+        - application/zip
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET https://localhost:9443/api/am/admin/v0.16/export/api-product?name=SampleAPIProduct&version=1.0.0&providerName=admin > exportAPIProduct.zip"
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/admin/v0.16/export/api-product?name=SampleAPIProduct&version=1.0.0&providerName=admin
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-api-product.zip\"\n  Content-Type: application/zip"
+      summary: Export an API Product
+      description: |
+        This operation can be used to export the details of a particular API Product as a zip file.
+      parameters:
+        - name: name
+          in: query
+          description: |
+            API Product Name
+          required: true
+          type: string
+        - name: version
+          in: query
+          description: |
+            Version of the API Product
+          required: true
+          type: string
+        - name: providerName
+          in: query
+          description: |
+            Provider name of the API Product
+          required: false
+          type: string
+        - name: format
+          in: query
+          description: |
+            Format of output documents. Can be YAML or JSON.
+          type: string
+          enum:
+            - JSON
+            - YAML
+          required: false
+        - name: preserveStatus
+          in: query
+          description: |
+            Preserve API Product Status on export
+          required: false
+          type: boolean
+      tags:
+        - API Product (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Export Successful.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            type: file
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error.
+            Error in exporting API Product.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # The "Label" resource API
 ######################################################
   /labels:

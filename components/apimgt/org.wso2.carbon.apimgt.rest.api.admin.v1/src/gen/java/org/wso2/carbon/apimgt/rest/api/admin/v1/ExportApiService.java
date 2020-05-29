@@ -21,6 +21,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ExportApiService {
-      public Response exportApiGet(String name, String version, String format, String providerName, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
+      public Response exportApiGet(String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
+      public Response exportApiProductGet(String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
       public Response exportApplicationsGet(String appName, String appOwner, Boolean withKeys, MessageContext messageContext) throws APIManagementException;
 }

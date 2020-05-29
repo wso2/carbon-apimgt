@@ -1686,13 +1686,13 @@ public final class APIUtil {
     /**
      * Utility method for creating storage path for an icon.
      *
-     * @param identifier APIIdentifier
+     * @param identifier Identifier
      * @return Icon storage path.
      */
-    public static String getIconPath(APIIdentifier identifier) {
+    public static String getIconPath(Identifier identifier) {
         String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+                identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
         return artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
     }
 
@@ -1841,15 +1841,25 @@ public final class APIUtil {
     /**
      * Utility method to get documentation path
      *
+     * @param id Identifier (API or API Product)
+     * @return Doc path
+     */
+    public static String getAPIOrAPIProductDocPath(Identifier id) {
+        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                id.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                id.getName() + RegistryConstants.PATH_SEPARATOR +
+                id.getVersion() + RegistryConstants.PATH_SEPARATOR +
+                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+    }
+
+    /**
+     * Utility method to get documentation path
+     *
      * @param apiId APIIdentifier
      * @return Doc path
      */
     public static String getAPIDocPath(APIIdentifier apiId) {
-        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiId.getApiName() + RegistryConstants.PATH_SEPARATOR +
-                apiId.getVersion() + RegistryConstants.PATH_SEPARATOR +
-                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+        return getAPIOrAPIProductDocPath(apiId);
     }
 
     /**

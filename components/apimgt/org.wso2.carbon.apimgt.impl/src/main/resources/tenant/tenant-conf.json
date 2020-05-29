@@ -74,6 +74,10 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:api_product_import_export",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:label_manage",
         "Roles": "admin"
       },

@@ -3738,7 +3738,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         ExportApiUtil exportApiUtil = new ExportApiUtil();
         if (apiId == null) {
 
-            return exportApiUtil.exportApiByParams(name, version, providerName, format, preserveStatus);
+            return exportApiUtil.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus, RestApiConstants.RESOURCE_API);
         } else {
             try {
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
