@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.gateway.v1.impl;
 
-import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.impl.APIGatewayManager;
 
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.*;
 
@@ -25,10 +23,8 @@ public class DeployApiApiServiceImpl implements DeployApiApiService {
       public Response deployApiPost(String apiName, String environment, String apiId, MessageContext messageContext) {
 
           APIGatewayManager apiGatewayManager = APIGatewayManager.getInstance();
-          DBRetriever dbRetriever = new DBRetriever();
-          GatewayAPIDTO gatewayAPIDTO = dbRetriever.retrieveArtifacts(apiId, apiName, environment);
+          apiGatewayManager.deployAPI(apiName, environment, apiId);
 
-          apiGatewayManager.deployAPI(gatewayAPIDTO);
           return Response.ok().entity("magic!").build();
   }
 }

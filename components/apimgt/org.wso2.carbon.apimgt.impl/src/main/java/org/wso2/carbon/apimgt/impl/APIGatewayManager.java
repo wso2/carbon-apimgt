@@ -285,15 +285,20 @@ public class APIGatewayManager {
         return failedEnvironmentsMap;
     }
 
-    public boolean deployAPI (GatewayAPIDTO gatewayAPIDTO){
-        String environmentName = gatewayAPIDTO.getEnvironment();
+    public boolean deployAPI (String apiName, String environmentName, String apiId){
+
         Environment environment = environments.get(environmentName);
         APIGatewayAdminClient client;
-        try {
-            client = new APIGatewayAdminClient(environment);
-            client.deployAPI(gatewayAPIDTO);
-        } catch (AxisFault axisFault) {
-            log.error(axisFault);
+        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getGatewayArtifactSynchronizerProperties().isSyncArtifacts()) {
+            try {
+                GatewayAPIDTO gatewayAPIDTO = ServiceReferenceHolder.getInstance().getArtifactRetriever()
+                        .retrieveArtifacts(apiId, apiName, environmentName);
+                client = new APIGatewayAdminClient(environment);
+                client.deployAPI(gatewayAPIDTO);
+            } catch (AxisFault axisFault) {
+                log.error(axisFault);
+            }
         }
         return true;
     }
