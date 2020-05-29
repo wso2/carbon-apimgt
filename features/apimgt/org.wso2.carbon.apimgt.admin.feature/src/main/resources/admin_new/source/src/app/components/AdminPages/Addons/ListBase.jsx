@@ -127,7 +127,12 @@ function ListBase(props) {
                                                 <EditIcon />
                                             </IconButton>
                                         </RouterLink>
-                                        {DeleteComponent && (<DeleteComponent dataRow={dataRow} updateList={fetchData} />)}
+                                        {DeleteComponent && (
+                                            <DeleteComponent
+                                                dataRow={dataRow}
+                                                updateList={fetchData}
+                                            />
+                                        )}
                                         {addedActions && addedActions.map((action) => {
                                             const AddedComponent = action;
                                             return (
