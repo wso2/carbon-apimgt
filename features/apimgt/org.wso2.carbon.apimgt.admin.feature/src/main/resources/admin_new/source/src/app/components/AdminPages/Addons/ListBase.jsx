@@ -73,6 +73,7 @@ function ListBase(props) {
             content: emptyBoxContent,
         },
         noDataMessage,
+        addedActions,
     } = props;
 
     const classes = useStyles();
@@ -126,7 +127,13 @@ function ListBase(props) {
                                                 <EditIcon />
                                             </IconButton>
                                         </RouterLink>
-                                        <DeleteComponent dataRow={dataRow} updateList={fetchData} />
+                                        {DeleteComponent && (<DeleteComponent dataRow={dataRow} updateList={fetchData} />)}
+                                        {addedActions && addedActions.map((action) => {
+                                            const AddedComponent = action;
+                                            return (
+                                                <AddedComponent rowData={tableMeta.rowData} updateList={fetchData} />
+                                            );
+                                        })}
                                     </>
                                 );
                             } else {
@@ -142,7 +149,13 @@ function ListBase(props) {
                                         {...editComponentProps}
                                     />
                                 )}
-                                <DeleteComponent dataRow={dataRow} updateList={fetchData} />
+                                {DeleteComponent && (<DeleteComponent dataRow={dataRow} updateList={fetchData} />)}
+                                {addedActions && addedActions.map((action) => {
+                                    const AddedComponent = action;
+                                    return (
+                                        <AddedComponent rowData={tableMeta.rowData} updateList={fetchData} />
+                                    );
+                                })}
                             </>
                         );
                     },
@@ -271,7 +284,6 @@ function ListBase(props) {
         </>
     );
 }
-const emptyReactObject = () => <></>;
 
 ListBase.defaultProps = {
     addButtonProps: {},
@@ -285,6 +297,7 @@ ListBase.defaultProps = {
         editIconOverride: null,
         deleteIconShow: true,
     },
+    addedActions: null,
     noDataMessage: (
         <FormattedMessage
             id='AdminPages.Addons.ListBase.nodata.message'
@@ -293,8 +306,8 @@ ListBase.defaultProps = {
     ),
     showActionColumn: true,
     apiCall: null,
-    EditComponent: emptyReactObject,
-    DeleteComponent: emptyReactObject,
+    EditComponent: null,
+    DeleteComponent: null,
     editComponentProps: {},
     columProps: null,
 };
@@ -322,5 +335,6 @@ ListBase.propTypes = {
     }),
     noDataMessage: PropTypes.element,
     addButtonOverride: PropTypes.element,
+    addedActions: PropTypes.shape({}),
 };
 export default ListBase;

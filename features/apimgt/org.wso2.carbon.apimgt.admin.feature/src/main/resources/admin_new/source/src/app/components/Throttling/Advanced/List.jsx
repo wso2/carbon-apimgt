@@ -25,7 +25,6 @@ import EditIcon from '@material-ui/icons/Edit';
 import { Link as RouterLink } from 'react-router-dom';
 import HelpLinks from 'AppComponents/Throttling/Advanced/HelpLinks';
 import Button from '@material-ui/core/Button';
-
 /**
  * Mock API call
  * @returns {Promise}.
@@ -38,10 +37,10 @@ function apiCall() {
                     id: '1', name: '10KPerMin', quotaPolicy: 'requestCount', quota: '10000',
                 },
                 {
-                    id: '1', name: '20KPerMin', quotaPolicy: 'requestCount', quota: '20000',
+                    id: '2', name: '20KPerMin', quotaPolicy: 'requestCount', quota: '20000',
                 },
                 {
-                    id: '1', name: '50KPerMin', quotaPolicy: 'requestCount', quota: '50000',
+                    id: '3', name: '50KPerMin', quotaPolicy: 'requestCount', quota: '50000',
                 },
 
             ]);
@@ -80,7 +79,7 @@ const columProps = [
         name: 'quota',
         label: 'Quota',
     },
-    {
+    { // Id column has to be always the last.
         name: 'id',
         options: {
             display: false,
@@ -189,8 +188,37 @@ export default function ListMG() {
                 <EditIcon />
             </RouterLink> }
     .....
+    /* **************************************************************** */
+    /*
+    Passing additional actions to the action column.
+    const addedActions = [
+        {
+            component: <Button>test</Button>,
+            componentProps: {
+                onClick={}
+            }
+        }
+    ]
 
     */
+
+    const addedActions = [
+        (props) => {
+            const { rowData, updateList } = props;
+            const updateSomething = () => {
+                alert(`Do something with ${JSON.stringify(rowData)}`);
+                updateList();
+            };
+            return (
+                <Button variant='contained' size='small' onClick={updateSomething}>
+                    <FormattedMessage
+                        id='Throttling.Advanced.List.custom.action'
+                        defaultMessage='Some Action'
+                    />
+                </Button>
+            );
+        },
+    ];
     const addButtonOverride = (
         <RouterLink to='/throttling/advanced/create'>
             <Button variant='contained' color='primary' size='small'>
@@ -216,6 +244,7 @@ export default function ListMG() {
             }}
             DeleteComponent={Delete}
             addButtonOverride={addButtonOverride}
+            addedActions={addedActions}
         />
     );
 }
