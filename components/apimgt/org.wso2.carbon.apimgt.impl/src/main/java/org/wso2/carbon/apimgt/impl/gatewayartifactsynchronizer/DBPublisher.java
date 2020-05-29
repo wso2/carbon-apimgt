@@ -26,12 +26,22 @@ public class DBPublisher implements ArtifactPublisher {
             objectOutputStream.writeObject(gatewayAPIDTO);
             byte[] gatewayAPIDTOAsBytes = byteArrayOutputStream.toByteArray();
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayAPIDTOAsBytes);
-            apiMgtDAO.addAPIBlob(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getName(), gatewayAPIDTO.getEnvironment(),
+            apiMgtDAO.addAPIBlob(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getName(), gatewayAPIDTO.getGatewayLabel(),
                     byteArrayInputStream, gatewayAPIDTOAsBytes.length);
 
         } catch (IOException | APIManagementException e) {
             log.error("Error publishing Artifact of " + gatewayAPIDTO.getName() + " API from DB", e);
         }
+
+    }
+
+    @Override
+    public void updateArtifacts(GatewayAPIDTO gatewayAPIDTO) {
+
+    }
+
+    @Override
+    public void deleteArtifacts(GatewayAPIDTO gatewayAPIDTO) {
 
     }
 }

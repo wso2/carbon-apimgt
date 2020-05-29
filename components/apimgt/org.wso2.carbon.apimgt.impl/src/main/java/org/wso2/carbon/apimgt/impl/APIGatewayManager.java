@@ -138,7 +138,12 @@ public class APIGatewayManager {
             gatewayAPIDTO.setApiId(api.getUUID());
             gatewayAPIDTO.setTenantDomain(tenantDomain);
             gatewayAPIDTO.setOverride(true);
-            gatewayAPIDTO.setEnvironment(environmentName);
+            try {
+                gatewayAPIDTO.setGatewayLabel(api.getProperty("gateway_label"));
+            } catch (Exception e){
+                log.error(e);
+            }
+
 
             try {
                 String definition;

@@ -32,9 +32,9 @@
           "required" : true,
           "type" : "string"
         }, {
-          "name" : "environment",
+          "name" : "label",
           "in" : "query",
-          "description" : "Environement of the API Gateway\n",
+          "description" : "Label of the API Gateway\n",
           "required" : true,
           "type" : "string"
         }, {

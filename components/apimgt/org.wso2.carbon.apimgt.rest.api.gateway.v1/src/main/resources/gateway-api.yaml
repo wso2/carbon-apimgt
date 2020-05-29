@@ -71,9 +71,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/deploy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&environment=Production\""
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/deploy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\""
       x-wso2-request: |
-        POST https://127.0.0.1:9443/api/am/gateway/v1/deploy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&environment=Production
+        POST https://127.0.0.1:9443/api/am/gateway/v1/deploy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK"
       summary: Deploy the API in the gateway
@@ -86,9 +86,9 @@ paths:
           in: query
           type: string
           required: true
-        - name: environment
+        - name: label
           description: |
-            Environement of the API Gateway
+            Label of the API Gateway
           in: query
           type: string
           required: true

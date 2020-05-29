@@ -6,4 +6,8 @@ public interface ArtifactPublisher {
 
     public void publishArtifacts (GatewayAPIDTO gatewayAPIDTO);
 
+    public void updateArtifacts (GatewayAPIDTO gatewayAPIDTO);
+
+    public void deleteArtifacts (GatewayAPIDTO gatewayAPIDTO);
+
 }

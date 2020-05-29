@@ -20,10 +20,10 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public class DeployApiApiServiceImpl implements DeployApiApiService {
-      public Response deployApiPost(String apiName, String environment, String apiId, MessageContext messageContext) {
+      public Response deployApiPost(String apiName, String label, String apiId, MessageContext messageContext) {
 
           APIGatewayManager apiGatewayManager = APIGatewayManager.getInstance();
-          apiGatewayManager.deployAPI(apiName, environment, apiId);
+          apiGatewayManager.deployAPI(apiName, label, apiId);
 
           return Response.ok().entity("magic!").build();
   }

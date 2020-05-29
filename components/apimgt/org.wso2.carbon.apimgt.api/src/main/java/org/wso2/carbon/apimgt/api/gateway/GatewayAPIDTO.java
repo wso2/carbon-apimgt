@@ -45,7 +45,7 @@ public class GatewayAPIDTO implements Serializable {
     private String[] endpointEntriesToBeRemove;
     private CredentialDto[] credentialsToBeAdd ;
     private String[] credentialsToBeRemove;
-    private String environment;
+    private String gatewayLabel;
 
     public String getName() {
 
@@ -227,13 +227,13 @@ public class GatewayAPIDTO implements Serializable {
         this.credentialsToBeRemove = credentialsToBeRemove;
     }
 
-    public String getEnvironment() {
+    public String getGatewayLabel() {
 
-        return environment;
+        return gatewayLabel;
     }
 
-    public void setEnvironment(String environment) {
+    public void setGatewayLabel(String gatewayLabel) {
 
-        this.environment = environment;
+        this.gatewayLabel = gatewayLabel;
     }
 }
