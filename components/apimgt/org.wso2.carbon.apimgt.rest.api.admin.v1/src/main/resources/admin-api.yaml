@@ -2965,7 +2965,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  /settings/scopes:
+  /settings/scopes/{scope}:
     #-----------------------------------------------------
     # Retrieve scope settings
     #-----------------------------------------------------
@@ -2985,10 +2985,7 @@ paths:
           in: query
           type: string
           required: true
-        - name: scope
-          in: query
-          type: string
-          required: true
+        - $ref : '#/parameters/scope'
       tags:
         - Settings
       responses:
@@ -2997,7 +2994,7 @@ paths:
             OK.
             Particular scope exists for the given user.
           schema:
-            $ref: '#/definitions/Settings'
+            $ref: '#/definitions/ScopeSettings'
         400:
           description: |
             Bad Request.
@@ -3025,10 +3022,10 @@ parameters:
     required: true
     type: string
 
-# Group Identifier of the application
+# Scope Name
   scope:
     name: scope
-    in: query
+    in: path
     description: |
       scope name to be validated
     required: true
@@ -4183,6 +4180,18 @@ definitions:
         type: boolean
         description: To determine whether analytics is enabled or not
         example: false
+
+  #-----------------------------------------------------
+  # The Scope Settings resource
+  #-----------------------------------------------------
+  ScopeSettings:
+    title: Settings
+    properties:
+      name:
+        type: string
+        items:
+          type: string
+
 
 #-----------------------------------------------------
 # END-OF-FILE

@@ -20,20 +20,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApiService;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SettingsApiServiceImpl implements SettingsApiService {
 
@@ -64,27 +63,30 @@ public class SettingsApiServiceImpl implements SettingsApiService {
      * @return Scope list
      */
     @Override
-    public Response settingsScopesGet(String username, String scopeName, MessageContext messageContext) {
-        String[] userRoles ;
-        List<String> scopeList = new ArrayList<>();
-        SettingsDTO settingsDTO = new SettingsDTO();
-        org.wso2.carbon.user.api.UserStoreManager userStoreManager;
-        try {
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(MultitenantUtils.getTenantDomain(username));
-            userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-            userRoles = userStoreManager.getRoleListOfUser(username);
+    public Response settingsScopesScopeGet(String username, String scopeName, MessageContext messageContext) {
+        String[] userRoles;
+        ScopeSettingsDTO scopeSettingsDTO = new ScopeSettingsDTO();
+        ErrorDTO errorDTO = new ErrorDTO();
 
-            SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-            if (settingsMappingUtil.GetRoleScopeList(userRoles, username).contains(scopeName)) {
-                scopeList.add(scopeName);
-                settingsDTO.setScopes(scopeList);
+        try {
+            if (APIUtil.isUserExist(username) && APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
+                    .getTenantDomain(username)).containsKey(scopeName)) {
+                userRoles = APIUtil.getListOfRoles(username);
+                SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
+
+                if (settingsMappingUtil.GetRoleScopeList(userRoles, username).contains(scopeName)) {
+                    scopeSettingsDTO.setName(scopeName);
+                }
+            } else {
+                errorDTO.setCode(404l);
+                errorDTO.description("Username or Scope does not exist");
+                errorDTO.setMessage("Not Found");
+                return Response.ok().entity(errorDTO).build();
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException  e) {
+        } catch (APIManagementException e) {
             String errorMessage = "Error when getting the list of scopes";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-        return Response.ok().entity(settingsDTO).build();
+        return Response.ok().entity(scopeSettingsDTO).build();
     }
 }
