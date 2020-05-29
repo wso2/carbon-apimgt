@@ -2973,9 +2973,9 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin_settings
-      x-wso2-curl: "curl -k -X GET \"https://localhost:9443/api/am/admin/v1/settings/scopes?username=john&scope=apim:subscribe\" -H \"accept: application/json\" -H \"Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
-      x-wso2-request: "GET https://localhost:9443/api/am/admin/v1/settings/scopes?username=john&scope=apim:subscribe Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
-      x-wso2-response: "{\n  \"scopes\":[\"apim:subscribe\" \n] \n}\n"
+      x-wso2-curl: "curl -k -X GET \"https://localhost:9443/api/am/admin/v1/settings/scopes/apim:subscribe?username=john\" -H \"accept: application/json\" -H \"Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
+      x-wso2-request: "GET https://localhost:9443/api/am/admin/v1/settings/scopes/apim:subscribe?username=john Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
+      x-wso2-response: "{\n  \"name\":\"apim:subscribe\"  \n}\n"
       summary: Retrieve scopes for a particular user
       description: |
         This operation will return the scope list of particular user
