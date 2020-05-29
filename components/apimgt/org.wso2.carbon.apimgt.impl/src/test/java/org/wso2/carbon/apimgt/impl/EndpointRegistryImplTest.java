@@ -26,13 +26,13 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryException;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.dao.EndpointRegistryDAO;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.impl.EndpointRegistryImpl;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryEntry;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntry;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -102,7 +102,7 @@ public class EndpointRegistryImplTest {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
 
         endpointRegistry.updateEndpointRegistry(endpointRegistryInfo.getUuid(), endpointRegistryInfo.getName(),
-                endpointRegistryInfo);
+                endpointRegistryInfo.getType(), endpointRegistryInfo);
         Mockito.verify(endpointRegistryDAO).updateEndpointRegistry(endpointRegistryInfo.getUuid(), endpointRegistryInfo,
                 ADMIN_USERNAME);
     }
@@ -115,7 +115,7 @@ public class EndpointRegistryImplTest {
                 .thenReturn(true);
 
         endpointRegistry.updateEndpointRegistry(endpointRegistryInfo.getUuid(), "Endpoint Registry 2",
-                endpointRegistryInfo);
+                "wso2", endpointRegistryInfo);
     }
 
     @Test
@@ -175,12 +175,12 @@ public class EndpointRegistryImplTest {
         String registryUUID = "reg1";
 
         EndpointRegistryEntry endpointRegistryEntry1 = createRegistryEntry("abc1", "Entry 1", "v1",
-                "{mutualTLS:true}", "https://xyz.com", "REST", "UTILITY",
+                "A Registry Entry that exposes a REST endpoint", "https://xyz.com", "REST", "UTILITY",
                 "https://petstore.swagger.io/v2/swagger.json", "OAS", null);
         endpointRegistryEntryList.add(endpointRegistryEntry1);
 
         EndpointRegistryEntry endpointRegistryEntry2 = createRegistryEntry("abc2", "Entry 2", "v1",
-                "{mutualTLS:false}", "https://xyz2.com", "REST", "DOMAIN",
+                "A Registry Entry that exposes a REST endpoint", "https://xyz2.com", "REST", "DOMAIN",
                 "https://petstore.swagger.io/v2/swagger.json", "WSDL1", null);
         endpointRegistryEntryList.add(endpointRegistryEntry2);
 
@@ -216,7 +216,7 @@ public class EndpointRegistryImplTest {
         EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
 
         EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
-                "Entry 2", "v1", "{mutualTLS:false}", "https://xyz2.com",
+                "Entry 2", "v1", "A Registry Entry that exposes a REST endpoint", "https://xyz2.com",
                 "REST",
                 "DOMAIN", "https://petstore.swagger.io/v2/swagger.json",
                 "WSDL1", null);
@@ -235,7 +235,7 @@ public class EndpointRegistryImplTest {
         EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
 
         EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
-                "Entry 2", "v1", "{mutualTLS:false}", "https://xyz2.com",
+                "Entry 2", "v1", "A Registry Entry that exposes a REST endpoint", "https://xyz2.com",
                 "REST",
                 "DOMAIN", "https://petstore.swagger.io/v2/swagger.json",
                 "WSDL1", null);
@@ -298,7 +298,7 @@ public class EndpointRegistryImplTest {
         Assert.assertEquals(expected.getEntryId(), actual.getEntryId());
         Assert.assertEquals(expected.getName(), actual.getName());
         Assert.assertEquals(expected.getVersion(), actual.getVersion());
-        Assert.assertEquals(expected.getMetaData(), actual.getMetaData());
+        Assert.assertEquals(expected.getDescription(), actual.getDescription());
         Assert.assertEquals(expected.getRegistryId(), actual.getRegistryId());
         Assert.assertEquals(expected.getProductionServiceURL(), actual.getProductionServiceURL());
         Assert.assertEquals(expected.getServiceType(), actual.getServiceType());
@@ -337,7 +337,7 @@ public class EndpointRegistryImplTest {
         endpointRegistryEntry.setEntryId("entry1");
         endpointRegistryEntry.setName("Entry Name 1");
         endpointRegistryEntry.setVersion("v1");
-        endpointRegistryEntry.setMetaData("{mutualTLS: true}");
+        endpointRegistryEntry.setDescription("A Registry Entry that exposes a REST endpoint");
         endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
         endpointRegistryEntry.setServiceType("REST");
         endpointRegistryEntry.setServiceCategory("UTILITY");
@@ -347,7 +347,7 @@ public class EndpointRegistryImplTest {
         return endpointRegistryEntry;
     }
 
-    private EndpointRegistryEntry createRegistryEntry(String id, String name, String version, String metadata,
+    private EndpointRegistryEntry createRegistryEntry(String id, String name, String version, String description,
                                                       String serviceUrl, String serviceType, String serviceCategory,
                                                       String definitionUrl, String definitionType,
                                                       InputStream definitionFile) {
@@ -355,7 +355,7 @@ public class EndpointRegistryImplTest {
         endpointRegistryEntry.setEntryId(id);
         endpointRegistryEntry.setName(name);
         endpointRegistryEntry.setVersion(version);
-        endpointRegistryEntry.setMetaData(metadata);
+        endpointRegistryEntry.setDescription(description);
         endpointRegistryEntry.setProductionServiceURL(serviceUrl);
         endpointRegistryEntry.setServiceType(serviceType);
         endpointRegistryEntry.setServiceCategory(serviceCategory);

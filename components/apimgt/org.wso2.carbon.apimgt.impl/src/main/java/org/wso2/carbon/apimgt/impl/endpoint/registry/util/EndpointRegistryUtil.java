@@ -19,13 +19,13 @@ package org.wso2.carbon.apimgt.impl.endpoint.registry.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
 
 public class EndpointRegistryUtil {
 
     private static final Log log = LogFactory.getLog(EndpointRegistryUtil.class);
 
-    public static void handleResourceAlreadyExistsException(String msg) throws
+    public static void raiseResourceAlreadyExistsException(String msg) throws
             EndpointRegistryResourceAlreadyExistsException {
 
         log.error(msg);

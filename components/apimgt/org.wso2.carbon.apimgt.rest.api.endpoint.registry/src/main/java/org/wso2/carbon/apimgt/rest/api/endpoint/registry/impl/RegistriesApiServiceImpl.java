@@ -34,13 +34,12 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistry;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistry;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.impl.EndpointRegistryImpl;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryEntry;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryException;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.model.EndpointRegistryInfo;
-import org.wso2.carbon.apimgt.impl.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntry;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi;
@@ -269,7 +268,8 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
                         " is not found", log);
             }
-            registryProvider.updateEndpointRegistry(registryId, endpointRegistry.getName(), registryToUpdate);
+            registryProvider.updateEndpointRegistry(registryId, endpointRegistry.getName(), endpointRegistry.getType(),
+                     registryToUpdate);
             EndpointRegistryInfo updatedEndpointRegistry
                     = registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
             audit.info("Successfully updated endpoint registry of id :" + updatedEndpointRegistry.getUuid()
