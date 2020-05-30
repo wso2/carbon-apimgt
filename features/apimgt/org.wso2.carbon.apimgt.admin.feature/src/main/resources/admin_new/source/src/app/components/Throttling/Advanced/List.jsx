@@ -18,21 +18,13 @@
 
 import React from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
-import HelpBase from 'AppComponents/AdminPages/Addons/HelpBase';
 import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
-import DescriptionIcon from '@material-ui/icons/Description';
-import Link from '@material-ui/core/Link';
-import Configurations from 'Config';
-import Delete from 'AppComponents/AdminPages/Microgateways/Delete';
+import Delete from 'AppComponents/Throttling/Advanced/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { Link as RouterLink } from 'react-router-dom';
-import IconButton from '@material-ui/core/IconButton';
-
+import HelpLinks from 'AppComponents/Throttling/Advanced/HelpLinks';
+import Button from '@material-ui/core/Button';
 /**
  * Mock API call
  * @returns {Promise}.
@@ -45,10 +37,10 @@ function apiCall() {
                     id: '1', name: '10KPerMin', quotaPolicy: 'requestCount', quota: '10000',
                 },
                 {
-                    id: '1', name: '20KPerMin', quotaPolicy: 'requestCount', quota: '20000',
+                    id: '2', name: '20KPerMin', quotaPolicy: 'requestCount', quota: '20000',
                 },
                 {
-                    id: '1', name: '50KPerMin', quotaPolicy: 'requestCount', quota: '50000',
+                    id: '3', name: '50KPerMin', quotaPolicy: 'requestCount', quota: '50000',
                 },
 
             ]);
@@ -68,9 +60,9 @@ const columProps = [
         name: 'name',
         options: {
             customBodyRender: (value, tableMeta) => {
-                if (tableMeta.rowData) {
-                    // const artifact = tableViewObj.state.data[tableMeta.rowIndex];
-                    return <RouterLink to='/throttling/advanced/polcyid'>{value}</RouterLink>;
+                if (typeof tableMeta.rowData === 'object') {
+                    const artifactId = tableMeta.rowData[tableMeta.rowData.length - 2];
+                    return <RouterLink to={`/throttling/advanced/${artifactId}`}>{value}</RouterLink>;
                 } else {
                     return <div />;
                 }
@@ -87,9 +79,8 @@ const columProps = [
         name: 'quota',
         label: 'Quota',
     },
-    {
-        name: 'quota',
-        label: 'Quota',
+    { // Id column has to be always the last.
+        name: 'id',
         options: {
             display: false,
         },
@@ -123,51 +114,7 @@ export default function ListMG() {
         active: true,
     };
     const pageProps = {
-        help: (
-            <HelpBase>
-                <List component='nav' aria-label='main mailbox folders'>
-                    <ListItem button>
-                        <ListItemIcon>
-                            <DescriptionIcon />
-                        </ListItemIcon>
-                        <Link
-                            target='_blank'
-                            href={Configurations.app.docUrl
-                                + `learn/rate-limiting/
-                                introducing-throttling-use-cases/`}
-                        >
-                            <ListItemText primary={(
-                                <FormattedMessage
-                                    id='Throttling.Advanced.List.help.link.one'
-                                    defaultMessage='Introducing Throttling Use-Cases'
-                                />
-                            )}
-                            />
-
-                        </Link>
-                    </ListItem>
-                    <ListItem button>
-                        <ListItemIcon>
-                            <DescriptionIcon />
-                        </ListItemIcon>
-                        <Link
-                            target='_blank'
-                            href={Configurations.app.docUrl
-                                + `learn/rate-limiting/adding-new-throttling-policies/
-                                #adding-a-new-advanced-throttling-policy`}
-                        >
-                            <ListItemText primary={(
-                                <FormattedMessage
-                                    id='Throttling.Advanced.List.help.link.two'
-                                    defaultMessage='Adding a new advanced throttling policy'
-                                />
-                            )}
-                            />
-
-                        </Link>
-                    </ListItem>
-                </List>
-            </HelpBase>),
+        help: (<HelpLinks />),
         /*
         pageStyle='half' center part of the screen.
         pageStyle='full' = Take the full content area.
@@ -241,8 +188,47 @@ export default function ListMG() {
                 <EditIcon />
             </RouterLink> }
     .....
+    /* **************************************************************** */
+    /*
+    Passing additional actions to the action column.
+    const addedActions = [
+        {
+            component: <Button>test</Button>,
+            componentProps: {
+                onClick={}
+            }
+        }
+    ]
 
     */
+
+    const addedActions = [
+        (props) => {
+            const { rowData, updateList } = props;
+            const updateSomething = () => {
+                alert(`Do something with ${JSON.stringify(rowData)}`);
+                updateList();
+            };
+            return (
+                <Button variant='contained' size='small' onClick={updateSomething}>
+                    <FormattedMessage
+                        id='Throttling.Advanced.List.custom.action'
+                        defaultMessage='Some Action'
+                    />
+                </Button>
+            );
+        },
+    ];
+    const addButtonOverride = (
+        <RouterLink to='/throttling/advanced/create'>
+            <Button variant='contained' color='primary' size='small'>
+                <FormattedMessage
+                    id='Throttling.Advanced.List.add.new.polcy'
+                    defaultMessage='Add New Policy'
+                />
+            </Button>
+        </RouterLink>
+    );
     return (
         <ListBase
             columProps={columProps}
@@ -251,18 +237,14 @@ export default function ListMG() {
             searchProps={searchProps}
             emptyBoxProps={emptyBoxProps}
             apiCall={apiCall}
-            EditComponent={() => (
-                <RouterLink to='/throttling/advanced/polcyid'>
-                    <IconButton color='primary' component='span'>
-                        <EditIcon />
-                    </IconButton>
-                </RouterLink>
-            )}
             editComponentProps={{
                 icon: <EditIcon />,
                 title: 'Edit Policy',
+                routeTo: '/throttling/advanced/',
             }}
             DeleteComponent={Delete}
+            addButtonOverride={addButtonOverride}
+            addedActions={addedActions}
         />
     );
 }

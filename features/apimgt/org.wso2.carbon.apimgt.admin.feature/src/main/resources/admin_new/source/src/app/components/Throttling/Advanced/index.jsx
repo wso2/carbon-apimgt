@@ -13,6 +13,7 @@ function AdvancedThrottlePolicies() {
         <Switch>
             <Route exact path='/throttling/advanced' component={List} />
             <Route path='/throttling/advanced/:id' component={AddEdit} />
+            <Route path='/throttling/advanced/create' component={AddEdit} />
             <Route component={ResourceNotFound} />
         </Switch>
     );

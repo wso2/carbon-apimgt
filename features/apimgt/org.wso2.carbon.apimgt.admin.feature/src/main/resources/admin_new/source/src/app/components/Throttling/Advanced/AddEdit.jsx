@@ -36,6 +36,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import ConditionalGroup from 'AppComponents/Throttling/Advanced/ConditionalGroup';
 import cloneDeep from 'lodash.clonedeep';
+import HelpLinks from 'AppComponents/Throttling/Advanced/HelpLinks';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -293,6 +294,7 @@ function AddEdit() {
                     defaultMessage: 'Advanced Throttle Policy - Create New',
                 })
             }
+            help={<HelpLinks />}
         >
             <Box component='div' m={2}>
                 <Grid container spacing={2}>

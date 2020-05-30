@@ -38,6 +38,8 @@ import MUIDataTable from 'mui-datatables';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
 import Alert from 'AppComponents/Shared/Alert';
+import { Link as RouterLink } from 'react-router-dom';
+import EditIcon from '@material-ui/icons/Edit';
 
 const useStyles = makeStyles((theme) => ({
     searchBar: {
@@ -71,6 +73,7 @@ function ListBase(props) {
             content: emptyBoxContent,
         },
         noDataMessage,
+        addedActions,
     } = props;
 
     const classes = useStyles();
@@ -114,14 +117,50 @@ function ListBase(props) {
                     sort: false,
                     customBodyRender: (value, tableMeta) => {
                         const dataRow = data[tableMeta.rowIndex];
+                        if (editComponentProps && editComponentProps.routeTo) {
+                            if (typeof tableMeta.rowData === 'object') {
+                                const artifactId = tableMeta.rowData[tableMeta.rowData.length - 2];
+                                return (
+                                    <>
+                                        <RouterLink to={editComponentProps.routeTo + artifactId}>
+                                            <IconButton color='primary' component='span'>
+                                                <EditIcon />
+                                            </IconButton>
+                                        </RouterLink>
+                                        {DeleteComponent && (
+                                            <DeleteComponent
+                                                dataRow={dataRow}
+                                                updateList={fetchData}
+                                            />
+                                        )}
+                                        {addedActions && addedActions.map((action) => {
+                                            const AddedComponent = action;
+                                            return (
+                                                <AddedComponent rowData={tableMeta.rowData} updateList={fetchData} />
+                                            );
+                                        })}
+                                    </>
+                                );
+                            } else {
+                                return (<div />);
+                            }
+                        }
                         return (
                             <>
-                                <EditComponent
-                                    dataRow={dataRow}
-                                    updateList={fetchData}
-                                    {...editComponentProps}
-                                />
-                                <DeleteComponent dataRow={dataRow} updateList={fetchData} />
+                                {EditComponent && (
+                                    <EditComponent
+                                        dataRow={dataRow}
+                                        updateList={fetchData}
+                                        {...editComponentProps}
+                                    />
+                                )}
+                                {DeleteComponent && (<DeleteComponent dataRow={dataRow} updateList={fetchData} />)}
+                                {addedActions && addedActions.map((action) => {
+                                    const AddedComponent = action;
+                                    return (
+                                        <AddedComponent rowData={tableMeta.rowData} updateList={fetchData} />
+                                    );
+                                })}
                             </>
                         );
                     },
@@ -164,7 +203,7 @@ function ListBase(props) {
                     </CardActionArea>
                     <CardActions>
                         {addButtonOverride || (
-                            <EditComponent updateList={fetchData} {...addButtonProps} />
+                            EditComponent && (<EditComponent updateList={fetchData} {...addButtonProps} />)
                         )}
                     </CardActions>
                 </Card>
@@ -207,10 +246,12 @@ function ListBase(props) {
                                 </Grid>
                                 <Grid item>
                                     {addButtonOverride || (
-                                        <EditComponent
-                                            updateList={fetchData}
-                                            {...addButtonProps}
-                                        />
+                                        EditComponent && (
+                                            <EditComponent
+                                                updateList={fetchData}
+                                                {...addButtonProps}
+                                            />
+                                        )
                                     )}
                                     <Tooltip title={(
                                         <FormattedMessage
@@ -248,7 +289,6 @@ function ListBase(props) {
         </>
     );
 }
-const emptyReactObject = () => <></>;
 
 ListBase.defaultProps = {
     addButtonProps: {},
@@ -262,6 +302,7 @@ ListBase.defaultProps = {
         editIconOverride: null,
         deleteIconShow: true,
     },
+    addedActions: null,
     noDataMessage: (
         <FormattedMessage
             id='AdminPages.Addons.ListBase.nodata.message'
@@ -270,8 +311,8 @@ ListBase.defaultProps = {
     ),
     showActionColumn: true,
     apiCall: null,
-    EditComponent: emptyReactObject,
-    DeleteComponent: emptyReactObject,
+    EditComponent: null,
+    DeleteComponent: null,
     editComponentProps: {},
     columProps: null,
 };
@@ -299,5 +340,6 @@ ListBase.propTypes = {
     }),
     noDataMessage: PropTypes.element,
     addButtonOverride: PropTypes.element,
+    addedActions: PropTypes.shape({}),
 };
 export default ListBase;
