@@ -67,5 +67,14 @@ public class EndpointRegistryConstants {
     public static final String DEFAULT_REGISTRY_NAME = "Default Registry";
 
     public static final String SYSTEM_USER_NAME = "SYSTEM_USER";
+
+    public static final String DEFINITION_TYPE_OAS = "OAS";
+
+    public static final String DEFINITION_TYPE_WSDL1 = "WSDL1";
+
+    public static final String DEFINITION_TYPE_WSDL2 = "WSDL2";
+
+    public static final String DEFINITION_TYPE_GQL_SDL = "GQL_SDL";
+
 }
 
