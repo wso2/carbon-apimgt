@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface TenantThemeApiService {
-      public Response tenantThemeImportPost(InputStream fileInputStream, Attachment fileDetail, String tenantDomain, MessageContext messageContext) throws APIManagementException;
+      public Response tenantThemeImportPost(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
 }

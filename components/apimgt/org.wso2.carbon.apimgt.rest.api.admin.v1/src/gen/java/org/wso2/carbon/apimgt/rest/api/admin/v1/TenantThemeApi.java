@@ -50,7 +50,7 @@ TenantThemeApiService delegate = new TenantThemeApiServiceImpl();
         @ApiResponse(code = 403, message = "Forbidden. Not Authorized to import. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Tenant does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error. Error in importing Theme. ", response = ErrorDTO.class) })
-    public Response tenantThemeImportPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @NotNull @ApiParam(value = "The tenant domain name ",required=true)  @QueryParam("tenantDomain") String tenantDomain) throws APIManagementException{
-        return delegate.tenantThemeImportPost(fileInputStream, fileDetail, tenantDomain, securityContext);
+    public Response tenantThemeImportPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) throws APIManagementException{
+        return delegate.tenantThemeImportPost(fileInputStream, fileDetail, securityContext);
     }
 }

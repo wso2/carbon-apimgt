@@ -19,16 +19,12 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.TenantThemeApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.TenantThemeImportManager;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.io.InputStream;
 
@@ -36,35 +32,26 @@ import javax.ws.rs.core.Response;
 
 public class TenantThemeApiServiceImpl implements TenantThemeApiService {
 
-    private static final Log log = LogFactory.getLog(ImportApiServiceImpl.class);
+    private static final Log log = LogFactory.getLog(TenantThemeApiServiceImpl.class);
 
     /**
      * Import an Tenant Theme for a particular tenant by uploading an archive file.
      *
      * @param fileInputStream content relevant to the tenant theme
      * @param fileDetail      file details as Attachment
-     * @param tenantDomain    tenant to which the theme is imported
      * @return Theme import response
      */
     @Override
-    public Response tenantThemeImportPost(InputStream fileInputStream, Attachment fileDetail, String tenantDomain,
+    public Response tenantThemeImportPost(InputStream fileInputStream, Attachment fileDetail,
                                           MessageContext messageContext) {
 
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         try {
-            boolean isTenantAvailable = APIUtil.isTenantAvailable(tenantDomain);
-            if (!isTenantAvailable) {
-                // tenant does not exist
-                String errorDescription = "The tenant " + tenantDomain + " does not exist";
-                ErrorDTO errorObject = RestApiUtil
-                        .getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404L,
-                                errorDescription);
-                return Response.ok().entity(errorObject).build();
-            }
-
-            TenantThemeImportManager.deployTenantTheme(fileInputStream, tenantDomain);
+            RestApiAdminUtils.deployTenantTheme(fileInputStream, tenantDomain);
             return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
-        } catch (UserStoreException | APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while importing tenant theme", e, log);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while importing tenant theme for tenant " + tenantDomain;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

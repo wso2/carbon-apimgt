@@ -3141,8 +3141,7 @@ paths:
       consumes:
         - multipart/form-data
       x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer
-      ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v1/tenant-theme/import?tenantDomain=abc
-      .com"
+      ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v1/tenant-theme/import"
       x-wso2-request: |
         POST https://localhost:9443/api/am/admin/v1/tenant-theme/import
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -3157,12 +3156,6 @@ paths:
             Zip archive consisting of tenant theme configuration
           required: true
           type: file
-        - name: tenantDomain
-          in: query
-          description: |
-            The tenant domain name
-          required: true
-          type: string
       responses:
         200:
           description: |
