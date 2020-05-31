@@ -27,6 +27,12 @@ import java.util.Properties;
 
 public class AdminAlertConfigurator extends AlertConfigurator {
 
+    private String agent;
+
+    public AdminAlertConfigurator() {
+        this.agent = AlertMgtConstants.ADMIN_DASHBOARD_AGENT;
+    }
+
     @Override public void subscribe(String userName, List<String> emailsList, List<AlertTypeDTO> alertTypeDTOList)
             throws APIManagementException {
 
@@ -49,4 +55,17 @@ public class AdminAlertConfigurator extends AlertConfigurator {
     @Override public void removeAlertConfiguration(String userName, String alertName,
             Map<String, String> configProperties) throws APIManagementException {
     }
+
+    public List<AlertTypeDTO> getSupportedAlertTypes() throws APIManagementException {
+        return super.getSupportedAlertTypes(this.agent);
+    }
+
+    public List<Integer> getSubscribedAlerts(String userName) throws APIManagementException {
+        return super.getSubscribedAlerts(userName, this.agent);
+    }
+
+    public List<String> getSubscribedEmailAddresses(String userName) throws APIManagementException {
+        return super.getSubscribedEmailAddresses(userName, this.agent);
+    }
+
 }

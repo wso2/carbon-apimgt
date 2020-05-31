@@ -3193,7 +3193,7 @@ paths:
                 The content type of the body.
               type: string
           schema:
-            $ref: '#/definitions/AlertsInfo'
+            $ref: '#/definitions/AlertsSubscription'
         500:
           description: |
             Internal Server Error
@@ -3201,6 +3201,50 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+    #--------------------------------------------------
+    # Subscribe to the selected alert types by the user.
+    #--------------------------------------------------
+    post:
+      security:
+        - OAuth2Security:
+            - apim:admin_alert_manage
+      summary: |
+        Subscribe to an admin alert.
+      operationId: subscribeToAlerts
+      description: |
+        This operation is used to subscribe to admin alerts
+      parameters:
+        - in: body
+          name: body
+          description:
+            The alerts list and the email list to subscribe.
+          required: true
+          schema:
+            $ref: '#/definitions/AlertsSubscription'
+      tags:
+        - Alert Subscriptions
+      responses:
+        201:
+          description: |
+            OK.
+            Successful response with the newly subscribed alerts.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertsSubscription'
+        400:
+          description: |
+            Bad Request.
+            Invalid Request or request validation failure.
+        500:
+          description: |
+            Internal Server Error
+            An internal server error occurred while subscribing to alerts.
+          schema:
+            $ref: '#/definitions/Error'
 
   /settings/scopes/{scope}:
     #-----------------------------------------------------
@@ -4910,9 +4954,9 @@ definitions:
         example: "AbnormalRequestTime"
 
   #-----------------------------------------------
-  # The Alert Info resource definition.
+  # The Alerts Subscription resource definition.
   #-----------------------------------------------
-  AlertsInfo:
+  AlertsSubscription:
     title: Alerts Info
     properties:
       alerts:

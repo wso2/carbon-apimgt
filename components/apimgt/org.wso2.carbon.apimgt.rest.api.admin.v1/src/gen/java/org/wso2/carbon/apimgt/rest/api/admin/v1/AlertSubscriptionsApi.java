@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertsInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertsSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.AlertSubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.AlertSubscriptionsApiServiceImpl;
@@ -40,15 +40,32 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get the list of API Admin alert types subscribed by the user. ", notes = "This operation is used to get the list of subscribed alert types by the user. ", response = AlertsInfoDTO.class, authorizations = {
+    @ApiOperation(value = "Get the list of API Admin alert types subscribed by the user. ", notes = "This operation is used to get the list of subscribed alert types by the user. ", response = AlertsSubscriptionDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts")
+        })
+    }, tags={ "Alert Subscriptions",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The list of subscribed alert types are returned. ", response = AlertsSubscriptionDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error An error occurred while retrieving subscribed alert types by user. ", response = ErrorDTO.class) })
+    public Response getSubscribedAlertTypes() throws APIManagementException{
+        return delegate.getSubscribedAlertTypes(securityContext);
+    }
+
+    @POST
+    
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Subscribe to an admin alert. ", notes = "This operation is used to subscribe to admin alerts ", response = AlertsSubscriptionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts")
         })
     }, tags={ "Alert Subscriptions" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. The list of subscribed alert types are returned. ", response = AlertsInfoDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error An error occurred while retrieving subscribed alert types by user. ", response = ErrorDTO.class) })
-    public Response getSubscribedAlertTypes() throws APIManagementException{
-        return delegate.getSubscribedAlertTypes(securityContext);
+        @ApiResponse(code = 201, message = "OK. Successful response with the newly subscribed alerts. ", response = AlertsSubscriptionDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid Request or request validation failure. ", response = Void.class),
+        @ApiResponse(code = 500, message = "Internal Server Error An internal server error occurred while subscribing to alerts. ", response = ErrorDTO.class) })
+    public Response subscribeToAlerts(@ApiParam(value = "The alerts list and the email list to subscribe." ,required=true) AlertsSubscriptionDTO body) throws APIManagementException{
+        return delegate.subscribeToAlerts(body, securityContext);
     }
 }

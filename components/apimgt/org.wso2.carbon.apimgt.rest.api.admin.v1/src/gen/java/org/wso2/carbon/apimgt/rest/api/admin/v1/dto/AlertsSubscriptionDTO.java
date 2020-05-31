@@ -16,14 +16,14 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class AlertsInfoDTO   {
+public class AlertsSubscriptionDTO   {
   
     private List<AlertTypeDTO> alerts = new ArrayList<>();
     private List<String> emailList = new ArrayList<>();
 
   /**
    **/
-  public AlertsInfoDTO alerts(List<AlertTypeDTO> alerts) {
+  public AlertsSubscriptionDTO alerts(List<AlertTypeDTO> alerts) {
     this.alerts = alerts;
     return this;
   }
@@ -40,7 +40,7 @@ public class AlertsInfoDTO   {
 
   /**
    **/
-  public AlertsInfoDTO emailList(List<String> emailList) {
+  public AlertsSubscriptionDTO emailList(List<String> emailList) {
     this.emailList = emailList;
     return this;
   }
@@ -64,9 +64,9 @@ public class AlertsInfoDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    AlertsInfoDTO alertsInfo = (AlertsInfoDTO) o;
-    return Objects.equals(alerts, alertsInfo.alerts) &&
-        Objects.equals(emailList, alertsInfo.emailList);
+    AlertsSubscriptionDTO alertsSubscription = (AlertsSubscriptionDTO) o;
+    return Objects.equals(alerts, alertsSubscription.alerts) &&
+        Objects.equals(emailList, alertsSubscription.emailList);
   }
 
   @Override
@@ -77,7 +77,7 @@ public class AlertsInfoDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class AlertsInfoDTO {\n");
+    sb.append("class AlertsSubscriptionDTO {\n");
     
     sb.append("    alerts: ").append(toIndentedString(alerts)).append("\n");
     sb.append("    emailList: ").append(toIndentedString(emailList)).append("\n");

@@ -73,4 +73,22 @@ public class AlertsMappingUtil {
         alertTypeDTO.setName(alert.getName());
         return alertTypeDTO;
     }
+
+    /**
+     * Map AlertTypeDTO list to AlertType
+     *
+     * @param alertTypeDTOList
+     * @return
+     */
+    public static List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> fromAlertTypeDTOListToAlertTypeList(
+            List<AlertTypeDTO> alertTypeDTOList) {
+        List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> alertTypeList = new ArrayList<>();
+        for (AlertTypeDTO alertTypeDTO : alertTypeDTOList) {
+            org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO alertType = new org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO();
+            alertType.setId(alertTypeDTO.getId());
+            alertType.setName(alertTypeDTO.getName());
+            alertTypeList.add(alertType);
+        }
+        return alertTypeList;
+    }
 }
