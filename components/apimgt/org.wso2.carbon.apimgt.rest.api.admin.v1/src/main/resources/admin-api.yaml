@@ -3141,7 +3141,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin_alert_manage
-      operationId: getPublisherAlertTypes
+      operationId: getAdminAlertTypes
       summary: |
         Get the list of admin alert types.
       description: |

@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface AlertTypesApiService {
-      public Response getPublisherAlertTypes(MessageContext messageContext) throws APIManagementException;
+      public Response getAdminAlertTypes(MessageContext messageContext) throws APIManagementException;
 }
