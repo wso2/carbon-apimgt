@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface DeployApiApiService {
-      public Response deployApiPost(String apiName, String environment, String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response deployApiPost(String apiName, String label, String apiId, MessageContext messageContext) throws APIManagementException;
 }
