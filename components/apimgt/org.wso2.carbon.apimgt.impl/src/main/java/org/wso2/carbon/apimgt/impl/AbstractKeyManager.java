@@ -177,7 +177,7 @@ public abstract class AbstractKeyManager implements KeyManager {
 
         boolean result = false;
         boolean canHandle = false;
-        Object tokenHandlingScript = configuration.getParameter(APIConstants.KeyManager.VALIDATION_VALUE);
+        Object tokenHandlingScript = configuration.getParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING);
         if (tokenHandlingScript != null && StringUtils.isNotEmpty((String) tokenHandlingScript)) {
             TokenHandlingDto[] tokenHandlers = new Gson().fromJson(
                     (String) tokenHandlingScript, TokenHandlingDto[].class);
@@ -185,7 +185,7 @@ public abstract class AbstractKeyManager implements KeyManager {
                 return true;
             }
             for (TokenHandlingDto tokenHandler : tokenHandlers) {
-                if (tokenHandler.getEnable().booleanValue()) {
+                if (tokenHandler.getEnable()) {
                     if (TokenHandlingDto.TypeEnum.REFERENCE.equals(tokenHandler.getType())) {
                         if (tokenHandler.getValue() != null &&
                                 StringUtils.isNotEmpty(String.valueOf(tokenHandler.getValue()))) {

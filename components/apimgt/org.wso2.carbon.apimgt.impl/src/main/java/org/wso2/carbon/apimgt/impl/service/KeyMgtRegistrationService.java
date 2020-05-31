@@ -170,7 +170,7 @@ public final class KeyMgtRegistrationService {
             tokenHandlingDto.setEnable(true);
             tokenHandlingDto.setType(TokenHandlingDto.TypeEnum.REFERENCE);
             tokenHandlingDto.setValue(APIConstants.KeyManager.UUID_REGEX);
-            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.VALIDATION_VALUE,
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
                     new Gson().toJson(Arrays.asList(tokenHandlingDto)));
             instance.addKeyManagerConfiguration(keyManagerConfigurationDTO);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {

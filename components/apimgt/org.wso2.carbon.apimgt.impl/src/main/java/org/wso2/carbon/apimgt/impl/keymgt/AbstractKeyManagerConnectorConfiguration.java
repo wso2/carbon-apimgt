@@ -50,7 +50,7 @@ public abstract class AbstractKeyManagerConnectorConfiguration implements KeyMan
         confiListMap.put(APPLICATION_CONFIGURATIONS, Collections.EMPTY_LIST);
         String connectorConfigPath = CarbonBaseUtils.getCarbonHome() + File.separator + "repository" + File.separator +
                 "resources" +
-                File.separator + "keyManager-extensions" + keyManagerType + ".json";
+                File.separator + "keyManager-extensions" +File.separator+ keyManagerType + ".json";
         File file = new File(connectorConfigPath);
         if (file.exists()) {
             try (FileInputStream fileInputStream = new FileInputStream(file)) {

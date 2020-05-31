@@ -296,7 +296,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
         if (isOAuthProtected) {
             authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory,
-                    removeOAuthHeadersFromOutMessage, apiLevelPolicy,keyManagersList);
+                    removeOAuthHeadersFromOutMessage, apiLevelPolicy, keyManagersList);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
