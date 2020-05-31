@@ -226,6 +226,10 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:tenant_theme_manage",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:admin_operations",
         "Roles": "admin"
       },
