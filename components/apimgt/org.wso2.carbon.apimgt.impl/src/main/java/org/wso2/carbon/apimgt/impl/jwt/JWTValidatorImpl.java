@@ -62,7 +62,7 @@ public class JWTValidatorImpl implements JWTValidator {
                 state = validateTokenExpiry(jwtToken.getJWTClaimsSet());
                 if (state) {
                     JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtToken.getJWTClaimsSet());
-                    creteJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
+                    createJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
                     jwtValidationInfo.setRawPayload(jwtToken.getParsedString());
                     return jwtValidationInfo;
                 } else {
@@ -139,10 +139,7 @@ public class JWTValidatorImpl implements JWTValidator {
                 ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getTimeStampSkewInSeconds();
         Date now = new Date();
         Date exp = jwtClaimsSet.getExpirationTime();
-        if (exp != null && !DateUtils.isAfter(exp, now, timestampSkew)) {
-            return false;
-        }
-        return true;
+        return exp == null || DateUtils.isAfter(exp, now, timestampSkew);
     }
 
     protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) {
@@ -150,8 +147,8 @@ public class JWTValidatorImpl implements JWTValidator {
         return jwtTransformer.transform(jwtClaimsSet);
     }
 
-    private void creteJWTValidationInfoFromJWT(JWTValidationInfo jwtValidationInfo,
-                                               JWTClaimsSet jwtClaimsSet)
+    private void createJWTValidationInfoFromJWT(JWTValidationInfo jwtValidationInfo,
+                                                JWTClaimsSet jwtClaimsSet)
             throws ParseException {
 
         jwtValidationInfo.setIssuer(jwtClaimsSet.getIssuer());

@@ -148,7 +148,7 @@ public class AbstractKeyManagerTestCase {
 
         KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
         KeyManager keyManager = new ModelKeyManagerForTest();
-        keyManagerConfiguration.addParameter(APIConstants.KeyManager.VALIDATION_VALUE, "[]");
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING, "[]");
         keyManager.loadConfiguration(keyManagerConfiguration);
         assertTrue(keyManager.canHandleToken(UUID.randomUUID().toString()));
     }
@@ -157,7 +157,7 @@ public class AbstractKeyManagerTestCase {
     public void testCanHandleTokenWithConfiguration() throws APIManagementException {
 
         KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
-        keyManagerConfiguration.addParameter(APIConstants.KeyManager.VALIDATION_VALUE,
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
                 "[{\"enable\": true,\"type\": \"JWT\",\"value\": {\"body\": {\"iss\": \"https://localhost:9443\"}}}]");
         KeyManager keyManager = new ModelKeyManagerForTest();
         keyManager.loadConfiguration(keyManagerConfiguration);
@@ -167,7 +167,7 @@ public class AbstractKeyManagerTestCase {
     public void testCanHandleTokenWithConfigurationJWT() throws APIManagementException {
 
         KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
-        keyManagerConfiguration.addParameter(APIConstants.KeyManager.VALIDATION_VALUE,
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
                 "[{\"enable\": true,\"type\": \"JWT\",\"value\": {\"body\": {\"iss\": \"https://localhost:9443\"}}}]");
         KeyManager keyManager = new ModelKeyManagerForTest();
         keyManager.loadConfiguration(keyManagerConfiguration);
@@ -186,7 +186,7 @@ public class AbstractKeyManagerTestCase {
     public void testCanHandleTokenWithConfigurationJWTMultipleClaim() throws APIManagementException {
 
         KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
-        keyManagerConfiguration.addParameter(APIConstants.KeyManager.VALIDATION_VALUE,
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
                 "[{\"enable\": true,\"type\": \"JWT\",\"value\": {\"body\": {\"iss\": \"https://localhost:9443\"," +
                         "\"domain\": \"abc.com\"}}}]");
         KeyManager keyManager = new ModelKeyManagerForTest();
@@ -206,7 +206,7 @@ public class AbstractKeyManagerTestCase {
     public void testCanHandleTokenWithConfigurationJWTAndOpaue() throws APIManagementException {
 
         KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
-        keyManagerConfiguration.addParameter(APIConstants.KeyManager.VALIDATION_VALUE,
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
                 "[{\"enable\": true,\"type\": \"JWT\",\"value\": {\"body\": {\"iss\": \"https://localhost:9443\"}}}," +
                         "{\"enable\": true,\"type\": \"REFERENCE\",\"value\": \"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0" +
                         "-9a-fA-F]{3}-[89ab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}\"}]");
@@ -223,7 +223,7 @@ public class AbstractKeyManagerTestCase {
     public void testCanHandleTokenWithConfigurationJWTAndOpaueDisableOne() throws APIManagementException {
 
         KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
-        keyManagerConfiguration.addParameter(APIConstants.KeyManager.VALIDATION_VALUE,
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
                 "[{\"enable\": true,\"type\": \"JWT\",\"value\": {\"body\": {\"iss\": \"https://localhost:9443\"}}}," +
                         "{\"enable\": false,\"type\": \"REFERENCE\",\"value\": " +
                         "\"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0" +
@@ -241,7 +241,7 @@ public class AbstractKeyManagerTestCase {
     public void testCanHandleTokenWithConfigurationJWTAndOpaueNegative() throws APIManagementException {
 
         KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
-        keyManagerConfiguration.addParameter(APIConstants.KeyManager.VALIDATION_VALUE,
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
                 "[{\"enable\": true,\"type\": \"JWT\",\"value\": {\"body\": {\"iss\": \"https://localhost:9443\"}}}," +
                         "{\"enable\": true,\"type\": \"REFERENCE\",\"value\": \"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0" +
                         "-9a-fA-F]{3}-[89ab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}\"}]");

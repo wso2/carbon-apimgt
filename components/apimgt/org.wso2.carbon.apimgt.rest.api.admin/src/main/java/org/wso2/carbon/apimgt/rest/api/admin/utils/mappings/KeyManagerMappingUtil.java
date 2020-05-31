@@ -147,7 +147,7 @@ public class KeyManagerMappingUtil {
         JsonElement selfValidateJWTElement = jsonObject.get(APIConstants.KeyManager.SELF_VALIDATE_JWT);
         JsonElement validationEnableElement = jsonObject.get(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION);
         JsonElement validationTypeElement = jsonObject.get(APIConstants.KeyManager.VALIDATION_TYPE);
-        JsonElement validationValueElement = jsonObject.get(APIConstants.KeyManager.VALIDATION_VALUE);
+        JsonElement validationValueElement = jsonObject.get(APIConstants.KeyManager.TOKEN_FORMAT_STRING);
         TokenValidationDTO tokenValidationDTO = new TokenValidationDTO();
         if (validationEnableElement != null) {
             tokenValidationDTO.setEnable(validationEnableElement.getAsBoolean());
@@ -165,11 +165,11 @@ public class KeyManagerMappingUtil {
         }
         if (validationValueElement instanceof JsonPrimitive) {
             tokenValidationDTO.setValue(validationValueElement.getAsString());
-            jsonObject.remove(APIConstants.KeyManager.VALIDATION_VALUE);
+            jsonObject.remove(APIConstants.KeyManager.TOKEN_FORMAT_STRING);
         }else if (validationValueElement instanceof JsonObject){
             Map validationValue = new Gson().fromJson(validationValueElement,Map.class);
             tokenValidationDTO.setValue(validationValue);
-            jsonObject.remove(APIConstants.KeyManager.VALIDATION_VALUE);
+            jsonObject.remove(APIConstants.KeyManager.TOKEN_FORMAT_STRING);
         }
         keyManagerDTO.setTokenValidation(tokenValidationDTO);
         if (selfValidateJWTElement != null) {
@@ -257,7 +257,7 @@ public class KeyManagerMappingUtil {
                 additionalProperties
                         .put(APIConstants.KeyManager.VALIDATION_TYPE, APIConstants.KeyManager.VALIDATION_CUSTOM);
             }
-            additionalProperties.put(APIConstants.KeyManager.VALIDATION_VALUE,tokenValidation.getValue());
+            additionalProperties.put(APIConstants.KeyManager.TOKEN_FORMAT_STRING,tokenValidation.getValue());
         }
         List<ClaimMappingEntryDTO> claimMapping = keyManagerDTO.getClaimMapping();
         if (claimMapping != null){

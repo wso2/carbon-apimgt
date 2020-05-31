@@ -2111,7 +2111,7 @@ public final class APIConstants {
         public static final String VALIDATION_JWT = "jwt";
         public static final String VALIDATION_REFERENCE = "reference";
         public static final String VALIDATION_CUSTOM = "custom";
-        public static final String VALIDATION_VALUE = "validation_value";
+        public static final String TOKEN_FORMAT_STRING = "token_format_string";
         public static final String ENABLE_TOKEN_VALIDATION = "validation_enable";
         public static final String VALIDATION_ENTRY_JWT_BODY = "body";
         public static final String API_LEVEL_ALL_KEY_MANAGERS = "all";

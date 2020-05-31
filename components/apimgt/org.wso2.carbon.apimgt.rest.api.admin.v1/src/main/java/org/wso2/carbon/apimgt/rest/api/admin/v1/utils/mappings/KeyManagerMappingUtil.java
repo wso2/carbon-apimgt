@@ -132,11 +132,11 @@ public class KeyManagerMappingUtil {
             jsonObject.remove(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
         }
         JsonElement selfValidateJWTElement = jsonObject.get(APIConstants.KeyManager.SELF_VALIDATE_JWT);
-        JsonElement validationValueElement = jsonObject.get(APIConstants.KeyManager.VALIDATION_VALUE);
+        JsonElement validationValueElement = jsonObject.get(APIConstants.KeyManager.TOKEN_FORMAT_STRING);
         if (validationValueElement instanceof JsonPrimitive) {
             keyManagerDTO.setTokenValidation(Arrays.asList(new Gson().fromJson(validationValueElement.getAsString(),
                     TokenValidationDTO[].class)));
-            jsonObject.remove(APIConstants.KeyManager.VALIDATION_VALUE);
+            jsonObject.remove(APIConstants.KeyManager.TOKEN_FORMAT_STRING);
         }
         if (selfValidateJWTElement != null) {
             keyManagerDTO.setEnableSelfValidationJWT(selfValidateJWTElement.getAsBoolean());
@@ -215,7 +215,7 @@ public class KeyManagerMappingUtil {
         List<TokenValidationDTO> tokenValidationDTOList = keyManagerDTO.getTokenValidation();
         if (tokenValidationDTOList != null && !tokenValidationDTOList.isEmpty()) {
             additionalProperties
-                    .put(APIConstants.KeyManager.VALIDATION_VALUE, new Gson().toJson(tokenValidationDTOList));
+                    .put(APIConstants.KeyManager.TOKEN_FORMAT_STRING, new Gson().toJson(tokenValidationDTOList));
         }
         List<ClaimMappingEntryDTO> claimMapping = keyManagerDTO.getClaimMapping();
         if (claimMapping != null){
