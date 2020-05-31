@@ -3167,6 +3167,40 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  '/alert-subscriptions':
+    #--------------------------------------------------
+    # Retrieve the list of alerts subscribed by the admin user
+    #--------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:admin_alert_manage
+      summary: |
+        Get the list of API Admin alert types subscribed by the user.
+      operationId: getSubscribedAlertTypes
+      description: |
+        This operation is used to get the list of subscribed alert types by the user.
+      tags:
+        - Alert Subscriptions
+      responses:
+        200:
+          description: |
+            OK.
+            The list of subscribed alert types are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertsInfo'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
+
 
   /settings/scopes/{scope}:
     #-----------------------------------------------------
@@ -4874,10 +4908,22 @@ definitions:
         type: string
         description: The name of the alert.
         example: "AbnormalRequestTime"
-      requireConfiguration:
-        type: boolean
-        description: Whether the alert type require additional configurations.
-        example: true
+
+  #-----------------------------------------------
+  # The Alert Info resource definition.
+  #-----------------------------------------------
+  AlertsInfo:
+    title: Alerts Info
+    properties:
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/AlertType'
+      emailList:
+        type: array
+        items:
+          type: string
+          example: "admin@wso2.com"
 
 #-----------------------------------------------------
 # END-OF-FILE

@@ -30,26 +30,47 @@ import java.util.List;
 public class AlertsMappingUtil {
 
     /**
-     * Map alert types to AlertTypesListDTO
+     * Map AlertTypeDTO list to AlertTypesListDTO
+     *
      * @param alertTypes
      * @return
      */
-    public static AlertTypesListDTO fromAlertTypesToAlertTypeListDTO(
+    public static AlertTypesListDTO fromAlertTypesListToAlertTypeListDTO(
             List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> alertTypes) {
 
         AlertTypesListDTO alertTypesListDTO = new AlertTypesListDTO();
-        List<AlertTypeDTO> alertTypeDTOList = new ArrayList<>();
-
-        for (org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO alertType : alertTypes) {
-            AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
-            alertTypeDTO.setId(alertType.getId());
-            alertTypeDTO.setName(alertType.getName());
-            alertTypeDTO.setRequireConfiguration(alertType.isConfigurable());
-            alertTypeDTOList.add(alertTypeDTO);
-        }
+        List<AlertTypeDTO> alertTypeDTOList = fromAlertTypesListToAlertTypeDTOList(alertTypes);
         alertTypesListDTO.setAlerts(alertTypeDTOList);
         alertTypesListDTO.setCount(alertTypeDTOList.size());
         return alertTypesListDTO;
     }
 
+    /**
+     * Map AlertType list to AlertTypeDTO list
+     *
+     * @param alertTypes
+     * @return
+     */
+    public static List<AlertTypeDTO> fromAlertTypesListToAlertTypeDTOList(
+            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> alertTypes) {
+
+        List<AlertTypeDTO> alertTypeDTOList = new ArrayList<>();
+        for (org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO alertType : alertTypes) {
+            alertTypeDTOList.add(fromAlertTypeToAlertTypeDTO(alertType));
+        }
+        return alertTypeDTOList;
+    }
+
+    /**
+     * Map AlertType to AlertTypeDTO
+     *
+     * @param alert
+     * @return
+     */
+    public static AlertTypeDTO fromAlertTypeToAlertTypeDTO(org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO alert) {
+        AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
+        alertTypeDTO.setId(alert.getId());
+        alertTypeDTO.setName(alert.getName());
+        return alertTypeDTO;
+    }
 }

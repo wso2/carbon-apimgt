@@ -17,7 +17,6 @@ public class AlertTypeDTO   {
   
     private Integer id = null;
     private String name = null;
-    private Boolean requireConfiguration = null;
 
   /**
    * The alert Id
@@ -55,24 +54,6 @@ public class AlertTypeDTO   {
     this.name = name;
   }
 
-  /**
-   * Whether the alert type require additional configurations.
-   **/
-  public AlertTypeDTO requireConfiguration(Boolean requireConfiguration) {
-    this.requireConfiguration = requireConfiguration;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "true", value = "Whether the alert type require additional configurations.")
-  @JsonProperty("requireConfiguration")
-  public Boolean isRequireConfiguration() {
-    return requireConfiguration;
-  }
-  public void setRequireConfiguration(Boolean requireConfiguration) {
-    this.requireConfiguration = requireConfiguration;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -84,13 +65,12 @@ public class AlertTypeDTO   {
     }
     AlertTypeDTO alertType = (AlertTypeDTO) o;
     return Objects.equals(id, alertType.id) &&
-        Objects.equals(name, alertType.name) &&
-        Objects.equals(requireConfiguration, alertType.requireConfiguration);
+        Objects.equals(name, alertType.name);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, requireConfiguration);
+    return Objects.hash(id, name);
   }
 
   @Override
@@ -100,7 +80,6 @@ public class AlertTypeDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    requireConfiguration: ").append(toIndentedString(requireConfiguration)).append("\n");
     sb.append("}");
     return sb.toString();
   }
