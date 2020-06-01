@@ -58,8 +58,7 @@ const useStyles = makeStyles((theme) => ({
  * @param {JSON} state The second number.
  * @returns {Promise}
  */
-function reducer(state, newValue) {
-    const { field, value } = newValue;
+function reducer(state, { field, value }) {
     switch (field) {
         case 'policyName':
             return { ...state, [field]: value };
@@ -95,8 +94,10 @@ function reducer(state, newValue) {
                 ...state,
                 defaultLimit: { ...state.defaultLimit, [field]: value },
             };
+        case 'editDetails':
+            return value;
         default:
-            return newValue;
+            return state;
     }
 }
 
@@ -318,7 +319,7 @@ function AddEdit(props) {
                         },
                     };
                 }
-                dispatch(editState);
+                dispatch({ field: 'editDetails', value: editState });
             });
         }
     };

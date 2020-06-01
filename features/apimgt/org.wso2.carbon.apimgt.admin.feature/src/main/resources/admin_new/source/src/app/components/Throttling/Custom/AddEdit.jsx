@@ -81,8 +81,7 @@ const formattedSampleSiddhiQuery = sqlFormatter.format(sampleSiddhiQuery);
  * @param {JSON} state The second number.
  * @returns {Promise}
  */
-function reducer(state, newValue) {
-    const { field, value } = newValue;
+function reducer(state, { field, value }) {
     switch (field) {
         case 'policyName':
             return { ...state, [field]: value };
@@ -92,8 +91,10 @@ function reducer(state, newValue) {
             return { ...state, [field]: value };
         case 'siddhiQuery':
             return { ...state, [field]: value };
+        case 'editDetails':
+            return value;
         default:
-            return newValue;
+            return state;
     }
 }
 
@@ -132,7 +133,7 @@ function AddEdit(props) {
                     keyTemplate: result.body.keyTemplate,
                     siddhiQuery: formattedSiddhiQuery,
                 };
-                dispatch(editState);
+                dispatch({ field: 'editDetails', value: editState });
             });
         }
         setInitialState({
