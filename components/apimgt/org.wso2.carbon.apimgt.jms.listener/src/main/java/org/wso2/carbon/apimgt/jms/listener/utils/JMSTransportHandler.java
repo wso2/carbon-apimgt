@@ -40,6 +40,7 @@ public class JMSTransportHandler {
     private JMSListener jmsListenerForThrottleDataTopic;
     private JMSListener jmsListenerForTokenRevocationTopic;
     private JMSListener jmsListenerForCacheInvalidationTopic;
+    private JMSListener jmsListenerForNotificationTopic;
     private boolean stopIssued = false;
     private static final Object lock = new Object();
 
@@ -126,6 +127,21 @@ public class JMSTransportHandler {
                 + "#" + JMSConstants.TOPIC_CACHE_INVALIDATION, jmsTaskManagerForCacheInvalidationTopic);
         jmsListenerForCacheInvalidationTopic.startListener();
         log.info("Starting jms topic consumer thread for the cacheInvalidation topic...");
+
+        //Listening to notification topic
+        messageConfig.put(JMSConstants.PARAM_DESTINATION, JMSConstants.TOPIC_NOTIFICATION);
+        JMSTaskManager jmsTaskManagerForNotificationTopic = JMSTaskManagerFactory.createTaskManagerForService(
+                jmsConnectionFactory,
+                ListenerConstants.CONNECTION_FACTORY_NAME,
+                new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
+                        keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
+                        "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
+        jmsTaskManagerForNotificationTopic.setMessageListener(new JMSMessageListener());
+
+        jmsListenerForNotificationTopic = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME
+                + "#" + JMSConstants.TOPIC_NOTIFICATION, jmsTaskManagerForNotificationTopic);
+        jmsListenerForNotificationTopic.startListener();
+        log.info("Starting jms topic consumer thread for the notification topic...");
     }
 
     public void unSubscribeFromEvents() {
@@ -147,6 +163,9 @@ public class JMSTransportHandler {
                     }
                     if (jmsListenerForCacheInvalidationTopic != null) {
                         jmsListenerForCacheInvalidationTopic.stopListener();
+                    }
+                    if (jmsListenerForNotificationTopic != null) {
+                        jmsListenerForNotificationTopic.stopListener();
                     }
 
                     log.debug("JMS Listeners Stopped");

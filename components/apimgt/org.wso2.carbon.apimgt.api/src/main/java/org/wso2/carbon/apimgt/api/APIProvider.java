@@ -747,6 +747,26 @@ public interface APIProvider extends APIManager {
     void saveSwaggerDefinition(APIProduct apiProduct, String jsonText) throws APIManagementException;
 
     /**
+     * This method adds the swagger definition of an API Product in registry
+     *
+     * @param apiToProductResourceMapping   List of API Product resource mappings
+     * @param apiProduct   API Product
+     * @throws APIManagementException
+     */
+    void addAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
+            throws APIManagementException;
+
+    /**
+     * This method updates the swagger definition of an API Product in registry
+     *
+     * @param apiToProductResourceMapping   List of API Product resource mappings
+     * @param apiProduct   API Product
+     * @throws APIManagementException
+     */
+    void updateAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
+            throws APIManagementException, FaultGatewaysException;
+
+    /**
      * This method validates the existence of all the resource level throttling tiers in URI templates of API
      *
      * @param api           api
@@ -958,6 +978,18 @@ public interface APIProvider extends APIManager {
     String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
 
     /**
+     *  Add a block condition with condition status
+     *
+     * @param conditionType type of the condition (IP, Context .. )
+     * @param conditionValue value of the condition
+     * @param conditionStatus status of the condition
+     * @return UUID of the new Block Condition
+     * @throws APIManagementException
+     */
+    String addBlockCondition(String conditionType, String conditionValue, boolean conditionStatus)
+            throws APIManagementException;
+
+    /**
      * Deletes a block condition given its Id
      *
      * @param conditionId Id of the condition
@@ -1086,6 +1118,18 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException API Management Exception.
      */
     List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
+            throws APIManagementException;
+
+    /**
+     * Method to search the client certificates for the provided tenant id, alias and api product identifier.
+     *
+     * @param tenantId      : ID of the tenant.
+     * @param alias         : Alias of the certificate.
+     * @param apiProductIdentifier : Identifier of the API Product.
+     * @return list of client certificates that match search criteria.
+     * @throws APIManagementException API Management Exception.
+     */
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIProductIdentifier apiProductIdentifier)
             throws APIManagementException;
 
     /**
@@ -1328,4 +1372,79 @@ public interface APIProvider extends APIManager {
      * @return List of removed resources that are reused among API Products
      */
     List<APIResource> getRemovedProductResources(Set<URITemplate> updatedUriTemplates, API existingAPI);
+
+    /**
+     * Check whether the given scope name exists as a shared scope in the tenant domain.
+     *
+     * @param scopeName    Shared Scope name
+     * @param tenantDomain Tenant Domain
+     * @return Scope availability
+     * @throws APIManagementException if failed to check the availability
+     */
+    boolean isSharedScopeNameExists(String scopeName, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Add a shared scope.
+     *
+     * @param scope        Shared Scope
+     * @param tenantDomain Tenant domain
+     * @return UUID of the added Shared Scope
+     * @throws APIManagementException if failed to add a scope
+     */
+    String addSharedScope(Scope scope, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get all available shared scopes.
+     *
+     * @param tenantDomain tenant domain
+     * @return Shared Scope list
+     * @throws APIManagementException if failed to get the scope list
+     */
+    List<Scope> getAllSharedScopes(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get all available shared scope keys.
+     *
+     * @param tenantDomain tenant domain
+     * @return Shared Scope Keyset
+     * @throws APIManagementException if failed to get the scope key set
+     */
+    Set<String> getAllSharedScopeKeys(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get shared scope by UUID.
+     *
+     * @param sharedScopeId Shared scope Id
+     * @param tenantDomain  tenant domain
+     * @return Shared Scope
+     * @throws APIManagementException If failed to get the scope
+     */
+    Scope getSharedScopeByUUID(String sharedScopeId, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Delete shared scope.
+     *
+     * @param scopeName Shared scope name
+     * @param tenantDomain  tenant domain
+     * @throws APIManagementException If failed to delete the scope
+     */
+    void deleteSharedScope(String scopeName, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Update a shared scope.
+     *
+     * @param sharedScope  Shared Scope
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException If failed to update
+     */
+    void updateSharedScope(Scope sharedScope, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Validate a shared scopes set. Add the additional attributes (scope description, bindings etc).
+     *
+     * @param scopes       Shared scopes set
+     * @param tenantDomain Tenant domain
+     * @throws APIManagementException If failed to validate
+     */
+    void validateSharedScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException;
 }

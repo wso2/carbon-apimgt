@@ -88,5 +88,28 @@ export default class Subscription extends Resource {
         });
         return promised_delete_subscription;
     }
+
+   /**
+    * Update subscription
+    * @param subscriptionId id of the subscription
+    * @param throttlingPolicy throttling tier
+    * @returns {promise} With 200 OK.
+    */
+    updateSubscription(applicationId, apiId, subscriptionId, throttlingPolicy, status, requestedThrottlingPolicy) {
+        const promised_update_subscription = this.client.then((client) => {
+        let subscriptionData = null;
+
+            subscriptionData = {
+                applicationId, apiId, subscriptionId, throttlingPolicy: throttlingPolicy, status, requestedThrottlingPolicy
+            };
+
+            const payload = { 
+                subscriptionId: subscriptionId,
+                body: subscriptionData 
+            };
+            return client.apis.Subscriptions.put_subscriptions__subscriptionId_(payload, { 'Content-Type': 'application/json' });
+        });
+        return promised_update_subscription;
+    }
 }
 

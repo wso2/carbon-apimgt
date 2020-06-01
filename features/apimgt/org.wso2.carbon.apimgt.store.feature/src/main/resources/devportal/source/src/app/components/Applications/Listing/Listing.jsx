@@ -38,9 +38,16 @@ import Application from 'AppData/Application';
 import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
 import Settings from 'AppComponents/Shared/SettingsContext';
 import { appSettings } from 'Settings';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import TextField from '@material-ui/core/TextField';
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
+import SearchIcon from '@material-ui/icons/Search';
 import AppsTableContent from './AppsTableContent';
 import ApplicationTableHead from './ApplicationTableHead';
 import DeleteConfirmation from './DeleteConfirmation';
+import HighlightOffRoundedIcon from '@material-ui/icons/HighlightOffRounded';
 
 /**
  *
@@ -48,6 +55,37 @@ import DeleteConfirmation from './DeleteConfirmation';
  * @param {*} theme theme object
  */
 const styles = theme => ({
+    noDataMessage: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        padding: 40,
+    },
+    clearSearch: {
+        position: 'absolute',
+        right: 111,
+        top: 13,
+    },
+    paper: {
+        margin: 30,
+    },
+    searchBar: {
+        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+    },
+    searchInput: {
+        fontSize: theme.typography.fontSize,
+        height: 50,
+    },
+    block: {
+        display: 'block',
+    },
+    addUser: {
+        marginRight: theme.spacing(1),
+    },
+    contentWrapper: {
+        margin: 0,
+    },
     card: {
         minWidth: 275,
         paddingBottom: 20,
@@ -100,8 +138,7 @@ const styles = theme => ({
         paddingLeft: theme.spacing(2),
     },
     appContent: {
-        marginTop: theme.spacing(2),
-        maxWidth: '95%',
+        marginTop: 0,
         margin: 'auto',
         maxHeight: theme.spacing(90),
         height: theme.spacing(90),
@@ -117,6 +154,9 @@ const styles = theme => ({
     appTablePaper: {
         '& table tr td':{
             paddingLeft: theme.spacing(1),
+        },
+        '& table tr td:first-child, & table tr th:first-child':{
+            paddingLeft: theme.spacing(2),
         },
         '& table tr:nth-child(even)': {
             backgroundColor: theme.custom.listView.tableBodyEvenBackgrund,
@@ -137,6 +177,10 @@ const styles = theme => ({
         },
 
     },
+    clearSearchLink: {
+        color: theme.palette.primary.light,
+        cursor: 'pointer',
+    }
 });
 
 /**
@@ -160,14 +204,48 @@ class Listing extends Component {
             data: null,
             page: 0,
             rowsPerPage: Listing.rowsPerPage,
-            open: false,
             isApplicationSharingEnabled: true,
             isDeleteOpen: false,
             totalApps: 0,
+            query: '',
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
+        this.setQuery = this.setQuery.bind(this);
+        this.handleSearchKeyPress = this.handleSearchKeyPress.bind(this);
+        this.filterApps = this.filterApps.bind(this);
+        this.clearSearch = this.clearSearch.bind(this);
+
+    }
+    /**
+     * @memberof Listing
+     */
+    setQuery = (event) => {
+        this.setState({ query: event.target.value });
+    };
+    /**
+     * @memberof Listing
+     */
+    handleSearchKeyPress = (event) => {
+        if (event.key === 'Enter') {
+            this.setState({page: 0});
+            this.updateApps(undefined, 0);
+            this.isApplicationGroupSharingEnabled();
+        }
+    }
+    /**
+     * @memberof Listing
+     */
+    filterApps = () => {
+        this.setState({page: 0});
+        this.updateApps(undefined, 0);
+        this.isApplicationGroupSharingEnabled();
     }
 
+    clearSearch = () => {
+        this.setState({ query: '', data: null, page: 0 });
+        this.updateApps('', 0);
+        this.isApplicationGroupSharingEnabled();
+    }
     /**
      * @memberof Listing
      */
@@ -189,11 +267,13 @@ class Listing extends Component {
     /**
      * @memberof Listing
      */
-    updateApps = () => {
+    updateApps = (newQuery, newPage) => {
         const {
-            page, rowsPerPage, order, orderBy,
+            page, rowsPerPage, order, orderBy, query,
         } = this.state;
-        const promisedApplications = Application.all(rowsPerPage, page * rowsPerPage, order, orderBy);
+        const queryToSearch = newQuery !== undefined ? newQuery : query;
+        const pageToSearch = newPage !== undefined ? newPage : page;
+        const promisedApplications = Application.all(rowsPerPage, pageToSearch * rowsPerPage, order, orderBy, queryToSearch);
         promisedApplications
             .then((applications) => {
                 const { pagination: { total } } = applications;
@@ -255,13 +335,6 @@ class Listing extends Component {
     /**
      * @memberof Listing
      */
-    handleClose = () => {
-        this.setState({ open: false });
-    };
-
-    /**
-     * @memberof Listing
-     */
     handleClickOpen = () => {
         const { history } = this.props;
         history.push('/applications/create');
@@ -317,8 +390,8 @@ class Listing extends Component {
      */
     render() {
         const {
-            data, order, orderBy, rowsPerPage, page, open, isApplicationSharingEnabled,
-            isDeleteOpen, totalApps,
+            data, order, orderBy, rowsPerPage, page, isApplicationSharingEnabled,
+            isDeleteOpen, totalApps, query,
         } = this.state;
         if (!data) {
             return <Loading />;
@@ -340,7 +413,7 @@ class Listing extends Component {
                                     defaultMessage='Applications'
                                 />
                             </Typography>
-                            {(data.size !== 0 || open) && (
+                            {(data.size !== 0) && (
                                 <div className={classes.createLinkWrapper}>
                                     <ScopeValidation
                                         resourcePath={resourcePaths.APPLICATIONS}
@@ -386,8 +459,64 @@ class Listing extends Component {
                         </Typography>
                     </Box>
                 </div>
-                <Grid container spacing={0} justify='center' className={classes.container}>
-                    <Grid item xs={12}>
+                {query === "" && data.size === 0 ? (
+                    <GenericDisplayDialog
+                        classes={classes}
+                        handleClick={this.handleClickOpen}
+                        heading='Create New Application'
+                        caption={intl.formatMessage({
+                            defaultMessage: `An application is a logical collection of APIs. Applications
+                    allow you to use a single access token to invoke a collection
+                    of APIs and to subscribe to one API multiple times with different
+                    SLA levels. The DefaultApplication is pre-created and allows unlimited
+                    access by default.`,
+                            id: 'Applications.Listing.Listing.generic.display.description',
+                        })}
+                        buttonText={intl.formatMessage({
+                            defaultMessage: 'ADD NEW APPLICATION',
+                            id: 'Applications.Listing.Listing.generic.display.description',
+                        })}
+                    />
+                ) : (<Paper className={classes.paper}>
+                    <AppBar className={classes.searchBar} position="static" color="default" elevation={0}>
+                        <Toolbar>
+                            <Grid container spacing={2} alignItems="center">
+                                <Grid item>
+                                    <SearchIcon className={classes.block} color="inherit" />
+                                </Grid>
+                                <Grid item xs>
+                                    <TextField
+                                        fullWidth
+                                        placeholder="Search application by name"
+                                        InputProps={{
+                                            disableUnderline: true,
+                                            className: classes.searchInput,
+                                        }}
+                                        value={query}
+                                        onChange={this.setQuery}
+                                        onKeyPress={this.handleSearchKeyPress}
+                                    />
+                                    {query.length > 0 && (<Tooltip title={intl.formatMessage({
+                                        defaultMessage: 'Clear Search',
+                                        id: 'Applications.Listing.Listing.clear.search',
+                                    })}>
+                                        <IconButton aria-label="delete" className={classes.clearSearch} onClick={this.clearSearch}>
+                                            <HighlightOffRoundedIcon />
+                                        </IconButton>
+                                    </Tooltip>)}
+                                </Grid>
+                                <Grid item>
+                                    <Button variant="contained" className={classes.addUser} onClick={this.filterApps}>
+                                        <FormattedMessage
+                                            id='Applications.Listing.Listing.applications.search'
+                                            defaultMessage='Search'
+                                        />                                    </Button>
+
+                                </Grid>
+                            </Grid>
+                        </Toolbar>
+                    </AppBar>
+                    <div className={classes.contentWrapper}>
                         {data.size > 0 ? (
                             <div className={classes.appContent}>
                                 <Paper className={classes.appTablePaper}>
@@ -434,31 +563,34 @@ class Listing extends Component {
                                 </Paper>
                             </div>
                         ) : (
-                                <GenericDisplayDialog
-                                    classes={classes}
-                                    handleClick={this.handleClickOpen}
-                                    heading='Create New Application'
-                                    caption={intl.formatMessage({
-                                        defaultMessage: `An application is a logical collection of APIs. Applications
-                                    allow you to use a single access token to invoke a collection
-                                    of APIs and to subscribe to one API multiple times with different
-                                    SLA levels. The DefaultApplication is pre-created and allows unlimited
-                                    access by default.`,
-                                        id: 'Applications.Listing.Listing.generic.display.description',
-                                    })}
-                                    buttonText={intl.formatMessage({
-                                        defaultMessage: 'ADD NEW APPLICATION',
-                                        id: 'Applications.Listing.Listing.generic.display.description.text',
-                                    })}
-                                />
+                                <div className={classes.noDataMessage}>
+                                    <Typography variant="h6" gutterBottom>
+                                        <FormattedMessage
+                                            id='Applications.Listing.Listing.applications.no.search.results.title'
+                                            defaultMessage='No Matching Applications'
+                                        />
+                                    </Typography>
+                                    <Typography variant="body2" gutterBottom>
+                                        <FormattedMessage
+                                            id='Applications.Listing.Listing.applications.no.search.results.body.prefix'
+                                            defaultMessage='Check the spelling or try to '
+                                        />
+                                        <a onClick={this.clearSearch} className={classes.clearSearchLink}>
+                                            <FormattedMessage
+                                                id='Applications.Listing.Listing.applications.no.search.results.body.sufix'
+                                                defaultMessage='clear the search'
+                                            />
+                                        </a>
+                                    </Typography>
+                                </div>
                             )}
                         <DeleteConfirmation
                             handleAppDelete={this.handleAppDelete}
                             isDeleteOpen={isDeleteOpen}
                             toggleDeleteConfirmation={this.toggleDeleteConfirmation}
                         />
-                    </Grid>
-                </Grid>
+                    </div>
+                </Paper>)}
             </main>
         );
     }

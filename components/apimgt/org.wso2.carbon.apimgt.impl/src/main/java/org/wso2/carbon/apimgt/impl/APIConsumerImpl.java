@@ -85,6 +85,9 @@ import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
@@ -105,6 +108,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -156,6 +160,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
@@ -2675,8 +2680,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
             throws APIManagementException {
+
         Subscriber subscriber = new Subscriber(username);
-        return apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId);
+        Set<String> scopeKeySet = apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId);
+        return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, tenantDomain).values());
     }
 
     /*
@@ -2837,10 +2844,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         WorkflowResponse workflowResponse = null;
+        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state)) {
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, applicationId,
-                    APIConstants.SubscriptionStatus.ON_HOLD);
+                    APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
 
             boolean isTenantFlowStarted = false;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -2866,6 +2874,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApiVersion(identifier.getVersion());
                 workflowDTO.setApiProvider(identifier.getProviderName());
                 workflowDTO.setTierName(identifier.getTier());
+                workflowDTO.setRequestedTierName(identifier.getTier());
                 workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
                 workflowDTO.setApplicationId(applicationId);
                 workflowDTO.setSubscriber(userId);
@@ -2954,6 +2963,201 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (workflowResponse == null) {
                     workflowResponse = new GeneralWorkflowResponse();
                 }
+
+            }
+            // get the workflow state once the executor is executed.
+            WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(applicationId),
+                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            // only send the notification if approved
+            // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
+            if (wfDTO != null) {
+                if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+                    SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                            System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId, subscriptionId,
+                            identifier.getUUID(), applicationId, identifier.getTier(), subscriptionStatus);
+                    APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+                }
+            } else {
+                SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId, subscriptionId,
+                        identifier.getUUID(), applicationId, identifier.getTier(), subscriptionStatus);
+                APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+            }
+
+            if (log.isDebugEnabled()) {
+                String logMessage = "API Name: " + identifier.getName() + ", API Version " + identifier.getVersion()
+                        + ", Subscription Status: " + subscriptionStatus + " subscribe by " + userId + " for app "
+                        + applicationName;
+                log.debug(logMessage);
+            }
+            return new SubscriptionResponse(subscriptionStatus, subscriptionUUID, workflowResponse);
+        } else {
+            throw new APIMgtResourceNotFoundException("Subscriptions not allowed on APIs/API Products in the state: " +
+                    state);
+        }
+    }
+
+    @Override
+    public SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId, int applicationId,
+                                                   String inputSubscriptionId, String currentThrottlingPolicy,
+                                                   String requestedThrottlingPolicy)
+            throws APIManagementException {
+
+        API api = null;
+        APIProduct product = null;
+        Identifier identifier = null;
+        final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
+        String state;
+        String apiContext;
+
+        if (isApiProduct) {
+            product = apiTypeWrapper.getApiProduct();
+            state = product.getState();
+            identifier = product.getId();
+            apiContext = product.getContext();
+        } else {
+            api = apiTypeWrapper.getApi();
+            state = api.getStatus();
+            identifier = api.getId();
+            apiContext = api.getContext();
+        }
+
+        WorkflowResponse workflowResponse = null;
+        int subscriptionId;
+        if (APIConstants.PUBLISHED.equals(state)) {
+            subscriptionId = apiMgtDAO.updateSubscription(apiTypeWrapper, inputSubscriptionId,
+                    APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, requestedThrottlingPolicy);
+
+            boolean isTenantFlowStarted = false;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
+            }
+
+            String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
+
+            try {
+                WorkflowExecutor updateSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+
+                SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+                workflowDTO.setStatus(WorkflowStatus.CREATED);
+                workflowDTO.setCreatedTime(System.currentTimeMillis());
+                workflowDTO.setTenantDomain(tenantDomain);
+                workflowDTO.setTenantId(tenantId);
+                workflowDTO.setExternalWorkflowReference(updateSubscriptionWFExecutor.generateUUID());
+                workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
+                workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+                workflowDTO.setCallbackUrl(updateSubscriptionWFExecutor.getCallbackURL());
+                workflowDTO.setApiName(identifier.getName());
+                workflowDTO.setApiContext(apiContext);
+                workflowDTO.setApiVersion(identifier.getVersion());
+                workflowDTO.setApiProvider(identifier.getProviderName());
+                workflowDTO.setTierName(identifier.getTier());
+                workflowDTO.setRequestedTierName(requestedThrottlingPolicy);
+                workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
+                workflowDTO.setApplicationId(applicationId);
+                workflowDTO.setSubscriber(userId);
+
+                Tier tier = null;
+                Set<Tier> policies = Collections.emptySet();
+                if (!isApiProduct) {
+                    policies = api.getAvailableTiers();
+                } else {
+                    policies = product.getAvailableTiers();
+                }
+
+                for (Tier policy : policies) {
+                    if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
+                        tier = policy;
+                    }
+                }
+                boolean isMonetizationEnabled = false;
+
+                if (api != null) {
+                    isMonetizationEnabled = api.getMonetizationStatus();
+                    //check whether monetization is enabled for API and tier plan is commercial
+                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                        workflowResponse = updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO, api);
+                    } else {
+                        workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
+                    }
+                } else {
+                    isMonetizationEnabled = product.getMonetizationStatus();
+                    //check whether monetization is enabled for API and tier plan is commercial
+                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                        workflowResponse = updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO, product);
+                    } else {
+                        workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
+                    }
+                }
+            } catch (WorkflowException e) {
+                throw new APIManagementException("Could not execute Workflow", e);
+            } finally {
+                if (isTenantFlowStarted) {
+                    endTenantFlow();
+                }
+            }
+
+            if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
+                invalidateCachedKeys(applicationId);
+            }
+
+            //to handle on-the-fly subscription rejection (and removal of subscription entry from the database)
+            //the response should have {"Status":"REJECTED"} in the json payload for this to work.
+            boolean subscriptionRejected = false;
+            String subscriptionStatus = null;
+            String subscriptionUUID = "";
+
+            if (workflowResponse != null && workflowResponse.getJSONPayload() != null
+                    && !workflowResponse.getJSONPayload().isEmpty()) {
+                try {
+                    JSONObject wfResponseJson = (JSONObject) new JSONParser().parse(workflowResponse.getJSONPayload());
+                    if (APIConstants.SubscriptionStatus.REJECTED.equals(wfResponseJson.get("Status"))) {
+                        subscriptionRejected = true;
+                        subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
+                    }
+                } catch (ParseException e) {
+                    log.error('\'' + workflowResponse.getJSONPayload() + "' is not a valid JSON.", e);
+                }
+            }
+
+            if (!subscriptionRejected) {
+                SubscribedAPI updatedSubscription = getSubscriptionById(subscriptionId);
+                subscriptionStatus = updatedSubscription.getSubStatus();
+                subscriptionUUID = updatedSubscription.getUUID();
+
+                JSONObject subsLogObject = new JSONObject();
+                subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
+                subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
+                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
+                subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
+
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                        APIConstants.AuditLogConstants.CREATED, this.username);
+
+                if (workflowResponse == null) {
+                    workflowResponse = new GeneralWorkflowResponse();
+                }
+
+            }
+
+            // get the workflow state once the executor is executed.
+            WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(applicationId),
+                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+            // only send the notification if approved
+            // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
+            if (wfDTO != null) {
+                if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+                    SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                            System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, subscriptionId,
+                            identifier.getUUID(), applicationId, identifier.getTier(), subscriptionStatus);
+                    APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+                }
+            } else {
+                SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, subscriptionId,
+                        identifier.getUUID(), applicationId, identifier.getTier(), subscriptionStatus);
+                APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
 
             if (log.isDebugEnabled()) {
@@ -3185,6 +3389,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         + ") removed from app " + appName;
                 log.debug(logMessage);
             }
+
+            // get the workflow state once the executor is executed.
+            WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(application.getId()),
+                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+            // only send the notification if approved
+            // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
+            if (wfDTO != null) {
+                if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+                    SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                            System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId, subscription.getSubscriptionId(),
+                            identifier.getUUID(),application.getId(), identifier.getTier(), subscription.getSubStatus());
+                    APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+                }
+            } else {
+                SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId, subscription.getSubscriptionId(),
+                        identifier.getUUID(),application.getId(), identifier.getTier(), subscription.getSubStatus());
+                APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+            }
         } else {
             throw new APIManagementException("Subscription for UUID:" + uuid +" does not exist.");
         }
@@ -3209,7 +3432,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void updateSubscriptions(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
         API api = getAPI(identifier);
-        apiMgtDAO.updateSubscriptions(new ApiTypeWrapper(api), applicationId);
+        apiMgtDAO.updateSubscriptions(new ApiTypeWrapper(api), applicationId, userId);
     }
 
     /**
@@ -3364,7 +3587,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
         }
-
         try {
 
             WorkflowExecutor appCreationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
@@ -3380,7 +3602,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setTenantId(tenantId);
             appWFDto.setUserName(userId);
             appWFDto.setCreatedTime(System.currentTimeMillis());
-
             appCreationWFExecutor.execute(appWFDto);
         } catch (WorkflowException e) {
             //If the workflow execution fails, roll back transaction by removing the application entry.
@@ -3404,6 +3625,24 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
+        }
+        // get the workflow state once the executor is executed.
+        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(applicationId),
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+        // only send the notification if approved
+        // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
+        if (wfDTO != null) {
+            if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+                ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(), System.currentTimeMillis()
+                        , APIConstants.EventType.APPLICATION_CREATE.name(), tenantId, applicationId, application.getName(), application.getTokenType(),
+                        application.getTier(), application.getGroupId());
+                APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+            }
+        } else {
+            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(), System.currentTimeMillis()
+                    , APIConstants.EventType.APPLICATION_CREATE.name(), tenantId, applicationId, application.getName(), application.getTokenType(),
+                    application.getTier(), application.getGroupId());
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
         return applicationId;
     }
@@ -3559,6 +3798,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
+
+        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(), System.currentTimeMillis()
+                , APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId, application.getId(), application.getName(),
+                application.getTokenType(), application.getTier(), application.getGroupId());
+        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
     /**
@@ -3598,7 +3842,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException("user: " + username + ", " +
                     "attempted to remove application owned by: " + application.getSubscriber().getName());
         }
-
         try {
             String workflowExtRef;
             ApplicationWorkflowDTO workflowDTO;
@@ -3701,7 +3944,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
-
             removeApplicationWFExecutor.execute(workflowDTO);
 
             JSONObject appLogObject = new JSONObject();
@@ -3734,6 +3976,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(applicationId, username, requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
+        }
+
+        // get the workflow state once the executor is executed.
+        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(applicationId),
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
+        // only send the notification if approved
+        // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
+        if (wfDTO != null) {
+            if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus()) || wfDTO.getStatus() == null) {
+                ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(), System.currentTimeMillis()
+                        , APIConstants.EventType.APPLICATION_DELETE.name(), tenantId, applicationId, application.getName(), application.getTokenType(),
+                        application.getTier(), application.getGroupId());
+                APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+            }
+        } else {
+            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(), System.currentTimeMillis()
+                    , APIConstants.EventType.APPLICATION_DELETE.name(), tenantId, applicationId, application.getName(), application.getTokenType(),
+                    application.getTier(), application.getGroupId());
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
     }
 
@@ -3903,6 +4164,46 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
                     APIConstants.AuditLogConstants.UPDATED, this.username);
 
+            // if its a PRODUCTION application.
+            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
+                // get the workflow state once the executor is executed.
+                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(appRegWFDto.getExternalWorkflowReference(),
+                        WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                // only send the notification if approved
+                // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
+                if (wfDTO != null) {
+                    if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+                        ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                                UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
+                                tenantId, application.getId(), applicationInfo.getClientId(), application.getTokenType());
+                        APIUtil.sendNotification(applicationRegistrationEvent, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+                    }
+                } else {
+                    ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                            UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
+                            tenantId, application.getId(), applicationInfo.getClientId(), application.getTokenType());
+                    APIUtil.sendNotification(applicationRegistrationEvent, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+                }
+            } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) {
+                // get the workflow state once the executor is executed.
+                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(appRegWFDto.getExternalWorkflowReference(),
+                        WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+                // only send the notification if approved
+                // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
+                if (wfDTO != null) {
+                    if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+                        ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                                UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
+                                tenantId, application.getId(), applicationInfo.getClientId(), application.getTokenType());
+                        APIUtil.sendNotification(applicationRegistrationEvent, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+                    }
+                } else {
+                    ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                            UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
+                            tenantId, application.getId(), applicationInfo.getClientId(), application.getTokenType());
+                    APIUtil.sendNotification(applicationRegistrationEvent, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+                }
+            }
             return keyDetails;
         } catch (WorkflowException e) {
             log.error("Could not execute Workflow", e);
@@ -4047,6 +4348,47 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appLogObject.put("Generated keys for application", application.getName());
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
                     APIConstants.AuditLogConstants.UPDATED, this.username);
+
+            // if its a PRODUCTION application.
+            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
+                // get the workflow state once the executor is executed.
+                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(appRegWFDto.getExternalWorkflowReference(),
+                        WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                // only send the notification if approved
+                // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
+                if (wfDTO != null) {
+                    if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+                        ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                                UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
+                                tenantId, application.getId(), applicationInfo.getClientId(), application.getTokenType());
+                        APIUtil.sendNotification(applicationRegistrationEvent, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+                    }
+                } else {
+                    ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                            UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
+                            tenantId, application.getId(), applicationInfo.getClientId(), application.getTokenType());
+                    APIUtil.sendNotification(applicationRegistrationEvent, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+                }
+            } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) {
+                // get the workflow state once the executor is executed.
+                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(appRegWFDto.getExternalWorkflowReference(),
+                        WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+                // only send the notification if approved
+                // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
+                if (wfDTO != null) {
+                    if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+                        ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                                UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
+                                tenantId, application.getId(), applicationInfo.getClientId(), application.getTokenType());
+                        APIUtil.sendNotification(applicationRegistrationEvent, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+                    }
+                } else {
+                    ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                            UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(),
+                            tenantId, application.getId(), applicationInfo.getClientId(), application.getTokenType());
+                    APIUtil.sendNotification(applicationRegistrationEvent, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+                }
+            }
             return keyDetails;
         } catch (WorkflowException e) {
             log.error("Could not execute Workflow", e);
@@ -4167,6 +4509,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         keyDetails.put("consumerKey", oauthApp.getClientId());
                         keyDetails.put("consumerSecret", oauthApp.getClientSecret());
                         keyDetails.put("appDetails", oauthApp.getJsonString());
+
+                        ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                                UUID.randomUUID().toString(), System.currentTimeMillis(),
+                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId,
+                                application.getId(), oauthApp.getClientId(), application.getTokenType());
+                        APIUtil.sendNotification(applicationRegistrationEvent,
+                                APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                     } catch (APIManagementException e) {
                         APIUtil.handleException("Error occurred while Creating Keys.", e);
                     }
@@ -4220,6 +4569,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         keyDetails.put("consumerSecret", oauthApp.getClientSecret());
                         keyDetails.put("accessallowdomains", registrationWorkflowDTO.getDomainList());
                         keyDetails.put("appDetails", oauthApp.getJsonString());
+                        ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
+                                UUID.randomUUID().toString(), System.currentTimeMillis(),
+                                APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId,
+                                application.getId(), oauthApp.getClientId(), application.getTokenType());
+                        APIUtil.sendNotification(applicationRegistrationEvent,
+                                APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                     } catch (APIManagementException e) {
                         APIUtil.handleException("Error occurred while Creating Keys.", e);
                     }
@@ -4479,10 +4834,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		return null;
 	}
 
-	public Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers)
-			throws APIManagementException {
-		return apiMgtDAO.getScopesBySubscribedAPIs(identifiers);
-	}
+    public Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers)
+            throws APIManagementException {
+
+        Set<String> scopeKeySet = apiMgtDAO.getScopesBySubscribedAPIs(identifiers);
+        return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, tenantDomain).values());
+    }
 
 	public String getScopesByToken(String accessToken) throws APIManagementException {
 		return null;
@@ -4901,6 +5258,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 try {
                     workflowExecutor = getWorkflowExecutor(workflowType);
                     workflowExecutor.complete(workflowDTO);
+                    if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
+                        WorkflowUtils.sendNotificationAfterWFComplete(workflowDTO, workflowType);
+                    }
                 } catch (WorkflowException e) {
                     throw new APIManagementException(e);
                 }
@@ -5680,14 +6040,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
             }
         } else {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            Map<String, Environment> allEnvironments = config.getApiGatewayEnvironments();
+            Map<String, Environment> allEnvironments = APIUtil.getEnvironments();
             Environment environment = allEnvironments.get(environmentName);
 
             if (environment == null) {
-                handleException(
-                        "Could not find provided environment '" + environmentName);
+                handleResourceNotFoundException("Could not find provided environment '" + environmentName + "'");
             }
 
             assert environment != null;

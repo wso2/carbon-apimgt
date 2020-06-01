@@ -20,6 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
+import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import Switch from '@material-ui/core/Switch';
@@ -30,10 +31,12 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import LaunchIcon from '@material-ui/icons/Launch';
+import ListSubheader from '@material-ui/core/ListSubheader';
 import { Link } from 'react-router-dom';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { getOperationScopes } from '../../operationUtils';
+
 
 /**
  *
@@ -44,9 +47,11 @@ import { getOperationScopes } from '../../operationUtils';
  */
 export default function OperationGovernance(props) {
     const {
-        operation, operationsDispatcher, operationRateLimits, api, disableUpdate, spec, target, verb,
+        operation, operationsDispatcher, operationRateLimits, api, disableUpdate, spec, target, verb, sharedScopes,
     } = props;
+    const operationScopes = getOperationScopes(operation, spec);
     const isOperationRateLimiting = api.apiThrottlingPolicy === null;
+    const filteredApiScopes = api.scopes.filter((sharedScope) => !sharedScope.shared);
     const intl = useIntl();
 
     return (
@@ -204,9 +209,13 @@ export default function OperationGovernance(props) {
                     <TextField
                         id='operation_scope'
                         select
+                        SelectProps={{
+                            multiple: true,
+                            renderValue: (selected) => (Array.isArray(selected) ? selected.join(', ') : selected),
+                        }}
                         disabled={disableUpdate}
                         fullWidth
-                        label={api.scopes.length !== 0 ? intl.formatMessage({
+                        label={api.scopes.length !== 0 || sharedScopes ? intl.formatMessage({
                             id: 'Apis.Details.Resources.components.operationComponents.'
                             + 'OperationGovernance.operation.scope.label.default',
                             defaultMessage: 'Operation scope',
@@ -215,7 +224,7 @@ export default function OperationGovernance(props) {
                             + 'OperationGovernance.operation.scope.label.notAvailable',
                             defaultMessage: 'No scope available',
                         })}
-                        value={getOperationScopes(operation, spec)[0]}
+                        value={operationScopes}
                         onChange={({ target: { value } }) => operationsDispatcher({
                             action: 'scopes',
                             data: { target, verb, value: value ? [value] : [] },
@@ -230,40 +239,66 @@ export default function OperationGovernance(props) {
                         margin='dense'
                         variant='outlined'
                     >
-                        <MenuItem
-                            value=''
-                            dense
-                        >
+                        <ListSubheader>
                             <FormattedMessage
                                 id={'Apis.Details.Resources.components.operationComponents.'
-                                + 'OperationGovernance.operation.scope.select.none'}
-                                defaultMessage='None'
+                                + 'OperationGovernance.operation.scope.select.local'}
+                                defaultMessage='API Scopes'
                             />
-                        </MenuItem>
-                        {api.scopes.length !== 0
-                            ? api.scopes.map((scope) => (
-                                <MenuItem
-                                    key={scope.name}
-                                    value={scope.name}
-                                    dense
-                                >
-                                    {scope.name}
-                                </MenuItem>
-                            )) : (
-                                <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
-                                    <MenuItem
-                                        key='Create New Scope'
-                                        value='Create New Scope'
-                                        dense
-                                    >
-                                        <FormattedMessage
-                                            id={'Apis.Details.Resources.components.operationComponents.'
-                                + 'OperationGovernance.operation.scope.create.new.scope'}
-                                            defaultMessage='Create New Scope'
-                                        />
-                                    </MenuItem>
-                                </Link>
-                            )}
+                        </ListSubheader>
+                        {filteredApiScopes.length !== 0 ? filteredApiScopes.map((apiScope) => (
+                            <MenuItem
+                                key={apiScope.scope.name}
+                                value={apiScope.scope.name}
+                                dense
+                            >
+                                <Checkbox checked={operationScopes.includes(apiScope.scope.name)} />
+                                {apiScope.scope.name}
+                            </MenuItem>
+                        )) : (
+                            <MenuItem
+                                value=''
+                                disabled
+                            >
+                                <em>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Resources.components.operationComponents.'
+                                    + 'OperationGovernance.operation.no.api.scope.available'}
+                                        defaultMessage='No API scopes available'
+                                    />
+                                </em>
+                            </MenuItem>
+                        )}
+                        <ListSubheader>
+                            <FormattedMessage
+                                id={'Apis.Details.Resources.components.operationComponents.'
+                                + 'OperationGovernance.operation.scope.select.shared'}
+                                defaultMessage='Shared Scopes'
+                            />
+                        </ListSubheader>
+                        {sharedScopes && sharedScopes.length !== 0 ? sharedScopes.map((sharedScope) => (
+                            <MenuItem
+                                key={sharedScope.scope.name}
+                                value={sharedScope.scope.name}
+                                dense
+                            >
+                                <Checkbox checked={operationScopes.includes(sharedScope.scope.name)} />
+                                {sharedScope.scope.name}
+                            </MenuItem>
+                        )) : (
+                            <MenuItem
+                                value=''
+                                disabled
+                            >
+                                <em>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Resources.components.operationComponents.'
+                                    + 'OperationGovernance.operation.no.sharedpi.scope.available'}
+                                        defaultMessage='No shared scopes available'
+                                    />
+                                </em>
+                            </MenuItem>
+                        )}
                     </TextField>
                 ) : null }
             </Grid>
@@ -298,10 +333,12 @@ OperationGovernance.propTypes = {
     api: PropTypes.shape({ scopes: PropTypes.arrayOf(PropTypes.shape({})) }),
     target: PropTypes.string.isRequired,
     verb: PropTypes.string.isRequired,
+    sharedScopes: PropTypes.arrayOf(PropTypes.shape({})),
 };
 
 OperationGovernance.defaultProps = {
     operationRateLimits: [],
     api: { scopes: [] },
+    sharedScopes: [],
     disableUpdate: false,
 };

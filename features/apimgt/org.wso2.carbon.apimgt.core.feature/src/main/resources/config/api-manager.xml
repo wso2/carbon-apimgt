@@ -138,6 +138,12 @@
         <EnableRESTAPITokenCache>true</EnableRESTAPITokenCache>
         <!-- Expiry time for the apim REST API token cache -->
         <RESTAPITokenCacheExpiry>300</RESTAPITokenCacheExpiry>
+
+        <!-- Enable/Disable cache control headers of the Product REST APIs-->
+        <EnableRESTAPICacheControlHeaders>true</EnableRESTAPICacheControlHeaders>
+        <!-- Expiry time for the apim REST API token cache -->
+        <RESTAPICacheControlMaxAge>86400</RESTAPICacheControlMaxAge>
+
 	    <!-- JWT claims Cache expiry in seconds -->
         <!--JWTClaimCacheExpiry>900</JWTClaimCacheExpiry-->
         <!-- Expiry time for the apim key mgt validation info cache -->
@@ -497,7 +503,15 @@
                 <URI>/api/am/publisher/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </WhiteListedURI>
-                        <WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/admin/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/endpoint-registry/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
                 <URI>/api/am/store/{version}/api-products</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>

@@ -43,6 +43,7 @@ import org.wso2.carbon.identity.oauth2.model.RequestParameter;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
+import org.wso2.carbon.user.core.UserCoreConstants;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -162,11 +163,16 @@ public class ExtendedJWTBearerGrantHandler extends JWTBearerGrantHandler {
         if (permissionAndRoleConfig != null && ArrayUtils.isNotEmpty(permissionAndRoleConfig.getRoleMappings())) {
             String[] receivedRoles = currentRoleClaimValue.split(FrameworkUtils.getMultiAttributeSeparator());
             List<String> updatedRoleClaimValues = new ArrayList<>();
+            String updatedLocalRole;
             loop:
             for (String receivedRole : receivedRoles) {
                 for (RoleMapping roleMapping : permissionAndRoleConfig.getRoleMappings()) {
                     if (roleMapping.getRemoteRole().equals(receivedRole)) {
-                        updatedRoleClaimValues.add(roleMapping.getLocalRole().getLocalRoleName());
+                        updatedLocalRole = StringUtils.isEmpty(roleMapping.getLocalRole().getUserStoreId())
+                                ? roleMapping.getLocalRole().getLocalRoleName()
+                                : roleMapping.getLocalRole().getUserStoreId() + UserCoreConstants.DOMAIN_SEPARATOR
+                                        + roleMapping.getLocalRole().getLocalRoleName();
+                        updatedRoleClaimValues.add(updatedLocalRole);
                         continue loop;
                     }
                 }

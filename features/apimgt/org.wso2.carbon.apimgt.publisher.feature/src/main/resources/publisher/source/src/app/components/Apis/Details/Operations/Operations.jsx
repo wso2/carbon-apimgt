@@ -129,6 +129,9 @@ class Operations extends React.Component {
             apiThrottlingPolicy: api.apiThrottlingPolicy,
             filterKeyWord: '',
             isSaving: false,
+            sharedScopes: [],
+            apiScopesByName: {},
+            sharedScopesByName: {},
         };
 
         this.newApi = new Api();
@@ -141,6 +144,8 @@ class Operations extends React.Component {
      *
      */
     componentDidMount() {
+        const { api } = this.props;
+        const apiScopesByNameList = {};
         const promisedResPolicies = Api.policies('api');
         promisedResPolicies
             .then((policies) => {
@@ -157,6 +162,15 @@ class Operations extends React.Component {
                     doRedirectToLogin();
                 }
             });
+
+        for (const scopeObject of api.scopes) {
+            const modifiedScope = {};
+            modifiedScope.scope = scopeObject.scope;
+            modifiedScope.shared = scopeObject.shared;
+            apiScopesByNameList[scopeObject.scope.name] = modifiedScope;
+        }
+        this.setState({ apiScopesByName: apiScopesByNameList });
+        this.getAllSharedScopes();
     }
 
     /**
@@ -165,6 +179,29 @@ class Operations extends React.Component {
      */
     setFilterByKeyWord(event) {
         this.setState({ filterKeyWord: event.target.value.toLowerCase() });
+    }
+
+    /**
+     * @memberof Operations
+     */
+    getAllSharedScopes() {
+        Api.getAllScopes()
+            .then((response) => {
+                if (response.body && response.body.list) {
+                    const sharedScopesList = [];
+                    const sharedScopesByNameList = {};
+                    const shared = true;
+                    for (const scope of response.body.list) {
+                        const modifiedScope = {};
+                        modifiedScope.scope = scope;
+                        modifiedScope.shared = shared;
+                        sharedScopesList.push(modifiedScope);
+                        sharedScopesByNameList[scope.name] = modifiedScope;
+                    }
+                    this.setState({ sharedScopesByName: sharedScopesByNameList });
+                    this.setState({ sharedScopes: sharedScopesList });
+                }
+            });
     }
 
     /**
@@ -182,11 +219,22 @@ class Operations extends React.Component {
      * @param {*} newOperation
      */
     handleUpdateList(newOperation) {
-        const { operations } = this.state;
+        const { operations, sharedScopesByName, apiScopesByName } = this.state;
         const updatedList = operations.map(
             (operation) => ((operation.target === newOperation.target && operation.verb === newOperation.verb)
                 ? newOperation : operation),
         );
+
+        for (const selectedScope of newOperation.scopes) {
+            if (selectedScope
+                && !apiScopesByName[selectedScope]
+                && apiScopesByName[selectedScope] !== '') {
+                if (selectedScope in sharedScopesByName) {
+                    apiScopesByName[selectedScope] = sharedScopesByName[selectedScope];
+                }
+            }
+        }
+        this.setState({ apiScopesByName });
         this.setState({ operations: updatedList });
     }
 
@@ -194,10 +242,37 @@ class Operations extends React.Component {
      *
      */
     updateOperations() {
-        const { operations, apiThrottlingPolicy } = this.state;
+        const { operations, apiThrottlingPolicy, apiScopesByName } = this.state;
         const { updateAPI } = this.props;
         this.setState({ isSaving: true });
-        updateAPI({ operations, apiThrottlingPolicy }).finally(() => this.setState({ isSaving: false }));
+        this.updateApiScopes(operations);
+        const scopes = Object.keys(apiScopesByName).map((key) => { return apiScopesByName[key]; });
+        updateAPI({ operations, apiThrottlingPolicy, scopes }).finally(() => this.setState({ isSaving: false }));
+    }
+
+    /**
+     *
+     * This method modifies the security definition scopes by removing the scopes which are not present
+     * in operations and which are shared scopes
+     * @param {Array} apiOperations Operations list
+     */
+    updateApiScopes(apiOperations) {
+        const { apiScopesByName, sharedScopesByName } = this.state;
+        Object.keys(apiScopesByName).forEach((key) => {
+            let isScopeExistsInOperation = false;
+            for (const operation of apiOperations) {
+                // Checking if the scope resides in the operation
+                if (operation.scopes.includes(key)) {
+                    isScopeExistsInOperation = true;
+                    break;
+                }
+            }
+            // Checking if the scope exists in operation and is a shared scope
+            if (!isScopeExistsInOperation && (key in sharedScopesByName)) {
+                delete apiScopesByName[key];
+            }
+        });
+        this.setState({ apiScopesByName });
     }
 
     /**
@@ -206,7 +281,7 @@ class Operations extends React.Component {
     render() {
         const { api, resourceNotFoundMessage } = this.props;
         const {
-            operations, apiPolicies, apiThrottlingPolicy, isSaving, filterKeyWord, notFound,
+            operations, apiPolicies, apiThrottlingPolicy, isSaving, filterKeyWord, notFound, sharedScopes,
         } = this.state;
         if (notFound) {
             return <ResourceNotFound message={resourceNotFoundMessage} />;
@@ -304,6 +379,7 @@ class Operations extends React.Component {
                                         operation={item}
                                         handleUpdateList={this.handleUpdateList}
                                         scopes={api.scopes}
+                                        sharedScopes={sharedScopes}
                                         isOperationRateLimiting={!apiThrottlingPolicy}
                                         apiPolicies={apiPolicies}
                                     />

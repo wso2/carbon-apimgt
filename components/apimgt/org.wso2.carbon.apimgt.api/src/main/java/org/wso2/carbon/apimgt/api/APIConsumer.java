@@ -319,6 +319,19 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
+     * Update Existing Subscription
+     *
+     * @param apiTypeWrapper    Identifier
+     * @param userId        id of the user
+     * @param applicationId Application Id
+     * @return SubscriptionResponse subscription response object
+     * @throws APIManagementException if failed to add subscription details to database
+     */
+    SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId, int applicationId,
+                                            String subscriptionId, String currentThrottlingPolicy,
+                                            String requestedThrottlingPolicy) throws APIManagementException;
+
+    /**
      * Add new Subscriber with GroupId
      *
      * @param apiTypeWrapper    APIIdentifier
