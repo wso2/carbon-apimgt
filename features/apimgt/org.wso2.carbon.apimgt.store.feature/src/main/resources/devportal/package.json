@@ -1,8 +1,8 @@
 {
-    "name": "wso2_apim_developer_portal",
+    "name": "developer_portal",
     "version": "1.0.0",
     "description": "WSO2 API Manager Developer Portal Web App Note: reverted the swagger-ui version from 3.24.3 to 3.22.2 as POST was not working within swagger console",
-    "main": "app.js",
+    "main": "source/src/index.js",
     "scripts": {
         "test": "shx jest",
         "test:integration": "jest -c source/Tests/Integration/jest.config.js",
