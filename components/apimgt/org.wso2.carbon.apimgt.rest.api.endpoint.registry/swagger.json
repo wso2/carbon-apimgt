@@ -30,7 +30,7 @@
           }
         },
         "security" : [ {
-          "default" : [ "registry:view" ]
+          "default" : [ "service_catalog:view" ]
         } ]
       },
       "post" : {
@@ -81,7 +81,7 @@
           }
         },
         "security" : [ {
-          "default" : [ "registry:write" ]
+          "default" : [ "service_catalog:write" ]
         } ]
       }
     },
@@ -135,7 +135,7 @@
           }
         },
         "security" : [ {
-          "default" : [ "registry:view" ]
+          "default" : [ "service_catalog:view" ]
         } ]
       },
       "put" : {
@@ -197,7 +197,7 @@
           }
         },
         "security" : [ {
-          "default" : [ "registry:write" ]
+          "default" : [ "service_catalog:write" ]
         } ]
       },
       "delete" : {
@@ -242,7 +242,7 @@
           }
         },
         "security" : [ {
-          "default" : [ "registry:write" ]
+          "default" : [ "service_catalog:write" ]
         } ]
       }
     },
@@ -401,7 +401,7 @@
           }
         },
         "security" : [ {
-          "default" : [ "registry:entry_view" ]
+          "default" : [ "service_catalog:entry_view" ]
         } ]
       }
     },
@@ -464,7 +464,7 @@
           }
         },
         "security" : [ {
-          "default" : [ "registry:entry_write" ]
+          "default" : [ "service_catalog:entry_write" ]
         } ]
       }
     },
@@ -528,7 +528,7 @@
           }
         },
         "security" : [ {
-          "default" : [ "registry:entry_view" ]
+          "default" : [ "service_catalog:entry_view" ]
         } ]
       },
       "put" : {
@@ -599,7 +599,7 @@
           }
         },
         "security" : [ {
-          "default" : [ "registry:entry_write" ]
+          "default" : [ "service_catalog:entry_write" ]
         } ]
       },
       "delete" : {
@@ -654,7 +654,7 @@
           }
         },
         "security" : [ {
-          "default" : [ "registry:entry_write" ]
+          "default" : [ "service_catalog:entry_write" ]
         } ]
       }
     },
@@ -719,7 +719,7 @@
           }
         },
         "security" : [ {
-          "default" : [ "registry:entry_view" ]
+          "default" : [ "service_catalog:entry_view" ]
         } ]
       }
     },
@@ -813,7 +813,7 @@
           }
         },
         "security" : [ {
-          "default" : [ "registry:entry_write" ]
+          "default" : [ "service_catalog:entry_write" ]
         } ]
       }
     },
@@ -1033,10 +1033,10 @@
           "implicit" : {
             "authorizationUrl" : "https://example.com/oauth/authorize",
             "scopes" : {
-              "registry:view" : "view registry",
-              "registry:write" : "write registry",
-              "registry:entry_view" : "view reg entry",
-              "registry:entry_write" : "write reg entry"
+              "service_catalog:view" : "view registry",
+              "service_catalog:write" : "write registry",
+              "service_catalog:entry_view" : "view reg entry",
+              "service_catalog:entry_write" : "write reg entry"
             }
           }
         }

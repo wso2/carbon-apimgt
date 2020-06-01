@@ -124,9 +124,9 @@ public final class APIConstants {
     public static final String ANALYTICS_ROLE = "Internal/analytics";
     public static final String API_TENANT_CONF_ENABLE_ANONYMOUS_MODE = "EnableAnonymous";
 
-    public static final String ENDPOINT_REGISTRY_ADMIN_ROLE = "Internal/registry_admin";
-    public static final String ENDPOINT_REGISTRY_USER_ROLE = "Internal/registry_user";
-    public static final String ENDPOINT_REGISTRY_BROWSER_ROLE = "Internal/registry_browser";
+    public static final String SERVICE_CATALOG_ADMIN_ROLE = "Internal/service_catalog_admin";
+    public static final String SERVICE_CATALOG_USER_ROLE = "Internal/service_catalog_user";
+    public static final String SERVICE_CATALOG_VIEWER_ROLE = "Internal/service_catalog_viewer";
 
     public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
 
