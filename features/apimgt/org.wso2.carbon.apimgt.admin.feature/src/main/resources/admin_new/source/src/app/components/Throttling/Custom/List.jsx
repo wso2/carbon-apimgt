@@ -28,10 +28,12 @@ import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
 import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
-import AddEdit from 'AppComponents/Throttling/Custom/AddEdit';
+import AddEdit from 'AppComponents/Throttling/Custom/AddEditOld';
 import Delete from 'AppComponents/Throttling/Custom/Delete';
 import API from 'AppData/api';
 import EditIcon from '@material-ui/icons/Edit';
+import { Link as RouterLink } from 'react-router-dom';
+import IconButton from '@material-ui/core/IconButton';
 
 /**
  * Render a list
@@ -179,7 +181,14 @@ export default function ListCustomThrottlingPolicies() {
             emptyBoxProps={emptyBoxProps}
             apiCall={apiCall}
             DeleteComponent={Delete}
-            EditComponent={AddEdit}
+            // EditComponent={AddEdit}
+            EditComponent={() => (
+                <RouterLink to='/throttling/custom/policyid'>
+                    <IconButton color='primary' component='span'>
+                        <EditIcon />
+                    </IconButton>
+                </RouterLink>
+            )}
             editComponentProps={{
                 icon: <EditIcon />,
                 title: 'Edit Custom Policy',

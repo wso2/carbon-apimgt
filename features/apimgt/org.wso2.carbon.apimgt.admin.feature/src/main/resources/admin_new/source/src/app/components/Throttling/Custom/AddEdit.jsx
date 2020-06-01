@@ -24,11 +24,17 @@ import TextField from '@material-ui/core/TextField';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
-import { Typography } from '@material-ui/core';
+import {
+    Typography, Box, Grid, FormHelperText, Button,
+} from '@material-ui/core';
+import { green } from '@material-ui/core/colors';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import sqlFormatter from 'sql-formatter';
 import { Progress } from 'AppComponents/Shared';
+import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
+import { Link as RouterLink } from 'react-router-dom';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "CustomPolicyAddMonacoEditor" */));
 
@@ -46,6 +52,21 @@ const useStyles = makeStyles((theme) => ({
     },
     showSampleButton: {
         marginTop: theme.spacing(2),
+    },
+    helperText: {
+        color: green[600],
+        fontSize: theme.spacing(1.6),
+        marginLeft: theme.spacing(1),
+    },
+    infoBox: {
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(2),
+    },
+    buttonBox: {
+        marginTop: theme.spacing(2),
+    },
+    saveButton: {
+        marginRight: theme.spacing(2),
     },
 }));
 
@@ -85,7 +106,7 @@ function reducer(state, newValue) {
 function AddEdit(props) {
     const classes = useStyles();
     const {
-        updateList, icon, triggerButtonText, title, dataRow,
+        updateList, dataRow, history,
     } = props;
     const [initialState, setInitialState] = useState({
         policyName: '',
@@ -115,6 +136,22 @@ function AddEdit(props) {
             },
         });
     }, []);
+
+    if (dataRow) {
+        setIsEditMode(true);
+        const { policyId } = dataRow;
+        console.log('policyId', policyId);
+        restApi.customPolicyGet(policyId).then((result) => {
+            const formattedSiddhiQuery = sqlFormatter.format(result.body.siddhiQuery);
+            const editState = {
+                policyName: result.body.policyName,
+                description: result.body.description,
+                keyTemplate: result.body.keyTemplate,
+                siddhiQuery: formattedSiddhiQuery,
+            };
+            dispatch(editState);
+        });
+    }
 
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
@@ -183,17 +220,17 @@ function AddEdit(props) {
                 customPolicy);
             return promisedAddCustomPolicy
                 .then(() => {
-                    return (
+                    Alert.success(
                         <FormattedMessage
                             id='Throttling.Application.Policy.policy.edit.success'
-                            defaultMessage='Application Rate Limiting Policy edited successfully.'
-                        />
+                            defaultMessage='Custom Policy edited successfully'
+                        />,
                     );
                 })
                 .catch((error) => {
                     const { response } = error;
                     if (response.body) {
-                        throw (response.body.description);
+                        Alert.error(response.body.description);
                     }
                     return null;
                 })
@@ -206,22 +243,24 @@ function AddEdit(props) {
             );
             return promisedAddCustomPolicy
                 .then(() => {
-                    return (
+                    Alert.success(
                         <FormattedMessage
                             id='Throttling.Application.Policy.policy.add.success'
                             defaultMessage='Custom Policy added successfully.'
-                        />
+                        />,
                     );
+                    history.push('/throttling/custom');
                 })
                 .catch((error) => {
                     const { response } = error;
                     if (response.body) {
-                        throw (response.body.description);
+                        Alert.error(response.body.description);
                     }
                     return null;
                 })
                 .finally(() => {
                     updateList();
+                    history.push('/throttling/custom');
                 });
         }
     };
@@ -244,98 +283,140 @@ function AddEdit(props) {
     };
 
     return (
-        <FormDialogBase
-            title={title}
-            saveButtonText='Apply Rule'
-            icon={icon}
-            triggerButtonText={triggerButtonText}
-            formSaveCallback={formSaveCallback}
+        <ContentBase
+            pageStyle='half'
+            title='Custom Rate Limitin Policy - Create New'
             dialogOpenCallback={dialogOpenCallback}
         >
-            <TextField
-                autoFocus
-                margin='dense'
-                name='policyName'
-                label='Name'
-                fullWidth
-                required
-                variant='outlined'
-                value={policyName}
-                disabled={editMode}
-                onChange={onChange}
-                InputProps={{
-                    id: 'policyName',
-                    onBlur: ({ target: { value } }) => {
-                        validate('policyName', value);
-                    },
-                }}
-                error={validationError.policyName}
-                helperText={validationError.policyName && validationError.policyName}
-            />
-            <TextField
-                margin='dense'
-                name='description'
-                label='Description'
-                fullWidth
-                variant='outlined'
-                value={description}
-                onChange={onChange}
-            />
-            <TextField
-                margin='dense'
-                name='keyTemplate'
-                label='Key Template'
-                fullWidth
-                required
-                variant='outlined'
-                value={keyTemplate}
-                onChange={onChange}
-                InputProps={{
-                    id: 'keyTemplate',
-                    onBlur: ({ target: { value } }) => {
-                        validate('keyTemplate', value);
-                    },
-                }}
-                error={validationError.keyTemplate}
-                helperText={validationError.keyTemplate && validationError.keyTemplate}
-            />
-            <Typography className={classes.siddhiQueryHeading}>
-                <FormattedMessage
-                    id='Admin.Throttling.Custom.policy.add.siddhi.query'
-                    defaultMessage='Siddhi Query: '
-                />
-            </Typography>
-            {!editMode && (
-                <>
-                    <Typography>
-                        <FormattedMessage
-                            id='Admin.Throttling.Custom.policy.add.siddhi.query.description'
-                            defaultMessage='The following query will allow 5 requests per minute for an Admin user.'
+            <Box component='div' m={2}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <TextField
+                            autoFocus
+                            margin='dense'
+                            name='policyName'
+                            label='Name'
+                            fullWidth
+                            required
+                            variant='outlined'
+                            value={policyName}
+                            disabled={editMode}
+                            onChange={onChange}
+                            InputProps={{
+                                id: 'policyName',
+                                onBlur: ({ target: { value } }) => {
+                                    validate('policyName', value);
+                                },
+                            }}
+                            error={validationError.policyName}
+                            helperText={validationError.policyName ? validationError.policyName : (
+                                <FormattedMessage
+                                    id='Admin.Throttling.Custom.policy.add.policy.name'
+                                    defaultMessage='Name of Throttling Policy'
+                                />
+                            )}
                         />
-                    </Typography>
-                    <Typography>
-                        <FormattedMessage
-                            id='Admin.Throttling.Custom.policy.add.siddhi.query.key.template'
-                            defaultMessage='Key Template : $userId'
+                        <TextField
+                            margin='dense'
+                            name='description'
+                            label='Description'
+                            fullWidth
+                            variant='outlined'
+                            value={description}
+                            onChange={onChange}
+                            helperText={(
+                                <FormattedMessage
+                                    id='Admin.Throttling.Custom.policy.add.policy.description'
+                                    defaultMessage='Description of Throttling Policy'
+                                />
+                            )}
                         />
-                    </Typography>
-                </>
-            )}
-            <Suspense fallback={<Progress />}>
-                <MonacoEditor
-                    language='sql'
-                    height='250px'
-                    theme='vs-dark'
-                    value={siddhiQuery}
-                    onChange={siddhiQueryOnChange}
-                />
-            </Suspense>
-        </FormDialogBase>
+                        <TextField
+                            margin='dense'
+                            name='keyTemplate'
+                            label='Key Template'
+                            fullWidth
+                            required
+                            variant='outlined'
+                            value={keyTemplate}
+                            onChange={onChange}
+                            InputProps={{
+                                id: 'keyTemplate',
+                                onBlur: ({ target: { value } }) => {
+                                    validate('keyTemplate', value);
+                                },
+                            }}
+                            error={validationError.keyTemplate}
+                            helperText={validationError.keyTemplate ? validationError.keyTemplate : (
+                                <FormattedMessage
+                                    id='dsdds'
+                                    defaultMessage={'The specific combination of attributes being checked '
+                                    + 'in the policy need to be defined as the key template'}
+                                />
+                            )}
+                        />
+                        <FormHelperText className={classes.helperText}>
+                        Eg: $userId, $apiContext, $apiVersion, $resourceKey, $appTenant, $apiTenant, $appId, $clientIp
+                        </FormHelperText>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={12}>
+                        <Typography className={classes.siddhiQueryHeading}>
+                            <FormattedMessage
+                                id='Admin.Throttling.Custom.policy.add.siddhi.query'
+                                defaultMessage='Siddhi Query: '
+                            />
+                        </Typography>
+                        {!editMode && (
+                            <InlineMessage type='info' height={50} className={classes.infoBox}>
+                                <div className={classes.contentWrapper}>
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='Admin.Throttling.Custom.policy.add.siddhi.query.description'
+                                            defaultMessage='The following query will allow 5 requests per minute for an Admin user.'
+                                        />
+                                    </Typography>
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='Admin.Throttling.Custom.policy.add.siddhi.query.key.template'
+                                            defaultMessage='Key Template : $userId'
+                                        />
+                                    </Typography>
+                                </div>
+                            </InlineMessage>
+                        )}
+                        <Suspense fallback={<Progress />}>
+                            <MonacoEditor
+                                language='sql'
+                                height='250px'
+                                theme='vs-dark'
+                                value={siddhiQuery}
+                                onChange={siddhiQueryOnChange}
+                            />
+                        </Suspense>
+                    </Grid>
+                    <Box component='span' className={classes.buttonBox}>
+                        <Button variant='contained' color='primary' className={classes.saveButton} onClick={formSaveCallback}>
+                            <FormattedMessage
+                                id='Throttling.Custom.AddEdit.form.add'
+                                defaultMessage='Add'
+                            />
+                        </Button>
+                        <RouterLink to='/throttling/custom'>
+                            <Button variant='contained'>
+                                <FormattedMessage
+                                    id='Throttling.Custom.AddEdit.form.cancel'
+                                    defaultMessage='Cancel'
+                                />
+                            </Button>
+                        </RouterLink>
+                    </Box>
+                </Grid>
+            </Box>
+        </ContentBase>
     );
 }
 
 AddEdit.defaultProps = {
-    icon: null,
     dataRow: null,
 };
 
@@ -344,7 +425,6 @@ AddEdit.propTypes = {
     dataRow: PropTypes.shape({
         policyId: PropTypes.string.isRequired,
     }),
-    icon: PropTypes.element,
     triggerButtonText: PropTypes.shape({}).isRequired,
     title: PropTypes.shape({}).isRequired,
 };
