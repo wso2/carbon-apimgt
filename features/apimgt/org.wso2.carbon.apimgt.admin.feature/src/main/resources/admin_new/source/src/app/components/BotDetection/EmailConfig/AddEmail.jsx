@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer } from 'react';
+import React, { useState } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import Joi from '@hapi/joi';
@@ -34,18 +34,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Reducer
- * @param {JSON} state State
- * @returns {Promise}.
- */
-function reducer(state, { field, value }) {
-    return {
-        ...state,
-        [field]: value,
-    };
-}
-
-/**
  * Render a pop-up dialog to add an email address
  * @param {JSON} props .
  * @returns {JSX}.
@@ -55,16 +43,10 @@ function AddEmail(props) {
         updateList, icon, triggerButtonText, title, emailList,
     } = props;
     const classes = useStyles();
-    const initialState = {
-        email: '',
-
-    };
-
-    const [state, dispatch] = useReducer(reducer, initialState);
-    const { email } = state;
+    const [email, setEmail] = useState('');
 
     const onChange = (e) => {
-        dispatch({ field: e.target.name, value: e.target.value });
+        setEmail(e.target.value);
     };
 
     const validateEmail = (value) => {
@@ -114,7 +96,6 @@ function AddEmail(props) {
                 }
             })
             .finally(() => {
-                dispatch('', '');
                 updateList();
             });
     };
