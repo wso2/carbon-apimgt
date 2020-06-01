@@ -45,7 +45,7 @@ public class GraphQLQueryDTO   {
   }
 
   
-  @ApiModelProperty(example = "10", value = "Maximum Depth of the GraphQL query")
+  @ApiModelProperty(example = "10#-----------------------------------------------------", value = "Maximum Depth of the GraphQL query")
   @JsonProperty("graphQLMaxDepth")
   public Integer getGraphQLMaxDepth() {
     return graphQLMaxDepth;

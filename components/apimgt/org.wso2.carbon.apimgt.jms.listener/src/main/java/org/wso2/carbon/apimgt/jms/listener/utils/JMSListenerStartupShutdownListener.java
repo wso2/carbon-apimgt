@@ -34,7 +34,7 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
 
         if (jmsTransportHandler != null) {
             // This method will make shutdown the Listener.
-            log.debug("Unsubscribing from JMS Events...");
+            log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandler.unSubscribeFromEvents();
         }
     }

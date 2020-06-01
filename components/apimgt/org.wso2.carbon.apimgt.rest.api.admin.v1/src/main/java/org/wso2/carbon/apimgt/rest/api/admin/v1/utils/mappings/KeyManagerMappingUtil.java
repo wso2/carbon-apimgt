@@ -147,6 +147,16 @@ public class KeyManagerMappingUtil {
                     Arrays.asList(new Gson().fromJson(claimMappingElement, ClaimMappingEntryDTO[].class)));
             jsonObject.remove(APIConstants.KeyManager.CLAIM_MAPPING);
         }
+        JsonElement scopeClaimKey = jsonObject.get(APIConstants.KeyManager.SCOPES_CLAIM);
+        if (scopeClaimKey != null){
+            keyManagerDTO.setScopesClaim(scopeClaimKey.getAsString());
+            jsonObject.remove(APIConstants.KeyManager.SCOPES_CLAIM);
+        }
+        JsonElement consumerKeyClaim = jsonObject.get(APIConstants.KeyManager.CONSUMER_KEY_CLAIM);
+        if (scopeClaimKey != null) {
+            keyManagerDTO.setConsumerKeyClaim(consumerKeyClaim.getAsString());
+            jsonObject.remove(APIConstants.KeyManager.CONSUMER_KEY_CLAIM);
+        }
         keyManagerDTO.setAdditionalProperties(new Gson().fromJson(jsonObject, Map.class));
         return keyManagerDTO;
     }
@@ -221,6 +231,12 @@ public class KeyManagerMappingUtil {
         if (claimMapping != null){
             additionalProperties
                     .put(APIConstants.KeyManager.CLAIM_MAPPING, new Gson().toJsonTree(claimMapping));
+        }
+        if (StringUtils.isNotEmpty(keyManagerDTO.getConsumerKeyClaim())) {
+            additionalProperties.put(APIConstants.KeyManager.CONSUMER_KEY_CLAIM, keyManagerDTO.getConsumerKeyClaim());
+        }
+        if (StringUtils.isNotEmpty(keyManagerDTO.getScopesClaim())) {
+            additionalProperties.put(APIConstants.KeyManager.SCOPES_CLAIM, keyManagerDTO.getScopesClaim());
         }
         keyManagerConfigurationDTO.setAdditionalProperties(additionalProperties);
         return keyManagerConfigurationDTO;

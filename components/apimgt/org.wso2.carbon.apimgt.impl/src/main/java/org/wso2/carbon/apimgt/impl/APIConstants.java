@@ -2120,6 +2120,8 @@ public final class APIConstants {
         public static final String KEY_MANAGER_TYPE = "type";
         public static final String UUID_REGEX = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F" +
                 "]{3}-[0-9a-fA-F]{12}";
+        public static final String CONSUMER_KEY_CLAIM = "consumer_key";
+        public static final String SCOPES_CLAIM = "scopes_claim";
 
         public static class KeyManagerEvent {
 

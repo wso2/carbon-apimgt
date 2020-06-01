@@ -161,6 +161,16 @@ public class KeyManagerHolder {
                     ClaimMappingDto[] claimMappingDto = gson.fromJson(jsonElement, ClaimMappingDto[].class);
                     tokenIssuerDto.addClaimMappings(claimMappingDto);
                 }
+                Object consumerKeyClaim =
+                        keyManagerConfiguration.getParameter(APIConstants.KeyManager.CONSUMER_KEY_CLAIM);
+                if (consumerKeyClaim instanceof String && StringUtils.isNotEmpty((String)consumerKeyClaim)){
+                    tokenIssuerDto.setConsumerKeyClaim((String) consumerKeyClaim);
+                }
+                Object scopeClaim =
+                        keyManagerConfiguration.getParameter(APIConstants.KeyManager.SCOPES_CLAIM);
+                if (scopeClaim instanceof String && StringUtils.isNotEmpty((String)scopeClaim)){
+                    tokenIssuerDto.setScopesClaim((String) scopeClaim);
+                }
                 Object jwksEndpoint = keyManagerConfiguration.getParameter(APIConstants.KeyManager.JWKS_ENDPOINT);
                 if (jwksEndpoint != null) {
                     if (StringUtils.isNotEmpty((String) jwksEndpoint)) {
