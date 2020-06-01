@@ -36,7 +36,6 @@ components/apimgt/org.wso2.carbon.apimgt.hybrid.gateway/org.wso2.carbon.apimgt.h
 components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/publisher-api.yaml
 components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/store-api.yaml
 components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/admin-api.yaml
-components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/endpoint-registry-api.yaml
 components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/swagger.json
 components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/swagger.json
 components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/swagger.json

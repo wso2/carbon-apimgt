@@ -152,8 +152,6 @@ public final class RestApiConstants {
     public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_0;
     public static final String REST_API_ADMIN_CONTEXT_FULL_1 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_1;
     public static final String REST_API_PROVIDER = "admin";
-    public static final String REST_API_ENDPOINT_REGISTRY_CONTEXT = "/api/am/endpoint-registry";
-    public static final String REST_API_ENDPOINT_REGISTRY_VERSION = "v1";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
     public static final Pattern REGEX_BEARER_PATTERN = Pattern.compile("Bearer\\s");
@@ -216,11 +214,6 @@ public final class RestApiConstants {
     public static final String SORT_BY_NAME = "name";
     public static final String SORT_BY_THROTTLING_TIER = "throttlingTier";
     public static final String SORT_BY_STATUS = "status";
-
-    //Constants for endpoint registry sortBy
-    public static final String ENDPOINT_REG_NAME = "registryName";
-    public static final String ENDPOINT_REG_ENTRY_DEFINITION_TYPE = "definitionType";
-    public static final String ENDPOINT_REG_ENTRY_SERVICE_TYPE = "serviceType";
 
     //default error messages
     public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";
