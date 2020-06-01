@@ -32,8 +32,8 @@
 
     <link href="<%= app.context %>/site/public/css/main.css" type="text/css" rel="stylesheet" />
     <link href="<%= app.context %>/site/public/css/draftjs.css" type="text/css" rel="stylesheet" />
-    <link rel="shortcut icon" href="<%= app.context %>/site/public/images/favicon.ico">
-    <link rel="icon" type="image/x-icon" href="<%= app.context %>/site/public/images/_favicon.ico">
+    <link rel="shortcut icon" href="<%= app.context %>/site/public/images/favicon.png">
+    <link rel="icon" type="image/x-icon" href="<%= app.context %>/site/public/images/_favicon.png">
 </head>
 
 <body>
