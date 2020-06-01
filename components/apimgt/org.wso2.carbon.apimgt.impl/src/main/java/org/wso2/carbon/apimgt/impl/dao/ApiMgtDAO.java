@@ -14921,4 +14921,29 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * @param apiId        ID of the API created using the Endpoint Registry Entry
+     * @param registryName Name of Endpoint Registry
+     * @param entryName    Name of Registry Entry
+     * @param version      Registry Entry version
+     * @param connection   Existing DB Connection
+     * @throws APIManagementException
+     */
+    public void addAPIRegistryEntryMappings(int apiId, String registryName, String entryName, String version)
+            throws APIManagementException {
+
+        String addAPIRegistryEntrySql = SQLConstants.ADD_API_REGISTRY_ENTRY_MAPPING_SQL;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(addAPIRegistryEntrySql)) {
+            preparedStatement.setInt(1, apiId);
+            preparedStatement.setString(2, registryName);
+            preparedStatement.setString(3, entryName);
+            preparedStatement.setString(4, version);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Error while adding Registry Entry mapping for API with ID: " + apiId, e);
+        }
+    }
+
 }

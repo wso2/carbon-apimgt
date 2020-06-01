@@ -878,6 +878,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int apiId = apiMgtDAO.addAPI(api, tenantId);
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
+        JSONParser parser = new JSONParser();
+        if (StringUtils.isNotEmpty(api.getEndpointConfig())) {
+            try {
+                JSONObject endpointConfig = (JSONObject) parser.parse(api.getEndpointConfig());
+                if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig.get(APIConstants.
+                        API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    String endpointId = (String) endpointConfig.get(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID);
+                    if (StringUtils.isNotEmpty(endpointId)) {
+                        String[] endpointIdArray = endpointId.split(":");
+                        apiMgtDAO.addAPIRegistryEntryMappings(apiId, endpointIdArray[0], endpointIdArray[1],
+                                endpointIdArray[2]);
+                    }
+                }
+            } catch (ParseException e) {
+                throw new APIManagementException("Error while parsing the endpoint config of API : "
+                        + api.getId().getApiName());
+            } catch (ArrayIndexOutOfBoundsException e) {
+                throw new APIManagementException("Missing required parameter in endpoint_id of API : " + api.getId()
+                        .getApiName());
+            }
+        }
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getId().getApiName(), apiId,
