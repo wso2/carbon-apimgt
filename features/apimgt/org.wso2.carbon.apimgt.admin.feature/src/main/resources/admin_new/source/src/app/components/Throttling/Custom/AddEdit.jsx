@@ -21,9 +21,8 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { useIntl, FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
-import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
 import {
     Typography, Box, Grid, FormHelperText, Button,
 } from '@material-ui/core';
@@ -47,7 +46,6 @@ const useStyles = makeStyles((theme) => ({
 
     },
     siddhiQueryHeading: {
-        marginTop: theme.spacing(2),
         marginBottom: theme.spacing(1),
     },
     showSampleButton: {
@@ -106,8 +104,9 @@ function reducer(state, newValue) {
 function AddEdit(props) {
     const classes = useStyles();
     const {
-        updateList, dataRow, history,
+        updateList, history,
     } = props;
+    const intl = useIntl();
     const [initialState, setInitialState] = useState({
         policyName: '',
         description: '',
@@ -121,8 +120,22 @@ function AddEdit(props) {
     const [validationError, setValidationError] = useState([]);
     const [editMode, setIsEditMode] = useState(false);
     const restApi = new API();
+    const { policyId } = props.match.params;
 
     useEffect(() => {
+        if (policyId !== 'create') {
+            setIsEditMode(true);
+            restApi.customPolicyGet(policyId).then((result) => {
+                const formattedSiddhiQuery = sqlFormatter.format(result.body.siddhiQuery);
+                const editState = {
+                    policyName: result.body.policyName,
+                    description: result.body.description,
+                    keyTemplate: result.body.keyTemplate,
+                    siddhiQuery: formattedSiddhiQuery,
+                };
+                dispatch(editState);
+            });
+        }
         setInitialState({
             policyName: '',
             description: '',
@@ -137,22 +150,6 @@ function AddEdit(props) {
         });
     }, []);
 
-    if (dataRow) {
-        setIsEditMode(true);
-        const { policyId } = dataRow;
-        console.log('policyId', policyId);
-        restApi.customPolicyGet(policyId).then((result) => {
-            const formattedSiddhiQuery = sqlFormatter.format(result.body.siddhiQuery);
-            const editState = {
-                policyName: result.body.policyName,
-                description: result.body.description,
-                keyTemplate: result.body.keyTemplate,
-                siddhiQuery: formattedSiddhiQuery,
-            };
-            dispatch(editState);
-        });
-    }
-
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
     };
@@ -163,15 +160,26 @@ function AddEdit(props) {
 
     const validate = (fieldName, value) => {
         let error = '';
+        let keys;
+        const validateKeyTemplates = ['$userId', '$apiContext', '$apiVersion', '$resourceKey',
+            '$appTenant', '$apiTenant', '$appId', '$clientIp'];
         switch (fieldName) {
             case 'policyName':
-                error = value === '' ? (fieldName + ' is Empty') : '';
+                if (value === '') {
+                    error = 'Name is Empty';
+                } else if (value.indexOf(' ') !== -1) {
+                    error = 'Name contains spaces';
+                } else {
+                    error = false;
+                }
                 setValidationError({ policyName: error });
                 break;
             case 'keyTemplate':
+                keys = value.split(':');
                 if (value === '') {
                     error = (fieldName + ' is Empty');
-                } else if (value.indexOf(' ') !== -1) {
+                } else if (value.indexOf(' ') !== -1
+                || keys.map((obj) => validateKeyTemplates.includes(obj)).includes(false)) {
                     error = 'Invalid Key Template';
                 } else {
                     error = false;
@@ -179,7 +187,7 @@ function AddEdit(props) {
                 setValidationError({ keyTemplate: error });
                 break;
             case 'siddhiQuery':
-                error = value === '' ? (fieldName + ' is Empty') : '';
+                error = value === '' ? (fieldName + ' is Empty') : false;
                 setValidationError({ siddhiQuery: error });
                 break;
             default:
@@ -189,19 +197,18 @@ function AddEdit(props) {
     };
 
     const getAllFormErrors = () => {
-        let errorText = '';
+        let error = '';
         const policyNameErrors = validate('policyName', policyName);
         const keyTemplateErrors = validate('keyTemplate', keyTemplate);
         const siddhiQueryErrors = validate('siddhiQuery', siddhiQuery);
-
-        errorText += policyNameErrors + keyTemplateErrors + siddhiQueryErrors;
-
+        error += policyNameErrors + keyTemplateErrors + siddhiQueryErrors;
+        const errorText = error.replace('false', '');
         return errorText;
     };
 
     const formSaveCallback = () => {
         const formErrors = getAllFormErrors();
-        if (formErrors !== '' && formErrors !== 'false') {
+        if (formErrors !== '' && formErrors !== '0') {
             Alert.error(formErrors);
             return (false);
         }
@@ -214,8 +221,7 @@ function AddEdit(props) {
         }
         const customPolicy = state;
 
-        if (dataRow) {
-            const { policyId } = dataRow;
+        if (policyId !== 'create') {
             promisedAddCustomPolicy = restApi.updateCustomPolicy(policyId,
                 customPolicy);
             return promisedAddCustomPolicy
@@ -226,6 +232,7 @@ function AddEdit(props) {
                             defaultMessage='Custom Policy edited successfully'
                         />,
                     );
+                    history.push('/throttling/custom');
                 })
                 .catch((error) => {
                     const { response } = error;
@@ -260,33 +267,22 @@ function AddEdit(props) {
                 })
                 .finally(() => {
                     updateList();
-                    history.push('/throttling/custom');
                 });
-        }
-    };
-
-    const dialogOpenCallback = () => {
-        if (dataRow) {
-            setIsEditMode(true);
-            const { policyId } = dataRow;
-            restApi.customPolicyGet(policyId).then((result) => {
-                const formattedSiddhiQuery = sqlFormatter.format(result.body.siddhiQuery);
-                const editState = {
-                    policyName: result.body.policyName,
-                    description: result.body.description,
-                    keyTemplate: result.body.keyTemplate,
-                    siddhiQuery: formattedSiddhiQuery,
-                };
-                dispatch(editState);
-            });
         }
     };
 
     return (
         <ContentBase
             pageStyle='half'
-            title='Custom Rate Limitin Policy - Create New'
-            dialogOpenCallback={dialogOpenCallback}
+            title={editMode
+                ? intl.formatMessage({
+                    id: 'Throttling.Custom.AddEdit.title.edit',
+                    defaultMessage: 'Custom Rate Limiting Policy - Edit',
+                })
+                : intl.formatMessage({
+                    id: 'Throttling.Custom.AddEdit.title.add',
+                    defaultMessage: 'Custom Rate Limiting Policy - Define Policy',
+                })}
         >
             <Box component='div' m={2}>
                 <Grid container spacing={2}>
@@ -372,7 +368,8 @@ function AddEdit(props) {
                                     <Typography>
                                         <FormattedMessage
                                             id='Admin.Throttling.Custom.policy.add.siddhi.query.description'
-                                            defaultMessage='The following query will allow 5 requests per minute for an Admin user.'
+                                            defaultMessage={'The following sample query will allow 5 requests per '
+                                            + 'minute for an Admin user.'}
                                         />
                                     </Typography>
                                     <Typography>
@@ -395,7 +392,14 @@ function AddEdit(props) {
                         </Suspense>
                     </Grid>
                     <Box component='span' className={classes.buttonBox}>
-                        <Button variant='contained' color='primary' className={classes.saveButton} onClick={formSaveCallback}>
+                        <Button
+                            variant='contained'
+                            color='primary'
+                            className={classes.saveButton}
+                            onClick={formSaveCallback}
+                            disabled={validationError && validationError.length !== 0
+                                && Object.values(validationError)[0] !== false}
+                        >
                             <FormattedMessage
                                 id='Throttling.Custom.AddEdit.form.add'
                                 defaultMessage='Add'
@@ -416,17 +420,15 @@ function AddEdit(props) {
     );
 }
 
-AddEdit.defaultProps = {
-    dataRow: null,
-};
-
 AddEdit.propTypes = {
     updateList: PropTypes.func.isRequired,
-    dataRow: PropTypes.shape({
-        policyId: PropTypes.string.isRequired,
-    }),
     triggerButtonText: PropTypes.shape({}).isRequired,
     title: PropTypes.shape({}).isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            policyId: PropTypes.string,
+        }),
+    }).isRequired,
 };
 
-export default injectIntl(AddEdit);
+export default AddEdit;
