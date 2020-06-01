@@ -28,6 +28,8 @@ import HelpBase from 'AppComponents/AdminPages/Addons/HelpBase';
 import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
 import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
 import Configurations from 'Config';
 import DeleteEmail from 'AppComponents/BotDetection/EmailConfig/DeleteEmail';
 import AddEmails from 'AppComponents/BotDetection/EmailConfig/AddEmail';
@@ -236,9 +238,16 @@ export default function ListEmails() {
         />
     )
         : (
-            <ListBase
-                pageProps={pageProps}
-                emptyBoxProps={analyticsDisabledEmptyBoxProps}
-            />
+            <ContentBase
+                {...pageProps}
+                pageStyle='small'
+            >
+                <Card>
+                    <CardContent>
+                        {analyticsDisabledEmptyBoxProps.title}
+                        {analyticsDisabledEmptyBoxProps.content}
+                    </CardContent>
+                </Card>
+            </ContentBase>
         ));
 }
