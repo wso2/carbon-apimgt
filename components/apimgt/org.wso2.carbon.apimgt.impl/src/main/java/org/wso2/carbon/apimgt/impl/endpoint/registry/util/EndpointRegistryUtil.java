@@ -19,8 +19,8 @@ package org.wso2.carbon.apimgt.impl.endpoint.registry.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.DefinitionValidationException;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
 
 import java.net.URL;
@@ -47,22 +47,22 @@ public class EndpointRegistryUtil {
     }
 
     public static boolean isValidDefinition(URL definitionURL, String definitionType)
-            throws EndpointRegistryException {
-        DefinitionValidator schemaValidator = definitionValidatorMap.get(definitionType);
-        if (schemaValidator != null) {
-            return schemaValidator.validate(definitionURL);
+            throws DefinitionValidationException {
+        DefinitionValidator definitionValidator = definitionValidatorMap.get(definitionType);
+        if (definitionValidator != null) {
+            return definitionValidator.validate(definitionURL);
         }
-        throw new EndpointRegistryException("No Schema Validator found for the given definition type: '"
+        throw new DefinitionValidationException("No Definition Validator found for the given definition type: '"
                 + definitionType + "'");
     }
 
     public static boolean isValidDefinition(byte[] definitionContent, String definitionType)
-            throws EndpointRegistryException {
-        DefinitionValidator schemaValidator = definitionValidatorMap.get(definitionType);
-        if (schemaValidator != null) {
-            return schemaValidator.validate(definitionContent);
+            throws DefinitionValidationException {
+        DefinitionValidator definitionValidator = definitionValidatorMap.get(definitionType);
+        if (definitionValidator != null) {
+            return definitionValidator.validate(definitionContent);
         }
-        throw new EndpointRegistryException("No Schema Validator found for the given definition type: '"
+        throw new DefinitionValidationException("No Definition Validator found for the given definition type: '"
                 + definitionType + "'");
     }
 
