@@ -120,10 +120,11 @@ function AddEdit(props) {
     const restApi = new API();
 
     const onChange = (e) => {
-        if (e.target.name === 'invert' || e.target.name === 'conditionStatus') {
-            dispatch({ field: e.target.name, value: e.target.checked });
+        const { name } = e.target;
+        if (name === 'invert' || name === 'conditionStatus') {
+            dispatch({ field: name, value: e.target.checked });
         } else {
-            dispatch({ field: e.target.name, value: e.target.value });
+            dispatch({ field: name, value: e.target.value });
         }
     };
 
