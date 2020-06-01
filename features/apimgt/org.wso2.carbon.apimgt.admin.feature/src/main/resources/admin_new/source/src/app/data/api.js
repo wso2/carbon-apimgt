@@ -556,17 +556,6 @@ class API extends Resource {
         });
     }
 
-    /**
-     * Get Analytics Enabled setting
-     */
-    getAnalyticsEnabled(){ 
-        return this.client.then((client) => {
-            return client.apis['Settings'].get_settings(
-                this._requestMetaData(),
-            );
-        });
-    }
-
      /**
      * Retrieve tenant information of the given username
      */
