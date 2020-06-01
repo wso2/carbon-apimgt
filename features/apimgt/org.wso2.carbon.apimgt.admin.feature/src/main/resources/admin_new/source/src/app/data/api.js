@@ -130,8 +130,11 @@ class API extends Resource {
         });
     }
 
-    updateAPICategory(id, name, description, callback = null) {
-        const promiseUpdateApiCategory = this.client.then((client) => {
+    /**
+     * Update an API category
+     */
+    updateAPICategory(id, name, description) {
+        return this.client.then((client) => {
             const data = {
                 name: name,
                 description: description,
@@ -143,16 +146,13 @@ class API extends Resource {
                 this._requestMetaData(),
             );
         });
-
-        if (callback) {
-            return promiseUpdateApiCategory.then(callback);
-        } else {
-            return promiseUpdateApiCategory;
-        }
     }
 
-    deleteAPICategory(id, callback = null) {
-        const promiseDeleteApiCategory = this.client.then((client) => {
+    /**
+     * Delete an API Category
+     */
+    deleteAPICategory(id) {
+        return this.client.then((client) => {
             return client.apis[
                 'API Category (Individual)'
             ].delete_api_categories__apiCategoryId_(
@@ -160,16 +160,13 @@ class API extends Resource {
                 this._requestMetaData(),
             );
         });
-
-        if (callback) {
-            return promiseDeleteApiCategory.then(callback);
-        } else {
-            return promiseDeleteApiCategory;
-        }
     }
 
-    createAPICategory(name, description, callback = null) {
-        const promiseCreateApiCategory = this.client.then((client) => {
+    /**
+     * Add an API Category
+     */
+    createAPICategory(name, description) {
+        return this.client.then((client) => {
             const data = {
                 name: name,
                 description: description,
@@ -183,12 +180,6 @@ class API extends Resource {
                 this._requestMetaData(),
             );
         });
-
-        if (callback) {
-            return promiseCreateApiCategory.then(callback);
-        } else {
-            return promiseCreateApiCategory;
-        }
     }
 
     /**
@@ -259,7 +250,9 @@ class API extends Resource {
         });
     }
 
-
+    /**
+     * Get a list of applications from all users
+     */
     getApplicationList() {
         return this.client.then((client) => {
             return client.apis['Application (Collection)'].get_applications(
@@ -268,8 +261,11 @@ class API extends Resource {
         });
     }
 
-    updateApplicationOwner(id, owner, callback = null) {
-        const promiseUpdateApplicationOwner = this.client.then((client) => {
+     /**
+     * Update an application's owner
+     */
+    updateApplicationOwner(id, owner) {
+        return this.client.then((client) => {
             return client.apis[
                 'Application'
             ].post_applications__applicationId__change_owner(
@@ -277,14 +273,11 @@ class API extends Resource {
                 this._requestMetaData(),
             );
         });
-
-        if (callback) {
-            return promiseUpdateApplicationOwner.then(callback);
-        } else {
-            return promiseUpdateApplicationOwner;
-        }
     }
 
+    /**
+     * Get a list of available Microgateway labels
+     */
     getMicrogatewayLabelList() {
         return this.client.then((client) => {
             return client.apis['Label Collection'].get_labels(
@@ -293,22 +286,23 @@ class API extends Resource {
         });
     }
 
-    deleteMicrogatewayLabel(id, callback = null) {
-        const promiseDeleteLabel = this.client.then((client) => {
+     /**
+     * Delete a Microgateway Label
+     */
+    deleteMicrogatewayLabel(id) {
+        return this.client.then((client) => {
             return client.apis['Label'].delete_labels__labelId_(
                 { labelId: id },
                 this._requestMetaData(),
             );
         });
-        if (callback) {
-            return promiseDeleteLabel.then(callback);
-        } else {
-            return promiseDeleteLabel;
-        }
     }
 
+     /**
+     * Add a Microgateway Label
+     */
     addMicrogatewayLabel(name, description, hosts,  callback = null) {
-        const promiseCreateMicrogatewayLabel = this.client.then((client) => {
+        return this.client.then((client) => {
             const data = {
                 name: name,
                 description: description,
@@ -323,16 +317,13 @@ class API extends Resource {
                 this._requestMetaData(),
             );
         });
-
-        if (callback) {
-            return promiseCreateMicrogatewayLabel.then(callback);
-        } else {
-            return promiseCreateMicrogatewayLabel;
-        }
     }
 
+     /**
+     * Update a Microgateway Label
+     */
     updateMicrogatewayLabel(id, name, description, hosts,  callback = null) {
-        const promiseUpdateMicrogatewayLabel = this.client.then((client) => {
+        return this.client.then((client) => {
             const data = {
                 name: name,
                 description: description,
@@ -343,12 +334,6 @@ class API extends Resource {
                 this._requestMetaData(),
             );
         });
-
-        if (callback) {
-            return promiseUpdateMicrogatewayLabel.then(callback);
-        } else {
-            return promiseUpdateMicrogatewayLabel;
-        }
     }
 
     /**
@@ -515,8 +500,11 @@ class API extends Resource {
         });
     }
 
-    addBotDetectionNotifyingEmail(email, callback = null) {
-        const promiseAddEmail = this.client.then((client) => {
+    /**
+     * Add an email for Bot Detection notifications
+     */
+    addBotDetectionNotifyingEmail(email) {
+        return this.client.then((client) => {
             const data = {
                 email: email,
             };
@@ -529,27 +517,18 @@ class API extends Resource {
                 this._requestMetaData(),
             );
         });
-
-        if (callback) {
-            return promiseAddEmail.then(callback);
-        } else {
-            return promiseAddEmail;
-        }
     }
 
-    deleteBotDetectionNotifyingEmail(id, callback = null) {
-        const promiseDeleteEmail = this.client.then((client) => {
+    /**
+     * Delete an email from Bot Detection notification configuration
+     */
+    deleteBotDetectionNotifyingEmail(id) {
+        return this.client.then((client) => {
             return client.apis['default'].delete_botData_deleteEmail(
                 { uuid: id },
                 this._requestMetaData(),
             );
         });
-
-        if (callback) {
-            return promiseDeleteEmail.then(callback);
-        } else {
-            return promiseDeleteEmail;
-        }
     }
 
     /**
