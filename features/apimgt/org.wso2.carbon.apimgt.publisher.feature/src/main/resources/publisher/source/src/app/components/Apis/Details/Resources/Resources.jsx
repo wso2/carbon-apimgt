@@ -38,7 +38,9 @@ import SpecErrors from './components/SpecErrors';
 import AddOperation from './components/AddOperation';
 import GoToDefinitionLink from './components/GoToDefinitionLink';
 import APIRateLimiting from './components/APIRateLimiting';
-import { extractPathParameters, isSelectAll, mapAPIOperations } from './operationUtils';
+import {
+    extractPathParameters, isSelectAll, mapAPIOperations, getVersion, VERSIONS,
+} from './operationUtils';
 import OperationsSelector from './components/OperationsSelector';
 import SaveOperations from './components/SaveOperations';
 
@@ -63,7 +65,10 @@ export default function Resources(props) {
     const [pageError, setPageError] = useState(false);
     const [operationRateLimits, setOperationRateLimits] = useState([]);
     const [markedOperations, setSelectedOperation] = useState({});
+    const [sharedScopes, setSharedScopes] = useState();
+    const [sharedScopesByName, setSharedScopesByName] = useState();
     const [openAPISpec, setOpenAPISpec] = useState({});
+    const [securityDefScopes, setSecurityDefScopes] = useState({});
     const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
     const [arns, setArns] = useState([]);
     const [resolvedSpec, setResolvedSpec] = useState({ spec: {}, errors: [] });
@@ -166,14 +171,28 @@ export default function Resources(props) {
             case 'amznResourceTimeout':
                 updatedOperation['x-amzn-resource-timeout'] = value;
                 break;
-            case 'scopes':
+            case 'scopes': {
                 if (!updatedOperation.security) {
                     updatedOperation.security = [{ default: [] }];
                 } else if (!updatedOperation.security.find((item) => item.default)) {
                     updatedOperation.security.push({ default: [] });
                 }
-                updatedOperation.security.find((item) => item.default).default = value;
+                const defValue = value[0];
+                updatedOperation.security.find((item) => item.default).default = defValue;
+                for (const selectedScope of defValue) {
+                    if (selectedScope
+                        && !securityDefScopes[selectedScope]
+                        && securityDefScopes[selectedScope] !== '') {
+                        let scopeDescription = '';
+                        if (selectedScope in sharedScopesByName) {
+                            scopeDescription = sharedScopesByName[selectedScope].scope.description;
+                            securityDefScopes[selectedScope] = scopeDescription;
+                        }
+                        setSecurityDefScopes(securityDefScopes);
+                    }
+                }
                 break;
+            }
             case 'add': {
                 const parameters = extractPathParameters(data.target, openAPISpec);
                 if (!addedOperations[data.target]) {
@@ -248,6 +267,47 @@ export default function Resources(props) {
         }),
         [api, apiThrottlingPolicy],
     );
+
+    /**
+     * This method sets the securityDefinitionScopes from the spec
+     * @param {Object} spec The original swagger content.
+     */
+    function setSecurityDefScopesFromSpec(spec) {
+        const openAPIVersion = getVersion(spec);
+        if (VERSIONS.V3.includes(openAPIVersion)) {
+            if (spec.components && spec.components.securitySchemes && spec.components.securitySchemes.default) {
+                const { flows } = spec.components.securitySchemes.default;
+                if (flows.implicit.scopes) {
+                    setSecurityDefScopes(cloneDeep(flows.implicit.scopes));
+                }
+            }
+        } else if (VERSIONS.V2.includes(openAPIVersion)) {
+            if (spec.securityDefinitions && spec.securityDefinitions.default) {
+                if (spec.securityDefinitions.default.scopes) {
+                    setSecurityDefScopes(cloneDeep(spec.securityDefinitions.default.scopes));
+                }
+            }
+        }
+    }
+
+    /**
+     * This method sets the scopes of the spec from the securityDefinitionScopes
+     */
+    function setSpecScopesFromSecurityDefScopes() {
+        const openAPIVersion = getVersion(openAPISpec);
+        if (VERSIONS.V3.includes(openAPIVersion)) {
+            if (openAPISpec.components
+                && openAPISpec.components.securitySchemes
+                && openAPISpec.components.securitySchemes.default) {
+                openAPISpec.components.securitySchemes.default.flows.implicit.scopes = securityDefScopes;
+            }
+        } else if (VERSIONS.V2.includes(openAPIVersion)) {
+            if (openAPISpec.securityDefinitions && openAPISpec.securityDefinitions.default) {
+                openAPISpec.securityDefinitions.default.scopes = securityDefScopes;
+            }
+        }
+    }
+
     /**
      *
      * @param {*} rawSpec The original swagger content.
@@ -274,6 +334,7 @@ export default function Resources(props) {
         });
         operationsDispatcher({ action: 'init', data: rawSpec.paths });
         setOpenAPISpec(rawSpec);
+        setSecurityDefScopesFromSpec(rawSpec);
     }
 
     /**
@@ -295,6 +356,37 @@ export default function Resources(props) {
                     Alert.error('Error while updating the definition');
                 }
             });
+    }
+
+    /**
+     *
+     * This method modifies the security definition scopes by removing the scopes which are not present
+     * in operations and which are shared scopes
+     * @param {Array} apiOperations Operations list
+     */
+    function updateSecurityDefinition(apiOperations) {
+        Object.keys(securityDefScopes).forEach((key) => {
+            let isScopeExistsInOperation = false;
+            for (const [, verbs] of Object.entries(apiOperations)) {
+                for (const [, verbInfo] of Object.entries(verbs)) {
+                    // Checking if the scope resides in the operation
+                    if (verbInfo.security
+                        && verbInfo.security[0].default
+                        && verbInfo.security[0].default.includes(key)) {
+                        isScopeExistsInOperation = true;
+                        break;
+                    }
+                }
+                if (isScopeExistsInOperation) {
+                    break;
+                }
+            }
+            // Checking if the scope exists in operation and is a shared scope
+            if (!isScopeExistsInOperation && (key in sharedScopesByName)) {
+                delete securityDefScopes[key];
+            }
+        });
+        setSecurityDefScopes(securityDefScopes);
     }
 
     /**
@@ -336,6 +428,8 @@ export default function Resources(props) {
             default:
                 return Promise.reject(new Error('Unsupported resource operation!'));
         }
+        updateSecurityDefinition(copyOfOperations);
+        setSpecScopesFromSecurityDefScopes();
         if (apiThrottlingPolicy !== api.apiThrottlingPolicy) {
             return updateAPI({ apiThrottlingPolicy })
                 .catch((error) => {
@@ -355,6 +449,28 @@ export default function Resources(props) {
                     setArns(response.body.list);
                 }
             });
+    }, []);
+
+    useEffect(() => {
+        if (api.apitype !== 'APIProduct') {
+            API.getAllScopes()
+                .then((response) => {
+                    if (response.body && response.body.list) {
+                        const sharedScopesList = [];
+                        const sharedScopesByNameList = {};
+                        const shared = true;
+                        for (const scope of response.body.list) {
+                            const modifiedScope = {};
+                            modifiedScope.scope = scope;
+                            modifiedScope.shared = shared;
+                            sharedScopesList.push(modifiedScope);
+                            sharedScopesByNameList[scope.name] = modifiedScope;
+                        }
+                        setSharedScopes(sharedScopesList);
+                        setSharedScopesByName(sharedScopesByNameList);
+                    }
+                });
+        }
     }, []);
 
     useEffect(() => {
@@ -495,6 +611,7 @@ export default function Resources(props) {
                                                     arns={arns}
                                                     {...operationProps}
                                                     resolvedSpec={resolvedSpec.spec}
+                                                    sharedScopes={sharedScopes}
                                                 />
                                             </Grid>
                                         ) : null;
