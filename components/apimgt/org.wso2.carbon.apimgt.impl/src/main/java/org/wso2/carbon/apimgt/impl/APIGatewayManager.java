@@ -138,6 +138,7 @@ public class APIGatewayManager {
             gatewayAPIDTO.setApiId(api.getUUID());
             gatewayAPIDTO.setTenantDomain(tenantDomain);
             gatewayAPIDTO.setOverride(true);
+            gatewayAPIDTO.setEnvironment(environmentName);
             try {
                 gatewayAPIDTO.setGatewayLabel(api.getProperty("gateway_label"));
             } catch (Exception e){
@@ -290,15 +291,16 @@ public class APIGatewayManager {
         return failedEnvironmentsMap;
     }
 
-    public boolean deployAPI (String apiName, String environmentName, String apiId){
+    public boolean deployAPI (String apiName, String label, String apiId){
 
-        Environment environment = environments.get(environmentName);
-        APIGatewayAdminClient client;
+
         if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getGatewayArtifactSynchronizerProperties().isSyncArtifacts()) {
             try {
                 GatewayAPIDTO gatewayAPIDTO = ServiceReferenceHolder.getInstance().getArtifactRetriever()
-                        .retrieveArtifacts(apiId, apiName, environmentName);
+                        .retrieveArtifacts(apiId, apiName, label);
+                Environment environment = environments.get(gatewayAPIDTO.getEnvironment());
+                APIGatewayAdminClient client;
                 client = new APIGatewayAdminClient(environment);
                 client.deployAPI(gatewayAPIDTO);
             } catch (AxisFault axisFault) {
