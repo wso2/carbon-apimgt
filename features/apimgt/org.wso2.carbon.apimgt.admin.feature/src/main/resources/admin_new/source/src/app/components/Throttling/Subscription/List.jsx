@@ -229,48 +229,49 @@ export default function ListSubscriptionThrottlingPolicies() {
     );
 
     /**
- * Mock API call
- * @returns {Promise}.
- */
+     * Populate subscription policies
+     * @returns {Promise} The list of subscription policies
+     */
     function apiCall() {
         let subscriptionThrottlingvalues;
-        return new Promise(((resolve) => {
-            restApi.getSubscritionPolicyList().then((result) => {
-                setSubscriptionThrottlingPolicyList(result.body.list);
-                const subscriptionPolicies = result.body.list.map((obj) => {
-                    if (obj.defaultLimit.requestCount !== null) {
-                        return {
-                            policyName: obj.policyName,
-                            quotaPolicy: obj.defaultLimit.requestCount.type,
-                            quota: obj.defaultLimit.requestCount.requestCount,
-                            unitTime: obj.defaultLimit.requestCount.unitTime + ' '
-                            + obj.defaultLimit.requestCount.timeUnit,
-                            rateLimit: obj.rateLimitCount,
-                            timeUnit: obj.rateLimitTimeUnit,
-                        };
-                    } else {
-                        return {
-                            policyName: obj.policyName,
-                            quotaPolicy: obj.defaultLimit.bandwidth.type,
-                            quota: obj.defaultLimit.bandwidth.requestCount,
-                            unitTime: obj.defaultLimit.bandwidth.unitTime + ' '
-                            + obj.defaultLimit.requestCount.timeUnit,
-                            rateLimit: obj.rateLimitCount,
-                            timeUnit: obj.rateLimitTimeUnit,
-                        };
-                    }
-                });
-
-                subscriptionThrottlingvalues = subscriptionPolicies
-                    .map((obj) => {
-                        return Object.values(obj);
-                    });
+        return restApi.getSubscritionPolicyList().then((result) => {
+            setSubscriptionThrottlingPolicyList(result.body.list);
+            const subscriptionPolicies = result.body.list.map((obj) => {
+                if (obj.defaultLimit.requestCount !== null) {
+                    return {
+                        policyName: obj.policyName,
+                        quotaPolicy: obj.defaultLimit.requestCount.type,
+                        quota: obj.defaultLimit.requestCount.requestCount,
+                        unitTime: obj.defaultLimit.requestCount.unitTime + ' '
+                        + obj.defaultLimit.requestCount.timeUnit,
+                        rateLimit: obj.rateLimitCount,
+                        timeUnit: obj.rateLimitTimeUnit,
+                    };
+                } else {
+                    return {
+                        policyName: obj.policyName,
+                        quotaPolicy: obj.defaultLimit.bandwidth.type,
+                        quota: obj.defaultLimit.bandwidth.requestCount,
+                        unitTime: obj.defaultLimit.bandwidth.unitTime + ' '
+                        + obj.defaultLimit.requestCount.timeUnit,
+                        rateLimit: obj.rateLimitCount,
+                        timeUnit: obj.rateLimitTimeUnit,
+                    };
+                }
             });
 
-            setTimeout(() => {
-                resolve(subscriptionThrottlingvalues);
-            }, 1000);
-        }));
+            subscriptionThrottlingvalues = subscriptionPolicies
+                .map((obj) => {
+                    return Object.values(obj);
+                });
+            return (subscriptionThrottlingvalues);
+        }).catch((error) => {
+            const { response } = error;
+            if (response.body) {
+                throw (response.body.description);
+            }
+            return null;
+        });
     }
 
     return (

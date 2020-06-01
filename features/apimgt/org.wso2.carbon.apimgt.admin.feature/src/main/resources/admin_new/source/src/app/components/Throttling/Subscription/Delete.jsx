@@ -36,13 +36,12 @@ function Delete(props) {
     } = props;
 
     const formSaveCallback = () => {
-        console.log(subscriptionThrottlingPolicyList);
         const selectedPolicy = subscriptionThrottlingPolicyList.filter(
             (policy) => policy.policyName === dataRow[0],
         );
         const policyId = selectedPolicy.length !== 0 && selectedPolicy[0].policyId;
 
-        //TODO: Implement Subscription policy delete
+        // TODO: Implement Subscription policy delete
         const promiseAPICall = restApi
             .deleteApplicationThrottlingPolicy(policyId)
             .then(() => {
