@@ -1405,8 +1405,6 @@ public final class APIConstants {
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
-    public static final String ENDPOINT_REGISTRY_TYPE = "Registry";
-    public static final String ENDPOINT_REGISTRY_ENTRY_ID = "endpoint_id";
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";

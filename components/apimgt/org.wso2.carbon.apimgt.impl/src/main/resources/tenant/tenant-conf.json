@@ -236,22 +236,6 @@
       {
         "Name": "apim:shared_scope_manage",
         "Roles": "admin"
-      },
-      {
-        "Name": "registry:view",
-        "Roles": "admin,Internal/registry_admin,Internal/registry_user,Internal/registry_browser,Internal/creator,Internal/publisher"
-      },
-      {
-        "Name": "registry:write",
-        "Roles": "admin,Internal/registry_admin"
-      },
-      {
-        "Name": "registry:entry_view",
-        "Roles": "admin,Internal/registry_admin,Internal/registry_user,Internal/registry_browser,Internal/creator,Internal/publisher"
-      },
-      {
-        "Name": "registry:entry_write",
-        "Roles": "admin,Internal/registry_admin,Internal/registry_user"
       }
     ]
   },
