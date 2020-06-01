@@ -118,13 +118,12 @@ function AddEdit(props) {
         policyName, description, keyTemplate, siddhiQuery,
     } = state;
     const [validationError, setValidationError] = useState([]);
-    const [editMode, setIsEditMode] = useState(false);
     const restApi = new API();
     const { policyId } = props.match.params;
+    const editMode = policyId !== 'create';
 
     useEffect(() => {
-        if (policyId !== 'create') {
-            setIsEditMode(true);
+        if (editMode) {
             restApi.customPolicyGet(policyId).then((result) => {
                 const formattedSiddhiQuery = sqlFormatter.format(result.body.siddhiQuery);
                 const editState = {
@@ -221,7 +220,7 @@ function AddEdit(props) {
         }
         const customPolicy = state;
 
-        if (policyId !== 'create') {
+        if (editMode) {
             promisedAddCustomPolicy = restApi.updateCustomPolicy(policyId,
                 customPolicy);
             return promisedAddCustomPolicy
