@@ -81,5 +81,8 @@ Delete.propTypes = {
     selectedPolicyName: PropTypes.shape({
         name: PropTypes.number.isRequired,
     }).isRequired,
+    dataRow: PropTypes.shape({
+        policyId: PropTypes.number.isRequired,
+    }).isRequired,
 };
 export default injectIntl(Delete);
