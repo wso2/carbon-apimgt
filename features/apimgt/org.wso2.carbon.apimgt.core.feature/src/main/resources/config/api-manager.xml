@@ -138,6 +138,12 @@
         <EnableRESTAPITokenCache>true</EnableRESTAPITokenCache>
         <!-- Expiry time for the apim REST API token cache -->
         <RESTAPITokenCacheExpiry>300</RESTAPITokenCacheExpiry>
+
+        <!-- Enable/Disable cache control headers of the Product REST APIs-->
+        <EnableRESTAPICacheControlHeaders>true</EnableRESTAPICacheControlHeaders>
+        <!-- Expiry time for the apim REST API token cache -->
+        <RESTAPICacheControlMaxAge>86400</RESTAPICacheControlMaxAge>
+
 	    <!-- JWT claims Cache expiry in seconds -->
         <!--JWTClaimCacheExpiry>900</JWTClaimCacheExpiry-->
         <!-- Expiry time for the apim key mgt validation info cache -->
@@ -381,6 +387,11 @@
         <EnableAccessControl>true</EnableAccessControl>
     </APIPublisher>
 
+    <EndpointRegistry>
+        <!-- This parameter specifies the remote endpoint registry URL -->
+        <URL>https://localhost:${mgt.transport.https.port}/api/am/endpoint-registry/v1</URL>
+    </EndpointRegistry>
+
     <!-- Status observers can be registered against the API Publisher to listen for
          API status update events. Each observer must implement the APIStatusObserver
          interface. Multiple observers can be engaged if necessary and in such situations
@@ -503,6 +514,10 @@
             </WhiteListedURI>
             <WhiteListedURI>
                 <URI>/api/am/admin/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/endpoint-registry/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </WhiteListedURI>
             <WhiteListedURI>

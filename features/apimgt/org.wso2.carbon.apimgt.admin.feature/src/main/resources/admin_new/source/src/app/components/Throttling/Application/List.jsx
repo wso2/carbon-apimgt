@@ -186,38 +186,40 @@ export default function ListApplicationThrottlingPolicies() {
  */
     function apiCall() {
         let applicationThrottlingvalues;
-        return new Promise(((resolve, reject) => {
-            restApi.applicationThrottlingPoliciesGet().then((result) => {
-                const applicationPolicies = result.body.list.map((obj) => {
-                    if (obj.defaultLimit.requestCount !== null) {
-                        return {
-                            policyName: obj.policyName,
-                            quotaPolicy: obj.defaultLimit.requestCount.type,
-                            quota: obj.defaultLimit.requestCount.requestCount,
-                            unitTime: obj.defaultLimit.requestCount.unitTime + ' '
+        return restApi.applicationThrottlingPoliciesGet().then((result) => {
+            const applicationPolicies = result.body.list.map((obj) => {
+                if (obj.defaultLimit.requestCount !== null) {
+                    return {
+                        policyName: obj.policyName,
+                        quotaPolicy: obj.defaultLimit.requestCount.type,
+                        quota: obj.defaultLimit.requestCount.requestCount,
+                        unitTime: obj.defaultLimit.requestCount.unitTime + ' '
                             + obj.defaultLimit.requestCount.timeUnit,
-                            policyId: obj.policyId,
-                        };
-                    } else {
-                        return {
-                            policyName: obj.policyName,
-                            quotaPolicy: obj.defaultLimit.bandwidth.type,
-                            quota: obj.defaultLimit.bandwidth.dataAmount + ' ' + obj.defaultLimit.bandwidth.dataUnit,
-                            unitTime: obj.defaultLimit.bandwidth.unitTime + ' ' + obj.defaultLimit.bandwidth.timeUnit,
-                            policyId: obj.policyId,
-                        };
-                    }
-                });
-                applicationThrottlingvalues = applicationPolicies
-                    .filter((policy) => policy.policyName !== 'Unlimited')
-                    .map((obj) => {
-                        return Object.values(obj);
-                    });
-                resolve(applicationThrottlingvalues);
-            }).catch((error) => {
-                reject(error);
+                        policyId: obj.policyId,
+                    };
+                } else {
+                    return {
+                        policyName: obj.policyName,
+                        quotaPolicy: obj.defaultLimit.bandwidth.type,
+                        quota: obj.defaultLimit.bandwidth.dataAmount + ' ' + obj.defaultLimit.bandwidth.dataUnit,
+                        unitTime: obj.defaultLimit.bandwidth.unitTime + ' ' + obj.defaultLimit.bandwidth.timeUnit,
+                        policyId: obj.policyId,
+                    };
+                }
             });
-        }));
+            applicationThrottlingvalues = applicationPolicies
+                .filter((policy) => policy.policyName !== 'Unlimited')
+                .map((obj) => {
+                    return Object.values(obj);
+                });
+            return (applicationThrottlingvalues);
+        }).catch((error) => {
+            const { response } = error;
+            if (response.body) {
+                throw (response.body.description);
+            }
+            return null;
+        });
     }
 
     return (

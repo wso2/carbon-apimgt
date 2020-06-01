@@ -17,9 +17,9 @@
 package org.wso2.carbon.apimgt.rest.api.endpoint.registry.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.wso2.carbon.apimgt.api.model.EndpointRegistryEntry;
-import org.wso2.carbon.apimgt.api.model.EndpointRegistryInfo;
-import org.wso2.carbon.apimgt.impl.EndpointRegistryConstants;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntry;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryDTO;
@@ -48,11 +48,6 @@ public class EndpointRegistryMappingUtils {
         } else {
             registry.setType(RegistryDTO.TypeEnum.WSO2.toString());
         }
-        if (registryDTO.getMode() != null) {
-            registry.setMode(registryDTO.getMode().toString());
-        } else {
-            registry.setMode(RegistryDTO.ModeEnum.READONLY.toString());
-        }
         return registry;
     }
 
@@ -67,7 +62,6 @@ public class EndpointRegistryMappingUtils {
         registryDTO.setId(registry.getUuid());
         registryDTO.setName(registry.getName());
         registryDTO.setType(RegistryDTO.TypeEnum.fromValue(registry.getType()));
-        registryDTO.setMode(RegistryDTO.ModeEnum.fromValue(registry.getMode()));
         registryDTO.setOwner(registry.getOwner());
         return registryDTO;
     }
@@ -82,10 +76,11 @@ public class EndpointRegistryMappingUtils {
         RegistryEntryDTO registryEntryDTO = new RegistryEntryDTO();
         registryEntryDTO.setId(registryEntry.getEntryId());
         registryEntryDTO.setEntryName(registryEntry.getName());
+        registryEntryDTO.setVersion(registryEntry.getVersion());
+        registryEntryDTO.setDescription(registryEntry.getDescription());
         registryEntryDTO.setDefinitionType(
                 RegistryEntryDTO.DefinitionTypeEnum.fromValue(registryEntry.getDefinitionType()));
         registryEntryDTO.setDefinitionUrl(registryEntry.getDefinitionURL());
-        registryEntryDTO.setMetadata(registryEntry.getMetaData());
         registryEntryDTO.setServiceType(RegistryEntryDTO.ServiceTypeEnum.fromValue(registryEntry.getServiceType()));
         registryEntryDTO.setProductionServiceUrl(registryEntry.getProductionServiceURL());
         registryEntryDTO.setSandboxServiceUrl(registryEntry.getSandboxServiceUrl());
@@ -107,12 +102,13 @@ public class EndpointRegistryMappingUtils {
         EndpointRegistryEntry registryEntry = new EndpointRegistryEntry();
         registryEntry.setEntryId(entryUUID);
         registryEntry.setName(registryEntryDTO.getEntryName());
+        registryEntry.setVersion(registryEntryDTO.getVersion());
+        registryEntry.setDescription(registryEntryDTO.getDescription());
         if (registryEntryDTO.getDefinitionType() != null) {
             registryEntry.setDefinitionType(registryEntryDTO.getDefinitionType().toString());
         }
         registryEntry.setDefinitionURL(registryEntryDTO.getDefinitionUrl());
         registryEntry.setEndpointDefinition(endpointDefinition);
-        registryEntry.setMetaData(registryEntryDTO.getMetadata());
         if (registryEntryDTO.getServiceType() != null) {
             registryEntry.setServiceType(registryEntryDTO.getServiceType().toString());
         }
@@ -123,22 +119,6 @@ public class EndpointRegistryMappingUtils {
             registryEntry.setServiceCategory(registryEntryDTO.getServiceCategory().toString());
         }
         return registryEntry;
-    }
-
-    /***
-     * Converts the sort by object according to the input
-     *
-     * @param sortBy Sort By field name
-     * @return Updated sort by field
-     */
-    public static String getRegistriesSortByField(RegistriesApi.SortRegistryByEnum sortBy) {
-        String updatedSortBy = StringUtils.EMPTY;
-        if (sortBy == null) {
-            updatedSortBy = EndpointRegistryConstants.COLUMN_ID; // default sortBy field
-        } else if (RestApiConstants.ENDPOINT_REG_NAME.equals(sortBy.toString())) {
-            updatedSortBy = EndpointRegistryConstants.COLUMN_REG_NAME;
-        }
-        return updatedSortBy;
     }
 
     /***

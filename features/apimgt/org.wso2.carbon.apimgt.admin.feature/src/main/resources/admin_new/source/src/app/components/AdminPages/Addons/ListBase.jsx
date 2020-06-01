@@ -38,6 +38,8 @@ import MUIDataTable from 'mui-datatables';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
 import Alert from 'AppComponents/Shared/Alert';
+import { Link as RouterLink } from 'react-router-dom';
+import EditIcon from '@material-ui/icons/Edit';
 
 const useStyles = makeStyles((theme) => ({
     searchBar: {
@@ -62,7 +64,7 @@ const useStyles = makeStyles((theme) => ({
  * @param {JSON} props props passed from parent
  * @returns {JSX} Header AppBar components.
  */
-function ListLabels(props) {
+function ListBase(props) {
     const {
         EditComponent, editComponentProps, DeleteComponent, showActionColumn,
         columProps, pageProps, addButtonProps, addButtonOverride,
@@ -71,6 +73,7 @@ function ListLabels(props) {
             content: emptyBoxContent,
         },
         noDataMessage,
+        addedActions,
     } = props;
 
     const classes = useStyles();
@@ -82,23 +85,28 @@ function ListLabels(props) {
     };
 
     const fetchData = () => {
-        // Fetch data from backend
+        // Fetch data from backend when an apiCall is provided
         setData(null);
-        const promiseAPICall = apiCall();
-        promiseAPICall.then((LocalData) => {
-            setData(LocalData);
-        })
-            .catch((e) => {
-                Alert.error(e);
-            });
+        if (apiCall) {
+            const promiseAPICall = apiCall();
+            promiseAPICall.then((LocalData) => {
+                setData(LocalData);
+            })
+                .catch((e) => {
+                    Alert.error(e);
+                });
+        }
     };
 
     useEffect(() => {
         fetchData();
     }, []);
-    const columns = [
-        ...columProps,
-    ];
+    let columns = [];
+    if (columProps) {
+        columns = [
+            ...columProps,
+        ];
+    }
     if (showActionColumn) {
         columns.push(
             {
@@ -109,14 +117,50 @@ function ListLabels(props) {
                     sort: false,
                     customBodyRender: (value, tableMeta) => {
                         const dataRow = data[tableMeta.rowIndex];
+                        if (editComponentProps && editComponentProps.routeTo) {
+                            if (typeof tableMeta.rowData === 'object') {
+                                const artifactId = tableMeta.rowData[tableMeta.rowData.length - 2];
+                                return (
+                                    <>
+                                        <RouterLink to={editComponentProps.routeTo + artifactId}>
+                                            <IconButton color='primary' component='span'>
+                                                <EditIcon />
+                                            </IconButton>
+                                        </RouterLink>
+                                        {DeleteComponent && (
+                                            <DeleteComponent
+                                                dataRow={dataRow}
+                                                updateList={fetchData}
+                                            />
+                                        )}
+                                        {addedActions && addedActions.map((action) => {
+                                            const AddedComponent = action;
+                                            return (
+                                                <AddedComponent rowData={tableMeta.rowData} updateList={fetchData} />
+                                            );
+                                        })}
+                                    </>
+                                );
+                            } else {
+                                return (<div />);
+                            }
+                        }
                         return (
                             <>
-                                <EditComponent
-                                    dataRow={dataRow}
-                                    updateList={fetchData}
-                                    {...editComponentProps}
-                                />
-                                <DeleteComponent dataRow={dataRow} updateList={fetchData} />
+                                {EditComponent && (
+                                    <EditComponent
+                                        dataRow={dataRow}
+                                        updateList={fetchData}
+                                        {...editComponentProps}
+                                    />
+                                )}
+                                {DeleteComponent && (<DeleteComponent dataRow={dataRow} updateList={fetchData} />)}
+                                {addedActions && addedActions.map((action) => {
+                                    const AddedComponent = action;
+                                    return (
+                                        <AddedComponent rowData={tableMeta.rowData} updateList={fetchData} />
+                                    );
+                                })}
                             </>
                         );
                     },
@@ -141,7 +185,10 @@ function ListLabels(props) {
         responsive: 'stacked',
         searchText,
     };
-    if (data && data.length === 0) {
+
+    // If no apiCall is provided OR,
+    // retrieved data is empty, display an information card.
+    if (!apiCall || (data && data.length === 0)) {
         return (
             <ContentBase
                 {...pageProps}
@@ -156,14 +203,16 @@ function ListLabels(props) {
                     </CardActionArea>
                     <CardActions>
                         {addButtonOverride || (
-                            <EditComponent updateList={fetchData} {...addButtonProps} />
+                            EditComponent && (<EditComponent updateList={fetchData} {...addButtonProps} />)
                         )}
                     </CardActions>
                 </Card>
             </ContentBase>
         );
     }
-    if (!data) {
+
+    // If apiCall is provided and data is not retrieved yet, display progress component
+    if (apiCall && !data) {
         return (
             <ContentBase pageStyle='paperLess'>
                 <InlineProgress />
@@ -172,7 +221,6 @@ function ListLabels(props) {
         );
     }
     return (
-
         <>
             <ContentBase {...pageProps}>
                 {(searchActive || addButtonProps) && (
@@ -198,10 +246,12 @@ function ListLabels(props) {
                                 </Grid>
                                 <Grid item>
                                     {addButtonOverride || (
-                                        <EditComponent
-                                            updateList={fetchData}
-                                            {...addButtonProps}
-                                        />
+                                        EditComponent && (
+                                            <EditComponent
+                                                updateList={fetchData}
+                                                {...addButtonProps}
+                                            />
+                                        )
                                     )}
                                     <Tooltip title={(
                                         <FormattedMessage
@@ -239,7 +289,8 @@ function ListLabels(props) {
         </>
     );
 }
-ListLabels.defaultProps = {
+
+ListBase.defaultProps = {
     addButtonProps: {},
     addButtonOverride: null,
     searchProps: {
@@ -251,6 +302,7 @@ ListLabels.defaultProps = {
         editIconOverride: null,
         deleteIconShow: true,
     },
+    addedActions: null,
     noDataMessage: (
         <FormattedMessage
             id='AdminPages.Addons.ListBase.nodata.message'
@@ -258,20 +310,25 @@ ListLabels.defaultProps = {
         />
     ),
     showActionColumn: true,
+    apiCall: null,
+    EditComponent: null,
+    DeleteComponent: null,
+    editComponentProps: {},
+    columProps: null,
 };
-ListLabels.propTypes = {
-    EditComponent: PropTypes.element.isRequired,
-    editComponentProps: PropTypes.shape({}).isRequired,
-    DeleteComponent: PropTypes.element.isRequired,
+ListBase.propTypes = {
+    EditComponent: PropTypes.element,
+    editComponentProps: PropTypes.shape({}),
+    DeleteComponent: PropTypes.element,
     showActionColumn: PropTypes.bool,
-    columProps: PropTypes.element.isRequired,
+    columProps: PropTypes.element,
     pageProps: PropTypes.shape({}).isRequired,
     addButtonProps: PropTypes.shape({}),
     searchProps: PropTypes.shape({
         searchPlaceholder: PropTypes.string.isRequired,
         active: PropTypes.bool.isRequired,
     }),
-    apiCall: PropTypes.func.isRequired,
+    apiCall: PropTypes.func,
     emptyBoxProps: PropTypes.shape({
         title: PropTypes.element.isRequired,
         content: PropTypes.element.isRequired,
@@ -283,5 +340,6 @@ ListLabels.propTypes = {
     }),
     noDataMessage: PropTypes.element,
     addButtonOverride: PropTypes.element,
+    addedActions: PropTypes.shape({}),
 };
-export default ListLabels;
+export default ListBase;

@@ -34,8 +34,9 @@ import BlacklistThrottlingPolicies from 'AppComponents/Throttling/Blacklist/List
 import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom/List';
 import ListApplications from 'AppComponents/ApplicationSettings/ListApplications';
 import MicrogatewayLabels from 'AppComponents/MicrogatewayLabels/ListMGLabels';
+import AdvancedThrottlePolicies from 'AppComponents/Throttling/Advanced';
 import TenantTheme from 'AppComponents/TenantTheme/UploadTheme';
-
+import ListDetectedBotData from 'AppComponents/BotDetection/DetectedBotData/ListDetectedBotData';
 
 const RouteMenuMapping = (intl) => [
     {
@@ -118,9 +119,26 @@ const RouteMenuMapping = (intl) => [
             id: 'Base.RouteMenuMapping.bot.detection',
             defaultMessage: 'Bot Detection',
         }),
-        path: '/settings/bot-detection',
-        component: () => <DemoTable />,
-        icon: <PhonelinkSetupIcon />,
+        children: [
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.bot.detection.data',
+                    defaultMessage: 'Bot Detection Data',
+                }),
+                path: '/settings/bot-detection/bot-detected-data-list',
+                component: () => <ListDetectedBotData />,
+                icon: <DnsRoundedIcon />,
+            },
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.configure.emails',
+                    defaultMessage: 'Configure Emails',
+                }),
+                path: '/settings/bot-detection/bot-detection-email-configuration',
+                component: () => <DemoTable />,
+                icon: <PhonelinkSetupIcon />,
+            },
+        ],
     },
     {
         id: intl.formatMessage({
@@ -169,7 +187,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Advanced Policies',
                 }),
                 path: '/throttling/advanced',
-                component: () => <DemoTable />,
+                component: () => <AdvancedThrottlePolicies />,
                 icon: <SettingsIcon />,
             },
             {

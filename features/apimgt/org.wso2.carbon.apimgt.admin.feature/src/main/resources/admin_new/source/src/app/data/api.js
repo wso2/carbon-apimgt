@@ -120,6 +120,16 @@ class API extends Resource {
     }
 
     /**
+     * Get settings of an API
+     */
+    getSettings() {
+        const promisedSettings = this.client.then(client => {
+            return client.apis['Settings'].get_settings();
+        });
+        return promisedSettings.then(response => response.body);
+    }
+
+    /**
      * Get list of api categories
      */
     apiCategoriesListGet() {
@@ -403,6 +413,21 @@ class API extends Resource {
     }
 
     /**
+     * Update the Condition Status of a Blacklist Policy
+     */
+    updateBlacklistPolicy(policyId, conditionStatus) {
+        return this.client.then((client) => {
+            const payload = {
+                conditionStatus: conditionStatus,
+            };
+            return client.apis['Blacklist (Individual)'].patch_throttling_blacklist__conditionId_(
+                { conditionId: policyId, body: payload, 'Content-Type': 'application/json', },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
      * Get Custom Policies
      */
     customPoliciesGet() {
@@ -470,6 +495,51 @@ class API extends Resource {
         });
     }
 
+    /**
+     * Get detected bot data -- Mock api call.
+     * todo: replace with actual api when available.
+     */
+    getDetectedBotData() {
+        const mockBotData = {
+            body: [
+                {
+                    recordtime: '5:08 PM Friday, May 22, 2020',
+                    messageID: '12345678902345678', 
+                    apiMethod: 'GET',
+                    headersSet: ['header1','header2','header3'],
+                    messageBody: null,
+                    clientIP: '127.0.0.1'
+                },
+                {
+                    recordtime: '5:10 PM Friday, May 22, 2020',
+                    messageID: '123456876502345678', 
+                    apiMethod: 'POST',
+                    headersSet: ['header1','header2','header3'],
+                    messageBody: '{name:johndoe@gmail.com, password:psw}',
+                    clientIP: '127.0.0.1'
+                }
+            ]
+        };
+        const promiseBotData = new Promise((resolve) => {
+            setTimeout(() => {
+                // resolve({body:[]});
+                resolve(mockBotData);
+            }, 100);
+        });
+        return promiseBotData;
+    }
+
+    /**
+     * Mock api call with delay
+     * todo: Replace with the rest api when available
+     */
+    getAnalyticsEnabled(){ 
+        return this.client.then((client) => {
+            return client.apis['Settings'].get_settings(
+                this._requestMetaData(),
+            );
+        });
+    }
 }
 
 API.CONSTS = {

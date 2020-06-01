@@ -362,9 +362,6 @@ public final class APIConstants {
     //This constant is used in Json schema validator
     public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
 
-    // This constant used in Endpoint Registry Entries
-    public static final String API_OVERVIEW_ENPOINT_REGISTRY_ENTRY = "overview_endpointRegistryEntry";
-
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME = "overview_name";
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
@@ -620,6 +617,11 @@ public final class APIConstants {
     public static final String TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "TokenCacheExpiry";
     public static final String REST_API_TOKEN_CACHE_ENABLED = CACHE_CONFIGS + "EnableRESTAPITokenCache";
     public static final String REST_API_TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "RESTAPITokenCacheExpiry";
+    public static final String REST_API_CACHE_CONTROL_HEADERS_ENABLED = CACHE_CONFIGS
+            + "EnableRESTAPICacheControlHeaders";
+    public static final String REST_API_CACHE_CONTROL_HEADERS_MAX_AGE = CACHE_CONFIGS
+            + "RESTAPICacheControlHeadersMaxAge";
+
     public static final String STORE_TAG_CACHE_DURATION = CACHE_CONFIGS + "TagCacheDuration";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = CACHE_CONFIGS + "EnableRecentlyAddedAPICache";
     public static final String SCOPE_CACHE_ENABLED = CACHE_CONFIGS + "EnableScopeCache";
@@ -2085,5 +2087,32 @@ public final class APIConstants {
         public static final String EXCLUDED_CACHES = "ExcludedCaches";
 
         public static String ReceiverConnectionDetails  = "ReceiverConnectionDetails";
+    }
+
+    // Supported Notifier Types
+    public enum NotifierType {
+        API,
+        APPLICATION,
+        APPLICATION_REGISTRATION,
+        POLICY,
+        SUBSCRIPTIONS
+    }
+
+    // Supported Event Types
+    public enum EventType {
+        API_CREATE,
+        API_UPDATE,
+        API_DELETE,
+        API_LIFECYCLE_CHANGE,
+        APPLICATION_CREATE,
+        APPLICATION_UPDATE,
+        APPLICATION_DELETE,
+        APPLICATION_REGISTRATION_CREATE,
+        POLICY_CREATE,
+        POLICY_UPDATE,
+        POLICY_DELETE,
+        SUBSCRIPTIONS_CREATE,
+        SUBSCRIPTIONS_UPDATE,
+        SUBSCRIPTIONS_DELETE
     }
 }
