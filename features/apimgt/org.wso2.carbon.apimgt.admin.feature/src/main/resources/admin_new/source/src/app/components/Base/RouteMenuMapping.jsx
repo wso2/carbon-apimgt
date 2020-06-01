@@ -31,7 +31,6 @@ import DemoTable from 'AppComponents/AdminPages/Microgateways/List';
 import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
 import APICategories from 'AppComponents/APICategories/ListApiCategories';
 import BlacklistThrottlingPolicies from 'AppComponents/Throttling/Blacklist/List';
-// import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom/List';
 import ListApplications from 'AppComponents/ApplicationSettings/ListApplications';
 import MicrogatewayLabels from 'AppComponents/MicrogatewayLabels/ListMGLabels';
 import AdvancedThrottlePolicies from 'AppComponents/Throttling/Advanced';
