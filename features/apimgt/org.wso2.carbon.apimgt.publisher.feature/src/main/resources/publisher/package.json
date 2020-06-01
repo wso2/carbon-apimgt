@@ -70,8 +70,7 @@
         "swagger-ui": "^3.25.0",
         "swagger-ui-react": "^3.25.0",
         "typeface-roboto": "0.0.35",
-        "url-loader": "^0.5.9",
-        "developer_portal": "^1.0.0"
+        "url-loader": "^0.5.9"
     },
     "devDependencies": {
         "@babel/core": "^7.6.4",
