@@ -31,16 +31,18 @@ import Link from '@material-ui/core/Link';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Configurations from 'Config';
+import DeleteEmail from 'AppComponents/BotDetection/EmailConfig/DeleteEmail';
+import AddEmails from 'AppComponents/BotDetection/EmailConfig/AddEmail';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
-
 
 /**
  * Render a list
  * @returns {JSX} Header AppBar components.
  */
-export default function ListMGLabels() {
+export default function ListEmails() {
     const intl = useIntl();
+    const [emailList, setEmailList] = useState([]);
     const [isAnalyticsEnabled, setIsAnalyticsEnabled] = useState();
     const restApi = new API();
 
@@ -49,105 +51,50 @@ export default function ListMGLabels() {
     });
 
     /**
-     * API call to get Detected Data
+     * API call to get all emails
      * @returns {Promise}.
      */
     function apiCall() {
         return restApi
-            .getDetectedBotData()
+            .botDetectionNotifyingEmailsGet()
             .then((result) => {
-                return (result.body);
+                setEmailList(result.body);
+                return result.body;
             })
             .catch((error) => {
-                throw (error);
+                throw error;
             });
     }
 
     const columProps = [
+        { name: 'uuid', options: { display: false } },
         {
-            name: 'recordtime',
+            name: 'email',
             label: intl.formatMessage({
-                id: 'AdminPages.BotDetection.detected.data.table.header.label.record.time',
-                defaultMessage: 'Record Time',
-            }),
-            options: {
-                sort: true,
-            },
-        },
-        {
-            name: 'messageID',
-            label: intl.formatMessage({
-                id: 'AdminPages.BotDetection.detected.data.table.header.label.message.id',
-                defaultMessage: 'Message ID',
-            }),
-            options: {
-                sort: true,
-            },
-        },
-        {
-            name: 'apiMethod',
-            label: intl.formatMessage({
-                id: 'AdminPages.BotDetection.detected.data.table.header.label.api.method',
-                defaultMessage: 'API method',
-            }),
-            options: {
-                sort: true,
-            },
-        },
-        {
-            name: 'headersSet',
-            label: intl.formatMessage({
-                id: 'AdminPages.BotDetection.detected.data.table.header.label.headers.set',
-                defaultMessage: 'Headers Set',
-            }),
-            options: {
-                sort: true,
-                customBodyRender: (value) => {
-                    return (
-                        value.join(', ')
-                    );
-                },
-            },
-        },
-        {
-            name: 'messageBody',
-            label: intl.formatMessage({
-                id: 'AdminPages.BotDetection.detected.data.table.header.label.message.body',
-                defaultMessage: 'Message Body',
-            }),
-            options: {
-                sort: true,
-                customBodyRender: (value) => {
-                    const emptyMessageBodyText = intl.formatMessage({
-                        id: 'AdminPages.BotDetection.detected.data.table.row.empty.message.body.default.message',
-                        defaultMessage: 'Empty Message Body',
-                    });
-                    if (value) {
-                        if (value === '') {
-                            return emptyMessageBodyText;
-                        }
-                        return value;
-                    }
-                    return emptyMessageBodyText;
-                },
-            },
-        },
-        {
-            name: 'clientIP',
-            label: intl.formatMessage({
-                id: 'AdminPages.BotDetection.detected.data.table.header.label.client.ip',
-                defaultMessage: 'Client IP',
+                id: 'AdminPages.BotDetection.Email.List.table.header.email',
+                defaultMessage: 'Email',
             }),
             options: {
                 sort: true,
             },
         },
     ];
-
+    const addButtonProps = {
+        triggerButtonText: intl.formatMessage({
+            id: 'AdminPages.BotDetection.Email.List.addButtonProps.triggerButtonText',
+            defaultMessage: 'Add Email',
+        }),
+        /* This title is what as the title of the popup dialog box */
+        title: intl.formatMessage({
+            id: 'AdminPages.BotDetection.Email.List.addButtonProps.title',
+            defaultMessage: 'Add Email',
+        }),
+        emailList,
+    };
     const searchProps = {
         searchPlaceholder: intl.formatMessage({
-            id: 'AdminPages.BotDetection.detected.data.List.search.default',
-            defaultMessage: 'Search Bot data',
+            id: 'AdminPages.BotDetection.Email.List.search.default',
+            defaultMessage: 'Search by Email',
         }),
         active: true,
     };
@@ -170,7 +117,7 @@ export default function ListMGLabels() {
                             <ListItemText
                                 primary={(
                                     <FormattedMessage
-                                        id='AdminPages.BotDetection.detected.data.List.help.link.one'
+                                        id='AdminPages.BotDetection.Email.List.help.link.one'
                                         defaultMessage='Enabling email notifications for bot detection'
                                     />
                                 )}
@@ -192,7 +139,7 @@ export default function ListMGLabels() {
                             <ListItemText
                                 primary={(
                                     <FormattedMessage
-                                        id='AdminPages.BotDetection.detected.data.List.help.link.two'
+                                        id='AdminPages.BotDetection.Email.List.help.link.two'
                                         defaultMessage='Viewing bot detection data via the Admin Portal'
                                     />
                                 )}
@@ -202,45 +149,51 @@ export default function ListMGLabels() {
                 </List>
             </HelpBase>
         ),
-        pageStyle: 'full',
+        pageStyle: 'half',
         title: intl.formatMessage({
-            id: 'AdminPages.BotDetection.detected.data.List.title',
-            defaultMessage: 'Detected Data',
+            id: 'AdminPages.BotDetection.Email.List.title',
+            defaultMessage: 'Emails',
         }),
     };
-
     const emptyBoxProps = {
         content: (
             <Typography variant='body2' color='textSecondary' component='p'>
                 <FormattedMessage
-                    id='AdminPages.BotDetection.detected.data.List.empty.content.microgateways'
+                    id='AdminPages.BotDetection.Email.List.empty.content'
                     values={{
                         breakingLine: <br />,
                     }}
-                    defaultMessage={'Bot detection is enabled. There is no detected bot data. '
-                    + 'When a bot attack is detected, you will be informed via email. '
-                    + 'Set the email to be informed with, '
-                    + '{breakingLine}{breakingLine}'
-                    + 'Bot Detection Data > Configure Emails '
-                    + '{breakingLine}{breakingLine}'
-                    + 'on the left side menu.'}
+                    defaultMessage={
+                        'After a Publisher publishes APIs in the API Developer Portal, '
+                        + 'hackers can invoke the APIs without an access token by scanning the '
+                        + 'open ports of a system. Therefore, WSO2 API Manager has a '
+                        + 'bot detection mechanism in place to prevent such attacks by '
+                        + 'identifying who tried to enter and invoke resources without proper '
+                        + 'authorization. WSO2 API Manager\'s bot detection mechanism traces and '
+                        + 'logs details of such unauthorized API calls and sends notifications '
+                        + 'in this regard via emails. Thereby this helps Publishers to protect '
+                        + 'their data from bot attackers and improve the security of their data.'
+                        + '{breakingLine}{breakingLine}'
+                        + 'You can add, delete and see the list of registered emails here.'
+                    }
                 />
             </Typography>
         ),
         title: (
             <Typography gutterBottom variant='h5' component='h2'>
                 <FormattedMessage
-                    id='AdminPages.BotDetection.detected.data.List.empty.title'
-                    defaultMessage='No Bots detected!'
+                    id='AdminPages.BotDetection.Email.List.empty.title'
+                    defaultMessage='Notification receiving Emails'
                 />
             </Typography>
         ),
     };
+
     const analyticsDisabledEmptyBoxProps = {
         content: (
             <Typography variant='body2' color='textSecondary' component='p'>
                 <FormattedMessage
-                    id='AdminPages.BotDetection.detected.data.List.analytics.disabled.empty.content'
+                    id='AdminPages.BotDetection.Email.List.analytics.disabled.empty.content'
                     values={{
                         breakingLine: <br />,
                     }}
@@ -257,12 +210,13 @@ export default function ListMGLabels() {
         title: (
             <Typography gutterBottom variant='h5' component='h2'>
                 <FormattedMessage
-                    id='AdminPages.BotDetection.detected.data.List.analytics.disabled.empty.title'
+                    id='AdminPages.BotDetection.Email.List.analytics.disabled.empty.title'
                     defaultMessage='Analytics disabled!'
                 />
             </Typography>
         ),
     };
+
     if (isAnalyticsEnabled === undefined) {
         return (
             <ContentBase pageStyle='paperLess'>
@@ -271,17 +225,19 @@ export default function ListMGLabels() {
         );
     }
 
-    return (
-        isAnalyticsEnabled ? (
-            <ListBase
-                columProps={columProps}
-                pageProps={pageProps}
-                searchProps={searchProps}
-                emptyBoxProps={emptyBoxProps}
-                apiCall={apiCall}
-                showActionColumn={false}
-            />
-        ) : (
+    return (isAnalyticsEnabled ? (
+        <ListBase
+            columProps={columProps}
+            pageProps={pageProps}
+            addButtonProps={addButtonProps}
+            searchProps={searchProps}
+            emptyBoxProps={emptyBoxProps}
+            apiCall={apiCall}
+            EditComponent={AddEmails}
+            DeleteComponent={DeleteEmail}
+        />
+    )
+        : (
             <ContentBase
                 {...pageProps}
                 pageStyle='small'

@@ -24,7 +24,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
 import {
-    Typography, RadioGroup, Radio, FormControlLabel, FormControl, Grid, FormHelperText, Switch,
+    Typography, RadioGroup, Radio, FormControlLabel, FormControl, Grid, FormHelperText, Switch, Checkbox,
 } from '@material-ui/core';
 import { green } from '@material-ui/core/colors';
 import API from 'AppData/api';
@@ -115,15 +115,16 @@ function AddEdit(props) {
     const {
         conditionType, conditionValue, conditionValue: {
             endingIp, startingIp, invert, fixedIp,
-        },
+        }, conditionStatus,
     } = state;
     const restApi = new API();
 
     const onChange = (e) => {
-        if (e.target.name === 'invert') {
-            dispatch({ field: e.target.name, value: e.target.checked });
+        const { name } = e.target;
+        if (name === 'invert' || name === 'conditionStatus') {
+            dispatch({ field: name, value: e.target.checked });
         } else {
-            dispatch({ field: e.target.name, value: e.target.value });
+            dispatch({ field: name, value: e.target.value });
         }
     };
 
@@ -407,6 +408,23 @@ function AddEdit(props) {
                         )}
                     />
                 )}
+                <FormControlLabel
+                    control={(
+                        <Checkbox
+                            checked={conditionStatus}
+                            onChange={onChange}
+                            name='conditionStatus'
+                            label='Enable Condition'
+                            color='primary'
+                        />
+                    )}
+                    label={(
+                        <FormattedMessage
+                            id='Admin.Throttling.Blacklist.policy.enable.condition'
+                            defaultMessage='Enable Condition'
+                        />
+                    )}
+                />
             </FormControl>
         </FormDialogBase>
     );

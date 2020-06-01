@@ -17,72 +17,56 @@
  */
 
 import React from 'react';
+import API from 'AppData/api';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
-import { injectIntl, FormattedMessage } from 'react-intl';
-import API from 'AppData/api';
 
 /**
  * Render delete dialog box.
  * @param {JSON} props component props.
  * @returns {JSX} Loading animation.
  */
-function Delete(props) {
-    const restApi = new API();
-    const {
-        dataRow, updateList,
-    } = props;
+function Delete({ updateList, dataRow }) {
+    const { uuid } = dataRow;
 
     const formSaveCallback = () => {
-        const policyId = dataRow[4];
-        const promiseAPICall = restApi
-            .deleteApplicationThrottlingPolicy(policyId)
+        const restApi = new API();
+        return restApi
+            .deleteBotDetectionNotifyingEmail(uuid)
             .then(() => {
-                updateList();
                 return (
                     <FormattedMessage
-                        id='Throttling.Application.Policy.policy.delete.success'
-                        defaultMessage='Application Rate Limiting Policy successfully deleted.'
+                        id='AdminPages.BotDetection.Email.Delete.form.delete.successful'
+                        defaultMessage='Email removed successfully'
                     />
                 );
             })
-            .catch(() => {
-                return (
-                    <FormattedMessage
-                        id='Throttling.Application.Policy.policy.delete.error'
-                        defaultMessage='Application Rate Limiting Policy could not be deleted.'
-                    />
-                );
+            .catch((error) => {
+                throw error.response.body.description;
+            })
+            .finally(() => {
+                updateList();
             });
-
-        return (promiseAPICall);
     };
 
     return (
         <FormDialogBase
-            title='Delete Application Policy?'
-            saveButtonText='Delete'
+            title='Remove Email?'
+            saveButtonText='Remove'
             icon={<DeleteForeverIcon />}
             formSaveCallback={formSaveCallback}
         >
-            <DialogContentText>
-                <FormattedMessage
-                    id='Throttling.Application.Policy.policy.dialog.delete.error'
-                    defaultMessage='Application Rate Limiting Policy will be deleted.'
-                />
-            </DialogContentText>
+            <DialogContentText>Are you sure you want to remove this Email?</DialogContentText>
         </FormDialogBase>
     );
 }
 Delete.propTypes = {
     updateList: PropTypes.number.isRequired,
-    selectedPolicyName: PropTypes.shape({
-        name: PropTypes.number.isRequired,
-    }).isRequired,
     dataRow: PropTypes.shape({
-        policyId: PropTypes.number.isRequired,
+        uuid: PropTypes.number.isRequired,
     }).isRequired,
 };
-export default injectIntl(Delete);
+export default Delete;
