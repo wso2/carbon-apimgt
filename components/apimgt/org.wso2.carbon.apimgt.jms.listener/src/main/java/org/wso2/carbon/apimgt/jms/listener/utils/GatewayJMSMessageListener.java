@@ -18,22 +18,14 @@
 
 package org.wso2.carbon.apimgt.jms.listener.utils;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.jms.JMSException;
@@ -42,9 +34,9 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Topic;
 
-public class GatewayTokenRevocationMessageListener implements MessageListener {
+public class GatewayJMSMessageListener implements MessageListener {
 
-    private static final Log log = LogFactory.getLog(GatewayTokenRevocationMessageListener.class);
+    private static final Log log = LogFactory.getLog(GatewayJMSMessageListener.class);
 
     public void onMessage(Message message) {
 
@@ -62,19 +54,21 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                         String key = (String) enumeration.nextElement();
                         map.put(key, mapMessage.getObject(key));
                     }
-                    if (JMSConstants.TOPIC_TOKEN_REVOCATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (map.get(APIConstants.REVOKED_TOKEN_KEY) !=
+                    if (JMSConstants.TOPIC_NOTIFICATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
+                        if (map.get(APIConstants.EVENT_TYPE) !=
                                 null) {
                             /*
-                             * This message contains revoked token data
-                             * revokedToken - Revoked Token which should be removed from the cache
-                             * expiryTime - ExpiryTime of the token if token is JWT, otherwise expiry is set to 0
+                             * This message contains notification
+                             * eventType - type of the event
+                             * timestamp - system time of the event published
+                             * event - event data
                              */
-                            handleRevokedTokenMessage((String) map.get(APIConstants.REVOKED_TOKEN_KEY),
-                                    (Long) map.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME));
+                            handleNotificationMessage((String) map.get(APIConstants.EVENT_TYPE),
+                                    (Long) map.get(APIConstants.EVENT_TIMESTAMP),
+                                    (String) map.get(APIConstants.EVENT_PAYLOAD));
                         }
-
                     }
+
                 } else {
                     log.warn("Event dropped due to unsupported message type " + message.getClass());
                 }
@@ -86,23 +80,9 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
         }
     }
 
-    private void handleRevokedTokenMessage(String revokedToken, long expiryTime) {
+    private void handleNotificationMessage(String eventType, long timestamp, String event) {
 
-        boolean isJwtToken = false;
-        if (StringUtils.isEmpty(revokedToken)) {
-            return;
-        }
+        byte[] eventDecoded = Base64.decodeBase64(event);
 
-        //handle JWT tokens
-        if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
-            revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
-            ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                    .addRevokedJWTIntoMap(revokedToken, expiryTime);  // Add revoked
-            // token to
-            // revoked JWT map
-            isJwtToken = true;
-        }
-        ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                .removeTokenFromGatewayCache(revokedToken, isJwtToken);
     }
 }

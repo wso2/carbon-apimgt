@@ -96,45 +96,6 @@ public class JMSMessageListener implements MessageListener {
                              */
                             handleKeyTemplateMessage(map);
                         }
-                    } else if (JMSConstants.TOPIC_TOKEN_REVOCATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (map.get(APIConstants.REVOKED_TOKEN_KEY) !=
-                                null) {
-                            /*
-                             * This message contains revoked token data
-                             * revokedToken - Revoked Token which should be removed from the cache
-                             * expiryTime - ExpiryTime of the token if token is JWT, otherwise expiry is set to 0
-                             */
-                            handleRevokedTokenMessage((String) map.get(APIConstants.REVOKED_TOKEN_KEY),
-                                    (Long) map.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME));
-                        }
-
-                    } else if (JMSConstants.TOPIC_CACHE_INVALIDATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (map.get(APIConstants.CACHE_INVALIDATION_TYPE) != null) {
-                            if (APIConstants.RESOURCE_CACHE_NAME
-                                    .equalsIgnoreCase((String) map.get(APIConstants.CACHE_INVALIDATION_TYPE))) {
-                                handleResourceCacheInvalidationMessage(map);
-                            } else if (APIConstants.GATEWAY_KEY_CACHE_NAME
-                                    .equalsIgnoreCase((String) map.get(APIConstants.CACHE_INVALIDATION_TYPE))) {
-                                handleKeyCacheInvalidationMessage(map);
-                            } else if (APIConstants.GATEWAY_USERNAME_CACHE_NAME
-                                    .equalsIgnoreCase((String) map.get(APIConstants.CACHE_INVALIDATION_TYPE))) {
-                                handleUserCacheInvalidationMessage(map);
-                            }
-
-                        }
-                    } else if (JMSConstants.TOPIC_NOTIFICATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (map.get(APIConstants.EVENT_TYPE) !=
-                                null) {
-                            /*
-                             * This message contains notification
-                             * eventType - type of the event
-                             * timestamp - system time of the event published
-                             * event - event data
-                             */
-                            handleNotificationMessage((String) map.get(APIConstants.EVENT_TYPE),
-                                    (Long) map.get(APIConstants.EVENT_TIMESTAMP),
-                                    (String) map.get(APIConstants.EVENT_PAYLOAD));
-                        }
                     }
                 } else {
                     log.warn("Event dropped due to unsupported message type " + message.getClass());
@@ -292,29 +253,4 @@ public class JMSMessageListener implements MessageListener {
         }
     }
 
-    private void handleRevokedTokenMessage(String revokedToken, long expiryTime) {
-
-        boolean isJwtToken = false;
-        if (StringUtils.isEmpty(revokedToken)) {
-            return;
-        }
-
-        //handle JWT tokens
-        if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
-            revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
-            ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                    .addRevokedJWTIntoMap(revokedToken, expiryTime);  // Add revoked
-            // token to
-            // revoked JWT map
-            isJwtToken = true;
-        }
-        ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                .removeTokenFromGatewayCache(revokedToken, isJwtToken);
-    }
-
-    private void handleNotificationMessage(String eventType, long timestamp, String event) {
-
-        byte[] eventDecoded = Base64.decodeBase64(event);
-
-    }
 }

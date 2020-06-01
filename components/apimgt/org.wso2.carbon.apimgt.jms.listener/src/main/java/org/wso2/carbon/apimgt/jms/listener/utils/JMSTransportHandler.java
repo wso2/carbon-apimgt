@@ -108,6 +108,10 @@ public class JMSTransportHandler {
                 maxThreadPoolSize, keepAliveTimeInMillis, jobQueueSize, new KeyManagerJMSMessageListener());
         jmsListenerForKeyManagerTopic.startListener();
         log.info("Starting jms topic consumer thread for the keyManager topic...");
+        jmsListenerForNotificationTopic = createJMSMessageListener(JMSConstants.TOPIC_NOTIFICATION, minThreadPoolSize,
+                maxThreadPoolSize, keepAliveTimeInMillis, jobQueueSize, new GatewayJMSMessageListener());
+        jmsListenerForKeyManagerTopic.startListener();
+        log.info("Starting jms topic consumer thread for the notification topic...");
     }
 
     private JMSListener createJMSMessageListener(String topicName, int minThreadPoolSize, int maxThreadPoolSize,
@@ -127,21 +131,6 @@ public class JMSTransportHandler {
         JMSListener jmsListener = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME
                 + "#" + topicName, jmsTaskManager);
         return jmsListener;
-
-        //Listening to notification topic
-        messageConfig.put(JMSConstants.PARAM_DESTINATION, JMSConstants.TOPIC_NOTIFICATION);
-        JMSTaskManager jmsTaskManagerForNotificationTopic = JMSTaskManagerFactory.createTaskManagerForService(
-                jmsConnectionFactory,
-                ListenerConstants.CONNECTION_FACTORY_NAME,
-                new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
-                        keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
-                        "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
-        jmsTaskManagerForNotificationTopic.setMessageListener(new JMSMessageListener());
-
-        jmsListenerForNotificationTopic = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME
-                + "#" + JMSConstants.TOPIC_NOTIFICATION, jmsTaskManagerForNotificationTopic);
-        jmsListenerForNotificationTopic.startListener();
-        log.info("Starting jms topic consumer thread for the notification topic...");
     }
 
     public void unSubscribeFromEvents() {

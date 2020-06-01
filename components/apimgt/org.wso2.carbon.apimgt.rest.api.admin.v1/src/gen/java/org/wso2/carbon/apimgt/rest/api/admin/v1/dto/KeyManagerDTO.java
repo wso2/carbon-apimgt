@@ -40,6 +40,8 @@ public class KeyManagerDTO   {
     private Boolean enableOAuthAppCreation = false;
     private Boolean enableSelfValidationJWT = true;
     private List<ClaimMappingEntryDTO> claimMapping = new ArrayList<>();
+    private String consumerKeyClaim = null;
+    private String scopesClaim = null;
     private List<TokenValidationDTO> tokenValidation = new ArrayList<>();
     private Boolean enabled = null;
     private Object additionalProperties = null;
@@ -405,6 +407,40 @@ public class KeyManagerDTO   {
 
   /**
    **/
+  public KeyManagerDTO consumerKeyClaim(String consumerKeyClaim) {
+    this.consumerKeyClaim = consumerKeyClaim;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "azp", value = "")
+  @JsonProperty("consumerKeyClaim")
+  public String getConsumerKeyClaim() {
+    return consumerKeyClaim;
+  }
+  public void setConsumerKeyClaim(String consumerKeyClaim) {
+    this.consumerKeyClaim = consumerKeyClaim;
+  }
+
+  /**
+   **/
+  public KeyManagerDTO scopesClaim(String scopesClaim) {
+    this.scopesClaim = scopesClaim;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "scp", value = "")
+  @JsonProperty("scopesClaim")
+  public String getScopesClaim() {
+    return scopesClaim;
+  }
+  public void setScopesClaim(String scopesClaim) {
+    this.scopesClaim = scopesClaim;
+  }
+
+  /**
+   **/
   public KeyManagerDTO tokenValidation(List<TokenValidationDTO> tokenValidation) {
     this.tokenValidation = tokenValidation;
     return this;
@@ -485,6 +521,8 @@ public class KeyManagerDTO   {
         Objects.equals(enableOAuthAppCreation, keyManager.enableOAuthAppCreation) &&
         Objects.equals(enableSelfValidationJWT, keyManager.enableSelfValidationJWT) &&
         Objects.equals(claimMapping, keyManager.claimMapping) &&
+        Objects.equals(consumerKeyClaim, keyManager.consumerKeyClaim) &&
+        Objects.equals(scopesClaim, keyManager.scopesClaim) &&
         Objects.equals(tokenValidation, keyManager.tokenValidation) &&
         Objects.equals(enabled, keyManager.enabled) &&
         Objects.equals(additionalProperties, keyManager.additionalProperties);
@@ -492,7 +530,7 @@ public class KeyManagerDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, description, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, jwksEndpoint, issuer, scopeManagementEndpoint, availableGrantTypes, enableTokenGneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, tokenValidation, enabled, additionalProperties);
+    return Objects.hash(id, name, type, description, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, jwksEndpoint, issuer, scopeManagementEndpoint, availableGrantTypes, enableTokenGneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties);
   }
 
   @Override
@@ -521,6 +559,8 @@ public class KeyManagerDTO   {
     sb.append("    enableOAuthAppCreation: ").append(toIndentedString(enableOAuthAppCreation)).append("\n");
     sb.append("    enableSelfValidationJWT: ").append(toIndentedString(enableSelfValidationJWT)).append("\n");
     sb.append("    claimMapping: ").append(toIndentedString(claimMapping)).append("\n");
+    sb.append("    consumerKeyClaim: ").append(toIndentedString(consumerKeyClaim)).append("\n");
+    sb.append("    scopesClaim: ").append(toIndentedString(scopesClaim)).append("\n");
     sb.append("    tokenValidation: ").append(toIndentedString(tokenValidation)).append("\n");
     sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");

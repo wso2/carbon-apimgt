@@ -17,7 +17,10 @@
 package org.wso2.carbon.apimgt.impl.jwt.transformer;
 
 import com.nimbusds.jwt.JWTClaimsSet;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
+
+import java.util.List;
 
 /**
  * This Class will be used to transform JWT claims to local claims
@@ -25,12 +28,27 @@ import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
 public interface JWTTransformer {
 
     /**
+     * This method used to retrieve ConsumerKey From JWT
+     * @param jwtClaimsSet retrieved JwtClaimSet
+     * @return consumerKey of JWT
+     */
+    public String getTransformedConsumerKey(JWTClaimsSet jwtClaimsSet) throws APIManagementException;
+
+    /**
+     * This method used to retrieve Scopes From JWT
+     * @param jwtClaimsSet retrieved JwtClaimSet
+     * @return scopes of JWT
+     */
+    public List<String> getTransformedScopes(JWTClaimsSet jwtClaimsSet) throws APIManagementException;
+
+
+    /**
      * This method used to transform JWT claimset from given JWT into required format
      *
      * @param jwtClaimsSet jwtClaimSet from given JWT
      * @return transformed JWT Claims.
      */
-    public JWTClaimsSet transform(JWTClaimsSet jwtClaimsSet);
+    public JWTClaimsSet transform(JWTClaimsSet jwtClaimsSet) throws APIManagementException;
 
     /**
      * This method returns issuer name which used the implementation to transform JWT.

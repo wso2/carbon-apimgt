@@ -42,6 +42,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import javax.cache.Cache;
 
@@ -61,6 +62,8 @@ public class JWTValidatorImpl implements JWTValidator {
             if (state) {
                 state = validateTokenExpiry(jwtToken.getJWTClaimsSet());
                 if (state) {
+                    jwtValidationInfo.setConsumerKey(getConsumerKey(jwtToken.getJWTClaimsSet()));
+                    jwtValidationInfo.setScopes(getScopes(jwtToken.getJWTClaimsSet()));
                     JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtToken.getJWTClaimsSet());
                     createJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
                     jwtValidationInfo.setRawPayload(jwtToken.getParsedString());
@@ -142,9 +145,17 @@ public class JWTValidatorImpl implements JWTValidator {
         return exp == null || DateUtils.isAfter(exp, now, timestampSkew);
     }
 
-    protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) {
+    protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
 
         return jwtTransformer.transform(jwtClaimsSet);
+    }
+    protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+
+        return jwtTransformer.getTransformedConsumerKey(jwtClaimsSet);
+    }
+    protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+
+        return jwtTransformer.getTransformedScopes(jwtClaimsSet);
     }
 
     private void createJWTValidationInfoFromJWT(JWTValidationInfo jwtValidationInfo,
@@ -153,12 +164,6 @@ public class JWTValidatorImpl implements JWTValidator {
 
         jwtValidationInfo.setIssuer(jwtClaimsSet.getIssuer());
         jwtValidationInfo.setValid(true);
-        if (jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY) != null) {
-            jwtValidationInfo
-                    .setConsumerKey(jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY));
-        } else if (jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY) != null) {
-            jwtValidationInfo.setConsumerKey(jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY));
-        }
         jwtValidationInfo.setClaims(jwtClaimsSet.getClaims());
         jwtValidationInfo.setExpiryTime(jwtClaimsSet.getExpirationTime().getTime());
         jwtValidationInfo.setIssuedTime(jwtClaimsSet.getIssueTime().getTime());

@@ -4669,6 +4669,12 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ClaimMappingEntry'
+      consumerKeyClaim:
+        type: string
+        example: 'azp'
+      scopesClaim:
+        type: string
+        example: 'scp'
       tokenValidation:
         type: array
         items:
@@ -4771,6 +4777,8 @@ definitions:
   TokenValidation:
     title: Token handling Configuration
     properties:
+      id:
+        type: int
       enable:
         type: boolean
         example: false
