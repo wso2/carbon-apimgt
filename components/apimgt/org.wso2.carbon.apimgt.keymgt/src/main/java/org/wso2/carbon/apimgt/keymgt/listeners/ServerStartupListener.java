@@ -50,6 +50,7 @@ public class ServerStartupListener extends AbstractAxis2ConfigurationContextObse
     public void terminatedConfigurationContext(ConfigurationContext configCtx) {
 
         int tenantId = MultitenantUtils.getTenantId(configCtx);
-        SubscriptionDataHolder.getInstance().unregisterTenantSubscriptionStore(tenantId);
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        SubscriptionDataHolder.getInstance().unregisterTenantSubscriptionStore(tenantDomain);
     }
 }
