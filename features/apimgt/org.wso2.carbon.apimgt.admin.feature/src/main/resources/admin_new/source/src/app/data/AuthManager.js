@@ -145,15 +145,6 @@ class AuthManager {
         return scopes.includes('apim:tier_view');
     }
 
-    static isNotAdminPortal() {
-        // if (AuthManager.getUser() === null) {
-        //     return doRedirectToLogin();
-        // } else {
-        //     return !AuthManager.getUser().scopes.includes('apim:api_publish');
-        // }
-        return false;
-    }
-
     /**
      * Return an user object given the login request response object
      * @param {Object} response - Response object received from either Axios or Fetch libraries
@@ -179,7 +170,6 @@ class AuthManager {
         const params = {
             refresh_token: AuthManager.getUser(environment.label).getRefreshPartialToken(),
             validity_period: -1,
-            scopes: AuthManager.CONST.USER_SCOPES,
         };
         const referrer = document.referrer.indexOf('https') !== -1 ? document.referrer : null;
         const url = Configurations.app.context + environment.refreshTokenPath;
@@ -195,14 +185,5 @@ class AuthManager {
         });
     }
 }
-
-// TODO: derive this from swagger definitions ~tmkb
-AuthManager.CONST = {
-    USER_SCOPES:
-        'apim:tier_view apim:tier_manage apim:bl_view apim:bl_manage apim:mediation_policy_view'
-        + ' apim:mediation_policy_create apim:app_owner_change apim:app_import_export '
-        + 'apim:api_import_export apim:label_manage apim:label_read apim:monetization_usage_publish'
-        + ' apim:api_workflow apim:bot_data apim:tenantInfo apim:admin_operations apim:admin_settings',
-};
 
 export default AuthManager;
