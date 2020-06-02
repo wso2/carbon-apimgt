@@ -238,20 +238,20 @@
         "Roles": "admin"
       },
       {
-        "Name": "registry:view",
-        "Roles": "admin,Internal/registry_admin,Internal/registry_user,Internal/registry_browser,Internal/creator,Internal/publisher"
+        "Name": "service_catalog:view",
+        "Roles": "admin,Internal/service_catalog_admin,Internal/service_catalog_user,Internal/service_catalog_viewer,Internal/creator,Internal/publisher"
       },
       {
-        "Name": "registry:write",
-        "Roles": "admin,Internal/registry_admin"
+        "Name": "service_catalog:write",
+        "Roles": "admin,Internal/service_catalog_admin"
       },
       {
-        "Name": "registry:entry_view",
-        "Roles": "admin,Internal/registry_admin,Internal/registry_user,Internal/registry_browser,Internal/creator,Internal/publisher"
+        "Name": "service_catalog:entry_view",
+        "Roles": "admin,Internal/service_catalog_admin,Internal/service_catalog_user,Internal/service_catalog_viewer,Internal/creator,Internal/publisher"
       },
       {
-        "Name": "registry:entry_write",
-        "Roles": "admin,Internal/registry_admin,Internal/registry_user"
+        "Name": "service_catalog:entry_write",
+        "Roles": "admin,Internal/service_catalog_admin,Internal/service_catalog_user"
       }
     ]
   },

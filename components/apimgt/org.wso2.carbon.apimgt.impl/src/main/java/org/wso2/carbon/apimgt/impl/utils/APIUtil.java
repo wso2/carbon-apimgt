@@ -4486,7 +4486,7 @@ public final class APIUtil {
 
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
             createSelfSignUpRoles(tenantId);
-            createEndpointRegistryRoles(tenantId);
+            createServiceCatalogRoles(tenantId);
         }
     }
 
@@ -4798,15 +4798,15 @@ public final class APIUtil {
     }
 
     /**
-     * Create Endpoint Registry roles in specified tenant
+     * Create Service Catalog roles in specified tenant
      *
      * @param tenantId id of the tenant
      * @throws APIManagementException
      */
-    public static void createEndpointRegistryRoles(int tenantId) throws APIManagementException {
-        createRole(APIConstants.ENDPOINT_REGISTRY_ADMIN_ROLE, null, tenantId);
-        createRole(APIConstants.ENDPOINT_REGISTRY_USER_ROLE, null, tenantId);
-        createRole(APIConstants.ENDPOINT_REGISTRY_BROWSER_ROLE, null, tenantId);
+    public static void createServiceCatalogRoles(int tenantId) throws APIManagementException {
+        createRole(APIConstants.SERVICE_CATALOG_ADMIN_ROLE, null, tenantId);
+        createRole(APIConstants.SERVICE_CATALOG_USER_ROLE, null, tenantId);
+        createRole(APIConstants.SERVICE_CATALOG_VIEWER_ROLE, null, tenantId);
     }
 
     /**

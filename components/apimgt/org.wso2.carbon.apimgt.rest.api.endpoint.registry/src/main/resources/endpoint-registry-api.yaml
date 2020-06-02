@@ -37,7 +37,7 @@ paths:
         - Registries
       security:
         - default:
-          - registry:view
+          - service_catalog:view
       operationId: getRegistries
       responses:
         200:
@@ -58,7 +58,7 @@ paths:
         This operation can be used to create a new Registry specifying the details of the Registry in the payload.
       security:
         - default:
-          - registry:write
+          - service_catalog:write
       tags:
         - Registries
       operationId: addRegistry
@@ -104,7 +104,7 @@ paths:
         Using this operation, you can retrieve complete details of a single Registry using the RegistryId.
       security:
         - default:
-          - registry:view
+          - service_catalog:view
       tags:
         - Registries
       operationId: getRegistryByUUID
@@ -150,7 +150,7 @@ paths:
         This operation can be used to update an existing Endpoint Registry
       security:
         - default:
-          - registry:write
+          - service_catalog:write
       tags:
         - Registries
       operationId: updateRegistry
@@ -202,7 +202,7 @@ paths:
         This operation can be used to delete an existing Registry proving the Id of the Registry.
       security:
         - default:
-          - registry:write
+          - service_catalog:write
       tags:
        - Registries
       operationId: deleteRegistry
@@ -244,7 +244,7 @@ paths:
       operationId: getAllEntriesInRegistry
       security:
         - default:
-          - registry:entry_view
+          - service_catalog:entry_view
       tags:
         - Registry Entries
       parameters:
@@ -357,7 +357,7 @@ paths:
         This operation can be used to create a new Registry Entry specifying the details of the Entry in the payload.
       security:
         - default:
-          - registry:entry_write
+          - service_catalog:entry_write
       tags:
         - Registry Entries
       operationId: createRegistryEntry
@@ -411,7 +411,7 @@ paths:
         Using this operation, you can retrieve a specific entry in a single Registry using the EntryId and RegistryId.
       security:
         - default:
-          - registry:entry_view
+          - service_catalog:entry_view
       operationId: getRegistryEntryByUuid
       tags:
         - Registry Entries
@@ -465,7 +465,7 @@ paths:
         This operation can be used to update an existing Entry in Registry with the details of the Entry in the payload.
       security:
         - default:
-          - registry:entry_write
+          - service_catalog:entry_write
       operationId: updateRegistryEntry
       tags:
         - Registry Entries
@@ -524,7 +524,7 @@ paths:
         This operation can be used to delete an existing Entry in Registry by specifying the registryId and entryId.
       security:
         - default:
-          - registry:entry_write
+          - service_catalog:entry_write
       operationId: deleteRegistryEntry
       tags:
         - Registry Entries
@@ -575,7 +575,7 @@ paths:
         Using this operation, you can retrieve the definition file of a specific entry in a Registry using the EntryId and RegistryId.
       security:
         - default:
-          - registry:entry_view
+          - service_catalog:entry_view
       operationId: getEndpointDefinition
       tags:
         - Registry Entries
@@ -632,7 +632,7 @@ paths:
         Using this operation, you can create a new version of an existing entry
       security:
         - default:
-            - registry:entry_write
+            - service_catalog:entry_write
       operationId: createNewEntryVersion
       tags:
         - Registry Entries
@@ -735,10 +735,10 @@ components:
         implicit:
           authorizationUrl: https://example.com/oauth/authorize
           scopes:
-            registry:view: view registry
-            registry:write: write registry
-            registry:entry_view: view reg entry
-            registry:entry_write: write reg entry
+            service_catalog:view: view registry
+            service_catalog:write: write registry
+            service_catalog:entry_view: view reg entry
+            service_catalog:entry_write: write reg entry
 
   #-------------------------------------------------------
   # The definitions of resources used by some of the APIs
