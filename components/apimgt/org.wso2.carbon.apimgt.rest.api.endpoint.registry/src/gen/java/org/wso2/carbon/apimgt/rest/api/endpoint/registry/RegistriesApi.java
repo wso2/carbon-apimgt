@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-06-01T17:03:29.461+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-06-02T17:30:19.044+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -256,11 +256,6 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 @Parameter(description = "uuid of the Registry",required=true) @PathParam("registryId") String registryId
 
 
-,             @Parameter(description = "Whether to perform exact search on name") 
-            @DefaultValue("false")
-        @QueryParam("exactNameMatch") Boolean exactNameMatch
-
-
 ,             @Parameter(description = "Version of the Registry Entry") 
         @QueryParam("version") String version
 
@@ -277,6 +272,10 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 ,             @Parameter(description = "Filter registry entries by the name of the Entry ") 
         @QueryParam("name") String name
+
+
+,             @Parameter(description = "Filter registry entries by the display name of the Entry ") 
+        @QueryParam("displayName") String displayName
 
 
 ,             @Parameter(description = "Filter registry entries by the service category of the Entry ",     schema=@Schema(allowableValues={ "UTILITY", "EDGE", "DOMAIN" })
@@ -305,7 +304,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
 
 
 ) throws EndpointRegistryException {
-        return delegate.getAllEntriesInRegistry(registryId, exactNameMatch, version, serviceType, definitionType, name, serviceCategory, sortEntryBy, sortEntryOrder, limit, offset, securityContext);
+        return delegate.getAllEntriesInRegistry(registryId, version, serviceType, definitionType, name, displayName, serviceCategory, sortEntryBy, sortEntryOrder, limit, offset, securityContext);
         }
     public enum ServiceTypeEnum {
     REST,SOAP_1_1,GQL,WS;

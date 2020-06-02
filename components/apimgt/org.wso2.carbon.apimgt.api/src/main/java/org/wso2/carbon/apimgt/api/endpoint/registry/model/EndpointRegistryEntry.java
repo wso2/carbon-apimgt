@@ -28,7 +28,9 @@ public class EndpointRegistryEntry {
 
     private int registryId;
 
-    private String name = null;
+    private String entryName = null;
+
+    private String displayName = null;
 
     private String version = null;
 
@@ -66,9 +68,9 @@ public class EndpointRegistryEntry {
         return registryId;
     }
 
-    public String getName() {
+    public String getEntryName() {
 
-        return name;
+        return entryName;
     }
 
     public String getVersion() {
@@ -116,9 +118,9 @@ public class EndpointRegistryEntry {
         this.registryId = registryId;
     }
 
-    public void setName(String name) {
+    public void setEntryName(String entryName) {
 
-        this.name = name;
+        this.entryName = entryName;
     }
 
     public void setVersion(String version) {
@@ -214,5 +216,13 @@ public class EndpointRegistryEntry {
     public void setSandboxServiceUrl(String sandboxServiceUrl) {
 
         this.sandboxServiceUrl = sandboxServiceUrl;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 }

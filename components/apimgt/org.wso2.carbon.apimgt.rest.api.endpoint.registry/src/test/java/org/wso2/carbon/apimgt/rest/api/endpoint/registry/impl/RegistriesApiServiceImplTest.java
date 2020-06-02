@@ -37,6 +37,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntryFilterParams;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
@@ -169,11 +170,11 @@ public class RegistriesApiServiceImplTest {
         List<EndpointRegistryInfo> endpointRegistryInfoList = new ArrayList<>();
 
         EndpointRegistryInfo endpointRegistryInfo1 = createRegistry("abc1", 1, "Endpoint Registry 1",
-                RegistryDTO.TypeEnum.WSO2, ADMIN_USERNAME);
+                "Endpoint Registry 1", RegistryDTO.TypeEnum.WSO2, ADMIN_USERNAME);
         endpointRegistryInfoList.add(endpointRegistryInfo1);
 
         EndpointRegistryInfo endpointRegistryInfo2 = createRegistry("abc2", 2, "Endpoint Registry 2",
-                RegistryDTO.TypeEnum.WSO2, ADMIN_USERNAME);
+                "Endpoint Registry 2", RegistryDTO.TypeEnum.WSO2, ADMIN_USERNAME);
         endpointRegistryInfoList.add(endpointRegistryInfo2);
 
         Mockito.when(registryProvider.getEndpointRegistries(TENANT_DOMAIN))
@@ -228,8 +229,8 @@ public class RegistriesApiServiceImplTest {
     @Test
     public void updateRegistry() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfoOld = createRegistryWithDefaultParams();
-        EndpointRegistryInfo endpointRegistryInfoNew = createRegistry(endpointRegistryInfoOld.getUuid(), 2,
-                "Endpoint Registry 2", RegistryDTO.TypeEnum.WSO2, "user1");
+        EndpointRegistryInfo endpointRegistryInfoNew = createRegistryWithDefaultParams();
+        endpointRegistryInfoNew.setDisplayName("Endpoint Registry 2");
 
         RegistryDTO payloadDTO = EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfoNew);
 
@@ -239,7 +240,8 @@ public class RegistriesApiServiceImplTest {
         Response response = registriesApiService.updateRegistry(payloadDTO, payloadDTO.getId(), messageContext);
 
         Mockito.verify(registryProvider)
-                .updateEndpointRegistry(Mockito.eq(payloadDTO.getId()), Mockito.eq(endpointRegistryInfoOld.getName()),
+                .updateEndpointRegistry(Mockito.eq(payloadDTO.getId()),
+                        Mockito.eq(endpointRegistryInfoOld.getDisplayName()),
                         Mockito.eq(endpointRegistryInfoOld.getType()), Mockito.any(EndpointRegistryInfo.class));
         Assert.assertNotNull("Endpoint Registry update failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -250,8 +252,8 @@ public class RegistriesApiServiceImplTest {
     @Test
     public void updateRegistry_existingName() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfoOld = createRegistryWithDefaultParams();
-        EndpointRegistryInfo endpointRegistryInfoNew = createRegistry(endpointRegistryInfoOld.getUuid(), 2,
-                "Endpoint Registry 2", RegistryDTO.TypeEnum.WSO2, "user1");
+        EndpointRegistryInfo endpointRegistryInfoNew = createRegistryWithDefaultParams();
+        endpointRegistryInfoNew.setDisplayName("Endpoint Registry 2");
 
         RegistryDTO payloadDTO = EndpointRegistryMappingUtils.fromEndpointRegistryToDTO(endpointRegistryInfoNew);
 
@@ -259,7 +261,7 @@ public class RegistriesApiServiceImplTest {
                 = Mockito.mock(EndpointRegistryResourceAlreadyExistsException.class);
         Mockito.doThrow(resourceAlreadyExistsException).when(registryProvider)
                 .updateEndpointRegistry(Mockito.eq(endpointRegistryInfoOld.getUuid()),
-                        Mockito.eq(endpointRegistryInfoOld.getName()), Mockito.eq(endpointRegistryInfoOld.getType()),
+                        Mockito.eq(endpointRegistryInfoOld.getDisplayName()), Mockito.eq(endpointRegistryInfoOld.getType()),
                         Mockito.any(EndpointRegistryInfo.class));
         Mockito.when(registryProvider.getEndpointRegistryByUUID(payloadDTO.getId(), TENANT_DOMAIN))
                 .thenReturn(endpointRegistryInfoOld, endpointRegistryInfoNew);
@@ -537,7 +539,8 @@ public class RegistriesApiServiceImplTest {
         Attachment definitionFileDetail = Mockito.mock(Attachment.class);
 
         EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
-                "Entry Name 2", "v1", "An Registry Entry that exposes a SOAP endpoint", "https://xyz2.com",
+                "Entry Name 1", "Entry Name 1", "v1",
+                "An Registry Entry that exposes a SOAP endpoint", "https://xyz2.com",
                 RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1, RegistryEntryDTO.ServiceCategoryEnum.DOMAIN,
                 "https://petstore.swagger.io/v2/swagger.json", RegistryEntryDTO.DefinitionTypeEnum.OAS,
                 definitionFileStream);
@@ -553,7 +556,8 @@ public class RegistriesApiServiceImplTest {
         Response response = registriesApiService.updateRegistryEntry(REGISTRY_UUID, payloadEntryDTO.getId(),
                 payloadEntryDTO, definitionFileStream, definitionFileDetail, messageContext);
 
-        Mockito.verify(registryProvider).updateEndpointRegistryEntry(Mockito.eq(endpointRegistryEntryOld.getName()),
+        Mockito.verify(registryProvider).updateEndpointRegistryEntry(
+                Mockito.eq(endpointRegistryEntryOld.getDisplayName()),
                 Mockito.any(EndpointRegistryEntry.class));
         Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -569,7 +573,8 @@ public class RegistriesApiServiceImplTest {
         EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
 
         EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
-                "Entry Name 2", "v1", "An Registry Entry that exposes a SOAP endpoint", "https://xyz2.com",
+                "Entry Name 1", "Entry Name 1", "v1",
+                "An Registry Entry that exposes a SOAP endpoint", "https://xyz2.com",
                 RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1, RegistryEntryDTO.ServiceCategoryEnum.DOMAIN,
                 "https://petstore.swagger.io/v2/swagger.json", RegistryEntryDTO.DefinitionTypeEnum.OAS,
                 null);
@@ -586,7 +591,8 @@ public class RegistriesApiServiceImplTest {
         Response response = registriesApiService.updateRegistryEntry(REGISTRY_UUID, payloadEntryDTO.getId(),
                 payloadEntryDTO, null, null, messageContext);
 
-        Mockito.verify(registryProvider).updateEndpointRegistryEntry(Mockito.eq(endpointRegistryEntryOld.getName()),
+        Mockito.verify(registryProvider).updateEndpointRegistryEntry(
+                Mockito.eq(endpointRegistryEntryOld.getDisplayName()),
                 Mockito.any(EndpointRegistryEntry.class));
         Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -602,7 +608,8 @@ public class RegistriesApiServiceImplTest {
         EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
 
         EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
-                "Entry Name 2", "v1", "An Registry Entry that exposes a SOAP endpoint", "https://xyz2.com",
+                "Entry Name 1", "Entry Name 1", "v1",
+                "An Registry Entry that exposes a SOAP endpoint", "https://xyz2.com",
                 RegistryEntryDTO.ServiceTypeEnum.SOAP_1_1, RegistryEntryDTO.ServiceCategoryEnum.DOMAIN,
                 null, RegistryEntryDTO.DefinitionTypeEnum.OAS, null);
 
@@ -618,7 +625,8 @@ public class RegistriesApiServiceImplTest {
         Response response = registriesApiService.updateRegistryEntry(REGISTRY_UUID, payloadEntryDTO.getId(),
                 payloadEntryDTO, null, null, messageContext);
 
-        Mockito.verify(registryProvider).updateEndpointRegistryEntry(Mockito.eq(endpointRegistryEntryOld.getName()),
+        Mockito.verify(registryProvider).updateEndpointRegistryEntry(
+                Mockito.eq(endpointRegistryEntryOld.getDisplayName()),
                 Mockito.any(EndpointRegistryEntry.class));
         Assert.assertNotNull("Endpoint Registry Entry creation failed", response);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -683,6 +691,7 @@ public class RegistriesApiServiceImplTest {
         List<EndpointRegistryEntry> endpointRegistryEntryList = new ArrayList<>();
 
         EndpointRegistryEntry endpointRegistryEntry1 = createRegistryEntry("entry1", "Entry Name 1",
+                "Entry Name 1",
                 "v1", "A Registry Entry that exposes a REST endpoint", "https://xyz.com",
                 RegistryEntryDTO.ServiceTypeEnum.REST, RegistryEntryDTO.ServiceCategoryEnum.UTILITY,
                 "https://petstore.swagger.io/v2/swagger.json", RegistryEntryDTO.DefinitionTypeEnum.OAS,
@@ -690,16 +699,14 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntryList.add(endpointRegistryEntry1);
 
         EndpointRegistryEntry endpointRegistryEntry2 = createRegistryEntry("entry2", "Entry Name 2",
+                "Entry Name 1",
                 "v1", "A Registry Entry that exposes a REST endpoint", "https://xyz2.com",
                 RegistryEntryDTO.ServiceTypeEnum.REST, RegistryEntryDTO.ServiceCategoryEnum.DOMAIN,
                 "https://petstore.swagger.io/v2/swagger.json", RegistryEntryDTO.DefinitionTypeEnum.OAS,
                 null);
         endpointRegistryEntryList.add(endpointRegistryEntry2);
 
-        Mockito.when(registryProvider.getEndpointRegistryEntries(EndpointRegistryConstants.COLUMN_ID,
-                RestApiConstants.DEFAULT_SORT_ORDER, RestApiConstants.PAGINATION_LIMIT_DEFAULT,
-                RestApiConstants.PAGINATION_OFFSET_DEFAULT, REGISTRY_UUID, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, false))
+        Mockito.when(registryProvider.getEndpointRegistryEntries(createDefaultEntryFilterParams(), REGISTRY_UUID))
                 .thenReturn(endpointRegistryEntryList);
 
         Response response = registriesApiService.getAllEntriesInRegistry(REGISTRY_UUID, null, null,
@@ -901,18 +908,20 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryInfo.setUuid("abc1");
         endpointRegistryInfo.setRegistryId(1);
         endpointRegistryInfo.setName("Endpoint Registry 1");
+        endpointRegistryInfo.setDisplayName("Endpoint Registry 1");
         endpointRegistryInfo.setType(RegistryDTO.TypeEnum.WSO2.toString());
         endpointRegistryInfo.setOwner(ADMIN_USERNAME);
 
         return endpointRegistryInfo;
     }
 
-    private EndpointRegistryInfo createRegistry(String uuid, int id, String name, RegistryDTO.TypeEnum type,
-                                                String owner) {
+    private EndpointRegistryInfo createRegistry(String uuid, int id, String name, String displayName,
+                                                RegistryDTO.TypeEnum type, String owner) {
         EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
         endpointRegistryInfo.setUuid(uuid);
         endpointRegistryInfo.setRegistryId(id);
         endpointRegistryInfo.setName(name);
+        endpointRegistryInfo.setDisplayName(displayName);
         endpointRegistryInfo.setType(type.toString());
         endpointRegistryInfo.setOwner(owner);
 
@@ -922,7 +931,8 @@ public class RegistriesApiServiceImplTest {
     private EndpointRegistryEntry createRegistryEntryWithDefaultParams() {
         EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
         endpointRegistryEntry.setEntryId("entry1");
-        endpointRegistryEntry.setName("Entry Name 1");
+        endpointRegistryEntry.setEntryName("Entry Name 1");
+        endpointRegistryEntry.setDisplayName("Entry Name 1");
         endpointRegistryEntry.setDescription("A Registry Entry that exposes a REST endpoint");
         endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
         endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
@@ -933,15 +943,17 @@ public class RegistriesApiServiceImplTest {
         return endpointRegistryEntry;
     }
 
-    private EndpointRegistryEntry createRegistryEntry(String id, String name, String version, String description,
+    private EndpointRegistryEntry createRegistryEntry(String id, String name, String displayName,
+                                                      String version, String description,
                                                       String serviceUrl, RegistryEntryDTO.ServiceTypeEnum serviceType,
-                                                    RegistryEntryDTO.ServiceCategoryEnum serviceCategory,
+                                                      RegistryEntryDTO.ServiceCategoryEnum serviceCategory,
                                                       String definitionUrl,
                                                       RegistryEntryDTO.DefinitionTypeEnum definitionType,
                                                       InputStream definitionFile) {
         EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
         endpointRegistryEntry.setEntryId(id);
-        endpointRegistryEntry.setName(name);
+        endpointRegistryEntry.setEntryName(name);
+        endpointRegistryEntry.setDisplayName(displayName);
         endpointRegistryEntry.setVersion(version);
         endpointRegistryEntry.setDescription(description);
         endpointRegistryEntry.setProductionServiceURL(serviceUrl);
@@ -954,4 +966,19 @@ public class RegistriesApiServiceImplTest {
         return endpointRegistryEntry;
     }
 
+    private EndpointRegistryEntryFilterParams createDefaultEntryFilterParams() {
+        EndpointRegistryEntryFilterParams filterParams = new EndpointRegistryEntryFilterParams();
+        filterParams.setEntryName(StringUtils.EMPTY);
+        filterParams.setDisplayName(StringUtils.EMPTY);
+        filterParams.setVersion(StringUtils.EMPTY);
+        filterParams.setServiceType(StringUtils.EMPTY);
+        filterParams.setServiceCategory(StringUtils.EMPTY);
+        filterParams.setDefinitionType(StringUtils.EMPTY);
+        filterParams.setSortBy(EndpointRegistryConstants.COLUMN_ENTRY_NAME);
+        filterParams.setSortOrder(RestApiConstants.DEFAULT_SORT_ORDER);
+        filterParams.setLimit(RestApiConstants.PAGINATION_LIMIT_DEFAULT);
+        filterParams.setOffset(RestApiConstants.PAGINATION_OFFSET_DEFAULT);
+
+        return filterParams;
+    }
 }

@@ -33,6 +33,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntryFilterParams;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistry;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.impl.EndpointRegistryImpl;
@@ -76,9 +77,10 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
     private static final Log audit = CarbonConstants.AUDIT_LOG;
 
     @Override
-    public Response getAllEntriesInRegistry(String registryId, Boolean exactNameMatch, String version,
+    public Response getAllEntriesInRegistry(String registryId, String version,
                                             RegistriesApi.ServiceTypeEnum serviceType,
-                                            RegistriesApi.DefinitionTypeEnum definitionType, String name,
+                                            RegistriesApi.DefinitionTypeEnum definitionType,
+                                            String name, String displayName,
                                             RegistriesApi.ServiceCategoryEnum serviceCategory,
                                             RegistriesApi.SortEntryByEnum sortEntryBy,
                                             RegistriesApi.SortEntryOrderEnum sortEntryOrder,
@@ -95,20 +97,12 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                         " is not found", log);
             }
 
-            limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-            offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-            String sortOrder = sortEntryOrder != null ? sortEntryOrder.toString() : RestApiConstants.DEFAULT_SORT_ORDER;
-            String sortBy = EndpointRegistryMappingUtils.getRegistryEntriesSortByField(sortEntryBy);
-            name = name == null ? StringUtils.EMPTY : name;
-            version = version == null ? StringUtils.EMPTY : version;
-            exactNameMatch = exactNameMatch == null ? false : exactNameMatch;
-            String serviceTypeStr = serviceType == null ? StringUtils.EMPTY : serviceType.toString();
-            String definitionTypeStr = definitionType == null ? StringUtils.EMPTY : definitionType.toString();
-            String serviceCategoryStr = serviceCategory == null ? StringUtils.EMPTY : serviceCategory.toString();
-
+            EndpointRegistryEntryFilterParams filterParams = EndpointRegistryMappingUtils
+                    .getRegistryEntryFilterParams(
+                    name, displayName, version, serviceType, serviceCategory, definitionType,
+                            sortEntryBy, sortEntryOrder, limit, offset);
             List<EndpointRegistryEntry> endpointRegistryEntryList =
-                    registryProvider.getEndpointRegistryEntries(sortBy, sortOrder, limit, offset, registryId,
-                            serviceTypeStr, definitionTypeStr, name, serviceCategoryStr, version, exactNameMatch);
+                    registryProvider.getEndpointRegistryEntries(filterParams, registryId);
             for (EndpointRegistryEntry endpointRegistryEntry : endpointRegistryEntryList) {
                 registryEntryArray.add(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(endpointRegistryEntry));
             }
@@ -268,8 +262,8 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 RestApiUtil.handleResourceNotFoundError("Endpoint registry with the id: " + registryId +
                         " is not found", log);
             }
-            registryProvider.updateEndpointRegistry(registryId, endpointRegistry.getName(), endpointRegistry.getType(),
-                     registryToUpdate);
+            registryProvider.updateEndpointRegistry(registryId, endpointRegistry.getDisplayName(),
+                    endpointRegistry.getType(), registryToUpdate);
             EndpointRegistryInfo updatedEndpointRegistry
                     = registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
             audit.info("Successfully updated endpoint registry of id :" + updatedEndpointRegistry.getUuid()
@@ -392,15 +386,14 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             }
             EndpointRegistryEntry entryToUpdate = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
                     entryId, definitionFile, endpointRegistry.getRegistryId());
-            registryProvider.updateEndpointRegistryEntry(endpointRegistryEntry.getName(), entryToUpdate);
+            registryProvider.updateEndpointRegistryEntry(endpointRegistryEntry.getDisplayName(), entryToUpdate);
 
             EndpointRegistryEntry updatedEntry = registryProvider.getEndpointRegistryEntryByUUID(registryId, entryId);
             audit.info("Successfully updated endpoint registry entry with id :" + entryId +
                     " in :" + registryId + " by:" + user);
             return Response.ok().entity(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(updatedEntry)).build();
         } catch (EndpointRegistryResourceAlreadyExistsException e) {
-            RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry Entry with name '"
-                    + registryEntry.getEntryName() + "' already exists", e, log);
+            RestApiUtil.handleResourceAlreadyExistsError(e.getMessage(), e, log);
         } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while updating the endpoint registry entry " +
                     "with id: " + entryId, e, log);
