@@ -3167,12 +3167,6 @@ paths:
             Not Authorized to import.
           schema:
             $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not Found.
-            Tenant does not exist.
-          schema:
-            $ref: '#/definitions/Error'
         500:
           description: |
             Internal Server Error.
@@ -3824,9 +3818,6 @@ definitions:
 #-----------------------------------------------------
   ThrottleLimit :
     discriminator: type
-    x-wso2-subtypes:
-      - RequestCountLimit
-      - BandwidthLimit
     required:
       - type
       - timeUnit
