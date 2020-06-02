@@ -36,6 +36,8 @@ public class EndpointRegistryConstants {
 
     public static final String COLUMN_ENTRY_NAME = "ENTRY_NAME";
 
+    public static final String COLUMN_DISPLAY_NAME = "DISPLAY_NAME";
+
     public static final String COLUMN_ENTRY_VERSION = "ENTRY_VERSION";
 
     public static final String COLUMN_PRODUCTION_SERVICE_URL = "PRODUCTION_SERVICE_URL";

@@ -18,9 +18,11 @@
 
 package org.wso2.carbon.apimgt.impl.endpoint.registry.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistry;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntryFilterParams;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.dao.EndpointRegistryDAO;
 import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryInfo;
@@ -68,9 +70,14 @@ public class EndpointRegistryImpl implements EndpointRegistry {
             if (registryDAO.isEndpointRegistryTypeExists(endpointRegistry.getType(), tenantId)) {
                 EndpointRegistryUtil.raiseResourceAlreadyExistsException("Endpoint Registry of type '"
                         + endpointRegistry.getType() + "' already exists");
-            } else if (registryDAO.isEndpointRegistryNameExists(endpointRegistry.getName(), tenantId)) {
+            } else if (registryDAO.isEndpointRegistryNameExists(endpointRegistry.getName(),
+                    false, tenantId)) {
                 EndpointRegistryUtil.raiseResourceAlreadyExistsException("Endpoint Registry with name '"
                         + endpointRegistry.getName() + "' already exists");
+            } else if (registryDAO.isEndpointRegistryNameExists(endpointRegistry.getDisplayName(),
+                    true, tenantId)) {
+                EndpointRegistryUtil.raiseResourceAlreadyExistsException("Endpoint Registry with display name '"
+                        + endpointRegistry.getDisplayName() + "' already exists");
             }
             return registryDAO.addEndpointRegistry(endpointRegistry, tenantId);
         } catch (UserStoreException e) {
@@ -134,6 +141,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
                 // Create the default registry if no registry found
                 EndpointRegistryInfo defaultRegistry = new EndpointRegistryInfo();
                 defaultRegistry.setName(EndpointRegistryConstants.DEFAULT_REGISTRY_NAME);
+                defaultRegistry.setDisplayName(EndpointRegistryConstants.DEFAULT_REGISTRY_NAME);
                 defaultRegistry.setType(EndpointRegistryConstants.REGISTRY_TYPE_WSO2);
                 defaultRegistry.setOwner(EndpointRegistryConstants.SYSTEM_USER_NAME);
                 String regId = registryDAO.addEndpointRegistry(defaultRegistry, tenantId);
@@ -165,32 +173,12 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     }
 
     /**
-     * /**
-     * Returns all entries belong to a given endpoint registry
-     *
-     * @param sortBy          Name of the sorting field
-     * @param sortOrder       Order of sorting (asc or desc)
-     * @param limit           Limit
-     * @param offset          Offset
-     * @param registryId      UUID of the endpoint registry
-     * @param serviceType     The endpoint service type
-     * @param definitionType  Then endpoint definition type
-     * @param entryName       The registry entry name
-     * @param serviceCategory The service category
-     * @param version         The version of registry entry
-     * @param exactNameMatch  Whether to perform exact search on name
-     * @return A list of EndpointRegistryEntry objects
-     * @throws EndpointRegistryException if failed to get entries of an Endpoint Registry
+     * {@inheritDoc}
      */
-    public List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit,
-                                                                  int offset, String registryId, String serviceType,
-                                                                  String definitionType, String entryName,
-                                                                  String serviceCategory, String version,
-                                                                  boolean exactNameMatch)
-            throws EndpointRegistryException {
+    public List<EndpointRegistryEntry> getEndpointRegistryEntries(EndpointRegistryEntryFilterParams filterParams,
+                                                                  String registryId) throws EndpointRegistryException {
 
-        return registryDAO.getEndpointRegistryEntries(sortBy, sortOrder, limit, offset, registryId, serviceType,
-                definitionType, entryName, serviceCategory, version, exactNameMatch);
+        return registryDAO.getEndpointRegistryEntries(filterParams, registryId);
     }
 
     /**
@@ -202,9 +190,12 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      */
     public String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws EndpointRegistryException {
 
-        if (registryDAO.isRegistryEntryNameExists(registryEntry)) {
+        if (registryDAO.isRegistryEntryNameExists(registryEntry, false)) {
             EndpointRegistryUtil.raiseResourceAlreadyExistsException("Endpoint Registry Entry with name '"
-                    + registryEntry.getName() + "' already exists");
+                    + registryEntry.getEntryName() + "' already exists");
+        } else if (registryDAO.isRegistryEntryNameExists(registryEntry, true)) {
+            EndpointRegistryUtil.raiseResourceAlreadyExistsException("Endpoint Registry Entry with display name '"
+                    + registryEntry.getDisplayName() + "' already exists");
         }
         return registryDAO.addEndpointRegistryEntry(registryEntry, username);
     }
@@ -212,17 +203,17 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * Updates Registry Entry
      *
-     * @param entryName     original name of the registry entry
+     * @param displayName   original display name of the registry entry
      * @param registryEntry EndpointRegistryEntry
      * @throws EndpointRegistryException if failed to update EndpointRegistryEntry
      */
-    public void updateEndpointRegistryEntry(String entryName, EndpointRegistryEntry registryEntry)
+    public void updateEndpointRegistryEntry(String displayName, EndpointRegistryEntry registryEntry)
             throws EndpointRegistryException {
 
-        if (!entryName.equals(registryEntry.getName()) &&
-                registryDAO.isRegistryEntryNameExists(registryEntry)) {
+        if (!displayName.equals(registryEntry.getDisplayName()) &&
+                registryDAO.isRegistryEntryNameExists(registryEntry, true)) {
             EndpointRegistryUtil.raiseResourceAlreadyExistsException("Endpoint Registry Entry with name '"
-                    + registryEntry.getName() + "' already exists");
+                    + registryEntry.getDisplayName() + "' already exists");
         }
         registryDAO.updateEndpointRegistryEntry(registryEntry, username);
     }
@@ -241,7 +232,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * {@inheritDoc}
      */
-    public void updateEndpointRegistry(String registryId, String registryName, String registryType,
+    public void updateEndpointRegistry(String registryId, String registryDisplayName, String registryType,
                                        EndpointRegistryInfo endpointRegistryInfo) throws EndpointRegistryException {
 
         String tenantDomain = MultitenantUtils
@@ -255,10 +246,11 @@ public class EndpointRegistryImpl implements EndpointRegistry {
                     registryDAO.isEndpointRegistryTypeExists(endpointRegistryInfo.getType(), tenantId)) {
                 EndpointRegistryUtil.raiseResourceAlreadyExistsException("Endpoint Registry of type '"
                         + endpointRegistryInfo.getType() + "' already exists");
-            } else if (!registryName.equals(endpointRegistryInfo.getName()) &&
-                    registryDAO.isEndpointRegistryNameExists(endpointRegistryInfo.getName(), tenantId)) {
+            } else if (!registryDisplayName.equals(endpointRegistryInfo.getDisplayName()) &&
+                    registryDAO.isEndpointRegistryNameExists(endpointRegistryInfo.getDisplayName(),
+                            true, tenantId)) {
                 EndpointRegistryUtil.raiseResourceAlreadyExistsException("Endpoint Registry with name '"
-                        + endpointRegistryInfo.getName() + "' already exists");
+                        + endpointRegistryInfo.getDisplayName() + "' already exists");
             }
             registryDAO.updateEndpointRegistry(registryId, endpointRegistryInfo, username);
         } catch (UserStoreException e) {
@@ -283,7 +275,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
 
         if (registryDAO.isRegistryEntryNameAndVersionExists(registryEntry)) {
             EndpointRegistryUtil.raiseResourceAlreadyExistsException("Endpoint Registry Entry with name '"
-                    + registryEntry.getName() + "' and version '" + registryEntry.getVersion() + "' already exists");
+                    + registryEntry.getEntryName() + "' and version '" + registryEntry.getVersion() + "' already exists");
         }
         return registryDAO.addEndpointRegistryEntry(registryEntry, username);
     }

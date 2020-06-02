@@ -28,6 +28,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntryFilterParams;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.dao.EndpointRegistryDAO;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.impl.EndpointRegistryImpl;
@@ -77,8 +78,10 @@ public class EndpointRegistryImplTest {
     public void addEndpointRegistry() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
 
-        Mockito.when(endpointRegistryDAO.isEndpointRegistryNameExists(endpointRegistryInfo.getName(), TENANT_ID))
-                .thenReturn(false);
+        Mockito.when(endpointRegistryDAO.isEndpointRegistryNameExists(endpointRegistryInfo.getName(),
+                false, TENANT_ID)).thenReturn(false);
+        Mockito.when(endpointRegistryDAO.isEndpointRegistryNameExists(endpointRegistryInfo.getDisplayName(),
+                true, TENANT_ID)).thenReturn(false);
         Mockito.when(endpointRegistryDAO.addEndpointRegistry(endpointRegistryInfo, TENANT_ID))
                 .thenReturn(endpointRegistryInfo.getUuid());
 
@@ -91,8 +94,8 @@ public class EndpointRegistryImplTest {
     public void addEndpointRegistry_existingEntryName() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
 
-        Mockito.when(endpointRegistryDAO.isEndpointRegistryNameExists(endpointRegistryInfo.getName(), TENANT_ID))
-                .thenReturn(true);
+        Mockito.when(endpointRegistryDAO.isEndpointRegistryNameExists(
+                endpointRegistryInfo.getName(), false, TENANT_ID)).thenReturn(true);
 
         endpointRegistry.addEndpointRegistry(endpointRegistryInfo);
     }
@@ -111,8 +114,8 @@ public class EndpointRegistryImplTest {
     public void updateEndpointRegistry_existingEntryName() throws EndpointRegistryException {
         EndpointRegistryInfo endpointRegistryInfo = createRegistryWithDefaultParams();
 
-        Mockito.when(endpointRegistryDAO.isEndpointRegistryNameExists(endpointRegistryInfo.getName(), TENANT_ID))
-                .thenReturn(true);
+        Mockito.when(endpointRegistryDAO.isEndpointRegistryNameExists(
+                endpointRegistryInfo.getDisplayName(), true, TENANT_ID)).thenReturn(true);
 
         endpointRegistry.updateEndpointRegistry(endpointRegistryInfo.getUuid(), "Endpoint Registry 2",
                 "wso2", endpointRegistryInfo);
@@ -174,25 +177,25 @@ public class EndpointRegistryImplTest {
         List<EndpointRegistryEntry> endpointRegistryEntryList = new ArrayList<>();
         String registryUUID = "reg1";
 
-        EndpointRegistryEntry endpointRegistryEntry1 = createRegistryEntry("abc1", "Entry 1", "v1",
-                "A Registry Entry that exposes a REST endpoint", "https://xyz.com", "REST", "UTILITY",
+        EndpointRegistryEntry endpointRegistryEntry1 = createRegistryEntry("abc1", "Entry 1",
+                "Entry 1", "v1",
+                "A Registry Entry that exposes a REST endpoint", "https://xyz.com",
+                "REST", "UTILITY",
                 "https://petstore.swagger.io/v2/swagger.json", "OAS", null);
         endpointRegistryEntryList.add(endpointRegistryEntry1);
 
-        EndpointRegistryEntry endpointRegistryEntry2 = createRegistryEntry("abc2", "Entry 2", "v1",
-                "A Registry Entry that exposes a REST endpoint", "https://xyz2.com", "REST", "DOMAIN",
+        EndpointRegistryEntry endpointRegistryEntry2 = createRegistryEntry("abc2", "Entry 2",
+                "Entry 2", "v1",
+                "A Registry Entry that exposes a REST endpoint", "https://xyz2.com",
+                "REST", "DOMAIN",
                 "https://petstore.swagger.io/v2/swagger.json", "WSDL1", null);
         endpointRegistryEntryList.add(endpointRegistryEntry2);
 
-        Mockito.when(endpointRegistryDAO.getEndpointRegistryEntries(EndpointRegistryConstants.COLUMN_ENTRY_NAME,
-                "ASC", 25, 0, registryUUID, "REST", "OAS",
-                "Entry 2", "UTILITY", "v1", false))
+        Mockito.when(endpointRegistryDAO.getEndpointRegistryEntries(createDefaultEntryFilterParams(), registryUUID))
                 .thenReturn(endpointRegistryEntryList);
 
         List<EndpointRegistryEntry> endpointRegistryEntryListResponse =
-                endpointRegistry.getEndpointRegistryEntries(EndpointRegistryConstants.COLUMN_ENTRY_NAME,
-                        "ASC", 25, 0, registryUUID, "REST", "OAS",
-                        "Entry 2", "UTILITY", "v1", false);
+                endpointRegistry.getEndpointRegistryEntries(createDefaultEntryFilterParams(), registryUUID);
 
         for (int i = 0; i < endpointRegistryEntryListResponse.size(); i++) {
             compareRegistryEntryInfo(endpointRegistryEntryList.get(i), endpointRegistryEntryListResponse.get(i));
@@ -216,17 +219,18 @@ public class EndpointRegistryImplTest {
         EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
 
         EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
-                "Entry 2", "v1", "A Registry Entry that exposes a REST endpoint", "https://xyz2.com",
+                "Entry 1", "Entry 2", "v1",
+                "A Registry Entry that exposes a REST endpoint", "https://xyz2.com",
                 "REST",
                 "DOMAIN", "https://petstore.swagger.io/v2/swagger.json",
                 "WSDL1", null);
 
         Mockito.when(endpointRegistryDAO.getEndpointRegistryEntryByUUID(endpointRegistryEntryOld.getEntryId()))
                 .thenReturn(endpointRegistryEntryOld);
-        Mockito.when(endpointRegistryDAO.isRegistryEntryNameExists(endpointRegistryEntryNew))
+        Mockito.when(endpointRegistryDAO.isRegistryEntryNameExists(endpointRegistryEntryNew, false))
                 .thenReturn(false);
 
-        endpointRegistry.updateEndpointRegistryEntry(endpointRegistryEntryOld.getName(), endpointRegistryEntryNew);
+        endpointRegistry.updateEndpointRegistryEntry(endpointRegistryEntryOld.getEntryName(), endpointRegistryEntryNew);
         Mockito.verify(endpointRegistryDAO).updateEndpointRegistryEntry(endpointRegistryEntryNew, ADMIN_USERNAME);
     }
 
@@ -235,17 +239,18 @@ public class EndpointRegistryImplTest {
         EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
 
         EndpointRegistryEntry endpointRegistryEntryNew = createRegistryEntry(endpointRegistryEntryOld.getEntryId(),
-                "Entry 2", "v1", "A Registry Entry that exposes a REST endpoint", "https://xyz2.com",
+                "Entry 1", "Entry 2", "v1",
+                "A Registry Entry that exposes a REST endpoint", "https://xyz2.com",
                 "REST",
                 "DOMAIN", "https://petstore.swagger.io/v2/swagger.json",
                 "WSDL1", null);
 
         Mockito.when(endpointRegistryDAO.getEndpointRegistryEntryByUUID(endpointRegistryEntryOld.getEntryId()))
                 .thenReturn(endpointRegistryEntryOld);
-        Mockito.when(endpointRegistryDAO.isRegistryEntryNameExists(endpointRegistryEntryNew))
+        Mockito.when(endpointRegistryDAO.isRegistryEntryNameExists(endpointRegistryEntryNew, true))
                 .thenReturn(true);
 
-        endpointRegistry.updateEndpointRegistryEntry(endpointRegistryEntryOld.getName(), endpointRegistryEntryNew);
+        endpointRegistry.updateEndpointRegistryEntry(endpointRegistryEntryOld.getEntryName(), endpointRegistryEntryNew);
     }
 
     @Test
@@ -273,7 +278,7 @@ public class EndpointRegistryImplTest {
         Assert.assertEquals(NEW_ENTRY_ID, newEntryId);
     }
 
-    @Test (expected = EndpointRegistryResourceAlreadyExistsException.class)
+    @Test(expected = EndpointRegistryResourceAlreadyExistsException.class)
     public void createNewEntryVersion_withExistingVersion() throws EndpointRegistryException {
         final String NEW_VERSION = "v2";
         EndpointRegistryEntry endpointRegistryEntryOld = createRegistryEntryWithDefaultParams();
@@ -296,7 +301,7 @@ public class EndpointRegistryImplTest {
 
     private void compareRegistryEntryInfo(EndpointRegistryEntry expected, EndpointRegistryEntry actual) {
         Assert.assertEquals(expected.getEntryId(), actual.getEntryId());
-        Assert.assertEquals(expected.getName(), actual.getName());
+        Assert.assertEquals(expected.getEntryName(), actual.getEntryName());
         Assert.assertEquals(expected.getVersion(), actual.getVersion());
         Assert.assertEquals(expected.getDescription(), actual.getDescription());
         Assert.assertEquals(expected.getRegistryId(), actual.getRegistryId());
@@ -320,12 +325,13 @@ public class EndpointRegistryImplTest {
         return endpointRegistryInfo;
     }
 
-    private EndpointRegistryInfo createRegistry(String uuid, int id, String name, String mode,String type,
+    private EndpointRegistryInfo createRegistry(String uuid, int id, String name, String displayName, String type,
                                                 String owner) {
         EndpointRegistryInfo endpointRegistryInfo = new EndpointRegistryInfo();
         endpointRegistryInfo.setUuid(uuid);
         endpointRegistryInfo.setRegistryId(id);
         endpointRegistryInfo.setName(name);
+        endpointRegistryInfo.setDisplayName(displayName);
         endpointRegistryInfo.setType(type);
         endpointRegistryInfo.setOwner(owner);
 
@@ -335,7 +341,8 @@ public class EndpointRegistryImplTest {
     private EndpointRegistryEntry createRegistryEntryWithDefaultParams() {
         EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
         endpointRegistryEntry.setEntryId("entry1");
-        endpointRegistryEntry.setName("Entry Name 1");
+        endpointRegistryEntry.setEntryName("Entry Name 1");
+        endpointRegistryEntry.setDisplayName("Entry Name 1");
         endpointRegistryEntry.setVersion("v1");
         endpointRegistryEntry.setDescription("A Registry Entry that exposes a REST endpoint");
         endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
@@ -347,13 +354,15 @@ public class EndpointRegistryImplTest {
         return endpointRegistryEntry;
     }
 
-    private EndpointRegistryEntry createRegistryEntry(String id, String name, String version, String description,
+    private EndpointRegistryEntry createRegistryEntry(String id, String name, String displayName,
+                                                      String version, String description,
                                                       String serviceUrl, String serviceType, String serviceCategory,
                                                       String definitionUrl, String definitionType,
                                                       InputStream definitionFile) {
         EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
         endpointRegistryEntry.setEntryId(id);
-        endpointRegistryEntry.setName(name);
+        endpointRegistryEntry.setEntryName(name);
+        endpointRegistryEntry.setDisplayName(displayName);
         endpointRegistryEntry.setVersion(version);
         endpointRegistryEntry.setDescription(description);
         endpointRegistryEntry.setProductionServiceURL(serviceUrl);
@@ -364,5 +373,21 @@ public class EndpointRegistryImplTest {
         endpointRegistryEntry.setEndpointDefinition(definitionFile);
 
         return endpointRegistryEntry;
+    }
+
+    private EndpointRegistryEntryFilterParams createDefaultEntryFilterParams() {
+        EndpointRegistryEntryFilterParams filterParams = new EndpointRegistryEntryFilterParams();
+        filterParams.setEntryName("Entry 1");
+        filterParams.setDisplayName("Entry 1");
+        filterParams.setVersion("v1");
+        filterParams.setServiceType("REST");
+        filterParams.setServiceCategory("UTILITY");
+        filterParams.setDefinitionType("OAS");
+        filterParams.setSortBy(EndpointRegistryConstants.COLUMN_ENTRY_NAME);
+        filterParams.setSortOrder("ASC");
+        filterParams.setLimit(25);
+        filterParams.setOffset(0);
+
+        return filterParams;
     }
 }

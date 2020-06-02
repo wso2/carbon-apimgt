@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntryFilterParams;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.SQLConstants;
 import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntry;
@@ -83,13 +84,14 @@ public class EndpointRegistryDAO {
             connection.setAutoCommit(false);
             ps.setString(1, uuid);
             ps.setString(2, endpointRegistry.getName());
-            ps.setString(3, endpointRegistry.getType());
-            ps.setInt(4, tenantID);
-            ps.setString(5, endpointRegistry.getOwner());
+            ps.setString(3, endpointRegistry.getDisplayName());
+            ps.setString(4, endpointRegistry.getType());
+            ps.setInt(5, tenantID);
             ps.setString(6, endpointRegistry.getOwner());
+            ps.setString(7, endpointRegistry.getOwner());
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            ps.setTimestamp(7, timestamp);
             ps.setTimestamp(8, timestamp);
+            ps.setTimestamp(9, timestamp);
 
             ps.executeUpdate();
             connection.commit();
@@ -114,7 +116,7 @@ public class EndpointRegistryDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
-            ps.setString(1, endpointRegistry.getName());
+            ps.setString(1, endpointRegistry.getDisplayName());
             ps.setString(2, endpointRegistry.getType());
             ps.setString(3, username);
             ps.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
@@ -149,6 +151,7 @@ public class EndpointRegistryDAO {
                     EndpointRegistryInfo endpointRegistry = new EndpointRegistryInfo();
                     endpointRegistry.setUuid(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
                     endpointRegistry.setName(rs.getString(EndpointRegistryConstants.COLUMN_REG_NAME));
+                    endpointRegistry.setDisplayName(rs.getString(EndpointRegistryConstants.COLUMN_DISPLAY_NAME));
                     endpointRegistry.setType(rs.getString(EndpointRegistryConstants.COLUMN_REG_TYPE));
                     endpointRegistry.setRegistryId(rs.getInt(EndpointRegistryConstants.COLUMN_ID));
                     endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
@@ -197,14 +200,21 @@ public class EndpointRegistryDAO {
     /**
      * Checks whether the given endpoint registry name is already available under given tenant domain
      *
-     * @param registryName
-     * @param tenantID
+     * @param registryName  Registry name
+     * @param isDisplayName Whether the display name or not
+     * @param tenantID      Tenant Identifier
      * @return boolean
      * @throws EndpointRegistryException
      */
-    public boolean isEndpointRegistryNameExists(String registryName, int tenantID) throws EndpointRegistryException {
+    public boolean isEndpointRegistryNameExists(String registryName, boolean isDisplayName, int tenantID)
+            throws EndpointRegistryException {
 
-        String sql = SQLConstants.IS_ENDPOINT_REGISTRY_NAME_EXISTS;
+        String sql;
+        if (isDisplayName) {
+            sql = SQLConstants.IS_ENDPOINT_REGISTRY_DISPLAY_NAME_EXISTS;
+        } else {
+            sql = SQLConstants.IS_ENDPOINT_REGISTRY_NAME_EXISTS;
+        }
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, registryName);
@@ -273,6 +283,7 @@ public class EndpointRegistryDAO {
                     EndpointRegistryInfo endpointRegistry = new EndpointRegistryInfo();
                     endpointRegistry.setUuid(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
                     endpointRegistry.setName(rs.getString(EndpointRegistryConstants.COLUMN_REG_NAME));
+                    endpointRegistry.setDisplayName(rs.getString(EndpointRegistryConstants.COLUMN_DISPLAY_NAME));
                     endpointRegistry.setType(rs.getString(EndpointRegistryConstants.COLUMN_REG_TYPE));
                     endpointRegistry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
                     endpointRegistry.setUpdatedBy(rs.getString(EndpointRegistryConstants.COLUMN_UPDATED_BY));
@@ -313,7 +324,8 @@ public class EndpointRegistryDAO {
                 if (rs.next()) {
                     EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
                     endpointRegistryEntry.setEntryId(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
-                    endpointRegistryEntry.setName(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_NAME));
+                    endpointRegistryEntry.setEntryName(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_NAME));
+                    endpointRegistryEntry.setDisplayName(rs.getString(EndpointRegistryConstants.COLUMN_DISPLAY_NAME));
                     endpointRegistryEntry.setVersion(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_VERSION));
                     endpointRegistryEntry.setDescription(rs.getString(EndpointRegistryConstants.COLUMN_DESCRIPTION));
                     endpointRegistryEntry.setDefinitionType(
@@ -353,67 +365,67 @@ public class EndpointRegistryDAO {
     }
 
     /**
-     * Returns all entries belong to a given endpoint registry
-     *
-     * @param sortBy         Name of the sorting field
-     * @param sortOrder      Order of sorting (asc or desc)
-     * @param limit          Limit
-     * @param offset         Offset
-     * @param registryId     UUID of the endpoint registry
-     * @param version        The version of registry entry
-     * @param exactNameMatch Whether to perform exact search on name
-     * @return A list of EndpointRegistryEntry objects
-     * @throws EndpointRegistryException if failed to get entries of an Endpoint Registry
+     * {@inheritDoc}
      */
-    public List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit,
-                                                                  int offset, String registryId, String serviceType,
-                                                                  String definitionType, String entryName,
-                                                                  String serviceCategory, String version,
-                                                                  boolean exactNameMatch)
-            throws EndpointRegistryException {
+    public List<EndpointRegistryEntry> getEndpointRegistryEntries(EndpointRegistryEntryFilterParams filterParams,
+                                                                  String registryId) throws EndpointRegistryException {
 
         List<EndpointRegistryEntry> endpointRegistryEntryList = new ArrayList<>();
         String query;
-        boolean versionMatch = !StringUtils.isEmpty(version);
+        boolean versionMatch = StringUtils.isNotEmpty(filterParams.getVersion());
+        boolean entryNameMatch = StringUtils.isNotEmpty(filterParams.getEntryName());
         try {
-            if (exactNameMatch && versionMatch) {
+            if (versionMatch && entryNameMatch) {
                 query = SQLConstantManagerFactory
-                        .getSQlString("GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_EXACT_NAME_WITH_VERSION");
-            } else if (exactNameMatch && !versionMatch) {
-                query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_EXACT_NAME");
-            } else if (!exactNameMatch && versionMatch) {
+                        .getSQlString("GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_VERSION_AND_NAME");
+            } else if (versionMatch) {
                 query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_VERSION");
+            } else if (entryNameMatch) {
+                query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_NAME");
             } else {
                 query = SQLConstantManagerFactory.getSQlString("GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY");
             }
-            query = query.replace("$1", sortBy);
-            query = query.replace("$2", sortOrder);
+            query = query.replace("$1", filterParams.getSortBy());
+            query = query.replace("$2", filterParams.getSortOrder());
 
             try (Connection connection = APIMgtDBUtil.getConnection();
                  PreparedStatement ps = connection.prepareStatement(query)) {
                 ps.setString(1, registryId);
-                if (exactNameMatch) {
-                    ps.setString(2, entryName);
+                String displayName = filterParams.getDisplayName();
+                if (StringUtils.isNotEmpty(filterParams.getDisplayName())) {
+                    displayName = displayName.replaceAll("\\*", "%");
                 } else {
-                    ps.setString(2, "%" + entryName + "%");
+                    displayName = "%" + displayName + "%";
                 }
-                ps.setString(3, "%" + definitionType + "%");
-                ps.setString(4, "%" + serviceType + "%");
-                ps.setString(5, "%" + serviceCategory + "%");
-                if (versionMatch) {
-                    ps.setString(6, version);
-                    ps.setInt(7, offset);
-                    ps.setInt(8, limit);
+                ps.setString(2, displayName);
+                ps.setString(3, "%" + filterParams.getDefinitionType() + "%");
+                ps.setString(4, "%" + filterParams.getServiceType() + "%");
+                ps.setString(5, "%" + filterParams.getServiceCategory() + "%");
+                if (versionMatch && entryNameMatch) {
+                    ps.setString(6, filterParams.getVersion());
+                    ps.setString(7, filterParams.getEntryName());
+                    ps.setInt(8, filterParams.getOffset());
+                    ps.setInt(9, filterParams.getLimit());
+                } else if (versionMatch) {
+                    ps.setString(6, filterParams.getVersion());
+                    ps.setInt(7, filterParams.getOffset());
+                    ps.setInt(8, filterParams.getLimit());
+                }  else if (entryNameMatch) {
+                    ps.setString(6, filterParams.getEntryName());
+                    ps.setInt(7, filterParams.getOffset());
+                    ps.setInt(8, filterParams.getLimit());
                 } else {
-                    ps.setInt(6, offset);
-                    ps.setInt(7, limit);
+                    ps.setInt(6, filterParams.getOffset());
+                    ps.setInt(7, filterParams.getLimit());
                 }
                 ps.executeQuery();
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         EndpointRegistryEntry endpointRegistryEntry = new EndpointRegistryEntry();
                         endpointRegistryEntry.setEntryId(rs.getString(EndpointRegistryConstants.COLUMN_UUID));
-                        endpointRegistryEntry.setName(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_NAME));
+                        endpointRegistryEntry.setEntryName(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_NAME));
+                        endpointRegistryEntry.setDisplayName(
+                                rs.getString(EndpointRegistryConstants.COLUMN_DISPLAY_NAME));
                         endpointRegistryEntry.setVersion(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_VERSION));
                         endpointRegistryEntry.setDescription(rs.getString(EndpointRegistryConstants.
                                 COLUMN_DESCRIPTION));
@@ -466,26 +478,27 @@ public class EndpointRegistryDAO {
              PreparedStatement ps = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
             ps.setString(1, uuid);
-            ps.setString(2, registryEntry.getName());
-            ps.setString(3, registryEntry.getVersion());
-            ps.setString(4, registryEntry.getProductionServiceURL());
-            ps.setString(5, registryEntry.getSandboxServiceUrl());
-            ps.setString(6, registryEntry.getDefinitionType());
-            ps.setString(7, registryEntry.getDefinitionURL());
-            ps.setString(8, registryEntry.getDescription());
-            ps.setString(9, registryEntry.getServiceType());
-            ps.setString(10, registryEntry.getServiceCategory());
-            ps.setBlob(11, registryEntry.getEndpointDefinition());
-            ps.setInt(12, registryEntry.getRegistryId());
-            ps.setString(13, username);
+            ps.setString(2, registryEntry.getEntryName());
+            ps.setString(3, registryEntry.getDisplayName());
+            ps.setString(4, registryEntry.getVersion());
+            ps.setString(5, registryEntry.getProductionServiceURL());
+            ps.setString(6, registryEntry.getSandboxServiceUrl());
+            ps.setString(7, registryEntry.getDefinitionType());
+            ps.setString(8, registryEntry.getDefinitionURL());
+            ps.setString(9, registryEntry.getDescription());
+            ps.setString(10, registryEntry.getServiceType());
+            ps.setString(11, registryEntry.getServiceCategory());
+            ps.setBlob(12, registryEntry.getEndpointDefinition());
+            ps.setInt(13, registryEntry.getRegistryId());
             ps.setString(14, username);
+            ps.setString(15, username);
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            ps.setTimestamp(15, timestamp);
             ps.setTimestamp(16, timestamp);
+            ps.setTimestamp(17, timestamp);
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
-            handleException("Error while adding new endpoint registry entry: " + registryEntry.getName(), e);
+            handleException("Error while adding new endpoint registry entry: " + registryEntry.getEntryName(), e);
         }
         return uuid;
     }
@@ -504,7 +517,7 @@ public class EndpointRegistryDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
-            ps.setString(1, registryEntry.getName());
+            ps.setString(1, registryEntry.getDisplayName());
             ps.setString(2, registryEntry.getVersion());
             ps.setString(3, registryEntry.getProductionServiceURL());
             ps.setString(4, registryEntry.getSandboxServiceUrl());
@@ -549,15 +562,26 @@ public class EndpointRegistryDAO {
     /**
      * Checks whether the given endpoint registry entry name is already available under given registry
      *
-     * @param registryEntry
+     * @param registryEntry Endpoint Registry Entry
+     * @param isDisplayName Whether display name or not
      * @return boolean
      */
-    public boolean isRegistryEntryNameExists(EndpointRegistryEntry registryEntry) throws EndpointRegistryException {
+    public boolean isRegistryEntryNameExists(EndpointRegistryEntry registryEntry, boolean isDisplayName)
+            throws EndpointRegistryException {
 
-        String sql = SQLConstants.IS_ENDPOINT_REGISTRY_ENTRY_NAME_EXISTS;
+        String sql;
+        if (isDisplayName) {
+            sql = SQLConstants.IS_ENDPOINT_REGISTRY_ENTRY_DISPLAY_NAME_EXISTS;
+        } else {
+            sql = SQLConstants.IS_ENDPOINT_REGISTRY_ENTRY_NAME_EXISTS;
+        }
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, registryEntry.getName());
+            if (isDisplayName) {
+                statement.setString(1, registryEntry.getDisplayName());
+            } else {
+                statement.setString(1, registryEntry.getEntryName());
+            }
             statement.setInt(2, registryEntry.getRegistryId());
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
@@ -567,7 +591,7 @@ public class EndpointRegistryDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to check the existence of Registry Entry: " + registryEntry.getName(), e);
+            handleException("Failed to check the existence of Registry Entry: " + registryEntry.getEntryName(), e);
         }
         return false;
     }
@@ -584,7 +608,7 @@ public class EndpointRegistryDAO {
         String sql = SQLConstants.IS_ENDPOINT_REGISTRY_ENTRY_NAME_AND_VERSION_EXISTS;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, registryEntry.getName());
+            statement.setString(1, registryEntry.getEntryName());
             statement.setString(2, registryEntry.getVersion());
             statement.setInt(3, registryEntry.getRegistryId());
             ResultSet rs = statement.executeQuery();
@@ -595,7 +619,7 @@ public class EndpointRegistryDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to check the existence of Registry Entry: " + registryEntry.getName(), e);
+            handleException("Failed to check the existence of Registry Entry: " + registryEntry.getEntryName(), e);
         }
         return false;
     }

@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.rest.api.endpoint.registry.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntryFilterParams;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryInfo;
@@ -42,6 +43,7 @@ public class EndpointRegistryMappingUtils {
     public static EndpointRegistryInfo fromDTOtoEndpointRegistry(RegistryDTO registryDTO, String owner) {
         EndpointRegistryInfo registry = new EndpointRegistryInfo();
         registry.setName(registryDTO.getName());
+        registry.setDisplayName(registryDTO.getDisplayName());
         registry.setOwner(owner);
         if (registryDTO.getType() != null) {
             registry.setType(registryDTO.getType().toString());
@@ -61,6 +63,11 @@ public class EndpointRegistryMappingUtils {
         RegistryDTO registryDTO = new RegistryDTO();
         registryDTO.setId(registry.getUuid());
         registryDTO.setName(registry.getName());
+        if (StringUtils.isEmpty(registry.getDisplayName())) {
+            registryDTO.setDisplayName(registry.getName());
+        } else {
+            registryDTO.setDisplayName(registry.getDisplayName());
+        }
         registryDTO.setType(RegistryDTO.TypeEnum.fromValue(registry.getType()));
         registryDTO.setOwner(registry.getOwner());
         return registryDTO;
@@ -75,7 +82,8 @@ public class EndpointRegistryMappingUtils {
     public static RegistryEntryDTO fromRegistryEntryToDTO(EndpointRegistryEntry registryEntry) {
         RegistryEntryDTO registryEntryDTO = new RegistryEntryDTO();
         registryEntryDTO.setId(registryEntry.getEntryId());
-        registryEntryDTO.setEntryName(registryEntry.getName());
+        registryEntryDTO.setEntryName(registryEntry.getEntryName());
+        registryEntryDTO.setDisplayName(registryEntry.getDisplayName());
         registryEntryDTO.setVersion(registryEntry.getVersion());
         registryEntryDTO.setDescription(registryEntry.getDescription());
         registryEntryDTO.setDefinitionType(
@@ -93,7 +101,7 @@ public class EndpointRegistryMappingUtils {
      * Converts a RegistryEntryDTO object with endpointDefinition file into EndpointRegistryEntry object
      *
      * @param registryEntryDTO   RegistryEntryDTO object
-     * @param entryUUID   Registry Entry Identifier(UUID)
+     * @param entryUUID          Registry Entry Identifier(UUID)
      * @param endpointDefinition endpointDefinition file
      * @return EndpointRegistryEntry corresponds to RegistryEntryDTO object
      */
@@ -101,7 +109,12 @@ public class EndpointRegistryMappingUtils {
                                                                InputStream endpointDefinition, int registryId) {
         EndpointRegistryEntry registryEntry = new EndpointRegistryEntry();
         registryEntry.setEntryId(entryUUID);
-        registryEntry.setName(registryEntryDTO.getEntryName());
+        registryEntry.setEntryName(registryEntryDTO.getEntryName());
+        if (StringUtils.isEmpty(registryEntryDTO.getDisplayName())) {
+            registryEntry.setDisplayName(registryEntryDTO.getEntryName());
+        } else {
+            registryEntry.setDisplayName(registryEntryDTO.getDisplayName());
+        }
         registryEntry.setVersion(registryEntryDTO.getVersion());
         registryEntry.setDescription(registryEntryDTO.getDescription());
         if (registryEntryDTO.getDefinitionType() != null) {
@@ -138,4 +151,52 @@ public class EndpointRegistryMappingUtils {
         }
         return updatedSortBy;
     }
+
+    /**
+     * Creates a EndpointRegistryEntryFilterParams object
+     *
+     * @param name            Entry name
+     * @param displayName     Entry display name
+     * @param version         Entry version
+     * @param serviceType     Service Type
+     * @param serviceCategory Service category
+     * @param definitionType  Definition type
+     * @param sortEntryBy     Sort by field name
+     * @param sortEntryOrder  Sorting order
+     * @param limit           Pagination limit
+     * @param offset          Pagination offset
+     * @return EndpointRegistryEntry corresponds to RegistryEntryDTO object
+     */
+    public static EndpointRegistryEntryFilterParams getRegistryEntryFilterParams(
+            String name, String displayName, String version, RegistriesApi.ServiceTypeEnum serviceType,
+            RegistriesApi.ServiceCategoryEnum serviceCategory, RegistriesApi.DefinitionTypeEnum definitionType,
+            RegistriesApi.SortEntryByEnum sortEntryBy, RegistriesApi.SortEntryOrderEnum sortEntryOrder,
+            Integer limit, Integer offset) {
+
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        String sortOrder = sortEntryOrder != null ? sortEntryOrder.toString() : RestApiConstants.DEFAULT_SORT_ORDER;
+        String sortBy = EndpointRegistryMappingUtils.getRegistryEntriesSortByField(sortEntryBy);
+        name = name == null ? StringUtils.EMPTY : name;
+        displayName = displayName == null ? StringUtils.EMPTY : displayName;
+        version = version == null ? StringUtils.EMPTY : version;
+        String serviceTypeStr = serviceType == null ? StringUtils.EMPTY : serviceType.toString();
+        String definitionTypeStr = definitionType == null ? StringUtils.EMPTY : definitionType.toString();
+        String serviceCategoryStr = serviceCategory == null ? StringUtils.EMPTY : serviceCategory.toString();
+
+        EndpointRegistryEntryFilterParams filterParams = new EndpointRegistryEntryFilterParams();
+        filterParams.setEntryName(name);
+        filterParams.setDisplayName(displayName);
+        filterParams.setVersion(version);
+        filterParams.setServiceType(serviceTypeStr);
+        filterParams.setServiceCategory(serviceCategoryStr);
+        filterParams.setDefinitionType(definitionTypeStr);
+        filterParams.setSortBy(sortBy);
+        filterParams.setSortOrder(sortOrder);
+        filterParams.setLimit(limit);
+        filterParams.setOffset(offset);
+
+        return filterParams;
+    }
+
 }

@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.*;
 
 public class RegistryDTO   {
     private String name = null;
+    private String displayName = null;
     private String id = null;
             @XmlType(name="TypeEnum")
             @XmlEnum(String.class)
@@ -56,7 +57,7 @@ public class RegistryDTO   {
 
     
     
-    @Schema(example = "Dev Registry", required = true, description = "")
+    @Schema(required = true, description = "")
     @JsonProperty("name")
             @NotNull
       public String getName() {
@@ -64,6 +65,24 @@ public class RegistryDTO   {
     }
     public void setName(String name) {
     this.name = name;
+    }
+
+    /**
+    **/
+    public RegistryDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+    }
+
+    
+    
+    @Schema(example = "Dev Registry", description = "")
+    @JsonProperty("displayName")
+          public String getDisplayName() {
+    return displayName;
+    }
+    public void setDisplayName(String displayName) {
+    this.displayName = displayName;
     }
 
     /**
@@ -131,6 +150,7 @@ return false;
 }
 RegistryDTO registry = (RegistryDTO) o;
     return Objects.equals(name, registry.name) &&
+    Objects.equals(displayName, registry.displayName) &&
     Objects.equals(id, registry.id) &&
     Objects.equals(type, registry.type) &&
     Objects.equals(owner, registry.owner);
@@ -138,7 +158,7 @@ RegistryDTO registry = (RegistryDTO) o;
 
 @Override
 public int hashCode() {
-return Objects.hash(name, id, type, owner);
+return Objects.hash(name, displayName, id, type, owner);
 }
 
 @Override
@@ -147,6 +167,7 @@ StringBuilder sb = new StringBuilder();
 sb.append("class RegistryDTO {\n");
 
 sb.append("    name: ").append(toIndentedString(name)).append("\n");
+sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
 sb.append("    id: ").append(toIndentedString(id)).append("\n");
 sb.append("    type: ").append(toIndentedString(type)).append("\n");
 sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
