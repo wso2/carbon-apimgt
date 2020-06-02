@@ -313,19 +313,19 @@ ExceptionCodes implements ErrorHandler {
     INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
     REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +
             "required configuration"),
-    KEY_MANAGER_ALREADY_EXIST(901402, "Key Manager Already Exist", 409, "Key Manager Already Exist"),
-    KEY_MANAGER_NOT_FOUND(901403, "Key Manager Not found", 400, "Key Manager not found"), KEY_MANAGER_NAME_EMPTY(901404,
-            "Key Manager name cannot be empty", 400,
-            "Key Manager name cannot be empty"),
-    KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION(901404, "Key Manager Didn't support to Generate Client Application", 400,
-            "Key Manager Didn't support to Generate Client Application"),
-    KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION(901405, "Key Manager didn't support to generate Token ", 400,
-            "Key Manager didn't support to generate Token "),
-    KEY_MANAGER_NOT_ENABLED(901406, "Key Manager not enabled in the system", 400,
-            "Key Manager not enabled in the system"),
-    KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901407, "Required Application Properties missing", 400,
-            "Required Application Properties missing"),
-    KEY_MAPPING_ALREADY_EXIST(901408, "Application Already Registered", 409, "Application Already Registered");
+    KEY_MANAGER_ALREADY_EXIST(901402, "Key Manager Already Exists", 409, "Key Manager Already Exists"),
+    KEY_MANAGER_NOT_FOUND(901403, "Key Manager not found", 400, "Key Manager not found"),
+    KEY_MANAGER_NAME_EMPTY(901404,
+            "Key Manager name cannot be empty", 400,"Key Manager name cannot be empty"),
+    KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION(901404, "Key Manager doesn't support Oauth application generation", 400,
+            "Key Manager doesn't support to Generate Client Application"),
+    KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION(901405, "Key Manager doesn't support token generation", 400,
+            "Key Manager doesn't support token generation"),
+    KEY_MANAGER_NOT_ENABLED(901406, "Key Manager is not enabled in the system", 400,
+            "Key Manager is not enabled in the system"),
+    KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901407, "Required application properties are missing", 400,
+            "Required application properties are missing"),
+    KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered");
 
 
     private final long errorCode;
@@ -382,7 +382,7 @@ ExceptionCodes implements ErrorHandler {
         return this.errorDescription;
     }
 
-    public boolean isStackTrace() {
+    public boolean printStackTrace() {
 
         return stackTrace;
     }
@@ -414,6 +414,6 @@ ExceptionCodes implements ErrorHandler {
             }
         }
         return new ErrorItem(message, description, errorHandler.getErrorCode(), errorHandler.getHttpStatusCode(),
-                errorHandler.isStackTrace());
+                errorHandler.printStackTrace());
     }
 }

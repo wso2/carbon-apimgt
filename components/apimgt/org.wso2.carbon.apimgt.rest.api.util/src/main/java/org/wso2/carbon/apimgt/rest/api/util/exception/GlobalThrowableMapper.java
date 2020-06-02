@@ -165,7 +165,7 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
 
             if (selectedErrorHandler != null) {
                 // logs the error as the error may be not logged by the origin
-                if (selectedErrorHandler.isStackTrace()) {
+                if (selectedErrorHandler.printStackTrace()) {
                     log.error("A defined exception has been captured and mapped to an HTTP response " +
                             "by the global exception mapper ", e);
                 } else {
