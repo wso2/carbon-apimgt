@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-06-02T16:23:42.619+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-06-02T16:31:35.177+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -318,7 +318,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     }    public enum SortEntryOrderEnum {
     asc,desc;
     }    @GET
-    @Path("/{registryId}/entries/{entryId}/definition-file")
+    @Path("/{registryId}/entries/{entryId}/definition")
     
     @Produces({ "application/octet-stream", "application/json" })
     @Operation(summary = "Retrieve the definition file of a specific Entry in a Registry", description = "Using this operation, you can retrieve the definition file of a specific entry in a Registry using the EntryId and RegistryId. ",

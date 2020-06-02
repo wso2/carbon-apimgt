@@ -19,6 +19,6 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi.*;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-06-02T16:23:42.619+05:30[Asia/Colombo]")public interface SettingsApiService {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-06-02T16:31:35.177+05:30[Asia/Colombo]")public interface SettingsApiService {
         public Response getSettings(MessageContext messageContext) throws EndpointRegistryException;
 }

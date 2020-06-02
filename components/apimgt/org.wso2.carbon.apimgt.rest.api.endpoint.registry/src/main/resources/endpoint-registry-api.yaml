@@ -567,7 +567,7 @@ paths:
   #-----------------------------------------------------
   # Retrieve definition file of an entry in Registry
   #-----------------------------------------------------
-  /registries/{registryId}/entries/{entryId}/definition-file:
+  /registries/{registryId}/entries/{entryId}/definition:
     get:
       summary: Retrieve the definition file of a specific Entry in a Registry
       description: |

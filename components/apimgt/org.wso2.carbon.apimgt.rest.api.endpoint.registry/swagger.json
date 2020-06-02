@@ -656,7 +656,7 @@
         } ]
       }
     },
-    "/registries/{registryId}/entries/{entryId}/definition-file" : {
+    "/registries/{registryId}/entries/{entryId}/definition" : {
       "get" : {
         "tags" : [ "Registry Entries" ],
         "summary" : "Retrieve the definition file of a specific Entry in a Registry",
