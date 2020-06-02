@@ -348,7 +348,15 @@ public interface KeyManager {
         // implementation.
     }
 
+    /**
+     * This method returns the type of key manager
+     * @return keymanager type
+     */
     public String getType();
 
+    /**
+     *  This method used to set the tenant Domain of KeyManager instance used
+     * @param tenantDomain tenantDomain
+     */
     public void setTenantDomain(String tenantDomain);
 }

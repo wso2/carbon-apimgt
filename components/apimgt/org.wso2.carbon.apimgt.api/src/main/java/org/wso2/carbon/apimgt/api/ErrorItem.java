@@ -86,7 +86,7 @@ public class ErrorItem implements ErrorHandler {
     }
 
     @Override
-    public boolean isStackTrace() {
+    public boolean printStackTrace() {
         return stackTrace;
     }
 }

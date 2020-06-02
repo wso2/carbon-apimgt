@@ -54,5 +54,5 @@ public interface ErrorHandler {
      *  Return true if stack trace to print;
      * @return
      */
-     boolean isStackTrace();
+     boolean printStackTrace();
 }
