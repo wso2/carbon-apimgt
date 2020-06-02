@@ -566,6 +566,34 @@ class API extends Resource {
             );
         });
     }
+
+     /**
+     * Retrieve tenant information of the given username
+     */
+    getTenantInformation(username) {
+        return this.client.then((client) => {
+            return client.apis['Tenants'].getTenantInfoByUsername(
+                { username: username },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Upload a Tenant Theme
+     */
+    uploadTenantTheme(file) {
+        return this.client.then(
+            client => {
+                return client.apis['default'].post_tenant_theme_import({
+                    file: file,
+                });
+            },
+            this._requestMetaData({
+                'Content-Type': 'multipart/form-data',
+            }),
+        );
+    }
 }
 
 API.CONSTS = {

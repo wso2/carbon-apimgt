@@ -9,6 +9,7 @@
   "Admin.Throttling.Blacklist.Throttling.policy.table.header.condition.type": "",
   "Admin.Throttling.Blacklist.Throttling.policy.table.header.conditional.value": "",
   "Admin.Throttling.Blacklist.policy.add.invert.condition": "",
+  "Admin.Throttling.Blacklist.policy.enable.condition": "",
   "Admin.Throttling.Custom.Throttling.policy.table.header.description": "",
   "Admin.Throttling.Custom.Throttling.policy.table.header.key.template": "",
   "Admin.Throttling.Custom.Throttling.policy.table.header.name": "",

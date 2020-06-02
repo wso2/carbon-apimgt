@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import Divider from '@material-ui/core/Divider';
@@ -27,6 +27,8 @@ import Link from '@material-ui/core/Link';
 import Collapse from '@material-ui/core/Collapse';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
+import API from 'AppData/api';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  * Render a list
@@ -39,6 +41,31 @@ function NavigatorChildren(props) {
     const handleClick = () => {
         setOpen(!open);
     };
+    const username = AuthManager.getUser().name;
+    const restApi = new API();
+    const [isTenant, setIsTenant] = useState(false);
+    let navigationChildren = navChildren;
+
+    useEffect(() => {
+        restApi
+            .getTenantInformation(username)
+            .then((result) => {
+                const { tenantDomain } = result.body;
+                if (tenantDomain === 'carbon.super') {
+                    setIsTenant(false);
+                } else {
+                    setIsTenant(true);
+                }
+            })
+            .catch((error) => {
+                throw error.response.body.description;
+            });
+    }, []);
+
+    if (!isTenant) {
+        navigationChildren = navChildren.filter((menu) => menu.id !== 'Tenant Theme');
+    }
+
     return (
         <>
             <ListItem className={classes.categoryHeader} button onClick={handleClick}>
@@ -53,7 +80,7 @@ function NavigatorChildren(props) {
 
             </ListItem>
             <Collapse in={open} timeout='auto' unmountOnExit>
-                {navChildren.map(({
+                {navigationChildren && navigationChildren.map(({
                     id: childId, icon, path, active,
                 }) => (
                     <Link component={RouterLink} to={path || '/'}>
