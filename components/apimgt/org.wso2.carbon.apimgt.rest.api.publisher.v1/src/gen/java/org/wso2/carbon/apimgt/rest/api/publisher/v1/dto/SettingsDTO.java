@@ -158,6 +158,7 @@ public class SettingsDTO   {
     return this;
   }
 
+  
   @ApiModelProperty(value = "")
   @JsonProperty("deployments")
   public List<DeploymentsDTO> getDeployments() {
