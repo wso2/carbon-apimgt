@@ -534,7 +534,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String apiProvider = api.getProvider();
             try {
                 sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(),
-                        api.getVersion(), apiProvider);
+                        api.getVersion(), apiProvider, RestApiUtil.getLoggedInUsername());
                 //Create the sdk response.
                 File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
                 return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",

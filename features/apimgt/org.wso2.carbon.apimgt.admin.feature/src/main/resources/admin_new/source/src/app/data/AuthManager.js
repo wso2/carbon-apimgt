@@ -202,7 +202,7 @@ AuthManager.CONST = {
         'apim:tier_view apim:tier_manage apim:bl_view apim:bl_manage apim:mediation_policy_view'
         + ' apim:mediation_policy_create apim:app_owner_change apim:app_import_export '
         + 'apim:api_import_export apim:label_manage apim:label_read apim:monetization_usage_publish'
-        + ' apim:api_workflow apim:bot_data apim:tenantInfo apim:admin_operations',
+        + ' apim:api_workflow apim:bot_data apim:tenantInfo apim:admin_operations apim:admin_settings',
 };
 
 export default AuthManager;

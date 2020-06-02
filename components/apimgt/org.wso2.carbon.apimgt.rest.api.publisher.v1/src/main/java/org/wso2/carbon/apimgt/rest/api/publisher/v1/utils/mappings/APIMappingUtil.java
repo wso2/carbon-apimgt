@@ -1244,6 +1244,7 @@ public class APIMappingUtil {
                         if (definedScope.getKey().equalsIgnoreCase(scopeKey)) {
                             template.setScopes(definedScope);
                             template.setScope(definedScope);
+                            break;
                         }
                     }
                 }
