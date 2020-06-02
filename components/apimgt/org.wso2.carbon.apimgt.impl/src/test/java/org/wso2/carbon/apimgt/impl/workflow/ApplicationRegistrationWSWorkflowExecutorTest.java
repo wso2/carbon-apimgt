@@ -32,9 +32,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -83,7 +83,9 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         application.setTier("Unlimited");
         PowerMockito.mockStatic(KeyManagerHolder.class);
         keyManager = Mockito.mock(KeyManager.class);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
+        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
+        Mockito.when(keyManager.getKeyManagerConfiguration()).thenReturn(keyManagerConfiguration);
+        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super", "default")).thenReturn(keyManager);
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         PowerMockito.when(keyManager.createApplication((OAuthAppRequest) Mockito.anyObject())).thenReturn
                 (oAuthApplicationInfo);
@@ -207,6 +209,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         applicationRegistrationWSWorkflowExecutor.setUsername(adminUsername);
         applicationRegistrationWSWorkflowExecutor.setPassword(adminPassword.toCharArray());
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
+        workflowDTO.setKeyManager("default");
         try {
             Assert.assertNotNull(applicationRegistrationWSWorkflowExecutor.complete(workflowDTO));
         } catch (WorkflowException e) {

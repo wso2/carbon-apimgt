@@ -26,7 +26,8 @@ import java.util.Arrays;
  * This enum class holds error codes that we need to pass to upper level. For example, to the UI.
  * You have to define your custom error codes here.
  */
-public enum ExceptionCodes implements ErrorHandler {
+public enum
+ExceptionCodes implements ErrorHandler {
 
     // API, Application related codes
     API_ALREADY_EXISTS(900300, "The API already exists.", 409, " The API already exists"),
@@ -141,7 +142,7 @@ public enum ExceptionCodes implements ErrorHandler {
     IDP_INITIALIZATION_FAILED(900605, "Identity Provider initialization failed", 500,
             "Identity provider initialization failed"),
     KEY_MANAGER_INITIALIZATION_FAILED(900606, "Key Manager initialization failed", 500,
-            "Key Manager initialization failed"),
+            "Key Manager initialization failed",true),
     ROLE_DOES_NOT_EXIST(900607, "Role does not exist in the system", 404, "Role does not exist in the system"),
     MULTIPLE_ROLES_EXIST(900608, "Multiple roles with the same display name exist in the system", 500, "Multiple " +
             "roles with the same display name exist in the system"),
@@ -307,13 +308,46 @@ public enum ExceptionCodes implements ErrorHandler {
 
 
     // Tenant related
-    INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found");
+    INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),
+    // Key Manager Related
+    INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
+    REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +
+            "required configuration"),
+    KEY_MANAGER_ALREADY_EXIST(901402, "Key Manager Already Exists", 409, "Key Manager Already Exists"),
+    KEY_MANAGER_NOT_FOUND(901403, "Key Manager not found", 400, "Key Manager not found"),
+    KEY_MANAGER_NAME_EMPTY(901404,
+            "Key Manager name cannot be empty", 400,"Key Manager name cannot be empty"),
+    KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION(901404, "Key Manager doesn't support Oauth application generation", 400,
+            "Key Manager doesn't support to Generate Client Application"),
+    KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION(901405, "Key Manager doesn't support token generation", 400,
+            "Key Manager doesn't support token generation"),
+    KEY_MANAGER_NOT_ENABLED(901406, "Key Manager is not enabled in the system", 400,
+            "Key Manager is not enabled in the system"),
+    KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901407, "Required application properties are missing", 400,
+            "Required application properties are missing"),
+    KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered");
 
 
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;
     private final String errorDescription;
+    private boolean stackTrace = false;
+
+    /**
+     * @param errorCode        This is unique error code that pass to upper level.
+     * @param msg              The error message that you need to pass along with the error code.
+     * @param httpErrorCode    This HTTP status code which should return from REST API layer. If you don't want to pass
+     *                         a http status code keep it blank.
+     * @param errorDescription The error description.
+     */
+    ExceptionCodes(long errorCode, String msg, int httpErrorCode, String errorDescription, boolean stackTrace) {
+        this.errorCode = errorCode;
+        this.errorMessage = msg;
+        this.httpStatusCode = httpErrorCode;
+        this.errorDescription = errorDescription;
+        this.stackTrace = stackTrace;
+    }
 
     /**
      * @param errorCode        This is unique error code that pass to upper level.
@@ -328,7 +362,6 @@ public enum ExceptionCodes implements ErrorHandler {
         this.httpStatusCode = httpErrorCode;
         this.errorDescription = errorDescription;
     }
-
     @Override
     public long getErrorCode() {
         return this.errorCode;
@@ -347,6 +380,11 @@ public enum ExceptionCodes implements ErrorHandler {
     @Override
     public String getErrorDescription() {
         return this.errorDescription;
+    }
+
+    public boolean printStackTrace() {
+
+        return stackTrace;
     }
 
     /**
@@ -375,6 +413,7 @@ public enum ExceptionCodes implements ErrorHandler {
                 description = String.format(description, part2);
             }
         }
-        return new ErrorItem(message, description, errorHandler.getErrorCode(), errorHandler.getHttpStatusCode());
+        return new ErrorItem(message, description, errorHandler.getErrorCode(), errorHandler.getHttpStatusCode(),
+                errorHandler.printStackTrace());
     }
 }

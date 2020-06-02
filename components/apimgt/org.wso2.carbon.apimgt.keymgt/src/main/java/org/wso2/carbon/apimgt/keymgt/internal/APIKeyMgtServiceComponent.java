@@ -21,12 +21,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.events.APIMOAuthEventInterceptor;
+import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.handlers.SessionDataPublisherImpl;
 import org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.PermissionBasedScopeIssuer;
@@ -43,18 +50,13 @@ import org.wso2.carbon.identity.oauth.event.OAuthEventInterceptor;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
 @Component(
          name = "api.keymgt.component", 
@@ -340,6 +342,36 @@ public class APIKeyMgtServiceComponent {
      */
     protected void unsetOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(null);
+    }
+
+    /**
+     * Initialize the KeyValidation Handlers Service dependency
+     *
+     * @param keyValidationHandler Key Validation handler reference
+     */
+    @Reference(
+            name = "key.validation.handler.service",
+            service = KeyValidationHandler.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeKeyValidationHandler")
+    protected void addKeyValidationHandler(KeyValidationHandler keyValidationHandler, Map<String, Object> properties) {
+        if (properties.containsKey(APIConstants.KeyManager.REGISTERED_TENANT_DOMAIN)){
+            String tenantDomain = (String) properties.get(APIConstants.KeyManager.REGISTERED_TENANT_DOMAIN);
+            ServiceReferenceHolder.getInstance().addKeyValidationHandler(tenantDomain, keyValidationHandler);
+        }
+    }
+
+    /**
+     * De-reference the KeyValidation Handler Dependency
+     *
+     * @param keyValidationHandler keyValidationHandler Reference to Defreference
+     */
+    protected void removeKeyValidationHandler(KeyValidationHandler keyValidationHandler, Map<String, Object> properties) {
+        if (properties.containsKey(APIConstants.KeyManager.REGISTERED_TENANT_DOMAIN)){
+            String tenantDomain = (String) properties.get(APIConstants.KeyManager.REGISTERED_TENANT_DOMAIN);
+            ServiceReferenceHolder.getInstance().removeKeyValidationHandler(tenantDomain);
+        }
     }
 }
 

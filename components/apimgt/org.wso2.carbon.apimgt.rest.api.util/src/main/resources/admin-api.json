@@ -2846,6 +2846,164 @@
           }
         }
       }
+    },
+    "/key-managers": {
+      "get": {
+        "x-scope": "apim:admin_operations",
+        "summary": "Get all Key managers",
+        "description": "Get all Key managers\n",
+        "tags": [
+          "Key Manager (Collection)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nKeyManagers returned\n",
+            "schema": {
+              "$ref": "#/definitions/KeyManagerList"
+            }
+          }
+        }
+      },
+      "post": {
+        "x-scope": "apim:admin_operations",
+        "summary": "Add a new API Key Manager",
+        "description": "Add a new API Key Manager\n",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Key Manager object that should to be added\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/KeyManager"
+            }
+          }
+        ],
+        "tags": [
+          "Key Manager (Collection)"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created.\nSuccessful response with the newly created object as entity in the body.\n",
+            "schema": {
+              "$ref": "#/definitions/KeyManager"
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/key-managers/{keyManagerId}": {
+      "get": {
+        "x-scope": "apim:admin_operations",
+        "summary": "Get a Key Manager Configuration",
+        "description": "Retrieve a single Key Manager Configuration. We should provide the Id of the KeyManager as a path parameter.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/keyManagerId"
+          }
+        ],
+        "tags": [
+          "Key Manager (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nKeyManager Configuration returned\n",
+            "schema": {
+              "$ref": "#/definitions/KeyManager"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested KeyManager Configuration does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "x-scope": "apim:admin_operations",
+        "summary": "Update a Key Manager",
+        "description": "Update a Key Manager by keyManager id\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/keyManagerId"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Key Manager object with updated information\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/KeyManager"
+            }
+          }
+        ],
+        "tags": [
+          "Key Manager (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nLabel updated.\n",
+            "schema": {
+              "$ref": "#/definitions/KeyManager"
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "x-scope": "apim:admin_operations",
+        "summary": "Delete a Key Manager",
+        "description": "Delete a Key Manager by keyManager id\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/keyManagerId"
+          }
+        ],
+        "tags": [
+          "Key Manager (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nKey Manager successfully deleted.\n"
+          },
+          "404": {
+            "description": "Not Found.\nKey Manager to be deleted does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "parameters": {
@@ -2962,6 +3120,13 @@
       "name": "apiCategoryId",
       "in": "path",
       "description": "API Category UUID\n",
+      "type": "string",
+      "required": true
+    },
+    "keyManagerId": {
+      "name": "keyManagerId",
+      "in": "path",
+      "description": "Key Manager UUID\n",
       "type": "string",
       "required": true
     }
@@ -3959,6 +4124,110 @@
           "type": "string",
           "description": "media-type of the file",
           "example": "image/jpeg"
+        }
+      }
+    },
+    "KeyManager": {
+      "title": "Key Manager",
+      "required": [
+        "name",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "01234567-0123-0123-0123-012345678901"
+        },
+        "name": {
+          "type": "string",
+          "example": "WSO2 IS"
+        },
+        "type": {
+          "type": "string",
+          "example": "IS"
+        },
+        "description": {
+          "type": "string",
+          "example": "This is a key manager for Developers"
+        },
+        "introspection_endpoint": {
+          "type": "string",
+          "example": ""
+        },
+        "dynamic_client_registration_endpoint": {
+          "type": "string",
+          "example": ""
+        },
+        "token_endpoint": {
+          "type": "string",
+          "example": ""
+        },
+        "revoke_endpoint": {
+          "type": "string",
+          "example": ""
+        },
+        "scope_management_endpoint": {
+          "type": "string",
+          "example": ""
+        },
+        "available_grant_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "example": "client_credentials"
+          }
+        },
+        "enabled": {
+          "type": "boolean",
+          "example": true
+        },
+        "additionalProperties": {
+          "type": "object"
+        }
+      }
+    },
+    "KeyManagerInfo": {
+      "title": "Key Manager Info",
+      "required": [
+        "name",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "01234567-0123-0123-0123-012345678901"
+        },
+        "name": {
+          "type": "string",
+          "example": "WSO2 IS"
+        },
+        "type": {
+          "type": "string",
+          "example": "IS"
+        },
+        "description": {
+          "type": "string",
+          "example": "This is a key manager for Developers"
+        },
+        "enabled": {
+          "type": "boolean",
+          "example": true
+        }
+      }
+    },
+    "KeyManagerList": {
+      "title": "Key Manager List",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of Key managers returned.\n",
+          "example": 1
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/KeyManagerInfo"
+          }
         }
       }
     }

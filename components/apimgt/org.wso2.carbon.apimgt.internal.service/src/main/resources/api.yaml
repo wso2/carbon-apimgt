@@ -1,6 +1,6 @@
 # this is an example of the Uber API
 # as a demonstration of an API spec in YAML
-swagger: "2.0"
+swagger: '2.0'
 info:
   title: Internal Utility API
   description: This API allows you to access internal data.
@@ -131,6 +131,22 @@ paths:
             type: array
             items:
               type: string
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /keymanagers:
+    get:
+      summary: An Array of key managers configured
+      description: |
+        this will provide key managers configured
+      responses:
+        200:
+          description: An array of key managers
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/KeyManager'
         default:
           description: Unexpected error
           schema:
@@ -542,6 +558,19 @@ definitions:
         type: string
       applicationId:
         type: integer
+
+  KeyManager:
+    properties:
+      name:
+        type: string
+      type:
+        type: string
+      enabled:
+        type: boolean
+      tenantDomain:
+        type: string
+      configuration:
+        type: object
   #-----------------------------------------------------
   # The Application Attribute resource
   #-----------------------------------------------------
@@ -617,12 +646,12 @@ definitions:
   #-----------------------------------------------------
   ApplicationKeyMapping:
     properties:
-        applicationId:
-          type: integer
-        consumerKey:
-          type: string
-        keyType:
-          type: string
+      applicationId:
+        type: integer
+      consumerKey:
+        type: string
+      keyType:
+        type: string
 
   #---------------------  --------------------------------
   # The Throttle Policy resource
