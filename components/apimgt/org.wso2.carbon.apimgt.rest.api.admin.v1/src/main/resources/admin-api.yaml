@@ -3641,7 +3641,7 @@ definitions:
       conditions:
         type: array
         items:
-          $ref: '#/definitions/ThrottleConditionType'
+          $ref: '#/definitions/ThrottleCondition'
         description: |
           Individual throttling conditions. They can be defined as either HeaderCondition, IPCondition, JWTClaimsCondition, QueryParameterCondition
           Please see schemas of each of those throttling condition in Definitions section.
@@ -3690,11 +3690,10 @@ definitions:
         $ref: '#/definitions/ThrottleLimitType'
 
 #-----------------------------------------------------
-# The Throttling Condition resource
+# The Throttling Condition Base resource
 #-----------------------------------------------------
-  ThrottleCondition:
-    title: Conditions used for Throttling
-    description: Throttling Conditions
+  ThrottleConditionBase:
+    title: Throttling Condition Base
     properties:
       invertCondition:
         type: boolean
@@ -3703,14 +3702,14 @@ definitions:
           Specifies whether inversion of the condition to be matched against the request.
 
           **Note:** When you add conditional groups for advanced throttling policies, this paramater should have the
-          same value ('true' or 'false')
-          for the same type of conditional group.
+          same value ('true' or 'false') for the same type of conditional group.
 
 #-----------------------------------------------------
-# The Throttling Condition Type resource
+# The Throttling Condition resource
 #-----------------------------------------------------
-  ThrottleConditionType:
-    title: Throttling Condition Type
+  ThrottleCondition:
+    title: Throttling Conditions
+    description: Conditions used for Throttling
     required:
       - type
     properties:
@@ -3742,7 +3741,7 @@ definitions:
       - headerName
       - headerValue
     allOf:
-      - $ref: '#/definitions/ThrottleCondition'
+      - $ref: '#/definitions/ThrottleConditionBase'
       - properties:
           headerName:
             type: string
@@ -3759,7 +3758,7 @@ definitions:
     required:
       - specificIP
     allOf:
-      - $ref: '#/definitions/ThrottleCondition'
+      - $ref: '#/definitions/ThrottleConditionBase'
       - properties:
           ipConditionType:
             type: string
@@ -3786,7 +3785,7 @@ definitions:
       - claimUrl
       - attribute
     allOf:
-      - $ref: '#/definitions/ThrottleCondition'
+      - $ref: '#/definitions/ThrottleConditionBase'
       - properties:
           claimUrl:
             type: string
@@ -3804,7 +3803,7 @@ definitions:
       - parameterName
       - parameterValue
     allOf:
-      - $ref: '#/definitions/ThrottleCondition'
+      - $ref: '#/definitions/ThrottleConditionBase'
       - properties:
           parameterName:
             type: string
