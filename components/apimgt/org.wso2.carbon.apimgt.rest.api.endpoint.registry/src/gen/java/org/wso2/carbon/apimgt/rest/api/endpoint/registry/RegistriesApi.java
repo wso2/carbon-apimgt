@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-06-02T16:31:35.177+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-06-02T16:43:00.102+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -171,7 +171,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
                  }, tags={ "Registries" })
 
     @ApiResponses(value = { 
-        @ApiResponse(responseCode = "200",
+        @ApiResponse(responseCode = "204",
             description = "Successfully deleted. "),
     
         @ApiResponse(responseCode = "400",
@@ -201,7 +201,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
                  }, tags={ "Registry Entries" })
 
     @ApiResponses(value = { 
-        @ApiResponse(responseCode = "200",
+        @ApiResponse(responseCode = "204",
             description = "Successfully deleted the registry entry. "),
     
         @ApiResponse(responseCode = "400",

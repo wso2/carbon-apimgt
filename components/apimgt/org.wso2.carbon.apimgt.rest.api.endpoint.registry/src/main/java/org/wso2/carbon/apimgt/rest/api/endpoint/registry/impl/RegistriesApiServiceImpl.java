@@ -299,7 +299,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             }
             registryProvider.deleteEndpointRegistry(registryId);
             audit.info("Successfully deleted endpoint registry of id :" + registryId + " by :" + user);
-            return Response.ok().entity("Successfully deleted the endpoint registry").build();
+            return Response.ok().build();
         } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while deleting the endpoint registry " +
                     "with id: " + registryId, e, log);
@@ -430,7 +430,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             registryProvider.deleteEndpointRegistryEntry(entryId);
             audit.info("Successfully deleted endpoint registry entry with id :" + entryId +
                     " in :" + registryId + " by:" + user);
-            return Response.ok().entity("Successfully deleted the endpoint registry entry").build();
+            return Response.ok().build();
         } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while deleting the endpoint registry entry " +
                     "with id: " + registryId, e, log);

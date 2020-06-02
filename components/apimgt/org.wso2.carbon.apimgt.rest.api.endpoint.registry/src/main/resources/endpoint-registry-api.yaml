@@ -216,7 +216,7 @@ paths:
         schema:
           type: string
       responses:
-        "200":
+        "204":
           description: |
             Successfully deleted.
         "400":
@@ -545,7 +545,7 @@ paths:
         schema:
           type: string
       responses:
-        "200":
+        "204":
           description: |
             Successfully deleted the registry entry.
         "400":

@@ -217,7 +217,7 @@
           }
         } ],
         "responses" : {
-          "200" : {
+          "204" : {
             "description" : "Successfully deleted.\n"
           },
           "400" : {
@@ -627,7 +627,7 @@
           }
         } ],
         "responses" : {
-          "200" : {
+          "204" : {
             "description" : "Successfully deleted the registry entry.\n"
           },
           "400" : {
