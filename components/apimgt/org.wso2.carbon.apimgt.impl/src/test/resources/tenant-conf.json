@@ -222,6 +222,10 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:tenant_theme_manage",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:shared_scope_manage",
         "Roles": "admin"
       }

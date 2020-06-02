@@ -203,6 +203,7 @@ public class APIManagerComponent {
             setupImagePermissions();
             APIMgtDBUtil.initialize();
             configureEventPublisherProperties();
+            configureNotificationEventPublisher();
             // Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
             /* TODO: Load Config values from apimgt.core*/
             boolean apiManagementEnabled = APIUtil.isAPIManagementEnabled();
@@ -765,6 +766,41 @@ public class APIManagerComponent {
     protected void removeNotifiers(Notifier notifier) {
 
         ServiceReferenceHolder.getInstance().getNotifiersMap().remove(notifier.getType());
+    }
+
+    /**
+     * Method to configure wso2event type event adapter to be used for event notification.
+     */
+    private void configureNotificationEventPublisher() {
+        OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
+        adapterConfiguration.setName(APIConstants.NOTIFICATION_EVENT_PUBLISHER);
+        adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
+        adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
+        Map<String, String> adapterParameters = new HashMap<>();
+        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
+            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            if (configuration.getThrottleProperties().getTrafficManager() != null && configuration.getThrottleProperties().getPolicyDeployer().isEnabled()) {
+                ThrottleProperties.TrafficManager trafficManager = configuration.getThrottleProperties().getTrafficManager();
+                adapterParameters.put(APIConstants.RECEIVER_URL, trafficManager.getReceiverUrlGroup());
+                adapterParameters.put(APIConstants.AUTHENTICATOR_URL, trafficManager.getAuthUrlGroup());
+                adapterParameters.put(APIConstants.USERNAME, trafficManager.getUsername());
+                adapterParameters.put(APIConstants.PASSWORD, trafficManager.getPassword());
+                adapterParameters.put(APIConstants.PROTOCOL, trafficManager.getType());
+                adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
+                adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
+                adapterConfiguration.setStaticProperties(adapterParameters);
+                try {
+                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
+                } catch (OutputEventAdapterException e) {
+                    log.warn("Exception occurred while creating WSO2 Event Adapter. Event notification may not work "
+                            + "properly", e);
+                }
+            } else {
+                log.info("Wso2Event Publisher not enabled.");
+            }
+        } else {
+            log.info("api-manager.xml not loaded. Wso2Event Publisher will not be enabled.");
+        }
     }
 }
 

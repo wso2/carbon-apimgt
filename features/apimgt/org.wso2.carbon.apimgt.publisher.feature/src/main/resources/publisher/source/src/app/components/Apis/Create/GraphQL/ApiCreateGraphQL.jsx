@@ -149,7 +149,7 @@ export default function ApiCreateGraphQL(props) {
             };
         }
         additionalProperties.gatewayEnvironments = Array.isArray(settings.environment)
-            && settings.environment.length > 0 ? settings.environment[0] : [];
+            && settings.environment.length > 0 ? [settings.environment[0].name] : [];
         const newApi = new API(additionalProperties);
         const apiData = {
             additionalProperties: JSON.stringify(additionalProperties),

@@ -2216,9 +2216,11 @@ public class SQLConstants {
             "  AM_API API " +
             "  INNER JOIN AM_API_PRODUCT_MAPPING APM ON API.API_ID = APM.API_ID " +
             "  WHERE APM.URL_MAPPING_ID IN " +
-                    "(SELECT AUM.URL_MAPPING_ID " +
-                    "FROM AM_API_URL_MAPPING AUM, AM_API API WHERE API.API_PROVIDER = ? AND " +
-                    "API.API_NAME = ? AND API.API_VERSION = ?)";
+            "   (SELECT AUM.URL_MAPPING_ID " + 
+            "   FROM AM_API_URL_MAPPING AUM " + 
+            "   INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " + 
+            "   WHERE API.API_PROVIDER = ? AND " + 
+            "   API.API_NAME = ? AND API.API_VERSION = ?)";
 
     public static final String GET_AUTHORIZED_DOMAINS_PREFIX =
             "SELECT AKDM.AUTHZ_DOMAIN FROM AM_APP_KEY_DOMAIN_MAPPING AKDM, ";
@@ -3321,7 +3323,7 @@ public class SQLConstants {
         		+ " (select count(map.THROTTLING_TIER) as c from AM_API_URL_MAPPING map, AM_API api"
         		+ "  where map.THROTTLING_TIER = ? and api.API_PROVIDER like ?  and map.API_ID = api.API_ID)) x ";
 
-        public static final String TIER_ATTACHED_TO_APPLICATION = " SELECT count(APPLICATION_TIER) as c FROM AM_APPLICATION where APPLICATION_TIER = ? and CREATED_BY like ? ";
+        public static final String TIER_ATTACHED_TO_APPLICATION = " SELECT count(APPLICATION_TIER) as c FROM AM_APPLICATION where APPLICATION_TIER = ? ";
         
         public static final String GET_TIERS_WITH_BANDWIDTH_QUOTA_TYPE_SQL = "SELECT NAME "
                 + "FROM AM_API_THROTTLE_POLICY LEFT JOIN AM_CONDITION_GROUP "

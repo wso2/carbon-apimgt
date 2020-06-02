@@ -46,19 +46,11 @@ public class ApiTypeWrapper {
     }
 
     public String getName() {
-        if (isAPIProduct) {
-            return apiProduct.getId().getName();
-        } else {
-            return api.getId().getName();
-        }
+        return isAPIProduct ? apiProduct.getId().getName() : api.getId().getName();
     }
 
     public String getStatus() {
-        if (isAPIProduct) {
-            return apiProduct.getState();
-        } else {
-            return api.getStatus();
-        }
+        return isAPIProduct ? apiProduct.getState() : api.getStatus();
     }
 
     public void setTier(String tier) {
@@ -67,5 +59,49 @@ public class ApiTypeWrapper {
         } else {
             api.getId().setTier(tier);
         }
+    }
+
+    public void setContext(String context) {
+        if (isAPIProduct) {
+            apiProduct.setContext(context);
+        } else {
+            api.setContext(context);
+        }
+    }
+
+    public String getContext() {
+        return isAPIProduct ? apiProduct.getContext() : api.getContext();
+    }
+
+    public void setContextTemplate(String contextTemplate) {
+        if (isAPIProduct) {
+            apiProduct.setContextTemplate(contextTemplate);
+        } else {
+            api.setContextTemplate(contextTemplate);
+        }
+    }
+
+    public String getContextTemplate() {
+        return isAPIProduct ? apiProduct.getContextTemplate() : api.getContextTemplate();
+    }
+
+    public Identifier getId() {
+        return isAPIProduct ? apiProduct.getId() : api.getId();
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        if (isAPIProduct) {
+            apiProduct.setThumbnailUrl(thumbnailUrl);
+        } else {
+            api.setThumbnailUrl(thumbnailUrl);
+        }
+    }
+
+    public String getVisibleRoles() {
+        return isAPIProduct ? apiProduct.getVisibleRoles() : api.getVisibleRoles();
+    }
+
+    public String getVisibility() {
+        return isAPIProduct ? apiProduct.getVisibility() : api.getVisibility();
     }
 }

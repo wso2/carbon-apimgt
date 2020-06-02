@@ -387,11 +387,6 @@
         <EnableAccessControl>true</EnableAccessControl>
     </APIPublisher>
 
-    <EndpointRegistry>
-        <!-- This parameter specifies the remote endpoint registry URL -->
-        <URL>https://localhost:${mgt.transport.https.port}/api/am/endpoint-registry/v1</URL>
-    </EndpointRegistry>
-
     <!-- Status observers can be registered against the API Publisher to listen for
          API status update events. Each observer must implement the APIStatusObserver
          interface. Multiple observers can be engaged if necessary and in such situations
@@ -454,10 +449,6 @@
             </WhiteListedURI>
             <WhiteListedURI>
                 <URI>/api/am/admin/{version}/swagger.yaml</URI>
-                <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
-                <URI>/api/am/endpoint-registry/{version}/swagger.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
             <WhiteListedURI>
