@@ -93,6 +93,20 @@ public class DBPublisher implements ArtifactPublisher {
     }
 
     @Override
+    public boolean isArtifactExists(GatewayAPIDTO gatewayAPIDTO) throws ConnectionUnavailableException {
+
+        boolean status;
+        try {
+            status = apiMgtDAO.isAPIBlobExists(gatewayAPIDTO.getApiId(),gatewayAPIDTO.getName(),
+                    gatewayAPIDTO.getGatewayLabel());
+        } catch (APIManagementException e) {
+            throw new ConnectionUnavailableException("Error checking the Artifact status of " + gatewayAPIDTO.getName() +
+                    " API from DB", e);
+        }
+        return status;
+    }
+
+    @Override
     public void disconnect() {
         //not required
     }

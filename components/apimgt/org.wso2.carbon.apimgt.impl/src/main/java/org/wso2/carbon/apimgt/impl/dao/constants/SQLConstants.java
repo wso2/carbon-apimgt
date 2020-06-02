@@ -3165,7 +3165,7 @@ public class SQLConstants {
     public static final String UPDATE_API_BLOB = "UPDATE AM_API_BLOB SET ARTIFACTS = ? WHERE (API_ID = ?)" +
             "AND (LABEL = ?)";
 
-    public static final String DELETE_API_BLOB = "DELETE FROM AM_API_BLOB WHERE (LABEL = ?) and (API_ID = ?)";
+    public static final String DELETE_API_BLOB = "DELETE FROM AM_API_BLOB WHERE API_ID = ? AND LABEL = ? ";
 
     public static final String GET_API_BLOB = "SELECT ARTIFACTS FROM AM_API_BLOB WHERE API_ID =? AND API_NAME=? AND " +
             "LABEL=?";

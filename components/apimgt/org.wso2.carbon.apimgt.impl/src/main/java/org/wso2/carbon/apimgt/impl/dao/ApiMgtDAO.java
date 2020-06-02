@@ -15497,13 +15497,28 @@ public class ApiMgtDAO {
 
     public void deleteAPIBlob(String APIId, String gatewayLabel) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_API_BLOB)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_API_BLOB)) {
             statement.setString(1, APIId);
             statement.setString(2, gatewayLabel);
             statement.executeUpdate();
         } catch (SQLException e) {
             handleException("Failed to delete blob of API with ID " + APIId, e);
         }
+    }
+
+    public boolean isAPIBlobExists(String APIId, String APIName, String label) throws APIManagementException {
+        boolean status = false;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_BLOB)) {
+            statement.setString(1, APIId);
+            statement.setString(2, APIName);
+            statement.setString(3, label);
+            ResultSet rs = statement.executeQuery();
+            status = rs.next();
+        } catch (SQLException e) {
+            handleException("Failed to get API Blob user ID for " + APIName, e);
+        }
+        return status;
     }
 
 }

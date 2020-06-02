@@ -52,6 +52,7 @@ public interface ArtifactPublisher {
      */
     void deleteArtifacts (GatewayAPIDTO gatewayAPIDTO) throws ConnectionUnavailableException;
 
+    boolean isArtifactExists (GatewayAPIDTO gatewayAPIDTO) throws ConnectionUnavailableException;
 
     /**
      * Will be called after all publishing is done, or when ConnectionUnavailableException is thrown

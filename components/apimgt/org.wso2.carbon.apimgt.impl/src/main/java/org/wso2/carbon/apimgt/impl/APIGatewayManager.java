@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactPublisher;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIGatewayEvent;
@@ -237,7 +238,14 @@ public class APIGatewayManager {
                     }
                     setSecureVaultPropertyToBeAdded(api, gatewayAPIDTO);
                     if (gatewayArtifactSynchronizerProperties.isSyncArtifacts()) {
-                        ServiceReferenceHolder.getInstance().getArtifactPublisher().publishArtifacts(gatewayAPIDTO);
+                        ArtifactPublisher artifactPublisher =
+                                ServiceReferenceHolder.getInstance().getArtifactPublisher();
+
+                        if (artifactPublisher.isArtifactExists(gatewayAPIDTO)) {
+                            artifactPublisher.updateArtifacts(gatewayAPIDTO);
+                        } else {
+                            artifactPublisher.publishArtifacts(gatewayAPIDTO);
+                        }
 
                         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
                         APIGatewayEvent apiGatewayEvent = new APIGatewayEvent(UUID.randomUUID().toString(),
@@ -317,6 +325,32 @@ public class APIGatewayManager {
                     APIGatewayAdminClient client;
                     client = new APIGatewayAdminClient(environment);
                     client.deployAPI(gatewayAPIDTO);
+                    return true;
+                } catch (AxisFault axisFault) {
+                    log.error(axisFault);
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean unDeployAPI (String apiName, String label, String apiId) {
+
+        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getGatewayArtifactSynchronizerProperties();
+
+        if (gatewayArtifactSynchronizerProperties.isSyncArtifacts()) {
+            if (gatewayArtifactSynchronizerProperties.getGatewayLabel().equals(label)
+                    || APIConstants.GatewayArtifactSynchronizer.DEFAULT_GATEWAY_LABEL.equals(label)) {
+                try {
+                    GatewayAPIDTO gatewayAPIDTO = ServiceReferenceHolder.getInstance().getArtifactRetriever()
+                            .retrieveArtifacts(apiId, apiName, label);
+                    Environment environment = environments.get(gatewayAPIDTO.getEnvironment());
+                    APIGatewayAdminClient client;
+                    client = new APIGatewayAdminClient(environment);
+                    client.unDeployAPI(gatewayAPIDTO);
+                    ServiceReferenceHolder.getInstance().getArtifactPublisher().deleteArtifacts(gatewayAPIDTO);
                     return true;
                 } catch (AxisFault axisFault) {
                     log.error(axisFault);
@@ -591,6 +625,14 @@ public class APIGatewayManager {
                     gatewayAPIDTO.setProvider(api.getId().getProviderName());
                     gatewayAPIDTO.setTenantDomain(tenantDomain);
                     gatewayAPIDTO.setOverride(true);
+                    gatewayAPIDTO.setEnvironment(environmentName);
+                    gatewayAPIDTO.setApiId(api.getUUID());
+                    try {
+                        gatewayAPIDTO.setGatewayLabel(api.getProperty("gateway_label"));
+                    } catch (Exception e){
+                        gatewayAPIDTO.setGatewayLabel(APIConstants.GatewayArtifactSynchronizer.DEFAULT_GATEWAY_LABEL);
+                    }
+
                     APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
                     setClientCertificatesToBeRemoved(api, tenantDomain, gatewayAPIDTO);
                     setEndpointsToBeRemoved(api, gatewayAPIDTO);
@@ -619,7 +661,19 @@ public class APIGatewayManager {
                         gatewayAPIDTO.setLocalEntriesToBeRemove(addStringToList(localEntryUUId,
                                 gatewayAPIDTO.getLocalEntriesToBeRemove()));
                     }
-                    client.unDeployAPI(gatewayAPIDTO);
+                    if (gatewayArtifactSynchronizerProperties.isSyncArtifacts()) {
+                        ServiceReferenceHolder.getInstance().getArtifactPublisher().updateArtifacts(gatewayAPIDTO);
+
+                        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                        APIGatewayEvent apiGatewayEvent = new APIGatewayEvent(UUID.randomUUID().toString(),
+                                System.currentTimeMillis(),
+                                APIConstants.EventType.PUBLISH_API_IN_GATEWAY.name(), tenantId, gatewayAPIDTO.getName(),
+                                gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel(),
+                                APIConstants.GatewayArtifactSynchronizer.REMOVE_EVENT_LABEL);
+                        APIUtil.sendNotification(apiGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+                    } else {
+                        client.unDeployAPI(gatewayAPIDTO);
+                    }
                 } catch (AxisFault axisFault) {
                     /*
                     didn't throw this exception to handle multiple gateway publishing
