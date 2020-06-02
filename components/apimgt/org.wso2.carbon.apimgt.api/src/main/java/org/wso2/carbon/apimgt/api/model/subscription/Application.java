@@ -18,6 +18,11 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Entity for keeping Application related information. Represents an Application in APIM.
  */
@@ -25,10 +30,11 @@ public class Application implements CacheableEntity<Integer> {
 
     private int id = -1;
     private String name = null;
-    private int subId = -1;
+    private String subName = null;
     private String policy = null;
     private String tokenType = null;
-    private String groupId = null;
+    private Set<String> groupIdList = new HashSet<>();
+    private Map<String, String> attributesMap = new Hashtable<>();
 
     public int getId() {
 
@@ -50,14 +56,14 @@ public class Application implements CacheableEntity<Integer> {
         this.name = name;
     }
 
-    public int getSubId() {
+    public String getSubName() {
 
-        return subId;
+        return subName;
     }
 
-    public void setSubId(int subId) {
+    public void setSubName(String subName) {
 
-        this.subId = subId;
+        this.subName = subName;
     }
 
     public String getPolicy() {
@@ -80,18 +86,30 @@ public class Application implements CacheableEntity<Integer> {
         this.tokenType = tokenType;
     }
 
-    public String getGroupId() {
+    public Set<String> getGroupIds() {
 
-        return groupId;
+        return groupIdList;
     }
 
-    public void setGroupId(String groupId) {
+    public void addGroupId(String groupId) {
 
-        this.groupId = groupId;
+        this.groupIdList.add(groupId);
     }
 
     public Integer getCacheKey() {
 
         return getId();
+    }
+
+    public Map<String, String> getAttributesMap() {
+
+        return attributesMap;
+    }
+
+    public void addAttribute(String name, String value) {
+
+        if (!this.attributesMap.containsKey(name)) {
+            this.attributesMap.put(name, value);
+        }
     }
 }

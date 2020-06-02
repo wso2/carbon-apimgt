@@ -20,11 +20,10 @@ package org.wso2.carbon.apimgt.keymgt.model.entity;
 
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Entity for keeping API related information.
@@ -38,21 +37,21 @@ public class API implements CacheableEntity<String> {
     private String context = null;
     private String policy = null;
 
-    private Map<String, Resource> resourceMap = new HashMap<>();
+    private List<URLMapping> urlMapings = new ArrayList<>();
 
-    public void addResource(Resource resource) {
 
-        resourceMap.put(resource.getUrlPattern(), resource);
+    public void addResource(URLMapping resource) {
+
+        urlMapings.add(resource);
     }
 
-    public Resource getResource(String urlMapping) {
+    public List<URLMapping> getResources(String urlMapping) {
 
-        return resourceMap.get(urlMapping);
+        return urlMapings;
     }
 
-    public List<Resource> getAllResources() {
-
-        return Arrays.asList(resourceMap.values().toArray(new Resource[]{}));
+    public void removeResource(URLMapping resource) {
+        urlMapings.remove(resource);
     }
 
     public String getContext() {

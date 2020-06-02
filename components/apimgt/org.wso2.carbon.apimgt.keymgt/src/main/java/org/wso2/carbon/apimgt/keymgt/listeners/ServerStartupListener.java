@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.keymgt.listeners;
 
 import org.apache.axis2.context.ConfigurationContext;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.ServerStartupObserver;
@@ -34,14 +35,15 @@ public class ServerStartupListener extends AbstractAxis2ConfigurationContextObse
     @Override
     public void completedServerStartup() {
         //load subscription data to memory
-        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_ID);
+        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
     }
 
     @Override
     public void createdConfigurationContext(ConfigurationContext configContext) {
         //load subscription data to memory
         int tenantId = MultitenantUtils.getTenantId(configContext);
-        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(tenantId);
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(tenantDomain);
     }
 
     @Override

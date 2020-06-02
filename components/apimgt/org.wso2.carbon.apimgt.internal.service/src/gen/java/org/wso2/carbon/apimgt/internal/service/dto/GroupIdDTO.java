@@ -13,43 +13,43 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class SubscriberDTO   {
+public class GroupIdDTO   {
   
-    private Integer tenantId = null;
-    private Integer subscriberId = null;
+    private String groupId = null;
+    private Integer applicationId = null;
 
   /**
    **/
-  public SubscriberDTO tenantId(Integer tenantId) {
-    this.tenantId = tenantId;
+  public GroupIdDTO groupId(String groupId) {
+    this.groupId = groupId;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("tenantId")
-  public Integer getTenantId() {
-    return tenantId;
+  @JsonProperty("groupId")
+  public String getGroupId() {
+    return groupId;
   }
-  public void setTenantId(Integer tenantId) {
-    this.tenantId = tenantId;
+  public void setGroupId(String groupId) {
+    this.groupId = groupId;
   }
 
   /**
    **/
-  public SubscriberDTO subscriberId(Integer subscriberId) {
-    this.subscriberId = subscriberId;
+  public GroupIdDTO applicationId(Integer applicationId) {
+    this.applicationId = applicationId;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("subscriberId")
-  public Integer getSubscriberId() {
-    return subscriberId;
+  @JsonProperty("applicationId")
+  public Integer getApplicationId() {
+    return applicationId;
   }
-  public void setSubscriberId(Integer subscriberId) {
-    this.subscriberId = subscriberId;
+  public void setApplicationId(Integer applicationId) {
+    this.applicationId = applicationId;
   }
 
 
@@ -61,23 +61,23 @@ public class SubscriberDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    SubscriberDTO subscriber = (SubscriberDTO) o;
-    return Objects.equals(tenantId, subscriber.tenantId) &&
-        Objects.equals(subscriberId, subscriber.subscriberId);
+    GroupIdDTO groupId = (GroupIdDTO) o;
+    return Objects.equals(groupId, groupId.groupId) &&
+        Objects.equals(applicationId, groupId.applicationId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(tenantId, subscriberId);
+    return Objects.hash(groupId, applicationId);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class SubscriberDTO {\n");
+    sb.append("class GroupIdDTO {\n");
     
-    sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
-    sb.append("    subscriberId: ").append(toIndentedString(subscriberId)).append("\n");
+    sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");
+    sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

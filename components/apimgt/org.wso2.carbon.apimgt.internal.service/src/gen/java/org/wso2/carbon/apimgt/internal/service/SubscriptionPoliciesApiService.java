@@ -10,7 +10,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
 
 import java.util.List;
 
@@ -21,6 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SubscriptionPoliciesApiService {
-      public Response subscriptionPoliciesGet(String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
-      public Response subscriptionPoliciesPolicyIdGet(Integer policyId, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionPoliciesGet(String xWSO2Tenant, String policyName, MessageContext messageContext) throws APIManagementException;
 }

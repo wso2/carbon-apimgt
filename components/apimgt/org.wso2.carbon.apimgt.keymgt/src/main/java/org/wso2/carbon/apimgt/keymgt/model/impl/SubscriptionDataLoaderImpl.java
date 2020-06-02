@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.keymgt.model.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,7 +52,7 @@ import java.util.List;
 public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     private static final Log log = LogFactory.getLog(SubscriptionDataLoaderImpl.class);
-    private static SubscriptionValidationConfig subscriptionValidationConfig;
+    private SubscriptionValidationConfig subscriptionValidationConfig;
 
     public static final int retrievalTimeoutInSeconds = 15;
     public static final int retrievalRetries = 15;
@@ -65,179 +66,116 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     }
 
     @Override
-    public List<Subscriber> loadAllSubscribers(int tenantId) throws DataLoadingException {
+    public List<Subscription> loadAllSubscriptions(String tenantDomain) throws DataLoadingException {
 
-        String subscribersEP = appendParam(APIConstants.SubscriptionValidationResources.SUBSCRIBERS, tenantId);
-        List<Subscriber> subscribers = new ArrayList<>();
-        String responseString = null;
-        try {
-            responseString = invokeService(subscribersEP, tenantId);
-        } catch (IOException e) {
-            String msg = "Error while executing the http client " + subscribersEP;
-            log.error(msg, e);
-            throw new DataLoadingException(msg, e);
-        }
-        if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                subscribers = Arrays.asList(mapper.readValue(responseString, Subscriber[].class));
-            } catch (IOException e) {
-                log.error("Exception when processing tenant subscriptions data for tenant: " + tenantId +
-                        " /n " + responseString, e);
-            }
-        }
-        return subscribers;
-    }
-
-    @Override
-    public List<Subscription> loadAllSubscriptions(int tenantId) throws DataLoadingException {
-
-        String subscriptionsEP = appendParam(APIConstants.SubscriptionValidationResources.SUBSCRIPTIONS, tenantId);
+        String subscriptionsEP = APIConstants.SubscriptionValidationResources.SUBSCRIPTIONS;
         List<Subscription> subscriptions = new ArrayList<>();
         String responseString = null;
         try {
-            responseString = invokeService(subscriptionsEP, tenantId);
+            responseString = invokeService(subscriptionsEP, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + subscriptionsEP;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                subscriptions = Arrays.asList(mapper.readValue(responseString, Subscription[].class));
-            } catch (IOException e) {
-                log.error("Exception when processing subscriptions data for tenant: " + tenantId +
-                        " /n " + responseString, e);
-            }
+            subscriptions = Arrays.asList(new Gson().fromJson(responseString, Subscription[].class));
         }
         return subscriptions;
     }
 
     @Override
-    public List<Application> loadAllApplications(int tenantId) throws DataLoadingException {
+    public List<Application> loadAllApplications(String tenantDomain) throws DataLoadingException {
 
-        String applicationsEP = appendParam(APIConstants.SubscriptionValidationResources.APPLICATIONS, tenantId);
+        String applicationsEP = APIConstants.SubscriptionValidationResources.APPLICATIONS;
         List<Application> applications = new ArrayList<>();
         String responseString = null;
         try {
-            responseString = invokeService(applicationsEP, tenantId);
+            responseString = invokeService(applicationsEP, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + applicationsEP;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                applications = Arrays.asList(mapper.readValue(responseString, Application[].class));
-            } catch (IOException e) {
-                log.error("Exception when processing applications data for tenant: " + tenantId +
-                        " /n " + responseString, e);
-            }
+            applications = Arrays.asList(new Gson().fromJson(responseString, Application[].class));
         }
         return applications;
     }
 
     @Override
-    public List<ApplicationKeyMapping> loadAllKeyMappings(int tenantId) throws DataLoadingException {
+    public List<ApplicationKeyMapping> loadAllKeyMappings(String tenantDomain) throws DataLoadingException {
 
-        String applicationsEP =
-                appendParam(APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS, tenantId);
+        String applicationsEP = APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS;
         List<ApplicationKeyMapping> applicationKeyMappings = new ArrayList<>();
         String responseString = null;
         try {
-            responseString = invokeService(applicationsEP, tenantId);
+            responseString = invokeService(applicationsEP, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + applicationsEP;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                applicationKeyMappings = Arrays.asList(mapper.readValue(responseString, ApplicationKeyMapping[].class));
-            } catch (IOException e) {
-                log.error("Exception when processing application key mappings data for tenant: " + tenantId +
-                        " /n " + responseString, e);
-            }
+            applicationKeyMappings = Arrays.asList(new Gson().fromJson(responseString, ApplicationKeyMapping[].class));
         }
         return applicationKeyMappings;
     }
 
     @Override
-    public List<API> loadAllApis(int tenantId) throws DataLoadingException {
+    public List<API> loadAllApis(String tenantDomain) throws DataLoadingException {
 
-        String apisEP = appendParam(APIConstants.SubscriptionValidationResources.APIS, tenantId);
+        String apisEP = APIConstants.SubscriptionValidationResources.APIS;
         List<API> apis = new ArrayList<>();
         String responseString = null;
         try {
-            responseString = invokeService(apisEP, tenantId);
+            responseString = invokeService(apisEP, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + apisEP;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                apis = Arrays.asList(mapper.readValue(responseString, API[].class));
-            } catch (IOException e) {
-                log.error("Exception when processing apis data for tenant: " + tenantId +
-                        " /n " + responseString, e);
-            }
+            apis = Arrays.asList(new Gson().fromJson(responseString, API[].class));
+
         }
         return apis;
     }
 
     @Override
-    public List<SubscriptionPolicy> loadAllSubscriptionPolicies(int tenantId) throws DataLoadingException {
+    public List<SubscriptionPolicy> loadAllSubscriptionPolicies(String tenantDomain) throws DataLoadingException {
 
-        String subscriptionPoliciesEP =
-                appendParam(APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES, tenantId);
+        String subscriptionPoliciesEP = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES;
         List<SubscriptionPolicy> subscriptionPolicies = new ArrayList<>();
         String responseString = null;
         try {
-            responseString = invokeService(subscriptionPoliciesEP, tenantId);
+            responseString = invokeService(subscriptionPoliciesEP, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + subscriptionPoliciesEP;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                subscriptionPolicies = Arrays.asList(mapper.readValue(responseString, SubscriptionPolicy[].class));
-            } catch (IOException e) {
-                log.error("Exception when processing subscription policies data for tenant: " + tenantId +
-                        " /n " + responseString, e);
-            }
+            subscriptionPolicies = Arrays.asList(new Gson().fromJson(responseString, SubscriptionPolicy[].class));
         }
         return subscriptionPolicies;
     }
 
     @Override
-    public List<ApplicationPolicy> loadAllAppPolicies(int tenantId) throws DataLoadingException {
+    public List<ApplicationPolicy> loadAllAppPolicies(String tenantDomain) throws DataLoadingException {
 
-        String applicationsEP =
-                appendParam(APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES, tenantId);
+        String applicationsEP = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES;
         List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
         String responseString = null;
         try {
-            responseString = invokeService(applicationsEP, tenantId);
+            responseString = invokeService(applicationsEP, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + applicationsEP;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                applicationPolicies = Arrays.asList(mapper.readValue(responseString, ApplicationPolicy[].class));
-            } catch (IOException e) {
-                log.error("Exception when processing application policies data for tenant: " + tenantId +
-                        " /n " + responseString, e);
-            }
+            applicationPolicies = Arrays.asList(new Gson().fromJson(responseString, ApplicationPolicy[].class));
         }
         return applicationPolicies;
     }
@@ -245,51 +183,38 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     @Override
     public Subscriber getSubscriberById(int subscriberId) throws DataLoadingException {
 
-        String endPoint =
-                appendParam(APIConstants.SubscriptionValidationResources.SUBSCRIBERS, subscriberId);
+        String endPoint = APIConstants.SubscriptionValidationResources.SUBSCRIBERS;
         Subscriber subscriber = new Subscriber();
         String responseString = null;
         try {
-            responseString = invokeService(endPoint, -1);
+            responseString = invokeService(endPoint, null);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                subscriber = mapper.readValue(responseString, Subscriber.class);
-            } catch (IOException e) {
-                log.error("Exception when processing subscriber data for subscriberId: " + subscriberId +
-                        " /n " + responseString, e);
-            }
+            subscriber = new Gson().fromJson(responseString, Subscriber.class);
         }
         return subscriber;
     }
 
     @Override
-    public Subscription getSubscriptionById(int subscriptionId) throws DataLoadingException {
+    public Subscription getSubscriptionById(String apiId, String appId) throws DataLoadingException {
 
         String endPoint =
-                appendParam(APIConstants.SubscriptionValidationResources.SUBSCRIPTIONS, subscriptionId);
+                APIConstants.SubscriptionValidationResources.SUBSCRIPTIONS + "?apiId=" + apiId + "&appId=" + appId;
         Subscription subscription = new Subscription();
-        String responseString = null;
+        String responseString;
         try {
-            responseString = invokeService(endPoint, -1);
+            responseString = invokeService(endPoint, null);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                subscription = mapper.readValue(responseString, Subscription.class);
-            } catch (IOException e) {
-                log.error("Exception when processing subscription data for subscription id: " + subscriptionId +
-                        " /n " + responseString, e);
-            }
+            subscription = new Gson().fromJson(responseString, Subscription.class);
         }
         return subscription;
     }
@@ -297,135 +222,107 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     @Override
     public Application getApplicationById(int appId) throws DataLoadingException {
 
-        String endPoint =
-                appendParam(APIConstants.SubscriptionValidationResources.APPLICATIONS, appId);
+        String endPoint = APIConstants.SubscriptionValidationResources.APPLICATIONS + "?appId=" + appId;
         Application application = new Application();
-        String responseString = null;
+        String responseString;
         try {
-            responseString = invokeService(endPoint, -1);
+            responseString = invokeService(endPoint, null);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                application = mapper.readValue(responseString, Application.class);
-            } catch (IOException e) {
-                log.error("Exception when processing application data for application id: " + appId +
-                        " /n " + responseString, e);
-            }
+            application = new Gson().fromJson(responseString, Application.class);
         }
         return application;
     }
 
     @Override
-    public ApplicationKeyMapping getKeyMapping(int applicationId, String keyType) throws DataLoadingException {
+    public ApplicationKeyMapping getKeyMapping(String consumerKey) throws DataLoadingException {
 
-        String key = applicationId + InMemorySubscriptionValidationConstants.DELEM_PERIOD + keyType;
-        String endPoint =
-                appendParam(APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS, 0, key);
+        String endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS + "?consumerKey="
+                + consumerKey;
         ApplicationKeyMapping application = new ApplicationKeyMapping();
-        String responseString = null;
+        String responseString;
         try {
-            responseString = invokeService(endPoint, -1);
+            responseString = invokeService(endPoint, null);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                application = mapper.readValue(responseString, ApplicationKeyMapping.class);
-            } catch (IOException e) {
-                log.error("Exception when processing application data for application id: " + applicationId +
-                        " /n " + responseString, e);
-            }
+            application = new Gson().fromJson(responseString, ApplicationKeyMapping.class);
         }
         return application;
     }
 
     @Override
-    public API getApiById(int apiId) throws DataLoadingException {
+    public API getApi(String context, String version) throws DataLoadingException {
 
-        String endPoint =
-                appendParam(APIConstants.SubscriptionValidationResources.APIS, apiId);
+        String endPoint = APIConstants.SubscriptionValidationResources.APIS + "?context=" + context +
+                "&version=" + version;
         API api = new API();
-        String responseString = null;
+        String responseString;
         try {
-            responseString = invokeService(endPoint, -1);
+            responseString = invokeService(endPoint, null);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                api = mapper.readValue(responseString, API.class);
-            } catch (IOException e) {
-                log.error("Exception when processing api data for api id: " + apiId +
-                        " /n " + responseString, e);
-            }
+            api = new Gson().fromJson(responseString, API.class);
+
         }
         return api;
     }
 
     @Override
-    public SubscriptionPolicy getSubscriptionPolicyById(int policyId) throws DataLoadingException {
+    public SubscriptionPolicy getSubscriptionPolicy(String policyName) throws DataLoadingException {
 
-        String endPoint =
-                appendParam(APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES, policyId);
+        String endPoint = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES + "?policyName=" +
+                policyName;
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
-        String responseString = null;
+        String responseString;
         try {
-            responseString = invokeService(endPoint, -1);
+            responseString = invokeService(endPoint, null);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                subscriptionPolicy = mapper.readValue(responseString, SubscriptionPolicy.class);
-            } catch (IOException e) {
-                log.error("Exception when processing subscription policy data for policyId: " + policyId +
-                        " /n " + responseString, e);
-            }
+
+            subscriptionPolicy = new Gson().fromJson(responseString, SubscriptionPolicy.class);
+
         }
         return subscriptionPolicy;
     }
 
     @Override
-    public ApplicationPolicy getApplicationPolicy(int policyId) throws DataLoadingException {
+    public ApplicationPolicy getApplicationPolicy(String policyName) throws DataLoadingException {
 
-        String endPoint =
-                appendParam(APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES, policyId);
-        ApplicationPolicy subscriptionPolicy = new ApplicationPolicy();
-        String responseString = null;
+        String endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES + "?policyName=" +
+                policyName;
+        ApplicationPolicy applicationPolicy = new ApplicationPolicy();
+        String responseString;
         try {
-            responseString = invokeService(endPoint, -1);
+            responseString = invokeService(endPoint, null);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                subscriptionPolicy = mapper.readValue(responseString, ApplicationPolicy.class);
-            } catch (IOException e) {
-                log.error("Exception when processing application policy data for policyId: " + policyId +
-                        " /n " + responseString, e);
-            }
+            applicationPolicy = new Gson().fromJson(responseString, ApplicationPolicy.class);
+
         }
-        return subscriptionPolicy;
+        return applicationPolicy;
     }
 
-    private String invokeService(String path, int tenantId) throws DataLoadingException, IOException {
+    private String invokeService(String path, String tenantDomain) throws DataLoadingException, IOException {
 
         String serviceURLStr = subscriptionValidationConfig.getServiceURL();
         HttpGet method = new HttpGet(serviceURLStr + path);
@@ -438,8 +335,8 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                     APIConstants.AUTHORIZATION_BASIC +
                             new String(credentials, StandardCharsets.UTF_8));
-            if (tenantId > 0) {
-                method.setHeader(APIConstants.HEADER_TENANT, String.valueOf(tenantId));
+            if (tenantDomain != null) {
+                method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
             }
             HttpClient httpClient = APIUtil.getHttpClient(servicePort, serviceProtocol);
 
@@ -468,7 +365,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                 }
             } while (retry);
             if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode()) {
-                log.error("Could not retrieve subscriptions for tenantId : " + tenantId);
+                log.error("Could not retrieve subscriptions for tenantDomain : " + tenantDomain);
                 throw new DataLoadingException("Error while retrieving subscription from " + path);
             }
             return EntityUtils.toString(httpResponse.getEntity(), UTF8);
@@ -483,15 +380,6 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         String pw = subscriptionValidationConfig.getPassword();
         return Base64.encodeBase64((username + APIConstants.DELEM_COLON + pw).getBytes
                 (StandardCharsets.UTF_8));
-    }
-
-    private String appendParam(String ep, int param, String... key) {
-
-        if (key.length == 0) {
-            return ep + "/" + "{" + param + "}";
-        } else {
-            return ep + "/" + "{" + key[0] + "}";
-        }
     }
 
 }

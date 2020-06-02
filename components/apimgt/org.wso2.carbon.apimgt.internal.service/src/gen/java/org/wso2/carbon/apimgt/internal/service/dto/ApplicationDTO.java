@@ -2,6 +2,10 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationAttributeDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.GroupIdDTO;
 import javax.validation.constraints.*;
 
 
@@ -17,9 +21,11 @@ public class ApplicationDTO   {
   
     private Integer id = null;
     private String name = null;
-    private Integer subId = null;
+    private String subName = null;
     private String policy = null;
     private String tokenType = null;
+    private List<GroupIdDTO> groupIds = new ArrayList<>();
+    private List<ApplicationAttributeDTO> attributes = new ArrayList<>();
 
   /**
    **/
@@ -57,19 +63,19 @@ public class ApplicationDTO   {
 
   /**
    **/
-  public ApplicationDTO subId(Integer subId) {
-    this.subId = subId;
+  public ApplicationDTO subName(String subName) {
+    this.subName = subName;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("subId")
-  public Integer getSubId() {
-    return subId;
+  @JsonProperty("subName")
+  public String getSubName() {
+    return subName;
   }
-  public void setSubId(Integer subId) {
-    this.subId = subId;
+  public void setSubName(String subName) {
+    this.subName = subName;
   }
 
   /**
@@ -108,6 +114,41 @@ public class ApplicationDTO   {
     this.tokenType = tokenType;
   }
 
+  /**
+   * group ids associated with the application.
+   **/
+  public ApplicationDTO groupIds(List<GroupIdDTO> groupIds) {
+    this.groupIds = groupIds;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "\"wso2\"", value = "group ids associated with the application.")
+  @JsonProperty("groupIds")
+  public List<GroupIdDTO> getGroupIds() {
+    return groupIds;
+  }
+  public void setGroupIds(List<GroupIdDTO> groupIds) {
+    this.groupIds = groupIds;
+  }
+
+  /**
+   **/
+  public ApplicationDTO attributes(List<ApplicationAttributeDTO> attributes) {
+    this.attributes = attributes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("attributes")
+  public List<ApplicationAttributeDTO> getAttributes() {
+    return attributes;
+  }
+  public void setAttributes(List<ApplicationAttributeDTO> attributes) {
+    this.attributes = attributes;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -120,14 +161,16 @@ public class ApplicationDTO   {
     ApplicationDTO application = (ApplicationDTO) o;
     return Objects.equals(id, application.id) &&
         Objects.equals(name, application.name) &&
-        Objects.equals(subId, application.subId) &&
+        Objects.equals(subName, application.subName) &&
         Objects.equals(policy, application.policy) &&
-        Objects.equals(tokenType, application.tokenType);
+        Objects.equals(tokenType, application.tokenType) &&
+        Objects.equals(groupIds, application.groupIds) &&
+        Objects.equals(attributes, application.attributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, subId, policy, tokenType);
+    return Objects.hash(id, name, subName, policy, tokenType, groupIds, attributes);
   }
 
   @Override
@@ -137,9 +180,11 @@ public class ApplicationDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    subId: ").append(toIndentedString(subId)).append("\n");
+    sb.append("    subName: ").append(toIndentedString(subName)).append("\n");
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
     sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
+    sb.append("    groupIds: ").append(toIndentedString(groupIds)).append("\n");
+    sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

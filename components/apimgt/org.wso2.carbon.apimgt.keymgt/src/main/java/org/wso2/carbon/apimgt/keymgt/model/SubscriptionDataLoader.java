@@ -37,67 +37,59 @@ import java.util.List;
 public interface SubscriptionDataLoader {
 
     /**
-     * Loads all Subscriptions from underlying Storage.
-     *
-     * @return A list of all {@link Subscription} objects at the time of calling.
-     * @throws DataLoadingException
-     */
-    public List<Subscriber> loadAllSubscribers(int tenantId) throws DataLoadingException;
-
-    /**
      * Loads all subscribers from underlying Storage.
      *
      * @return A list of all {@link Subscription} objects at the time of calling.
-     * @throws DataLoadingException
+     * @throws DataLoadingException If any error
      */
-    public List<Subscription> loadAllSubscriptions(int tenantId) throws DataLoadingException;
+    public List<Subscription> loadAllSubscriptions(String tenantDomain) throws DataLoadingException;
 
     /**
      * Load all Applications from the Database belonging to all Tenants
      *
      * @return A list of all {@link Application}s.
-     * @throws DataLoadingException
+     * @throws DataLoadingException If any error
      */
-    public List<Application> loadAllApplications(int tenantId) throws DataLoadingException;
+    public List<Application> loadAllApplications(String tenantDomain) throws DataLoadingException;
 
     /**
      * Load all Key Mappings (Mapping between the Consumer Key and Application) from the Database
      * owned by all tenants
      *
      * @return A list of {@link ApplicationKeyMapping}s
-     * @throws DataLoadingException
+     * @throws DataLoadingException If any error
      */
-    public List<ApplicationKeyMapping> loadAllKeyMappings(int tenantId) throws DataLoadingException;
+    public List<ApplicationKeyMapping> loadAllKeyMappings(String tenantDomain) throws DataLoadingException;
 
     /**
      * Load all {@link API} objects owned by all Tenants.
      *
      * @return A list of {@link API}
-     * @throws DataLoadingException
+     * @throws DataLoadingException If any error
      */
-    public List<API> loadAllApis(int tenantId) throws DataLoadingException;
+    public List<API> loadAllApis(String tenantDomain) throws DataLoadingException;
 
     /**
      * Load All Subscription Throttling Policies.
      *
      * @return A list of Subscription Throttling Policies.
-     * @throws DataLoadingException
+     * @throws DataLoadingException If any error
      */
-    public List<SubscriptionPolicy> loadAllSubscriptionPolicies(int tenantId) throws DataLoadingException;
+    public List<SubscriptionPolicy> loadAllSubscriptionPolicies(String tenantDomain) throws DataLoadingException;
 
     /**
      * Loads All Application Throttling Policies.
      *
      * @return A list of Api Throttling Policies.
-     * @throws DataLoadingException
+     * @throws DataLoadingException If any error
      */
-    public List<ApplicationPolicy> loadAllAppPolicies(int tenantId) throws DataLoadingException;
+    public List<ApplicationPolicy> loadAllAppPolicies(String tenantDomain) throws DataLoadingException;
 
     /**
      * Retrieve a Subscriber from db.
      *
      * @return A {@link Subscriber}.
-     * @throws DataLoadingException
+     * @throws DataLoadingException If any error
      */
     public Subscriber getSubscriberById(int subscriberId) throws DataLoadingException;
 
@@ -105,15 +97,15 @@ public interface SubscriptionDataLoader {
      * Retrieve Subscription from db.
      *
      * @return A {@link Subscription}.
-     * @throws DataLoadingException
+     * @throws DataLoadingException If any error
      */
-    public Subscription getSubscriptionById(int subscriptionId) throws DataLoadingException;
+    public Subscription getSubscriptionById(String apiId, String appId) throws DataLoadingException;
 
     /**
      * Retrieve Application from db.
      *
      * @return An {@link Application}s.
-     * @throws DataLoadingException
+     * @throws DataLoadingException If any error
      */
     public Application getApplicationById(int appId) throws DataLoadingException;
 
@@ -121,32 +113,34 @@ public interface SubscriptionDataLoader {
      * Retrieve Key Mapping (Mapping between the Consumer Key and Application) from the Database
      *
      * @return A list of {@link ApplicationKeyMapping}s
-     * @throws DataLoadingException
+     * @throws DataLoadingException If any error
      */
-    public ApplicationKeyMapping getKeyMapping(int applicationId, String keyType) throws DataLoadingException;
+    public ApplicationKeyMapping getKeyMapping(String consumerKey) throws DataLoadingException;
 
     /**
      * Retrieve {@link API} object.
      *
+     * @param context context of the API
+     * @param version Version of the API
      * @return An {@link API}
-     * @throws DataLoadingException
+     * @throws DataLoadingException If any error
      */
-    public API getApiById(int apiId) throws DataLoadingException;
+    public API getApi(String context, String version) throws DataLoadingException;
 
     /**
      * Retrieve Subscription Throttling Policy.
      *
      * @return A {@link SubscriptionPolicy}.
-     * @throws DataLoadingException
+     * @throws DataLoadingException If any error
      */
-    public SubscriptionPolicy getSubscriptionPolicyById(int policyId) throws DataLoadingException;
+    public SubscriptionPolicy getSubscriptionPolicy(String policyName) throws DataLoadingException;
 
     /**
      * Retrieve Application Throttling Policy.
      *
      * @return A {@link ApplicationPolicy}.
-     * @throws DataLoadingException
+     * @throws DataLoadingException If any error
      */
-    public ApplicationPolicy getApplicationPolicy(int policyId) throws DataLoadingException;
+    public ApplicationPolicy getApplicationPolicy(String policyName) throws DataLoadingException;
 
 }

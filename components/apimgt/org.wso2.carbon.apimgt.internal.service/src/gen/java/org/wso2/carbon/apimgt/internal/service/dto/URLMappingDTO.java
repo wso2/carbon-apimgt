@@ -15,44 +15,9 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class URLMappingDTO   {
   
-    private Integer id = null;
-    private Integer apiId = null;
     private String authScheme = null;
     private String throttlingPolicy = null;
-
-  /**
-   **/
-  public URLMappingDTO id(Integer id) {
-    this.id = id;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("id")
-  public Integer getId() {
-    return id;
-  }
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  /**
-   **/
-  public URLMappingDTO apiId(Integer apiId) {
-    this.apiId = apiId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("apiId")
-  public Integer getApiId() {
-    return apiId;
-  }
-  public void setApiId(Integer apiId) {
-    this.apiId = apiId;
-  }
+    private String httpMethod = null;
 
   /**
    **/
@@ -88,6 +53,23 @@ public class URLMappingDTO   {
     this.throttlingPolicy = throttlingPolicy;
   }
 
+  /**
+   **/
+  public URLMappingDTO httpMethod(String httpMethod) {
+    this.httpMethod = httpMethod;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("httpMethod")
+  public String getHttpMethod() {
+    return httpMethod;
+  }
+  public void setHttpMethod(String httpMethod) {
+    this.httpMethod = httpMethod;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -98,15 +80,14 @@ public class URLMappingDTO   {
       return false;
     }
     URLMappingDTO urLMapping = (URLMappingDTO) o;
-    return Objects.equals(id, urLMapping.id) &&
-        Objects.equals(apiId, urLMapping.apiId) &&
-        Objects.equals(authScheme, urLMapping.authScheme) &&
-        Objects.equals(throttlingPolicy, urLMapping.throttlingPolicy);
+    return Objects.equals(authScheme, urLMapping.authScheme) &&
+        Objects.equals(throttlingPolicy, urLMapping.throttlingPolicy) &&
+        Objects.equals(httpMethod, urLMapping.httpMethod);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, apiId, authScheme, throttlingPolicy);
+    return Objects.hash(authScheme, throttlingPolicy, httpMethod);
   }
 
   @Override
@@ -114,10 +95,9 @@ public class URLMappingDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class URLMappingDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    authScheme: ").append(toIndentedString(authScheme)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
+    sb.append("    httpMethod: ").append(toIndentedString(httpMethod)).append("\n");
     sb.append("}");
     return sb.toString();
   }

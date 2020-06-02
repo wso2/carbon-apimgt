@@ -1,7 +1,7 @@
 package org.wso2.carbon.apimgt.internal.service;
 
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.SubscriptionPoliciesApiService;
 import org.wso2.carbon.apimgt.internal.service.impl.SubscriptionPoliciesApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -40,23 +40,11 @@ SubscriptionPoliciesApiService delegate = new SubscriptionPoliciesApiServiceImpl
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all subscription throttling policies", notes = "This will provide access to subscription level throttling policies in database. ", response = SubscriptionPolicyDTO.class, responseContainer = "List", tags={ "Subscription Validation",  })
+    @ApiOperation(value = "Get all subscription throttling policies", notes = "This will provide access to subscription level throttling policies in database. ", response = SubscriptionPolicyListDTO.class, tags={ "Subscription Validation" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "An array of subscription policies in the database", response = SubscriptionPolicyDTO.class, responseContainer = "List"),
+        @ApiResponse(code = 200, message = "An array of subscription policies in the database", response = SubscriptionPolicyListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response subscriptionPoliciesGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
-        return delegate.subscriptionPoliciesGet(xWSO2Tenant, securityContext);
-    }
-
-    @GET
-    @Path("/{policyId}")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get all subscription throttling policies", notes = "This will provide access to subscription level throttling policy in database. ", response = Object.class, tags={ "Subscription Validation" })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "The subscription policy in the database", response = Object.class),
-        @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response subscriptionPoliciesPolicyIdGet(@ApiParam(value = "Policy Id represented as a UUID ",required=true) @PathParam("policyId") Integer policyId) throws APIManagementException{
-        return delegate.subscriptionPoliciesPolicyIdGet(policyId, securityContext);
+    public Response subscriptionPoliciesGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  Subscription policy name ")  @QueryParam("policyName") String policyName) throws APIManagementException{
+        return delegate.subscriptionPoliciesGet(xWSO2Tenant, policyName, securityContext);
     }
 }

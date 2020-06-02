@@ -9,7 +9,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 
 import java.util.List;
@@ -21,6 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApplicationKeyMappingsApiService {
-      public Response applicationKeyMappingsConsumerKeyGet(String consumerKey, MessageContext messageContext) throws APIManagementException;
-      public Response applicationKeyMappingsGet(String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response applicationKeyMappingsGet(String xWSO2Tenant, String consumerKey, MessageContext messageContext) throws APIManagementException;
 }

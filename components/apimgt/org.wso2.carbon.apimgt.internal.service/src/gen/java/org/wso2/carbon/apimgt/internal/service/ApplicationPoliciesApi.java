@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.internal.service;
 
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.internal.service.ApplicationPoliciesApiService;
 import org.wso2.carbon.apimgt.internal.service.impl.ApplicationPoliciesApiServiceImpl;
@@ -40,23 +40,11 @@ ApplicationPoliciesApiService delegate = new ApplicationPoliciesApiServiceImpl()
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all application throttling policies", notes = "This will provide access to application level throttling policies in database. ", response = ApplicationPolicyDTO.class, responseContainer = "List", tags={ "Subscription Validation",  })
+    @ApiOperation(value = "Get all application throttling policies", notes = "This will provide access to application level throttling policies in database. ", response = ApplicationPolicyListDTO.class, tags={ "Subscription Validation" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "An array of application policies in the database", response = ApplicationPolicyDTO.class, responseContainer = "List"),
+        @ApiResponse(code = 200, message = "An array of application policies in the database", response = ApplicationPolicyListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response applicationPoliciesGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
-        return delegate.applicationPoliciesGet(xWSO2Tenant, securityContext);
-    }
-
-    @GET
-    @Path("/{policyId}")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get all application throttling policies", notes = "This will provide access to application level throttling policy in database. ", response = Object.class, tags={ "Subscription Validation" })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "The application policy in the database", response = Object.class),
-        @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response applicationPoliciesPolicyIdGet(@ApiParam(value = "Policy Id represented as a UUID ",required=true) @PathParam("policyId") Integer policyId) throws APIManagementException{
-        return delegate.applicationPoliciesPolicyIdGet(policyId, securityContext);
+    public Response applicationPoliciesGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  Application policy name ")  @QueryParam("policyName") String policyName) throws APIManagementException{
+        return delegate.applicationPoliciesGet(xWSO2Tenant, policyName, securityContext);
     }
 }

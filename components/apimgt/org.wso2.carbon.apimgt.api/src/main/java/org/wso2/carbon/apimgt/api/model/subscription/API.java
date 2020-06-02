@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api.model.subscription;
 
 import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -37,21 +38,21 @@ public class API implements CacheableEntity<String> {
     private String context = null;
     private String policy = null;
 
-    private Map<String, Resource> resourceMap = new HashMap<>();
+    private List<URLMapping> resources = new ArrayList<>();
 
-    public void addResource(Resource resource) {
+    public void addResource(URLMapping urlMapping) {
 
-        resourceMap.put(resource.getUrlPattern(), resource);
+        resources.add(urlMapping);
     }
 
-    public Resource getResource(String urlMapping) {
+    public boolean removeResource(URLMapping urlMapping) {
 
-        return resourceMap.get(urlMapping);
+        return resources.remove(urlMapping);
     }
 
-    public List<Resource> getAllResources() {
+    public List<URLMapping> getAllResources() {
 
-        return Arrays.asList(resourceMap.values().toArray(new Resource[]{}));
+        return resources;
     }
 
     public int getApiId() {

@@ -201,15 +201,31 @@
           "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
           "type" : "string"
+        }, {
+          "name" : "context",
+          "in" : "query",
+          "description" : "**Search condition**.\n context of the api\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "**Search condition**.\n versio  of the api\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "Accept",
+          "in" : "header",
+          "description" : "Media types acceptable for the response. Default is application/json.\n",
+          "required" : false,
+          "type" : "string",
+          "default" : "application/json"
         } ],
         "responses" : {
           "200" : {
             "description" : "An array of APIs in the database",
             "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/API"
-              }
+              "$ref" : "#/definitions/APIList"
             }
           },
           "default" : {
@@ -232,15 +248,18 @@
           "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
           "type" : "string"
+        }, {
+          "name" : "appId",
+          "in" : "query",
+          "description" : "**Search condition**.\n Application ID of the application\n",
+          "required" : false,
+          "type" : "integer"
         } ],
         "responses" : {
           "200" : {
             "description" : "An array of applications in the database",
             "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/Application"
-              }
+              "$ref" : "#/definitions/ApplicationList"
             }
           },
           "default" : {
@@ -263,77 +282,24 @@
           "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
           "type" : "string"
+        }, {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Api ID  of the subscription\n",
+          "required" : false,
+          "type" : "integer"
+        }, {
+          "name" : "appId",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Application ID  of the subscription\n",
+          "required" : false,
+          "type" : "integer"
         } ],
         "responses" : {
           "200" : {
             "description" : "An array of subscriptions in the database",
             "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/Subscription"
-              }
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/subscribers" : {
-      "get" : {
-        "tags" : [ "Subscription Validation" ],
-        "summary" : "Get all subscribers",
-        "description" : "This will provide access to subscribers in database.\n",
-        "parameters" : [ {
-          "name" : "X-WSO2-Tenant",
-          "in" : "header",
-          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
-          "required" : true,
-          "type" : "string"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An array of subscribers in the database",
-            "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/Subscriber"
-              }
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/application-key-mappings" : {
-      "get" : {
-        "tags" : [ "Subscription Validation" ],
-        "summary" : "Get all application key mappings",
-        "description" : "This will provide access to application vs key mappings in database.\n",
-        "parameters" : [ {
-          "name" : "X-WSO2-Tenant",
-          "in" : "header",
-          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
-          "required" : true,
-          "type" : "string"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An array of application key mappings in the database",
-            "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/ApplicationKeyMapping"
-              }
+              "$ref" : "#/definitions/SubscriptionList"
             }
           },
           "default" : {
@@ -356,15 +322,18 @@
           "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
           "type" : "string"
+        }, {
+          "name" : "policyName",
+          "in" : "query",
+          "description" : "**Search condition**.\n Subscription policy name\n",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
             "description" : "An array of subscription policies in the database",
             "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/SubscriptionPolicy"
-              }
+              "$ref" : "#/definitions/SubscriptionPolicyList"
             }
           },
           "default" : {
@@ -387,15 +356,18 @@
           "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
           "type" : "string"
+        }, {
+          "name" : "policyName",
+          "in" : "query",
+          "description" : "**Search condition**.\n Application policy name\n",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
             "description" : "An array of application policies in the database",
             "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/ApplicationPolicy"
-              }
+              "$ref" : "#/definitions/ApplicationPolicyList"
             }
           },
           "default" : {
@@ -407,219 +379,29 @@
         }
       }
     },
-    "/apis/{apiId}" : {
+    "/application-key-mappings" : {
       "get" : {
         "tags" : [ "Subscription Validation" ],
-        "summary" : "Get the API",
-        "description" : "This will provide access to api in database.\n",
-        "parameters" : [ {
-          "name" : "apiId",
-          "in" : "path",
-          "description" : "**API ID** consisting of the **UUID** of the API.\n",
-          "required" : true,
-          "type" : "integer"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "The API in the database",
-            "schema" : {
-              "type" : "string"
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/applications/{applicationId}" : {
-      "get" : {
-        "tags" : [ "Subscription Validation" ],
-        "summary" : "Get an application",
-        "description" : "This will provide access to application in database.\n",
-        "parameters" : [ {
-          "name" : "applicationId",
-          "in" : "path",
-          "description" : "Application Identifier consisting of the UUID of the Application.\n",
-          "required" : true,
-          "type" : "integer"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Application in the database",
-            "schema" : {
-              "type" : "object"
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/subscriptions/{subscriptionId}" : {
-      "get" : {
-        "tags" : [ "Subscription Validation" ],
-        "summary" : "Get a subscription",
-        "description" : "This will provide access to subscription in database.\n",
-        "parameters" : [ {
-          "name" : "subscriptionId",
-          "in" : "path",
-          "description" : "Subscription Id\n",
-          "required" : true,
-          "type" : "integer"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A subscription in the database",
-            "schema" : {
-              "type" : "object"
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/application-key-mappings/{consumerKey}" : {
-      "get" : {
-        "tags" : [ "Subscription Validation" ],
-        "summary" : "Get an application key mapping",
-        "description" : "This will provide access to application vs key mapping in database.\n",
-        "parameters" : [ {
-          "name" : "consumerKey",
-          "in" : "path",
-          "description" : "**key** consisting of the ***Consumer Key* of an application key mapping.\n",
-          "required" : true,
-          "type" : "string"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An application key mapping in the database",
-            "schema" : {
-              "type" : "object"
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/subscription-policies/{policyId}" : {
-      "get" : {
-        "tags" : [ "Subscription Validation" ],
-        "summary" : "Get all subscription throttling policies",
-        "description" : "This will provide access to subscription level throttling policy in database.\n",
-        "parameters" : [ {
-          "name" : "policyId",
-          "in" : "path",
-          "description" : "Policy Id represented as a UUID\n",
-          "required" : true,
-          "type" : "integer"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "The subscription policy in the database",
-            "schema" : {
-              "type" : "object"
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/application-policies/{policyId}" : {
-      "get" : {
-        "tags" : [ "Subscription Validation" ],
-        "summary" : "Get all application throttling policies",
-        "description" : "This will provide access to application level throttling policy in database.\n",
-        "parameters" : [ {
-          "name" : "policyId",
-          "in" : "path",
-          "description" : "Policy Id represented as a UUID\n",
-          "required" : true,
-          "type" : "integer"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "The application policy in the database",
-            "schema" : {
-              "type" : "object"
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/url-mappings" : {
-      "get" : {
-        "tags" : [ "Subscription Validation" ],
-        "summary" : "Get all url mappings",
-        "description" : "This will provide access to url mappings in database.\n",
+        "summary" : "Get all application key mappings",
+        "description" : "This will provide access to application vs key mappings in database.\n",
         "parameters" : [ {
           "name" : "X-WSO2-Tenant",
           "in" : "header",
           "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
           "type" : "string"
+        }, {
+          "name" : "consumerKey",
+          "in" : "query",
+          "description" : "**Search condition**.\n Consumer Key of the application\n",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
-            "description" : "The url mappings in the database",
+            "description" : "An array of application key mappings in the database",
             "schema" : {
-              "type" : "object"
-            }
-          },
-          "default" : {
-            "description" : "Unexpected error",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/url-mappings/{mappingId}" : {
-      "get" : {
-        "tags" : [ "Subscription Validation" ],
-        "summary" : "Get all url mappings",
-        "description" : "This will provide access to url mappings in database.\n",
-        "parameters" : [ {
-          "name" : "mappingId",
-          "in" : "path",
-          "description" : "**ID** of the ***URL Mapping * of an api.\n",
-          "required" : true,
-          "type" : "integer"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "The url mappings in the database",
-            "schema" : {
-              "type" : "object"
+              "$ref" : "#/definitions/ApplicationKeyMappingList"
             }
           },
           "default" : {
@@ -764,6 +546,25 @@
         }
       }
     },
+    "APIList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of APIs returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/API"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "API List"
+    },
     "API" : {
       "properties" : {
         "apiId" : {
@@ -788,8 +589,33 @@
         "policy" : {
           "type" : "string",
           "description" : "API level throttling policy."
+        },
+        "urlMaping" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/URLMapping"
+          }
         }
       }
+    },
+    "ApplicationList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of Applications returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Application"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "Application List"
     },
     "Application" : {
       "properties" : {
@@ -799,8 +625,8 @@
         "name" : {
           "type" : "string"
         },
-        "subId" : {
-          "type" : "integer"
+        "subName" : {
+          "type" : "string"
         },
         "policy" : {
           "type" : "string",
@@ -810,8 +636,75 @@
           "type" : "string",
           "example" : "JWT",
           "description" : "type of the token."
+        },
+        "groupIds" : {
+          "type" : "array",
+          "example" : "wso2",
+          "description" : "group ids associated with the application.",
+          "items" : {
+            "$ref" : "#/definitions/GroupId"
+          }
+        },
+        "attributes" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ApplicationAttribute"
+          }
         }
       }
+    },
+    "GroupId" : {
+      "properties" : {
+        "groupId" : {
+          "type" : "string"
+        },
+        "applicationId" : {
+          "type" : "integer"
+        }
+      },
+      "title" : "Application Group Id"
+    },
+    "ApplicationAttribute" : {
+      "properties" : {
+        "applicationId" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "application ID of the attribute associated with"
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "name of the attribute"
+        },
+        "value" : {
+          "type" : "string",
+          "description" : "the value of the attribute"
+        },
+        "tenant" : {
+          "type" : "string",
+          "example" : "wso2.com",
+          "description" : "tenant domain"
+        }
+      },
+      "title" : "Application attributes"
+    },
+    "SubscriptionList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of Subscriptions returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Subscription"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "Application List"
     },
     "Subscription" : {
       "properties" : {
@@ -832,15 +725,24 @@
         }
       }
     },
-    "Subscriber" : {
+    "ApplicationKeyMappingList" : {
       "properties" : {
-        "tenantId" : {
-          "type" : "integer"
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of ApplicationKeyMappings returned.\n"
         },
-        "subscriberId" : {
-          "type" : "integer"
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ApplicationKeyMapping"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
         }
-      }
+      },
+      "title" : "ApplicationKeyMapping List"
     },
     "ApplicationKeyMapping" : {
       "properties" : {
@@ -871,10 +773,48 @@
         }
       }
     },
+    "SubscriptionPolicyList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of SubscriptionPolices returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/SubscriptionPolicy"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "SubscriptionPolicy List"
+    },
     "SubscriptionPolicy" : {
       "allOf" : [ {
         "$ref" : "#/definitions/Policy"
       } ]
+    },
+    "ApplicationPolicyList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of ApplicationPolicies returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ApplicationPolicy"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "ApplicationPolicy List"
     },
     "ApplicationPolicy" : {
       "allOf" : [ {
@@ -899,19 +839,41 @@
     },
     "URLMapping" : {
       "properties" : {
-        "id" : {
-          "type" : "integer"
-        },
-        "apiId" : {
-          "type" : "integer"
-        },
         "authScheme" : {
           "type" : "string"
         },
         "throttlingPolicy" : {
           "type" : "string"
+        },
+        "httpMethod" : {
+          "type" : "string"
         }
       }
+    },
+    "Pagination" : {
+      "properties" : {
+        "offset" : {
+          "type" : "integer",
+          "example" : 0
+        },
+        "limit" : {
+          "type" : "integer",
+          "example" : 1
+        },
+        "total" : {
+          "type" : "integer",
+          "example" : 10
+        },
+        "next" : {
+          "type" : "string",
+          "description" : "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n"
+        },
+        "previous" : {
+          "type" : "string",
+          "description" : "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned."
+        }
+      },
+      "title" : "Pagination"
     }
   },
   "parameters" : {
@@ -922,54 +884,13 @@
       "required" : true,
       "type" : "string"
     },
-    "apiId" : {
-      "name" : "apiId",
-      "in" : "path",
-      "description" : "**API ID** consisting of the **UUID** of the API.\n",
-      "required" : true,
-      "type" : "integer"
-    },
-    "applicationId" : {
-      "name" : "applicationId",
-      "in" : "path",
-      "description" : "Application Identifier consisting of the UUID of the Application.\n",
-      "required" : true,
-      "type" : "integer"
-    },
-    "subscriptionId" : {
-      "name" : "subscriptionId",
-      "in" : "path",
-      "description" : "Subscription Id\n",
-      "required" : true,
-      "type" : "integer"
-    },
-    "policyId" : {
-      "name" : "policyId",
-      "in" : "path",
-      "description" : "Policy Id represented as a UUID\n",
-      "required" : true,
-      "type" : "integer"
-    },
-    "subscrberId" : {
-      "name" : "subscriberId",
-      "in" : "path",
-      "description" : "**Subscriber ID** consisting of the **ID** of Subscriber.\n",
-      "required" : true,
-      "type" : "integer"
-    },
-    "consumerKey" : {
-      "name" : "consumerKey",
-      "in" : "path",
-      "description" : "**key** consisting of the ***Consumer Key* of an application key mapping.\n",
-      "required" : true,
-      "type" : "string"
-    },
-    "mappingId" : {
-      "name" : "mappingId",
-      "in" : "path",
-      "description" : "**ID** of the ***URL Mapping * of an api.\n",
-      "required" : true,
-      "type" : "integer"
+    "Accept" : {
+      "name" : "Accept",
+      "in" : "header",
+      "description" : "Media types acceptable for the response. Default is application/json.\n",
+      "required" : false,
+      "type" : "string",
+      "default" : "application/json"
     }
   }
 }

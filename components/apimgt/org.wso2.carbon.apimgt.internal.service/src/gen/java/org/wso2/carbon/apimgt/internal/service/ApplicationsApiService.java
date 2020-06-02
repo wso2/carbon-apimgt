@@ -9,7 +9,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 
 import java.util.List;
@@ -21,6 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApplicationsApiService {
-      public Response applicationsApplicationIdGet(Integer applicationId, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsGet(String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsGet(String xWSO2Tenant, Integer appId, MessageContext messageContext) throws APIManagementException;
 }

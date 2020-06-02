@@ -51,19 +51,16 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private Map<String, ApplicationKeyMapping> applicationKeyMappingMap;
     private Map<Integer, Application> applicationMap;
     private Map<String, API> apiMap;
-    //    private Map<String, Policy> policyMap;
-//    private Map<String, APIPolicy> apiPolicyMap;
     private Map<String, SubscriptionPolicy> subscriptionPolicyMap;
     private Map<String, ApplicationPolicy> appPolicyMap;
     private Map<String, Subscription> subscriptionMap;
-    private Map<String, Subscriber> subscriberMap;
     public static final int LOADING_POOL_SIZE = 7;
-    private int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+    private String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(LOADING_POOL_SIZE);
 
-    public SubscriptionDataStoreImpl(int tenantId) {
+    public SubscriptionDataStoreImpl(String tenantDomain) {
 
-        this.tenantId = tenantId;
+        this.tenantDomain = tenantDomain;
         initializeStore();
     }
 
@@ -80,14 +77,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.subscriptionPolicyMap = new ConcurrentHashMap<>();
         this.appPolicyMap = new ConcurrentHashMap<>();
         this.subscriptionMap = new ConcurrentHashMap<>();
-        this.subscriberMap = new ConcurrentHashMap<>();
         initializeLoadingTasks();
-    }
-
-    @Override
-    public SubscriptionDataStore getInstance(int tenantId) {
-
-        return new SubscriptionDataStoreImpl(tenantId);
     }
 
     @Override
@@ -136,7 +126,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 () -> {
                     try {
                         log.debug("Calling loadAllApis. ");
-                        return new SubscriptionDataLoaderImpl().loadAllApis(tenantId);
+                        return new SubscriptionDataLoaderImpl().loadAllApis(tenantDomain);
                     } catch (APIManagementException e) {
                         log.error("Exception while loading APIs " + e);
                     }
@@ -149,7 +139,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 () -> {
                     try {
                         log.debug("Calling loadAllSubscriptions.");
-                        return new SubscriptionDataLoaderImpl().loadAllSubscriptions(tenantId);
+                        return new SubscriptionDataLoaderImpl().loadAllSubscriptions(tenantDomain);
                     } catch (APIManagementException e) {
                         log.error("Exception while loading Subscriptions " + e);
                     }
@@ -162,7 +152,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 () -> {
                     try {
                         log.debug("Calling loadAllApplications.");
-                        return new SubscriptionDataLoaderImpl().loadAllApplications(tenantId);
+                        return new SubscriptionDataLoaderImpl().loadAllApplications(tenantDomain);
                     } catch (APIManagementException e) {
                         log.error("Exception while loading Applications " + e);
                     }
@@ -176,7 +166,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                         () -> {
                             try {
                                 log.debug("Calling loadAllKeyMappings.");
-                                return new SubscriptionDataLoaderImpl().loadAllKeyMappings(tenantId);
+                                return new SubscriptionDataLoaderImpl().loadAllKeyMappings(tenantDomain);
                             } catch (APIManagementException e) {
                                 log.error("Exception while loading ApplicationKeyMapping " + e);
                             }
@@ -190,7 +180,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                         () -> {
                             try {
                                 log.debug("Calling loadAllSubscriptionPolicies.");
-                                return new SubscriptionDataLoaderImpl().loadAllSubscriptionPolicies(tenantId);
+                                return new SubscriptionDataLoaderImpl().loadAllSubscriptionPolicies(tenantDomain);
                             } catch (APIManagementException e) {
                                 log.error("Exception while loading Subscription Policies " + e);
                             }
@@ -204,7 +194,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                         () -> {
                             try {
                                 log.debug("Calling loadAllAppPolicies.");
-                                return new SubscriptionDataLoaderImpl().loadAllAppPolicies(tenantId);
+                                return new SubscriptionDataLoaderImpl().loadAllAppPolicies(tenantDomain);
                             } catch (APIManagementException e) {
                                 log.error("Exception while loading Application Policies " + e);
                             }
@@ -212,22 +202,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                         });
 
         executorService.schedule(appPolicyLoadingTask, 0, TimeUnit.SECONDS);
-//todo load subscribers
-//        Runnable apiPolicyLoadingTask = //todo validate from local cache
-//                new PeriodicPopulateTask<String, APIPolicy>(apiPolicyMap,
-//                        () -> {
-//                            try {
-//                                log.debug("Calling loadAllApiPolicies.");
-//                                return dataLoader.loadAllApiPolicies();
-//                            } catch (APIManagementException e) {
-//                                log.error("Exception while loading Api Policies");
-//                            }
-//                            return null;
-//                        });
-//
-//        executorService.scheduleAtFixedRate(apiPolicyLoadingTask, 0,
-//                this.mapBasedSubscriptionStoreConfig.getPolicyLoadingFrequency(), TimeUnit.SECONDS);
-
     }
 
     private <T extends Policy> T getPolicy(String policyName, int tenantId,

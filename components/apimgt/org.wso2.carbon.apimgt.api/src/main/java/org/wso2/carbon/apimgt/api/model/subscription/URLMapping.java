@@ -18,12 +18,14 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
+import java.util.Objects;
+
 public class URLMapping {
 
-    private int id;
-    private int apiId;
     private String throttlingPolicy;
     private String authScheme;
+    private String httpMethod;
+    private String urlPattern;
 
     public String getHttpMethod() {
 
@@ -33,28 +35,6 @@ public class URLMapping {
     public void setHttpMethod(String httpMethod) {
 
         this.httpMethod = httpMethod;
-    }
-
-    private String httpMethod;
-
-    public int getId() {
-
-        return id;
-    }
-
-    public void setId(int id) {
-
-        this.id = id;
-    }
-
-    public int getApiId() {
-
-        return apiId;
-    }
-
-    public void setApiId(int apiId) {
-
-        this.apiId = apiId;
     }
 
     public String getThrottlingPolicy() {
@@ -75,5 +55,44 @@ public class URLMapping {
     public void setAuthScheme(String authScheme) {
 
         this.authScheme = authScheme;
+    }
+
+    public String getUrlPattern() {
+
+        return urlPattern;
+    }
+
+    public void setUrlPattern(String urlPattern) {
+
+        this.urlPattern = urlPattern;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        URLMapping that = (URLMapping) o;
+        return Objects.equals(throttlingPolicy, that.throttlingPolicy) &&
+                Objects.equals(authScheme, that.authScheme) &&
+                Objects.equals(httpMethod, that.httpMethod) &&
+                Objects.equals(urlPattern, that.urlPattern);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(throttlingPolicy, authScheme, httpMethod, urlPattern);
+    }
+
+    @Override
+    public String toString() {
+
+        return "URLMapping {" +
+                ", throttlingPolicy ='" + throttlingPolicy + '\'' +
+                ", authScheme ='" + authScheme + '\'' +
+                ", httpMethod ='" + httpMethod + '\'' +
+                ", urlPattern ='" + urlPattern + '\'' +
+                '}';
     }
 }

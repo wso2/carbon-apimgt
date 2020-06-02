@@ -21,7 +21,6 @@ import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataStoreImpl;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /*
@@ -29,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * */
 public class SubscriptionDataHolder {
 
-    private Map<Integer, SubscriptionDataStore> subscriptionStore =
+    private Map<String, SubscriptionDataStore> subscriptionStore =
             new ConcurrentHashMap<>();
     private static SubscriptionDataHolder instance = new SubscriptionDataHolder();
 
@@ -38,18 +37,18 @@ public class SubscriptionDataHolder {
         return instance;
     }
 
-    public void registerTenantSubscriptionStore(int tenantId) {
+    public void registerTenantSubscriptionStore(String tenantDomain) {
 
-        SubscriptionDataStore tenantStore = subscriptionStore.get(tenantId);
+        SubscriptionDataStore tenantStore = subscriptionStore.get(tenantDomain);
         if (tenantStore == null) {
-            tenantStore = new SubscriptionDataStoreImpl(tenantId);
+            tenantStore = new SubscriptionDataStoreImpl(tenantDomain);
         }
-        subscriptionStore.put(tenantId, tenantStore);
+        subscriptionStore.put(tenantDomain, tenantStore);
     }
 
     public void unregisterTenantSubscriptionStore(int tenantId) {
 
-        subscriptionStore.keySet().removeIf(tenant -> tenant == tenantId);
+        subscriptionStore.remove(tenantId);
     }
 
     public SubscriptionDataStore getTenantSubscriptionStore(int tenantId) {

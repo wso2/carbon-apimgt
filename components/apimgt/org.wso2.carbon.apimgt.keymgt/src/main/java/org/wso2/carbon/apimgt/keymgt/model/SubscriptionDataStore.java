@@ -30,14 +30,6 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
 public interface SubscriptionDataStore {
 
     /**
-     * Gets an {@link SubscriptionDataStore} by tenant Id
-     *
-     * @param tenantId
-     * @return {@link SubscriptionDataStore} for the given appId
-     */
-    SubscriptionDataStore getInstance(int tenantId);
-
-    /**
      * Gets an {@link Application} by Id
      *
      * @param appId Id of the Application

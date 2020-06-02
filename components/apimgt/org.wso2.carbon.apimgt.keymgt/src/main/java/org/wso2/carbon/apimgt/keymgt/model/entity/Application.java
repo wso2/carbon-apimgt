@@ -20,6 +20,11 @@ package org.wso2.carbon.apimgt.keymgt.model.entity;
 
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Entity for keeping Application related information. Represents an Application in APIM.
  */
@@ -30,7 +35,8 @@ public class Application implements CacheableEntity<Integer> {
     private Integer subId = null;
     private String policy = null;
     private String tokenType = null;
-    private String groupId = null;
+    private List<String> groupIds = new ArrayList<>();
+    private Map<String, String> attributes = new ConcurrentHashMap<>();
 
     public Integer getId() {
 
@@ -87,13 +93,33 @@ public class Application implements CacheableEntity<Integer> {
         return getId();
     }
 
-    public String getGroupId() {
+    public List<String> getGroupIds() {
 
-        return groupId;
+        return groupIds;
     }
 
-    public void setGroupId(String groupId) {
+    public void addGroupId(String groupId) {
 
-        this.groupId = groupId;
+        this.groupIds.add(groupId);
+    }
+
+    public void removeGroupId(String groupId) {
+
+        this.groupIds.remove(groupId);
+    }
+
+    public Map<String, String> getAttributes() {
+
+        return attributes;
+    }
+
+    public void addAttribute(String key, String value) {
+
+        this.attributes.put(key, value);
+    }
+
+    public void removeAttribute(String key) {
+
+        this.attributes.remove(key);
     }
 }

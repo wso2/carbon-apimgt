@@ -2,6 +2,9 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
 import javax.validation.constraints.*;
 
 
@@ -21,6 +24,7 @@ public class APIDTO   {
     private String version = null;
     private String context = null;
     private String policy = null;
+    private List<URLMappingDTO> urlMaping = new ArrayList<>();
 
   /**
    **/
@@ -129,6 +133,23 @@ public class APIDTO   {
     this.policy = policy;
   }
 
+  /**
+   **/
+  public APIDTO urlMaping(List<URLMappingDTO> urlMaping) {
+    this.urlMaping = urlMaping;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("urlMaping")
+  public List<URLMappingDTO> getUrlMaping() {
+    return urlMaping;
+  }
+  public void setUrlMaping(List<URLMappingDTO> urlMaping) {
+    this.urlMaping = urlMaping;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -144,12 +165,13 @@ public class APIDTO   {
         Objects.equals(name, API.name) &&
         Objects.equals(version, API.version) &&
         Objects.equals(context, API.context) &&
-        Objects.equals(policy, API.policy);
+        Objects.equals(policy, API.policy) &&
+        Objects.equals(urlMaping, API.urlMaping);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiId, provider, name, version, context, policy);
+    return Objects.hash(apiId, provider, name, version, context, policy, urlMaping);
   }
 
   @Override
@@ -163,6 +185,7 @@ public class APIDTO   {
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
+    sb.append("    urlMaping: ").append(toIndentedString(urlMaping)).append("\n");
     sb.append("}");
     return sb.toString();
   }
