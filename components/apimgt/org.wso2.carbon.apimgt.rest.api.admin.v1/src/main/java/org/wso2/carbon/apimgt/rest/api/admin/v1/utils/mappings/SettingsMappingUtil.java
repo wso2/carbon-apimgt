@@ -72,7 +72,7 @@ public class SettingsMappingUtil {
         return scopeList;
     }
 
-    public List<String> GetRoleScopeList(String[] userRoles, String username) {
+    public List<String> GetRoleScopeList(String[] userRoles, Map<String, String> scopeRoleMapping) {
         List<String> userRoleList;
         List<String> authorizedScopes = new ArrayList<>();
 
@@ -81,8 +81,6 @@ public class SettingsMappingUtil {
         }
 
         userRoleList = Arrays.asList(userRoles);
-        Map<String, String> scopeRoleMapping =
-                APIUtil.getRESTAPIScopesForTenant(MultitenantUtils.getTenantDomain(username));
         Iterator<Map.Entry<String, String>> iterator = scopeRoleMapping.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, String> entry = iterator.next();

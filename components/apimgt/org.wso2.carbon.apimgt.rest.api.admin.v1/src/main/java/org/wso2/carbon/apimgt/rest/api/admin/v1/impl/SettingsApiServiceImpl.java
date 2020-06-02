@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
+import java.util.Map;
 
 public class SettingsApiServiceImpl implements SettingsApiService {
 
@@ -67,24 +68,26 @@ public class SettingsApiServiceImpl implements SettingsApiService {
         String[] userRoles;
         ScopeSettingsDTO scopeSettingsDTO = new ScopeSettingsDTO();
         ErrorDTO errorDTO = new ErrorDTO();
-
+        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
+                .getTenantDomain(username));
         try {
-            if (APIUtil.isUserExist(username) && APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
-                    .getTenantDomain(username)).containsKey(scopeName)) {
+            if (APIUtil.isUserExist(username) && scopeRoleMapping.containsKey(scopeName)) {
                 userRoles = APIUtil.getListOfRoles(username);
                 SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
 
-                if (settingsMappingUtil.GetRoleScopeList(userRoles, username).contains(scopeName)) {
+                if (settingsMappingUtil.GetRoleScopeList(userRoles, scopeRoleMapping).contains(scopeName)) {
                     scopeSettingsDTO.setName(scopeName);
                 }
             } else {
                 errorDTO.setCode(404l);
-                errorDTO.description("Username or Scope does not exist");
+                errorDTO.description("Username or Scope does not exist. Username: "
+                        + username + ", " + "Scope: " + scopeName);
                 errorDTO.setMessage("Not Found");
                 return Response.ok().entity(errorDTO).build();
             }
         } catch (APIManagementException e) {
-            String errorMessage = "Error when getting the list of scopes";
+            String errorMessage = "Error when getting the list of scopes. Username: " + username + " , "
+                    + "Scope: " + scopeName;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return Response.ok().entity(scopeSettingsDTO).build();
