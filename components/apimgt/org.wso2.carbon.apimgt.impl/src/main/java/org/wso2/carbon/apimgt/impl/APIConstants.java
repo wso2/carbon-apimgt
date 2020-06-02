@@ -2248,6 +2248,7 @@ public final class APIConstants {
     // Supported Notifier Types
     public enum NotifierType {
         API,
+        GATEWAY_PUBLISHED_API,
         APPLICATION,
         APPLICATION_REGISTRATION,
         POLICY,
@@ -2269,7 +2270,8 @@ public final class APIConstants {
         POLICY_DELETE,
         SUBSCRIPTIONS_CREATE,
         SUBSCRIPTIONS_UPDATE,
-        SUBSCRIPTIONS_DELETE
+        SUBSCRIPTIONS_DELETE,
+        PUBLISH_API_IN_GATEWAY
     }
 
     public static class GatewayArtifactSynchronizer{
@@ -2279,5 +2281,6 @@ public final class APIConstants {
         public static final String RETRIEVER_CONFIG = "Retriever";
         public static final String SKIP_LOCAL_COPY_CONFIG  = "SkipLocalCopy";
         public static final String GATEWAY_LABEL_CONFIG  = "GatewayLabel";
+        public static final String PUBLISH_EVENT_LABEL = "PublishInGateway";
     }
 }

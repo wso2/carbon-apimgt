@@ -48,6 +48,8 @@ import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIGatewayEvent;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
@@ -236,6 +238,14 @@ public class APIGatewayManager {
                     setSecureVaultPropertyToBeAdded(api, gatewayAPIDTO);
                     if (gatewayArtifactSynchronizerProperties.isSyncArtifacts()) {
                         ServiceReferenceHolder.getInstance().getArtifactPublisher().publishArtifacts(gatewayAPIDTO);
+
+                        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                        APIGatewayEvent apiGatewayEvent = new APIGatewayEvent(UUID.randomUUID().toString(),
+                                System.currentTimeMillis(),
+                                APIConstants.EventType.PUBLISH_API_IN_GATEWAY.name(), tenantId, gatewayAPIDTO.getName(),
+                                gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel(),
+                                APIConstants.GatewayArtifactSynchronizer.PUBLISH_EVENT_LABEL);
+                        APIUtil.sendNotification(apiGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
                     } else {
                         client.deployAPI(gatewayAPIDTO);
                     }
@@ -292,7 +302,6 @@ public class APIGatewayManager {
     }
 
     public boolean deployAPI (String apiName, String label, String apiId){
-
 
         if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getGatewayArtifactSynchronizerProperties().isSyncArtifacts()) {
