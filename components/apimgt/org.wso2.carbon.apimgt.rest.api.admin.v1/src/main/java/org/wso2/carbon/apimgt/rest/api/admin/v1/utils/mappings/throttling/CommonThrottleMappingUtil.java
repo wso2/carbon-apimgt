@@ -209,17 +209,11 @@ public class CommonThrottleMappingUtil {
         return conditions;
     }
 
-    public static String constructErrorMessage(ThrottleConditionTypeDTO.TypeEnum typeEnum,
-                                                ThrottleConditionTypeDTO dto) {
-        return "Condition item corresponding to type " + typeEnum + " not provided\n"
-                + dto.toString();
-    }
-
     /**
-     * Converts a list of Condition objects into a list of Throttle Condition DTO objects
+     * Converts a list of Condition objects into a list of Throttle Condition Type DTO objects
      *
      * @param conditions List of Condition objects
-     * @return a list of Throttle Condition DTO objects derived from a list of model Condition objects
+     * @return a list of Throttle Condition Type DTO objects derived from a list of model Condition objects
      * @throws UnsupportedThrottleConditionTypeException
      */
     public static List<ThrottleConditionTypeDTO> fromConditionListToDTOList(List<Condition> conditions)
@@ -702,5 +696,19 @@ public class CommonThrottleMappingUtil {
             default:
                 return null;
         }
+    }
+
+    /**
+     * Constructs an error message to indicate that condition item corresponding to a condition type is not provided
+     *
+     * @param typeEnum Throttle Condition Type DTO's Type Enum
+     * @param dto      Throttle Conditiom Type DTO onject
+     * @return constructed error message
+     */
+    public static String constructErrorMessage(ThrottleConditionTypeDTO.TypeEnum typeEnum,
+                                               ThrottleConditionTypeDTO dto) {
+
+        return "Condition item corresponding to type " + typeEnum + " not provided\n"
+                + dto.toString();
     }
 }
