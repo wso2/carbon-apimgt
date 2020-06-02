@@ -12,6 +12,8 @@
   "Admin.Throttling.Custom.Throttling.policy.table.header.description": "Description",
   "Admin.Throttling.Custom.Throttling.policy.table.header.key.template": "Key Template",
   "Admin.Throttling.Custom.Throttling.policy.table.header.name": "Name",
+  "Admin.Throttling.Custom.policy.add.policy.description": "Description of Throttling Policy",
+  "Admin.Throttling.Custom.policy.add.policy.name": "Name of Throttling Policy",
   "Admin.Throttling.Custom.policy.add.siddhi.query": "Siddhi Query:",
   "Admin.Throttling.Custom.policy.add.siddhi.query.description": "The following query will allow 5 requests per minute for an Admin user.",
   "Admin.Throttling.Custom.policy.add.siddhi.query.key.template": "Key Template : $userId",
@@ -194,6 +196,11 @@
   "Throttling.Blacklist.Policy.policy.dialog.delete.error": "Blacklist Policy will be deleted.",
   "Throttling.Blacklist.Policy.policy.update.success": "Condition status has been updated successfully.",
   "Throttling.Blacklist.Policy.search.default": "Blacklist Policies",
+  "Throttling.Custom.AddEdit.form.add": "Add",
+  "Throttling.Custom.AddEdit.form.cancel": "Cancel",
+  "Throttling.Custom.AddEdit.title.add": "Custom Rate Limiting Policy - Define Policy",
+  "Throttling.Custom.AddEdit.title.edit": "Custom Rate Limiting Policy - Edit",
+  "Throttling.Custom.List.add.new.polcy": "Define Policy",
   "Throttling.Custom.Policy.List.addButtonProps.title": "Define Custom Policy",
   "Throttling.Custom.Policy.List.addButtonProps.triggerButtonText": "Define Policy",
   "Throttling.Custom.Policy.List.empty.content.custom.policies and abuse by": "Custom throttling allows system administrators to define dynamic rules for specific use cases, which are applied globally across all tenants.",
@@ -207,5 +214,6 @@
   "UnexpectedError.logout": "Logout",
   "UnexpectedError.message": "Error occured due to invalid request",
   "UnexpectedError.title": "Internal Server Error",
-  "app.components.Shared.Banner.back": "Back"
+  "app.components.Shared.Banner.back": "Back",
+  "dsdds": "The specific combination of attributes being checked in the policy need to be defined as the key template"
 }

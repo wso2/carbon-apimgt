@@ -12,6 +12,8 @@
   "Admin.Throttling.Custom.Throttling.policy.table.header.description": "",
   "Admin.Throttling.Custom.Throttling.policy.table.header.key.template": "",
   "Admin.Throttling.Custom.Throttling.policy.table.header.name": "",
+  "Admin.Throttling.Custom.policy.add.policy.description": "",
+  "Admin.Throttling.Custom.policy.add.policy.name": "",
   "Admin.Throttling.Custom.policy.add.siddhi.query": "",
   "Admin.Throttling.Custom.policy.add.siddhi.query.description": "",
   "Admin.Throttling.Custom.policy.add.siddhi.query.key.template": "",
@@ -194,6 +196,11 @@
   "Throttling.Blacklist.Policy.policy.dialog.delete.error": "",
   "Throttling.Blacklist.Policy.policy.update.success": "",
   "Throttling.Blacklist.Policy.search.default": "",
+  "Throttling.Custom.AddEdit.form.add": "",
+  "Throttling.Custom.AddEdit.form.cancel": "",
+  "Throttling.Custom.AddEdit.title.add": "",
+  "Throttling.Custom.AddEdit.title.edit": "",
+  "Throttling.Custom.List.add.new.polcy": "",
   "Throttling.Custom.Policy.List.addButtonProps.title": "",
   "Throttling.Custom.Policy.List.addButtonProps.triggerButtonText": "",
   "Throttling.Custom.Policy.List.empty.content.custom.policies and abuse by": "",
@@ -207,5 +214,6 @@
   "UnexpectedError.logout": "",
   "UnexpectedError.message": "",
   "UnexpectedError.title": "",
-  "app.components.Shared.Banner.back": ""
+  "app.components.Shared.Banner.back": "",
+  "dsdds": ""
 }

@@ -19,6 +19,7 @@
 import React from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
+import Button from '@material-ui/core/Button';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -28,10 +29,10 @@ import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
 import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
-import AddEdit from 'AppComponents/Throttling/Custom/AddEdit';
 import Delete from 'AppComponents/Throttling/Custom/Delete';
 import API from 'AppData/api';
 import EditIcon from '@material-ui/icons/Edit';
+import { Link as RouterLink } from 'react-router-dom';
 
 /**
  * Render a list
@@ -125,6 +126,12 @@ export default function ListCustomThrottlingPolicies() {
                 sort: false,
             },
         },
+        { // Id column has to be always the last.
+            name: 'policyId',
+            options: {
+                display: false,
+            },
+        },
     ];
 
     const emptyBoxProps = {
@@ -170,6 +177,17 @@ export default function ListCustomThrottlingPolicies() {
         });
     }
 
+    const addButtonOverride = (
+        <RouterLink to='/throttling/custom/create'>
+            <Button variant='contained' color='primary' size='small'>
+                <FormattedMessage
+                    id='Throttling.Custom.List.add.new.polcy'
+                    defaultMessage='Define Policy'
+                />
+            </Button>
+        </RouterLink>
+    );
+
     return (
         <ListBase
             columProps={columProps}
@@ -179,11 +197,12 @@ export default function ListCustomThrottlingPolicies() {
             emptyBoxProps={emptyBoxProps}
             apiCall={apiCall}
             DeleteComponent={Delete}
-            EditComponent={AddEdit}
             editComponentProps={{
                 icon: <EditIcon />,
-                title: 'Edit Custom Policy',
+                title: 'Edit Policy',
+                routeTo: '/throttling/custom/',
             }}
+            addButtonOverride={addButtonOverride}
         />
     );
 }
