@@ -15458,10 +15458,22 @@ public class ApiMgtDAO {
             statement.setString(2, APIName);
             statement.setString(3, gatewayLabel);
             statement.setBinaryStream(4, bais, streamLength);
-            statement.setBinaryStream(5, bais, streamLength);
             statement.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to add blob for " + APIName , e);
+            handleException("Failed to add blob for " + APIName, e);
+        }
+    }
+
+    public void updateAPIBlob(String APIId, String gatewayLabel, ByteArrayInputStream bais,
+                           int streamLength) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_BLOB)) {
+            statement.setBinaryStream(1, bais, streamLength);
+            statement.setString(2, APIId);
+            statement.setString(3, gatewayLabel);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to update blob for API with ID " + APIId, e);
         }
     }
 
@@ -15478,9 +15490,20 @@ public class ApiMgtDAO {
                 baip = new ByteArrayInputStream(st);
             }
         } catch (SQLException e) {
-            handleException("Failed to get API Blob user ID for " + APIName , e);
+            handleException("Failed to get API Blob user ID for " + APIName, e);
         }
         return baip;
+    }
+
+    public void deleteAPIBlob(String APIId, String gatewayLabel) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_API_BLOB)) {
+            statement.setString(1, APIId);
+            statement.setString(2, gatewayLabel);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to delete blob of API with ID " + APIId, e);
+        }
     }
 
 }
