@@ -40,9 +40,9 @@
 
         var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
         var systemApplicationDAO = new SystemApplicationDTO();
-        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME,SUPER_TENANT_DOMAIN);
+        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME,SUPER_TENANT_DOMAIN);
         if (systemApplicationDTO === null) {
-            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD,SUPER_TENANT_DOMAIN);
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME_OLD,SUPER_TENANT_DOMAIN);
         }
         if (systemApplicationDTO == null) {
             log.error("Oauth application details not found for 'admin portal'");
@@ -81,7 +81,7 @@
                 var refreshTokenPart1 = refreshToken.substring(0, tokenLength / 2);
                 var refreshTokenPart2 = refreshToken.substring(tokenLength / 2, tokenLength);
 
-                // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/publisher
+                // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/admin
                 // because partial HTTP only cookie is required for get the user information from access token,
                 // hence setting the HTTP only access token path to App context
                 var cookie = {
@@ -97,7 +97,7 @@
                 cookie = {
                     'name': 'AM_ACC_TOKEN_DEFAULT_P2',
                     'value': accessTokenPart2,
-                    'path': "/api/am/publisher/",
+                    'path': "/api/am/admin/",
                     "httpOnly": true,
                     "secure": true,
                     "maxAge": Integer(tokenResponse.expires_in)

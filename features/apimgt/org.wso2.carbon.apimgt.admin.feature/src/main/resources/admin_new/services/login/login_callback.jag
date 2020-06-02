@@ -45,9 +45,9 @@
         var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
         var systemApplicationDAO = new SystemApplicationDTO();
         // this is to support migration from admin_publisher to apim_publisher
-        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME, SUPER_TENANT_DOMAIN);
+        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME, SUPER_TENANT_DOMAIN);
         if (systemApplicationDTO === null) {
-            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD, SUPER_TENANT_DOMAIN);
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(ADMIN_CLIENT_APP_NAME_OLD, SUPER_TENANT_DOMAIN);
         }
         var clientId = systemApplicationDTO.getConsumerKey();
         var clientSecret = systemApplicationDTO.getConsumerSecret();
@@ -78,7 +78,7 @@
         var refreshTokenPart1 = refreshToken.substring(0, tokenLength / 2);
         var refreshTokenPart2 = refreshToken.substring(tokenLength / 2, tokenLength);
 
-        // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/publisher
+        // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/admin
         // because partial HTTP only cookie is required for get the user information from access token,
         // hence setting the HTTP only access token path to App context
         var cookie = {
@@ -148,7 +148,7 @@
         response.addCookie(cookie);
 
         cookie = {
-            'name': 'publisher_session_state',
+            'name': 'admin_session_state',
             'value': request.getParameter("session_state", "UTF-8"),
             'path': app.context + "/",
             "secure": true,
