@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import PeopleIcon from '@material-ui/icons/People';
 import DnsRoundedIcon from '@material-ui/icons/DnsRounded';
 import PermMediaOutlinedIcon from '@material-ui/icons/PhotoSizeSelectActual';
@@ -48,7 +48,7 @@ const RouteMenuMapping = (intl) => [
         icon: <HomeIcon />,
         path: '/dashboard',
         component: <Dashboard />,
-        exact: false,
+        exact: true,
     },
     {
         id: intl.formatMessage({
@@ -199,7 +199,6 @@ const RouteMenuMapping = (intl) => [
                 path: '/throttling/application',
                 component: () => <ApplicationThrottlingPolicies />,
                 icon: <TimerIcon />,
-                exact: true,
             },
             {
                 id: intl.formatMessage({
