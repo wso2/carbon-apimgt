@@ -60,12 +60,28 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts")
         })
-    }, tags={ "Alert Subscriptions" })
+    }, tags={ "Alert Subscriptions",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "OK. Successful response with the newly subscribed alerts. ", response = AlertsSubscriptionDTO.class),
+        @ApiResponse(code = 200, message = "OK. Successful response with the newly subscribed alerts. ", response = AlertsSubscriptionDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid Request or request validation failure. ", response = Void.class),
         @ApiResponse(code = 500, message = "Internal Server Error An internal server error occurred while subscribing to alerts. ", response = ErrorDTO.class) })
     public Response subscribeToAlerts(@ApiParam(value = "The alerts list and the email list to subscribe." ,required=true) AlertsSubscriptionDTO body) throws APIManagementException{
         return delegate.subscribeToAlerts(body, securityContext);
+    }
+
+    @DELETE
+    
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Unsubscribe user from all the admin alert types. ", notes = "This operation is used to unsubscribe the respective user from all the admin alert types. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts")
+        })
+    }, tags={ "Alert Subscriptions" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The user is unsubscribed from the alerts successfully. ", response = Void.class),
+        @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
+    public Response unsubscribeAllAlerts() throws APIManagementException{
+        return delegate.unsubscribeAllAlerts(securityContext);
     }
 }

@@ -3224,7 +3224,7 @@ paths:
       tags:
         - Alert Subscriptions
       responses:
-        201:
+        200:
           description: |
             OK.
             Successful response with the newly subscribed alerts.
@@ -3245,6 +3245,37 @@ paths:
             An internal server error occurred while subscribing to alerts.
           schema:
             $ref: '#/definitions/Error'
+
+    #--------------------------------------------------
+    # Unsubscribe the user from all the admin alerts types
+    #--------------------------------------------------
+    delete:
+      security:
+        - OAuth2Security:
+            - apim:admin_alert_manage
+      summary: |
+        Unsubscribe user from all the admin alert types.
+      operationId: unsubscribeAllAlerts
+      description: |
+        This operation is used to unsubscribe the respective user from all the admin alert types.
+      tags:
+        - Alert Subscriptions
+      responses:
+        200:
+          description: |
+            OK.
+            The user is unsubscribed from the alerts successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        500:
+          description: |
+            Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
 
   /settings/scopes/{scope}:
     #-----------------------------------------------------

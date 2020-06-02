@@ -23,4 +23,5 @@ import javax.ws.rs.core.SecurityContext;
 public interface AlertSubscriptionsApiService {
       public Response getSubscribedAlertTypes(MessageContext messageContext) throws APIManagementException;
       public Response subscribeToAlerts(AlertsSubscriptionDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response unsubscribeAllAlerts(MessageContext messageContext) throws APIManagementException;
 }
