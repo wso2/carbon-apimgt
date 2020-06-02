@@ -20,8 +20,10 @@ package org.wso2.carbon.apimgt.impl.listeners;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +37,8 @@ public class ServerStartupListener implements ServerStartupObserver {
     @Override
     public void completedServerStartup() {
         copyToExtensions();
+        //TODO: Only register when API-M KeyManager Profile is used as the KM.
+        KeyMgtRegistrationService.registerKeyMgtApplication(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
     }
 
     /**

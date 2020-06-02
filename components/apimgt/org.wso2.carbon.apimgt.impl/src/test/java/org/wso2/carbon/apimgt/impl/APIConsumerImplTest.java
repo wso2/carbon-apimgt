@@ -870,7 +870,7 @@ public class APIConsumerImplTest {
     public void testGetScopesBySubscribedAPIs() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         List<APIIdentifier> identifiers = new ArrayList<>();
-        Set<Scope> scopes = new HashSet<>();
+        Set<String> scopes = new HashSet<>();
         when(apiMgtDAO.getScopesBySubscribedAPIs(identifiers)).thenReturn(scopes);
         assertEquals(scopes, apiConsumer.getScopesBySubscribedAPIs(identifiers));
     }
@@ -1279,10 +1279,10 @@ public class APIConsumerImplTest {
     public void testUpdateSubscriptions() throws APIManagementException {
         APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
         ApiTypeWrapper apiTypeWrapper = Mockito.mock(ApiTypeWrapper.class);
-        Mockito.doNothing().when(apiMgtDAO).updateSubscriptions(apiTypeWrapper, 2);
+        Mockito.doNothing().when(apiMgtDAO).updateSubscriptions(apiTypeWrapper, 2, "1");
         new APIConsumerImplWrapper(apiMgtDAO).updateSubscriptions(identifier, "1", 2);
         Mockito.verify(apiMgtDAO, Mockito.times(1)).
-                updateSubscriptions(Mockito.any(ApiTypeWrapper.class), eq(2));
+                updateSubscriptions(Mockito.any(ApiTypeWrapper.class), eq(2), eq("1"));
     }
 
     @Test
@@ -1354,7 +1354,7 @@ public class APIConsumerImplTest {
         Mockito.when(api.getStatus()).thenReturn(APIConstants.PUBLISHED);
         Mockito.when(api.getId()).thenReturn(new APIIdentifier(API_PROVIDER, "published_api",
                 SAMPLE_API_VERSION));
-        Mockito.when(apiMgtDAO.addSubscription(Mockito.any(), Mockito.anyInt(), Mockito.anyString())).thenReturn(1);
+        Mockito.when(apiMgtDAO.addSubscription(Mockito.any(), Mockito.anyInt(), Mockito.anyString(), Mockito.anyString())).thenReturn(1);
         Mockito.when(apiMgtDAO.isAppAllowed(Mockito.anyInt(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);

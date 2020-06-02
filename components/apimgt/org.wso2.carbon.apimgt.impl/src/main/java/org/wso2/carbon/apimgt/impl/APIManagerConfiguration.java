@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
@@ -148,6 +149,24 @@ public class APIManagerConfiguration {
     }
 
     /**
+     * Returns Product REST APIs' cache configuration by reading from api-manager.xml
+     *
+     * @return Product REST APIs' cache configuration.
+     */
+    public RESTAPICacheConfiguration getRESTAPICacheConfig() {
+        boolean tokenCacheEnabled = Boolean.parseBoolean(getFirstProperty(APIConstants.REST_API_TOKEN_CACHE_ENABLED));
+        int tokenCacheExpiry = Integer.parseInt(getFirstProperty(APIConstants.REST_API_TOKEN_CACHE_EXPIRY));
+        boolean cacheControlHeadersEnabled = Boolean.parseBoolean(getFirstProperty(APIConstants.REST_API_CACHE_CONTROL_HEADERS_ENABLED));
+        int cacheControlHeadersMaxAge = Integer.parseInt(getFirstProperty(APIConstants.REST_API_CACHE_CONTROL_HEADERS_MAX_AGE));
+        return new RESTAPICacheConfiguration.Builder()
+                .tokenCacheEnabled(tokenCacheEnabled)
+                .tokenCacheExpiry(tokenCacheExpiry)
+                .cacheControlHeadersEnabled(cacheControlHeadersEnabled)
+                .cacheControlHeadersMaxAge(cacheControlHeadersMaxAge)
+                .build();
+    }
+
+    /**
      * Returns the configuration of the InMemory Subscription validation.
      *
      * @return configuration of the internal data service from the api-manager configuration
@@ -159,7 +178,7 @@ public class APIManagerConfiguration {
 
     /**
      * Populate this configuration by reading an XML file at the given location. This method
-     * can be e xecuted only once on a given APIManagerConfiguration instance. Once invoked and
+     * can be executed only once on a given APIManagerConfiguration instance. Once invoked and
      * successfully populated, it will ignore all subsequent invocations.
      *
      * @param filePath Path of the XML descriptor file

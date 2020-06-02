@@ -28,7 +28,8 @@ public class Scope implements Serializable{
     String name;
     String roles;
     String description;
-    int id;
+    String id;
+    int usageCount;
 
     public String getKey() {
         return key;
@@ -62,12 +63,20 @@ public class Scope implements Serializable{
         this.description = description;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
+    }
+
+    public int getUsageCount() {
+        return usageCount;
+    }
+
+    public void setUsageCount(int usageCount) {
+        this.usageCount = usageCount;
     }
 
     @Override
@@ -77,7 +86,7 @@ public class Scope implements Serializable{
 
         Scope scope = (Scope) o;
 
-        if (id != scope.id) return false;
+        if (id != null ? !id.equals(scope.id) : scope.id != null) return false;
         if (!key.equals(scope.key)) return false;
         if (!name.equals(scope.name)) return false;
         if (roles != null ? !roles.equals(scope.roles) : scope.roles != null) return false;

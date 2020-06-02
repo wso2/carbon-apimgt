@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyDTO
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
@@ -78,6 +79,23 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = ErrorDTO.class) })
     public Response throttlingBlacklistConditionIdGet(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-None-Match") String ifNoneMatch, @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-Modified-Since") String ifModifiedSince) throws APIManagementException{
         return delegate.throttlingBlacklistConditionIdGet(conditionId, ifNoneMatch, ifModifiedSince, securityContext);
+    }
+
+    @PATCH
+    @Path("/blacklist/{conditionId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update a blocking condition", notes = "Update a blocking condition by Id ", response = BlockingConditionDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:bl_manage", description = "Update and delete blocking conditions")
+        })
+    }, tags={ "Blacklist (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Resource successfully updated. ", response = BlockingConditionDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Resource to be updated does not exist. ", response = ErrorDTO.class) })
+    public Response throttlingBlacklistConditionIdPatch(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId, @ApiParam(value = "Blocking condition with updated status " ,required=true) BlockingConditionStatusDTO body, @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
+        return delegate.throttlingBlacklistConditionIdPatch(conditionId, body, contentType, ifMatch, ifUnmodifiedSince, securityContext);
     }
 
     @GET

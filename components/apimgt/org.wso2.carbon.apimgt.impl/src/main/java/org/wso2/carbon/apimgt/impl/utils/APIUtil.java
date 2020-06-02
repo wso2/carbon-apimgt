@@ -120,6 +120,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
+import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
@@ -140,6 +141,8 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
+import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
@@ -241,8 +244,6 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -250,19 +251,16 @@ import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateNotYetValidException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -471,21 +469,22 @@ public final class APIUtil {
             api.setEnableSchemaValidation(Boolean.parseBoolean(
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
-            Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(api.getId());
-            api.setScopes(scopes);
+
+            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
+            api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
 
-            HashMap<String, String> resourceScopesMap;
-            resourceScopesMap = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
-
             for (URITemplate uriTemplate : uriTemplates) {
-                String uTemplate = uriTemplate.getUriTemplate();
-                String method = uriTemplate.getHTTPVerb();
-                String resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                Scope scope = findScopeByKey(scopes, resourceScopesMap.get(resourceScopeKey));
-                uriTemplate.setScope(scope);
-                uriTemplate.setScopes(scope);
+                List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
+                List<Scope> newTemplateScopes = new ArrayList<>();
+                if (!oldTemplateScopes.isEmpty()) {
+                    for (Scope templateScope: oldTemplateScopes) {
+                        Scope scope = scopeToKeyMapping.get(templateScope.getKey());
+                        newTemplateScopes.add(scope);
+                    }
+                }
+                uriTemplate.addAllScopes(newTemplateScopes);
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
             }
@@ -535,6 +534,23 @@ public final class APIUtil {
                 usedByProduct.setUUID(apiProductPath);
             }
         }
+    }
+
+    /**
+     * This method used to send Notifications
+     *
+     * @param event        Event object
+     * @param notifierType eventType
+     */
+    public static void sendNotification(org.wso2.carbon.apimgt.impl.notifier.events.Event event, String notifierType) {
+        List<Notifier> notifierList = ServiceReferenceHolder.getInstance().getNotifiersMap().get(notifierType);
+        notifierList.forEach((notifier) -> {
+            try {
+                notifier.publishEvent(event);
+            } catch (NotifierException e) {
+                log.error("Error when publish " + event + " through notifier:" + notifierType + ". Error:" + e);
+            }
+        });
     }
 
     /**
@@ -656,11 +672,8 @@ public final class APIUtil {
             api.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
-            Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(api.getId());
-            api.setScopes(scopes);
-
-            HashMap<String, String> resourceScopes;
-            resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
+            Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
+            api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
 
@@ -677,10 +690,15 @@ public final class APIUtil {
             for (URITemplate uriTemplate : uriTemplates) {
                 String uTemplate = uriTemplate.getUriTemplate();
                 String method = uriTemplate.getHTTPVerb();
-                String resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                Scope scope = findScopeByKey(scopes, resourceScopes.get(resourceScopeKey));
-                uriTemplate.setScope(scope);
-                uriTemplate.setScopes(scope);
+                List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
+                List<Scope> newTemplateScopes = new ArrayList<>();
+                if (!oldTemplateScopes.isEmpty()) {
+                    for (Scope templateScope: oldTemplateScopes) {
+                        Scope scope = scopeToKeyMapping.get(templateScope.getKey());
+                        newTemplateScopes.add(scope);
+                    }
+                }
+                uriTemplate.addAllScopes(newTemplateScopes);
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
                 // AWS Lambda: set arn & timeout to URI template
@@ -1668,13 +1686,13 @@ public final class APIUtil {
     /**
      * Utility method for creating storage path for an icon.
      *
-     * @param identifier APIIdentifier
+     * @param identifier Identifier
      * @return Icon storage path.
      */
-    public static String getIconPath(APIIdentifier identifier) {
+    public static String getIconPath(Identifier identifier) {
         String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+                identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
         return artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
     }
 
@@ -1823,15 +1841,25 @@ public final class APIUtil {
     /**
      * Utility method to get documentation path
      *
+     * @param id Identifier (API or API Product)
+     * @return Doc path
+     */
+    public static String getAPIOrAPIProductDocPath(Identifier id) {
+        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                id.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                id.getName() + RegistryConstants.PATH_SEPARATOR +
+                id.getVersion() + RegistryConstants.PATH_SEPARATOR +
+                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+    }
+
+    /**
+     * Utility method to get documentation path
+     *
      * @param apiId APIIdentifier
      * @return Doc path
      */
     public static String getAPIDocPath(APIIdentifier apiId) {
-        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiId.getApiName() + RegistryConstants.PATH_SEPARATOR +
-                apiId.getVersion() + RegistryConstants.PATH_SEPARATOR +
-                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+        return getAPIOrAPIProductDocPath(apiId);
     }
 
     /**
@@ -3440,10 +3468,10 @@ public final class APIUtil {
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
             ArrayList<URITemplate> urlPatternsList;
 
-            Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(oldId);
-            api.setScopes(scopes);
+            Map<String, Scope> scopeToKeyMapping = getAPIScopes(oldId, tenantDomainName);
+            api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
-            HashMap<String, String> resourceScopes;
+            HashMap<Integer, Set<String>> resourceScopes;
             resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(oldId);
 
             urlPatternsList = ApiMgtDAO.getInstance().getAllURITemplates(oldContext, oldId.getVersion());
@@ -3452,9 +3480,15 @@ public final class APIUtil {
             for (URITemplate uriTemplate : uriTemplates) {
                 uriTemplate.setResourceURI(api.getUrl());
                 uriTemplate.setResourceSandboxURI(api.getSandboxUrl());
-                String resourceScopeKey = APIUtil.getResourceKey(oldContext, oldId.getVersion(), uriTemplate.getUriTemplate(), uriTemplate.getHTTPVerb());
-                uriTemplate.setScope(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
-
+                List<String> templateScopeKeys = new ArrayList<>(resourceScopes.get(uriTemplate.getId()));
+                List<Scope> newTemplateScopes = new ArrayList<>();
+                if (!templateScopeKeys.isEmpty()) {
+                    for (String templateScope : templateScopeKeys) {
+                        Scope scope = scopeToKeyMapping.get(templateScope);
+                        newTemplateScopes.add(scope);
+                    }
+                }
+                uriTemplate.addAllScopes(newTemplateScopes);
             }
             api.setUriTemplates(uriTemplates);
 
@@ -4452,7 +4486,6 @@ public final class APIUtil {
 
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
             createSelfSignUpRoles(tenantId);
-            createEndpointRegistryRoles(tenantId);
         }
     }
 
@@ -4764,18 +4797,6 @@ public final class APIUtil {
     }
 
     /**
-     * Create Endpoint Registry roles in specified tenant
-     *
-     * @param tenantId id of the tenant
-     * @throws APIManagementException
-     */
-    public static void createEndpointRegistryRoles(int tenantId) throws APIManagementException {
-        createRole(APIConstants.ENDPOINT_REGISTRY_ADMIN_ROLE, null, tenantId);
-        createRole(APIConstants.ENDPOINT_REGISTRY_USER_ROLE, null, tenantId);
-        createRole(APIConstants.ENDPOINT_REGISTRY_BROWSER_ROLE, null, tenantId);
-    }
-
-    /**
      * Creates a role with a given set of permissions for the specified tenant
      *
      * @param roleName    role name
@@ -5010,23 +5031,6 @@ public final class APIUtil {
         } catch (Exception e) {
             log.error("Did not found valid API Validation Information cache configuration. Use default configuration"
                     + e);
-        }
-        return true;
-    }
-
-    /**
-     * Returns whether Product REST APIs' token cache is enabled
-     *
-     * @return true if token cache is enabled
-     */
-    public static boolean isRESTAPITokenCacheEnabled() {
-        try {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            String cacheEnabled = config.getFirstProperty(APIConstants.REST_API_TOKEN_CACHE_ENABLED);
-            return Boolean.parseBoolean(cacheEnabled);
-        } catch (Exception e) {
-            log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e);
         }
         return true;
     }
@@ -5740,7 +5744,6 @@ public final class APIUtil {
      * Return the sequence extension name.
      * eg: admin--testAPi--v1.00
      *
-     * @param api
      * @return
      */
     public static String getSequenceExtensionName(String provider, String name, String version) {
@@ -6009,6 +6012,20 @@ public final class APIUtil {
         return APIUtil.getResourceKey(api.getContext(), api.getId().getVersion(), template.getUriTemplate(),
                 template.getHTTPVerb());
     }
+
+    /**
+     * Get the key of the Resource using context, version, uri template and http verb.( used in scopes)
+     *
+     * @param apiIdentifier - API Identifier
+     * @param template      - URI Template
+     * @return - The resource key
+     */
+    public static String getResourceKey(APIIdentifier apiIdentifier, String context, URITemplate template) {
+
+        return APIUtil.getResourceKey(context, apiIdentifier.getVersion(), template.getUriTemplate(),
+                template.getHTTPVerb());
+    }
+
 
     /**
      * Get the key of the Resource ( used in scopes)
@@ -7551,11 +7568,20 @@ public final class APIUtil {
      *  case, local server will be used as the IDP.
      *
      * @return configuration of the Identity Provider from the api-manager configuration
-     * @throws APIManagementException error when retrieving the configuration
      */
-    public static IDPConfiguration getIdentityProviderConfig() throws APIManagementException {
+    public static IDPConfiguration getIdentityProviderConfig() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getIdentityProviderConfig();
+    }
+
+    /**
+     * Returns Product REST APIs' cache configuration by reading from api-manager.xml
+     *
+     * @return Product REST APIs' cache configuration.
+     */
+    public static RESTAPICacheConfiguration getRESTAPICacheConfig() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getRESTAPICacheConfig();
     }
 
     /**
@@ -10614,5 +10640,38 @@ public final class APIUtil {
 
         }
         return temp;
+    }
+    /**
+     * Get scopes attached to the API.
+     *
+     * @param identifier   API Identifier
+     * @param tenantDomain Tenant Domain
+     * @return Scope key to Scope object mapping
+     * @throws APIManagementException if an error occurs while getting scope attached to API
+     */
+    public static Map<String, Scope> getAPIScopes(APIIdentifier identifier, String tenantDomain)
+            throws APIManagementException {
+
+        Set<String> scopeKeys = ApiMgtDAO.getInstance().getAPIScopeKeys(identifier);
+        return getScopes(scopeKeys, tenantDomain);
+    }
+
+    /**
+     * Get scopes for the given scope keys from authorization server.
+     *
+     * @param scopeKeys    Scope Keys
+     * @param tenantDomain Tenant Domain
+     * @return Scope key to Scope object mapping
+     * @throws APIManagementException if an error occurs while getting scopes using scope keys
+     */
+    public static Map<String, Scope> getScopes(Set<String> scopeKeys, String tenantDomain)
+            throws APIManagementException {
+
+        Map<String, Scope> scopeToKeyMap = new HashMap<>();
+        for (String scopeKey : scopeKeys) {
+            Scope scope = KeyManagerHolder.getKeyManagerInstance().getScopeByName(scopeKey, tenantDomain);
+            scopeToKeyMap.put(scopeKey, scope);
+        }
+        return scopeToKeyMap;
     }
 }

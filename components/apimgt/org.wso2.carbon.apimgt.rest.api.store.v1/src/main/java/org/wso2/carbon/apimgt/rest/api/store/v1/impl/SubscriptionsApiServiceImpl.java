@@ -245,6 +245,107 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     }
 
     /**
+     * Update already created subscriptions with the details specified in the body parameter
+     *
+     * @param body        new subscription details
+     * @return newly added subscription as a SubscriptionDTO if successful
+     */
+    @Override
+    public Response subscriptionsSubscriptionIdPut(SubscriptionDTO body, String subscriptionId, String xWSO2Tenant, MessageContext messageContext) {
+        String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        APIConsumer apiConsumer;
+
+        try {
+            apiConsumer = RestApiUtil.getConsumer(username);
+            String applicationId = body.getApplicationId();
+            String currentThrottlingPolicy = body.getThrottlingPolicy();
+            String requestedThrottlingPolicy = body.getRequestedThrottlingPolicy();
+
+            //Check whether the subscription status is not empty and also not blocked
+            if (body.getStatus() != null) {
+                if (body.getStatus().value() == "BLOCKED" || body.getStatus().value() == "ON_HOLD"
+                        || body.getStatus().value() == "REJECTED") {
+                    RestApiUtil.handleBadRequest(
+                            "Cannot update subscriptions with provided status", log);
+                    return null;
+                }
+            } else {
+                RestApiUtil.handleBadRequest(
+                        "Request must contain status of the subscription", log);
+                return null;
+            }
+
+            //check whether user is permitted to access the API. If the API does not exist,
+            // this will throw a APIMgtResourceNotFoundException
+            if (body.getApiId() != null) {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(body.getApiId(), tenantDomain)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiId(), log);
+                }
+            }  else {
+                RestApiUtil.handleBadRequest(
+                        "Request must contain either apiIdentifier or apiProductIdentifier and the relevant type", log);
+                return null;
+            }
+
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application == null) {
+                //required application not found
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                return null;
+            }
+
+            if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                //application access failure occurred
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), tenantDomain);
+
+            //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
+            //  throw an APIMgtAuthorizationFailedException with the reason as the message
+            RestAPIStoreUtils.checkSubscriptionAllowed(apiTypeWrapper, body.getThrottlingPolicy());
+
+            apiTypeWrapper.setTier(body.getThrottlingPolicy());
+
+            SubscriptionResponse subscriptionResponse = apiConsumer
+                    .updateSubscription(apiTypeWrapper, username, application.getId(), subscriptionId,
+                            currentThrottlingPolicy, requestedThrottlingPolicy);
+            SubscribedAPI addedSubscribedAPI = apiConsumer
+                    .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
+            SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
+            WorkflowResponse workflowResponse = subscriptionResponse.getWorkflowResponse();
+            if (workflowResponse instanceof HttpWorkflowResponse) {
+                String payload = workflowResponse.getJSONPayload();
+                addedSubscriptionDTO.setRedirectionParams(payload);
+            }
+
+            return Response.ok(new URI(RestApiConstants.RESOURCE_PATH_SUBSCRIPTIONS + "/" +
+                    addedSubscribedAPI.getUUID())).entity(addedSubscriptionDTO).build();
+
+        } catch (APIMgtAuthorizationFailedException e) {
+            //this occurs when the api:application:tier mapping is not allowed. The reason for the message is taken from
+            // the message of the exception e
+            RestApiUtil.handleAuthorizationFailure(e.getMessage(), e, log);
+        } catch (SubscriptionAlreadyExistingException e) {
+            RestApiUtil.handleResourceAlreadyExistsError(
+                    "Specified subscription already exists for API " + body.getApiId() + ", for application "
+                            + body.getApplicationId(), e, log);
+        } catch (APIManagementException | URISyntaxException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                //this happens when the specified API identifier does not exist
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, body.getApiId(), e, log);
+            } else {
+                //unhandled exception
+                RestApiUtil.handleInternalServerError(
+                        "Error while adding the subscription API:" + body.getApiId() + ", application:" + body
+                                .getApplicationId() + ", tier:" + body.getThrottlingPolicy(), e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Create multiple new subscriptions with the list of subscription details specified in the body parameter.
      *
      * @param body        list of new subscription details

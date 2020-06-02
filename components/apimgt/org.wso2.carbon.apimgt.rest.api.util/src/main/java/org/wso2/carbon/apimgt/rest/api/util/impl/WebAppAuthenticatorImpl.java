@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -34,6 +35,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
@@ -63,8 +65,9 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                 RestApiConstants.REGEX_BEARER_PATTERN, RestApiConstants.AUTH_HEADER_NAME);
         AccessTokenInfo tokenInfo = null;
 
+        RESTAPICacheConfiguration cacheConfiguration = APIUtil.getRESTAPICacheConfig();
         //validate the token from cache if it is enabled
-        if (APIUtil.isRESTAPITokenCacheEnabled()) {
+        if (cacheConfiguration.isTokenCacheEnabled()) {
             tokenInfo = (AccessTokenInfo)getRESTAPITokenCache().get(accessToken);
             if (tokenInfo != null) {
                 if (isAccessTokenExpired(tokenInfo)) {
@@ -98,7 +101,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
 
         // if we got valid access token we will proceed with next
         if (tokenInfo != null && tokenInfo.isTokenValid()) {
-            if (APIUtil.isRESTAPITokenCacheEnabled() && !retrievedFromTokenCache) {
+            if (cacheConfiguration.isTokenCacheEnabled() && !retrievedFromTokenCache) {
                 //put the token info into token cache
                 getRESTAPITokenCache().put(accessToken, tokenInfo);
             }
@@ -120,7 +123,9 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                         //when the username is an email in supertenant, it has at least 2 occurrences of '@'
                         long count = username.chars().filter(ch -> ch == '@').count();
                         //in the case of email, there will be more than one '@'
-                        if (username.endsWith(SUPER_TENANT_SUFFIX) && count <= 1) {
+                        boolean isEmailUsernameEnabled = Boolean.parseBoolean(CarbonUtils.getServerConfiguration().
+                                getFirstProperty("EnableEmailUserName"));
+                        if (isEmailUsernameEnabled || (username.endsWith(SUPER_TENANT_SUFFIX) && count <= 1)) {
                             username = MultitenantUtils.getTenantAwareUsername(username);
                         }
                     }
@@ -143,7 +148,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
             }
         } else {
             log.error(RestApiConstants.ERROR_TOKEN_INVALID);
-            if (APIUtil.isRESTAPITokenCacheEnabled() && !retrievedFromInvalidTokenCache) {
+            if (cacheConfiguration.isTokenCacheEnabled() && !retrievedFromInvalidTokenCache) {
                 getRESTAPIInvalidTokenCache().put(accessToken, tokenInfo);
             }
         }

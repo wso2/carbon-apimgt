@@ -37,7 +37,6 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.LabelsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ScopesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiCategoriesApi"/>
-
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
@@ -71,6 +70,10 @@
         </property>
         <property name="allowCredentials" value="true" />
     </bean>
+
+    <!-- Out interceptors -->
+    <bean id="gZipInterceptor" class="org.apache.cxf.transport.common.gzip.GZIPOutInterceptor" />
+
     <cxf:bus>
         <cxf:inInterceptors>
             <ref bean="URLValidationInterceptor"/>
@@ -81,5 +84,8 @@
             <ref bean="PostAuthenticationInterceptor"/>
             <ref bean="ValidationInInterceptor"/>
         </cxf:inInterceptors>
+        <cxf:outInterceptors>
+            <ref bean="gZipInterceptor"/>
+        </cxf:outInterceptors>
     </cxf:bus>
 </beans>

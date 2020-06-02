@@ -58,6 +58,25 @@ ImportApiService delegate = new ImportApiServiceImpl();
     }
 
     @POST
+    @Path("/api-product")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Import an API Product", notes = "This operation can be used to import an API Product. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products")
+        })
+    }, tags={ "API Product (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Created. API Product Imported Successfully. ", response = Void.class),
+        @ApiResponse(code = 403, message = "Forbidden Not Authorized to import. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested API Product to update not found. ", response = ErrorDTO.class),
+        @ApiResponse(code = 409, message = "Conflict. API Product to import already exists. ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error. Error in importing API Product. ", response = ErrorDTO.class) })
+    public Response importApiProductPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Preserve Original Provider of the API Product. This is the user choice to keep or replace the API Product provider. ")  @QueryParam("preserveProvider") Boolean preserveProvider,  @ApiParam(value = "Whether to import the dependent APIs or not. ")  @QueryParam("importAPIs") Boolean importAPIs,  @ApiParam(value = "Whether to update the API Product or not. This is used when updating already existing API Products. ")  @QueryParam("overwriteAPIProduct") Boolean overwriteAPIProduct,  @ApiParam(value = "Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product. ")  @QueryParam("overwriteAPIs") Boolean overwriteAPIs) throws APIManagementException{
+        return delegate.importApiProductPost(fileInputStream, fileDetail, preserveProvider, importAPIs, overwriteAPIProduct, overwriteAPIs, securityContext);
+    }
+
+    @POST
     @Path("/applications")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })

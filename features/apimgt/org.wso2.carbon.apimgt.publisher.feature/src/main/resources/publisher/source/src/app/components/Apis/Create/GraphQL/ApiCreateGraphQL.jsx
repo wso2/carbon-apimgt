@@ -31,6 +31,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm';
 import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 
 import ProvideGraphQL from './Steps/ProvideGraphQL';
 
@@ -44,7 +45,7 @@ import ProvideGraphQL from './Steps/ProvideGraphQL';
 export default function ApiCreateGraphQL(props) {
     const [wizardStep, setWizardStep] = useState(0);
     const { history } = props;
-
+    const { settings } = useAppContext();
     /**
      *
      * Reduce the events triggered from API input fields to current state
@@ -147,7 +148,8 @@ export default function ApiCreateGraphQL(props) {
                 },
             };
         }
-        additionalProperties.gatewayEnvironments = ['Production and Sandbox'];
+        additionalProperties.gatewayEnvironments = Array.isArray(settings.environment)
+            && settings.environment.length > 0 ? [settings.environment[0].name] : [];
         const newApi = new API(additionalProperties);
         const apiData = {
             additionalProperties: JSON.stringify(additionalProperties),

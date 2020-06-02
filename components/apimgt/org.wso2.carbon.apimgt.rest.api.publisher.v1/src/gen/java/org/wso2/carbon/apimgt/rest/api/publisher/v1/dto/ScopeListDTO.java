@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import javax.validation.constraints.*;
 
 
@@ -19,7 +20,8 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 public class ScopeListDTO   {
   
     private Integer count = null;
-    private List<ScopeListListDTO> list = new ArrayList<>();
+    private List<ScopeDTO> list = new ArrayList<>();
+    private PaginationDTO pagination = null;
 
   /**
    * Number of Scopes returned. 
@@ -41,7 +43,7 @@ public class ScopeListDTO   {
 
   /**
    **/
-  public ScopeListDTO list(List<ScopeListListDTO> list) {
+  public ScopeListDTO list(List<ScopeDTO> list) {
     this.list = list;
     return this;
   }
@@ -49,11 +51,28 @@ public class ScopeListDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<ScopeListListDTO> getList() {
+  public List<ScopeDTO> getList() {
     return list;
   }
-  public void setList(List<ScopeListListDTO> list) {
+  public void setList(List<ScopeDTO> list) {
     this.list = list;
+  }
+
+  /**
+   **/
+  public ScopeListDTO pagination(PaginationDTO pagination) {
+    this.pagination = pagination;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("pagination")
+  public PaginationDTO getPagination() {
+    return pagination;
+  }
+  public void setPagination(PaginationDTO pagination) {
+    this.pagination = pagination;
   }
 
 
@@ -67,12 +86,13 @@ public class ScopeListDTO   {
     }
     ScopeListDTO scopeList = (ScopeListDTO) o;
     return Objects.equals(count, scopeList.count) &&
-        Objects.equals(list, scopeList.list);
+        Objects.equals(list, scopeList.list) &&
+        Objects.equals(pagination, scopeList.pagination);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, list);
+    return Objects.hash(count, list, pagination);
   }
 
   @Override
@@ -82,6 +102,7 @@ public class ScopeListDTO   {
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
+    sb.append("    pagination: ").append(toIndentedString(pagination)).append("\n");
     sb.append("}");
     return sb.toString();
   }

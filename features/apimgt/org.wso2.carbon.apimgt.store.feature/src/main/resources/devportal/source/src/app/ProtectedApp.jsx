@@ -170,11 +170,13 @@ class ProtectedApp extends Component {
      * Invoke checksession oidc endpoint.
      */
     checkSession() {
-        setInterval(() => {
-            const { clientId, sessionStateCookie } = this.state;
-            const msg = clientId + ' ' + sessionStateCookie;
-            document.getElementById('iframeOP').contentWindow.postMessage(msg, Settings.idp.origin);
-        }, 2000);
+        if (Settings.app.singleLogout && Settings.app.singleLogout.enabled) {
+            setInterval(() => {
+                const { clientId, sessionStateCookie } = this.state;
+                const msg = clientId + ' ' + sessionStateCookie;
+                document.getElementById('iframeOP').contentWindow.postMessage(msg, Settings.idp.origin);
+            }, Settings.app.singleLogout.timeout);
+        }
     }
 
 

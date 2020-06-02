@@ -23,12 +23,13 @@ public class SubscriptionDTO   {
     private APIInfoDTO apiInfo = null;
     private ApplicationInfoDTO applicationInfo = null;
     private String throttlingPolicy = null;
+    private String requestedThrottlingPolicy = null;
 
 @XmlType(name="StatusEnum")
 @XmlEnum(String.class)
 public enum StatusEnum {
 
-    @XmlEnumValue("BLOCKED") BLOCKED(String.valueOf("BLOCKED")), @XmlEnumValue("PROD_ONLY_BLOCKED") PROD_ONLY_BLOCKED(String.valueOf("PROD_ONLY_BLOCKED")), @XmlEnumValue("UNBLOCKED") UNBLOCKED(String.valueOf("UNBLOCKED")), @XmlEnumValue("ON_HOLD") ON_HOLD(String.valueOf("ON_HOLD")), @XmlEnumValue("REJECTED") REJECTED(String.valueOf("REJECTED"));
+    @XmlEnumValue("BLOCKED") BLOCKED(String.valueOf("BLOCKED")), @XmlEnumValue("PROD_ONLY_BLOCKED") PROD_ONLY_BLOCKED(String.valueOf("PROD_ONLY_BLOCKED")), @XmlEnumValue("UNBLOCKED") UNBLOCKED(String.valueOf("UNBLOCKED")), @XmlEnumValue("ON_HOLD") ON_HOLD(String.valueOf("ON_HOLD")), @XmlEnumValue("REJECTED") REJECTED(String.valueOf("REJECTED")), @XmlEnumValue("TIER_UPDATE_PENDING") TIER_UPDATE_PENDING(String.valueOf("TIER_UPDATE_PENDING"));
 
 
     private String value;
@@ -168,6 +169,23 @@ public enum StatusEnum {
 
   /**
    **/
+  public SubscriptionDTO requestedThrottlingPolicy(String requestedThrottlingPolicy) {
+    this.requestedThrottlingPolicy = requestedThrottlingPolicy;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Unlimited", value = "")
+  @JsonProperty("requestedThrottlingPolicy")
+  public String getRequestedThrottlingPolicy() {
+    return requestedThrottlingPolicy;
+  }
+  public void setRequestedThrottlingPolicy(String requestedThrottlingPolicy) {
+    this.requestedThrottlingPolicy = requestedThrottlingPolicy;
+  }
+
+  /**
+   **/
   public SubscriptionDTO status(StatusEnum status) {
     this.status = status;
     return this;
@@ -217,13 +235,14 @@ public enum StatusEnum {
         Objects.equals(apiInfo, subscription.apiInfo) &&
         Objects.equals(applicationInfo, subscription.applicationInfo) &&
         Objects.equals(throttlingPolicy, subscription.throttlingPolicy) &&
+        Objects.equals(requestedThrottlingPolicy, subscription.requestedThrottlingPolicy) &&
         Objects.equals(status, subscription.status) &&
         Objects.equals(redirectionParams, subscription.redirectionParams);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionId, applicationId, apiId, apiInfo, applicationInfo, throttlingPolicy, status, redirectionParams);
+    return Objects.hash(subscriptionId, applicationId, apiId, apiInfo, applicationInfo, throttlingPolicy, requestedThrottlingPolicy, status, redirectionParams);
   }
 
   @Override
@@ -237,6 +256,7 @@ public enum StatusEnum {
     sb.append("    apiInfo: ").append(toIndentedString(apiInfo)).append("\n");
     sb.append("    applicationInfo: ").append(toIndentedString(applicationInfo)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
+    sb.append("    requestedThrottlingPolicy: ").append(toIndentedString(requestedThrottlingPolicy)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    redirectionParams: ").append(toIndentedString(redirectionParams)).append("\n");
     sb.append("}");

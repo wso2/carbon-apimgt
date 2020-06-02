@@ -40,7 +40,6 @@ import java.util.regex.Pattern;
 public abstract class APIDefinition {
 
     private static final Pattern CURLY_BRACES_PATTERN = Pattern.compile("(?<=\\{)(?!\\s*\\{)[^{}]+");
-    public static final String KEEP_LEGACY_EXTENSION_PROP = "preserveLegacyExtensions";
 
     /**
      * This method generates Mock/Sample payloads for API prototyping
@@ -148,16 +147,6 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     /**
-     * Check extension migration is disabled
-     *
-     * @return boolean
-     */
-    protected boolean isLegacyExtensionsPreserved() {
-        String keepLegacyExtension = System.getProperty(KEEP_LEGACY_EXTENSION_PROP);
-        return Boolean.parseBoolean(keepLegacyExtension);
-    }
-
-    /**
      * Update the OAS definition for API consumers
      *
      * @param api            API
@@ -201,9 +190,20 @@ public abstract class APIDefinition {
      * This method changes the URI templates from the API definition as it support different schemes
      * @param resourceConfigsJSON json String of oasDefinition
      * @throws APIManagementException throws if an error occurred
-     * @return URI templates
+     * @return String
      */
     public abstract String processOtherSchemeScopes(String resourceConfigsJSON)
+            throws APIManagementException;
+
+    /**
+     * This method returns api that is attached with api extensions related to micro-gw
+     *
+     * @param swaggerContent String
+     * @param api            API
+     * @param isBasepathExtractedFromSwagger boolean
+     * @return API
+     */
+    public abstract API setExtensionsToAPI(String swaggerContent, API api, boolean isBasepathExtractedFromSwagger)
             throws APIManagementException;
 
 }
