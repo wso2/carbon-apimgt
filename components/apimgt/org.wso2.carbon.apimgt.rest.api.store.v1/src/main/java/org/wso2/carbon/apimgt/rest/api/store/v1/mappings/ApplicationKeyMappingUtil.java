@@ -53,7 +53,7 @@ public class ApplicationKeyMappingUtil {
     public static ApplicationKeyDTO fromApplicationKeyToDTO(Map<String, Object> keyDetails, String applicationKeyType) {
         ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
         applicationKeyDTO.setConsumerKey((String) keyDetails.get(APIConstants.FrontEndParameterNames.CONSUMER_KEY));
-        applicationKeyDTO.setKeyMappingId((String) keyDetails.get(APIConstants.FrontEndParameterNames.KEY_MAPPING_UD));
+        applicationKeyDTO.setKeyMappingId((String) keyDetails.get(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID));
         applicationKeyDTO
                 .setConsumerSecret((String) keyDetails.get(APIConstants.FrontEndParameterNames.CONSUMER_SECRET));
         applicationKeyDTO.setKeyState((String) keyDetails.get(APIConstants.FrontEndParameterNames.KEY_STATE));

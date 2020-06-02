@@ -1,3 +1,21 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.impl.utils;
 
 import com.nimbusds.jose.JOSEException;
@@ -24,6 +42,13 @@ public class JWTUtil {
 
     private static final Log log = LogFactory.getLog(JWTUtil.class);
 
+    /**
+     * This method used to retrieve JWKS keys from endpoint
+     *
+     * @param jwksEndpoint
+     * @return
+     * @throws IOException
+     */
     public static String retrieveJWKSConfiguration(String jwksEndpoint) throws IOException {
 
         URL url = new URL(jwksEndpoint);
@@ -92,12 +117,13 @@ public class JWTUtil {
                     JWSAlgorithm.RS384.equals(algorithm))) {
                 return verifyTokenSignature(jwt, (RSAPublicKey) publicCert.getPublicKey());
             } else {
-                log.error("Public key is not a RSA");
-                throw new APIManagementException("Public key is not a RSA");
+                log.error("Public key is not RSA");
+                throw new APIManagementException("Public key is not RSA");
             }
         } else {
-            log.error("Couldn't find a public certificate to verify signature with alias " + alias);
-            throw new APIManagementException("Couldn't find a public certificate to verify signature with alias ");
+            log.error("Couldn't find a public certificate with alias " + alias + " to verify the signature");
+            throw new APIManagementException(
+                    "Couldn't find a public certificate with alias " + alias + " to verify the signature");
         }
     }
 
