@@ -350,7 +350,6 @@ paths:
   #-----------------------------------------------------
   # Create new entry in entry in Registry
   #-----------------------------------------------------
-  /registries/{registryId}/entry:
     post:
       summary: Create a new Registry Entry
       description: |
