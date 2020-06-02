@@ -46,14 +46,14 @@ public class SubscriptionDataHolder {
         subscriptionStore.put(tenantDomain, tenantStore);
     }
 
-    public void unregisterTenantSubscriptionStore(int tenantId) {
+    public void unregisterTenantSubscriptionStore(String tenantDomain) {
 
-        subscriptionStore.remove(tenantId);
+        subscriptionStore.remove(tenantDomain);
     }
 
-    public SubscriptionDataStore getTenantSubscriptionStore(int tenantId) {
+    public SubscriptionDataStore getTenantSubscriptionStore(String tenantDomain) {
 
-        return subscriptionStore.get(tenantId);
+        return subscriptionStore.get(tenantDomain);
     }
 
 }
