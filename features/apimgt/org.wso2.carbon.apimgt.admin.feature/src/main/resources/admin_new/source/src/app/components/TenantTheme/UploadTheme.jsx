@@ -34,6 +34,9 @@ import DropZoneLocal, { humanFileSize } from 'AppComponents/Shared/DropZoneLocal
 import InsertDriveFile from '@material-ui/icons/InsertDriveFile';
 import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
+import API from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
+import AlertMui from '@material-ui/lab/Alert';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -51,6 +54,12 @@ const useStyles = makeStyles((theme) => ({
         maxWidth: 936,
         margin: 'auto',
         overflow: 'hidden',
+    },
+    warningPaper: {
+        maxWidth: 936,
+        margin: 'auto',
+        overflow: 'hidden',
+        marginTop: theme.spacing(2),
     },
     main: {
         flex: 1,
@@ -76,6 +85,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+
 /**
  * Render a pop-up dialog to add/edit an Microgateway label
  * @param {JSON} props .
@@ -85,6 +95,7 @@ function UploadTheme() {
     const classes = useStyles();
     const [themeFile, setThemeFile] = useState([]);
     const [isFileAccepted, setIsFileAccepted] = useState(false);
+    const [isUplaodUnsuccessful, setIsUploadUnsuccessful] = useState(false);
 
 
     const onDrop = (acceptedFile) => {
@@ -93,7 +104,26 @@ function UploadTheme() {
     };
 
     const uploadThemeFile = () => {
-        // Upload theme API call
+        const restApi = new API();
+        return restApi.uploadTenantTheme(themeFile)
+            .then(() => {
+                setIsUploadUnsuccessful(false);
+                Alert.success(
+                    <FormattedMessage
+                        id='TenantTheme.Upload.Theme.upload.successful'
+                        defaultMessage='Theme uploaded successfully'
+                    />,
+                );
+                setThemeFile([]);
+            })
+            .catch((error) => {
+                setIsUploadUnsuccessful(true);
+                setThemeFile([]);
+                const { response } = error;
+                if (response.body) {
+                    Alert.error(response.body.description);
+                }
+            });
     };
 
     return (
@@ -151,6 +181,16 @@ function UploadTheme() {
                         </div>
                     </InlineMessage>
                 </Paper>
+                {isUplaodUnsuccessful && (
+                    <Paper className={classes.warningPaper}>
+                        <AlertMui severity='warning'>
+                            <FormattedMessage
+                                id='TenantTheme.Upload.Theme.warning.message'
+                                defaultMessage='Zip file contains unsupported files. Upload only supported files.'
+                            />
+                        </AlertMui>
+                    </Paper>
+                )}
                 <Paper className={classes.paperUpload}>
                     <Grid className={classes.dropbox}>
                         {(themeFile && themeFile.name) ? (
