@@ -144,7 +144,7 @@ public class APIGatewayManager {
             try {
                 gatewayAPIDTO.setGatewayLabel(api.getProperty("gateway_label"));
             } catch (Exception e){
-                log.error(e);
+                gatewayAPIDTO.setGatewayLabel(APIConstants.GatewayArtifactSynchronizer.DEFAULT_GATEWAY_LABEL);
             }
 
 
@@ -301,22 +301,29 @@ public class APIGatewayManager {
         return failedEnvironmentsMap;
     }
 
-    public boolean deployAPI (String apiName, String label, String apiId){
+    public boolean deployAPI (String apiName, String label, String apiId) {
 
-        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .getGatewayArtifactSynchronizerProperties().isSyncArtifacts()) {
-            try {
-                GatewayAPIDTO gatewayAPIDTO = ServiceReferenceHolder.getInstance().getArtifactRetriever()
-                        .retrieveArtifacts(apiId, apiName, label);
-                Environment environment = environments.get(gatewayAPIDTO.getEnvironment());
-                APIGatewayAdminClient client;
-                client = new APIGatewayAdminClient(environment);
-                client.deployAPI(gatewayAPIDTO);
-            } catch (AxisFault axisFault) {
-                log.error(axisFault);
+        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getGatewayArtifactSynchronizerProperties();
+
+        if (gatewayArtifactSynchronizerProperties.isSyncArtifacts()) {
+            if (gatewayArtifactSynchronizerProperties.getGatewayLabel().equals(label)
+                    || APIConstants.GatewayArtifactSynchronizer.DEFAULT_GATEWAY_LABEL.equals(label)) {
+                try {
+                    GatewayAPIDTO gatewayAPIDTO = ServiceReferenceHolder.getInstance().getArtifactRetriever()
+                            .retrieveArtifacts(apiId, apiName, label);
+                    Environment environment = environments.get(gatewayAPIDTO.getEnvironment());
+                    APIGatewayAdminClient client;
+                    client = new APIGatewayAdminClient(environment);
+                    client.deployAPI(gatewayAPIDTO);
+                    return true;
+                } catch (AxisFault axisFault) {
+                    log.error(axisFault);
+                }
             }
         }
-        return true;
+        return false;
     }
 
     private void addGAConfigLocalEntry(GatewayAPIDTO gatewayAPIDTO, String tenantDomain)

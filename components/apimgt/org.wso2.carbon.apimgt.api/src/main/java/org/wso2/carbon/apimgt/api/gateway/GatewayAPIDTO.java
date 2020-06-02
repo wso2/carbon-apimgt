@@ -45,7 +45,7 @@ public class GatewayAPIDTO implements Serializable {
     private String[] endpointEntriesToBeRemove;
     private CredentialDto[] credentialsToBeAdd ;
     private String[] credentialsToBeRemove;
-    private String gatewayLabel = "Default";
+    private String gatewayLabel;
     private String environment;
 
     public String getName() {

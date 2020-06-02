@@ -2281,6 +2281,7 @@ public final class APIConstants {
         public static final String RETRIEVER_CONFIG = "Retriever";
         public static final String SKIP_LOCAL_COPY_CONFIG  = "SkipLocalCopy";
         public static final String GATEWAY_LABEL_CONFIG  = "GatewayLabel";
+        public static final String DEFAULT_GATEWAY_LABEL = "DefaultGateway";
         public static final String PUBLISH_EVENT_LABEL = "PublishInGateway";
     }
 }
