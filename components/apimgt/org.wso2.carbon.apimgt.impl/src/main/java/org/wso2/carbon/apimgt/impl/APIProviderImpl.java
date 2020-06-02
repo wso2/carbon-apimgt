@@ -83,6 +83,7 @@ import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Usage;
@@ -101,6 +102,7 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -5345,6 +5347,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public void addAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
+            throws APIManagementException {
+        APIDefinition parser = new OAS3Parser();
+        SwaggerData swaggerData = new SwaggerData(apiProduct);
+        String apiProductSwagger = parser.generateAPIDefinition(swaggerData);
+
+        apiProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping, apiProductSwagger);
+
+        saveSwagger20Definition(apiProduct.getId(), apiProductSwagger);
+        apiProduct.setDefinition(apiProductSwagger);
+    }
+
+    @Override
+    public void updateAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
+            throws APIManagementException, FaultGatewaysException {
+        APIDefinition parser = new OAS3Parser();
+        SwaggerData updatedData = new SwaggerData(apiProduct);
+        String existingProductSwagger = getAPIDefinitionOfAPIProduct(apiProduct);
+        String updatedProductSwagger = parser.generateAPIDefinition(updatedData, existingProductSwagger);
+
+        updatedProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping,
+                updatedProductSwagger);
+
+        saveSwagger20Definition(apiProduct.getId(), updatedProductSwagger);
+        apiProduct.setDefinition(updatedProductSwagger);
+
+        updateLocalEntry(apiProduct);
+    }
+
     public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
             throws APIManagementException, FaultGatewaysException {
         APIStateChangeResponse response = new APIStateChangeResponse();
@@ -6784,6 +6816,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIProductIdentifier apiProductIdentifier)
+            throws APIManagementException {
+        APIIdentifier apiIdentifier = new APIIdentifier(apiProductIdentifier.getProviderName(),
+                apiProductIdentifier.getName(), apiProductIdentifier.getVersion());
+        return certificateManager.searchClientCertificates(tenantId, alias, apiIdentifier);
+    }
+
+    @Override
     public boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException {
         return certificateManager.isCertificatePresent(tenantId, alias);
     }
@@ -7451,19 +7491,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         List<APIProductResource> resources = product.getProductResources();
 
-        // list to hold resouces which are actually in an existing api. If user has created an API product with invalid
+        // list to hold resources which are actually in an existing api. If user has created an API product with invalid
         // API or invalid resource of a valid API, that content will be removed .validResources array will have only
         // legitimate apis
         List<APIProductResource> validResources = new ArrayList<APIProductResource>();
         for (APIProductResource apiProductResource : resources) {
-            API api = null;
-            try {
+            API api;
+            if (apiProductResource.getProductIdentifier() != null) {
+                APIIdentifier productAPIIdentifier = apiProductResource.getApiIdentifier();
+                String emailReplacedAPIProviderName = APIUtil.replaceEmailDomain(productAPIIdentifier.getProviderName());
+                APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
+                        productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
+                api = super.getAPI(emailReplacedAPIIdentifier);
+            } else {
                 api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
                 // if API does not exist, getLightweightAPIByUUID() method throws exception.
-            } catch (APIMgtResourceNotFoundException e) {
-                //If there is no API , this exception is thrown. We create the product without this invalid api.
-                log.warn("API does not exist for the given apiId: " + apiProductResource.getApiId());
-                continue;
             }
             if (api != null) {
                 validateApiLifeCycleForApiProducts(api);

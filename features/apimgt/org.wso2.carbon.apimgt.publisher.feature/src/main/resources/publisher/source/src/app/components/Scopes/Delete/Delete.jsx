@@ -81,7 +81,7 @@ function Delete(props) {
                 console.error(errorResponse);
                 Alert.error(intl.formatMessage({
                     id: 'Scopes.Delete.Delete.something.went.wrong.while.updating.the.api',
-                    defaultMessage: 'Error occurred while updating API',
+                    defaultMessage: 'Error occurred while deleting scope',
                 }));
                 setOpenLocal(!open);
             });

@@ -525,7 +525,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         Map<String, String> sdkDataMap = null;
         try {
             sdkDataMap = apiClientGenerationManager.generateSDK(language, apiIdentifier.getApiName(),
-                    apiIdentifier.getVersion(), apiIdentifier.getProviderName());
+                    apiIdentifier.getVersion(), apiIdentifier.getProviderName(), RestApiUtil.getLoggedInUsername());
         } catch (APIClientGenerationException e) {
             String errorMessage = "SDK generation failed. Error : " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, log);
