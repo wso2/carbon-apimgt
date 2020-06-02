@@ -15,13 +15,13 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class AlertTypeDTO   {
   
-    private Integer id = null;
+    private String id = null;
     private String name = null;
 
   /**
    * The alert Id
    **/
-  public AlertTypeDTO id(Integer id) {
+  public AlertTypeDTO id(String id) {
     this.id = id;
     return this;
   }
@@ -29,10 +29,10 @@ public class AlertTypeDTO   {
   
   @ApiModelProperty(example = "1", value = "The alert Id")
   @JsonProperty("id")
-  public Integer getId() {
+  public String getId() {
     return id;
   }
-  public void setId(Integer id) {
+  public void setId(String id) {
     this.id = id;
   }
 

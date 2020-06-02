@@ -66,8 +66,8 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
             RestApiUtil.handleBadRequest("Email list cannot be empty", log);
         }
         //Validate for empty list of alerts
-        List<AlertTypeDTO> alertDTOs = body.getAlerts();
-        if (alertDTOs == null || alertDTOs.size() == 0) {
+        List<AlertTypeDTO> subscribingAlertDTOs = body.getAlerts();
+        if (subscribingAlertDTOs == null || subscribingAlertDTOs.size() == 0) {
             RestApiUtil.handleBadRequest("Alert list should not be empty", log);
         }
 
@@ -75,7 +75,20 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
         try {
             AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
                     .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
-            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> alertTypesToSubscribe= AlertsMappingUtil.fromAlertTypeDTOListToAlertTypeList(alertDTOs);
+
+            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> alertTypesToSubscribe = AlertsMappingUtil
+                    .fromAlertTypeDTOListToAlertTypeList(subscribingAlertDTOs);
+            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> supportedAlertTypeDTOS = adminAlertConfigurator
+                    .getSupportedAlertTypes();
+
+
+            //Filter out the subscribed alerts
+            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> subscribedAlertsList = supportedAlertTypeDTOS.stream()
+                    .filter(supportedAlertTypes -> alertTypesToSubscribe.stream()
+                            .anyMatch(subscribedAlerts -> supportedAlertTypes.getId().equals(subscribedAlerts)))
+                    .collect(Collectors.toList());
+
+
             adminAlertConfigurator.subscribe(fullyQualifiedUsername, emailsList, alertTypesToSubscribe);
             return Response.status(Response.Status.CREATED).entity(null).build();
         } catch (AlertManagementException e) {

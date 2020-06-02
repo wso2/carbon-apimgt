@@ -69,7 +69,7 @@ public class AlertsMappingUtil {
      */
     public static AlertTypeDTO fromAlertTypeToAlertTypeDTO(org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO alert) {
         AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
-        alertTypeDTO.setId(alert.getId());
+        alertTypeDTO.setId(alert.getId().toString());
         alertTypeDTO.setName(alert.getName());
         return alertTypeDTO;
     }
@@ -85,7 +85,7 @@ public class AlertsMappingUtil {
         List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> alertTypeList = new ArrayList<>();
         for (AlertTypeDTO alertTypeDTO : alertTypeDTOList) {
             org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO alertType = new org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO();
-            alertType.setId(alertTypeDTO.getId());
+            alertType.setId(Integer.valueOf(alertTypeDTO.getId()));
             alertType.setName(alertTypeDTO.getName());
             alertTypeList.add(alertType);
         }

@@ -18,8 +18,13 @@
 
 package org.wso2.carbon.apimgt.impl.alertmgt;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -28,13 +33,47 @@ import java.util.Properties;
 public class AdminAlertConfigurator extends AlertConfigurator {
 
     private String agent;
+    private static final Log log = LogFactory.getLog(AdminAlertConfigurator.class);
+    private ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     public AdminAlertConfigurator() {
         this.agent = AlertMgtConstants.ADMIN_DASHBOARD_AGENT;
     }
 
+    /**
+     * Subscribe for admin alerts
+     * @param userName : The username of the user, who is subscribing.
+     * @param emailsList : The list of emails which needs to be subscribed.
+     * @param alertTypeDTOList: The list of Alert types which needs to be subscribed.
+     * @throws APIManagementException
+     */
     @Override public void subscribe(String userName, List<String> emailsList, List<AlertTypeDTO> alertTypeDTOList)
             throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Subscribing user: " + userName + "to alert types");
+        }
+        String emails = StringUtils.join(emailsList, ",");
+        Map<String, String> alertTypesMap = AlertMgtUtils.alertTypesToMap(alertTypeDTOList);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Persisting subscribing alert types " + alertTypesMap.get("ids") + "in database.");
+        }
+
+        String query =
+                "select '" + userName + "' as userId, '" + alertTypesMap.get("names") + "' as alertTypes, '" + emails
+                        + "' as emails, false as isSubscriber, false as isPublisher, "
+                        + "true as isAdmin update or insert into ApimAlertStakeholderInfo "
+                        + "set ApimAlertStakeholderInfo.userId = userId, "
+                        + "ApimAlertStakeholderInfo.alertTypes = alertTypes , "
+                        + "ApimAlertStakeholderInfo.emails = emails , "
+                        + "ApimAlertStakeholderInfo.isSubscriber = isSubscriber, "
+                        + "ApimAlertStakeholderInfo.isPublisher = isPublisher, "
+                        + "ApimAlertStakeholderInfo.isAdmin = isAdmin on "
+                        + "ApimAlertStakeholderInfo.userId == userId and "
+                        + "ApimAlertStakeholderInfo.isPublisher == isPublisher";
+        APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_STAKEHOLDER_ALERT_APP, query);
+        apiMgtDAO.addAlertTypesConfigInfo(userName, emails, alertTypesMap.get("ids"),
+                AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
 
     }
 

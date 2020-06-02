@@ -3204,7 +3204,7 @@ paths:
     #--------------------------------------------------
     # Subscribe to the selected alert types by the user.
     #--------------------------------------------------
-    post:
+    put:
       security:
         - OAuth2Security:
             - apim:admin_alert_manage
@@ -4945,7 +4945,7 @@ definitions:
     title: Alert Type
     properties:
       id:
-        type: integer
+        type: string
         description: The alert Id
         example: 1
       name:
@@ -4957,7 +4957,7 @@ definitions:
   # The Alerts Subscription resource definition.
   #-----------------------------------------------
   AlertsSubscription:
-    title: Alerts Info
+    title: Alerts Subscription
     properties:
       alerts:
         type: array

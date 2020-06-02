@@ -52,7 +52,7 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
         return delegate.getSubscribedAlertTypes(securityContext);
     }
 
-    @POST
+    @PUT
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
