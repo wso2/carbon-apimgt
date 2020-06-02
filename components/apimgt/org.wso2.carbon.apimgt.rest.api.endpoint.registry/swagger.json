@@ -895,11 +895,7 @@
             "type" : "string",
             "example" : "v1"
           },
-          "productionServiceUrl" : {
-            "type" : "string",
-            "example" : "http://localhost/pizzashack"
-          },
-          "sandboxServiceUrl" : {
+          "serviceUrl" : {
             "type" : "string",
             "example" : "http://localhost/pizzashack"
           },

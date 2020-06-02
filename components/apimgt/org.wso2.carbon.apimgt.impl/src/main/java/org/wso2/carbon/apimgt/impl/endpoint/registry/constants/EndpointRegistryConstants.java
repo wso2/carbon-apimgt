@@ -38,9 +38,7 @@ public class EndpointRegistryConstants {
 
     public static final String COLUMN_ENTRY_VERSION = "ENTRY_VERSION";
 
-    public static final String COLUMN_PRODUCTION_SERVICE_URL = "PRODUCTION_SERVICE_URL";
-
-    public static final String COLUMN_SANDBOX_SERVICE_URL = "SANDBOX_SERVICE_URL";
+    public static final String COLUMN_SERVICE_URL = "SERVICE_URL";
 
     public static final String COLUMN_SERVICE_TYPE = "SERVICE_TYPE";
 

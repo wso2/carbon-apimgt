@@ -323,10 +323,7 @@ public class EndpointRegistryDAO {
                     endpointRegistryEntry.setServiceType(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_TYPE));
                     endpointRegistryEntry.setServiceCategory(rs.getString(EndpointRegistryConstants.
                             COLUMN_SERVICE_CATEGORY));
-                    endpointRegistryEntry.setProductionServiceURL(rs.getString(EndpointRegistryConstants.
-                            COLUMN_PRODUCTION_SERVICE_URL));
-                    endpointRegistryEntry.setSandboxServiceUrl(rs.getString(EndpointRegistryConstants.
-                            COLUMN_SANDBOX_SERVICE_URL));
+                    endpointRegistryEntry.setServiceURL(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_URL));
                     endpointRegistryEntry.setEndpointDefinition(
                             rs.getBinaryStream(EndpointRegistryConstants.COLUMN_ENDPOINT_DEFINITION));
                     endpointRegistryEntry.setOwner(rs.getString(EndpointRegistryConstants.COLUMN_CREATED_BY));
@@ -417,10 +414,7 @@ public class EndpointRegistryDAO {
                         endpointRegistryEntry.setVersion(rs.getString(EndpointRegistryConstants.COLUMN_ENTRY_VERSION));
                         endpointRegistryEntry.setDescription(rs.getString(EndpointRegistryConstants.
                                 COLUMN_DESCRIPTION));
-                        endpointRegistryEntry.setProductionServiceURL(rs.getString(EndpointRegistryConstants.
-                                COLUMN_PRODUCTION_SERVICE_URL));
-                        endpointRegistryEntry.setSandboxServiceUrl(rs.getString(EndpointRegistryConstants.
-                                COLUMN_SANDBOX_SERVICE_URL));
+                        endpointRegistryEntry.setServiceURL(rs.getString(EndpointRegistryConstants.COLUMN_SERVICE_URL));
                         endpointRegistryEntry.setDefinitionType(rs.getString(EndpointRegistryConstants.
                                 COLUMN_DEFINITION_TYPE));
                         endpointRegistryEntry.setDefinitionURL(rs.getString(EndpointRegistryConstants.
@@ -468,20 +462,19 @@ public class EndpointRegistryDAO {
             ps.setString(1, uuid);
             ps.setString(2, registryEntry.getName());
             ps.setString(3, registryEntry.getVersion());
-            ps.setString(4, registryEntry.getProductionServiceURL());
-            ps.setString(5, registryEntry.getSandboxServiceUrl());
-            ps.setString(6, registryEntry.getDefinitionType());
-            ps.setString(7, registryEntry.getDefinitionURL());
-            ps.setString(8, registryEntry.getDescription());
-            ps.setString(9, registryEntry.getServiceType());
-            ps.setString(10, registryEntry.getServiceCategory());
-            ps.setBlob(11, registryEntry.getEndpointDefinition());
-            ps.setInt(12, registryEntry.getRegistryId());
+            ps.setString(4, registryEntry.getServiceURL());
+            ps.setString(5, registryEntry.getDefinitionType());
+            ps.setString(6, registryEntry.getDefinitionURL());
+            ps.setString(7, registryEntry.getDescription());
+            ps.setString(8, registryEntry.getServiceType());
+            ps.setString(9, registryEntry.getServiceCategory());
+            ps.setBlob(10, registryEntry.getEndpointDefinition());
+            ps.setInt(11, registryEntry.getRegistryId());
+            ps.setString(12, username);
             ps.setString(13, username);
-            ps.setString(14, username);
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            ps.setTimestamp(14, timestamp);
             ps.setTimestamp(15, timestamp);
-            ps.setTimestamp(16, timestamp);
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -506,17 +499,16 @@ public class EndpointRegistryDAO {
             connection.setAutoCommit(false);
             ps.setString(1, registryEntry.getName());
             ps.setString(2, registryEntry.getVersion());
-            ps.setString(3, registryEntry.getProductionServiceURL());
-            ps.setString(4, registryEntry.getSandboxServiceUrl());
-            ps.setString(5, registryEntry.getDefinitionType());
-            ps.setString(6, registryEntry.getDefinitionURL());
-            ps.setString(7, registryEntry.getDescription());
-            ps.setString(8, registryEntry.getServiceType());
-            ps.setString(9, registryEntry.getServiceCategory());
-            ps.setBlob(10, registryEntry.getEndpointDefinition());
-            ps.setString(11, username);
-            ps.setTimestamp(12, new Timestamp(System.currentTimeMillis()));
-            ps.setString(13, registryEntry.getEntryId());
+            ps.setString(3, registryEntry.getServiceURL());
+            ps.setString(4, registryEntry.getDefinitionType());
+            ps.setString(5, registryEntry.getDefinitionURL());
+            ps.setString(6, registryEntry.getDescription());
+            ps.setString(7, registryEntry.getServiceType());
+            ps.setString(8, registryEntry.getServiceCategory());
+            ps.setBlob(9, registryEntry.getEndpointDefinition());
+            ps.setString(10, username);
+            ps.setTimestamp(11, new Timestamp(System.currentTimeMillis()));
+            ps.setString(12, registryEntry.getEntryId());
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {

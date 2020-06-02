@@ -300,7 +300,7 @@ public class EndpointRegistryImplTest {
         Assert.assertEquals(expected.getVersion(), actual.getVersion());
         Assert.assertEquals(expected.getDescription(), actual.getDescription());
         Assert.assertEquals(expected.getRegistryId(), actual.getRegistryId());
-        Assert.assertEquals(expected.getProductionServiceURL(), actual.getProductionServiceURL());
+        Assert.assertEquals(expected.getServiceURL(), actual.getServiceURL());
         Assert.assertEquals(expected.getServiceType(), actual.getServiceType());
         Assert.assertEquals(expected.getServiceCategory(), actual.getServiceCategory());
         Assert.assertEquals(expected.getDefinitionURL(), actual.getDefinitionURL());
@@ -338,7 +338,7 @@ public class EndpointRegistryImplTest {
         endpointRegistryEntry.setName("Entry Name 1");
         endpointRegistryEntry.setVersion("v1");
         endpointRegistryEntry.setDescription("A Registry Entry that exposes a REST endpoint");
-        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
+        endpointRegistryEntry.setServiceURL("https://xyz.com");
         endpointRegistryEntry.setServiceType("REST");
         endpointRegistryEntry.setServiceCategory("UTILITY");
         endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
@@ -356,7 +356,7 @@ public class EndpointRegistryImplTest {
         endpointRegistryEntry.setName(name);
         endpointRegistryEntry.setVersion(version);
         endpointRegistryEntry.setDescription(description);
-        endpointRegistryEntry.setProductionServiceURL(serviceUrl);
+        endpointRegistryEntry.setServiceURL(serviceUrl);
         endpointRegistryEntry.setServiceType(serviceType);
         endpointRegistryEntry.setServiceCategory(serviceCategory);
         endpointRegistryEntry.setDefinitionURL(definitionUrl);
