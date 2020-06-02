@@ -23,8 +23,23 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
 
+/**
+ * This interface used to validate JWT In Self Contain Manner
+ */
 public interface JWTValidator {
 
+    /**
+     * This method used to validate JWT token
+     * @param jwtToken {@link SignedJWT} token
+     * @return JWTValidationInfo for validated Token
+     * @throws APIManagementException
+     */
     JWTValidationInfo validateToken(SignedJWT jwtToken) throws APIManagementException;
+
+    /**
+     * This method used to load JWTValidator related configurations
+     *
+     * @param tokenIssuerConfigurations
+     */
     void loadTokenIssuerConfiguration(TokenIssuerDto tokenIssuerConfigurations);
  }

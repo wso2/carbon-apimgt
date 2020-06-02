@@ -20,9 +20,32 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.util.List;
 
+/**
+ * This Interface providing functionality to register KeyManagerConnector Related Configurations
+ */
 public interface KeyManagerConnectorConfiguration {
+
+    /**
+     *  This method returns the KeyManager implementation class name
+     * @return keymanager implementation class name
+     */
     public String getImplementation();
+
+    /**
+     *  This method returns JWTValidator class name if defined.
+     * @return JWTValidator class name
+     */
     public String getJWTValidator();
+
+    /**
+     * This method returns the Configurations related to keymanager registration
+     * @return
+     */
     public List<ConfigurationDto> getConnectionConfigurations();
+
+    /**
+     * This method returns the Configurations related to Oauth Application Creation
+     * @return
+     */
     public List<ConfigurationDto> getApplicationConfigurations();
 }

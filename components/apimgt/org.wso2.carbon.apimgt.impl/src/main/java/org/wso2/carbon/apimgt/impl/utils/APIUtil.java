@@ -143,9 +143,8 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
-import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
+import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
@@ -759,9 +758,9 @@ public final class APIUtil {
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
             //non empty URLs to API object
             String keyManagers = artifact.getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
-            if (StringUtils.isNotEmpty(keyManagers)){
-                api.setKeyManagers(new Gson().fromJson(keyManagers,List.class));
-            }else{
+            if (StringUtils.isNotEmpty(keyManagers)) {
+                api.setKeyManagers(new Gson().fromJson(keyManagers, List.class));
+            } else {
                 api.setKeyManagers(Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
             }
             try {
