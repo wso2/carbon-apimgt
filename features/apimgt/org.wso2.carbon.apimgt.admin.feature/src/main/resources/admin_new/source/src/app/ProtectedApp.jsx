@@ -263,7 +263,7 @@ class Protected extends Component {
         );
         const { clientId, settings } = this.state;
         const checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
-            + clientId + '&redirect_uri=https://' + Configurations.idp.origin
+            + clientId + '&redirect_uri=' + Configurations.idp.origin
             + Configurations.app.context + '/services/auth/callback/login';
         if (!user) {
             return (
