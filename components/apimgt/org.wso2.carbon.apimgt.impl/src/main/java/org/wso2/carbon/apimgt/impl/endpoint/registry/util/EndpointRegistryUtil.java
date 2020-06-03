@@ -19,17 +19,68 @@ package org.wso2.carbon.apimgt.impl.endpoint.registry.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.DefinitionValidationException;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
+
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EndpointRegistryUtil {
 
     private static final Log log = LogFactory.getLog(EndpointRegistryUtil.class);
+    private static final Map<String, DefinitionValidator> definitionValidatorMap = new HashMap<>();
+
+    static {
+        definitionValidatorMap.put(EndpointRegistryConstants.DEFINITION_TYPE_OAS, new OASDefinitionValidator());
+        definitionValidatorMap.put(EndpointRegistryConstants.DEFINITION_TYPE_WSDL1, new WSDLDefinitionValidator());
+        definitionValidatorMap.put(EndpointRegistryConstants.DEFINITION_TYPE_WSDL2, new WSDLDefinitionValidator());
+        definitionValidatorMap.put(EndpointRegistryConstants.DEFINITION_TYPE_GQL_SDL, new GraphQLDefinitionValidator());
+    }
 
     public static void raiseResourceAlreadyExistsException(String msg) throws
             EndpointRegistryResourceAlreadyExistsException {
 
         log.error(msg);
         throw new EndpointRegistryResourceAlreadyExistsException(msg);
+    }
+
+    /**
+     * Validates the content in a given API definition URL
+     *
+     * @param definitionURL  Definition URL
+     * @param definitionType Definition Type
+     * @return true if definition is valid
+     * @throws DefinitionValidationException if failed to validate the definition
+     */
+    public static boolean isValidDefinition(URL definitionURL, String definitionType)
+            throws DefinitionValidationException {
+        DefinitionValidator definitionValidator = definitionValidatorMap.get(definitionType);
+        if (definitionValidator != null) {
+            return definitionValidator.validate(definitionURL);
+        }
+        throw new DefinitionValidationException("No Definition Validator found for the given definition type: '"
+                + definitionType + "'");
+    }
+
+    /**
+     * Validates the content of a given API definition
+     *
+     * @param definitionContent Definition content as a byte array
+     * @param definitionType    Definition Type
+     * @return true if definition is valid
+     * @throws DefinitionValidationException if failed to validate the definition
+     */
+    public static boolean isValidDefinition(byte[] definitionContent, String definitionType)
+            throws DefinitionValidationException {
+        DefinitionValidator definitionValidator = definitionValidatorMap.get(definitionType);
+        if (definitionValidator != null) {
+            return definitionValidator.validate(definitionContent);
+        }
+        throw new DefinitionValidationException("No Definition Validator found for the given definition type: '"
+                + definitionType + "'");
     }
 
 }

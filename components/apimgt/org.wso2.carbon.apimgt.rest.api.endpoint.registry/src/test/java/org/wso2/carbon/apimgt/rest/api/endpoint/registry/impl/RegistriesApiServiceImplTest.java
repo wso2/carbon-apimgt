@@ -18,12 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.endpoint.registry.impl;
 
-import graphql.schema.GraphQLSchema;
-import graphql.schema.idl.SchemaParser;
-import graphql.schema.idl.TypeDefinitionRegistry;
-import graphql.schema.idl.UnExecutableSchemaGenerator;
-import graphql.schema.validation.SchemaValidationError;
-import graphql.schema.validation.SchemaValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -36,18 +30,15 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
-import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntryFilterParams;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.impl.EndpointRegistryImpl;
 import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryInfo;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.util.EndpointRegistryUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
-import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApiService;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryArrayDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
@@ -65,14 +56,12 @@ import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor({"org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil"})
 @PrepareForTest({RestApiUtil.class, RegistriesApiServiceImpl.class, ServiceReferenceHolder.class,
-        MultitenantUtils.class, OASParserUtil.class, APIMWSDLReader.class, UnExecutableSchemaGenerator.class})
+        MultitenantUtils.class, EndpointRegistryUtil.class})
 public class RegistriesApiServiceImplTest {
     private final String ADMIN_USERNAME = "admin";
     private final String TENANT_DOMAIN = "carbon.super";
@@ -101,34 +90,11 @@ public class RegistriesApiServiceImplTest {
         PowerMockito.doReturn(ADMIN_USERNAME).when(RestApiUtil.class, "getLoggedInUsername");
         PowerMockito.doReturn(TENANT_DOMAIN).when(RestApiUtil.class, "getLoggedInUserTenantDomain");
 
-        PowerMockito.mockStatic(OASParserUtil.class);
-        APIDefinitionValidationResponse oasValidationResponse =
-                Mockito.mock(APIDefinitionValidationResponse.class);
-        Mockito.when(oasValidationResponse.isValid()).thenReturn(true);
-        PowerMockito.doReturn(oasValidationResponse).when(OASParserUtil.class, "validateAPIDefinition",
-                Mockito.anyString(), Mockito.anyBoolean());
-
-        PowerMockito.mockStatic(APIMWSDLReader.class);
-        WSDLValidationResponse wsdlValidationResponse = Mockito.mock(WSDLValidationResponse.class);
-        Mockito.when(wsdlValidationResponse.isValid()).thenReturn(true);
-        PowerMockito.when(APIMWSDLReader.class, "validateWSDLFile", Mockito.any(InputStream.class))
-                .thenReturn(wsdlValidationResponse);
-        PowerMockito.when(APIMWSDLReader.class, "validateWSDLUrl", Mockito.any(URL.class))
-                .thenReturn(wsdlValidationResponse);
-
-
-        TypeDefinitionRegistry typeRegistry = Mockito.mock(TypeDefinitionRegistry.class);
-        SchemaParser schemaParser = Mockito.mock(SchemaParser.class);
-        Mockito.when(schemaParser.parse(Mockito.anyString())).thenReturn(typeRegistry);
-        PowerMockito.whenNew(SchemaParser.class).withNoArguments().thenReturn(schemaParser);
-        PowerMockito.mockStatic(UnExecutableSchemaGenerator.class);
-        GraphQLSchema graphQLSchema = Mockito.mock(GraphQLSchema.class);
-        PowerMockito.when(UnExecutableSchemaGenerator.class, "makeUnExecutableSchema",
-                Mockito.eq(typeRegistry)).thenReturn(graphQLSchema);
-        SchemaValidator schemaValidator = Mockito.mock(SchemaValidator.class);
-        PowerMockito.whenNew(SchemaValidator.class).withNoArguments().thenReturn(schemaValidator);
-        Set<SchemaValidationError> validationErrors = new HashSet<>();
-        Mockito.when(schemaValidator.validateSchema(graphQLSchema)).thenReturn(validationErrors);
+        PowerMockito.mockStatic(EndpointRegistryUtil.class);
+        PowerMockito.doReturn(true).when(EndpointRegistryUtil.class, "isValidDefinition",
+                Mockito.any(URL.class), Mockito.anyString());
+        PowerMockito.doReturn(true).when(EndpointRegistryUtil.class, "isValidDefinition",
+                Mockito.any(byte[].class), Mockito.anyString());
 
         messageContext = Mockito.mock(MessageContext.class);
         registryProvider = Mockito.mock(EndpointRegistryImpl.class);

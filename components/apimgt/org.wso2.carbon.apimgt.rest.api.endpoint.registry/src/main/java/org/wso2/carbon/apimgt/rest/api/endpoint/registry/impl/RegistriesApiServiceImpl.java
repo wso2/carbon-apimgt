@@ -18,31 +18,22 @@
 
 package org.wso2.carbon.apimgt.rest.api.endpoint.registry.impl;
 
-import graphql.schema.GraphQLSchema;
-import graphql.schema.idl.SchemaParser;
-import graphql.schema.idl.TypeDefinitionRegistry;
-import graphql.schema.idl.UnExecutableSchemaGenerator;
-import graphql.schema.idl.errors.SchemaProblem;
-import graphql.schema.validation.SchemaValidationError;
-import graphql.schema.validation.SchemaValidator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.DefinitionValidationException;
 import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntryFilterParams;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistry;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.impl.EndpointRegistryImpl;
 import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntry;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
 import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryInfo;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.impl.endpoint.registry.util.EndpointRegistryUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApi;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.RegistriesApiService;
 
@@ -53,7 +44,6 @@ import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryArrayDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.dto.RegistryEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.endpoint.registry.util.EndpointRegistryMappingUtils;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.ByteArrayInputStream;
@@ -64,7 +54,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Set;
 
 import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.core.MediaType;
@@ -201,7 +190,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             if (definitionFileInputStream != null) {
                 // Retrieve definition from the file
                 byte[] definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
-                if (!isValidEndpointDefinition(null, definitionFileByteArray,
+                if (!EndpointRegistryUtil.isValidDefinition(definitionFileByteArray,
                         registryEntry.getDefinitionType().toString())) {
                     RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
                             "the new registry entry with registry id: " + registryId, log);
@@ -214,7 +203,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 // Retrieve the endpoint definition from URL
                 try {
                     URL definitionURL = new URL(registryEntry.getDefinitionUrl());
-                    if (!isValidEndpointDefinition(definitionURL, null,
+                    if (!EndpointRegistryUtil.isValidDefinition(definitionURL,
                             registryEntry.getDefinitionType().toString())) {
                         RestApiUtil.handleBadRequest("Error while validating the endpoint URL definition of " +
                                 "the new registry entry with registry id: " + registryId, log);
@@ -238,6 +227,9 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
         } catch (EndpointRegistryResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry Entry with name '"
                     + registryEntry.getEntryName() + "' already exists", e, log);
+        } catch (DefinitionValidationException e) {
+            RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
+                    "the new registry entry with registry id: " + registryId, e, log);
         } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while adding new entry for the endpoint registry " +
                     "with id: " + registryId, e, log);
@@ -358,7 +350,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             if (definitionFileInputStream != null) {
                 // Retrieve definition from the file
                 byte[] definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
-                if (!isValidEndpointDefinition(null, definitionFileByteArray,
+                if (!EndpointRegistryUtil.isValidDefinition(definitionFileByteArray,
                         registryEntry.getDefinitionType().toString())) {
                     RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
                             "the registry entry with id: " + entryId, log);
@@ -370,7 +362,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                 // Retrieve the endpoint definition from URL
                 try {
                     URL definitionURL = new URL(registryEntry.getDefinitionUrl());
-                    if (!isValidEndpointDefinition(definitionURL, null,
+                    if (!EndpointRegistryUtil.isValidDefinition(definitionURL,
                             registryEntry.getDefinitionType().toString())) {
                         RestApiUtil.handleBadRequest("Error while validating the endpoint URL definition of " +
                                 "the registry entry with id: " + entryId, log);
@@ -394,6 +386,9 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             return Response.ok().entity(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(updatedEntry)).build();
         } catch (EndpointRegistryResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError(e.getMessage(), e, log);
+        } catch (DefinitionValidationException e) {
+            RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
+                    "the registry entry with id: " + entryId, e, log);
         } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while updating the endpoint registry entry " +
                     "with id: " + entryId, e, log);
@@ -474,65 +469,6 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
                     "endpoint registry entry with id: " + registryId, e, log);
         }
         return null;
-    }
-
-    private boolean isValidEndpointDefinition(URL definitionURL, byte[] definitionFileByteArray,
-                                              String definitionType) {
-        String definitionContent = null;
-        try {
-            // definition file is given priority than the definition url
-            if (definitionFileByteArray != null) {
-                definitionContent = new String(definitionFileByteArray);
-            } else if (definitionURL != null) {
-                definitionContent = IOUtils.toString(definitionURL.openStream());
-            }
-        } catch (IOException e) {
-            log.error("Error in reading endpoint definition content", e);
-            return false;
-        }
-        if (StringUtils.isEmpty(definitionContent)) {
-            log.error("No endpoint definition content found");
-            return false;
-        }
-
-        boolean isValid = false;
-
-        if (RegistryEntryDTO.DefinitionTypeEnum.OAS.toString().equals(definitionType)) {
-            // Validate OpenAPI definitions
-            try {
-                APIDefinitionValidationResponse response =
-                        OASParserUtil.validateAPIDefinition(definitionContent, false);
-                isValid = response.isValid();
-            } catch (APIManagementException | ClassCastException e) {
-                log.error("Unable to parse the OpenAPI endpoint definition", e);
-            }
-        } else if (RegistryEntryDTO.DefinitionTypeEnum.WSDL1.toString().equals(definitionType) ||
-                RegistryEntryDTO.DefinitionTypeEnum.WSDL2.toString().equals(definitionType)) {
-            // Validate WSDL1 and WSDL2 definitions
-            try {
-                if (definitionFileByteArray != null) {
-                    ByteArrayInputStream definitionFileByteStream = new ByteArrayInputStream(definitionFileByteArray);
-                    isValid = APIMWSDLReader.validateWSDLFile(definitionFileByteStream).isValid();
-                } else {
-                    isValid = APIMWSDLReader.validateWSDLUrl(definitionURL).isValid();
-                }
-            } catch (APIManagementException e) {
-                log.error("Unable to parse the WSDL endpoint definition", e);
-            }
-        } else if (RegistryEntryDTO.DefinitionTypeEnum.GQL_SDL.toString().equals(definitionType)) {
-            // Validate GraphQL definitions
-            try {
-                SchemaParser schemaParser = new SchemaParser();
-                TypeDefinitionRegistry typeRegistry = schemaParser.parse(definitionContent);
-                GraphQLSchema graphQLSchema = UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry);
-                SchemaValidator schemaValidation = new SchemaValidator();
-                Set<SchemaValidationError> validationErrors = schemaValidation.validateSchema(graphQLSchema);
-                isValid = (validationErrors.toArray().length == 0);
-            } catch (SchemaProblem e) {
-                log.error("Unable to parse the GraphQL endpoint definition", e);
-            }
-        }
-        return isValid;
     }
 
     @Override
