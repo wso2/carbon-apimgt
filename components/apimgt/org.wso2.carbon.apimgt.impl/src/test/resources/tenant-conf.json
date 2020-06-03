@@ -228,6 +228,10 @@
       {
         "Name": "apim:shared_scope_manage",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:admin_alert_manage",
+        "Roles": "admin"
       }
     ]
   },

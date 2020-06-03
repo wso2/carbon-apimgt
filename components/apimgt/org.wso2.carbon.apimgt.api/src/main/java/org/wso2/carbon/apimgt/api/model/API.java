@@ -124,7 +124,7 @@ public class API implements Serializable {
 
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion = false;
-
+    private List<String> keyManagers = new ArrayList<>();
     /**
      * Used to set the workflow status in lifecycle state change workflow
      */
@@ -998,6 +998,16 @@ public class API implements Serializable {
 
     public List<APICategory> getApiCategories() {
         return apiCategories;
+    }
+
+    public List<String> getKeyManagers() {
+
+        return keyManagers;
+    }
+
+    public void setKeyManagers(List<String> keyManagers) {
+
+        this.keyManagers = keyManagers;
     }
 
     @Override

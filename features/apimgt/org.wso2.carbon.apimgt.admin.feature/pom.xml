@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.6.250-SNAPSHOT</version>
+        <version>6.6.252-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -213,7 +213,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
-                            <workingDirectory>${basedir}/src/main/resources/admin_new</workingDirectory>
+                            <workingDirectory>src/main/resources/admin</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>ci</argument>
@@ -228,7 +228,7 @@
                         </goals>
                         <phase>compile</phase>
                         <configuration>
-                            <workingDirectory>${basedir}/src/main/resources/admin_new</workingDirectory>
+                            <workingDirectory>src/main/resources/admin</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>run</argument>
@@ -246,22 +246,22 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>admin_new/site/**</include>
-                    <include>admin_new/services/**</include>
-                    <include>admin_new/jaggery.conf</include>
-                    <include>admin_new/source/**</include>
-                    <include>admin_new/override/**</include>
-                    <include>admin_new/.eslintignore</include>
-                    <include>admin_new/.eslintrc.js</include>
-                    <include>admin_new/.npmrc</include>
-                    <include>admin_new/babel.config.js</include>
-                    <include>admin_new/jest.config.js</include>
-                    <include>admin_new/jsconfig.json</include>
-                    <include>admin_new/loader.js</include>
-                    <include>admin_new/package-lock.json</include>
-                    <include>admin_new/package.json</include>
-                    <include>admin_new/webpack.config.js</include>
-                    <include>admin_new/Readme.txt</include>
+                    <include>admin/site/**</include>
+                    <include>admin/services/**</include>
+                    <include>admin/jaggery.conf</include>
+                    <include>admin/source/**</include>
+                    <include>admin/override/**</include>
+                    <include>admin/.eslintignore</include>
+                    <include>admin/.eslintrc.js</include>
+                    <include>admin/.npmrc</include>
+                    <include>admin/babel.config.js</include>
+                    <include>admin/jest.config.js</include>
+                    <include>admin/jsconfig.json</include>
+                    <include>admin/loader.js</include>
+                    <include>admin/package-lock.json</include>
+                    <include>admin/package.json</include>
+                    <include>admin/webpack.config.js</include>
+                    <include>admin/Readme.txt</include>
                     <include>p2.inf</include>
                 </includes>
             </resource>

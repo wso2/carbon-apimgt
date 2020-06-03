@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl.dto;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 
 /**
  * This class represent the API key validation Info DTO.
@@ -62,6 +61,7 @@ public class APIKeyValidationInfoDTO implements Serializable {
     //keeps productId of product for which the key was validated, if key was validated for an api this will be null
     private String productName;
     private String productProvider;
+    private String keyManager;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -334,6 +334,16 @@ public class APIKeyValidationInfoDTO implements Serializable {
 
     public String getProductProvider() {
         return productProvider;
+    }
+
+    public void setKeyManager(String keyManager) {
+
+        this.keyManager = keyManager;
+    }
+
+    public String getKeyManager() {
+
+        return keyManager;
     }
 }
 

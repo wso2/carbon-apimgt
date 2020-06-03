@@ -1687,7 +1687,7 @@ paths:
             - apim:api_create
       summary: Import API Definition
       description: |
-        This operation can be used to create api from api definition.
+        This operation can be used to create api from api definition.APIMgtDAOTest
 
         API definition is GraphQL Schema
       parameters:
@@ -7500,13 +7500,13 @@ definitions:
           ],"
       subscriptionAvailability:
         type: string
-        description: The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
+        description: The subscription availability. Accepts one of the following. CURRENT_TENANT, ALL_TENANTS or SPECIFIC_TENANTS.
         enum:
-          - current_tenant
-          - all_tenants
-          - specific_tenants
-        example: current_tenant
-        default: all_tenants
+          - CURRENT_TENANT
+          - ALL_TENANTS
+          - SPECIFIC_TENANTS
+        example: CURRENT_TENANT
+        default: ALL_TENANTS
         x-otherScopes:
           - apim:api_publish
       subscriptionAvailableTenants:
@@ -7690,6 +7690,10 @@ definitions:
         items:
           type: string
           example: ["Finance"]
+      keyManagers:
+        description: |
+          API Key Managers
+        type: object
 
   #-----------------------------------------------------
   # The Audit Report resource
@@ -7910,13 +7914,13 @@ definitions:
           type: string
       subscriptionAvailability:
         type: string
-        description: The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
+        description: The subscription availability. Accepts one of the following. CURRENT_TENANT, ALL_TENANTS or SPECIFIC_TENANTS.
         enum:
-          - current_tenant
-          - all_tenants
-          - specific_tenants
-        example: current_tenant
-        default: all_tenants
+          - CURRENT_TENANT
+          - ALL_TENANTS
+          - SPECIFIC_TENANTS
+        example: CURRENT_TENANT
+        default: ALL_TENANTS
       subscriptionAvailableTenants:
         type: array
         items:

@@ -1266,62 +1266,6 @@ public class RestApiUtil {
         return null;
     }
 
-    /**
-     * Following 3 methods are temporary added to rest API Util
-     * Ideally they should move to DCR, RR and Introspection API implementation
-     *
-     * @param api
-     * @param swagger
-     * @return
-     */
-    public static boolean registerResource(API api, String swagger) {
-
-        APIDefinition oasParser;
-        try {
-            oasParser = OASParserUtil.getOASParser(swagger);
-        } catch (APIManagementException e) {
-            log.error("Error occurred while parsing swagger definition");
-            return false;
-        }
-
-
-        Set<URITemplate> uriTemplates = null;
-        try {
-            uriTemplates = oasParser.getURITemplates(swagger);
-        } catch (APIManagementException e) {
-            log.error("Error while parsing swagger content to get URI Templates", e);
-        }
-        api.setUriTemplates(uriTemplates);
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-        Map registeredResource = null;
-        try {
-            registeredResource = keyManager.getResourceByApiId(api.getId().toString());
-        } catch (APIManagementException e) {
-            log.error("Error while getting registered resources for API: " + api.getId().toString(), e);
-        }
-        //Add new resource if not exist
-        if (registeredResource == null) {
-            boolean isNewResourceRegistered = false;
-            try {
-                isNewResourceRegistered = keyManager.registerNewResource(api, null);
-            } catch (APIManagementException e) {
-                log.error("Error while registering new resource for API: " + api.getId().toString(), e);
-            }
-            if (!isNewResourceRegistered) {
-                log.error("New resource not registered for API: " + api.getId());
-            }
-        }
-        //update existing resource
-        else {
-            try {
-                keyManager.updateRegisteredResource(api, registeredResource);
-            } catch (APIManagementException e) {
-                log.error("Error while updating resource", e);
-            }
-        }
-        return true;
-    }
-
     public static OAuthApplicationInfo registerOAuthApplication(OAuthAppRequest appRequest) {
         //Create Oauth Application - Dynamic client registration service
         AMDefaultKeyManagerImpl impl = new AMDefaultKeyManagerImpl();
@@ -1331,18 +1275,6 @@ public class RestApiUtil {
         } catch (APIManagementException e) {
             log.error("Cannot create OAuth application from provided information, for APP name: " +
                     appRequest.getOAuthApplicationInfo().getClientName(), e);
-        }
-        return returnedAPP;
-    }
-
-    public static OAuthApplicationInfo retrieveOAuthApplication(String consumerKey) {
-        //Create Oauth Application - Dynamic client registration service
-        AMDefaultKeyManagerImpl impl = new AMDefaultKeyManagerImpl();
-        OAuthApplicationInfo returnedAPP = null;
-        try {
-            returnedAPP = impl.retrieveApplication(consumerKey);
-        } catch (APIManagementException e) {
-            log.error("Error while retrieving OAuth application information for Consumer Key: " + consumerKey, e);
         }
         return returnedAPP;
     }

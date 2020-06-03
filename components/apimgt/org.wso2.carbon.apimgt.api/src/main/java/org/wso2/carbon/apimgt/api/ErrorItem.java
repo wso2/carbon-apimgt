@@ -28,6 +28,16 @@ public class ErrorItem implements ErrorHandler {
     private String description;
     private long errorCode;
     private int statusCode;
+    private boolean stackTrace = false;
+
+
+    public ErrorItem(String message, String description, long errorCode, int statusCode, boolean stackTrace) {
+        this.message = message;
+        this.errorCode = errorCode;
+        this.statusCode = statusCode;
+        this.description = description;
+        this.stackTrace = stackTrace;
+    }
 
     public void setErrorCode(long errorCode) {
         this.errorCode = errorCode;
@@ -73,5 +83,10 @@ public class ErrorItem implements ErrorHandler {
     @Override
     public int getHttpStatusCode() {
         return statusCode;
+    }
+
+    @Override
+    public boolean printStackTrace() {
+        return stackTrace;
     }
 }

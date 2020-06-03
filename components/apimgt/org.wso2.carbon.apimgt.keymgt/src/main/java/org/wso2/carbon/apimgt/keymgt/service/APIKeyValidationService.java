@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.keymgt.service;
 
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
@@ -32,9 +31,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
@@ -44,19 +41,16 @@ import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -64,30 +58,6 @@ import java.util.*;
 public class APIKeyValidationService extends AbstractAdmin {
     private static final Log log = LogFactory.getLog(APIKeyValidationService.class);
     private static KeyValidationHandler keyValidationHandler;
-
-    public APIKeyValidationService() {
-        try {
-            if (keyValidationHandler == null) {
-
-                KeyValidationHandler validationHandler = (KeyValidationHandler) APIUtil.getClassForName
-                        (ServiceReferenceHolder.getInstance().
-                                getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                                getFirstProperty(APIConstants.API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME).trim()).newInstance();
-                log.info("Initialised KeyValidationHandler instance successfully");
-                if (keyValidationHandler == null) {
-                    synchronized (this) {
-                        keyValidationHandler = validationHandler;
-                    }
-                }
-            }
-        } catch (InstantiationException e) {
-            log.error("Error while instantiating class" + e.toString());
-        } catch (IllegalAccessException e) {
-            log.error("Error while accessing class" + e.toString());
-        } catch (ClassNotFoundException e) {
-            log.error("Error while creating keyManager instance" + e.toString());
-        }
-    }
 
     /**
      * Validates the access tokens issued for a particular user to access an API.
@@ -100,7 +70,8 @@ public class APIKeyValidationService extends AbstractAdmin {
      */
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
                                                String requiredAuthenticationLevel, String clientDomain,
-                                               String matchingResource, String httpVerb)
+                                               String matchingResource, String httpVerb,String tenantDomain,
+                                               String[] keyManagers)
             throws APIKeyMgtException, APIManagementException {
 
         TracingSpan validateMainSpan = null;
@@ -167,6 +138,8 @@ public class APIKeyValidationService extends AbstractAdmin {
         validationContext.setRequiredAuthenticationLevel(requiredAuthenticationLevel);
         validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
         validationContext.setVersion(version);
+        validationContext.setTenantDomain(tenantDomain);
+        validationContext.setKeyManagers(Arrays.asList(keyManagers));
 
         if (Util.tracingEnabled()) {
             getAccessTokenCacheSpan =
@@ -200,6 +173,8 @@ public class APIKeyValidationService extends AbstractAdmin {
         if (Util.tracingEnabled()) {
             validateTokenSpan = Util.startSpan(TracingConstants.VALIDATE_TOKEN, validateMainSpan, tracer);
         }
+        KeyValidationHandler keyValidationHandler =
+                ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         boolean state = keyValidationHandler.validateToken(validationContext);
         timerContext2.stop();
         if (Util.tracingEnabled()) {
@@ -374,7 +349,8 @@ public class APIKeyValidationService extends AbstractAdmin {
      * @throws APIManagementException
      */
     public APIKeyValidationInfoDTO validateKeyforHandshake(String context, String version,
-                                                           String accessToken)
+                                                           String accessToken, String tenantDomain,
+                                                           String[] keyManagers)
             throws APIKeyMgtException, APIManagementException {
         boolean defaultVersionInvoked = false;
         APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
@@ -384,13 +360,18 @@ public class APIKeyValidationService extends AbstractAdmin {
         validationContext.setContext(context);
         validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
         validationContext.setVersion(version);
+        validationContext.setTenantDomain(tenantDomain);
         validationContext.setRequiredAuthenticationLevel("Any");
+        validationContext.setKeyManagers(Arrays.asList(keyManagers));
+        KeyValidationHandler keyValidationHandler =
+                ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         boolean state = keyValidationHandler.validateToken(validationContext);
         ApiMgtDAO dao = ApiMgtDAO.getInstance();
         if (state) {
             info.setAuthorized(true);
             info.setValidityPeriod(validationContext.getTokenInfo().getValidityPeriod());
             info.setIssuedTime(validationContext.getTokenInfo().getIssuedTime());
+            info.setKeyManager(validationContext.getValidationInfoDTO().getKeyManager());
             String def_version = isDefaultVersionInvoked(validationContext.getContext());
             if (def_version != null) {
                 defaultVersionInvoked = true;
@@ -399,9 +380,9 @@ public class APIKeyValidationService extends AbstractAdmin {
                 validationContext.setVersion(version);
                 validationContext.setContext(context);
             }
-            info = dao.validateSubscriptionDetails(info, validationContext.getContext(),
-                                               validationContext.getVersion(),
-                                               validationContext.getTokenInfo().getConsumerKey(), defaultVersionInvoked);
+            info = dao.validateSubscriptionDetails(info, validationContext.getContext(), validationContext.getVersion(),
+                    validationContext.getTokenInfo().getConsumerKey(), info.getKeyManager(),
+                    defaultVersionInvoked);
 
             if (defaultVersionInvoked) {
                 info.setApiName(info.getApiName() + "*" + version);
@@ -452,8 +433,12 @@ public class APIKeyValidationService extends AbstractAdmin {
      * authorized, tier information will be <pre>null</pre>
      * @throws APIKeyMgtException Error occurred when accessing the underlying database or registry.
      */
-    public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey)
-            throws APIKeyMgtException, APIManagementException  {
-        return keyValidationHandler.validateSubscription(context, version, consumerKey);
+    public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
+                                                        String tenantDomain,String keyManager)
+            throws APIKeyMgtException, APIManagementException {
+
+        KeyValidationHandler keyValidationHandler =
+                ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
+        return keyValidationHandler.validateSubscription(context, version, consumerKey,keyManager);
     }
 }

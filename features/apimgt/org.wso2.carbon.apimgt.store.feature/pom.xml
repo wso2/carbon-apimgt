@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.6.250-SNAPSHOT</version>
+        <version>6.6.252-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -327,7 +327,7 @@
                     <include>devportal/webpack.config.js</include>
                     <include>devportal/Readme.txt</include>
                     <include>p2.inf</include>
-                    <include>admin/**</include>
+                    <include>admin-old/**</include>
                     <include>apistore/**</include>
                     <include>customTheme/**</include>
                     <include>store-old/**</include>

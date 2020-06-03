@@ -47,18 +47,19 @@ public class SQLConstants {
             "   AND MAP.CONSUMER_KEY   = ? ";
 
     public static final String GET_APPLICATION_REGISTRATION_SQL =
-            " SELECT REG_ID FROM AM_APPLICATION_REGISTRATION WHERE SUBSCRIBER_ID = ? AND APP_ID = ? AND TOKEN_TYPE = ?";
+            " SELECT REG_ID FROM AM_APPLICATION_REGISTRATION WHERE SUBSCRIBER_ID = ? AND APP_ID = ? AND TOKEN_TYPE = " +
+                    "? AND KEY_MANAGER = ?";
 
     public static final String ADD_APPLICATION_REGISTRATION_SQL =
             " INSERT INTO " +
             "   AM_APPLICATION_REGISTRATION (SUBSCRIBER_ID,WF_REF,APP_ID,TOKEN_TYPE,ALLOWED_DOMAINS," +
-            "VALIDITY_PERIOD,TOKEN_SCOPE,INPUTS) " +
-            " VALUES(?,?,?,?,?,?,?,?)";
+            "VALIDITY_PERIOD,TOKEN_SCOPE,INPUTS,KEY_MANAGER) " +
+            " VALUES(?,?,?,?,?,?,?,?,?)";
 
     public static final String ADD_APPLICATION_KEY_MAPPING_SQL =
             " INSERT INTO " +
-            "   AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,KEY_TYPE,STATE) " +
-            " VALUES(?,?,?)";
+            "   AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,KEY_TYPE,STATE,KEY_MANAGER,UUID) " +
+            " VALUES(?,?,?,?,?)";
 
     public static final String GET_OAUTH_APPLICATION_SQL =
             " SELECT CONSUMER_SECRET, USERNAME, TENANT_ID, APP_NAME, APP_NAME, CALLBACK_URL, GRANT_TYPES " +
@@ -253,45 +254,6 @@ public class SQLConstants {
             "   API.API_PROVIDER" +
             " FROM ";
 
-    public static final String VALIDATE_KEY_DEFAULT_SUFFIX =
-            " IAT," + APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE + "ISAT," +
-            "   AM_SUBSCRIPTION SUB," +
-            "   AM_SUBSCRIBER SUBS," +
-            "   AM_APPLICATION APP," +
-            "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_API API," +
-            "   IDN_OAUTH_CONSUMER_APPS ICA" +
-            " WHERE " +
-            "   IAT.ACCESS_TOKEN = ? " +
-            "   AND API.CONTEXT = ? " +
-            "   AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
-            "   AND ICA.CONSUMER_KEY = AKM.CONSUMER_KEY " +
-            "   AND ICA.ID = IAT.CONSUMER_KEY_ID" +
-            "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-            "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-            "   AND API.API_ID = SUB.API_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
-
-    public static final String VALIDATE_KEY_VERSION_SUFFIX =
-            " IAT," + APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE + "ISAT," +
-            "   AM_SUBSCRIPTION SUB," +
-            "   AM_SUBSCRIBER SUBS," +
-            "   AM_APPLICATION APP," +
-            "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_API API," +
-            "   IDN_OAUTH_CONSUMER_APPS ICA" +
-            " WHERE " +
-            "   IAT.ACCESS_TOKEN = ? " +
-            "   AND API.CONTEXT = ? " +
-            "   AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
-            "   AND API.API_VERSION = ? " +
-            "   AND ICA.CONSUMER_KEY = AKM.CONSUMER_KEY " +
-            "   AND ICA.ID = IAT.CONSUMER_KEY_ID" +
-            "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-            "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-            "   AND API.API_ID = SUB.API_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
-
     public static final String VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
             " SELECT " +
             "   SUB.TIER_ID," +
@@ -313,6 +275,7 @@ public class SQLConstants {
             " WHERE " +
             "   API.CONTEXT = ? " +
             "   AND AKM.CONSUMER_KEY = ? " +
+            "   AND AKM.KEY_MANAGER = ? " +
             "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUB.API_ID" +
@@ -339,6 +302,7 @@ public class SQLConstants {
             " WHERE " +
             "   API.CONTEXT = ? " +
             "   AND AKM.CONSUMER_KEY = ? " +
+            "   AND AKM.KEY_MANAGER = ? " +
             "   AND API.API_VERSION = ? " +
             "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
@@ -372,6 +336,7 @@ public class SQLConstants {
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
+                    "   AND AKM.KEY_MANAGER = ? " +
                     "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
                     "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
                     "   AND API.API_ID = SUB.API_ID" +
@@ -406,6 +371,7 @@ public class SQLConstants {
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
+                    "   AND AKM.KEY_MANAGER = ? " +
                     "   AND APS.TENANT_ID = ? " +
                     "   AND API.API_VERSION = ? " +
                     "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
@@ -413,15 +379,6 @@ public class SQLConstants {
                     "   AND API.API_ID = SUB.API_ID" +
                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
                     "   AND APS.NAME = SUB.TIER_ID" ;
-
-    public static final String UPDATE_TOKEN_PREFIX = "UPDATE ";
-
-    public static final String UPDATE_TOKEN_SUFFIX =
-            " SET " +
-            "   TOKEN_STATE = ? " +
-            "   ,TOKEN_STATE_ID = ? " +
-            " WHERE " +
-            "   ACCESS_TOKEN = ?";
 
     public static final String ADD_SUBSCRIBER_SQL =
             " INSERT" +
@@ -914,12 +871,7 @@ public class SQLConstants {
             " ORDER BY IAT.TOKEN_ID";
 
     public static final String GET_CLIENT_OF_APPLICATION_SQL =
-            " SELECT  CONSUMER_KEY " +
-            " FROM AM_APPLICATION_KEY_MAPPING " +
-            " WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
-
-    public static final String GET_KEY_STATUS_OF_APPLICATION_SQL =
-            " SELECT STATE " +
+            " SELECT  CONSUMER_KEY,KEY_MANAGER " +
             " FROM AM_APPLICATION_KEY_MAPPING " +
             " WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
 
@@ -1185,18 +1137,20 @@ public class SQLConstants {
             " VALUES (?,?)";
 
     public static final String GET_REGISTRATION_APPROVAL_STATUS_SQL =
-            " SELECT STATE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE =?";
+            " SELECT KEY_MANAGER,STATE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE =?";
 
     public static final String UPDATE_APPLICAITON_KEY_TYPE_MAPPINGS_SQL =
-            " UPDATE AM_APPLICATION_KEY_MAPPING SET CONSUMER_KEY = ? WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
+            " UPDATE AM_APPLICATION_KEY_MAPPING SET CONSUMER_KEY = ? WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND " +
+                    "KEY_MANAGER = ?";
 
     public static final String ADD_APPLICATION_KEY_TYPE_MAPPING_SQL =
             " INSERT INTO " +
-            " AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,CONSUMER_KEY,KEY_TYPE,STATE,CREATE_MODE) " +
-            " VALUES (?,?,?,?,?)";
+            " AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,CONSUMER_KEY,KEY_TYPE,STATE,CREATE_MODE,KEY_MANAGER) " +
+            " VALUES (?,?,?,?,?,?)";
 
     public static final String UPDATE_APPLICATION_KEY_MAPPING_SQL =
-            " UPDATE AM_APPLICATION_KEY_MAPPING SET STATE = ? WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
+            " UPDATE AM_APPLICATION_KEY_MAPPING SET STATE = ? WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND " +
+                    "KEY_MANAGER=?";
 
     public static final String GET_SUBSCRIPTION_SQL =
             " SELECT " +
@@ -1754,8 +1708,9 @@ public class SQLConstants {
     public static final String GET_CONSUMER_KEY_OF_APPLICATION_SQL =
             " SELECT" +
             "   CONSUMER_KEY," +
-            "   CREATE_MODE" +
-            " FROM" +
+            "   CREATE_MODE," +
+            "   KEY_MANAGER" +
+                    " FROM" +
             "   AM_APPLICATION_KEY_MAPPING " +
             " WHERE" +
             "   APPLICATION_ID = ?";
@@ -1824,11 +1779,14 @@ public class SQLConstants {
     public static final String DELETE_APPLICATION_KEY_MAPPING_BY_CONSUMER_KEY_SQL =
             "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ?";
 
+    public static final String DELETE_APPLICATION_KEY_MAPPING_BY_UUID_SQL =
+            "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE UUID = ?";
+
     public static final String DELETE_APPLICATION_KEY_MAPPING_BY_APPLICATION_ID_SQL =
             "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
 
     public static final String REMOVE_FROM_APPLICATION_REGISTRANTS_SQL =
-            "DELETE FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ? AND TOKEN_TYPE = ?";
+            "DELETE FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ? AND TOKEN_TYPE = ? AND KEY_MANAGER = ?";
 
     public static final String GET_SUBSCRIBER_CASE_INSENSITIVE_SQL =
             " SELECT " +
@@ -2300,7 +2258,7 @@ public class SQLConstants {
             "   SUB.USER_ID," +
             "   REG.ALLOWED_DOMAINS," +
             "   REG.VALIDITY_PERIOD," +
-            "   REG.INPUTS" +
+            "   REG.INPUTS, REG.KEY_MANAGER" +
             " FROM " +
             "   AM_APPLICATION_REGISTRATION REG," +
             "   AM_APPLICATION APP," +
@@ -2421,7 +2379,7 @@ public class SQLConstants {
                     "   AND SUB_STATUS = ?";
 
     public static final String GET_REGISTRATION_WORKFLOW_SQL =
-            "SELECT WF_REF FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ? AND TOKEN_TYPE = ?";
+            "SELECT WF_REF FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ? AND TOKEN_TYPE = ? AND KEY_MANAGER = ?";
 
     public static final String GET_SUBSCRIPTION_STATUS_SQL =
             "SELECT SUB_STATUS FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
@@ -2617,11 +2575,11 @@ public class SQLConstants {
             "SELECT API_VERSION FROM AM_API WHERE CONTEXT_TEMPLATE = ? AND API_NAME = ?";
 
     public static final String GET_APPLICATION_MAPPING_FOR_CONSUMER_KEY_SQL =
-            "SELECT APPLICATION_ID FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY   = ?";
+            "SELECT APPLICATION_ID FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ? AND KEY_MANAGER = ?";
 
     public static final String GET_CONSUMER_KEY_BY_APPLICATION_AND_KEY_SQL =
             " SELECT " +
-            "   CONSUMER_KEY " +
+            "   CONSUMER_KEY,KEY_MANAGER " +
             " FROM " +
             "   AM_APPLICATION_KEY_MAPPING " +
             " WHERE " +
@@ -3169,6 +3127,11 @@ public class SQLConstants {
     public static final String GET_USER_ID = "SELECT USER_ID FROM AM_USER WHERE USER_NAME=?";
 
     public static final String ADD_USER_ID = "INSERT INTO AM_USER (USER_ID, USER_NAME) VALUES (?,?)";
+    public static final String GET_KEY_MAPPING_ID_FROM_APPLICATION =
+            "SELECT UUID FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND KEY_MANAGER = ?";
+    public static final String GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_APP_ID_KEY_MANAGER_SQL =
+            "SELECT CONSUMER_KEY FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND " +
+                    "KEY_MANAGER = ?";
 
     /** Throttle related constants**/
 
@@ -3529,11 +3492,6 @@ public class SQLConstants {
      */
     public static class KeyMgtConstants {
 
-        public static final String ADD_KM_APPLICATION =
-                "INSERT INTO AM_KM_MGT_APPLICATION (CONSUMER_KEY,CONSUMER_SECRET,TENANT_ID) VALUES (?,?,?)";
-
-        public static final String GET_KM_APPLICATION_FOR_TENANT =
-                "SELECT CONSUMER_KEY, CONSUMER_SECRET FROM AM_KM_MGT_APPLICATION WHERE TENANT_ID = ?";
     }
 
     //TODO: Need remove after KM seperation
@@ -3548,4 +3506,15 @@ public class SQLConstants {
 
     public static final String GET_OAUTH2_SCOPE_ID_BY_NAME_SQL =
             "SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
+    public static class KeyManagerSqlConstants {
+        public static final String ADD_KEY_MANAGER =
+                " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,TENANT_DOMAIN,ENABLED) VALUES " +
+                        "(?,?,?,?,?,?,?)";
+        public static final String UPDATE_KEY_MANAGER =
+                "UPDATE AM_KEY_MANAGER SET NAME = ?,DESCRIPTION = ?,TYPE = ?,CONFIGURATION = ?,TENANT_DOMAIN = ?," +
+                        "ENABLED = ? WHERE UUID = ?";
+
+        public static final String DELETE_KEY_MANAGER =
+                "DELETE FROM AM_KEY_MANAGER WHERE UUID = ? AND TENANT_DOMAIN = ?";
+    }
 }

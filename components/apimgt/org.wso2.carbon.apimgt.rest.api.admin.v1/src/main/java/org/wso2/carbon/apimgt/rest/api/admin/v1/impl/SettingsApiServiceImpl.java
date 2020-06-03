@@ -20,15 +20,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApiService;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
+import java.util.Map;
 
 public class SettingsApiServiceImpl implements SettingsApiService {
 
@@ -50,5 +55,41 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    /**
+     * Get all scopes of a user
+     *
+     * @param username Search query
+     * @return Scope list
+     */
+    @Override
+    public Response settingsScopesScopeGet(String username, String scopeName, MessageContext messageContext) {
+        String[] userRoles;
+        ScopeSettingsDTO scopeSettingsDTO = new ScopeSettingsDTO();
+        ErrorDTO errorDTO = new ErrorDTO();
+        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
+                .getTenantDomain(username));
+        try {
+            if (APIUtil.isUserExist(username) && scopeRoleMapping.containsKey(scopeName)) {
+                userRoles = APIUtil.getListOfRoles(username);
+                SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
+
+                if (settingsMappingUtil.GetRoleScopeList(userRoles, scopeRoleMapping).contains(scopeName)) {
+                    scopeSettingsDTO.setName(scopeName);
+                }
+            } else {
+                errorDTO.setCode(404l);
+                errorDTO.description("Username or Scope does not exist. Username: "
+                        + username + ", " + "Scope: " + scopeName);
+                errorDTO.setMessage("Not Found");
+                return Response.ok().entity(errorDTO).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error when getting the list of scopes. Username: " + username + " , "
+                    + "Scope: " + scopeName;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return Response.ok().entity(scopeSettingsDTO).build();
     }
 }
