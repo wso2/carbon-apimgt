@@ -4031,9 +4031,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (url != null) {
             validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, returnContent);
         } else if (fileInputStream != null) {
+            String filename = fileDetail.getContentDisposition().getFilename();
             try {
-                String openAPIContent = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
-                validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
+                if (filename.endsWith(".zip")) {
+                    validationResponse =
+                            OASParserUtil. extractAndValidateOpenAPIArchive(fileInputStream,returnContent);
+                } else  {
+                    String openAPIContent = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+                    validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
+                }
             } catch (IOException e) {
                 RestApiUtil.handleInternalServerError("Error while reading file content", e, log);
             }
