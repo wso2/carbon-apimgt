@@ -1,7 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApiService;
@@ -52,23 +51,6 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. Requested Settings does not exist. ", response = ErrorDTO.class) })
     public Response settingsGet() throws APIManagementException{
         return delegate.settingsGet(securityContext);
-    }
-
-    @GET
-    @Path("/scopes")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get the list of role scope mapping. ", notes = "This operation is used to get the list of role scope mapping from tenant-conf for the apim admin dashboard ", response = ScopeListDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
-        })
-    }, tags={ "Settings",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. The list of role scope mappings are returned. ", response = ScopeListDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error. An internal server error occurred while retrieving the role scope mapping. ", response = ErrorDTO.class) })
-    public Response settingsScopesGet() throws APIManagementException{
-        return delegate.settingsScopesGet(securityContext);
     }
 
     @GET
