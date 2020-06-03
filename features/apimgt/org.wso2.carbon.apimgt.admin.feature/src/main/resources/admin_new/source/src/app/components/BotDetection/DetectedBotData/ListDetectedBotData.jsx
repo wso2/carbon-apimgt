@@ -16,7 +16,8 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 import API from 'AppData/api';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
@@ -39,14 +40,11 @@ import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
  * Render a list
  * @returns {JSX} Header AppBar components.
  */
-export default function ListMGLabels() {
+export default function ListDetectedBotData() {
+    const { settings } = useAppContext();
     const intl = useIntl();
-    const [isAnalyticsEnabled, setIsAnalyticsEnabled] = useState();
+    const isAnalyticsEnabled = settings.analyticsEnabled;
     const restApi = new API();
-
-    restApi.getAnalyticsEnabled().then((result) => {
-        setIsAnalyticsEnabled(result.body.analyticsEnabled);
-    });
 
     /**
      * API call to get Detected Data

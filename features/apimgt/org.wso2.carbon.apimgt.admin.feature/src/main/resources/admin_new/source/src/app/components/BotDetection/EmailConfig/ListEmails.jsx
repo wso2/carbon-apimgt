@@ -17,6 +17,7 @@
  */
 
 import React, { useState } from 'react';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 import API from 'AppData/api';
 import { useIntl, FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
@@ -41,14 +42,11 @@ import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
  * @returns {JSX} Header AppBar components.
  */
 export default function ListEmails() {
+    const { settings } = useAppContext();
     const intl = useIntl();
     const [emailList, setEmailList] = useState([]);
-    const [isAnalyticsEnabled, setIsAnalyticsEnabled] = useState();
+    const isAnalyticsEnabled = settings.analyticsEnabled;
     const restApi = new API();
-
-    restApi.getAnalyticsEnabled().then((result) => {
-        setIsAnalyticsEnabled(result.body.analyticsEnabled);
-    });
 
     /**
      * API call to get all emails
