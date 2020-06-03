@@ -16,25 +16,33 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.keymgt.model.util;
+package org.wso2.carbon.apimgt.keymgt.model.entity;
 
-public class SubscriptionDataStoreUtil {
+import java.util.ArrayList;
+import java.util.List;
 
-    public static final String DELEM_PERIOD = ".";
+public class SubscriptionPolicyList {
 
-    public static String getAPICacheKey(String context, String version) {
+    private Integer count = null;
+    private List<SubscriptionPolicy> list = new ArrayList<>();
 
-        return context + DELEM_PERIOD + version;
+    public Integer getCount() {
+
+        return count;
     }
 
-    public static String getSubscriptionCacheKey(int appId, int apiId) {
+    public void setCount(Integer count) {
 
-        return appId + DELEM_PERIOD + apiId;
+        this.count = count;
     }
 
-    public static String getPolicyCacheKey(String tierName, int tenantId) {
+    public List<SubscriptionPolicy> getList() {
 
-        return tierName + DELEM_PERIOD + tenantId;
+        return list;
     }
 
+    public void setList(List<SubscriptionPolicy> list) {
+
+        this.list = list;
+    }
 }

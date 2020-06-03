@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
-import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
-
 /**
  * Entity to represent a Subscription Throttling Policy.
  */
@@ -62,7 +60,7 @@ public class SubscriptionPolicy extends Policy {
     @Override
     public String getCacheKey() {
 
-        return InMemorySubscriptionValidationConstants.POLICY_TYPE.SUBSCRIPTION +
+        return POLICY_TYPE.SUBSCRIPTION +
                 getPolicyCacheKey(getName(), getTenantId());
 
     }

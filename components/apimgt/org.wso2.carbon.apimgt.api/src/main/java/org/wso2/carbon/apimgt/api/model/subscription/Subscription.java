@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
-import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
-
 /**
  * Entity for representing a SubscriptionDTO in APIM
  */
@@ -89,6 +87,6 @@ public class Subscription implements CacheableEntity<String> {
 
     private static String getSubscriptionCacheKey(int appId, int apiId) {
 
-        return appId + InMemorySubscriptionValidationConstants.DELEM_PERIOD + apiId;
+        return appId + DELEM_PERIOD + apiId;
     }
 }

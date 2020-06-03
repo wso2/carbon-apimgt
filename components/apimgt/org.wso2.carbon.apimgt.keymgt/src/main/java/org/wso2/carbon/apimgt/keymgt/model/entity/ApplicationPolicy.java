@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
-import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
-
 /**
  * Entity for keeping Application Policy
  */
@@ -30,7 +28,6 @@ public class ApplicationPolicy extends Policy {
     @Override
     public String getCacheKey() {
 
-        return InMemorySubscriptionValidationConstants.POLICY_TYPE.APPLICATION +
-                InMemorySubscriptionValidationConstants.DELEM_PERIOD + super.getCacheKey();
+        return POLICY_TYPE.APPLICATION + DELEM_PERIOD + super.getCacheKey();
     }
 }

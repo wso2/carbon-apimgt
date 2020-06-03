@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.keymgt.model.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
@@ -29,7 +28,6 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Policy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
-import org.wso2.carbon.apimgt.keymgt.model.entity.Subscriber;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -46,7 +44,10 @@ import java.util.function.Supplier;
 public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     private static final Log log = LogFactory.getLog(SubscriptionDataStoreImpl.class);
-
+    public enum POLICY_TYPE {
+        SUBSCRIPTION,
+        APPLICATION
+    }
     // Maps for keeping Subscription related details.
     private Map<String, ApplicationKeyMapping> applicationKeyMappingMap;
     private Map<Integer, Application> applicationMap;
@@ -101,7 +102,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public SubscriptionPolicy getSubscriptionPolicyByName(String policyName, int tenantId) {
 
-        String key = InMemorySubscriptionValidationConstants.POLICY_TYPE.SUBSCRIPTION +
+        String key = POLICY_TYPE.SUBSCRIPTION +
                 SubscriptionDataStoreUtil.getPolicyCacheKey(policyName, tenantId);
         return subscriptionPolicyMap.get(key);
     }
@@ -109,7 +110,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public ApplicationPolicy getApplicationPolicyByName(String policyName, int tenantId) {
 
-        String key = InMemorySubscriptionValidationConstants.POLICY_TYPE.APPLICATION +
+        String key = POLICY_TYPE.APPLICATION +
                 SubscriptionDataStoreUtil.getPolicyCacheKey(policyName, tenantId);
         return appPolicyMap.get(key);
     }

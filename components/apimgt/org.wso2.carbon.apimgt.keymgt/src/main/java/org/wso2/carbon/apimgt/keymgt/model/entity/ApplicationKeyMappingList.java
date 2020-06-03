@@ -15,15 +15,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.api;
 
-public class InMemorySubscriptionValidationConstants {
 
-    public static final String DELEM_PERIOD = ".";
+package org.wso2.carbon.apimgt.keymgt.model.entity;
 
-    public static enum POLICY_TYPE {
-        SUBSCRIPTION,
-        APPLICATION
+import java.util.ArrayList;
+import java.util.List;
+
+public class ApplicationKeyMappingList {
+
+    private Integer count = null;
+    private List<ApplicationKeyMapping> list = new ArrayList<>();
+
+    public Integer getCount() {
+
+        return count;
     }
 
+    public void setCount(Integer count) {
+
+        this.count = count;
+    }
+
+    public List<ApplicationKeyMapping> getList() {
+
+        return list;
+    }
+
+    public void setList(List<ApplicationKeyMapping> list) {
+
+        this.list = list;
+    }
 }

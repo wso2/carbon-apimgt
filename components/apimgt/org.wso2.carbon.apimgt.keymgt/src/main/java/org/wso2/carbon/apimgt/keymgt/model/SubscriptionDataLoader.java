@@ -86,14 +86,6 @@ public interface SubscriptionDataLoader {
     public List<ApplicationPolicy> loadAllAppPolicies(String tenantDomain) throws DataLoadingException;
 
     /**
-     * Retrieve a Subscriber from db.
-     *
-     * @return A {@link Subscriber}.
-     * @throws DataLoadingException If any error
-     */
-    public Subscriber getSubscriberById(int subscriberId) throws DataLoadingException;
-
-    /**
      * Retrieve Subscription from db.
      *
      * @return A {@link Subscription}.

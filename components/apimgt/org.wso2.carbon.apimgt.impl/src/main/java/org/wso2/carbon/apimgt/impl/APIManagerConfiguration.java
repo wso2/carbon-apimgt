@@ -1531,7 +1531,7 @@ public class APIManagerConfiguration {
                 keyManagerConfigurationsDto.setServiceUrl(serviceUrl.getText());
             } else {
                 String keyManagerURl = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
-                        System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.UTILITY_WEB_APP_EP;
+                        System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
                 keyManagerConfigurationsDto.setServiceUrl(keyManagerURl);
             }
             OMElement initDelay = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.INIT_DELAY));
@@ -1539,7 +1539,7 @@ public class APIManagerConfiguration {
                 keyManagerConfigurationsDto.setInitDelay(Integer.parseInt(initDelay.getText()));
             } else {
                 String keyManagerURl = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
-                        System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.UTILITY_WEB_APP_EP;
+                        System.getProperty(APIConstants.KEYMANAGER_PORT) + APIConstants.INTERNAL_WEB_APP_EP;
                 keyManagerConfigurationsDto.setServiceUrl(keyManagerURl);
             }
             OMElement usernameElement = omElement.getFirstChildWithName(new QName(APIConstants.KeyManager.USERNAME));

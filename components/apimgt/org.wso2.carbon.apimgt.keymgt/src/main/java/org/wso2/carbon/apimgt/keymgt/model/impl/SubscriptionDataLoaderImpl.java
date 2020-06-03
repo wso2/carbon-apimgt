@@ -17,8 +17,8 @@
  */
 package org.wso2.carbon.apimgt.keymgt.model.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.hazelcast.map.impl.querycache.subscriber.SubscriberListener;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,7 +27,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
+import org.wso2.carbon.apimgt.keymgt.model.entity.APIList;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.SubscriptionValidationConfig;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -36,10 +36,15 @@ import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
+import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMappingList;
+import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationList;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicyList;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscriber;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
+import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionList;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicyList;
 import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 
 import java.io.IOException;
@@ -79,7 +84,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            subscriptions = Arrays.asList(new Gson().fromJson(responseString, Subscription[].class));
+            subscriptions = (new Gson().fromJson(responseString, SubscriptionList.class)).getList();
         }
         return subscriptions;
     }
@@ -98,7 +103,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            applications = Arrays.asList(new Gson().fromJson(responseString, Application[].class));
+            applications = (new Gson().fromJson(responseString, ApplicationList.class)).getList();
         }
         return applications;
     }
@@ -117,7 +122,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            applicationKeyMappings = Arrays.asList(new Gson().fromJson(responseString, ApplicationKeyMapping[].class));
+            applicationKeyMappings = (new Gson().fromJson(responseString, ApplicationKeyMappingList.class)).getList();
         }
         return applicationKeyMappings;
     }
@@ -136,8 +141,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            apis = Arrays.asList(new Gson().fromJson(responseString, API[].class));
-
+            apis = (new Gson().fromJson(responseString, APIList.class)).getList();
         }
         return apis;
     }
@@ -156,7 +160,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            subscriptionPolicies = Arrays.asList(new Gson().fromJson(responseString, SubscriptionPolicy[].class));
+            subscriptionPolicies = (new Gson().fromJson(responseString, SubscriptionPolicyList.class)).getList();
         }
         return subscriptionPolicies;
     }
@@ -175,28 +179,9 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            applicationPolicies = Arrays.asList(new Gson().fromJson(responseString, ApplicationPolicy[].class));
+            applicationPolicies = (new Gson().fromJson(responseString, ApplicationPolicyList.class)).getList();
         }
         return applicationPolicies;
-    }
-
-    @Override
-    public Subscriber getSubscriberById(int subscriberId) throws DataLoadingException {
-
-        String endPoint = APIConstants.SubscriptionValidationResources.SUBSCRIBERS;
-        Subscriber subscriber = new Subscriber();
-        String responseString = null;
-        try {
-            responseString = invokeService(endPoint, null);
-        } catch (IOException e) {
-            String msg = "Error while executing the http client " + endPoint;
-            log.error(msg, e);
-            throw new DataLoadingException(msg, e);
-        }
-        if (responseString != null && !responseString.isEmpty()) {
-            subscriber = new Gson().fromJson(responseString, Subscriber.class);
-        }
-        return subscriber;
     }
 
     @Override
@@ -214,7 +199,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            subscription = new Gson().fromJson(responseString, Subscription.class);
+            subscription = (new Gson().fromJson(responseString, SubscriptionList.class)).getList().get(0);
         }
         return subscription;
     }
@@ -233,7 +218,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            application = new Gson().fromJson(responseString, Application.class);
+            application = (new Gson().fromJson(responseString, ApplicationList.class)).getList().get(0);
         }
         return application;
     }
@@ -253,7 +238,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            application = new Gson().fromJson(responseString, ApplicationKeyMapping.class);
+            application = (new Gson().fromJson(responseString, ApplicationKeyMappingList.class)).getList().get(0);
         }
         return application;
     }
@@ -273,7 +258,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            api = new Gson().fromJson(responseString, API.class);
+            api = (new Gson().fromJson(responseString, APIList.class)).getList().get(0);
 
         }
         return api;
@@ -295,7 +280,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         }
         if (responseString != null && !responseString.isEmpty()) {
 
-            subscriptionPolicy = new Gson().fromJson(responseString, SubscriptionPolicy.class);
+            subscriptionPolicy = (new Gson().fromJson(responseString, SubscriptionPolicyList.class)).getList().get(0);
 
         }
         return subscriptionPolicy;
@@ -316,7 +301,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             throw new DataLoadingException(msg, e);
         }
         if (responseString != null && !responseString.isEmpty()) {
-            applicationPolicy = new Gson().fromJson(responseString, ApplicationPolicy.class);
+            applicationPolicy = (new Gson().fromJson(responseString, ApplicationPolicyList.class)).getList().get(0);
 
         }
         return applicationPolicy;

@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
-import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 
 /**
@@ -26,6 +25,10 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
  */
 public class Policy implements CacheableEntity<String> {
 
+    public enum POLICY_TYPE {
+        SUBSCRIPTION,
+        APPLICATION
+    }
     private int id = -1;
     private int tenantId = -1;
     private String name = null;
@@ -84,6 +87,6 @@ public class Policy implements CacheableEntity<String> {
 
     public static String getPolicyCacheKey(String tierName, int tenantId) {
 
-        return tierName + InMemorySubscriptionValidationConstants.DELEM_PERIOD + tenantId;
+        return tierName + DELEM_PERIOD + tenantId;
     }
 }

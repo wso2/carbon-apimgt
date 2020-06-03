@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
-import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
 
 /**
  * Entity for keeping mapping between Application and Consumer key.

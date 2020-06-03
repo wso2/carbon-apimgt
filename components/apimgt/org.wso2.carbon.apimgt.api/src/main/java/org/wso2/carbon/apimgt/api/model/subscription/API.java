@@ -18,13 +18,8 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
-import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Entity for keeping API related information.
@@ -117,6 +112,6 @@ public class API implements CacheableEntity<String> {
 
     public String getCacheKey() {
 
-        return context + InMemorySubscriptionValidationConstants.DELEM_PERIOD + version;
+        return context + DELEM_PERIOD + version;
     }
 }

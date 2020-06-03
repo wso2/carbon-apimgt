@@ -570,6 +570,124 @@
         }
       }
     },
+    "APIList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of APIs returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/API"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "API List"
+    },
+    "API" : {
+      "properties" : {
+        "apiId" : {
+          "type" : "integer"
+        },
+        "provider" : {
+          "type" : "string",
+          "description" : "API Provider name."
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "Name of the API"
+        },
+        "version" : {
+          "type" : "string",
+          "description" : "Version of the API."
+        },
+        "context" : {
+          "type" : "string",
+          "description" : "Context of the API."
+        },
+        "policy" : {
+          "type" : "string",
+          "description" : "API level throttling policy."
+        },
+        "urlMaping" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/URLMapping"
+          }
+        }
+      }
+    },
+    "ApplicationList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of Applications returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Application"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "Application List"
+    },
+    "Application" : {
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "subName" : {
+          "type" : "string"
+        },
+        "policy" : {
+          "type" : "string",
+          "description" : "Application level throtting policy."
+        },
+        "tokenType" : {
+          "type" : "string",
+          "example" : "JWT",
+          "description" : "type of the token."
+        },
+        "groupIds" : {
+          "type" : "array",
+          "example" : "wso2",
+          "description" : "group ids associated with the application.",
+          "items" : {
+            "$ref" : "#/definitions/GroupId"
+          }
+        },
+        "attributes" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ApplicationAttribute"
+          }
+        }
+      }
+    },
+    "GroupId" : {
+      "properties" : {
+        "groupId" : {
+          "type" : "string"
+        },
+        "applicationId" : {
+          "type" : "integer"
+        }
+      },
+      "title" : "Application Group Id"
+    },
     "KeyManager" : {
       "properties" : {
         "name" : {
@@ -588,354 +706,235 @@
           "type" : "object",
           "properties" : { }
         }
-      },
-
-      "APIList" : {
-        "properties" : {
-          "count" : {
-            "type" : "integer",
-            "example" : 1,
-            "description" : "Number of APIs returned.\n"
-          },
-          "list" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/definitions/API"
-            }
-          },
-          "pagination" : {
-            "$ref" : "#/definitions/Pagination"
-          }
-        },
-        "title" : "API List"
-      },
-      "API" : {
-        "properties" : {
-          "apiId" : {
-            "type" : "integer"
-          },
-          "provider" : {
-            "type" : "string",
-            "description" : "API Provider name."
-          },
-          "name" : {
-            "type" : "string",
-            "description" : "Name of the API"
-          },
-          "version" : {
-            "type" : "string",
-            "description" : "Version of the API."
-          },
-          "context" : {
-            "type" : "string",
-            "description" : "Context of the API."
-          },
-          "policy" : {
-            "type" : "string",
-            "description" : "API level throttling policy."
-          },
-          "urlMaping" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/definitions/URLMapping"
-            }
-          }
-        }
-      },
-      "ApplicationList" : {
-        "properties" : {
-          "count" : {
-            "type" : "integer",
-            "example" : 1,
-            "description" : "Number of Applications returned.\n"
-          },
-          "list" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/definitions/Application"
-            }
-          },
-          "pagination" : {
-            "$ref" : "#/definitions/Pagination"
-          }
-        },
-        "title" : "Application List"
-      },
-      "Application" : {
-        "properties" : {
-          "id" : {
-            "type" : "integer"
-          },
-          "name" : {
-            "type" : "string"
-          },
-          "subName" : {
-            "type" : "string"
-          },
-          "policy" : {
-            "type" : "string",
-            "description" : "Application level throtting policy."
-          },
-          "tokenType" : {
-            "type" : "string",
-            "example" : "JWT",
-            "description" : "type of the token."
-          },
-          "groupIds" : {
-            "type" : "array",
-            "example" : "wso2",
-            "description" : "group ids associated with the application.",
-            "items" : {
-              "$ref" : "#/definitions/GroupId"
-            }
-          },
-          "attributes" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/definitions/ApplicationAttribute"
-            }
-          }
-        }
-      },
-      "GroupId" : {
-        "properties" : {
-          "groupId" : {
-            "type" : "string"
-          },
-          "applicationId" : {
-            "type" : "integer"
-          }
-        },
-        "title" : "Application Group Id"
-      },
-      "ApplicationAttribute" : {
-        "properties" : {
-          "applicationId" : {
-            "type" : "integer",
-            "example" : 1,
-            "description" : "application ID of the attribute associated with"
-          },
-          "name" : {
-            "type" : "string",
-            "description" : "name of the attribute"
-          },
-          "value" : {
-            "type" : "string",
-            "description" : "the value of the attribute"
-          },
-          "tenant" : {
-            "type" : "string",
-            "example" : "wso2.com",
-            "description" : "tenant domain"
-          }
-        },
-        "title" : "Application attributes"
-      },
-      "SubscriptionList" : {
-        "properties" : {
-          "count" : {
-            "type" : "integer",
-            "example" : 1,
-            "description" : "Number of Subscriptions returned.\n"
-          },
-          "list" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/definitions/Subscription"
-            }
-          },
-          "pagination" : {
-            "$ref" : "#/definitions/Pagination"
-          }
-        },
-        "title" : "Application List"
-      },
-      "Subscription" : {
-        "properties" : {
-          "subscriptionId" : {
-            "type" : "integer"
-          },
-          "policyId" : {
-            "type" : "string"
-          },
-          "apiId" : {
-            "type" : "integer"
-          },
-          "appId" : {
-            "type" : "integer"
-          },
-          "subscriptionState" : {
-            "type" : "string"
-          }
-        }
-      },
-      "ApplicationKeyMappingList" : {
-        "properties" : {
-          "count" : {
-            "type" : "integer",
-            "example" : 1,
-            "description" : "Number of ApplicationKeyMappings returned.\n"
-          },
-          "list" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/definitions/ApplicationKeyMapping"
-            }
-          },
-          "pagination" : {
-            "$ref" : "#/definitions/Pagination"
-          }
-        },
-        "title" : "ApplicationKeyMapping List"
-      },
-      "ApplicationKeyMapping" : {
-        "properties" : {
-          "applicationId" : {
-            "type" : "integer"
-          },
-          "consumerKey" : {
-            "type" : "string"
-          },
-          "keyType" : {
-            "type" : "string"
-          }
-        }
-      },
-      "Policy" : {
-        "properties" : {
-          "id" : {
-            "type" : "integer"
-          },
-          "tenantId" : {
-            "type" : "integer"
-          },
-          "name" : {
-            "type" : "string"
-          },
-          "quotaType" : {
-            "type" : "string"
-          }
-        }
-      },
-      "SubscriptionPolicyList" : {
-        "properties" : {
-          "count" : {
-            "type" : "integer",
-            "example" : 1,
-            "description" : "Number of SubscriptionPolices returned.\n"
-          },
-          "list" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/definitions/SubscriptionPolicy"
-            }
-          },
-          "pagination" : {
-            "$ref" : "#/definitions/Pagination"
-          }
-        },
-        "title" : "SubscriptionPolicy List"
-      },
-      "SubscriptionPolicy" : {
-        "allOf" : [ {
-          "$ref" : "#/definitions/Policy"
-        } ]
-      },
-      "ApplicationPolicyList" : {
-        "properties" : {
-          "count" : {
-            "type" : "integer",
-            "example" : 1,
-            "description" : "Number of ApplicationPolicies returned.\n"
-          },
-          "list" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/definitions/ApplicationPolicy"
-            }
-          },
-          "pagination" : {
-            "$ref" : "#/definitions/Pagination"
-          }
-        },
-        "title" : "ApplicationPolicy List"
-      },
-      "ApplicationPolicy" : {
-        "allOf" : [ {
-          "$ref" : "#/definitions/Policy"
-        } ]
-      },
-      "Condition" : {
-        "properties" : {
-          "conditionType" : {
-            "type" : "string"
-          },
-          "name" : {
-            "type" : "string"
-          },
-          "value" : {
-            "type" : "string"
-          },
-          "isInverted" : {
-            "type" : "boolean"
-          }
-        }
-      },
-      "URLMapping" : {
-        "properties" : {
-          "authScheme" : {
-            "type" : "string"
-          },
-          "throttlingPolicy" : {
-            "type" : "string"
-          },
-          "httpMethod" : {
-            "type" : "string"
-          }
-        }
-      },
-      "Pagination" : {
-        "properties" : {
-          "offset" : {
-            "type" : "integer",
-            "example" : 0
-          },
-          "limit" : {
-            "type" : "integer",
-            "example" : 1
-          },
-          "total" : {
-            "type" : "integer",
-            "example" : 10
-          },
-          "next" : {
-            "type" : "string",
-            "description" : "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n"
-          },
-          "previous" : {
-            "type" : "string",
-            "description" : "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned."
-          }
-        },
-        "title" : "Pagination"
       }
     },
-    "parameters" : {
-      "requestedTenant": {
-        "name": "X-WSO2-Tenant",
-        "in": "header",
-        "description": "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
-        "required": true,
-        "type": "string"
+    "ApplicationAttribute" : {
+      "properties" : {
+        "applicationId" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "application ID of the attribute associated with"
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "name of the attribute"
+        },
+        "value" : {
+          "type" : "string",
+          "description" : "the value of the attribute"
+        },
+        "tenant" : {
+          "type" : "string",
+          "example" : "wso2.com",
+          "description" : "tenant domain"
+        }
       },
-      "Accept": {
-        "name": "Accept",
-        "in": "header",
-        "description": "Media types acceptable for the response. Default is application/json.\n",
-        "required": false,
-        "type": "string",
-        "default": "application/json"
+      "title" : "Application attributes"
+    },
+    "SubscriptionList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of Subscriptions returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Subscription"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "Application List"
+    },
+    "Subscription" : {
+      "properties" : {
+        "subscriptionId" : {
+          "type" : "integer"
+        },
+        "policyId" : {
+          "type" : "string"
+        },
+        "apiId" : {
+          "type" : "integer"
+        },
+        "appId" : {
+          "type" : "integer"
+        },
+        "subscriptionState" : {
+          "type" : "string"
+        }
       }
+    },
+    "ApplicationKeyMappingList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of ApplicationKeyMappings returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ApplicationKeyMapping"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "ApplicationKeyMapping List"
+    },
+    "ApplicationKeyMapping" : {
+      "properties" : {
+        "applicationId" : {
+          "type" : "integer"
+        },
+        "consumerKey" : {
+          "type" : "string"
+        },
+        "keyType" : {
+          "type" : "string"
+        }
+      }
+    },
+    "Policy" : {
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "tenantId" : {
+          "type" : "integer"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "quotaType" : {
+          "type" : "string"
+        }
+      }
+    },
+    "SubscriptionPolicyList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of SubscriptionPolices returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/SubscriptionPolicy"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "SubscriptionPolicy List"
+    },
+    "SubscriptionPolicy" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/Policy"
+      } ]
+    },
+    "ApplicationPolicyList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of ApplicationPolicies returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ApplicationPolicy"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "ApplicationPolicy List"
+    },
+    "ApplicationPolicy" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/Policy"
+      } ]
+    },
+    "Condition" : {
+      "properties" : {
+        "conditionType" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "value" : {
+          "type" : "string"
+        },
+        "isInverted" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "URLMapping" : {
+      "properties" : {
+        "authScheme" : {
+          "type" : "string"
+        },
+        "throttlingPolicy" : {
+          "type" : "string"
+        },
+        "httpMethod" : {
+          "type" : "string"
+        }
+      }
+    },
+    "Pagination" : {
+      "properties" : {
+        "offset" : {
+          "type" : "integer",
+          "example" : 0
+        },
+        "limit" : {
+          "type" : "integer",
+          "example" : 1
+        },
+        "total" : {
+          "type" : "integer",
+          "example" : 10
+        },
+        "next" : {
+          "type" : "string",
+          "description" : "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n"
+        },
+        "previous" : {
+          "type" : "string",
+          "description" : "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned."
+        }
+      },
+      "title" : "Pagination"
+    }
+  },
+  "parameters" : {
+    "requestedTenant" : {
+      "name" : "X-WSO2-Tenant",
+      "in" : "header",
+      "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+      "required" : true,
+      "type" : "string"
+    },
+    "Accept" : {
+      "name" : "Accept",
+      "in" : "header",
+      "description" : "Media types acceptable for the response. Default is application/json.\n",
+      "required" : false,
+      "type" : "string",
+      "default" : "application/json"
     }
   }
 }

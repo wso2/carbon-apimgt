@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
-import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
-
 /**
  * Entity for keeping mapping between Application and Consumer key.
  */
@@ -73,6 +71,6 @@ public class ApplicationKeyMapping implements CacheableEntity<String> {
     @Override
     public String getCacheKey() {
 
-        return getApplicationId() + InMemorySubscriptionValidationConstants.DELEM_PERIOD + getKeyType();
+        return getConsumerKey();
     }
 }
