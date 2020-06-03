@@ -32,7 +32,8 @@ const DefaultConfigurations = {
     custom: {
         contentAreaWidth: 1240,
         backgroundImage: '', // Add a watermark background to the content area of the page. Example ( '/devportal/site/public/images/back-light.png')
-        defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
+        defaultApiView: 'grid',   // Sets the default view for the api listing page ( Other values available = 'list' ). 
+                                    // To disable one option for an example if you want to disable grid completely and get rid of the toggle buttons use ['list'].
         page: {
             style: 'fluid', // Set the page style ( Other values available 'fixed', 'fluid')
             width: 1240, // This value is effected only when the page.style = 'fixed'

@@ -104,7 +104,8 @@ const AppThemes = {
             logo: '/site/public/images/logo.svg',
             logoHeight: 40,
             logoWidth: 222,
-            defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
+            defaultApiView: 'grid', /* Sets the default view for the api listing page ( Other values available = 'list' )
+                                        To disable one option for an example if you want to disable grid completely and get rid of the toggle buttons use ['list']. */
             showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
             leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
             leftMenuIconSize: 24,
