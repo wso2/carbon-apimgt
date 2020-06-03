@@ -2,7 +2,6 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionBaseDTO;
 import javax.validation.constraints.*;
 
 
@@ -14,16 +13,14 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class HeaderConditionDTO   {
+public class ThrottleConditionBaseDTO   {
   
     private Boolean invertCondition = false;
-    private String headerName = null;
-    private String headerValue = null;
 
   /**
    * Specifies whether inversion of the condition to be matched against the request.  **Note:** When you add conditional groups for advanced throttling policies, this paramater should have the same value (&#39;true&#39; or &#39;false&#39;) for the same type of conditional group. 
    **/
-  public HeaderConditionDTO invertCondition(Boolean invertCondition) {
+  public ThrottleConditionBaseDTO invertCondition(Boolean invertCondition) {
     this.invertCondition = invertCondition;
     return this;
   }
@@ -38,42 +35,6 @@ public class HeaderConditionDTO   {
     this.invertCondition = invertCondition;
   }
 
-  /**
-   * Name of the header
-   **/
-  public HeaderConditionDTO headerName(String headerName) {
-    this.headerName = headerName;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Name of the header")
-  @JsonProperty("headerName")
-  public String getHeaderName() {
-    return headerName;
-  }
-  public void setHeaderName(String headerName) {
-    this.headerName = headerName;
-  }
-
-  /**
-   * Value of the header
-   **/
-  public HeaderConditionDTO headerValue(String headerValue) {
-    this.headerValue = headerValue;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Value of the header")
-  @JsonProperty("headerValue")
-  public String getHeaderValue() {
-    return headerValue;
-  }
-  public void setHeaderValue(String headerValue) {
-    this.headerValue = headerValue;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -83,25 +44,21 @@ public class HeaderConditionDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    HeaderConditionDTO headerCondition = (HeaderConditionDTO) o;
-    return Objects.equals(invertCondition, headerCondition.invertCondition) &&
-        Objects.equals(headerName, headerCondition.headerName) &&
-        Objects.equals(headerValue, headerCondition.headerValue);
+    ThrottleConditionBaseDTO throttleConditionBase = (ThrottleConditionBaseDTO) o;
+    return Objects.equals(invertCondition, throttleConditionBase.invertCondition);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(invertCondition, headerName, headerValue);
+    return Objects.hash(invertCondition);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class HeaderConditionDTO {\n");
+    sb.append("class ThrottleConditionBaseDTO {\n");
     
     sb.append("    invertCondition: ").append(toIndentedString(invertCondition)).append("\n");
-    sb.append("    headerName: ").append(toIndentedString(headerName)).append("\n");
-    sb.append("    headerValue: ").append(toIndentedString(headerValue)).append("\n");
     sb.append("}");
     return sb.toString();
   }
