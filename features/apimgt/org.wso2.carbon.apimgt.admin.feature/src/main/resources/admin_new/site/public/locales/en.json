@@ -146,6 +146,8 @@
   "TenantTheme.Upload.Theme.help.link.one": "Tenant theming",
   "TenantTheme.Upload.Theme.info.message": "The theme should be a zip file containing CSS and images compliant with the API Manager theme format",
   "TenantTheme.Upload.Theme.page.heading": "Upload Tenant Theme",
+  "TenantTheme.Upload.Theme.upload.successful": "Theme uploaded successfully",
+  "TenantTheme.Upload.Theme.warning.message": "Zip file contains unsupported files. Upload only supported files.",
   "Throttling.Advanced.AddEdit.ConditionalGroups.form.description.help": "Description of this group",
   "Throttling.Advanced.AddEdit.add.conditional.group": "Conditional groups",
   "Throttling.Advanced.AddEdit.add.conditional.group.add": "Add Conditional Group",
