@@ -36,9 +36,7 @@ public class EndpointRegistryEntry {
 
     private String description = null;
 
-    private String productionServiceURL = null;
-
-    private String sandboxServiceUrl = null;
+    private String serviceURL = null;
 
     private String serviceType = null;
 
@@ -83,9 +81,9 @@ public class EndpointRegistryEntry {
         return description;
     }
 
-    public String getProductionServiceURL() {
+    public String getServiceURL() {
 
-        return productionServiceURL;
+        return serviceURL;
     }
 
     public String getServiceType() {
@@ -133,9 +131,9 @@ public class EndpointRegistryEntry {
         this.description = description;
     }
 
-    public void setProductionServiceURL(String productionServiceURL) {
+    public void setServiceURL(String serviceURL) {
 
-        this.productionServiceURL = productionServiceURL;
+        this.serviceURL = serviceURL;
     }
 
     public void setServiceType(String serviceType) {
@@ -206,16 +204,6 @@ public class EndpointRegistryEntry {
     public void setLastUpdatedTime(String lastUpdatedTime) {
 
         this.lastUpdatedTime = lastUpdatedTime;
-    }
-
-    public String getSandboxServiceUrl() {
-
-        return sandboxServiceUrl;
-    }
-
-    public void setSandboxServiceUrl(String sandboxServiceUrl) {
-
-        this.sandboxServiceUrl = sandboxServiceUrl;
     }
 
     public String getDisplayName() {

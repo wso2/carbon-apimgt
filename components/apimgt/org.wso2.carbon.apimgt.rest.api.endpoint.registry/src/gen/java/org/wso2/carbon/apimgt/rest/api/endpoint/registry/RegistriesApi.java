@@ -42,7 +42,7 @@ import javax.validation.constraints.*;
 
 
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-06-02T17:30:19.044+05:30[Asia/Colombo]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaJAXRSCXFCDIServerCodegen", date = "2020-06-02T16:43:00.102+05:30[Asia/Colombo]")
 public class RegistriesApi  {
 
 @Context MessageContext securityContext;
@@ -127,7 +127,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
         return delegate.createNewEntryVersion(registryId, entryId, version, securityContext);
         }
     @POST
-    @Path("/{registryId}/entry")
+    @Path("/{registryId}/entries")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @Operation(summary = "Create a new Registry Entry", description = "This operation can be used to create a new Registry Entry specifying the details of the Entry in the payload. ",
@@ -171,7 +171,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
                  }, tags={ "Registries" })
 
     @ApiResponses(value = { 
-        @ApiResponse(responseCode = "200",
+        @ApiResponse(responseCode = "204",
             description = "Successfully deleted. "),
     
         @ApiResponse(responseCode = "400",
@@ -201,7 +201,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
                  }, tags={ "Registry Entries" })
 
     @ApiResponses(value = { 
-        @ApiResponse(responseCode = "200",
+        @ApiResponse(responseCode = "204",
             description = "Successfully deleted the registry entry. "),
     
         @ApiResponse(responseCode = "400",
@@ -274,7 +274,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
         @QueryParam("name") String name
 
 
-,             @Parameter(description = "Filter registry entries by the display name of the Entry ") 
+,             @Parameter(description = "Filter registry entries by the display name of the Entry ")
         @QueryParam("displayName") String displayName
 
 
@@ -317,7 +317,7 @@ RegistriesApiService delegate = new RegistriesApiServiceImpl();
     }    public enum SortEntryOrderEnum {
     asc,desc;
     }    @GET
-    @Path("/{registryId}/entries/{entryId}/definition-file")
+    @Path("/{registryId}/entries/{entryId}/definition")
     
     @Produces({ "application/octet-stream", "application/json" })
     @Operation(summary = "Retrieve the definition file of a specific Entry in a Registry", description = "Using this operation, you can retrieve the definition file of a specific entry in a Registry using the EntryId and RegistryId. ",

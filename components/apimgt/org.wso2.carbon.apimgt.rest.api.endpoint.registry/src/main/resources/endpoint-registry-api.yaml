@@ -216,7 +216,7 @@ paths:
         schema:
           type: string
       responses:
-        "200":
+        "204":
           description: |
             Successfully deleted.
         "400":
@@ -350,7 +350,6 @@ paths:
   #-----------------------------------------------------
   # Create new entry in entry in Registry
   #-----------------------------------------------------
-  /registries/{registryId}/entry:
     post:
       summary: Create a new Registry Entry
       description: |
@@ -546,7 +545,7 @@ paths:
         schema:
           type: string
       responses:
-        "200":
+        "204":
           description: |
             Successfully deleted the registry entry.
         "400":
@@ -568,7 +567,7 @@ paths:
   #-----------------------------------------------------
   # Retrieve definition file of an entry in Registry
   #-----------------------------------------------------
-  /registries/{registryId}/entries/{entryId}/definition-file:
+  /registries/{registryId}/entries/{entryId}/definition:
     get:
       summary: Retrieve the definition file of a specific Entry in a Registry
       description: |
@@ -816,10 +815,7 @@ components:
         version:
           type: string
           example: v1
-        productionServiceUrl:
-          type: string
-          example: http://localhost/pizzashack
-        sandboxServiceUrl:
+        serviceUrl:
           type: string
           example: http://localhost/pizzashack
         serviceCategory:

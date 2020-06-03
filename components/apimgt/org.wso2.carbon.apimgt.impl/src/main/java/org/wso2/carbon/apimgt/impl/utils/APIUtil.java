@@ -10687,4 +10687,32 @@ public final class APIUtil {
         }
         return scopeToKeyMap;
     }
+
+    /**
+     * Extract Endpoint Registry Entry information
+     * @param endpointConfig
+     * @return Map
+     */
+    public static Map extractEndpointRegistryEntries(String endpointConfig) {
+        Map serviceCatalogEntries = new HashMap();
+        if (StringUtils.isNotEmpty(endpointConfig)) {
+            org.json.JSONObject endpointConfigJSON = new org.json.JSONObject(endpointConfig);
+            if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfigJSON.get(APIConstants.
+                    API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                String production_endpoint = null;
+                String sandbox_endpoint = null;
+                if (endpointConfigJSON.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
+                    production_endpoint = endpointConfigJSON.getJSONObject(APIConstants.
+                            API_DATA_PRODUCTION_ENDPOINTS).getString("id");
+                }
+                if (endpointConfigJSON.has(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
+                    sandbox_endpoint = endpointConfigJSON.getJSONObject(APIConstants.
+                            API_DATA_SANDBOX_ENDPOINTS).getString("id");
+                }
+                serviceCatalogEntries.put("production_endpoint_id", production_endpoint);
+                serviceCatalogEntries.put("sandbox_endpoint_id", sandbox_endpoint);
+            }
+        }
+        return serviceCatalogEntries;
+    }
 }

@@ -861,7 +861,7 @@ public class RegistriesApiServiceImplTest {
         Assert.assertEquals(expectedDTO.getEntryName(), actualDTO.getEntryName());
         Assert.assertEquals(expectedDTO.getVersion(), actualDTO.getVersion());
         Assert.assertEquals(expectedDTO.getDescription(), actualDTO.getDescription());
-        Assert.assertEquals(expectedDTO.getProductionServiceUrl(), actualDTO.getProductionServiceUrl());
+        Assert.assertEquals(expectedDTO.getServiceUrl(), actualDTO.getServiceUrl());
         Assert.assertEquals(expectedDTO.getServiceType(), actualDTO.getServiceType());
         Assert.assertEquals(expectedDTO.getServiceCategory(), actualDTO.getServiceCategory());
         Assert.assertEquals(expectedDTO.getDefinitionUrl(), actualDTO.getDefinitionUrl());
@@ -900,7 +900,7 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntry.setEntryName("Entry Name 1");
         endpointRegistryEntry.setDisplayName("Entry Name 1");
         endpointRegistryEntry.setDescription("A Registry Entry that exposes a REST endpoint");
-        endpointRegistryEntry.setProductionServiceURL("https://xyz.com");
+        endpointRegistryEntry.setServiceURL("https://xyz.com");
         endpointRegistryEntry.setServiceType(RegistryEntryDTO.ServiceTypeEnum.REST.toString());
         endpointRegistryEntry.setServiceCategory(RegistryEntryDTO.ServiceCategoryEnum.UTILITY.toString());
         endpointRegistryEntry.setDefinitionURL("https://petstore.swagger.io/v2/swagger.json");
@@ -922,7 +922,7 @@ public class RegistriesApiServiceImplTest {
         endpointRegistryEntry.setDisplayName(displayName);
         endpointRegistryEntry.setVersion(version);
         endpointRegistryEntry.setDescription(description);
-        endpointRegistryEntry.setProductionServiceURL(serviceUrl);
+        endpointRegistryEntry.setServiceURL(serviceUrl);
         endpointRegistryEntry.setServiceType(serviceType.toString());
         endpointRegistryEntry.setServiceCategory(serviceCategory.toString());
         endpointRegistryEntry.setDefinitionURL(definitionUrl);

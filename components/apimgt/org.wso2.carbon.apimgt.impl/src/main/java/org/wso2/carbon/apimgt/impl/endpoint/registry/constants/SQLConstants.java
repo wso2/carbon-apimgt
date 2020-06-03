@@ -73,8 +73,8 @@ public class SQLConstants {
                     "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME, REG_ID FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
 
     public static final String ADD_ENDPOINT_REGISTRY_ENTRY_SQL =
-            "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, DISPLAY_NAME, ENTRY_VERSION, PRODUCTION_SERVICE_URL, " +
-                    "SANDBOX_SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, SERVICE_TYPE, SERVICE_CATEGORY,"
+            "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, DISPLAY_NAME, ENTRY_VERSION, SERVICE_URL, " +
+                    " DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, SERVICE_TYPE, SERVICE_CATEGORY,"
                     + " ENDPOINT_DEFINITION, REG_ID, CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -82,8 +82,7 @@ public class SQLConstants {
             "UPDATE ENDPOINT_REG_ENTRY SET " +
                     "DISPLAY_NAME = ?, " +
                     "ENTRY_VERSION = ?, " +
-                    "PRODUCTION_SERVICE_URL = ?, " +
-                    "SANDBOX_SERVICE_URL = ?, " +
+                    "SERVICE_URL = ?, " +
                     "DEFINITION_TYPE = ?, " +
                     "DEFINITION_URL = ?, " +
                     "DESCRIPTION = ?, " +

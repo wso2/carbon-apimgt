@@ -217,7 +217,7 @@
           }
         } ],
         "responses" : {
-          "200" : {
+          "204" : {
             "description" : "Successfully deleted.\n"
           },
           "400" : {
@@ -402,9 +402,7 @@
         "security" : [ {
           "default" : [ "service_catalog:entry_view" ]
         } ]
-      }
-    },
-    "/registries/{registryId}/entry" : {
+      },
       "post" : {
         "tags" : [ "Registry Entries" ],
         "summary" : "Create a new Registry Entry",
@@ -628,7 +626,7 @@
           }
         } ],
         "responses" : {
-          "200" : {
+          "204" : {
             "description" : "Successfully deleted the registry entry.\n"
           },
           "400" : {
@@ -657,7 +655,7 @@
         } ]
       }
     },
-    "/registries/{registryId}/entries/{entryId}/definition-file" : {
+    "/registries/{registryId}/entries/{entryId}/definition" : {
       "get" : {
         "tags" : [ "Registry Entries" ],
         "summary" : "Retrieve the definition file of a specific Entry in a Registry",
@@ -903,11 +901,7 @@
             "type" : "string",
             "example" : "v1"
           },
-          "productionServiceUrl" : {
-            "type" : "string",
-            "example" : "http://localhost/pizzashack"
-          },
-          "sandboxServiceUrl" : {
+          "serviceUrl" : {
             "type" : "string",
             "example" : "http://localhost/pizzashack"
           },

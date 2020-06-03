@@ -239,8 +239,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.DEFINITION_TYPE, " +
                     "   E.DEFINITION_URL, " +
                     "   E.SERVICE_TYPE, " +
-                    "   E.PRODUCTION_SERVICE_URL, " +
-                    "   E.SANDBOX_SERVICE_URL, " +
+                    "   E.SERVICE_URL, " +
                     "   E.SERVICE_CATEGORY, " +
                     "   E.CREATED_BY, " +
                     "   E.UPDATED_BY, " +
@@ -273,8 +272,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.DEFINITION_TYPE, " +
                     "   E.DEFINITION_URL, " +
                     "   E.SERVICE_TYPE, " +
-                    "   E.PRODUCTION_SERVICE_URL, " +
-                    "   E.SANDBOX_SERVICE_URL, " +
+                    "   E.SERVICE_URL, " +
                     "   E.SERVICE_CATEGORY, " +
                     "   E.CREATED_BY, " +
                     "   E.UPDATED_BY, " +
@@ -309,8 +307,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.DEFINITION_TYPE, " +
                     "   E.DEFINITION_URL, " +
                     "   E.SERVICE_TYPE, " +
-                    "   E.PRODUCTION_SERVICE_URL, " +
-                    "   E.SANDBOX_SERVICE_URL, " +
+                    "   E.SERVICE_URL, " +
                     "   E.SERVICE_CATEGORY, " +
                     "   E.CREATED_BY, " +
                     "   E.UPDATED_BY, " +
@@ -345,8 +342,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.DEFINITION_TYPE, " +
                     "   E.DEFINITION_URL, " +
                     "   E.SERVICE_TYPE, " +
-                    "   E.PRODUCTION_SERVICE_URL, " +
-                    "   E.SANDBOX_SERVICE_URL, " +
+                    "   E.SERVICE_URL, " +
                     "   E.SERVICE_CATEGORY, " +
                     "   E.CREATED_BY, " +
                     "   E.UPDATED_BY, " +
