@@ -30,10 +30,11 @@ import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsKeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -135,5 +136,34 @@ public class SettingsMappingUtil {
             }
         }
         return authorizedScopes;
+    }
+
+    /**
+     * Convert list of API Scope to ScopeListDTO
+     *
+     * @param roleScopeMapping Map of a Role Scope  Mapping
+     * @return ScopeListDTO list containing role scope mapping data
+     */
+    public static ScopeListDTO fromScopeListToScopeListDTO(Map<String, String>  roleScopeMapping) {
+        ScopeListDTO scopeListDTO = new ScopeListDTO();
+        scopeListDTO.setList(fromRoleScopeMapToRoleScopeDTOList(roleScopeMapping));
+        return scopeListDTO;
+    }
+
+    /**
+     * Converts api role-scope mapping to RoleScopeDTO List.
+     *
+     * @param roleScopeMapping Map of a Role Scope  Mapping
+     * @return RoleScopeDTO list
+     */
+    private static List<ScopeDTO>  fromRoleScopeMapToRoleScopeDTOList(Map<String, String>  roleScopeMapping) {
+        List<ScopeDTO> scopeDTOs = new ArrayList<>(roleScopeMapping.size());
+        for (Map.Entry<String, String>  mapping : roleScopeMapping.entrySet()) {
+            ScopeDTO roleScopeDTO = new ScopeDTO();
+                roleScopeDTO.setScope(mapping.getKey());
+                roleScopeDTO.setRoles(mapping.getValue());
+            scopeDTOs.add(roleScopeDTO);
+        }
+        return scopeDTOs;
     }
 }
