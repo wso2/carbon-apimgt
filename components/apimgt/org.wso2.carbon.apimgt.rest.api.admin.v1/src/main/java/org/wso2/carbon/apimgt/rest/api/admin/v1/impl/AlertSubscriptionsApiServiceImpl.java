@@ -8,27 +8,33 @@ import org.wso2.carbon.apimgt.impl.alertmgt.AdminAlertConfigurator;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigManager;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
-import org.wso2.carbon.apimgt.impl.dto.AlertInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.AlertSubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertTypeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AlertsSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.AlertsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiService {
 
     private static final Log log = LogFactory.getLog(AlertSubscriptionsApiServiceImpl.class);
 
+    /**
+     * Retrieves all the admin alert subscriptions of the logged in user
+     *
+     * @param messageContext
+     * @return
+     */
     public Response getSubscribedAlertTypes(MessageContext messageContext) {
 
         String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiUtil.getLoggedInUsername());
-
         try {
             AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
                     .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
@@ -57,8 +63,14 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 
-    @Override public Response subscribeToAlerts(AlertsSubscriptionDTO body, MessageContext messageContext)
-            throws APIManagementException {
+    /**
+     * Subscribes the logged in user for requested admin alert types
+     *
+     * @param body
+     * @param messageContext
+     * @return
+     */
+    @Override public Response subscribeToAlerts(AlertsSubscriptionDTO body, MessageContext messageContext) {
 
         //Validate for empty list of emails
         List<String> emailsList = body.getEmailList();
@@ -73,24 +85,29 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
 
         String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiUtil.getLoggedInUsername());
         try {
+
             AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
                     .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
-
-            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> alertTypesToSubscribe = AlertsMappingUtil
-                    .fromAlertTypeDTOListToAlertTypeList(subscribingAlertDTOs);
-            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> supportedAlertTypeDTOS = adminAlertConfigurator
+            //Retrieve the supported alert types
+            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> supportedAlertTypes = adminAlertConfigurator
                     .getSupportedAlertTypes();
+            Map<String, org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> supportedAlertTypesMap = supportedAlertTypes
+                    .stream().collect(Collectors
+                            .toMap(org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO::getName, alertType -> alertType));
+            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> alertTypesToSubscribe = new ArrayList<>();
 
-
-            //Filter out the subscribed alerts
-            List<org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO> subscribedAlertsList = supportedAlertTypeDTOS.stream()
-                    .filter(supportedAlertTypes -> alertTypesToSubscribe.stream()
-                            .anyMatch(subscribedAlerts -> supportedAlertTypes.getId().equals(subscribedAlerts)))
-                    .collect(Collectors.toList());
-
-
+            //Validate the request alerts against supported alert types
+            for (AlertTypeDTO subscribingAlertDTO : subscribingAlertDTOs) {
+                if (supportedAlertTypesMap.containsKey(subscribingAlertDTO.getName())) {
+                    alertTypesToSubscribe.add(supportedAlertTypesMap.get(subscribingAlertDTO.getName()));
+                } else {
+                    RestApiUtil.handleBadRequest(
+                            "Unsupported alert type : " + subscribingAlertDTO.getName() + " is provided.", log);
+                    return null;
+                }
+            }
             adminAlertConfigurator.subscribe(fullyQualifiedUsername, emailsList, alertTypesToSubscribe);
-            return Response.status(Response.Status.CREATED).entity(null).build();
+            return Response.status(Response.Status.OK).build();
         } catch (AlertManagementException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity("API Manager analytics is not Enabled").build();
         } catch (APIManagementException e) {
@@ -99,6 +116,34 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
         return null;
     }
 
+    /**
+     * Unsubscribe the user from all the admin alert types
+     *
+     * @param messageContext
+     * @return
+     */
+    @Override public Response unsubscribeAllAlerts(MessageContext messageContext) {
+
+        String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiUtil.getLoggedInUsername());
+        try {
+            AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
+                    .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
+            adminAlertConfigurator.unsubscribe(fullyQualifiedUsername);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Internal Server Error occurred while un subscribing from alerts", e,
+                    log);
+        } catch (AlertManagementException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Analytics not Enabled").build();
+        }
+        return Response.status(Response.Status.OK).build();
+    }
+
+    /**
+     *
+     * Obtain the fully qualified username of the given user
+     * @param username  tenant aware username
+     * @return
+     */
     private String getFullyQualifiedUsername(String username) {
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(RestApiUtil.getLoggedInUserTenantDomain())) {
             return username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;

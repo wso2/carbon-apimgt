@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 public class AdminAlertConfigurator extends AlertConfigurator {
 
@@ -42,21 +41,22 @@ public class AdminAlertConfigurator extends AlertConfigurator {
 
     /**
      * Subscribe for admin alerts
-     * @param userName : The username of the user, who is subscribing.
-     * @param emailsList : The list of emails which needs to be subscribed.
+     *
+     * @param userName          : The username of the user, who is subscribing.
+     * @param emailsList        : The list of emails which needs to be subscribed.
      * @param alertTypeDTOList: The list of Alert types which needs to be subscribed.
      * @throws APIManagementException
      */
     @Override public void subscribe(String userName, List<String> emailsList, List<AlertTypeDTO> alertTypeDTOList)
             throws APIManagementException {
-        if (log.isDebugEnabled()) {
-            log.debug("Subscribing user: " + userName + "to alert types");
-        }
+
         String emails = StringUtils.join(emailsList, ",");
         Map<String, String> alertTypesMap = AlertMgtUtils.alertTypesToMap(alertTypeDTOList);
 
         if (log.isDebugEnabled()) {
-            log.debug("Persisting subscribing alert types " + alertTypesMap.get("ids") + "in database.");
+            log.debug(
+                    "Subscribing user: " + userName + " for alert types: " + alertTypesMap.get("ids") + " with emails: "
+                            + emails);
         }
 
         String query =
@@ -72,13 +72,28 @@ public class AdminAlertConfigurator extends AlertConfigurator {
                         + "ApimAlertStakeholderInfo.userId == userId and "
                         + "ApimAlertStakeholderInfo.isPublisher == isPublisher";
         APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_STAKEHOLDER_ALERT_APP, query);
+        //Persist the alert subscription in database
         apiMgtDAO.addAlertTypesConfigInfo(userName, emails, alertTypesMap.get("ids"),
                 AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
-
     }
 
+    /**
+     * Unsubscribe from all admin alerts
+     *
+     * @param userName : The name of the user who needs to be unsubscribed.
+     * @throws APIManagementException
+     */
     @Override public void unsubscribe(String userName) throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Unsubscribing user: " + userName + " for all alert types");
+        }
+
+        //Removing the existing alert subscription information from the database
+        apiMgtDAO.unSubscribeAlerts(userName, AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
+        String query = "delete ApimAlertStakeholderInfo on ApimAlertStakeholderInfo.userId == '" + userName + "' and "
+                + "ApimAlertStakeholderInfo.isAdmin == true";
+        APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_STAKEHOLDER_ALERT_APP, query);
     }
 
     @Override public void addAlertConfiguration(String userName, String alertName, Map<String, String> configProperties)
