@@ -98,10 +98,10 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
                 apiStateWorkFlowDTO.setMetadata("Invoker", apiStateWorkFlowDTO.getInvoker());
                 apiStateWorkFlowDTO.setMetadata("TenantId", String.valueOf(apiStateWorkFlowDTO.getTenantId()));
 
-                apiStateWorkFlowDTO.setProperties("Application", apiStateWorkFlowDTO.getApiLCAction());
-                apiStateWorkFlowDTO.setProperties("ApiName", apiStateWorkFlowDTO.getApiName());
-                apiStateWorkFlowDTO.setProperties("ApiVersion", apiStateWorkFlowDTO.getApiVersion());
-                apiStateWorkFlowDTO.setProperties("ApiProvider", apiStateWorkFlowDTO.getApiProvider());
+                apiStateWorkFlowDTO.setProperties("application", apiStateWorkFlowDTO.getApiLCAction());
+                apiStateWorkFlowDTO.setProperties("apiName", apiStateWorkFlowDTO.getApiName());
+                apiStateWorkFlowDTO.setProperties("apiVersion", apiStateWorkFlowDTO.getApiVersion());
+                apiStateWorkFlowDTO.setProperties("apiProvider", apiStateWorkFlowDTO.getApiProvider());
                 super.execute(workflowDTO);
             } else {
                 // For any other states, act as simple workflow executor.

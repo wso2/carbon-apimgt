@@ -59,8 +59,8 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
         String message = "Approve APIStore signup request done by " + tenantAwareUserName + " from the tenant domain " +
                 workflowDTO.getTenantDomain();
         workflowDTO.setWorkflowDescription(message);
-        workflowDTO.setProperties("TenantAwareUserName", tenantAwareUserName);
-        workflowDTO.setProperties("TenantDomain", workflowDTO.getTenantDomain());
+        workflowDTO.setProperties("tenantAwareUserName", tenantAwareUserName);
+        workflowDTO.setProperties("tenantDomain", workflowDTO.getTenantDomain());
         super.execute(workflowDTO);
         return new GeneralWorkflowResponse();
     }

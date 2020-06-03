@@ -50,10 +50,10 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
         String message = "Approve request to create " + appRegDTO.getKeyType() + " keys for " + application.getName() +
                 " from application creator - " + appRegDTO.getUserName() + " with throttling tier - " + application.getTier();
         workflowDTO.setWorkflowDescription(message);
-        workflowDTO.setProperties("KeyType", appRegDTO.getKeyType());
-        workflowDTO.setProperties("ApplicationName", application.getName());
-        workflowDTO.setProperties("UserName", appRegDTO.getUserName());
-        workflowDTO.setProperties("ApplicationTier", application.getTier());
+        workflowDTO.setProperties("keyType", appRegDTO.getKeyType());
+        workflowDTO.setProperties("applicationName", application.getName());
+        workflowDTO.setProperties("userName", appRegDTO.getUserName());
+        workflowDTO.setProperties("applicationTier", application.getTier());
         super.execute(workflowDTO);
 
         return new GeneralWorkflowResponse();

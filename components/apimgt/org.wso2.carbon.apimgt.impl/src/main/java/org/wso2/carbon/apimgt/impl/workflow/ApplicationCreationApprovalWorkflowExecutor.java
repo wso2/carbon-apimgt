@@ -56,9 +56,9 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
         String message = "Approve application " + application.getName() + " creation request from application creator -"
                 + appWorkFlowDTO.getUserName() + " with throttling tier - " + application.getTier();
         workflowDTO.setWorkflowDescription(message);
-        workflowDTO.setProperties("ApplicationName", application.getName());
-        workflowDTO.setProperties("UserName", appWorkFlowDTO.getUserName());
-        workflowDTO.setProperties("ApplicationTier", application.getTier());
+        workflowDTO.setProperties("applicationName", application.getName());
+        workflowDTO.setProperties("userName", appWorkFlowDTO.getUserName());
+        workflowDTO.setProperties("applicationTier", application.getTier());
         super.execute(workflowDTO);
 
         return new GeneralWorkflowResponse();
