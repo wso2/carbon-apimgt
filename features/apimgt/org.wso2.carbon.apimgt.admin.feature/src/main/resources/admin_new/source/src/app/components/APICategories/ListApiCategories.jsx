@@ -80,7 +80,7 @@ export default function ListApiCategories() {
             },
         },
         {
-            name: 'noOfApis',
+            name: 'numberOfAPIs',
             label: intl.formatMessage({
                 id: 'AdminPages.ApiCategories.table.header.category.number.of.apis',
                 defaultMessage: 'Number of APIs',
