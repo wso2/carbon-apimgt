@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class TokenValidationDTO   {
   
+    private Integer id = null;
     private Boolean enable = true;
 
 @XmlType(name="TypeEnum")
@@ -51,6 +52,23 @@ public enum TypeEnum {
 
     private TypeEnum type = null;
     private Object value = null;
+
+  /**
+   **/
+  public TokenValidationDTO id(Integer id) {
+    this.id = id;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("id")
+  public Integer getId() {
+    return id;
+  }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
   /**
    **/
@@ -113,14 +131,15 @@ public enum TypeEnum {
       return false;
     }
     TokenValidationDTO tokenValidation = (TokenValidationDTO) o;
-    return Objects.equals(enable, tokenValidation.enable) &&
+    return Objects.equals(id, tokenValidation.id) &&
+        Objects.equals(enable, tokenValidation.enable) &&
         Objects.equals(type, tokenValidation.type) &&
         Objects.equals(value, tokenValidation.value);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(enable, type, value);
+    return Objects.hash(id, enable, type, value);
   }
 
   @Override
@@ -128,6 +147,7 @@ public enum TypeEnum {
     StringBuilder sb = new StringBuilder();
     sb.append("class TokenValidationDTO {\n");
     
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    enable: ").append(toIndentedString(enable)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");
