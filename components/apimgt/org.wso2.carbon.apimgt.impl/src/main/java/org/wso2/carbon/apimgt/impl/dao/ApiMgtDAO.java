@@ -6075,7 +6075,7 @@ public class ApiMgtDAO {
                 byte[] metadataByte = workflow.getMetadata().toJSONString().getBytes("UTF-8");
                 prepStmt.setBlob(9, new ByteArrayInputStream(metadataByte));
             } else {
-                prepStmt.setNull(10, java.sql.Types.BLOB);
+                prepStmt.setNull(9, java.sql.Types.BLOB);
             }
 
             if (workflow.getProperties() != null) {

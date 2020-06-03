@@ -29,11 +29,11 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
 import java.util.List;
 
 /**
  * Approval workflow for User Self Sign Up.
- *
  */
 public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecutor {
 
@@ -59,6 +59,8 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
         String message = "Approve APIStore signup request done by " + tenantAwareUserName + " from the tenant domain " +
                 workflowDTO.getTenantDomain();
         workflowDTO.setWorkflowDescription(message);
+        workflowDTO.setProperties("TenantAwareUserName", tenantAwareUserName);
+        workflowDTO.setProperties("TenantDomain", workflowDTO.getTenantDomain());
         super.execute(workflowDTO);
         return new GeneralWorkflowResponse();
     }

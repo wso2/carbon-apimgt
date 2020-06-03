@@ -4511,15 +4511,15 @@ definitions:
       workflowType:
         type: string
         enum:
-          - AM_APPLICATION_CREATION
-          - AM_SUBSCRIPTION_CREATION
-          - AM_USER_SIGNUP
-          - AM_APPLICATION_REGISTRATION_PRODUCTION
-          - AM_APPLICATION_REGISTRATION_SANDBOX
-          - AM_APPLICATION_DELETION
-          - AM_API_STATE
-          - AM_SUBSCRIPTION_DELETION
-        example: AM_APPLICATION_CREATION
+          - APPLICATION_CREATION
+          - SUBSCRIPTION_CREATION
+          - USER_SIGNUP
+          - APPLICATION_REGISTRATION_PRODUCTION
+          - APPLICATION_REGISTRATION_SANDBOX
+          - APPLICATION_DELETION
+          - API_STATE
+          - SUBSCRIPTION_DELETION
+        example: APPLICATION_CREATION
         description: |
           Type of the Workflow Request. It shows which type of request is it.
       workflowStatus:

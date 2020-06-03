@@ -50,6 +50,13 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
 
     private static final Log log = LogFactory.getLog(WorkflowsApiService.class);
 
+    /**
+     * This is used to get the workflow pending request according to ExternalWorkflowReference
+     *
+     * @param externalWorkflowRef is the unique identifier for workflow request
+     * @param ifNoneMatch         If-None-Match header value
+     * @return
+     */
     @Override
     public Response workflowsExternalWorkflowRefGet(String externalWorkflowRef, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         WorkflowInfoDTO workflowinfoDTO;
@@ -68,6 +75,16 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
         return null;
     }
 
+    /**
+     * This is used to get the workflow pending requests
+     *
+     * @param limit        maximum number of workflow returns
+     * @param offset       starting index
+     * @param accept       accept header value
+     * @param ifNoneMatch  If-None-Match header value
+     * @param workflowType is the the type of the workflow request. (e.g: Application Creation, Application Subscription etc.)
+     * @return
+     */
     @Override
     public Response workflowsGet(Integer limit, Integer offset, String accept, String ifNoneMatch, String workflowType, MessageContext messageContext) throws APIManagementException {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;

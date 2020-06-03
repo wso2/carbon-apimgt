@@ -32,6 +32,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,6 @@ import java.util.ArrayList;
 
 /**
  * Approval workflow for API state change.
- *
  */
 public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
 
@@ -97,6 +97,11 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
                 apiStateWorkFlowDTO.setMetadata("ApiProvider", apiStateWorkFlowDTO.getApiProvider());
                 apiStateWorkFlowDTO.setMetadata("Invoker", apiStateWorkFlowDTO.getInvoker());
                 apiStateWorkFlowDTO.setMetadata("TenantId", String.valueOf(apiStateWorkFlowDTO.getTenantId()));
+
+                apiStateWorkFlowDTO.setProperties("Application", apiStateWorkFlowDTO.getApiLCAction());
+                apiStateWorkFlowDTO.setProperties("ApiName", apiStateWorkFlowDTO.getApiName());
+                apiStateWorkFlowDTO.setProperties("ApiVersion", apiStateWorkFlowDTO.getApiVersion());
+                apiStateWorkFlowDTO.setProperties("ApiProvider", apiStateWorkFlowDTO.getApiProvider());
                 super.execute(workflowDTO);
             } else {
                 // For any other states, act as simple workflow executor.
