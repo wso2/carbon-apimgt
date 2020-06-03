@@ -2965,6 +2965,45 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /settings/scopes:
+    #--------------------------------------------------
+    # Retrieve the list of role scope mapping
+    #--------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:admin_settings
+      summary: |
+        Get the list of role scope mapping.
+      description: |
+        This operation is used to get the list of role scope mapping from tenant-conf for the apim admin dashboard
+      tags:
+        - Settings
+      responses:
+        200:
+          description: |
+            OK.
+            The list of role scope mappings are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/ScopeList'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error.
+            An internal server error occurred while retrieving the role scope mapping.
+          schema:
+            $ref: '#/definitions/Error'
+
   /settings/scopes/{scope}:
     #-----------------------------------------------------
     # Retrieve scope settings
@@ -4180,6 +4219,34 @@ definitions:
         type: boolean
         description: To determine whether analytics is enabled or not
         example: false
+
+  #-----------------------------------------------------
+  # The Role Scope resource
+  #-----------------------------------------------------
+  Scope:
+    title: Role Scope
+    properties:
+      scope:
+        type: string
+        description: |
+          Scope name.
+        example: "apim:api_publish"
+      roles:
+        type: string
+        description: |
+          Roles for the particular scope.
+        example: "admin,Internal/publisher"
+
+  #-----------------------------------------------------
+  # The Role Scope Mapping List resource
+  #-----------------------------------------------------
+  ScopeList:
+    title: Role Scope Mapping List
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Scope'
 
   #-----------------------------------------------------
   # The Scope Settings resource
