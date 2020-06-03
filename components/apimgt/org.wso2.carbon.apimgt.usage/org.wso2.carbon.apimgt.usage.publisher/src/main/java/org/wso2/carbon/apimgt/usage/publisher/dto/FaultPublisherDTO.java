@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class FaultPublisherDTO {
@@ -28,9 +27,11 @@ public class FaultPublisherDTO {
     private String apiVersion;
     private String apiContext;
     private String apiResourcePath;
+    private String apiResourceTemplate;
     private String apiMethod;
     private String apiCreator;
     private String apiCreatorTenantDomain;
+    private String applicationOwner;
     private String username;
     private String userTenantDomain;
     private String protocol;
@@ -203,4 +204,19 @@ public class FaultPublisherDTO {
         this.properties = properties;
     }
 
+    public String getApiResourceTemplate() {
+        return apiResourceTemplate;
+    }
+
+    public void setApiResourceTemplate(String apiResourceTemplate) {
+        this.apiResourceTemplate = apiResourceTemplate;
+    }
+
+    public String getApplicationOwner() {
+        return applicationOwner;
+    }
+
+    public void setApplicationOwner(String applicationOwner) {
+        this.applicationOwner = applicationOwner;
+    }
 }
