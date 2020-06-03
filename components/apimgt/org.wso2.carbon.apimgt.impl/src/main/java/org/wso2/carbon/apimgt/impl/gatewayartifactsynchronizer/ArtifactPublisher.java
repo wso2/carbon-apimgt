@@ -34,25 +34,23 @@ public interface ArtifactPublisher {
 
     /**
      * The init of the publisher, this will be called only once.
-     * @throws ConnectionUnavailableException if there are any configuration errors
+     * @throws ArtifactSynchronizerException if there are any errors in the process
      */
-    void publishArtifacts (GatewayAPIDTO gatewayAPIDTO) throws ConnectionUnavailableException;
+    void publishArtifacts (GatewayAPIDTO gatewayAPIDTO) throws ArtifactSynchronizerException;
 
 
     /**
      * The init of the publisher, this will be called only once.
-     * @throws ConnectionUnavailableException if there are any configuration errors
+     * @throws ArtifactSynchronizerException if there are any errors in the process
      */
-    void updateArtifacts (GatewayAPIDTO gatewayAPIDTO) throws ConnectionUnavailableException;
+    void updateArtifacts (GatewayAPIDTO gatewayAPIDTO) throws ArtifactSynchronizerException;
 
 
     /**
-     * The init of the publisher, this will be called only once.
-     * @throws ConnectionUnavailableException if there are any configuration errors
+     * This method will check whether the artifact exists in the storage
+     * @throws ArtifactSynchronizerException if there are any errors in the process
      */
-    void deleteArtifacts (GatewayAPIDTO gatewayAPIDTO) throws ConnectionUnavailableException;
-
-    boolean isArtifactExists (GatewayAPIDTO gatewayAPIDTO) throws ConnectionUnavailableException;
+    boolean isArtifactExists (GatewayAPIDTO gatewayAPIDTO) throws ArtifactSynchronizerException;
 
     /**
      * Will be called after all publishing is done, or when ConnectionUnavailableException is thrown
@@ -64,5 +62,11 @@ public interface ArtifactPublisher {
      * Will be called at the end to clean all the resources consumed
      */
     void destroy();
+
+    /**
+     * The method to get notifier
+     * @return   type of the notifier
+     */
+    public String getType();
 
 }

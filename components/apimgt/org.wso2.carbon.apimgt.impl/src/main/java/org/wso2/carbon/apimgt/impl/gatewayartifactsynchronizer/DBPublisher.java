@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ConnectionUnavailableException;
@@ -36,7 +37,8 @@ public class DBPublisher implements ArtifactPublisher {
     }
 
     @Override
-    public void publishArtifacts (GatewayAPIDTO gatewayAPIDTO) throws ConnectionUnavailableException {
+    public void publishArtifacts (GatewayAPIDTO gatewayAPIDTO)
+            throws ArtifactSynchronizerException {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
@@ -51,13 +53,15 @@ public class DBPublisher implements ArtifactPublisher {
             }
 
         } catch (IOException | APIManagementException e) {
-            throw new ConnectionUnavailableException("Error publishing Artifact of " + gatewayAPIDTO.getName() + " API from DB", e);
+            throw new ArtifactSynchronizerException("Error publishing Artifact of " + gatewayAPIDTO.getName() +
+                    " API from DB", e);
         }
 
     }
 
     @Override
-    public void updateArtifacts(GatewayAPIDTO gatewayAPIDTO) throws ConnectionUnavailableException{
+    public void updateArtifacts(GatewayAPIDTO gatewayAPIDTO)
+            throws ArtifactSynchronizerException {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
@@ -67,40 +71,28 @@ public class DBPublisher implements ArtifactPublisher {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayAPIDTOAsBytes);
             apiMgtDAO.updateAPIBlob(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel(),
                     byteArrayInputStream, gatewayAPIDTOAsBytes.length);
-            if (log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Successfully updated Artifacts of " + gatewayAPIDTO.getName());
             }
-
-        } catch (IOException | APIManagementException e) {
-            throw new ConnectionUnavailableException("Error updating Artifact of " + gatewayAPIDTO.getName() + " API " +
-                    "from DB", e);
+        } catch (APIManagementException | IOException e) {
+            throw new ArtifactSynchronizerException ("Error updating Artifact of " + gatewayAPIDTO.getName() +
+                    " API", e);
         }
 
     }
 
     @Override
-    public void deleteArtifacts(GatewayAPIDTO gatewayAPIDTO) throws ConnectionUnavailableException{
-
-        try {
-            apiMgtDAO.deleteAPIBlob(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel());
-            if (log.isDebugEnabled()){
-                log.debug("Successfully deleted Artifacts of " + gatewayAPIDTO.getName());
-            }
-        } catch (APIManagementException e) {
-            throw new ConnectionUnavailableException("Error deleting Artifacts of " + gatewayAPIDTO.getName() + " API from DB", e);
-        }
-
-    }
-
-    @Override
-    public boolean isArtifactExists(GatewayAPIDTO gatewayAPIDTO) throws ConnectionUnavailableException {
+    public boolean isArtifactExists(GatewayAPIDTO gatewayAPIDTO) throws ArtifactSynchronizerException {
 
         boolean status;
         try {
             status = apiMgtDAO.isAPIBlobExists(gatewayAPIDTO.getApiId(),gatewayAPIDTO.getName(),
                     gatewayAPIDTO.getGatewayLabel());
+            if (log.isDebugEnabled()){
+                log.debug("Successfully read the status of Artifacts belongs to " + gatewayAPIDTO.getName());
+            }
         } catch (APIManagementException e) {
-            throw new ConnectionUnavailableException("Error checking the Artifact status of " + gatewayAPIDTO.getName() +
+            throw new ArtifactSynchronizerException("Error checking the Artifact status of " + gatewayAPIDTO.getName() +
                     " API from DB", e);
         }
         return status;
@@ -114,5 +106,11 @@ public class DBPublisher implements ArtifactPublisher {
     @Override
     public void destroy() {
         //not required
+    }
+
+    @Override
+    public String getType() {
+
+         return APIConstants.GatewayArtifactSynchronizer.DEFAULT_PUBLISHER_NAME;
     }
 }

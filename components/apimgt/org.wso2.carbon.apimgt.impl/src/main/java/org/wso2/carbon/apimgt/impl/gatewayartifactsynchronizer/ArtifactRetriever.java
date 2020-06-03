@@ -30,10 +30,17 @@ public interface ArtifactRetriever {
     void connect() throws ConnectionUnavailableException;
 
     /**
-     * The init of the publisher, this will be called only once.
-     * @throws ConnectionUnavailableException if there are any configuration errors
+     * This method is used to retrieve data from the storage
+     * @throws ArtifactSynchronizerException if there are any errors when retrieving the Artifacts
      */
-    GatewayAPIDTO retrieveArtifacts (String APIId, String APIName, String label) throws ConnectionUnavailableException;
+    GatewayAPIDTO retrieveArtifacts (String APIId, String APIName, String label) throws ArtifactSynchronizerException;
+
+
+    /**
+     * The init of the publisher, this will be called only once.
+     * @throws ArtifactSynchronizerException if there are any errors in the process
+     */
+    void deleteArtifacts (GatewayAPIDTO gatewayAPIDTO) throws ArtifactSynchronizerException;
 
     /**
      * Will be called after all publishing is done, or when ConnectionUnavailableException is thrown
@@ -44,4 +51,11 @@ public interface ArtifactRetriever {
      * Will be called at the end to clean all the resources consumed
      */
     void destroy();
+
+    /**
+     * The method to get notifier
+     * @return   type of the notifier
+     */
+    public String getType();
+
 }
