@@ -17,14 +17,16 @@
 */
 package org.wso2.carbon.apimgt.api;
 
-import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * APIAdmin responsible for providing helper functionality
@@ -210,6 +212,74 @@ public interface APIAdmin  {
      * @return Timestamp in long format
      */
     long getTimestamp(String date);
+
+    /**
+     * This method used to retrieve key manager configurations for tenant
+     * @param tenantDomain tenant Domain
+     * @return KeyManagerConfigurationDTO list
+     * @throws APIManagementException if error occurred
+     */
+    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByTenant(String tenantDomain) throws APIManagementException;
+
+    /**
+     * This method returns all the key managers registered in all the tenants
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, List<KeyManagerConfigurationDTO>> getAllKeyManagerConfigurations() throws APIManagementException;
+
+    /**
+     * This method used to retrieve key manager with Id in respective tenant
+     * @param tenantDomain tenant domain requested
+     * @param id uuid of key manager
+     * @return KeyManagerConfigurationDTO for retrieved data
+     * @throws APIManagementException
+     */
+    KeyManagerConfigurationDTO getKeyManagerConfigurationById(String tenantDomain, String id)
+            throws APIManagementException;
+    /**
+     * This method used to check existence of key manager with Id in respective tenant
+     * @param tenantDomain tenant domain requested
+     * @param id uuid of key manager
+     * @return existence
+     * @throws APIManagementException
+     */
+    boolean isKeyManagerConfigurationExistById(String tenantDomain, String id) throws APIManagementException;
+
+    /**
+     * This method used to create key Manager
+     * @param keyManagerConfigurationDTO key manager data
+     * @return created key manager
+     * @throws APIManagementException
+     */
+    KeyManagerConfigurationDTO addKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException;
+    /**
+     * This method used to update key Manager
+     * @param keyManagerConfigurationDTO key manager data
+     * @return updated key manager
+     * @throws APIManagementException
+     */
+    KeyManagerConfigurationDTO updateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException;
+
+    /**
+     * This method used to delete key manager
+     * @param tenantDomain tenant domain requested
+     * @param id uuid of key manager
+     * @throws APIManagementException
+     */
+    void deleteKeyManagerConfigurationById(String tenantDomain,String id) throws APIManagementException;
+
+    /**
+     * This method used to retrieve key manager from name
+     * @param tenantDomain tenant domain requested
+     * @param name name requested
+     * @return keyManager data
+     * @throws APIManagementException
+     */
+    KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String tenantDomain, String name)
+            throws APIManagementException;
 
     /**
      * The method get all the pending workflow requests

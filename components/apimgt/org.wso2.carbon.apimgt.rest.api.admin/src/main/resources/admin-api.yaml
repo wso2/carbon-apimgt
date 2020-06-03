@@ -232,6 +232,7 @@ paths:
           description: |
             Unsupported media type.
             The entity of the request was in a not supported format.
+
   ######################################################
   # The "Individual Application Throttling Policy" resource API
   ######################################################
@@ -809,6 +810,7 @@ paths:
           description: |
             Unsupported media type.
             The entity of the request was in a not supported format.
+
   ######################################################
   # The "Individual Subscription Throttling Policy" resource API
   ######################################################
@@ -1095,6 +1097,7 @@ paths:
           description: |
             Unsupported media type.
             The entity of the request was in a not supported format.
+
   ######################################################
   # The "Individual Custom Rule" resource API
   ######################################################
@@ -1383,6 +1386,7 @@ paths:
           description: |
             Unsupported media type.
             The entity of the request was in a not supported format.
+
   ######################################################
   # The "Individual Advanced Throttling Policy" resource API
   ######################################################
@@ -1664,6 +1668,7 @@ paths:
           description: |
             Unsupported media type.
             The entity of the request was in a not supported format.
+
   ######################################################
   # The "Individual Blocking Condition" resource API
   ######################################################
@@ -3199,6 +3204,7 @@ definitions:
         type: string
         description: |
           Description about individual errors occurred
+
   #-----------------------------------------------------
   # The Throttling Policy resource
   #-----------------------------------------------------
@@ -3478,6 +3484,7 @@ definitions:
           Specifies whether inversion of the condition to be matched against the request.
           **Note:** When you add conditional groups for advanced throttling policies, this paramater should have the same value (`true` or `false`)
           for the same type of conditional group.
+
   #-----------------------------------------------------
   # The Throttling HTTP Header Condition resource
   #-----------------------------------------------------

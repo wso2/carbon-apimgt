@@ -369,29 +369,6 @@
        {% endif %}
     </APIKeyValidator>
 
-    <!-- Uncomment this section only if you are going to have an instance other than KeyValidator as your KeyManager.
-         Unless a ThirdParty KeyManager is used, you don't need to configure this section. -->
-    {% if apim.key_manager.key_manager_client_impl is defined %}
-    <APIKeyManager>
-        <KeyManagerClientImpl>{{apim.key_manager.key_manager_client_impl}}</KeyManagerClientImpl>
-        <Configuration>
-           {% for property_name,property_value in apim.key_manager.configuration.items() %}
-           <{{property_name}}>{{property_value}}</{{property_name}}>
-           {% endfor %}
-        </Configuration>
-    </APIKeyManager>
-    {% else %}
-    <!--APIKeyManager>
-        <KeyManagerClientImpl>org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl</KeyManagerClientImpl>
-        <Configuration>
-            <ServerURL>https://localhost:${mgt.transport.https.port}${carbon.context}services/</ServerURL>
-            <Username>${admin.username}</Username>
-            <Password>${admin.password}</Password>
-            <TokenURL>https://${carbon.local.ip}:${https.nio.port}/token</TokenURL>
-            <RevokeURL>https://${carbon.local.ip}:${https.nio.port}/revoke</RevokeURL>
-        </Configuration>
-    </APIKeyManager-->
-    {% endif %}
 
     <OAuthConfigurations>
         <!-- Remove OAuth headers from outgoing message. -->
@@ -1121,8 +1098,31 @@
     <CertificateReLoaderConfiguration>
         <Period>{{apim.certificate_reloader.period}}</Period>
     </CertificateReLoaderConfiguration>
-        <MutualSSL>
-            <ClientCertificateHeader>{{apimgt.mutual_ssl.certificate_header}}</ClientCertificateHeader>
-            <EnableClientCertificateValidation>{{apimgt.mutual_ssl.enable_client_validation}}</EnableClientCertificateValidation>
-        </MutualSSL>
+     <MutualSSL>
+        <ClientCertificateHeader>{{apimgt.mutual_ssl.certificate_header}}</ClientCertificateHeader>
+        <EnableClientCertificateValidation>{{apimgt.mutual_ssl.enable_client_validation}}</EnableClientCertificateValidation>
+     </MutualSSL>
+
+     <KeyManagerConfigurations>
+        <Enable>{{apim.key_manager.enable}}</Enable>
+        {% if apim.key_manager.connector.service_url is defined %}
+        <ServiceUrl>{{apim.key_manager.connector.service_url}}</ServiceUrl>
+        {% endif %}
+         {% if apim.key_manager.connector.service_url is defined %}
+        <InitDelay>{{apim.key_manager.connector.init_delay}}</InitDelay>
+          {% endif %}
+         <ConfigurationRetriever>
+             <transport.jms.ConnectionFactoryJNDIName>keymanager</transport.jms.ConnectionFactoryJNDIName>
+             <transport.jms.DestinationType>TopicConnectionFactory</transport.jms.DestinationType>
+             <java.naming.factory.initial>{{apim.key_manager.configuration_retriever.java_naming_factory_initial}}</java.naming.factory.initial>
+             {% if apim.key_manager.configuration_retriever.topic_connection_urls is defined %}
+             <connectionfactory.TopicConnectionFactory>amqp://{{apim.key_manager.configuration_retriever.username}}:{{apim.key_manager.configuration_retriever.password}}@clientid/carbon?brokerlist='{% for url in apim.key_manager.configuration_retriever.topic_connection_urls %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+             {% elif apim.throttling.throttle_decision_endpoints is defined %}
+             <connectionfactory.TopicConnectionFactory>amqp://{{apim.throttling.jms.username}}:{{apim.throttling.jms.password}}@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+             {% else %}
+             <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
+             {% endif %}
+         </ConfigurationRetriever>
+     </KeyManagerConfigurations>
+
 </APIManager>

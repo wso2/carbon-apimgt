@@ -49,4 +49,10 @@ public interface ErrorHandler {
      * @return  error code.
      */
      int getHttpStatusCode();
+
+    /**
+     *  Return true if stack trace to print;
+     * @return
+     */
+     boolean printStackTrace();
 }

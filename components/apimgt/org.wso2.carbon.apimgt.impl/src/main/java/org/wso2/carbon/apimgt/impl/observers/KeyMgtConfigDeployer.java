@@ -31,7 +31,5 @@ public class KeyMgtConfigDeployer extends AbstractAxis2ConfigurationContextObser
     public void createdConfigurationContext(ConfigurationContext configContext) {
 
         //TODO: Only register when API-M KeyManager Profile is used as the KM.
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        KeyMgtRegistrationService.registerKeyMgtApplication(tenantDomain);
     }
 }
