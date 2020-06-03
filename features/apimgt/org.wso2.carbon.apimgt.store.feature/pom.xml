@@ -327,7 +327,7 @@
                     <include>devportal/webpack.config.js</include>
                     <include>devportal/Readme.txt</include>
                     <include>p2.inf</include>
-                    <include>admin/**</include>
+                    <include>admin-old/**</include>
                     <include>apistore/**</include>
                     <include>customTheme/**</include>
                     <include>store-old/**</include>
