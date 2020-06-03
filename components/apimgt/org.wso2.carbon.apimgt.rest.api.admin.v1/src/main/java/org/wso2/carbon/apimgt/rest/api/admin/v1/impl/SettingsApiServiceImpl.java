@@ -58,6 +58,19 @@ public class SettingsApiServiceImpl implements SettingsApiService {
         return null;
     }
 
+    @Override public Response settingsRoleAliasesGet(MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override public Response settingsRoleAliasesPost(MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override public Response settingsRoleAliasesRoleAliasDelete(String roleAlias, MessageContext messageContext)
+            throws APIManagementException {
+        return null;
+    }
+
     /**
      * Get all scopes of a user
      *

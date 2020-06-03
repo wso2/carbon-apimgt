@@ -3130,6 +3130,100 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ######################################################
+  # The 'Role Alias' Collection API Resource
+  ######################################################
+  /settings/role-aliases:
+    #-----------------------------------------------------
+    # Retrieve role alias mappings for system scope roles
+    #-----------------------------------------------------
+    get:
+      summary: Retreive role alias mappings
+      security:
+        - OAuth2Security:
+            - apim:admin_settings
+      description: |
+        This operation can be used to retreive role alias mapping for system scope roles
+      tags:
+        - Settings
+      responses:
+        200:
+          description: |
+            OK.
+            Settings returned
+          schema:
+            $ref: '#/definitions/RoleAliasList'
+        404:
+          description: |
+            Not Found.
+            Requested Settings does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-----------------------------------------------------
+    # Add a new role alias mapping for system roles
+    #-----------------------------------------------------
+    post:
+      summary: Add a new role alias
+      security:
+        - OAuth2Security:
+            - apim:admin_settings
+      description: |
+        This operation can be used to add a new role alias mapping for system scope roles
+      tags:
+        - Settings
+      responses:
+        201:
+          description: |
+            OK.
+            Settings returned
+          schema:
+            $ref: '#/definitions/RoleAlias'
+        404:
+          description: |
+            Not Found.
+            Requested Settings does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+  ######################################################
+  # The 'Role Alias' Individual API Resource
+  ######################################################
+  /settings/role-aliases/{roleAlias}:
+    #-----------------------------------------------------
+    # Deletes the role alias mappings for system scope roles
+    #-----------------------------------------------------
+    delete:
+      summary: Delete role alias mapping
+      security:
+        - OAuth2Security:
+            - apim:admin_settings
+      parameters:
+        - $ref: '#/parameters/roleAlias'
+      description: |
+        This operation can be used to delete a given role alias mapping for system scope roles
+      tags:
+        - Settings
+      responses:
+        200:
+          description: |
+            OK.
+            Role alias is deleted
+        400:
+          description: |
+            Bad Request
+            The request parameters validation failed.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested Settings does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+
   ####################################################
   # The Admin alert  management REST API
   ####################################################
@@ -3777,6 +3871,17 @@ parameters:
       Key Manager UUID
     type: string
     required: true
+
+  # Role alias identifier
+  # Specified as part of the path expression
+  roleAlias:
+    name: roleAlias
+    in: path
+    description: |
+      Role Alias Identifier
+    type: string
+    required: true
+
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -5091,6 +5196,37 @@ definitions:
           type: string
           example: "admin@wso2.com"
 
+  #-----------------------------------------------
+  # The Role Alias resource definition.
+  #-----------------------------------------------
+  RoleAlias:
+    title: Role alias
+    properties:
+      name:
+        type: string
+        description: The role alias name
+        example: "Internal-subscriber"
+      roleList:
+        type: string
+        description: The role mapping for role alias
+        items:
+          type: string
+          example: "Subscriber,Internal-subscriber"
+
+  #-----------------------------------------------
+  # The Role Alias resource definition.
+  #-----------------------------------------------
+  RoleAliasList:
+    title: Role alias list
+    properties:
+      count:
+        type: integer
+        description: The number of role aliases
+        example: 3
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/RoleAlias'
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

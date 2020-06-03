@@ -1,6 +1,8 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
@@ -63,12 +65,61 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
         })
     }, tags={ "Settings",  })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK. The list of role scope mappings are returned. ", response = ScopeListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error. An internal server error occurred while retrieving the role scope mapping. ", response = ErrorDTO.class) })
     public Response settingsScopesGet() throws APIManagementException{
         return delegate.settingsScopesGet(securityContext);
+    }
+
+    @GET
+    @Path("/role-aliases")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retreive role alias mappings", notes = "This operation can be used to retreive role alias mapping for system scope roles ", response = RoleAliasListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
+        })
+    }, tags={ "Settings",  })
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK. Settings returned ", response = RoleAliasListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested Settings does not exist. ", response = ErrorDTO.class) })
+    public Response settingsRoleAliasesGet() throws APIManagementException{
+        return delegate.settingsRoleAliasesGet(securityContext);
+    }
+
+    @POST
+    @Path("/role-aliases")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Add a new role alias", notes = "This operation can be used to add a new role alias mapping for system scope roles ", response = RoleAliasDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
+        })
+    }, tags={ "Settings",  })
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = "OK. Settings returned ", response = RoleAliasDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested Settings does not exist. ", response = ErrorDTO.class) })
+    public Response settingsRoleAliasesPost() throws APIManagementException{
+        return delegate.settingsRoleAliasesPost(securityContext);
+    }
+
+    @DELETE
+    @Path("/role-aliases/{roleAlias}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete role alias mapping", notes = "This operation can be used to delete a given role alias mapping for system scope roles ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
+        })
+    }, tags={ "Settings",  })
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK. Role alias is deleted ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request The request parameters validation failed. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested Settings does not exist. ", response = ErrorDTO.class) })
+    public Response settingsRoleAliasesRoleAliasDelete(@ApiParam(value = "Role Alias Identifier ",required=true) @PathParam("roleAlias") String roleAlias) throws APIManagementException{
+        return delegate.settingsRoleAliasesRoleAliasDelete(roleAlias, securityContext);
     }
 
     @GET
