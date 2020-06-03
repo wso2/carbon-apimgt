@@ -89,6 +89,7 @@ public class SubscriptionValidationConfig {
             subscriptionValidationConfig.serviceURL = serviceURL;
             subscriptionValidationConfig.username = username;
             subscriptionValidationConfig.password = password;
+            subscriptionValidationConfig.enabled = enabled;
             return subscriptionValidationConfig;
         }
     }
