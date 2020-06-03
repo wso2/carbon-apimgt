@@ -4193,12 +4193,12 @@ definitions:
 #-----------------------------------------------------
   CustomRule:
     title: Custom Rule
-    required:
-      - siddhiQuery
-      - keyTemplate
     allOf:
       - $ref: '#/definitions/ThrottlePolicy'
-      - properties:
+      - required:
+        - siddhiQuery
+        - keyTemplate
+        properties:
           siddhiQuery:
             type: string
             description: Siddhi query which represents the custom throttling policy

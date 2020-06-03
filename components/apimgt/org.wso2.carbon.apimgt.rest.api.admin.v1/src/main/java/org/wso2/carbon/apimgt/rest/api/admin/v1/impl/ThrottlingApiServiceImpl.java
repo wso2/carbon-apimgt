@@ -707,8 +707,19 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesCustomPost(CustomRuleDTO body, String contentType,
                                                  MessageContext messageContext) {
 
+        String errorMessage;
+
+        //Check if the required fields are blank
         if (StringUtils.isBlank(body.getPolicyName())) {
-            String errorMessage = "Policy name of custom rule cannot be blank";
+            errorMessage = "Policy name of custom rule cannot be blank";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+        }
+        if (StringUtils.isBlank(body.getSiddhiQuery())) {
+            errorMessage = "Siddhi Query of custom rule cannot be blank";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+        }
+        if (StringUtils.isBlank(body.getKeyTemplate())) {
+            errorMessage = "Key Template of custom rule cannot be blank";
             RestApiUtil.handleBadRequest(errorMessage, log);
         }
 
@@ -735,10 +746,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             CustomRuleDTO policyDTO = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyToDTO(newGlobalPolicy);
             return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL + "/" + policyDTO.getPolicyId())).entity(policyDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while adding a custom rule: " + body.getPolicyName();
+            errorMessage = "Error while adding a custom rule: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving Global Throttle policy location : " + body.getPolicyName();
+            errorMessage = "Error while retrieving Global Throttle policy location : " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
