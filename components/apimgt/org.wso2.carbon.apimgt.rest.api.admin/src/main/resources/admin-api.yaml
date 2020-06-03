@@ -103,8 +103,8 @@ x-wso2-security:
         key: apim:monetization_usage_publish
       - description: ""
         roles: admin
-        name: apim:api_workflow
-        key: apim:api_workflow
+        name: apim:api_workflow_approve
+        key: apim:api_workflow_approve
       - description: ""
         roles: admin
         name: apim:bot_data
@@ -122,14 +122,14 @@ x-wso2-security:
 # The "API Collection" resource APIs
 ######################################################
 paths:
-######################################################
-# The "Application Throttling Policy Collection" resource API
-######################################################
+  ######################################################
+  # The "Application Throttling Policy Collection" resource API
+  ######################################################
   '/throttling/policies/application':
 
-#-----------------------------------------------------
-# Retrieve all Application level policies
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve all Application level policies
+    #-----------------------------------------------------
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer e59e2657-4c2a-3cd0-8b48-0f4f39940c41\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/application"
       x-wso2-request: |
@@ -1000,7 +1000,6 @@ paths:
       summary: Get all Custom Rules
       description: |
         Retrieves all Custom Rules.
-
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
@@ -1053,7 +1052,6 @@ paths:
       summary: Add a Custom Rule
       description: |
         Adds a new Custom Rule.
-
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
@@ -1118,7 +1116,6 @@ paths:
       summary: Get a Custom Rule
       description: |
         Retrieves a Custom Rule. We need to provide the policy Id as a path parameter.
-
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
@@ -1179,7 +1176,6 @@ paths:
       summary: Delete a Custom Rule
       description: |
         Delete a Custom Rule. We need to provide the Id of the policy as a path parameter.
-
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
@@ -1217,7 +1213,6 @@ paths:
       summary: Update a Custom Rule
       description: |
         Updates an existing Custom Rule.
-
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
@@ -1875,7 +1870,6 @@ paths:
           description: |
             OK.
             Application owner changed successfully.
-
         400:
           description: |
             Bad Request.
@@ -2529,7 +2523,7 @@ paths:
     # Resume the workflow by approving or rejecting the workflow request
     #-------------------------------------------------------------------
     post:
-      x-scope: apim:api_workflow
+      x-scope: apim:api_workflow_approve
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v0.16/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\""
       x-wso2-request: "POST https://localhost:9443/api/am/publisher/v0.16/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"status\" : \"APPROVED\",\n   \"attributes\" : {\n      \"apiCurrentState\": \"Created\",\n      \"apiLCAction\": \"Publish\",\n      \"apiName\":\"APIname\",\n      \"apiVersion\" : \"1.0.0\",\n      \"apiProvider\" : \"admin\",\n      \"invoker\": \"admin\"\n   }\n}"
       x-wso2-response: "HTTP/1.1 200 OK"
@@ -2593,7 +2587,6 @@ paths:
         - name: username
           description: |
             The state represents the current state of the tenant
-
             Supported states are [ active, inactive]
           in: path
           type: string
@@ -3489,7 +3482,6 @@ definitions:
         default: false
         description: |
           Specifies whether inversion of the condition to be matched against the request.
-
           **Note:** When you add conditional groups for advanced throttling policies, this paramater should have the same value (`true` or `false`)
           for the same type of conditional group.
 

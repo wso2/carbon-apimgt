@@ -85,13 +85,14 @@ securityDefinitions:
       apim:label_manage: Manage labels
       apim:label_read: Retrieve labels
       apim:monetization_usage_publish: Retrieve and publish Monetization related usage records #TODO: Verify Description
-      apim:api_workflow: Manage workflows #TODO: Verify Description
+      apim:api_workflow_approve: Manage workflows #TODO: Verify Description
       apim:bot_data: Manage emails  #TODO: Verify Description
       apim:tenantInfo: Retrieve tenant related information  #TODO: Verify Description
       apim:tenant_theme_manage: Manage tenant themes
       apim:admin_operations: Manage API categories
       apim:admin_settings: Retrieve admin settings
       apim:admin_alert_manage: Manage admin alerts
+      apim:api_workflow_view: Retrive workflow requests
 
 ######################################################
 # The "API Collection" resource APIs
@@ -2792,7 +2793,145 @@ paths:
           schema:
             $ref: '#/definitions/MonetizationUsagePublishInfo'
 
-######################################################
+  ######################################################
+  # The "Workflow Collection" resource APIs
+  ######################################################
+  '/workflows':
+
+    #---------------------------------------------------
+    # Retrieve a list of all workflow pending processes
+    #---------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_workflow_view
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/admin/v1/workflows
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v1/workflows\""
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n    \"WF_TYPE\": \"AM_APPLICATION_CREATION\",\n         \"WF_STATUS\": \"APPROVED\",\n         \"WF_CREATED_TIME\": \"  2020-02-10 09:33:34.476\"\n    \"WF_UPDATED_TIME\": \"  2020-02-10 09:33:34.476\"\n    \"WF_STATUS_DESC\": \"  Approve workflow request\"\n   \"TENANT_ID\": \"-1234\",\n  \"TENANT_DOMAIN\": \"carbon.super\",\n  \"WF_EXTERNAL_REFERENCE\": \"5871244b-d6f3-466e-8995-8accd1e64303\",\n  \"PAYLOAD\": \"7b2263616c6c4261636b55524c22\",\n },\n  {\n         \"WF_ID\": \"\",\n         \"WF_REFERENCE\": \"ABBA\",\n           \"WF_TYPE\": \"AM_APPLICATION_CREATION\",\n         \"WF_STATUS\": \"APPROVED\",\n         \"WF_CREATED_TIME\": \"  2020-01-10 09:32:34.476\"\n    \"WF_UPDATED_TIME\": \"  2020-03-12 09:34:34.476\"\n    \"WF_STATUS_DESC\": \"  Approve workflow request\"\n   \"TENANT_ID\": \"-1234\",\n  \"TENANT_DOMAIN\": \"carbon.super\",\n  \"WF_EXTERNAL_REFERENCE\": \"5871244b-d6f3-466e-8922-8accd1e64303\",\n  \"PAYLOAD\": \"7b226170694e616d65223a2253616\",\n }          "
+      summary: |
+        Retrieve All pending workflow processes
+      description: |
+        This operation can be used to retrieve list of workflow pending processes.
+      parameters:
+
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - name: workflowType
+          in: query
+          description: |
+            We need to show the values of each workflow process separately .for that we use workflow type.
+            Workflow type can be AM_APPLICATION_CREATION, AM_SUBSCRIPTION_CREATION,   AM_USER_SIGNUP, AM_APPLICATION_REGISTRATION_PRODUCTION, AM_APPLICATION_REGISTRATION_SANDBOX.
+          required: false
+          type: string
+          enum:
+            - AM_APPLICATION_CREATION
+            - AM_SUBSCRIPTION_CREATION
+            - AM_USER_SIGNUP
+            - AM_APPLICATION_REGISTRATION_PRODUCTION
+            - AM_APPLICATION_REGISTRATION_SANDBOX
+            - AM_SUBSCRIPTION_DELETION
+            - AM_APPLICATION_DELETION
+            - AM_API_STATE
+      tags:
+        - Workflow (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            Workflow pendding process list returned.
+          schema:
+            $ref: '#/definitions/WorkflowList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        404:
+          description: |
+            Not Found.
+            Requested user does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+  #----------------------------------------------------------------
+  # Retrieve workflow requests according to the external reference
+  #----------------------------------------------------------------
+  '/workflows/{externalWorkflowRef}':
+
+    #-----------------------------------------------------
+    # Retrieve the Details of a workflow pendding process
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_workflow_view
+      x-wso2-curl: "curl https://localhost:9443/api/am/admin/v1/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"
+      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/admin/v0.16/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/admin/v1/workflows/c43a325c-260b-4302-81cb-768eafaa3aed
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n                 \"WF_TYPE\": \"AM_APPLICATION_CREATION\",\n         \"WF_STATUS\": \"APPROVED\",\n         \"WF_CREATED_TIME\": \"  2020-02-10 09:33:34.476\"\n    \"WF_UPDATED_TIME\": \"  2020-02-10 09:33:34.476\"\n    \"WF_STATUS_DESC\": \"  Approve workflow request\"\n   \"TENANT_ID\": \"-1234\",\n  \"TENANT_DOMAIN\": \"carbon.super\",\n  \"WF_EXTERNAL_REFERENCE\": \"5871244b-d6f3-466e-8995-8accd1e64303\",\n  \"PAYLOAD\": \"7b2263616c6c4261636b55524c22\",\n } "
+      summary: |
+        Get details of a the pending workflow request according to the External Workflow Reference.
+      description: |
+        Using this operation, you can retrieve complete details of a pending workflow request that either belongs to application creation, application subscription, application registration, api state change, user self sign up.. You need to provide the External_Workflow_Reference of the workflow Request to retrive it.
+
+      parameters:
+        - name: externalWorkflowRef
+          in: path
+          description: |
+            from the externel workflow reference we decide what is the the pending request that the are requesting.
+          required: true
+          type: string
+        - $ref: '#/parameters/If-None-Match'
+      tags:
+        - Workflows (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested Workflow Pending is returned
+          schema:
+            $ref: '#/definitions/WorkflowInfo'
+
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested workflow pendding process does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+  ######################################################
   # The "Workflow approval" resource API
   ######################################################
   /workflows/update-workflow-status:
@@ -2803,7 +2942,7 @@ paths:
     post:
       security:
         - OAuth2Security:
-            - apim:api_workflow
+            - apim:api_workflow_approve
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v1/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\""
       x-wso2-request: "POST https://localhost:9443/api/am/publisher/v1/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"status\" : \"APPROVED\",\n   \"attributes\" : {\n      \"apiCurrentState\": \"Created\",\n      \"apiLCAction\": \"Publish\",\n      \"apiName\":\"APIname\",\n      \"apiVersion\" : \"1.0.0\",\n      \"apiProvider\" : \"admin\",\n      \"invoker\": \"admin\"\n   }\n}"
       x-wso2-response: "HTTP/1.1 200 OK"
@@ -5024,6 +5163,85 @@ definitions:
         items:
           type: string
           example: "admin@wso2.com"
+
+    #-----------------------------------------------------
+  # The Workflow List resource
+  #-----------------------------------------------------
+  WorkflowList:
+    title: WorkflowList
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of workflow processes returned.
+        example: 1
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+        example: "/workflows?limit=1&offset=2&user="
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+        example: "/workflows?limit=1&offset=0&user="
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/WorkflowInfo'
+
+  #-----------------------------------------------------
+  # The Workflow Info resource
+  #-----------------------------------------------------
+  WorkflowInfo:
+    title: Workflow info object with basic workflow details
+    properties:
+      workflowType:
+        type: string
+        enum:
+          - APPLICATION_CREATION
+          - SUBSCRIPTION_CREATION
+          - USER_SIGNUP
+          - APPLICATION_REGISTRATION_PRODUCTION
+          - APPLICATION_REGISTRATION_SANDBOX
+          - APPLICATION_DELETION
+          - API_STATE
+          - SUBSCRIPTION_DELETION
+        example: APPLICATION_CREATION
+        description: |
+          Type of the Workflow Request. It shows which type of request is it.
+      workflowStatus:
+        type: string
+        enum:
+          - APPROVED
+          - CREATED
+        example: APPROVED
+        description: |
+          Show the Status of the the workflow request whether it is approved or created.
+      createdTime:
+        type: string
+        example: '2020-02-10 10:10:19.704'
+        description: |
+          Time of the the workflow request created.
+      updatedTime:
+        type: string
+        example: '2020-02-10 10:10:19.704'
+        description: |
+          Time of the the workflow request updated.
+      referenceId:
+        type: string
+        example: '5871244b-d6f3-466e-8995-8accd1e64303'
+        description: |
+          Workflow external reference is used to identify the workflow requests uniquely.
+      properties:
+        type: object
+      description:
+        type: string
+        example: 'Approve application [APP1] creation request from application creator - admin with throttling tier - 10MinPer'
+        description: |
+          description is a message with basic details about the workflow request.
 
 #-----------------------------------------------------
 # END-OF-FILE
