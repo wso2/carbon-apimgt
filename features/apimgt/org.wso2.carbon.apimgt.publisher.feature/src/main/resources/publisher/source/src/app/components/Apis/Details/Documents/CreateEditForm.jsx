@@ -446,7 +446,7 @@ class CreateEditForm extends React.Component {
                         error={summeryEmpty}
                     />
                 </FormControl>
-                {!settingsContext.externalStoresEnabled && 
+                {settingsContext.docVisibilityEnabled && 
                 <FormControl margin='normal' className={classes.FormControlOdd}>
                 <TextField
                     fullWidth
@@ -489,6 +489,12 @@ class CreateEditForm extends React.Component {
                         <FormattedMessage
                             id='Apis.Details.Documents.CreateEditForm.document.docVisibility.dropdown.private'
                             defaultMessage='Private'
+                        />
+                    </MenuItem>
+                    <MenuItem value='OWNER_ONLY'>
+                        <FormattedMessage
+                            id='Apis.Details.Documents.CreateEditForm.document.docVisibility.dropdown.ownerOnly'
+                            defaultMessage='Owner Only'
                         />
                     </MenuItem>
                 </TextField>

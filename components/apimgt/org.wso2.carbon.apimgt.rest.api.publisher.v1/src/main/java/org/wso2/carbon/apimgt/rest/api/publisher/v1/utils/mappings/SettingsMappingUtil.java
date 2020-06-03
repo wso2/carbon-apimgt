@@ -87,6 +87,7 @@ public class SettingsMappingUtil {
             settingsDTO.setSecurityAuditProperties(getSecurityAuditProperties());
             settingsDTO.setExternalStoresEnabled(
                     APIUtil.isExternalStoresEnabled(RestApiUtil.getLoggedInUserTenantDomain()));
+            settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
         }
         settingsDTO.setScopes(GetScopeList());
         return settingsDTO;
