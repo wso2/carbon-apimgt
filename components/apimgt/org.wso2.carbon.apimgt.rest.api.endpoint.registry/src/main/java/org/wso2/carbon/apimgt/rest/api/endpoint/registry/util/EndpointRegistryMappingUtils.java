@@ -63,11 +63,7 @@ public class EndpointRegistryMappingUtils {
         RegistryDTO registryDTO = new RegistryDTO();
         registryDTO.setId(registry.getUuid());
         registryDTO.setName(registry.getName());
-        if (StringUtils.isEmpty(registry.getDisplayName())) {
-            registryDTO.setDisplayName(registry.getName());
-        } else {
-            registryDTO.setDisplayName(registry.getDisplayName());
-        }
+        registryDTO.setDisplayName(registry.getDisplayName());
         registryDTO.setType(RegistryDTO.TypeEnum.fromValue(registry.getType()));
         registryDTO.setOwner(registry.getOwner());
         return registryDTO;
@@ -109,11 +105,7 @@ public class EndpointRegistryMappingUtils {
         EndpointRegistryEntry registryEntry = new EndpointRegistryEntry();
         registryEntry.setEntryId(entryUUID);
         registryEntry.setEntryName(registryEntryDTO.getEntryName());
-        if (StringUtils.isEmpty(registryEntryDTO.getDisplayName())) {
-            registryEntry.setDisplayName(registryEntryDTO.getEntryName());
-        } else {
-            registryEntry.setDisplayName(registryEntryDTO.getDisplayName());
-        }
+        registryEntry.setDisplayName(registryEntryDTO.getDisplayName());
         registryEntry.setVersion(registryEntryDTO.getVersion());
         registryEntry.setDescription(registryEntryDTO.getDescription());
         if (registryEntryDTO.getDefinitionType() != null) {
