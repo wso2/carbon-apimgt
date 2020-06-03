@@ -880,15 +880,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int apiId = apiMgtDAO.addAPI(api, tenantId);
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
-        try {
-            String[] endpointIdArray = retrieveEndpointEntryInfo(api.getEndpointConfig());
-            if (endpointIdArray != null) {
-                apiMgtDAO.addAPIRegistryEntryMappings(apiId, endpointIdArray[0], endpointIdArray[1], endpointIdArray[2],
-                        null);
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-                throw new APIManagementException("Missing required parameter in endpoint_id of API : " + api.getId()
-                        .getApiName());
+        Map endpointRegistryEntries = APIUtil.extractEndpointRegistryEntries(api.getEndpointConfig());
+        if (endpointRegistryEntries != null) {
+            apiMgtDAO.addAPIRegistryEntryMappings(apiId, endpointRegistryEntries, null);
         }
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
@@ -1499,16 +1493,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
                 api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
-        try {
-            String[] endpointIdArray = retrieveEndpointEntryInfo(api.getEndpointConfig());
-            if (endpointIdArray != null) {
-                apiMgtDAO.updateAPIRegistryEntryMappings(apiId, endpointIdArray[0], endpointIdArray[1],
-                        endpointIdArray[2]);
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new APIManagementException("Missing required parameter in endpoint_id of API : "
-                    + api.getId().getApiName());
+        Map endpointRegistryEntriesEntries = APIUtil.extractEndpointRegistryEntries(api.getEndpointConfig());
+        if (endpointRegistryEntriesEntries != null) {
+            apiMgtDAO.updateAPIRegistryEntryMappings(apiId, endpointRegistryEntriesEntries);
         }
+
     }
 
     /**
@@ -8599,25 +8588,5 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return removedReusedResources;
-    }
-
-    private String[] retrieveEndpointEntryInfo(String endpointConfig) throws APIManagementException {
-        String[] endpointEntryInfoArray = null;
-        if (StringUtils.isNotEmpty(endpointConfig)) {
-            JSONParser parser = new JSONParser();
-            try {
-                JSONObject endpointConfigJSON = (JSONObject) parser.parse(endpointConfig);
-                if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfigJSON.get(APIConstants.
-                        API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                    String endpointId = (String) endpointConfigJSON.get(APIConstants.ENDPOINT_REGISTRY_ENTRY_ID);
-                    if (StringUtils.isNotEmpty(endpointId)) {
-                        endpointEntryInfoArray = endpointId.split(":");
-                    }
-                }
-            } catch (ParseException e) {
-                throw new APIManagementException("Error while parsing the endpoint config", e);
-            }
-        }
-        return endpointEntryInfoArray;
     }
 }

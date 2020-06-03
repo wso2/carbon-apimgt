@@ -14924,16 +14924,15 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param apiId        ID of the API created using the Endpoint Registry Entry
-     * @param registryName Name of Endpoint Registry
-     * @param entryName    Name of Registry Entry
-     * @param version      Registry Entry version
-     * @param connection   DB Connection
+     * @param apiId                   ID of the API created using the Endpoint Registry Entry
+     * @param endpointRegistryEntries Map contains production and sandbox endpoint ID
+     * @param connection              DB Connection
      * @throws APIManagementException
      */
-    public void addAPIRegistryEntryMappings(int apiId, String registryName, String entryName, String version,
-                                            Connection connection) throws APIManagementException {
+    public void addAPIRegistryEntryMappings(int apiId, Map endpointRegistryEntries, Connection connection) throws
+            APIManagementException {
 
+        String[] endpointInfoArray = null;
         String addApiRegistryEntryMappingSql = SQLConstants.ADD_API_REGISTRY_ENTRY_MAPPING_SQL;
         boolean isNewConnection = false;
         PreparedStatement preparedStatement = null;
@@ -14944,13 +14943,22 @@ public class ApiMgtDAO {
             }
             connection = APIMgtDBUtil.getConnection();
             preparedStatement = connection.prepareStatement(addApiRegistryEntryMappingSql);
-            preparedStatement.setInt(1, apiId);
-            preparedStatement.setString(2, registryName);
-            preparedStatement.setString(3, entryName);
-            preparedStatement.setString(4, version);
-            preparedStatement.executeUpdate();
+            for (Object key : endpointRegistryEntries.keySet()) {
+                String endpointType = key.toString();
+                if (endpointRegistryEntries.get(endpointType) != null) {
+                    endpointInfoArray = endpointRegistryEntries.get(endpointType).toString().split(":");
+                    preparedStatement.setInt(1, apiId);
+                    preparedStatement.setString(2, endpointInfoArray[0]);
+                    preparedStatement.setString(3, endpointInfoArray[1]);
+                    preparedStatement.setString(4, endpointInfoArray[2]);
+                    preparedStatement.addBatch();
+                }
+            }
+            preparedStatement.executeBatch();
         } catch (SQLException e) {
-            handleException("Error while adding Registry Entry mapping for API with ID: " + apiId, e);
+            handleException("Error while adding Endpoint Registry Entry mapping for API with ID: " + apiId, e);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new APIManagementException("Required parameter of Endpoint Registry Entry is missing");
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, null, null);
             if (isNewConnection) {
@@ -14960,29 +14968,28 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param apiId        ID of the API created using the Endpoint Registry Entry
-     * @param registryName Name of Endpoint Registry
-     * @param entryName    Name of Registry Entry
-     * @param version      Registry Entry version
+     * @param apiId                   ID of the API created using the Endpoint Registry Entry
+     * @param endpointRegistryEntries Map contains production and sandbox endpoint ID
      * @throws APIManagementException
      */
-    public void updateAPIRegistryEntryMappings(int apiId, String registryName, String entryName, String version)
-            throws APIManagementException {
+    public void updateAPIRegistryEntryMappings(int apiId, Map endpointRegistryEntries) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             deleteAPIRegistryEntryMappings(apiId, connection);
-            addAPIRegistryEntryMappings(apiId, registryName, entryName, version, connection);
+            addAPIRegistryEntryMappings(apiId, endpointRegistryEntries, connection);
         } catch (SQLException e) {
-            handleException("Error while updating Registry Entry mapping for API with ID: " + apiId, e);
+            handleException("Error while updating Endpoint Registry Entry mapping for API with ID: " + apiId, e);
         }
     }
 
     private void deleteAPIRegistryEntryMappings(int apiId, Connection connection) throws APIManagementException {
+
         String deleteAPIRegistryEntryMappingSql = SQLConstants.DELETE_API_REGISTRY_ENTRY_MAPPINGS_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(deleteAPIRegistryEntryMappingSql)) {
             preparedStatement.setInt(1, apiId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            handleException("Error while deleting Registry Entry mapping for API with ID: " + apiId, e);
+            handleException("Error while deleting Endpoint Registry mapping for API with ID: " + apiId, e);
         }
     }
 
