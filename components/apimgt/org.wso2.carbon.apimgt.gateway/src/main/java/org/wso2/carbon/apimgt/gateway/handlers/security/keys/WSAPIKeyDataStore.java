@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides a web service interface for the API key data store. This implementation
@@ -41,14 +42,15 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
 
     @MethodStats
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey,String requiredAuthenticationLevel, String clientDomain,
-                                                 String matchingResource, String httpVerb)
+                                                 String apiKey, String requiredAuthenticationLevel, String clientDomain,
+                                                 String matchingResource, String httpVerb,
+                                                 String tenantDomain, List<String> keyManagers)
             throws APISecurityException {
         APIKeyValidatorClient client = null;
         try {
             client = clientPool.get();
-            return client.getAPIKeyData(context, apiVersion, apiKey,requiredAuthenticationLevel, clientDomain,
-                                        matchingResource, httpVerb);
+            return client.getAPIKeyData(context, apiVersion, apiKey, requiredAuthenticationLevel, clientDomain,
+                    matchingResource, httpVerb, tenantDomain, keyManagers);
         }catch (APISecurityException ex) {
             throw new APISecurityException(ex.getErrorCode(),
                     "Resource forbidden", ex);
@@ -116,13 +118,14 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
     }
 
     @Override
-    public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey)
+    public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
+                                                        String tenantDomain, String keyManager)
             throws APISecurityException {
 
         APIKeyValidatorClient client = null;
         try {
             client = clientPool.get();
-            return client.validateSubscription(context, version, consumerKey);
+            return client.validateSubscription(context, version, consumerKey,tenantDomain, keyManager);
         } catch (APISecurityException ex) {
             throw new APISecurityException(ex.getErrorCode(),
                     "Resource forbidden", ex);

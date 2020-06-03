@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -226,10 +225,11 @@ public class ApplicationImportExportManager {
         }
         String jsonParams = jsonParamObj.toString();
         String tokenScopes = apiKey.getTokenScope();
+        String keyManager = apiKey.getKeyManager();
         apiConsumer.requestApprovalForApplicationRegistration(
                 username, application.getName(), apiKey.getType(), apiKey.getCallbackUrl(),
                 accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()), tokenScopes, application.getGroupId(),
-                jsonParams);
+                jsonParams, keyManager);
     }
 }
 

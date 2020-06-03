@@ -400,7 +400,7 @@ public class RecommenderDetailsExtractor implements RecommenderEventPublisher {
             } else if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED &&
                     accessTokenGenerator != null){
                 log.warn("Error getting recommendations from server. Invalid credentials used");
-                accessTokenGenerator.setValidToken(false);
+                accessTokenGenerator.removeInvalidToken(new String[]{APIConstants.OAUTH2_DEFAULT_SCOPE});
             } else {
                 log.warn("Error getting recommendations from server. Server responded with "
                         + httpResponse.getStatusLine().getStatusCode());

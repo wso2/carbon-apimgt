@@ -27,8 +27,6 @@ public class SubscriberKeyMgtClientPool {
 
     private static final Log log = LogFactory.getLog(SubscriberKeyMgtClientPool.class);
 
-    private static final SubscriberKeyMgtClientPool instance = new SubscriberKeyMgtClientPool();
-
     private final ObjectPool clientPool;
 
     private String serverURL;
@@ -37,7 +35,7 @@ public class SubscriberKeyMgtClientPool {
 
     private String password;
 
-    private SubscriberKeyMgtClientPool() {
+    public SubscriberKeyMgtClientPool() {
         log.debug("Initializing API Key Management Client Pool");
         clientPool = new StackObjectPool(new BasePoolableObjectFactory() {
             @Override
@@ -48,9 +46,6 @@ public class SubscriberKeyMgtClientPool {
         }, 20, 5);
     }
 
-    public static SubscriberKeyMgtClientPool getInstance() {
-        return instance;
-    }
 
     public SubscriberKeyMgtClient get() throws Exception {
         return (SubscriberKeyMgtClient) clientPool.borrowObject();
@@ -73,8 +68,8 @@ public class SubscriberKeyMgtClientPool {
     }
 
     public void setConfiguration(KeyManagerConfiguration configuration) {
-        this.serverURL = configuration.getParameter("ServerURL");
-        this.username = configuration.getParameter("Username");
-        this.password = configuration.getParameter("Password");
+        this.serverURL = (String) configuration.getParameter("ServerURL");
+        this.username = (String) configuration.getParameter("Username");
+        this.password = (String) configuration.getParameter("Password");
     }
 }

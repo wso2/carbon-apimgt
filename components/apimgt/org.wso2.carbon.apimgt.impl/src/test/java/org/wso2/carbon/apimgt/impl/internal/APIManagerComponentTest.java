@@ -16,7 +16,10 @@
 
 package org.wso2.carbon.apimgt.impl.internal;
 
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
@@ -28,7 +31,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.util.APIManagerComponentWrapper;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
@@ -46,7 +48,7 @@ import java.io.FileNotFoundException;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ APIUtil.class, APIManagerComponent.class, ServiceReferenceHolder.class, AuthorizationUtils.class,
-                        RegistryUtils.class, APIMgtDBUtil.class, KeyManagerHolder.class,
+                        RegistryUtils.class, APIMgtDBUtil.class,
                         SQLConstantManagerFactory.class, ApiMgtDAO.class })
 public class APIManagerComponentTest {
 
@@ -60,7 +62,6 @@ public class APIManagerComponentTest {
         PowerMockito.mockStatic(APIMgtDBUtil.class);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(AuthorizationUtils.class);
-        PowerMockito.mockStatic(KeyManagerHolder.class);
         PowerMockito.mockStatic(RegistryUtils.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(SQLConstantManagerFactory.class);
@@ -97,7 +98,6 @@ public class APIManagerComponentTest {
         PowerMockito.doNothing().when(APIUtil.class, "loadTenantExternalStoreConfig", Mockito.anyInt());
         PowerMockito.doNothing().when(AuthorizationUtils.class ,"addAuthorizeRoleListener",
                 Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
-        PowerMockito.doNothing().when(KeyManagerHolder.class, "initializeKeyManager", configuration);
         PowerMockito.doNothing().when(SQLConstantManagerFactory.class, "initializeSQLConstantManager");
         PowerMockito.when(APIUtil.getMountedPath(null, "")).thenReturn("");
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);

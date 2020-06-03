@@ -32,11 +32,13 @@ import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.UUID;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 public class ExportApiServiceImpl implements ExportApiService {
 
@@ -59,10 +61,29 @@ public class ExportApiServiceImpl implements ExportApiService {
      * @return Zipped file containing exported API
      */
     @Override
-    public Response exportApiGet(String name, String version, String format, String providerName,
+    public Response exportApiGet(String name, String version, String providerName, String format,
                                  Boolean preserveStatus, MessageContext messageContext) {
         ExportApiUtil exportApi = new ExportApiUtil();
-        return exportApi.exportApiByParams(name, version, providerName, format, preserveStatus);
+        return exportApi.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus, RestApiConstants.RESOURCE_API);
+    }
+
+    /**
+     * Exports an API Product from API Manager. Meta information, API icon, documentation, client certificates and dependent APIs
+     * are exported. This service generates a zipped archive which contains all the above mentioned
+     * resources for a given API Product.
+     *
+     * @param name           Name of the API Product that needs to be exported
+     * @param version        Version of the API Product that needs to be exported
+     * @param providerName   Provider name of the API Product that needs to be exported
+     * @param format         Format of output documents. Can be YAML or JSON
+     * @param preserveStatus Preserve API Product status on export
+     * @return Zipped file containing exported API Product
+     */
+    @Override
+    public Response exportApiProductGet(String name, String version, String providerName, String format,
+                                        Boolean preserveStatus, MessageContext messageContext) {
+        ExportApiUtil exportApi = new ExportApiUtil();
+        return exportApi.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus, RestApiConstants.RESOURCE_API_PRODUCT);
     }
 
     /**
@@ -115,20 +136,26 @@ public class ExportApiServiceImpl implements ExportApiService {
                 applicationDetails.clearOAuthApps();
             } else {
                 // encode Oauth secrets
-                OAuthApplicationInfo productionOAuthApplicationInfo = applicationDetails.getOAuthApp(PRODUCTION);
-                if (productionOAuthApplicationInfo != null) {
-                    byte[] consumerSecretBytes =
-                            productionOAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
-                    productionOAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+                Map<String, OAuthApplicationInfo>
+                        keyManagerWiseProductionOAuthApplicationInfoMap = applicationDetails.getOAuthApp(PRODUCTION);
+                if (keyManagerWiseProductionOAuthApplicationInfoMap != null) {
+                    keyManagerWiseProductionOAuthApplicationInfoMap.forEach((keyManagerName, oAuthApplicationInfo) -> {
+                        byte[] consumerSecretBytes =
+                                oAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
+                        oAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+                    });
                 }
-                OAuthApplicationInfo sandboxOAuthApplicationInfo = applicationDetails.getOAuthApp(SANDBOX);
-                if (sandboxOAuthApplicationInfo != null) {
-                    byte[] consumerSecretBytes =
-                            sandboxOAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
-                    sandboxOAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+                Map<String, OAuthApplicationInfo>
+                        keyManagerWiseSandboxOAuthApplicationInfoMap = applicationDetails.getOAuthApp(SANDBOX);
+                if (keyManagerWiseSandboxOAuthApplicationInfoMap != null) {
+                    keyManagerWiseSandboxOAuthApplicationInfoMap.forEach((keyManagerName, oAuthApplicationInfo) ->{
+                        byte[] consumerSecretBytes =
+                                oAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
+                        oAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+                    });
+
                 }
             }
-
             exportedFilePath = importExportManager.exportApplication(applicationDetails,
                     DEFAULT_APPLICATION_EXPORT_DIR);
             String zippedFilePath = importExportManager.createArchiveFromExportedAppArtifacts(exportedFilePath,

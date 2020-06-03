@@ -520,6 +520,7 @@ public final class APIConstants {
     public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
     public static final String KEY_TEMPLATE_STREM_ID = "org.wso2.keytemplate.request.stream:1.0.0";
     public static final String CACHE_INVALIDATION_STREAM_ID = "org.wso2.apimgt.cache.invalidation.stream:1.0.0";
+    public static final String NOTIFICATION_STREAM_ID = "org.wso2.apimgt.notification.stream:1.0.0";
 
     //Property for enabling scope sharing between APIs
     public static final String ENABLE_API_SCOPES_SHARING = "enable-api-scopes-sharing";
@@ -536,6 +537,9 @@ public final class APIConstants {
     public static final String CACHE_INVALIDATION_TYPE = "type";
     public static final String GATEWAY_JWKS_CACHE = "JWKS_CACHE";
     public static final String BLOCKING_CONDITION_ID = "id";
+    public static final String API_OVERVIEW_KEY_MANAGERS = "overview_keyManagers";
+    public static final String KEY_MANAGER_CONSUMER_KEY = "consumer_key";
+    public static final String KEY_MANAGER_CONSUMER_SECRET = "consumer_secret";
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
@@ -635,8 +639,6 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
     public static final String API_KEY_VALIDATOR_USERNAME = API_KEY_VALIDATOR + "Username";
     public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
-    public static final String API_KEY_VALIDATOR_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_VALIDATOR
-            + "ApplicationTokenDefaultValidityPeriod";
 
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
@@ -649,7 +651,7 @@ public final class APIConstants {
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
             + KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM;
-    public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_MGT_SCOPES[] = {"internal_application_mgt_create",
+    public static final String[] KEY_MANAGER_OAUTH2_SCOPES_REST_API_MGT_SCOPES = {"internal_application_mgt_create",
             "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view"};
     public static final String API_KEY_MANAGER_CONFIGURATION = "Configuration.";
     public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
@@ -898,6 +900,7 @@ public final class APIConstants {
     public static final String BLOCKING_EVENT_PUBLISHER = "blockingEventPublisher";
     public static final String TOKEN_REVOCATION_EVENT_PUBLISHER = "tokenRevocationPublisher";
     public static final String CACHE_INVALIDATION_EVENT_PUBLISHER = "cacheInvalidationEventPublisher";
+    public static final String NOTIFICATION_EVENT_PUBLISHER = "notificationPublisher";
 
     public static final int AM_CREATOR_APIMGT_EXECUTION_ID = 200;
     public static final int AM_CREATOR_GOVERNANCE_EXECUTION_ID = 201;
@@ -933,15 +936,12 @@ public final class APIConstants {
     public static class KeyValidationStatus {
         public static final int API_AUTH_GENERAL_ERROR = 900900;
         public static final int API_AUTH_INVALID_CREDENTIALS = 900901;
-        public static final int API_AUTH_MISSING_CREDENTIALS = 900902;
-        public static final int API_AUTH_ACCESS_TOKEN_EXPIRED = 900903;
-        public static final int API_AUTH_ACCESS_TOKEN_INACTIVE = 900904;
         public static final int API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE = 900905;
-        public static final int API_AUTH_INCORRECT_API_RESOURCE = 900906;
         public static final int API_BLOCKED = 900907;
         public static final int API_AUTH_RESOURCE_FORBIDDEN = 900908;
         public static final int SUBSCRIPTION_INACTIVE = 900909;
         public static final int INVALID_SCOPE = 900910;
+        public static final int KEY_MANAGER_NOT_AVAILABLE = 900912;
 
         private KeyValidationStatus() {
         }
@@ -1091,6 +1091,7 @@ public final class APIConstants {
         public static final String CLIENT_DETAILS = "appDetails";
         public static final String CALLBACK_URL = "callbackUrl";
         public static final String KEY_STATE = "keyState";
+        public static final String KEY_MAPPING_ID = "keyMappingId";
     }
 
     public static class AccessTokenConstants {
@@ -1403,8 +1404,6 @@ public final class APIConstants {
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
-    public static final String ENDPOINT_REGISTRY_TYPE = "Registry";
-    public static final String ENDPOINT_REGISTRY_ENTRY_ID = "endpoint_id";
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
@@ -1552,6 +1551,9 @@ public final class APIConstants {
     public static final String BLOCK_CONDITION_IP_TYPE = "type";
     public static final String REVOKED_TOKEN_KEY = "revokedToken";
     public static final String REVOKED_TOKEN_EXPIRY_TIME = "expiryTime";
+    public static final String EVENT_TYPE = "eventType";
+    public static final String EVENT_TIMESTAMP = "timestamp";
+    public static final String EVENT_PAYLOAD = "event";
 
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
@@ -2029,6 +2031,7 @@ public final class APIConstants {
     public static final String AUTHORIZATION_BASIC = "Basic ";
     public static final String AUTHORIZATION_BEARER = "Bearer ";
     public static final String TOKEN_GRANT_TYPE_KEY = "grant_type";
+    public static final String SCOPES_KEY = "scopes";
     public static final String TOKEN_KEY = "token";
     public static final String GRANT_TYPE_VALUE = "client_credentials";
     public static final String RECOMMENDATIONS_CACHE_NAME = "APIRecommendationsCache";
@@ -2073,6 +2076,70 @@ public final class APIConstants {
         }
     }
 
+    public static class KeyManager {
+        public static final String SERVICE_URL = "ServiceURL";
+        public static final String INIT_DELAY = "InitDelay";
+        public static final String INTROSPECTION_ENDPOINT = "introspection_endpoint";
+        public static final String CLIENT_REGISTRATION_ENDPOINT = "client_registration_endpoint";
+        public static final String TOKEN_ENDPOINT = "token_endpoint";
+        public static final String REVOKE_ENDPOINT = "revoke_endpoint";
+        public static final String SCOPE_MANAGEMENT_ENDPOINT = "scope_endpoint";
+        public static final String AVAILABLE_GRANT_TYPE = "grant_types";
+        public static final String ENABLE_TOKEN_GENERATION = "enable_token_generation";
+        public static final String ENABLE_TOKEN_HASH = "enable_token_hash";
+        public static final String ENABLE_TOKEN_ENCRYPTION = "enable_token_encryption";
+        public static final String ENABLE_OAUTH_APP_CREATION = "enable_oauth_app_creation";
+        public static final String DEFAULT_KEY_MANAGER = "Default";
+        public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
+        public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Key Manager";
+
+        public static final String ISSUER = "issuer";
+        public static final String JWKS_ENDPOINT = "jwks_endpoint";
+        public static final String USERINFO_ENDPOINT = "userinfo_endpoint";
+        public static final String AUTHORIZE_ENDPOINT = "authorize_endpoint";
+        public static final String KEY_MANAGER_CONFIGURATIONS = "KeyManagerConfigurations";
+        public static final String KEY_MANAGER = "KeyManager";
+        public static final String APPLICATION_CONFIGURATIONS = "ApplicationConfigurations";
+        public static final String CONFIGURATION_RETRIEVER = "ConfigurationRetriever";
+
+        public static final String ENABLE = "Enable";
+        public static final String USERNAME = "Username";
+        public static final String PASSWORD = "Password";
+        public static final String SELF_VALIDATE_JWT = "self_validate_jwt";
+        public static final String CLAIM_MAPPING = "claim_mappings" ;
+        public static final String VALIDATION_TYPE = "validation_type";
+        public static final String VALIDATION_JWT = "jwt";
+        public static final String VALIDATION_REFERENCE = "reference";
+        public static final String VALIDATION_CUSTOM = "custom";
+        public static final String TOKEN_FORMAT_STRING = "token_format_string";
+        public static final String ENABLE_TOKEN_VALIDATION = "validation_enable";
+        public static final String VALIDATION_ENTRY_JWT_BODY = "body";
+        public static final String API_LEVEL_ALL_KEY_MANAGERS = "all";
+        public static final String REGISTERED_TENANT_DOMAIN = "tenantDomain";
+        public static final String ENABLE_MAP_OAUTH_CONSUMER_APPS = "enable_map_oauth_consumer_apps";
+        public static final String KEY_MANAGER_TYPE = "type";
+        public static final String UUID_REGEX = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F" +
+                "]{3}-[0-9a-fA-F]{12}";
+        public static final String CONSUMER_KEY_CLAIM = "consumer_key";
+        public static final String SCOPES_CLAIM = "scopes_claim";
+
+        public static class KeyManagerEvent {
+
+            public static final String EVENT_TYPE = "event_type";
+            public static final String KEY_MANAGER_CONFIGURATION = "key_manager_configuration";
+            public static final String ACTION = "action";
+            public static final String NAME = "name";
+            public static final String ENABLED = "enabled";
+            public static final String VALUE = "value";
+            public static final String TENANT_DOMAIN = "tenantDomain";
+            public static final String ACTION_ADD = "add";
+            public static final String ACTION_UPDATE = "update";
+            public static final String ACTION_DELETE = "delete";
+            public static final String TYPE = "type";
+            public static final String KEY_MANAGER_STREAM_ID = "org.wso2.apimgt.keymgt.stream:1.0.0";
+        }
+    }
+
     public static class GlobalCacheInvalidation {
         public static final String ENABLED = "Enabled";
         public static final Object GLOBAL_CACHE_INVALIDATION = "GlobalCacheInvalidation";
@@ -2085,8 +2152,7 @@ public final class APIConstants {
         public static final String PASSWORD = "Password";
         public static final String TOPIC_NAME = "Topic";
         public static final String EXCLUDED_CACHES = "ExcludedCaches";
-
-        public static String ReceiverConnectionDetails  = "ReceiverConnectionDetails";
+        public static final String ReceiverConnectionDetails = "ReceiverConnectionDetails";
     }
 
     // Supported Notifier Types

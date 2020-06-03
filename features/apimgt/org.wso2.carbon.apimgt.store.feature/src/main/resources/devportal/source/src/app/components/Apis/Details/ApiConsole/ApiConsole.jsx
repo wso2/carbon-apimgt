@@ -314,7 +314,11 @@ class ApiConsole extends React.Component {
         const fileName = 'swagger.json';
 
         if (serverError) {
-            return { serverError };
+            return (
+                <Typography variant='h4' className={classes.titleSub}>
+                    {serverError}
+                </Typography>
+            );
         }
 
         if (api == null || swagger == null) {

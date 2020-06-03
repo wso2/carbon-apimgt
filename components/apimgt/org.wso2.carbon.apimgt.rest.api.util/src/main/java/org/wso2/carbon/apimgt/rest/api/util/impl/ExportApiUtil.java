@@ -23,9 +23,11 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIProductExportUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -37,7 +39,7 @@ import java.io.File;
 public class ExportApiUtil {
     private static final Log log = LogFactory.getLog(ExportApiUtil.class);
     /**
-     * Exports an API from API Manager for a given API ID. Meta information, API icon, documentation, WSDL
+     * Exports an API or an API Product from API Manager. Meta information, API icon, documentation, client certificates, WSDL
      * and sequences are exported. This service generates a zipped archive which contains all the above mentioned
      * resources for a given API.
      *
@@ -46,13 +48,13 @@ public class ExportApiUtil {
      * @param providerName   Provider name of the API that needs to be exported
      * @param format         Format of output documents. Can be YAML or JSON
      * @param preserveStatus Preserve API status on export
+     * @param type           Whether an API or an API Product
      * @return Zipped file containing exported API
      */
 
-    public Response exportApiByParams(String name, String version, String providerName, String format, Boolean preserveStatus) {
+    public Response exportApiOrApiProductByParams(String name, String version, String providerName, String format, Boolean preserveStatus, String type) {
         ExportFormat exportFormat;
         String userName;
-        APIIdentifier apiIdentifier;
         APIProvider apiProvider;
         String apiDomain;
         String apiRequesterDomain;
@@ -97,16 +99,26 @@ public class ExportApiUtil {
                         " name:" + name + " version:" + version + " provider:" + providerName, log);
             }
 
-            apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), name, version);
             apiProvider = RestApiUtil.getLoggedInUserProvider();
-            // Checking whether the API exists
-            if (!apiProvider.isAPIAvailable(apiIdentifier)) {
-                String errorMessage = "Error occurred while exporting. API: " + name + " version: " + version
-                        + " not found";
-                RestApiUtil.handleResourceNotFoundError(errorMessage, log);
+            if (!StringUtils.equals(type, RestApiConstants.RESOURCE_API_PRODUCT)) {
+                APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), name, version);
+                // Checking whether the API exists
+                if (!apiProvider.isAPIAvailable(apiIdentifier)) {
+                    String errorMessage = "Error occurred while exporting. API: " + name + " version: " + version
+                            + " not found";
+                    RestApiUtil.handleResourceNotFoundError(errorMessage, log);
+                }
+                file = APIExportUtil.exportApi(apiProvider, apiIdentifier, userName, exportFormat, preserveStatus);
+            } else {
+                APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(providerName), name, version);
+                // Checking whether the API exists
+                if (!apiProvider.isAPIProductAvailable(apiProductIdentifier)) {
+                    String errorMessage = "Error occurred while exporting. API Product: " + name + " version: " + version
+                            + " not found";
+                    RestApiUtil.handleResourceNotFoundError(errorMessage, log);
+                }
+                file = APIProductExportUtil.exportApiProduct(apiProvider, apiProductIdentifier, userName, exportFormat, preserveStatus);
             }
-
-            file = APIExportUtil.exportApi(apiProvider, apiIdentifier, userName, exportFormat, preserveStatus);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")

@@ -18,24 +18,19 @@
 
 package org.wso2.carbon.apimgt.jms.listener.utils;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.jms.listener.APICondition;
 import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -101,32 +96,6 @@ public class JMSMessageListener implements MessageListener {
                              */
                             handleKeyTemplateMessage(map);
                         }
-                    } else if (JMSConstants.TOPIC_TOKEN_REVOCATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (map.get(APIConstants.REVOKED_TOKEN_KEY) !=
-                                null) {
-                            /*
-                             * This message contains revoked token data
-                             * revokedToken - Revoked Token which should be removed from the cache
-                             * expiryTime - ExpiryTime of the token if token is JWT, otherwise expiry is set to 0
-                             */
-                            handleRevokedTokenMessage((String) map.get(APIConstants.REVOKED_TOKEN_KEY),
-                                    (Long) map.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME));
-                        }
-
-                    } else if (JMSConstants.TOPIC_CACHE_INVALIDATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (map.get(APIConstants.CACHE_INVALIDATION_TYPE) != null) {
-                            if (APIConstants.RESOURCE_CACHE_NAME
-                                    .equalsIgnoreCase((String) map.get(APIConstants.CACHE_INVALIDATION_TYPE))) {
-                                handleResourceCacheInvalidationMessage(map);
-                            } else if (APIConstants.GATEWAY_KEY_CACHE_NAME
-                                    .equalsIgnoreCase((String) map.get(APIConstants.CACHE_INVALIDATION_TYPE))) {
-                                handleKeyCacheInvalidationMessage(map);
-                            } else if (APIConstants.GATEWAY_USERNAME_CACHE_NAME
-                                    .equalsIgnoreCase((String) map.get(APIConstants.CACHE_INVALIDATION_TYPE))) {
-                                handleUserCacheInvalidationMessage(map);
-                            }
-
-                        }
                     }
                 } else {
                     log.warn("Event dropped due to unsupported message type " + message.getClass());
@@ -139,57 +108,6 @@ public class JMSMessageListener implements MessageListener {
         } catch (ParseException e) {
             log.error("Error while processing evaluatedConditions", e);
         }
-    }
-
-    private void handleUserCacheInvalidationMessage(Map<String, Object> map) throws ParseException {
-
-        if (map.containsKey("value")) {
-            String value = (String) map.get("value");
-            JSONParser jsonParser = new JSONParser();
-            JSONArray jsonValue = (JSONArray) jsonParser.parse(value);
-
-            ServiceReferenceHolder.getInstance().getCacheInvalidationService()
-                    .invalidateCachedUsernames((String[]) jsonValue.toArray(new String[jsonValue.size()]));
-        }
-    }
-
-    private void handleKeyCacheInvalidationMessage(Map<String, Object> map) throws ParseException {
-
-        if (map.containsKey("value")) {
-            String value = (String) map.get("value");
-            JSONParser jsonParser = new JSONParser();
-            JSONArray jsonValue = (JSONArray) jsonParser.parse(value);
-
-            ServiceReferenceHolder.getInstance().getCacheInvalidationService()
-                    .invalidateCachedTokens((String[]) jsonValue.toArray(new String[jsonValue.size()]));
-        }
-    }
-
-    private void handleResourceCacheInvalidationMessage(Map<String, Object> map) throws ParseException {
-
-        if (map.containsKey("value")) {
-            String value = (String) map.get("value");
-            JSONParser jsonParser = new JSONParser();
-            JSONObject jsonValue = (JSONObject) jsonParser.parse(value);
-            String apiContext = (String) jsonValue.get("apiContext");
-            String apiVersion = (String) jsonValue.get("apiVersion");
-            JSONArray resources = (JSONArray) jsonValue.get("resources");
-            List<ResourceCacheInvalidationDto> resourceCacheInvalidationDtoList = new ArrayList<>();
-            for (Object resource : resources) {
-                JSONObject uriTemplate = (JSONObject) resource;
-                String resourceURLContext = (String) uriTemplate.get("resourceURLContext");
-                String httpVerb = (String) uriTemplate.get("httpVerb");
-                ResourceCacheInvalidationDto uriTemplateDto = new ResourceCacheInvalidationDto();
-                uriTemplateDto.setHttpVerb(httpVerb);
-                uriTemplateDto.setResourceURLContext(resourceURLContext);
-                resourceCacheInvalidationDtoList.add(uriTemplateDto);
-            }
-            ServiceReferenceHolder.getInstance().getCacheInvalidationService().invalidateResourceCache(apiContext,
-                    apiVersion,
-                    resourceCacheInvalidationDtoList
-                            .toArray(new ResourceCacheInvalidationDto[resourceCacheInvalidationDtoList.size()]));
-        }
-
     }
 
     private void handleThrottleUpdateMessage(Map<String, Object> map) throws ParseException {
@@ -263,11 +181,11 @@ public class JMSMessageListener implements MessageListener {
         if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(condition)) {
             if (APIConstants.AdvancedThrottleConstants.TRUE.equals(conditionState)) {
                 ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
-                        .addBlockingCondition(APIConstants.BLOCKING_CONDITIONS_APPLICATION,conditionValue,
+                        .addBlockingCondition(APIConstants.BLOCKING_CONDITIONS_APPLICATION, conditionValue,
                                 conditionValue);
             } else {
                 ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
-                        .removeBlockCondition(APIConstants.BLOCKING_CONDITIONS_APPLICATION,conditionValue);
+                        .removeBlockCondition(APIConstants.BLOCKING_CONDITIONS_APPLICATION, conditionValue);
             }
         } else if (APIConstants.BLOCKING_CONDITIONS_API.equals(condition)) {
             if (APIConstants.AdvancedThrottleConstants.TRUE.equals(conditionState)) {
@@ -335,23 +253,4 @@ public class JMSMessageListener implements MessageListener {
         }
     }
 
-    private void handleRevokedTokenMessage(String revokedToken, long expiryTime) {
-
-        boolean isJwtToken = false;
-        if (StringUtils.isEmpty(revokedToken)) {
-            return;
-        }
-
-        //handle JWT tokens
-        if (revokedToken.contains(APIConstants.DOT) && APIUtil.isValidJWT(revokedToken)) {
-            revokedToken = APIUtil.getSignatureIfJWT(revokedToken); //JWT signature is the cache key
-            ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                    .addRevokedJWTIntoMap(revokedToken, expiryTime);  // Add revoked
-            // token to
-            // revoked JWT map
-            isJwtToken = true;
-        }
-        ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                .removeTokenFromGatewayCache(revokedToken, isJwtToken);
-    }
 }

@@ -34,11 +34,13 @@ import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.UUID;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 public class ExportApiServiceImpl extends ExportApiService {
 
@@ -64,7 +66,7 @@ public class ExportApiServiceImpl extends ExportApiService {
     public Response exportApiGet(String name, String version, String format, String providerName,
                                  Boolean preserveStatus) {
         ExportApiUtil exportApi = new ExportApiUtil();
-        return exportApi.exportApiByParams(name, version, providerName, format, preserveStatus);
+        return exportApi.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus, RestApiConstants.RESOURCE_API);
     }
 
     /**
@@ -118,15 +120,23 @@ public class ExportApiServiceImpl extends ExportApiService {
                 applicationDetails.clearOAuthApps();
             } else {
                 // encode Oauth secrets
-                OAuthApplicationInfo productionOAuthApplicationInfo = applicationDetails.getOAuthApp(PRODUCTION);
-                if (productionOAuthApplicationInfo != null) {
-                    byte[] consumerSecretBytes = productionOAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
-                    productionOAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+                Map<String, OAuthApplicationInfo>
+                        keyManagerWiseProductionOAuthApps = applicationDetails.getOAuthApp(PRODUCTION);
+                if (keyManagerWiseProductionOAuthApps != null) {
+                    keyManagerWiseProductionOAuthApps.forEach((keyManagerName, oAuthApplicationInfo) -> {
+                        byte[] consumerSecretBytes = oAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
+                        oAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+                    });
+
                 }
-                OAuthApplicationInfo sandboxOAuthApplicationInfo = applicationDetails.getOAuthApp(SANDBOX);
-                if (sandboxOAuthApplicationInfo != null) {
-                    byte[] consumerSecretBytes = sandboxOAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
-                    sandboxOAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+                Map<String, OAuthApplicationInfo>
+                        keyManagerWiseSandBoxOAuthApps = applicationDetails.getOAuthApp(SANDBOX);
+                if (keyManagerWiseSandBoxOAuthApps != null) {
+                    keyManagerWiseSandBoxOAuthApps.forEach((keyManagerName, oAuthApplicationInfo) -> {
+                        byte[] consumerSecretBytes =
+                                oAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
+                        oAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+                    });
                 }
             }
 

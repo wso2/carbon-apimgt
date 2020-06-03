@@ -39,6 +39,8 @@ public final class RestApiConstants {
 
     public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
 
+    public static final String API_IMPORT_EXPORT_SCOPE = "apim:api_import_export";
+
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
 
     public static final String RESOURCE = "resource";
@@ -53,6 +55,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_APP_POLICY = "application policy";
     public static final String RESOURCE_APP_CONSUMER_KEY = "application consumer key";
     public static final String RESOURCE_ADVANCED_POLICY = "advanced policy";
+    public static final String RESOURCE_KEY_MANAGER = "key manager";
     public static final String RESOURCE_SUBSCRIPTION_POLICY = "subcription policy";
     public static final String RESOURCE_CUSTOM_RULE = "custom rule";
     public static final String RESOURCE_BLOCK_CONDITION = "block condition";
@@ -104,6 +107,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL = RESOURCE_PATH_THROTTLING_POLICIES
             + "/custom";
     public static final String RESOURCE_PATH_CATEGORY = "/categories";
+    public static final String KEY_MANAGERS = "/key-managers";
 
     // Used in XACML authentication interceptor: Deprecated
     public static final String SERVER_URL = "server_url";
@@ -144,14 +148,12 @@ public final class RestApiConstants {
             REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_0;
     public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
             REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_1;
-    public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin";
+    public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
     public static final String REST_API_ADMIN_VERSION_0 = "v0.16";
     public static final String REST_API_ADMIN_VERSION_1 = "v1";
     public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_0;
     public static final String REST_API_ADMIN_CONTEXT_FULL_1 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_1;
     public static final String REST_API_PROVIDER = "admin";
-    public static final String REST_API_ENDPOINT_REGISTRY_CONTEXT = "/api/am/endpoint-registry";
-    public static final String REST_API_ENDPOINT_REGISTRY_VERSION = "v1";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
     public static final Pattern REGEX_BEARER_PATTERN = Pattern.compile("Bearer\\s");
@@ -214,11 +216,6 @@ public final class RestApiConstants {
     public static final String SORT_BY_NAME = "name";
     public static final String SORT_BY_THROTTLING_TIER = "throttlingTier";
     public static final String SORT_BY_STATUS = "status";
-
-    //Constants for endpoint registry sortBy
-    public static final String ENDPOINT_REG_NAME = "registryName";
-    public static final String ENDPOINT_REG_ENTRY_DEFINITION_TYPE = "definitionType";
-    public static final String ENDPOINT_REG_ENTRY_SERVICE_TYPE = "serviceType";
 
     //default error messages
     public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";

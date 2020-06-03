@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
@@ -153,7 +154,7 @@ public class AbstractAPIManagerTestCase {
         graphQLSchemaDefinition = Mockito.mock(GraphQLSchemaDefinition.class);
         keyManager = Mockito.mock(KeyManager.class);
         PowerMockito.mockStatic(KeyManagerHolder.class);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
+        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super")).thenReturn(keyManager);
     }
 
     @Test
@@ -498,6 +499,24 @@ public class AbstractAPIManagerTestCase {
             Assert.assertTrue(e.getMessage().contains("Failed to check availability of api"));
         }
         Assert.assertTrue(abstractAPIManager.isAPIAvailable(apiIdentifier));
+    }
+
+    @Test
+    public void testIsAPIProductAvailable() throws RegistryException, APIManagementException {
+        APIProductIdentifier apiProductIdentifier = getAPIProductIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
+        String path =
+                APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getProviderName()
+                        + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getName()
+                        + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getVersion();
+        Mockito.when(registry.resourceExists(path)).thenThrow(RegistryException.class).thenReturn(true);
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
+        try {
+            abstractAPIManager.isAPIProductAvailable(apiProductIdentifier);
+            Assert.fail("Exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Failed to check availability of API Product"));
+        }
+        Assert.assertTrue(abstractAPIManager.isAPIProductAvailable(apiProductIdentifier));
     }
 
     @Test
@@ -1108,7 +1127,7 @@ public class AbstractAPIManagerTestCase {
 
         Mockito.when(apiMgtDAO.isSharedScopeExists(Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn(false, true, false);
-        Mockito.when(keyManager.isScopeExists(Mockito.anyString(), Mockito.anyString())).thenReturn(false, false);
+        Mockito.when(keyManager.isScopeExists(Mockito.anyString())).thenReturn(false, false);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         Assert.assertFalse(abstractAPIManager.isScopeKeyExist("sample", -1234));
         Assert.assertTrue(abstractAPIManager.isScopeKeyExist("sample1", -1234));
@@ -1364,35 +1383,9 @@ public class AbstractAPIManagerTestCase {
         }
     }
 
-    @Test
-    public void testIsApplicationTokenExists() throws APIManagementException {
-        Mockito.when(apiMgtDAO.isAccessTokenExists(Mockito.anyString())).thenReturn(true);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Assert.assertEquals(abstractAPIManager.isApplicationTokenExists(SAMPLE_RESOURCE_ID), true);
-    }
 
-    @Test
-    public void testIsApplicationTokenRevoked() throws APIManagementException {
-        Mockito.when(apiMgtDAO.isAccessTokenRevoked(Mockito.anyString())).thenReturn(true);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Assert.assertEquals(abstractAPIManager.isApplicationTokenRevoked(SAMPLE_RESOURCE_ID), true);
-    }
 
-    @Test
-    public void testGetAccessTokenData() throws APIManagementException {
-        APIKey apiKey = new APIKey();
-        apiKey.setAccessToken(SAMPLE_RESOURCE_ID);
-        Mockito.when(apiMgtDAO.getAccessTokenData(Mockito.anyString())).thenReturn(apiKey);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Assert.assertEquals(abstractAPIManager.getAccessTokenData(SAMPLE_RESOURCE_ID).getAccessToken(),
-                SAMPLE_RESOURCE_ID);
-    }
 
-    @Test
-    public void testSearchAccessToken() throws APIManagementException {
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
-        Assert.assertEquals(abstractAPIManager.searchAccessToken("Before", "query1", API_PROVIDER).size(), 0);
-    }
 
     @Test
     public void testGetAPIByAccessToken() throws APIManagementException {
@@ -1990,5 +1983,9 @@ public class AbstractAPIManagerTestCase {
 
     private APIIdentifier getAPIIdentifier(String apiName, String provider, String version) {
         return new APIIdentifier(provider, apiName, version);
+    }
+
+    private APIProductIdentifier getAPIProductIdentifier(String apiProductName, String provider, String version) {
+        return new APIProductIdentifier(provider, apiProductName, version);
     }
 }

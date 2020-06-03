@@ -522,6 +522,10 @@ public class APIProduct {
         availableTiers.clear();
     }
 
+    public void removeAvailableTiers(Set<Tier> availableTiers) {
+        this.availableTiers.removeAll(availableTiers);
+    }
+
     public void setApiCategories(List<APICategory> apiCategories) {
         this.apiCategories = apiCategories;
     }

@@ -120,14 +120,15 @@ public class WebsocketWSClient {
 	 * @return
 	 * @throws APISecurityException
 	 */
-	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey)
+	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey, String tenantDomain)
 			throws APISecurityException {
 
 		CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());
 
 		try {
 			org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
-					keyValidationServiceStub.validateKeyforHandshake(context, apiVersion, apiKey);
+					keyValidationServiceStub.validateKeyforHandshake(context, apiVersion, apiKey, tenantDomain,
+							new String[]{APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS});
 			return toDTO(dto);
 		} catch (Exception e) {
 			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,

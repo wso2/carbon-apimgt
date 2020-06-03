@@ -87,15 +87,18 @@ public class APIClientGenerationManager {
      * @param apiName     name of the API
      * @param apiVersion  version of the API
      * @param apiProvider provider of the API
+     * @param loggedInUsername username of the currently logged in user
      * @return a map containing the zip file name and its' temporary location until it is downloaded
      * @throws APIClientGenerationException if failed to generate the SDK
      */
-    public Map<String, String> generateSDK(String sdkLanguage, String apiName, String apiVersion, String apiProvider)
+    public Map<String, String> generateSDK(String sdkLanguage, String apiName, String apiVersion, String apiProvider,
+                                           String loggedInUsername)
             throws APIClientGenerationException {
 
         if (StringUtils.isBlank(sdkLanguage) || StringUtils.isBlank(apiName) || StringUtils.isBlank(apiVersion) ||
-                StringUtils.isBlank(apiProvider)) {
-            handleSDKGenException("SDK Language, API Name, API Version or API Provider should not be null.");
+                StringUtils.isBlank(apiProvider) || StringUtils.isBlank(loggedInUsername)) {
+            handleSDKGenException("SDK Language, API Name, API Version, API Provider or Logged In Username " +
+                    "should not be null.");
         }
         //we should replace the '@' sign with '-AT-' hence it is needed to retrieve the API identifier
         String apiProviderNameWithReplacedEmailDomain = APIUtil.replaceEmailDomain(apiProvider);
@@ -122,7 +125,8 @@ public class APIClientGenerationManager {
             }
             Registry requiredRegistry = null;
             try {
-                requiredRegistry = getGovernanceUserRegistry(MultitenantUtils.getTenantAwareUsername(apiProvider), tenantId);
+                requiredRegistry =
+                        getGovernanceUserRegistry(MultitenantUtils.getTenantAwareUsername(loggedInUsername), tenantId);
             } catch (RegistryException e) {
                 handleSDKGenException("Error occurred when retrieving the tenant registry for tenant : " +
                         requestedTenant + " tenant ID : " + tenantId, e);

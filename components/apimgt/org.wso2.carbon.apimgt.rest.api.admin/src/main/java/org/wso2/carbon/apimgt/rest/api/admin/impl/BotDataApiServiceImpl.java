@@ -45,8 +45,9 @@ public class BotDataApiServiceImpl extends BotDataApiService {
 
     @Override
     public Response botDataGetEmailListGet(String tenantDomain) {
+        APIAdminImpl apiAdminImpl = new APIAdminImpl();
         try {
-            List<BotDetectionData> emailList = APIAdminImpl.retrieveSavedBotDataEmailList();
+            List<BotDetectionData> emailList = apiAdminImpl.retrieveSavedBotDataEmailList();
             return Response.ok().entity(emailList).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error when getting email ";
