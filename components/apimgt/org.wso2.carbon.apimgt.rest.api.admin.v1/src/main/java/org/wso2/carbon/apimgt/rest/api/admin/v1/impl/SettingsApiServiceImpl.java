@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SettingsMappingUtil;
@@ -92,24 +91,5 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return Response.ok().entity(scopeSettingsDTO).build();
-    }
-
-    /**
-     * Get all scopes and respective roles
-     *
-     * @return Role-Scope list
-     */
-    @Override
-    public Response settingsScopesGet(MessageContext messageContext) {
-        try {
-            Map<String, String> roleScopeMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
-                    .getTenantDomain(RestApiUtil.getLoggedInUsername()));
-            ScopeListDTO scopeListDTO = SettingsMappingUtil.fromScopeListToScopeListDTO(roleScopeMapping);
-            return Response.ok().entity(scopeListDTO).build();
-        } catch (Exception e) {
-            String errorMessage = "Error when getting the list of role-scopes mapping.";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
     }
 }
