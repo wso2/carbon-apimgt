@@ -49,10 +49,11 @@ const InputList = (props) => {
 
     useEffect(() => {
         if (initialList) {
+            let i = 0;
             setUserInputItems(initialList.map((item) => {
-                setId(id + 1);
-                return { key: '' + id, value: item, error: onValidation(item) };
+                return { key: '' + i++, value: item, error: onValidation(item) };
             }));
+            setId(i);
         } else {
             setId(id + 1);
             setUserInputItems([{ key: '' + id, value: '', error: onValidation('') }]);

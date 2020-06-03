@@ -118,6 +118,10 @@ function AddEditMGLabel(props) {
                 }
                 break;
             case 'hosts':
+                if (value.length === 0) {
+                    error = 'Host is empty';
+                    break;
+                }
                 for (const h in value) {
                     if (handleHostValidation(value[h])) {
                         error = handleHostValidation(value[h]);
