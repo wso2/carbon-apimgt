@@ -10,6 +10,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
@@ -30,5 +31,7 @@ public interface SettingsApiService {
       public Response settingsRoleAliasesPost(MessageContext messageContext) throws APIManagementException;
       public Response settingsRoleAliasesRoleAliasDelete(String roleAlias, MessageContext messageContext) throws APIManagementException;
       public Response settingsScopesGet(MessageContext messageContext) throws APIManagementException;
+      public Response settingsScopesScopeDelete(String keyManagerId, MessageContext messageContext) throws APIManagementException;
       public Response settingsScopesScopeGet(String username, String scope, MessageContext messageContext) throws APIManagementException;
+      public Response settingsScopesScopePut(String keyManagerId, KeyManagerDTO body, MessageContext messageContext) throws APIManagementException;
 }

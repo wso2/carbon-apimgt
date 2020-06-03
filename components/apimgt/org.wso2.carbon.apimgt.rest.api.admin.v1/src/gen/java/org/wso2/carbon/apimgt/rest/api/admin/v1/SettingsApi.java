@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
@@ -57,23 +58,6 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
     }
 
     @GET
-    @Path("/scopes")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get the list of role scope mapping. ", notes = "This operation is used to get the list of role scope mapping from tenant-conf for the apim admin dashboard ", response = ScopeListDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
-        })
-    }, tags={ "Settings",  })
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK. The list of role scope mappings are returned. ", response = ScopeListDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error. An internal server error occurred while retrieving the role scope mapping. ", response = ErrorDTO.class) })
-    public Response settingsScopesGet() throws APIManagementException{
-        return delegate.settingsScopesGet(securityContext);
-    }
-
-    @GET
     @Path("/role-aliases")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -82,7 +66,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
         })
     }, tags={ "Settings",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Settings returned ", response = RoleAliasListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Settings does not exist. ", response = ErrorDTO.class) })
     public Response settingsRoleAliasesGet() throws APIManagementException{
@@ -98,7 +82,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
         })
     }, tags={ "Settings",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "OK. Settings returned ", response = RoleAliasDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Settings does not exist. ", response = ErrorDTO.class) })
     public Response settingsRoleAliasesPost() throws APIManagementException{
@@ -114,12 +98,45 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
         })
     }, tags={ "Settings",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Role alias is deleted ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request The request parameters validation failed. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Settings does not exist. ", response = ErrorDTO.class) })
     public Response settingsRoleAliasesRoleAliasDelete(@ApiParam(value = "Role Alias Identifier ",required=true) @PathParam("roleAlias") String roleAlias) throws APIManagementException{
         return delegate.settingsRoleAliasesRoleAliasDelete(roleAlias, securityContext);
+    }
+
+    @GET
+    @Path("/scopes")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get the list of role scope mapping. ", notes = "This operation is used to get the list of role scope mapping from tenant-conf for the apim admin dashboard ", response = ScopeListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
+        })
+    }, tags={ "Settings",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The list of role scope mappings are returned. ", response = ScopeListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error. An internal server error occurred while retrieving the role scope mapping. ", response = ErrorDTO.class) })
+    public Response settingsScopesGet() throws APIManagementException{
+        return delegate.settingsScopesGet(securityContext);
+    }
+
+    @DELETE
+    @Path("/scopes/{scope}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete a Key Manager", notes = "Delete a Key Manager by keyManager id ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories")
+        })
+    }, tags={ "Key Manager (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Key Manager successfully deleted. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Key Manager to be deleted does not exist. ", response = ErrorDTO.class) })
+    public Response settingsScopesScopeDelete(@ApiParam(value = "Key Manager UUID ",required=true) @PathParam("keyManagerId") String keyManagerId) throws APIManagementException{
+        return delegate.settingsScopesScopeDelete(keyManagerId, securityContext);
     }
 
     @GET
@@ -130,12 +147,29 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
         })
-    }, tags={ "Settings" })
+    }, tags={ "Settings",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Particular scope exists for the given user. ", response = ScopeSettingsDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested user does not exist. ", response = ErrorDTO.class) })
     public Response settingsScopesScopeGet( @NotNull @ApiParam(value = "",required=true)  @QueryParam("username") String username, @ApiParam(value = "scope name to be validated ",required=true) @PathParam("scope") String scope) throws APIManagementException{
         return delegate.settingsScopesScopeGet(username, scope, securityContext);
+    }
+
+    @PUT
+    @Path("/scopes/{scope}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update a Key Manager", notes = "Update a Key Manager by keyManager id ", response = KeyManagerDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories")
+        })
+    }, tags={ "Key Manager (Individual)" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Label updated. ", response = KeyManagerDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class) })
+    public Response settingsScopesScopePut(@ApiParam(value = "Key Manager UUID ",required=true) @PathParam("keyManagerId") String keyManagerId, @ApiParam(value = "Key Manager object with updated information " ,required=true) KeyManagerDTO body) throws APIManagementException{
+        return delegate.settingsScopesScopePut(keyManagerId, body, securityContext);
     }
 }

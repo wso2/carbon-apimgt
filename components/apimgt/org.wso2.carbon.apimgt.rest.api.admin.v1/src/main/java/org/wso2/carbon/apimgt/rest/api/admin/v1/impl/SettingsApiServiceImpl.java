@@ -25,10 +25,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApiService;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -123,6 +120,16 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             String errorMessage = "Error when getting the list of role-scopes mapping.";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
+        return null;
+    }
+
+    @Override public Response settingsScopesScopeDelete(String keyManagerId, MessageContext messageContext)
+            throws APIManagementException {
+        return null;
+    }
+
+    @Override public Response settingsScopesScopePut(String keyManagerId, KeyManagerDTO body,
+            MessageContext messageContext) throws APIManagementException {
         return null;
     }
 }
