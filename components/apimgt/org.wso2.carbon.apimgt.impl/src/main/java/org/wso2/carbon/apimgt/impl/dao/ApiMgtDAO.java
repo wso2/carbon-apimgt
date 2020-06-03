@@ -28,6 +28,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
@@ -58,6 +59,7 @@ import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -14702,6 +14704,80 @@ public class ApiMgtDAO {
             handleException("Failed to get Shared Scope : " + uuid, e);
         }
         return scopeKey;
+    }
+
+    /***
+     * Get the API and URI usages of the given shared scope
+     *
+     * @param uuid Id of the shared scope
+     * @param tenantId tenant Id
+     * @return usgaes ofr the shaerd scope
+     * @throws APIManagementException If an error occurs while getting the usage details
+     */
+    public SharedScopeUsage getSharedScopeUsage(String uuid, int tenantId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet apiUsageResultSet = null;
+        ResultSet uriUsageResultSet = null;
+        PreparedStatement psForApiUsage = null;
+        PreparedStatement psForUriUsage = null;
+        SharedScopeUsage sharedScopeUsage = null;
+        List<API> usedApiList = new ArrayList<>();
+        String sharedScopeName = getSharedScopeKeyByUUID(uuid);
+
+        if (sharedScopeName != null) {
+            sharedScopeUsage = new SharedScopeUsage();
+            sharedScopeUsage.setId(uuid);
+            sharedScopeUsage.setName(sharedScopeName);
+        } else {
+            throw new APIMgtResourceNotFoundException("Shared Scope not found for scope ID: " + uuid,
+                    ExceptionCodes.from(ExceptionCodes.SHARED_SCOPE_NOT_FOUND, uuid));
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String sqlQueryForApiUsage = SQLConstants.GET_SHARED_SCOPE_API_USAGE_BY_TENANT;
+            psForApiUsage = conn.prepareStatement(sqlQueryForApiUsage);
+            psForApiUsage.setString(1, uuid);
+            psForApiUsage.setInt(2, tenantId);
+            apiUsageResultSet = psForApiUsage.executeQuery();
+            while (apiUsageResultSet.next()) {
+                String provider = apiUsageResultSet.getString("API_PROVIDER");
+                String apiName = apiUsageResultSet.getString("API_NAME");
+                String version = apiUsageResultSet.getString("API_VERSION");
+                APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, version);
+                API usedApi = new API(apiIdentifier);
+                usedApi.setContext(apiUsageResultSet.getString("CONTEXT"));
+
+                int apiId = apiUsageResultSet.getInt("API_ID");
+                Set<URITemplate> usedUriTemplates = new LinkedHashSet<>();
+                String sqlQueryForUriUsage = SQLConstants.GET_SHARED_SCOPE_URI_USAGE_BY_TENANT;
+                psForUriUsage = conn.prepareStatement(sqlQueryForUriUsage);
+                psForUriUsage.setString(1, uuid);
+                psForUriUsage.setInt(2, tenantId);
+                psForUriUsage.setInt(3, apiId);
+                uriUsageResultSet = psForUriUsage.executeQuery();
+                while (uriUsageResultSet.next()) {
+                    URITemplate usedUriTemplate = new URITemplate();
+                    usedUriTemplate.setUriTemplate(uriUsageResultSet.getString("URL_PATTERN"));
+                    usedUriTemplate.setHTTPVerb(uriUsageResultSet.getString("HTTP_METHOD"));
+                    usedUriTemplates.add(usedUriTemplate);
+                }
+                usedApi.setUriTemplates(usedUriTemplates);
+                usedApiList.add(usedApi);
+            }
+
+            if (sharedScopeUsage != null) {
+                sharedScopeUsage.setApis(usedApiList);
+            }
+
+            return sharedScopeUsage;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve usages of shared scope with scope ID" + uuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(psForApiUsage, conn, apiUsageResultSet);
+            APIMgtDBUtil.closeAllConnections(psForUriUsage, null, uriUsageResultSet);
+        }
+        return null;
     }
 
     /**
