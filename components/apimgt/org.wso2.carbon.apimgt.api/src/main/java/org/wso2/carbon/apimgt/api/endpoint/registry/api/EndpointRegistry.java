@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.api.endpoint.registry.api;
 
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
 import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntry;
+import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntryFilterParams;
 import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryInfo;
 
 import java.util.List;
@@ -68,25 +69,13 @@ public interface EndpointRegistry {
     /**
      * Returns all entries belong to a given endpoint registry
      *
-     * @param sortBy          Name of the sorting field
-     * @param sortOrder       Order of sorting (asc or desc)
-     * @param limit           Limit
-     * @param offset          Offset
-     * @param registryId      UUID of the endpoint registry
-     * @param serviceType     The endpoint service type
-     * @param definitionType  Then endpoint definition type
-     * @param entryName       The registry entry name
-     * @param serviceCategory The service category
-     * @param version         The version of registry entry
-     * @param exactNameMatch  Whether to perform exact search on name
+     * @param filterParams Endpoint Registry Entry Filter Parameters
+     * @param registryId   UUID of the endpoint registry
      * @return A list of EndpointRegistryEntry objects
      * @throws EndpointRegistryException if failed to get entries of an Endpoint Registry
      */
-    List<EndpointRegistryEntry> getEndpointRegistryEntries(String sortBy, String sortOrder, int limit,
-                                                           int offset, String registryId, String serviceType,
-                                                           String definitionType, String entryName,
-                                                           String serviceCategory, String version,
-                                                           boolean exactNameMatch) throws EndpointRegistryException;
+    List<EndpointRegistryEntry> getEndpointRegistryEntries(EndpointRegistryEntryFilterParams filterParams,
+                                                           String registryId) throws EndpointRegistryException;
 
     /**
      * Returns details of a specific Endpoint Registry Entry
@@ -109,11 +98,11 @@ public interface EndpointRegistry {
     /**
      * Updates Registry Entry
      *
-     * @param entryName     original name of the registry entry
+     * @param displayName   original display name of the registry entry
      * @param registryEntry EndpointRegistryEntry
      * @throws EndpointRegistryException if failed to update EndpointRegistryEntry
      */
-    void updateEndpointRegistryEntry(String entryName, EndpointRegistryEntry registryEntry)
+    void updateEndpointRegistryEntry(String displayName, EndpointRegistryEntry registryEntry)
             throws EndpointRegistryException;
 
     /**
@@ -128,13 +117,13 @@ public interface EndpointRegistry {
      * Updates an existing endpoint registry
      *
      * @param registryId           uuid of the endpoint registry which needs to be updated
-     * @param registryName         original name of the registry for the given registryId
+     * @param registryDisplayName  original display name of the registry for the given registryId
      * @param registryType         original type of the registry for the given registryId
      * @param endpointRegistryInfo EndpointRegistryInfo object with details to be updated
      * @return uuid of the endpoint registry
      * @throws EndpointRegistryException if failed to update the endpoint registry
      */
-    void updateEndpointRegistry(String registryId, String registryName, String registryType,
+    void updateEndpointRegistry(String registryId, String registryDisplayName, String registryType,
                                 EndpointRegistryInfo endpointRegistryInfo)
             throws EndpointRegistryException;
 

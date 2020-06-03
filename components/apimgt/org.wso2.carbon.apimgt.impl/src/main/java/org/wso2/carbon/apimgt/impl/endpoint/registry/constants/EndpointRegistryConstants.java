@@ -36,6 +36,8 @@ public class EndpointRegistryConstants {
 
     public static final String COLUMN_ENTRY_NAME = "ENTRY_NAME";
 
+    public static final String COLUMN_DISPLAY_NAME = "DISPLAY_NAME";
+
     public static final String COLUMN_ENTRY_VERSION = "ENTRY_VERSION";
 
     public static final String COLUMN_SERVICE_URL = "SERVICE_URL";
@@ -65,5 +67,14 @@ public class EndpointRegistryConstants {
     public static final String DEFAULT_REGISTRY_NAME = "Default Registry";
 
     public static final String SYSTEM_USER_NAME = "SYSTEM_USER";
+
+    public static final String DEFINITION_TYPE_OAS = "OAS";
+
+    public static final String DEFINITION_TYPE_WSDL1 = "WSDL1";
+
+    public static final String DEFINITION_TYPE_WSDL2 = "WSDL2";
+
+    public static final String DEFINITION_TYPE_GQL_SDL = "GQL_SDL";
+
 }
 

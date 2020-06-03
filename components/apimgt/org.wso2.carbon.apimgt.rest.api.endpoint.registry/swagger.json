@@ -262,17 +262,6 @@
             "type" : "string"
           }
         }, {
-          "name" : "exactNameMatch",
-          "in" : "query",
-          "description" : "Whether to perform exact search on name",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "type" : "boolean",
-            "default" : false
-          }
-        }, {
           "name" : "version",
           "in" : "query",
           "description" : "Version of the Registry Entry",
@@ -308,6 +297,16 @@
           "name" : "name",
           "in" : "query",
           "description" : "Filter registry entries by the name of the Entry\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "displayName",
+          "in" : "query",
+          "description" : "Filter registry entries by the display name of the Entry\n",
           "required" : false,
           "style" : "form",
           "explode" : true,
@@ -840,6 +839,9 @@
         "type" : "object",
         "properties" : {
           "name" : {
+            "type" : "string"
+          },
+          "displayName" : {
             "type" : "string",
             "example" : "Dev Registry"
           },
@@ -882,6 +884,12 @@
             "example" : "01234567-0123-0123-0123-012345678901"
           },
           "entryName" : {
+            "pattern" : "^[^\\*]+$",
+            "type" : "string",
+            "example" : "Pizzashack-Endpoint"
+          },
+          "displayName" : {
+            "pattern" : "^[^\\*]+$",
             "type" : "string",
             "example" : "Pizzashack-Endpoint"
           },

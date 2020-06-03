@@ -256,12 +256,6 @@ paths:
         explode: false
         schema:
           type: string
-      - name: exactNameMatch
-        in: query
-        description: Whether to perform exact search on name
-        schema:
-          type: boolean
-          default: false
       - name: version
         in: query
         description: Version of the Registry Entry
@@ -295,6 +289,12 @@ paths:
         in: query
         description: |
           Filter registry entries by the name of the Entry
+        schema:
+          type: string
+      - name: displayName
+        in: query
+        description: |
+          Filter registry entries by the display name of the Entry
         schema:
           type: string
       - name: serviceCategory
@@ -755,6 +755,8 @@ components:
       properties:
         name:
           type: string
+        displayName:
+          type: string
           example: Dev Registry
         id:
           type: string
@@ -801,6 +803,11 @@ components:
           example: 01234567-0123-0123-0123-012345678901
         entryName:
           type: string
+          pattern: '^[^\*]+$'
+          example: Pizzashack-Endpoint
+        displayName:
+          type: string
+          pattern: '^[^\*]+$'
           example: Pizzashack-Endpoint
         description:
           type: string

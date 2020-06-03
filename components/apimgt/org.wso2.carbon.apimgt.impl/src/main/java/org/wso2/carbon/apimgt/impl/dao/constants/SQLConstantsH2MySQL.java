@@ -233,6 +233,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " SELECT " +
                     "   E.UUID, " +
                     "   E.ENTRY_NAME, " +
+                    "   E.DISPLAY_NAME, " +
                     "   E.ENTRY_VERSION, " +
                     "   E.DESCRIPTION, " +
                     "   E.DEFINITION_TYPE, " +
@@ -251,13 +252,48 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.REG_ID=R.ID AND " +
                     "   R.UUID=? " +
                     "   AND " +
-                    "       ENTRY_NAME like ?" +
+                    "       E.DISPLAY_NAME like ?" +
                     "   AND " +
-                    "       DEFINITION_TYPE like ?" +
+                    "       E.DEFINITION_TYPE like ?" +
                     "   AND " +
-                    "       SERVICE_TYPE like ?" +
+                    "       E.SERVICE_TYPE like ?" +
                     "   AND " +
-                    "       SERVICE_CATEGORY like ?" +
+                    "       E.SERVICE_CATEGORY like ?" +
+                    " ORDER BY $1 $2 " +
+                    " LIMIT ?, ? ";
+
+    public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_NAME =
+            " SELECT " +
+                    "   E.UUID, " +
+                    "   E.ENTRY_NAME, " +
+                    "   E.DISPLAY_NAME, " +
+                    "   E.ENTRY_VERSION, " +
+                    "   E.DESCRIPTION, " +
+                    "   E.DEFINITION_TYPE, " +
+                    "   E.DEFINITION_URL, " +
+                    "   E.SERVICE_TYPE, " +
+                    "   E.SERVICE_URL, " +
+                    "   E.SERVICE_CATEGORY, " +
+                    "   E.CREATED_BY, " +
+                    "   E.UPDATED_BY, " +
+                    "   E.CREATED_TIME, " +
+                    "   E.UPDATED_TIME " +
+                    " FROM " +
+                    "   ENDPOINT_REG_ENTRY AS E, " +
+                    "   ENDPOINT_REG AS R " +
+                    " WHERE " +
+                    "   E.REG_ID=R.ID AND " +
+                    "   R.UUID=? " +
+                    "   AND " +
+                    "       E.DISPLAY_NAME like ?" +
+                    "   AND " +
+                    "       E.DEFINITION_TYPE like ?" +
+                    "   AND " +
+                    "       E.SERVICE_TYPE like ?" +
+                    "   AND " +
+                    "       E.SERVICE_CATEGORY like ?" +
+                    "   AND " +
+                    "       E.ENTRY_NAME = ?" +
                     " ORDER BY $1 $2 " +
                     " LIMIT ?, ? ";
 
@@ -265,6 +301,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " SELECT " +
                     "   E.UUID, " +
                     "   E.ENTRY_NAME, " +
+                    "   E.DISPLAY_NAME, " +
                     "   E.ENTRY_VERSION, " +
                     "   E.DESCRIPTION, " +
                     "   E.DEFINITION_TYPE, " +
@@ -283,22 +320,23 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.REG_ID=R.ID AND " +
                     "   R.UUID=? " +
                     "   AND " +
-                    "       ENTRY_NAME like ?" +
+                    "       E.DISPLAY_NAME like ?" +
                     "   AND " +
-                    "       DEFINITION_TYPE like ?" +
+                    "       E.DEFINITION_TYPE like ?" +
                     "   AND " +
-                    "       SERVICE_TYPE like ?" +
+                    "       E.SERVICE_TYPE like ?" +
                     "   AND " +
-                    "       SERVICE_CATEGORY like ?" +
+                    "       E.SERVICE_CATEGORY like ?" +
                     "   AND " +
-                    "       ENTRY_VERSION=?" +
+                    "       E.ENTRY_VERSION = ?" +
                     " ORDER BY $1 $2 " +
                     " LIMIT ?, ? ";
 
-    public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_EXACT_NAME =
+    public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_VERSION_AND_NAME =
             " SELECT " +
                     "   E.UUID, " +
                     "   E.ENTRY_NAME, " +
+                    "   E.DISPLAY_NAME, " +
                     "   E.ENTRY_VERSION, " +
                     "   E.DESCRIPTION, " +
                     "   E.DEFINITION_TYPE, " +
@@ -317,47 +355,17 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.REG_ID=R.ID AND " +
                     "   R.UUID=? " +
                     "   AND " +
-                    "       ENTRY_NAME=?" +
+                    "       E.DISPLAY_NAME like ?" +
                     "   AND " +
-                    "       DEFINITION_TYPE like ?" +
+                    "       E.DEFINITION_TYPE like ?" +
                     "   AND " +
-                    "       SERVICE_TYPE like ?" +
+                    "       E.SERVICE_TYPE like ?" +
                     "   AND " +
-                    "       SERVICE_CATEGORY like ?" +
-                    " ORDER BY $1 $2 " +
-                    " LIMIT ?, ? ";
-
-    public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_EXACT_NAME_WITH_VERSION =
-            " SELECT " +
-                    "   E.UUID, " +
-                    "   E.ENTRY_NAME, " +
-                    "   E.ENTRY_VERSION, " +
-                    "   E.DESCRIPTION, " +
-                    "   E.DEFINITION_TYPE, " +
-                    "   E.DEFINITION_URL, " +
-                    "   E.SERVICE_TYPE, " +
-                    "   E.SERVICE_URL, " +
-                    "   E.SERVICE_CATEGORY, " +
-                    "   E.CREATED_BY, " +
-                    "   E.UPDATED_BY, " +
-                    "   E.CREATED_TIME, " +
-                    "   E.UPDATED_TIME " +
-                    " FROM " +
-                    "   ENDPOINT_REG_ENTRY AS E, " +
-                    "   ENDPOINT_REG AS R " +
-                    " WHERE " +
-                    "   E.REG_ID=R.ID AND " +
-                    "   R.UUID=? " +
+                    "       E.SERVICE_CATEGORY like ?" +
                     "   AND " +
-                    "       ENTRY_NAME=?" +
+                    "       E.ENTRY_VERSION = ?" +
                     "   AND " +
-                    "       DEFINITION_TYPE like ?" +
-                    "   AND " +
-                    "       SERVICE_TYPE like ?" +
-                    "   AND " +
-                    "       SERVICE_CATEGORY like ?" +
-                    "   AND " +
-                    "       ENTRY_VERSION=?" +
+                    "       E.ENTRY_NAME = ?" +
                     " ORDER BY $1 $2 " +
                     " LIMIT ?, ? ";
 

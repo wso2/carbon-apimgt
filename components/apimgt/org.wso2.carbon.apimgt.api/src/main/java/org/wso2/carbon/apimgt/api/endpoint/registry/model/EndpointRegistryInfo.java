@@ -26,6 +26,8 @@ public class EndpointRegistryInfo {
 
     private String name = null;
 
+    private String displayName = null;
+
     private String type = null;
 
     private String owner = null;
@@ -116,6 +118,14 @@ public class EndpointRegistryInfo {
     public void setLastUpdatedTime(String lastUpdatedTime) {
 
         this.lastUpdatedTime = lastUpdatedTime;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 }
 

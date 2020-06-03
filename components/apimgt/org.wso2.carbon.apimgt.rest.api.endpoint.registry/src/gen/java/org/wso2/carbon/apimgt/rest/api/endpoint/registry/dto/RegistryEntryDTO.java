@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.*;
 public class RegistryEntryDTO   {
     private String id = null;
     private String entryName = null;
+    private String displayName = null;
     private String description = null;
     private String version = null;
     private String serviceUrl = null;
@@ -142,11 +143,29 @@ public class RegistryEntryDTO   {
     @Schema(example = "Pizzashack-Endpoint", required = true, description = "")
     @JsonProperty("entryName")
             @NotNull
-      public String getEntryName() {
+     @Pattern(regexp="^[^\\*]+$")  public String getEntryName() {
     return entryName;
     }
     public void setEntryName(String entryName) {
     this.entryName = entryName;
+    }
+
+    /**
+    **/
+    public RegistryEntryDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+    }
+
+
+
+    @Schema(example = "Pizzashack-Endpoint", description = "")
+    @JsonProperty("displayName")
+         @Pattern(regexp="^[^\\*]+$")  public String getDisplayName() {
+    return displayName;
+    }
+    public void setDisplayName(String displayName) {
+    this.displayName = displayName;
     }
 
     /**
@@ -291,6 +310,7 @@ return false;
 RegistryEntryDTO registryEntry = (RegistryEntryDTO) o;
     return Objects.equals(id, registryEntry.id) &&
     Objects.equals(entryName, registryEntry.entryName) &&
+    Objects.equals(displayName, registryEntry.displayName) &&
     Objects.equals(description, registryEntry.description) &&
     Objects.equals(version, registryEntry.version) &&
     Objects.equals(serviceUrl, registryEntry.serviceUrl) &&
@@ -302,7 +322,7 @@ RegistryEntryDTO registryEntry = (RegistryEntryDTO) o;
 
 @Override
 public int hashCode() {
-return Objects.hash(id, entryName, description, version, serviceUrl, serviceCategory, serviceType, definitionType, definitionUrl);
+return Objects.hash(id, entryName, displayName, description, version, serviceUrl, serviceCategory, serviceType, definitionType, definitionUrl);
 }
 
 @Override
@@ -312,6 +332,7 @@ sb.append("class RegistryEntryDTO {\n");
 
 sb.append("    id: ").append(toIndentedString(id)).append("\n");
 sb.append("    entryName: ").append(toIndentedString(entryName)).append("\n");
+sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
 sb.append("    description: ").append(toIndentedString(description)).append("\n");
 sb.append("    version: ").append(toIndentedString(version)).append("\n");
 sb.append("    serviceUrl: ").append(toIndentedString(serviceUrl)).append("\n");
