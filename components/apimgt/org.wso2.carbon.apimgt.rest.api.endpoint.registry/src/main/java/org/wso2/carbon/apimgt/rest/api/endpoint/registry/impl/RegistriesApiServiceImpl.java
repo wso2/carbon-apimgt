@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.DefinitionValidationException;
 import org.wso2.carbon.apimgt.api.endpoint.registry.model.EndpointRegistryEntryFilterParams;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistry;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.impl.EndpointRegistryImpl;
@@ -226,6 +227,9 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
         } catch (EndpointRegistryResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Endpoint Registry Entry with name '"
                     + registryEntry.getEntryName() + "' already exists", e, log);
+        } catch (DefinitionValidationException e) {
+            RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
+                    "the new registry entry with registry id: " + registryId, e, log);
         } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while adding new entry for the endpoint registry " +
                     "with id: " + registryId, e, log);
@@ -382,6 +386,9 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             return Response.ok().entity(EndpointRegistryMappingUtils.fromRegistryEntryToDTO(updatedEntry)).build();
         } catch (EndpointRegistryResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError(e.getMessage(), e, log);
+        } catch (DefinitionValidationException e) {
+            RestApiUtil.handleBadRequest("Error while validating the endpoint definition of " +
+                    "the registry entry with id: " + entryId, e, log);
         } catch (EndpointRegistryException e) {
             RestApiUtil.handleInternalServerError("Error while updating the endpoint registry entry " +
                     "with id: " + entryId, e, log);

@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.endpoint.registry.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryException;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.EndpointRegistryResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.endpoint.registry.api.DefinitionValidationException;
 import org.wso2.carbon.apimgt.impl.endpoint.registry.constants.EndpointRegistryConstants;
@@ -46,6 +47,14 @@ public class EndpointRegistryUtil {
         throw new EndpointRegistryResourceAlreadyExistsException(msg);
     }
 
+    /**
+     * Validates the content in a given API definition URL
+     *
+     * @param definitionURL  Definition URL
+     * @param definitionType Definition Type
+     * @return true if definition is valid
+     * @throws DefinitionValidationException if failed to validate the definition
+     */
     public static boolean isValidDefinition(URL definitionURL, String definitionType)
             throws DefinitionValidationException {
         DefinitionValidator definitionValidator = definitionValidatorMap.get(definitionType);
@@ -56,6 +65,14 @@ public class EndpointRegistryUtil {
                 + definitionType + "'");
     }
 
+    /**
+     * Validates the content of a given API definition
+     *
+     * @param definitionContent Definition content as a byte array
+     * @param definitionType    Definition Type
+     * @return true if definition is valid
+     * @throws DefinitionValidationException if failed to validate the definition
+     */
     public static boolean isValidDefinition(byte[] definitionContent, String definitionType)
             throws DefinitionValidationException {
         DefinitionValidator definitionValidator = definitionValidatorMap.get(definitionType);

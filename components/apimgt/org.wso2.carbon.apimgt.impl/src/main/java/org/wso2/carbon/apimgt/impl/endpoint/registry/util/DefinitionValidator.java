@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.endpoint.registry.util;
 
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.DefinitionValidationException;
+
 import java.net.URL;
 
 /**
@@ -25,10 +27,10 @@ import java.net.URL;
  */
 public interface DefinitionValidator {
 
-    boolean validate(URL definitionUrl);
+    boolean validate(URL definitionUrl) throws DefinitionValidationException;
 
-    boolean validate(byte[] definition);
+    boolean validate(byte[] definition) throws DefinitionValidationException;
 
-    boolean validate(String definition);
+    boolean validate(String definition) throws DefinitionValidationException;
 
 }

@@ -19,10 +19,9 @@
 package org.wso2.carbon.apimgt.impl.endpoint.registry.util;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.DefinitionValidationException;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 
 import java.io.IOException;
@@ -32,35 +31,35 @@ import java.net.URL;
  * This class provides the functionality of validating OpenAPI definitions
  */
 public class OASDefinitionValidator implements DefinitionValidator {
-    private static final Log log = LogFactory.getLog(OASDefinitionValidator.class);
 
     @Override
-    public boolean validate(URL definitionUrl) {
-        boolean isValid = false;
+    public boolean validate(URL definitionUrl) throws DefinitionValidationException {
+        boolean isValid;
         try {
             String definitionContent = IOUtils.toString(definitionUrl.openStream());
             isValid = validate(definitionContent);
         } catch (IOException e) {
-            log.error("Error in reading content in the definition URL: " + definitionUrl, e);
+            throw new DefinitionValidationException("Error in reading content in the definition URL: "
+                    + definitionUrl, e);
         }
         return isValid;
     }
 
     @Override
-    public boolean validate(byte[] definition) {
+    public boolean validate(byte[] definition) throws DefinitionValidationException {
         String definitionContent = new String(definition);
         return validate(definitionContent);
     }
 
     @Override
-    public boolean validate(String definition) {
-        boolean isValid = false;
+    public boolean validate(String definition) throws DefinitionValidationException {
+        boolean isValid;
         try {
             APIDefinitionValidationResponse response =
                     OASParserUtil.validateAPIDefinition(definition, false);
             isValid = response.isValid();
         } catch (APIManagementException | ClassCastException e) {
-            log.error("Unable to parse the OpenAPI definition", e);
+            throw new DefinitionValidationException("Unable to parse the OpenAPI definition", e);
         }
         return isValid;
     }

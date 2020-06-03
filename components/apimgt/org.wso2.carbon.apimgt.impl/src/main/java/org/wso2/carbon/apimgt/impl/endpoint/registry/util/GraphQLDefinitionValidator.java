@@ -26,8 +26,7 @@ import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.endpoint.registry.api.DefinitionValidationException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -37,29 +36,29 @@ import java.util.Set;
  * This class provides the functionality of validating GraphQL definitions
  */
 public class GraphQLDefinitionValidator implements DefinitionValidator {
-    private static final Log log = LogFactory.getLog(GraphQLDefinitionValidator.class);
 
     @Override
-    public boolean validate(URL definitionUrl) {
-        boolean isValid = false;
+    public boolean validate(URL definitionUrl) throws DefinitionValidationException {
+        boolean isValid;
         try {
             String definitionContent = IOUtils.toString(definitionUrl.openStream());
             isValid = validate(definitionContent);
         } catch (IOException e) {
-            log.error("Error in reading content in the definition URL: " + definitionUrl, e);
+            throw new DefinitionValidationException("Error in reading content in the definition URL: "
+                    + definitionUrl, e);
         }
         return isValid;
     }
 
     @Override
-    public boolean validate(byte[] definition) {
+    public boolean validate(byte[] definition) throws DefinitionValidationException {
         String definitionContent = new String(definition);
         return validate(definitionContent);
     }
 
     @Override
-    public boolean validate(String definition) {
-        boolean isValid = false;
+    public boolean validate(String definition) throws DefinitionValidationException {
+        boolean isValid;
         try {
             SchemaParser schemaParser = new SchemaParser();
             TypeDefinitionRegistry typeRegistry = schemaParser.parse(definition);
@@ -68,7 +67,7 @@ public class GraphQLDefinitionValidator implements DefinitionValidator {
             Set<SchemaValidationError> validationErrors = schemaValidation.validateSchema(graphQLSchema);
             isValid = (validationErrors.toArray().length == 0);
         } catch (SchemaProblem e) {
-            log.error("Unable to parse the GraphQL definition", e);
+            throw new DefinitionValidationException("Unable to parse the GraphQL definition", e);
         }
         return isValid;
     }
