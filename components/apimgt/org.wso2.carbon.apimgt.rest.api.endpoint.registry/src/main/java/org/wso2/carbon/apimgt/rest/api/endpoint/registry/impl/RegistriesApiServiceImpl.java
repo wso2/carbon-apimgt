@@ -142,6 +142,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
         EndpointRegistryInfo registry = EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(body, user);
         try {
             EndpointRegistry registryProvider = new EndpointRegistryImpl(user);
+            EndpointRegistryMappingUtils.updateDisplayName(registry, null);
             String registryId = registryProvider.addEndpointRegistry(registry);
             EndpointRegistryInfo createdRegistry = registryProvider.getEndpointRegistryByUUID(registryId, tenantDomain);
 
@@ -170,6 +171,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             InputStream definitionFile = validateAndRetrieveDefinition(definitionFileInputStream, registryEntry);
             EndpointRegistryEntry entryToAdd = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
                     null, definitionFile, endpointRegistry.getRegistryId());
+            EndpointRegistryMappingUtils.updateDisplayName(entryToAdd, null);
             String entryId = registryProvider.addEndpointRegistryEntry(entryToAdd);
             EndpointRegistryEntry createdEntry = registryProvider.getEndpointRegistryEntryByUUID(registryId, entryId);
             audit.info("Successfully created endpoint registry entry with id :" + createdEntry.getEntryId() +
@@ -197,6 +199,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
         EndpointRegistryInfo registryToUpdate = EndpointRegistryMappingUtils.fromDTOtoEndpointRegistry(body, user);
         try {
             EndpointRegistryInfo endpointRegistry = getEndpointRegistry(registryId, tenantDomain, registryProvider);
+            EndpointRegistryMappingUtils.updateDisplayName(registryToUpdate, endpointRegistry.getDisplayName());
             registryProvider.updateEndpointRegistry(registryId, endpointRegistry.getDisplayName(),
                     endpointRegistry.getType(), registryToUpdate);
             EndpointRegistryInfo updatedEndpointRegistry
@@ -265,7 +268,7 @@ public class RegistriesApiServiceImpl implements RegistriesApiService {
             InputStream definitionFile = validateAndRetrieveDefinition(definitionFileInputStream, registryEntry);
             EndpointRegistryEntry entryToUpdate = EndpointRegistryMappingUtils.fromDTOToRegistryEntry(registryEntry,
                     entryId, definitionFile, endpointRegistry.getRegistryId());
-
+            EndpointRegistryMappingUtils.updateDisplayName(entryToUpdate, endpointRegistryEntry.getDisplayName());
             registryProvider.updateEndpointRegistryEntry(endpointRegistryEntry.getDisplayName(), entryToUpdate);
 
             EndpointRegistryEntry updatedEntry = registryProvider.getEndpointRegistryEntryByUUID(registryId, entryId);

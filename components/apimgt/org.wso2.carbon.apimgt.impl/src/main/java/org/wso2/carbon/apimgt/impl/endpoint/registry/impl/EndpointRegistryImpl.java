@@ -67,11 +67,6 @@ public class EndpointRegistryImpl implements EndpointRegistry {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
 
-            // If the displayName is empty, set the registryName as the displayName
-            if (StringUtils.isEmpty(endpointRegistry.getDisplayName())) {
-                endpointRegistry.setDisplayName(endpointRegistry.getName());
-            }
-
             // if another registry with the given name or type already exists, fail the operation.
             if (registryDAO.isEndpointRegistryTypeExists(endpointRegistry.getType(), tenantId)) {
                 EndpointRegistryUtil.raiseResourceAlreadyExistsException("Endpoint Registry of type '"
@@ -196,11 +191,6 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      */
     public String addEndpointRegistryEntry(EndpointRegistryEntry registryEntry) throws EndpointRegistryException {
 
-        // If the displayName is empty, set the entryName as the displayName
-        if (StringUtils.isEmpty(registryEntry.getDisplayName())) {
-            registryEntry.setDisplayName(registryEntry.getEntryName());
-        }
-
         if (registryDAO.isRegistryEntryNameExists(registryEntry, false)) {
             EndpointRegistryUtil.raiseResourceAlreadyExistsException("Endpoint Registry Entry with name '"
                     + registryEntry.getEntryName() + "' already exists");
@@ -220,11 +210,6 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      */
     public void updateEndpointRegistryEntry(String displayName, EndpointRegistryEntry registryEntry)
             throws EndpointRegistryException {
-
-        // If the displayName is empty, set the old displayName
-        if (StringUtils.isEmpty(registryEntry.getDisplayName())) {
-            registryEntry.setDisplayName(displayName);
-        }
 
         if (!displayName.equals(registryEntry.getDisplayName()) &&
                 registryDAO.isRegistryEntryNameExists(registryEntry, true)) {
@@ -257,11 +242,6 @@ public class EndpointRegistryImpl implements EndpointRegistry {
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
-
-            // If the displayName is empty, set the old displayName
-            if (StringUtils.isEmpty(endpointRegistryInfo.getDisplayName())) {
-                endpointRegistryInfo.setDisplayName(registryDisplayName);
-            }
 
             // if another registry with the updated name or type already exists, fail the operation.
             if (!registryType.equals(endpointRegistryInfo.getType()) &&

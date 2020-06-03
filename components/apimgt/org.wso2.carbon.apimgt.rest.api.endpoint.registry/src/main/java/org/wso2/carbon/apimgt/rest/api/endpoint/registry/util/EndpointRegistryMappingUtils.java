@@ -189,4 +189,39 @@ public class EndpointRegistryMappingUtils {
         return filterParams;
     }
 
+    /**
+     * Updates the displayName in a given EndpointRegistryInfo
+     *
+     * @param endpointRegistryInfo EndpointRegistryInfo object
+     * @param oldDisplayName       Old display name
+     */
+    public static void updateDisplayName(EndpointRegistryInfo endpointRegistryInfo, String oldDisplayName) {
+        if (StringUtils.isEmpty(endpointRegistryInfo.getDisplayName())) {
+            if (StringUtils.isNotEmpty(oldDisplayName)) {
+                // If the displayName is empty, set the old displayName
+                endpointRegistryInfo.setDisplayName(oldDisplayName);
+            } else {
+                // If the displayName is empty, set the registryName as the displayName
+                endpointRegistryInfo.setDisplayName(endpointRegistryInfo.getName());
+            }
+        }
+    }
+
+    /**
+     * Updates the displayName in a given EndpointRegistryEntry
+     *
+     * @param registryEntry  EndpointRegistryEntry object
+     * @param oldDisplayName Old display name
+     */
+    public static void updateDisplayName(EndpointRegistryEntry registryEntry, String oldDisplayName) {
+        if (StringUtils.isEmpty(registryEntry.getDisplayName())) {
+            if (StringUtils.isNotEmpty(oldDisplayName)) {
+                // If the displayName is empty, set the old displayName
+                registryEntry.setDisplayName(oldDisplayName);
+            } else {
+                // If the displayName is empty, set the entryName as the displayName
+                registryEntry.setDisplayName(registryEntry.getEntryName());
+            }
+        }
+    }
 }
