@@ -307,8 +307,13 @@ public class APIManagerComponent {
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
 
-            bundleContext.registerService(ArtifactPublisher.class.getName(), new DBPublisher(), null);
-            bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
+            if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                    .getGatewayArtifactSynchronizerProperties().isSyncArtifacts()) {
+
+                bundleContext.registerService(ArtifactPublisher.class.getName(), new DBPublisher(), null);
+                bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
+
+            }
 
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
@@ -892,36 +897,26 @@ public class APIManagerComponent {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                         .getGatewayArtifactSynchronizerProperties();
 
-        if (gatewayArtifactSynchronizerProperties.getPublisher().equals(artifactPublisher.getClass().getName())) {
+        if (gatewayArtifactSynchronizerProperties.getPublisher().equals(artifactPublisher.getType())) {
             ServiceReferenceHolder.getInstance().setArtifactPublisher(artifactPublisher);
+
+            try {
+                ServiceReferenceHolder.getInstance().getArtifactPublisher().init();
+                ServiceReferenceHolder.getInstance().getArtifactPublisher().testConnect();
+                ServiceReferenceHolder.getInstance().getArtifactPublisher().connect();
+            } catch (Exception e) {
+                log.error("Error connecting with the ArtifactPublisher");
+                ServiceReferenceHolder.getInstance().getArtifactPublisher().disconnect();
+                ServiceReferenceHolder.getInstance().getArtifactPublisher().destroy();
+            }
         }
     }
 
     protected void unsetArtifactPublisher(ArtifactPublisher artifactPublisher) {
+        ServiceReferenceHolder.getInstance().getArtifactPublisher().disconnect();
+        ServiceReferenceHolder.getInstance().getArtifactPublisher().destroy();
         ServiceReferenceHolder.getInstance().setArtifactPublisher(null);
     }
-
-    @Reference(
-            name = "gateway.artifact.retriever",
-            service = ArtifactRetriever.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetArtifactRetriever")
-    protected void setArtifactRetriever(ArtifactRetriever artifactRetriever) {
-
-        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                        .getGatewayArtifactSynchronizerProperties();
-
-        if (gatewayArtifactSynchronizerProperties.getRetriever().equals(artifactRetriever.getClass().getName())) {
-            ServiceReferenceHolder.getInstance().setArtifactRetriever(artifactRetriever);
-        }
-    }
-
-    protected void unsetArtifactRetriever(ArtifactRetriever artifactRetriever) {
-        ServiceReferenceHolder.getInstance().setArtifactRetriever(null);
-    }
-
 
     /**
      * Method to configure wso2event type event adapter to be used for event notification.

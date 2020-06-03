@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.gateway.APIDeployer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIGatewayManager;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIGatewayEvent;
@@ -62,6 +63,7 @@ public class JMSMessageListener implements MessageListener {
     private Pattern resourcePattern = Pattern.compile("/.*/(.*)/\\1(.*)?:[A-Z]{0,5}_(condition_(\\d*)|default)");
     public static final int RESOURCE_PATTERN_GROUPS = 4;
     public static final int RESOURCE_PATTERN_CONDITION_INDEX = 3;
+    private APIDeployer apiDeployer = new APIDeployer();
 
     private Pattern productResourcePattern = Pattern.compile("/.*/(.*):[A-Z]{0,5}_(condition_(\\d*)|default)");
     private static final int PRODUCT_RESOURCE_PATTERN_GROUPS = 3;

@@ -49,6 +49,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
@@ -395,6 +397,40 @@ public class APIHandlerServiceComponent {
 
         ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
                 .remove(gatewayJWTGenerator.getClass().getName());
+    }
+
+    @Reference(
+            name = "gateway.artifact.retriever",
+            service = ArtifactRetriever.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetArtifactRetriever")
+    protected void setArtifactRetriever(ArtifactRetriever artifactRetriever) {
+
+        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                        .getGatewayArtifactSynchronizerProperties();
+
+        if (gatewayArtifactSynchronizerProperties.getRetriever().equals(artifactRetriever.getType())) {
+            ServiceReferenceHolder.getInstance().setArtifactRetriever(artifactRetriever);
+
+            try {
+                ServiceReferenceHolder.getInstance().getArtifactRetriever().init();
+                ServiceReferenceHolder.getInstance().getArtifactRetriever().testConnect();
+                ServiceReferenceHolder.getInstance().getArtifactRetriever().connect();
+            } catch (Exception e) {
+                log.error("Error connecting with the ArtifactPublisher");
+                ServiceReferenceHolder.getInstance().getArtifactRetriever().disconnect();
+                ServiceReferenceHolder.getInstance().getArtifactRetriever().destroy();
+            }
+        }
+    }
+
+    protected void unsetArtifactRetriever(ArtifactRetriever artifactRetriever) {
+        ServiceReferenceHolder.getInstance().getArtifactRetriever().disconnect();
+        ServiceReferenceHolder.getInstance().getArtifactRetriever().destroy();
+        ServiceReferenceHolder.getInstance().setArtifactRetriever(null);
+
     }
 }
 

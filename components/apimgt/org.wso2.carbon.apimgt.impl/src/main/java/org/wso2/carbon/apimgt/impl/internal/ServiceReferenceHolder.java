@@ -58,7 +58,6 @@ public class ServiceReferenceHolder {
     private Map<String,JWTTransformer> jwtTransformerMap = new HashMap<>();
     private Map<String,KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap  = new HashMap<>();
     private ArtifactPublisher artifactPublisher;
-    private ArtifactRetriever artifactRetriever;
     private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
 
     public static ConfigurationContextService getContextService() {
@@ -214,13 +213,5 @@ public class ServiceReferenceHolder {
 
     public void setArtifactPublisher(ArtifactPublisher artifactPublisher) {
         this.artifactPublisher = artifactPublisher;
-    }
-
-    public ArtifactRetriever getArtifactRetriever() {
-        return artifactRetriever;
-    }
-
-    public void setArtifactRetriever(ArtifactRetriever artifactRetriever) {
-        this.artifactRetriever = artifactRetriever;
     }
 }
