@@ -264,7 +264,8 @@ export default function ProvideOpenAPI(props) {
                                         : ([
                                             <FormattedMessage
                                                 id='Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.dropzone'
-                                                defaultMessage='Drag & Drop Open API File/Archive  here {break} or {break} Browse files'
+                                                defaultMessage={'Drag & Drop Open API File/Archive '
+                                                 + 'here {break} or {break} Browse files'}
                                                 values={{ break: <br /> }}
                                             />,
                                             <Button
