@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
-import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
 import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
 
 /**
@@ -74,8 +73,7 @@ public class SubscriptionPolicy extends Policy {
     @Override
     public String getCacheKey() {
 
-        return InMemorySubscriptionValidationConstants.POLICY_TYPE.SUBSCRIPTION +
-                SubscriptionDataStoreUtil.getPolicyCacheKey(getName(), getTenantId());
+        return POLICY_TYPE.SUBSCRIPTION + SubscriptionDataStoreUtil.getPolicyCacheKey(getName(), getTenantId());
 
     }
 }

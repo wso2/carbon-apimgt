@@ -27,6 +27,10 @@ import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
  */
 public class Policy implements CacheableEntity<String> {
 
+    public enum POLICY_TYPE {
+        SUBSCRIPTION,
+        APPLICATION
+    }
     private Integer id = null;
     private Integer tenantId = null;
     private String name = null;

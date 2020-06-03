@@ -18,7 +18,6 @@
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
-import org.wso2.carbon.apimgt.api.InMemorySubscriptionValidationConstants;
 
 public class Subscriber extends Object implements CacheableEntity<String> {
 
@@ -48,6 +47,6 @@ public class Subscriber extends Object implements CacheableEntity<String> {
     @Override
     public String getCacheKey() {
 
-        return getSubscriberId() + InMemorySubscriptionValidationConstants.DELEM_PERIOD + getTenantId();
+        return getSubscriberId() + DELEM_PERIOD + getTenantId();
     }
 }
