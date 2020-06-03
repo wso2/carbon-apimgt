@@ -31,13 +31,13 @@ import javax.validation.constraints.*;
 
 public class SettingsApi  {
 
-  @Context MessageContext securityContext;
+    @Context MessageContext securityContext;
 
-SettingsApiService delegate = new SettingsApiServiceImpl();
+    SettingsApiService delegate = new SettingsApiServiceImpl();
 
 
     @GET
-    
+
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Retreive admin settings", notes = "Retreive admin settings ", response = SettingsDTO.class, authorizations = {

@@ -58,4 +58,5 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingsToDTO(isUserAvailable);
             return Response.ok().entity(settingsDTO).build();
     }
+
 }
