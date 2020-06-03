@@ -110,7 +110,7 @@ public class JMSTransportHandler {
         log.info("Starting jms topic consumer thread for the keyManager topic...");
         jmsListenerForNotificationTopic = createJMSMessageListener(JMSConstants.TOPIC_NOTIFICATION, minThreadPoolSize,
                 maxThreadPoolSize, keepAliveTimeInMillis, jobQueueSize, new GatewayJMSMessageListener());
-        jmsListenerForKeyManagerTopic.startListener();
+        jmsListenerForNotificationTopic.startListener();
         log.info("Starting jms topic consumer thread for the notification topic...");
     }
 
