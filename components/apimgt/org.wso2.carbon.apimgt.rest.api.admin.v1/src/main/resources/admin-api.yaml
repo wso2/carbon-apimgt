@@ -4897,7 +4897,7 @@ definitions:
     title: Token handling Configuration
     properties:
       id:
-        type: int
+        type: integer
       enable:
         type: boolean
         example: false
