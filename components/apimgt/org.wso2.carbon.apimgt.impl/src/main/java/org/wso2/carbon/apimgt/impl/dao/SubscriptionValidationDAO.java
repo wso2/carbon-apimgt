@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
+import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
@@ -225,6 +226,29 @@ public class SubscriptionValidationDAO {
                 ResultSet resultSet = ps.executeQuery();
         ) {
             populateApplicationPolicyList(applicationPolicies, resultSet);
+
+        } catch (SQLException e) {
+            log.error("Error in loading application policies : ", e);
+        }
+
+        return applicationPolicies;
+    }
+
+    /*
+     * This method can be used to retrieve all the ApplicationPolicys in the database
+     *
+     * @return {@link List<ApplicationPolicy>}
+     * */
+    public List<APIPolicy> getAllApiPolicies() {
+
+        List<APIPolicy> applicationPolicies = new ArrayList<>();
+        try (
+                Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps =
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_APPLICATION_POLICIES_SQL);
+                ResultSet resultSet = ps.executeQuery();
+        ) {
+            populateApiPolicyList(applicationPolicies, resultSet);
 
         } catch (SQLException e) {
             log.error("Error in loading application policies : ", e);
@@ -483,7 +507,7 @@ public class SubscriptionValidationDAO {
     }
 
     /*
-     * @param subscriptionId : unique identifier of a subscription
+     * @param tenantDomain : tenant domain name
      * @return {@link List<ApplicationPolicy>}
      * */
     public List<ApplicationPolicy> getAllApplicationPolicies(String tenantDomain) {
@@ -523,6 +547,51 @@ public class SubscriptionValidationDAO {
                 applicationPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
                 applicationPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
                 applicationPolicies.add(applicationPolicyDTO);
+            }
+        }
+    }
+
+    /*
+     * @param tenantDomain : tenant domain name
+     * @return {@link List<APIPolicy>}
+     * */
+    public List<APIPolicy> getAllApiPolicies(String tenantDomain) {
+
+        ArrayList<APIPolicy> apiPolicies = new ArrayList<>();
+        try (
+                Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps =
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICIES_SQL);) {
+            int tenantId = 0;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                log.error("Error in loading ApplicationPolicies for tenantDomain : " + tenantDomain, e);
+            }
+            ps.setInt(1, tenantId);
+            ResultSet resultSet = ps.executeQuery();
+
+            populateApiPolicyList(apiPolicies, resultSet);
+
+        } catch (SQLException e) {
+            log.error("Error in loading application policies for tenantId : " + tenantDomain, e);
+        }
+
+        return apiPolicies;
+    }
+
+    private void populateApiPolicyList(List<APIPolicy> apiPolicies, ResultSet resultSet)
+            throws SQLException {
+
+        if (apiPolicies != null && resultSet != null) {
+            while (resultSet.next()) {
+                APIPolicy apiPolicyDTO = new APIPolicy();
+                apiPolicyDTO.setId(resultSet.getInt("POLICY_ID"));
+                apiPolicyDTO.setName(resultSet.getString("NAME"));
+                apiPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
+                apiPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
+                apiPolicies.add(apiPolicyDTO);
             }
         }
     }
@@ -613,6 +682,33 @@ public class SubscriptionValidationDAO {
 
                 return applicationPolicy;
             }
+
+        } catch (SQLException e) {
+            log.error("Error in loading application policies by policyId : " + policyName + " of " + policyName, e);
+        }
+
+        return null;
+    }
+
+    /*
+     * @param policyName : name of an application level throttling policy
+     * @return {@link ApplicationPolicy}
+     * */
+    public APIPolicy getApiPolicyByNameForTenant(String policyName, String tenantDomain) {
+
+        try (
+                Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps =
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_POLICY_SQL);
+        ) {
+            int tenantId = 0;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                log.error("Error in loading ApplicationPolicy for tenantDomain : " + tenantDomain, e);
+            }
+        //todo
 
         } catch (SQLException e) {
             log.error("Error in loading application policies by policyId : " + policyName + " of " + policyName, e);

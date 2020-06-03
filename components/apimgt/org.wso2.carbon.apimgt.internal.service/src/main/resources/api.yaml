@@ -320,6 +320,30 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /api-policies:
+    get:
+      summary: Get all API throttling policies
+      description: |
+        This will provide access to api level throttling policies in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: policyName
+          in: query
+          description: |
+            **Search condition**.
+             Api policy name
+          type: string
+      tags:
+        - Subscription Validation
+      responses:
+        200:
+          description: An array of api policies in the database
+          schema:
+            $ref: '#/definitions/ApiPolicyList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /application-key-mappings:
     get:
       summary: Get all application key mappings
@@ -498,7 +522,7 @@ definitions:
       policy:
         type: string
         description: API level throttling policy.
-      urlMaping:
+      urlMappings:
         type: array
         items:
           $ref: '#/definitions/URLMapping'
@@ -697,7 +721,7 @@ definitions:
       stopOnQuotaReach:
         type: boolean
   #-----------------------------------------------------
-  # The ApplicationKeyMapping List resource
+  # The Application Policy List resource
   #-----------------------------------------------------
   ApplicationPolicyList:
     title: ApplicationPolicy List
@@ -719,6 +743,51 @@ definitions:
   ApplicationPolicy:
     allOf:
     - $ref: '#/definitions/Policy'
+  #-----------------------------------------------------
+  # The Api Policy List resource
+  #-----------------------------------------------------
+  ApiPolicyList:
+    title: ApiPolicy List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Api Policies returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ApiPolicy'
+      pagination:
+        $ref: '#/definitions/Pagination'
+
+  #-----------------------------------------------------
+  # The API Level Policy resource
+  #-----------------------------------------------------
+  ApiPolicy:
+    allOf:
+    - $ref: '#/definitions/Policy'
+    properties:
+      conditionGroups:
+        type: array
+        items:
+          $ref: '#/definitions/ApiPolicyConditionGroup'
+
+  #-----------------------------------------------------
+  # The API Policy Condition  Group resource
+  #-----------------------------------------------------
+  ApiPolicyConditionGroup:
+    properties:
+      policyId:
+        type: integer
+      quotaType:
+        type: string
+      conditionGroupId:
+        type: integer
+      condition:
+        type: array
+        items:
+          $ref: '#/definitions/Condition'
 
   #-----------------------------------------------------
   # The Throttle Policy Condition resource

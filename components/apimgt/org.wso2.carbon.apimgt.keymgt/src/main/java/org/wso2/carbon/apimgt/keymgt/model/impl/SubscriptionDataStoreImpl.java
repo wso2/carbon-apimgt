@@ -48,6 +48,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         SUBSCRIPTION,
         APPLICATION
     }
+    public static final String DELEM_PERIOD = ".";
+
     // Maps for keeping Subscription related details.
     private Map<String, ApplicationKeyMapping> applicationKeyMappingMap;
     private Map<Integer, Application> applicationMap;
@@ -96,7 +98,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public API getApiByContextAndVersion(String context, String version) {
 
-        return null;
+        String key = context + DELEM_PERIOD + version;
+        return apiMap.get(key);
     }
 
     @Override

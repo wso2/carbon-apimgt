@@ -642,16 +642,6 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
     public static final String API_KEY_VALIDATOR_USERNAME = API_KEY_VALIDATOR + "Username";
     public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
-
-    public static class ApiKeyValidator {
-        public static final String KEY_VALIDATION_HANDLER = "KeyValidationHandler";
-        public static final String KEY_VALIDATOR_HANDLER = "KeyValidationHandlerImpl";
-        public static final String IN_MEM_SUBSCRIPTION_STORE = "InMemorySubscriptionStore";
-        public static final String IN_MEM_SUBSCRIPTION_STORE_IMPL = "InMemorySubscriptionStoreImpl";
-        public static final String CONFIGURATION_ELEMENT = "Configuration";
-
-    }
-
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
     public static final String KEY_MANAGER_CLIENT = API_KEY_MANAGER + "KeyManagerClientImpl";

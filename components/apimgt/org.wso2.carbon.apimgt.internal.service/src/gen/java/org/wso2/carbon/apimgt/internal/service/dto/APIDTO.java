@@ -24,7 +24,7 @@ public class APIDTO   {
     private String version = null;
     private String context = null;
     private String policy = null;
-    private List<URLMappingDTO> urlMaping = new ArrayList<>();
+    private List<URLMappingDTO> urlMappings = new ArrayList<>();
 
   /**
    **/
@@ -135,19 +135,19 @@ public class APIDTO   {
 
   /**
    **/
-  public APIDTO urlMaping(List<URLMappingDTO> urlMaping) {
-    this.urlMaping = urlMaping;
+  public APIDTO urlMappings(List<URLMappingDTO> urlMappings) {
+    this.urlMappings = urlMappings;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("urlMaping")
-  public List<URLMappingDTO> getUrlMaping() {
-    return urlMaping;
+  @JsonProperty("urlMappings")
+  public List<URLMappingDTO> getUrlMappings() {
+    return urlMappings;
   }
-  public void setUrlMaping(List<URLMappingDTO> urlMaping) {
-    this.urlMaping = urlMaping;
+  public void setUrlMappings(List<URLMappingDTO> urlMappings) {
+    this.urlMappings = urlMappings;
   }
 
 
@@ -166,12 +166,12 @@ public class APIDTO   {
         Objects.equals(version, API.version) &&
         Objects.equals(context, API.context) &&
         Objects.equals(policy, API.policy) &&
-        Objects.equals(urlMaping, API.urlMaping);
+        Objects.equals(urlMappings, API.urlMappings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiId, provider, name, version, context, policy, urlMaping);
+    return Objects.hash(apiId, provider, name, version, context, policy, urlMappings);
   }
 
   @Override
@@ -185,7 +185,7 @@ public class APIDTO   {
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
-    sb.append("    urlMaping: ").append(toIndentedString(urlMaping)).append("\n");
+    sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
     sb.append("}");
     return sb.toString();
   }

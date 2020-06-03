@@ -230,6 +230,9 @@ public class SubscriptionValidationSQLConstants {
                     " WHERE " +
                     "   TENANT_ID = ? ";
 
+    public static final String GET_TENANT_API_POLICIES_SQL =
+            ""; //todo
+
     public static final String GET_APPLICATION_POLICY_SQL =
             "SELECT " +
                     "   POLICY_ID," +
@@ -241,6 +244,9 @@ public class SubscriptionValidationSQLConstants {
                     " WHERE " +
                     "   NAME = ? AND" +
                     "   TENANT_ID = ? ";
+
+    public static final String GET_API_POLICY_SQL =
+            "";//todo
 
     public static final String GET_TENANT_APIS_SQL =
             "SELECT " +

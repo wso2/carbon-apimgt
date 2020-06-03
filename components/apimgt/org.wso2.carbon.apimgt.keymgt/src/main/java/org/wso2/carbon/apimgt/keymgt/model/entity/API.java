@@ -36,21 +36,21 @@ public class API implements CacheableEntity<String> {
     private String context = null;
     private String policy = null;
 
-    private List<URLMapping> urlMapings = new ArrayList<>();
+    private List<URLMapping> urlMappings = new ArrayList<>();
 
 
     public void addResource(URLMapping resource) {
 
-        urlMapings.add(resource);
+        urlMappings.add(resource);
     }
 
     public List<URLMapping> getResources(String urlMapping) {
 
-        return urlMapings;
+        return urlMappings;
     }
 
     public void removeResource(URLMapping resource) {
-        urlMapings.remove(resource);
+        urlMappings.remove(resource);
     }
 
     public String getContext() {

@@ -27,6 +27,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
 import org.wso2.carbon.apimgt.keymgt.model.entity.APIList;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.SubscriptionValidationConfig;
@@ -57,7 +58,7 @@ import java.util.List;
 public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     private static final Log log = LogFactory.getLog(SubscriptionDataLoaderImpl.class);
-    private SubscriptionValidationConfig subscriptionValidationConfig;
+    private KeyManagerConfigurationsDto getKeyManagerConfigurationsDto;
 
     public static final int retrievalTimeoutInSeconds = 15;
     public static final int retrievalRetries = 15;
@@ -65,9 +66,9 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     public SubscriptionDataLoaderImpl() {
 
-        this.subscriptionValidationConfig = ServiceReferenceHolder.getInstance()
+        this.getKeyManagerConfigurationsDto = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .getSubscriptionValidationConfig();
+                .getKeyManagerConfigurationsDto();
     }
 
     @Override
@@ -143,6 +144,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         if (responseString != null && !responseString.isEmpty()) {
             apis = (new Gson().fromJson(responseString, APIList.class)).getList();
         }
+        System.out.println("apis :" +  apis.get(0).toString());
         return apis;
     }
 
@@ -309,12 +311,11 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     private String invokeService(String path, String tenantDomain) throws DataLoadingException, IOException {
 
-        String serviceURLStr = subscriptionValidationConfig.getServiceURL();
+        String serviceURLStr = getKeyManagerConfigurationsDto.getServiceUrl();
         HttpGet method = new HttpGet(serviceURLStr + path);
 
-        if (null != subscriptionValidationConfig && subscriptionValidationConfig.isEnabled()) {
             URL serviceURL = new URL(serviceURLStr + path);
-            byte[] credentials = getServiceCredentials(subscriptionValidationConfig);
+            byte[] credentials = getServiceCredentials(getKeyManagerConfigurationsDto);
             int servicePort = serviceURL.getPort();
             String serviceProtocol = serviceURL.getProtocol();
             method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
@@ -354,15 +355,13 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                 throw new DataLoadingException("Error while retrieving subscription from " + path);
             }
             return EntityUtils.toString(httpResponse.getEntity(), UTF8);
-        }
-        return null;
 
     }
 
-    private byte[] getServiceCredentials(SubscriptionValidationConfig subscriptionValidationConfig) {
+    private byte[] getServiceCredentials(KeyManagerConfigurationsDto keyManagerConfigurationsDto) {
 
-        String username = subscriptionValidationConfig.getUsername();
-        String pw = subscriptionValidationConfig.getPassword();
+        String username = keyManagerConfigurationsDto.getUsername();
+        String pw = keyManagerConfigurationsDto.getPassword();
         return Base64.encodeBase64((username + APIConstants.DELEM_COLON + pw).getBytes
                 (StandardCharsets.UTF_8));
     }

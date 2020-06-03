@@ -96,7 +96,6 @@ public class APIManagerConfiguration {
     private JSONArray applicationAttributes = new JSONArray();
     private JSONArray monetizationAttributes = new JSONArray();
     private CacheInvalidationConfiguration cacheInvalidationConfiguration;
-    private SubscriptionValidationConfig inMemorySubsValidationConfig = null;
 
     private RecommendationEnvironment recommendationEnvironment;
 
@@ -172,16 +171,6 @@ public class APIManagerConfiguration {
                 .cacheControlHeadersEnabled(cacheControlHeadersEnabled)
                 .cacheControlHeadersMaxAge(cacheControlHeadersMaxAge)
                 .build();
-    }
-
-    /**
-     * Returns the configuration of the InMemory Subscription validation.
-     *
-     * @return configuration of the internal data service from the api-manager configuration
-     */
-    public SubscriptionValidationConfig getSubscriptionValidationConfig() {
-
-        return inMemorySubsValidationConfig;
     }
 
     /**
@@ -451,8 +440,6 @@ public class APIManagerConfiguration {
 
             } else if (APIConstants.AdvancedThrottleConstants.THROTTLING_CONFIGURATIONS.equals(localName)) {
                 setThrottleProperties(serverConfig);
-            } else if (APIConstants.IN_MEMORY_SUBSCRIPTION_VALIDATION.equals(localName)) {
-                setSubscriptionValidationConfig(serverConfig);
             } else if (APIConstants.WorkflowConfigConstants.WORKFLOW.equals(localName)) {
                 setWorkflowProperties(serverConfig);
             } else if (APIConstants.ApplicationAttributes.APPLICATION_ATTRIBUTES.equals(localName)) {
@@ -1301,31 +1288,6 @@ public class APIManagerConfiguration {
                     }
                 }
             }
-        }
-    }
-
-    private void setSubscriptionValidationConfig(OMElement omElement) {
-
-        Iterator iterator =
-                omElement.getChildrenWithLocalName(APIConstants.IN_MEMORY_SUBSCRIPTION_VALIDATION);
-        while (iterator.hasNext()) {
-            OMElement element = (OMElement) iterator.next();
-            Iterator attributes = element.getChildElements();
-            SubscriptionValidationConfig.Builder builder = null;
-            while (attributes.hasNext()) {
-                OMElement attribute = (OMElement) attributes.next();
-                if (attribute.getLocalName().equals(APIConstants.API_KEY_VALIDATOR_SUBS_VALIDATION_IS_ENABLED)) {
-                    builder = new SubscriptionValidationConfig.Builder(Boolean.parseBoolean(attribute.getText()));
-                } else if (attribute.getLocalName().equals(APIConstants.API_KEY_VALIDATOR_SUBS_VALIDATION_SERVICE_URL)) {
-                    builder = builder.serviceURL(attribute.getText());
-                } else if (attribute.getLocalName().equals(APIConstants.API_KEY_VALIDATOR_SUBS_VALIDATION_USERNAMEL)) {
-                    builder = builder.username(attribute.getText());
-                } else if (attribute.getLocalName().equals(APIConstants.API_KEY_VALIDATOR_SUBS_VALIDATION_PW)) {
-                    builder = builder.password(attribute.getText());
-                }
-            }
-
-            inMemorySubsValidationConfig = builder.build();
         }
     }
 

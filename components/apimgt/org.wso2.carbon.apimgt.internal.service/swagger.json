@@ -403,6 +403,40 @@
         }
       }
     },
+    "/api-policies" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all API throttling policies",
+        "description" : "This will provide access to api level throttling policies in database.\n",
+        "parameters" : [ {
+          "name" : "X-WSO2-Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "policyName",
+          "in" : "query",
+          "description" : "**Search condition**.\n Api policy name\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of api policies in the database",
+            "schema" : {
+              "$ref" : "#/definitions/ApiPolicyList"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/application-key-mappings" : {
       "get" : {
         "tags" : [ "Subscription Validation" ],
@@ -614,7 +648,7 @@
           "type" : "string",
           "description" : "API level throttling policy."
         },
-        "urlMaping" : {
+        "urlMappings" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/URLMapping"
@@ -864,6 +898,49 @@
       "allOf" : [ {
         "$ref" : "#/definitions/Policy"
       } ]
+    },
+    "ApiPolicyList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of Api Policies returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ApiPolicy"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "ApiPolicy List"
+    },
+    "ApiPolicy" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/Policy"
+      } ]
+    },
+    "ApiPolicyConditionGroup" : {
+      "properties" : {
+        "policyId" : {
+          "type" : "integer"
+        },
+        "quotaType" : {
+          "type" : "string"
+        },
+        "conditionGroupId" : {
+          "type" : "integer"
+        },
+        "condition" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Condition"
+          }
+        }
+      }
     },
     "Condition" : {
       "properties" : {

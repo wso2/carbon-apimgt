@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.apimgt.internal.service.utils;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
+import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
@@ -28,6 +28,8 @@ import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.internal.service.dto.APIDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationAttributeDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingDTO;
@@ -49,7 +51,7 @@ import java.util.Set;
 
 public class SubscriptionValidationDataUtil {
 
-    public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
+    private static APIDTO fromAPItoDTO(API model) {
 
         APIDTO apidto = null;
         if (model != null) {
@@ -68,12 +70,12 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingsDTO.add(urlMappingDTO);
             }
-            apidto.setUrlMaping(urlMappingsDTO);
+            apidto.setUrlMappings(urlMappingsDTO);
         }
         return apidto;
     }
 
-    public static APIListDTO fromAPIToAPIListDTO(API model) throws APIManagementException {
+    public static APIListDTO fromAPIToAPIListDTO(API model) {
 
         APIListDTO apiListdto = new APIListDTO();
         if (model != null) {
@@ -92,7 +94,7 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingsDTO.add(urlMappingDTO);
             }
-            apidto.setUrlMaping(urlMappingsDTO);
+            apidto.setUrlMappings(urlMappingsDTO);
             apiListdto.setCount(1);
             apiListdto.getList().add(apidto);
         } else {
@@ -101,10 +103,9 @@ public class SubscriptionValidationDataUtil {
         return apiListdto;
     }
 
-    public static APIListDTO fromAPIListToAPIListDTO(List<API> apiList) throws APIManagementException {
+    public static APIListDTO fromAPIListToAPIListDTO(List<API> apiList) {
 
         APIListDTO apiListDTO = new APIListDTO();
-        apiListDTO.getList();
 
         if (apiList != null) {
             for (API api : apiList) {
@@ -211,7 +212,7 @@ public class SubscriptionValidationDataUtil {
                 applicationPolicyDTO.setName(applicationPolicyModel.getName());
                 applicationPolicyDTO.setQuotaType(applicationPolicyModel.getQuotaType());
                 applicationPolicyDTO.setTenantId(applicationPolicyModel.getTenantId());
-
+//todo set
                 applicationPolicyListDTO.getList().add(applicationPolicyDTO);
 
             }
@@ -221,6 +222,27 @@ public class SubscriptionValidationDataUtil {
             applicationPolicyListDTO.setCount(0);
         }
         return applicationPolicyListDTO;
+    }
+
+    public static ApiPolicyListDTO fromApiPolicyToApiPolicyListDTO(List<APIPolicy> model) {
+
+        ApiPolicyListDTO apiPolicyListDTO = new ApiPolicyListDTO();
+        if (model != null) {
+            for (APIPolicy apiPolicyModel : model) {
+                ApiPolicyDTO policyDTO = new ApiPolicyDTO();
+                policyDTO.setName(apiPolicyModel.getName());
+                policyDTO.setQuotaType(apiPolicyModel.getQuotaType());
+                policyDTO.setTenantId(apiPolicyModel.getTenantId());
+
+                apiPolicyListDTO.getList().add(policyDTO);
+
+            }
+            apiPolicyListDTO.setCount(model.size());
+
+        } else {
+            apiPolicyListDTO.setCount(0);
+        }
+        return apiPolicyListDTO;
     }
 
     public static ApplicationKeyMappingListDTO fromApplicationKeyMappingToApplicationKeyMappingListDTO(
