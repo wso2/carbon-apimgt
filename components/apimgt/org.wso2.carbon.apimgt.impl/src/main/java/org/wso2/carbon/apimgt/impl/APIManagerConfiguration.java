@@ -1570,19 +1570,19 @@ public class APIManagerConfiguration {
         OMElement retrieverElement = omElement.getFirstChildWithName(
                 new QName(APIConstants.GatewayArtifactSynchronizer.RETRIEVER_CONFIG));
         if (retrieverElement != null) {
-            String deployer = retrieverElement.getText();
-            gatewayArtifactSynchronizerProperties.setRetriever(deployer);
+            String retriever = retrieverElement.getText();
+            gatewayArtifactSynchronizerProperties.setRetriever(retriever);
         } else {
             log.debug("GatewayArtifactsSynchronizer Deployer Element is not set. Set to default DB Deployer");
         }
 
-        OMElement skipLocalCopyElement = omElement
-                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.SKIP_LOCAL_COPY_CONFIG));
-        if (skipLocalCopyElement != null) {
-            gatewayArtifactSynchronizerProperties.setSkipLocalCopy(JavaUtils.isTrueExplicitly(skipLocalCopyElement
-                    .getText()));
+        OMElement synchronizerElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.SYNCHRONIZER_CONFIG));
+        if (synchronizerElement != null) {
+            String synchronizer = synchronizerElement.getText();
+            gatewayArtifactSynchronizerProperties.setArtifactSynchronizer(synchronizer);
         } else {
-            log.debug("GatewayArtifactsSynchronizer SkipLocalCopy Element is not set. Set to default false");
+            log.debug("GatewayArtifactsSynchronizer Deployer Element is not set. Set to default DB Deployer");
         }
 
         OMElement gatewayLabelElement = omElement

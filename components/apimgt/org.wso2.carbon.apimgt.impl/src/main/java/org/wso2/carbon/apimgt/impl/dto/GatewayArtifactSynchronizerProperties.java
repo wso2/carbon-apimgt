@@ -1,11 +1,13 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
 public class GatewayArtifactSynchronizerProperties {
 
     private boolean syncArtifacts = false;
-    private boolean skipLocalCopy = false;
-    private String publisher;
-    private String retriever;
+    private boolean fileBasedArtifactSynchronizer = true;
+    private String publisher = APIConstants.GatewayArtifactSynchronizer.DEFAULT_PUBLISHER_NAME;
+    private String retriever = APIConstants.GatewayArtifactSynchronizer.DEFAULT_RETRIEVER_NAME;
     private String gatewayLabel = "DefaultGateway";
 
     public boolean isSyncArtifacts() {
@@ -16,16 +18,6 @@ public class GatewayArtifactSynchronizerProperties {
     public void setSyncArtifacts(boolean syncArtifacts) {
 
         this.syncArtifacts = syncArtifacts;
-    }
-
-    public boolean isSkipLocalCopy() {
-
-        return skipLocalCopy;
-    }
-
-    public void setSkipLocalCopy(boolean skipLocalCopy) {
-
-        this.skipLocalCopy = skipLocalCopy;
     }
 
     public String getPublisher() {
@@ -56,5 +48,22 @@ public class GatewayArtifactSynchronizerProperties {
     public void setGatewayLabel(String gatewayLabel) {
 
         this.gatewayLabel = gatewayLabel;
+    }
+
+    public void setArtifactSynchronizer (String artifactSynchronizer){
+
+        if (APIConstants.GatewayArtifactSynchronizer.IN_MEMORY_SYNCHRONIZER.equals(artifactSynchronizer)){
+            this.fileBasedArtifactSynchronizer = false;
+        }
+    }
+
+    public boolean isFileBasedArtifactSynchronizer(){
+
+        return this.fileBasedArtifactSynchronizer;
+    }
+
+    public boolean isInMemoryArtifactSynchronizer(){
+
+        return !this.fileBasedArtifactSynchronizer;
     }
 }
