@@ -82,6 +82,7 @@ import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
@@ -8481,6 +8482,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void validateSharedScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException {
 
         KeyManagerHolder.getKeyManagerInstance(tenantDomain).validateScopes(scopes);
+    }
+
+    @Override
+    /**
+     * Get the API and URI usages of the given shared scope
+     *
+     * @param uuid       UUID of the shared scope
+     * @param tenantId ID of the Tenant domain
+     * @throws APIManagementException If failed to validate
+     */
+    public SharedScopeUsage getSharedScopeUsage(String uuid, int tenantId) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getSharedScopeUsage(uuid, tenantId);
     }
 
     /**
