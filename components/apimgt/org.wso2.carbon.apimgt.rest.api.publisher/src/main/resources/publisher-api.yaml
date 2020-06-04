@@ -90,8 +90,8 @@ x-wso2-security:
         key: apim:mediation_policy_view
       - description: ""
         roles: admin
-        name: apim:api_workflow
-        key: apim:api_workflow
+        name: apim:api_workflow_approve
+        key: apim:api_workflow_approve
 
 
 ######################################################
@@ -2793,7 +2793,7 @@ paths:
     # Resume the workflow by approving or rejecting the workflow request
     #-------------------------------------------------------------------
     post:
-      x-scope: apim:api_workflow
+      x-scope: apim:api_workflow_approve
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v0.16/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\""
       x-wso2-request: "POST https://localhost:9443/api/am/publisher/v0.16/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"status\" : \"APPROVED\",\n   \"attributes\" : {\n      \"apiCurrentState\": \"Created\",\n      \"apiLCAction\": \"Publish\",\n      \"apiName\":\"APIname\",\n      \"apiVersion\" : \"1.0.0\",\n      \"apiProvider\" : \"admin\",\n      \"invoker\": \"admin\"\n   }\n}"
       x-wso2-response: "HTTP/1.1 200 OK"

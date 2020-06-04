@@ -1906,8 +1906,8 @@ public class SQLConstants {
 
     public static final String ADD_WORKFLOW_ENTRY_SQL =
             " INSERT INTO AM_WORKFLOWS (WF_REFERENCE,WF_TYPE,WF_STATUS,WF_CREATED_TIME,WF_STATUS_DESC,TENANT_ID," +
-            "TENANT_DOMAIN,WF_EXTERNAL_REFERENCE)" +
-            " VALUES (?,?,?,?,?,?,?,?)";
+            "TENANT_DOMAIN,WF_EXTERNAL_REFERENCE,WF_METADATA,WF_PROPERTIES)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_WORKFLOW_ENTRY_SQL =
             " UPDATE AM_WORKFLOWS " +
@@ -1922,6 +1922,33 @@ public class SQLConstants {
 
     public static final String GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_REF_SQL =
             "SELECT * FROM AM_WORKFLOWS WHERE WF_REFERENCE=? AND WF_TYPE=?";
+
+    public static final String ADD_PAYLOAD_SQL =
+            " UPDATE AM_WORKFLOWS " +
+                    " SET " +
+                    "   WF_METADATA = ?, " +
+                    "   WF_PROPERTIES = ?, " +
+                    "   WF_STATUS_DESC = ? " +
+                    " WHERE " +
+                    "    WF_EXTERNAL_REFERENCE = ?";
+
+    public static final String DELETE_WORKFLOW_REQUEST_SQL=
+            " DELETE FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE = ?";
+
+    public static final String GET_ALL_WORKFLOW_DETAILS_BY_EXTERNALWORKFLOWREF =
+            " SELECT  * FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE = ?";
+
+    public static final String GET_ALL_WORKFLOW_DETAILS_BY_WORKFLOW_TYPE =
+            " SELECT  * FROM AM_WORKFLOWS WHERE WF_TYPE = ? AND  WF_STATUS = ? AND TENANT_DOMAIN = ?";
+
+    public static final String GET_ALL_WORKFLOW_DETAILS =
+            " SELECT  * FROM AM_WORKFLOWS WHERE WF_STATUS = ? AND TENANT_DOMAIN = ?";
+
+    public static final String GET_ALL_WORKFLOW_DETAILS_BY_EXTERNAL_WORKFLOW_REFERENCE =
+            " SELECT  * FROM AM_WORKFLOWS " +
+            " WHERE WF_EXTERNAL_REFERENCE = ? " +
+            " AND WF_STATUS = ? " +
+            " AND TENANT_DOMAIN = ?";
 
     public static final String UPDATE_PUBLISHED_DEFAULT_VERSION_SQL =
             " UPDATE AM_API_DEFAULT_VERSION " +
