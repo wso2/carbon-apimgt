@@ -22,6 +22,8 @@ import { Link } from 'react-router-dom';
 import Joi from '@hapi/joi';
 import { withStyles } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
 import Checkbox from '@material-ui/core/Checkbox';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Dialog from '@material-ui/core/Dialog';
@@ -34,10 +36,12 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
+import DescriptionIcon from '@material-ui/icons/Description';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
+import HelpBase from 'AppComponents/AdminPages/Addons/HelpBase';
 import Alert from 'AppComponents/Shared/Alert';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import API from 'AppData/api';
+import Configurations from 'Config';
 import ChipInput from 'material-ui-chip-input';
 import PropTypes from 'prop-types';
 
@@ -183,9 +187,8 @@ const ManageAlerts = (props) => {
             description: intl.formatMessage({
                 id: 'Manage.Alerts.health.availability.description',
                 defaultMessage: 'This alert gets triggered if at least one of the two cases below are '
-                + 'satisfied; Response time of an API > Threshold response time value defined '
-                + 'for that particular API or Response status code >= 500 (By Default) AND '
-                + 'Response status code < 600 (By Default)',
+                + 'satisfied; Response time of an API greater than Threshold response time value defined '
+                + 'for that particular API or Response status code is in between 500 and 600 (By Default)',
             }),
         },
     };
@@ -330,179 +333,239 @@ const ManageAlerts = (props) => {
             }));
         }).finally(() => setInProgress({ unSubscribing: false }));
     };
+
+    const pageProps = {
+        help: (
+            <HelpBase>
+                <List component='nav' aria-label='main mailbox folders'>
+                    <ListItem button>
+                        <ListItemIcon>
+                            <DescriptionIcon />
+                        </ListItemIcon>
+                        <a
+                            rel='noopener noreferrer'
+                            href={
+                                Configurations.app.docUrl
+                                + 'learn/analytics/managing-alerts-with-real-time-analytics/'
+                                + 'subscribing-for-alerts/#system-administrators'
+                            }
+                            target='_blank'
+                        >
+                            <ListItemText
+                                primary={(
+                                    <FormattedMessage
+                                        id='Manage.Alerts.help.link.one'
+                                        defaultMessage='Subscribe to alerts'
+                                    />
+                                )}
+                            />
+                        </a>
+                    </ListItem>
+                </List>
+            </HelpBase>
+        ),
+        pageStyle: 'full',
+        title: intl.formatMessage({
+            id: 'Manage.Alerts.title',
+            defaultMessage: 'Manage Alert Subscriptions',
+        }),
+    };
+
+    const analyticsDisabledEmptyBoxProps = {
+        content: (
+            <Typography variant='body2' color='textSecondary' component='p'>
+                <FormattedMessage
+                    id='Manage.Alerts.analytics.disabled.empty.content'
+                    values={{
+                        breakingLine: <br />,
+                    }}
+                    defaultMessage={'A system administrator is allowed to select '
+                    + 'one or more alert types to subscribe for, as well as specify a '
+                    + 'list of email addresses to which the alerts should be sent. '
+                    + '{breakingLine}{breakingLine}'
+                    + 'Please enable Analytics for subscribing to Alerts'}
+                />
+            </Typography>
+        ),
+        title: (
+            <Typography gutterBottom variant='h5' component='h2'>
+                <FormattedMessage
+                    id='Manage.Alerts.analytics.disabled.empty.title'
+                    defaultMessage='Analytics disabled!'
+                />
+            </Typography>
+        ),
+    };
+
     return (
-        <ContentBase
-            pageStyle='full'
-            title='Manage Alert Subscriptions'
-        >
-            <>
-                <div className={classes.alertsWrapper}>
-                    {!isAnalyticsEnabled
-                        ? (
-                            <>
-                                <InlineMessage type='info' height={100}>
-                                    <div>
-                                        <Typography>
+        <>
+            {!isAnalyticsEnabled
+                ? (
+                    <ContentBase
+                        {...pageProps}
+                        pageStyle='small'
+                    >
+                        <Card>
+                            <CardContent>
+                                {analyticsDisabledEmptyBoxProps.title}
+                                {analyticsDisabledEmptyBoxProps.content}
+                            </CardContent>
+                        </Card>
+                    </ContentBase>
+                )
+                : (
+                    <ContentBase
+                        {...pageProps}
+                    >
+                        <div className={classes.alertsWrapper}>
+                            {!supportedAlerts
+                                ? <CircularProgress />
+                                : (
+                                    <>
+                                        <Typography variant='caption'>
                                             <FormattedMessage
-                                                id='Manage.Alerts.enable.analytics.message'
-                                                defaultMessage='Enable Analytics to Configure Alerts'
+                                                id='Manage.Alerts.subscribe.to.alerts.subheading'
+                                                defaultMessage={'Select the Alert types to subscribe/ unsubscribe'
+                                        + ' and click Save.'}
                                             />
                                         </Typography>
-                                    </div>
-                                </InlineMessage>
-                            </>
-                        )
-                        : (
-                            <>
-                                {!supportedAlerts
-                                    ? <CircularProgress />
-                                    : (
-                                        <>
-                                            <Typography variant='caption'>
-                                                <FormattedMessage
-                                                    id='Manage.Alerts.subscribe.to.alerts.subheading'
-                                                    defaultMessage={'Select the Alert types to subscribe/ unsubscribe'
-                                        + ' and click Save.'}
-                                                />
-                                            </Typography>
-                                            <List>
-                                                {supportedAlerts && supportedAlerts.map((alert) => {
-                                                    return (
-                                                        <ListItem key={alert.id} divider>
-                                                            <ListItemIcon>
-                                                                <Checkbox
-                                                                    edge='start'
-                                                                    tabIndex={-1}
-                                                                    value={alert.id}
-                                                                    checked={isAlertSubscribed(alert.id)}
-                                                                    onChange={() => handleCheckAlert(alert)}
-                                                                    inputProps={{ 'aria-labelledby': alert.name }}
-                                                                    color='primary'
-                                                                />
-                                                            </ListItemIcon>
-                                                            <ListItemText
-                                                                id={alert.id}
-                                                                primary={alertIdMapping[alert.id].name}
-                                                                secondary={alertIdMapping[alert.id].description}
-                                                                className={classes.listItem}
+                                        <List>
+                                            {supportedAlerts && supportedAlerts.map((alert) => {
+                                                return (
+                                                    <ListItem key={alert.id} divider>
+                                                        <ListItemIcon>
+                                                            <Checkbox
+                                                                edge='start'
+                                                                tabIndex={-1}
+                                                                value={alert.id}
+                                                                checked={isAlertSubscribed(alert.id)}
+                                                                onChange={() => handleCheckAlert(alert)}
+                                                                inputProps={{ 'aria-labelledby': alert.name }}
+                                                                color='primary'
                                                             />
-                                                        </ListItem>
-                                                    );
-                                                })}
-                                            </List>
-                                            <ChipInput
-                                                label='Emails'
-                                                variant='outlined'
-                                                className={classes.chipInput}
-                                                placeholder={emails.length === 0
-                                                    ? 'Enter email address and press Enter' : ''}
-                                                defaultValue={emails}
-                                                required
-                                                helperText={validateEmailList(emails) || 'Email address to receive '
+                                                        </ListItemIcon>
+                                                        <ListItemText
+                                                            id={alert.id}
+                                                            primary={alertIdMapping[alert.id].name}
+                                                            secondary={alertIdMapping[alert.id].description}
+                                                            className={classes.listItem}
+                                                        />
+                                                    </ListItem>
+                                                );
+                                            })}
+                                        </List>
+                                        <ChipInput
+                                            label='Emails'
+                                            variant='outlined'
+                                            className={classes.chipInput}
+                                            placeholder={emails.length === 0
+                                                ? 'Enter email address and press Enter' : ''}
+                                            defaultValue={emails}
+                                            required
+                                            helperText={validateEmailList(emails) || 'Email address to receive '
                                                 + 'alerts of selected Alert types.'
                                                 + ' Type email address and press Enter to add'}
-                                                error={validateEmailList(emails)}
-                                                onChange={(chip) => {
-                                                    handleAddEmail(chip);
-                                                }}
-                                                onDelete={(chip) => {
-                                                    handleEmailDeletion(chip);
-                                                }}
-                                            />
-                                            <Grid
-                                                container
-                                                direction='row'
-                                                spacing={2}
-                                                className={classes.btnContainer}
-                                            >
-                                                <Grid item>
-                                                    <Button
-                                                        disabled={emails.length === 0 || subscribedAlerts.length === 0}
-                                                        onClick={handleSubscribe}
-                                                        variant='contained'
-                                                        color='primary'
-                                                    >
-                                                        {isInProgress.subscribing && <CircularProgress size={15} />}
+                                            error={validateEmailList(emails)}
+                                            onChange={(chip) => {
+                                                handleAddEmail(chip);
+                                            }}
+                                            onDelete={(chip) => {
+                                                handleEmailDeletion(chip);
+                                            }}
+                                        />
+                                        <Grid
+                                            container
+                                            direction='row'
+                                            spacing={2}
+                                            className={classes.btnContainer}
+                                        >
+                                            <Grid item>
+                                                <Button
+                                                    disabled={emails.length === 0 || subscribedAlerts.length === 0}
+                                                    onClick={handleSubscribe}
+                                                    variant='contained'
+                                                    color='primary'
+                                                >
+                                                    {isInProgress.subscribing && <CircularProgress size={15} />}
                                             Save
-                                                    </Button>
-                                                </Grid>
-                                                <Grid item>
+                                                </Button>
+                                            </Grid>
+                                            <Grid item>
+                                                <Button
+                                                    disabled={isInProgress.subscribing}
+                                                    color='primary'
+                                                    variant='contained'
+                                                    onClick={() => setUnsubscribeAll(true)}
+                                                >
+                                                    {isInProgress.unSubscribing && <CircularProgress size={15} />}
+                                            Unsubscribe All
+                                                </Button>
+                                            </Grid>
+                                            <Grid item>
+                                                <Link to='/'>
                                                     <Button
                                                         disabled={isInProgress.subscribing}
-                                                        color='primary'
                                                         variant='contained'
-                                                        onClick={() => setUnsubscribeAll(true)}
+                                                        color='default'
                                                     >
-                                                        {isInProgress.unSubscribing && <CircularProgress size={15} />}
-                                            Unsubscribe All
-                                                    </Button>
-                                                </Grid>
-                                                <Grid item>
-                                                    <Link to='/'>
-                                                        <Button
-                                                            disabled={isInProgress.subscribing}
-                                                            variant='contained'
-                                                            color='default'
-                                                        >
-                                                            {isInProgress.unSubscribing
+                                                        {isInProgress.unSubscribing
                                                             && <CircularProgress size={15} />}
                                                     Cancel
-                                                        </Button>
-                                                    </Link>
-                                                </Grid>
+                                                    </Button>
+                                                </Link>
                                             </Grid>
-                                        </>
-                                    )}
-                            </>
-                        )}
-                </div>
-                <Dialog open={unsubscribeAll}>
-                    <DialogTitle>
-                        <Typography className={classes.configDialogHeading}>
-                            <FormattedMessage
-                                id='Manage.Alerts.unsubscribe.confirm.dialog.heading'
-                                defaultMessage='Confirm unsubscription from All Alerts'
-                            />
-                        </Typography>
-                    </DialogTitle>
-                    <DialogContent>
+                                        </Grid>
+                                    </>
+                                )}
+                        </div>
+                    </ContentBase>
+                )}
+            <Dialog open={unsubscribeAll}>
+                <DialogTitle>
+                    <Typography className={classes.configDialogHeading}>
+                        <FormattedMessage
+                            id='Manage.Alerts.unsubscribe.confirm.dialog.heading'
+                            defaultMessage='Confirm unsubscription from All Alerts'
+                        />
+                    </Typography>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        <FormattedMessage
+                            id='Manage.Alerts.unsubscribe.confirm.dialog.message'
+                            defaultMessage={'This will remove all the existing alert subscriptions and emails. This'
+                            + ' action cannot be undone.'}
+                        />
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        color='primary'
+                        size='small'
+                        onClick={() => {
+                            handleUnSubscribe();
+                            setUnsubscribeAll(false);
+                        }}
+                    >
                         <Typography>
                             <FormattedMessage
-                                id='Manage.Alerts.unsubscribe.confirm.dialog.message'
-                                defaultMessage={'This will remove all the existing alert subscriptions and emails. This'
-                            + ' action cannot be undone.'}
+                                id='Manage.Alerts.confirm.btn'
+                                defaultMessage='Unsubscribe All'
                             />
                         </Typography>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button
-                            color='primary'
-                            size='small'
-                            onClick={() => {
-                                handleUnSubscribe();
-                                setUnsubscribeAll(false);
-                            }}
-                        >
-                            <Typography>
-                                <FormattedMessage
-                                    id='Manage.Alerts.confirm.btn'
-                                    defaultMessage='Unsubscribe All'
-                                />
-                            </Typography>
-                        </Button>
-                        <Button
-                            color='secondary'
-                            size='small'
-                            onClick={() => setUnsubscribeAll(false)}
-                        >
-                            <Typography>
-                                <FormattedMessage id='Manage.Alerts.cancel.btn' defaultMessage='Cancel' />
-                            </Typography>
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            </>
-        </ContentBase>
+                    </Button>
+                    <Button
+                        color='secondary'
+                        size='small'
+                        onClick={() => setUnsubscribeAll(false)}
+                    >
+                        <Typography>
+                            <FormattedMessage id='Manage.Alerts.cancel.btn' defaultMessage='Cancel' />
+                        </Typography>
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
     );
 };
 
