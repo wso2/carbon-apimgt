@@ -83,18 +83,6 @@ function Header(props) {
                     <Breadcrumbs />
                     <Grid item xs />
                     <Grid item>
-                        <Link className={classes.link} href='#' variant='body2'>
-                                Go to docs
-                        </Link>
-                    </Grid>
-                    <Grid item>
-                        <Tooltip title='Alerts • No alerts'>
-                            <IconButton color='inherit'>
-                                <NotificationsIcon />
-                            </IconButton>
-                        </Tooltip>
-                    </Grid>
-                    <Grid item>
                         {avatar}
                         {/* <IconButton color="inherit" className={classes.iconButtonAvatar}>
                 <Avatar src="/static/images/avatar/1.jpg" alt="My Avatar" />
