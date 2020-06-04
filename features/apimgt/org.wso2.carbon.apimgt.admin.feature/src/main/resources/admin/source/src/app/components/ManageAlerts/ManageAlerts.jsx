@@ -41,7 +41,6 @@ import API from 'AppData/api';
 import ChipInput from 'material-ui-chip-input';
 import PropTypes from 'prop-types';
 
-
 const styles = (theme) => ({
     alertsWrapper: {
         padding: theme.spacing(2),
@@ -227,7 +226,7 @@ const ManageAlerts = (props) => {
         if (validationError) {
             const errorType = validationError.details[0].type;
             if (errorType === 'string.email') {
-                return 'Invalid Email';
+                return 'Invalid Email: ' + value;
             }
         }
         return false;
