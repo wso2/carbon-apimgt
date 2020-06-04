@@ -21,11 +21,8 @@ import { Avatar as AvatarComponent } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import IconButton from '@material-ui/core/IconButton';
-import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
-import NotificationsIcon from '@material-ui/icons/Notifications';
 import Toolbar from '@material-ui/core/Toolbar';
-import Tooltip from '@material-ui/core/Tooltip';
 import { withStyles } from '@material-ui/core/styles';
 import Breadcrumbs from 'AppComponents/Base/Header/Breadcrumbs';
 
@@ -82,18 +79,6 @@ function Header(props) {
                     </Hidden>
                     <Breadcrumbs />
                     <Grid item xs />
-                    <Grid item>
-                        <Link className={classes.link} href='#' variant='body2'>
-                                Go to docs
-                        </Link>
-                    </Grid>
-                    <Grid item>
-                        <Tooltip title='Alerts • No alerts'>
-                            <IconButton color='inherit'>
-                                <NotificationsIcon />
-                            </IconButton>
-                        </Tooltip>
-                    </Grid>
                     <Grid item>
                         {avatar}
                         {/* <IconButton color="inherit" className={classes.iconButtonAvatar}>
