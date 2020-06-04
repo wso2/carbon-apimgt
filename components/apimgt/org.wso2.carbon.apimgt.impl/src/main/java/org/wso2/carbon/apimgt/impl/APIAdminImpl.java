@@ -32,8 +32,11 @@ import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
@@ -546,5 +549,40 @@ public class APIAdminImpl implements APIAdmin {
                     "Key Manager Type " + keyManagerConfigurationDTO.getType() + " is invalid.",
                     ExceptionCodes.INVALID_KEY_MANAGER_TYPE);
         }
+    }
+
+    /**
+     * The method converts the date into timestamp
+     *
+     * @param workflowType workflow Type of workflow pending request
+     * @param status       Workflow status of workflow pending request
+     * @param tenantDomain tenant domain of user
+     * @return Workflow[]  list of workflow pending requests
+     * @throws APIManagementException
+     */
+    public Workflow[] getworkflows(String workflowType, String status, String tenantDomain)
+            throws APIManagementException {
+        return apiMgtDAO.getworkflows(workflowType, status, tenantDomain);
+    }
+
+    /**
+     * The method converts the date into timestamp
+     *
+     * @param externelWorkflowRef External Workflow Reference of workflow pending request
+     * @param status              Workflow status of workflow pending request
+     * @param tenantDomain        tenant domain of user
+     * @return Workflow           Workflow pending request
+     * @throws APIManagementException
+     */
+    public Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status,
+                                                                      String tenantDomain) throws APIManagementException {
+        Workflow workflow = apiMgtDAO.getworkflowReferenceByExternalWorkflowReferenceID(externelWorkflowRef,
+                status, tenantDomain);
+
+        if (workflow == null) {
+            String msg = "External workflow Reference: " + externelWorkflowRef + " was not found.";
+            throw new APIMgtResourceNotFoundException(msg);
+        }
+        return workflow;
     }
 }

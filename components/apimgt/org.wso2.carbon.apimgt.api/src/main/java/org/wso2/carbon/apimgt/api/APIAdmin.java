@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
+import org.wso2.carbon.apimgt.api.model.Workflow;
 
 import java.util.List;
 import java.util.Map;
@@ -278,5 +279,28 @@ public interface APIAdmin  {
      * @throws APIManagementException
      */
     KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String tenantDomain, String name)
+            throws APIManagementException;
+
+    /**
+     * The method get all the pending workflow requests
+     *
+     * @param workflowType
+     * @param status
+     * @param tenantDomain
+     * @return Workflow[]
+     * @throws APIManagementException
+     */
+    Workflow[] getworkflows(String workflowType, String status, String tenantDomain) throws APIManagementException;
+
+    /**
+     * The method get all the pending workflow requests
+     *
+     * @param externelWorkflowRef
+     * @param status
+     * @param tenantDomain
+     * @return Workflow
+     * @throws APIManagementException
+     */
+    Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status, String tenantDomain)
             throws APIManagementException;
 }
