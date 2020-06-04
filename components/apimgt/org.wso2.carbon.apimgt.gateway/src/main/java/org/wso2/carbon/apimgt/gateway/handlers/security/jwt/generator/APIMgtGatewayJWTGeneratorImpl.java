@@ -85,9 +85,9 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         Map<String, Object> claims = new HashMap<>();
         Set<String> jwtExcludedClaims = jwtConfigurationDto.getJWTExcludedClaims();
         jwtExcludedClaims.addAll(Arrays.asList(restrictedClaims));
-        JWTClaimsSet jwtToken = jwtInfoDto.getJwtToken();
+        Map<String, Object> jwtToken = jwtInfoDto.getJwtValidationInfo().getClaims();
         if (jwtToken != null) {
-            for (Map.Entry<String, Object> jwtClaimEntry : jwtToken.getClaims().entrySet()) {
+            for (Map.Entry<String, Object> jwtClaimEntry : jwtToken.entrySet()) {
                 if (!jwtExcludedClaims.contains(jwtClaimEntry.getKey())) {
                     claims.put(jwtClaimEntry.getKey(), jwtClaimEntry.getValue());
                 }

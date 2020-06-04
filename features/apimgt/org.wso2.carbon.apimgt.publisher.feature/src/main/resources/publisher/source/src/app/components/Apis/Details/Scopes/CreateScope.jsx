@@ -269,14 +269,14 @@ class CreateScope extends React.Component {
             return;
         }
         const scope = this.state.apiScope;
-        scope.bindings = {
-            type: 'role',
-            values: this.state.validRoles,
-        };
+        scope.bindings = this.state.validRoles;
         const scopes = api.scopes.map((aScope) => {
             return aScope;
         });
-        scopes.push(scope);
+        scopes.push({
+            scope,
+            shared: false,
+        });
         const updateProperties = { scopes };
         const promisedApiUpdate = updateAPI(updateProperties);
         this.setState({ scopeAddDisabled: true });

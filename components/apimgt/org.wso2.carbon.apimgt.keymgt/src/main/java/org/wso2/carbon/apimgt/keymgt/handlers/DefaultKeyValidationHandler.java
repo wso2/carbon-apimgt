@@ -24,8 +24,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
@@ -34,26 +36,28 @@ import org.wso2.carbon.identity.application.authentication.framework.model.Authe
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
-import org.wso2.carbon.identity.oauth2.validators.JDBCScopeValidator;
-import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
-import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDAO;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
+import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
+import org.wso2.carbon.identity.oauth2.validators.JDBCScopeValidator;
+import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
     private static final Log log = LogFactory.getLog(DefaultKeyValidationHandler.class);
 
-    public DefaultKeyValidationHandler(){
+    public DefaultKeyValidationHandler() {
+
         log.info(this.getClass().getName() + " Initialised");
     }
 
@@ -75,12 +79,61 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             }
         }
 
-        AccessTokenInfo tokenInfo;
+        AccessTokenInfo tokenInfo = null;
 
         try {
-
+            String electedKeyManager = null;
             // Obtaining details about the token.
-            tokenInfo = KeyManagerHolder.getKeyManagerInstance().getTokenMetaData(validationContext.getAccessToken());
+            if (StringUtils.isNotEmpty(validationContext.getTenantDomain())) {
+                Map<String, KeyManagerDto>
+                        tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(validationContext.getTenantDomain());
+                KeyManager keyManagerInstance = null;
+                if (tenantKeyManagers.values().size() == 1){
+                    Map.Entry<String, KeyManagerDto> entry = tenantKeyManagers.entrySet().iterator().next();
+                    if (entry != null) {
+                        KeyManagerDto keyManagerDto = entry.getValue();
+                        if (keyManagerDto != null && (validationContext.getKeyManagers()
+                                .contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
+                                validationContext.getKeyManagers().contains(keyManagerDto.getName()))) {
+                            keyManagerInstance = keyManagerDto.getKeyManager();
+                            electedKeyManager = entry.getKey();
+                        }
+                    }
+                } else if (tenantKeyManagers.values().size() > 1) {
+                    if (validationContext.getKeyManagers()
+                            .contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS)) {
+                        for (Map.Entry<String,KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
+                            if (keyManagerDtoEntry.getValue().getKeyManager() != null &&
+                                    keyManagerDtoEntry.getValue().getKeyManager().canHandleToken(validationContext.getAccessToken())) {
+                                keyManagerInstance = keyManagerDtoEntry.getValue().getKeyManager();
+                                electedKeyManager = keyManagerDtoEntry.getKey();
+                                break;
+                            }
+                        }
+                    } else {
+                        for (String selectedKeyManager : validationContext.getKeyManagers()) {
+                            KeyManagerDto keyManagerDto = tenantKeyManagers.get(selectedKeyManager);
+                            if (keyManagerDto != null && keyManagerDto.getKeyManager() != null &&
+                                    keyManagerDto.getKeyManager().canHandleToken(validationContext.getAccessToken())) {
+                                keyManagerInstance = keyManagerDto.getKeyManager();
+                                electedKeyManager = selectedKeyManager;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+
+                if (keyManagerInstance != null) {
+                    tokenInfo = keyManagerInstance.getTokenMetaData(validationContext.getAccessToken());
+                }else{
+                    APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+                    validationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
+                    apiKeyValidationInfoDTO
+                            .setValidationStatus(APIConstants.KeyValidationStatus.KEY_MANAGER_NOT_AVAILABLE);
+                    return false;
+                }
+            }
 
             if (tokenInfo == null) {
                 return false;
@@ -97,13 +150,13 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 apiKeyValidationInfoDTO.setAuthorized(false);
                 if (tokenInfo.getErrorcode() > 0) {
                     apiKeyValidationInfoDTO.setValidationStatus(tokenInfo.getErrorcode());
-                }else {
+                } else {
                     apiKeyValidationInfoDTO.setValidationStatus(APIConstants
-                                                                        .KeyValidationStatus.API_AUTH_GENERAL_ERROR);
+                            .KeyValidationStatus.API_AUTH_GENERAL_ERROR);
                 }
                 return false;
             }
-
+            apiKeyValidationInfoDTO.setKeyManager(electedKeyManager);
             apiKeyValidationInfoDTO.setAuthorized(tokenInfo.isTokenValid());
             apiKeyValidationInfoDTO.setEndUserName(tokenInfo.getEndUserName());
             apiKeyValidationInfoDTO.setConsumerKey(tokenInfo.getConsumerKey());
@@ -187,7 +240,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
         String resourceList = validationContext.getMatchingResource();
         List<String> resourceArray = new ArrayList<>(Arrays.asList(resourceList.split(",")));
-        Set<OAuth2ScopeValidator> oAuth2ScopeValidators = new HashSet<> (OAuthServerConfiguration.getInstance().
+        Set<OAuth2ScopeValidator> oAuth2ScopeValidators = new HashSet<>(OAuthServerConfiguration.getInstance().
                 getOAuth2ScopeValidators());
         //validate scope for filtered validators from db
         String[] scopeValidators;
@@ -197,7 +250,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             appInfo = oAuthAppDAO.getAppInformation(clientId);
             scopeValidators = appInfo.getScopeValidators();     //get scope validators from the DB
             boolean isValid = true;
-            List<String> appScopeValidators=  new ArrayList<>(Arrays.asList(scopeValidators));
+            List<String> appScopeValidators = new ArrayList<>(Arrays.asList(scopeValidators));
             for (String resourceString : resourceArray) {
                 String resource = validationContext.getContext() + "/" + actualVersion + resourceString
                         + ":" + validationContext.getHttpVerb();
@@ -219,7 +272,8 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                                 break;
                             }
                         } else if (validator != null && appScopeValidators.contains(validator.getValidatorName())) {
-                            //take the intersection of defined scope validators and scope validators registered for the apps
+                            //take the intersection of defined scope validators and scope validators registered for
+                            // the apps
                             log.debug(String.format("Validating scope of token %s using %s", accessTokenDO.getTokenId(),
                                     validator.getValidatorName()));
 
@@ -243,9 +297,11 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             }
             if (!appScopeValidators.isEmpty()) {   //if scope validators are not defined in identity.xml but there are
                 // scope validators assigned to an application, throws exception.
-                throw new IdentityOAuth2Exception(String.format("The scope validator(s) %s registered for application %s@%s" +
-                                " is/are not found in the server configuration ", StringUtils.join(appScopeValidators, ", "),
-                        appInfo.getApplicationName(), OAuth2Util.getTenantDomainOfOauthApp(appInfo)));
+                throw new IdentityOAuth2Exception(
+                        String.format("The scope validator(s) %s registered for application %s@%s" +
+                                        " is/are not found in the server configuration ",
+                                StringUtils.join(appScopeValidators, ", "),
+                                appInfo.getApplicationName(), OAuth2Util.getTenantDomainOfOauthApp(appInfo)));
             }
 
         } catch (InvalidOAuthClientException e) {

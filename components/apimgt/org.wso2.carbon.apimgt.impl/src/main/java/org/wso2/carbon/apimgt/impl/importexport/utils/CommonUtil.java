@@ -28,6 +28,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
@@ -65,7 +66,6 @@ public class CommonUtil {
             File file = new File(path);
             if (!file.exists() && !file.mkdirs()) {
                 String errorMessage = "Error while creating directory : " + path;
-                log.error(errorMessage);
                 throw new APIImportExportException(errorMessage);
             }
         }
@@ -76,11 +76,16 @@ public class CommonUtil {
      *
      * @throws APIImportExportException If an error occurs while creating temporary location
      */
-    public static File createTempDirectory() throws APIImportExportException {
+    public static File createTempDirectory(Identifier identifier) throws APIImportExportException {
 
         String currentDirectory = System.getProperty(APIConstants.JAVA_IO_TMPDIR);
-        String createdDirectories = File.separator + RandomStringUtils
-                .randomAlphanumeric(APIImportExportConstants.TEMP_FILENAME_LENGTH) + File.separator;
+        String createdDirectories;
+        if (identifier != null) {
+            createdDirectories = File.separator + identifier.toString() + File.separator;
+        } else {
+            createdDirectories = File.separator + RandomStringUtils
+                    .randomAlphanumeric(APIImportExportConstants.TEMP_FILENAME_LENGTH) + File.separator;
+        }
         File tempDirectory = new File(currentDirectory + createdDirectories);
         createDirectory(tempDirectory.getPath());
         return tempDirectory;
@@ -141,7 +146,6 @@ public class CommonUtil {
             }
         } catch (IOException e) {
             String errorMessage = "I/O error while adding files to archive";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -171,7 +175,6 @@ public class CommonUtil {
             zipOutputStream.closeEntry();
         } catch (IOException e) {
             String errorMessage = "I/O error while writing files to archive";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -189,7 +192,6 @@ public class CommonUtil {
             IOUtils.copy(new StringReader(content), writer);
         } catch (IOException e) {
             String errorMessage = "I/O error while writing to file: " + path;
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -263,7 +265,6 @@ public class CommonUtil {
             }
         } catch (IOException e) {
             String errorMessage = "Error in transferring files.";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }
@@ -304,7 +305,6 @@ public class CommonUtil {
                 if (!canonicalizedDestinationFilePath.startsWith(new File(destination).getCanonicalPath())) {
                     String errorMessage = "Attempt to upload invalid zip archive with file at " + currentEntry +
                             ". File path is outside target directory";
-                    log.error(errorMessage);
                     throw new APIImportExportException(errorMessage);
                 }
 
@@ -325,7 +325,6 @@ public class CommonUtil {
             return archiveName;
         } catch (IOException e) {
             String errorMessage = "Failed to extract the archive (zip) file. ";
-            log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
     }

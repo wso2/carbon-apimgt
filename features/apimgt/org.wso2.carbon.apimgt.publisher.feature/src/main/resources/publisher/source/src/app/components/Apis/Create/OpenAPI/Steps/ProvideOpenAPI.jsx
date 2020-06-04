@@ -129,6 +129,11 @@ export default function ProvideOpenAPI(props) {
                 }
                 onValidate(isValidURL);
                 setIsValidating(false);
+            }).catch((error) => {
+                setValidity({ url: { message: error.message } });
+                onValidate(false);
+                setIsValidating(false);
+                console.error(error);
             });
             // Valid URL string
             // TODO: Handle catch network or api call failures ~tmkb
@@ -201,7 +206,7 @@ export default function ProvideOpenAPI(props) {
                             <FormControlLabel
                                 value={ProvideOpenAPI.INPUT_TYPES.FILE}
                                 control={<Radio color='primary' />}
-                                label='OpenAPI File'
+                                label='OpenAPI File/Archive'
                             />
                         </RadioGroup>
                     </FormControl>
@@ -253,13 +258,14 @@ export default function ProvideOpenAPI(props) {
                                     error={isValid.file}
                                     onDrop={onDrop}
                                     files={apiInputs.inputValue}
-                                    accept='.json,application/json,.yaml'
+                                    accept='.bz,.bz2,.gz,.rar,.tar,.zip,.7z,.json,application/json,.yaml'
                                 >
                                     {isValidating ? (<CircularProgress />)
                                         : ([
                                             <FormattedMessage
                                                 id='Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.dropzone'
-                                                defaultMessage='Drag & Drop files here {break} or {break} Browse files'
+                                                defaultMessage={'Drag & Drop Open API File/Archive '
+                                                 + 'here {break} or {break} Browse files'}
                                                 values={{ break: <br /> }}
                                             />,
                                             <Button
@@ -299,7 +305,6 @@ export default function ProvideOpenAPI(props) {
                             // 'Give the URL of OpenAPI endpoint'
                             helperText={(isValid.url && isValid.url.message) || 'Click away to validate the URL'}
                             error={isInvalidURL}
-                            disabled={isValidating}
                         />
                     )}
                 </Grid>

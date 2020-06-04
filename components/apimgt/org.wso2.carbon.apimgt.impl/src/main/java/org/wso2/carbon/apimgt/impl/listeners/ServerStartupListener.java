@@ -20,8 +20,12 @@ package org.wso2.carbon.apimgt.impl.listeners;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.loader.KeyManagerConfigurationDataRetriever;
+import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +39,12 @@ public class ServerStartupListener implements ServerStartupObserver {
     @Override
     public void completedServerStartup() {
         copyToExtensions();
+        try {
+            KeyMgtRegistrationService.registerDefaultKeyManager(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        } catch (APIManagementException e) {
+            log.error("Error while registering Default Key Manager for SuperTenant", e);
+        }
+        startConfigureKeyManagerConfigurations();
     }
 
     /**
@@ -111,6 +121,11 @@ public class ServerStartupListener implements ServerStartupObserver {
             log.error("An error occurred while copying file to directory", ex);
             throw new IOException("An error occurred while copying file to directory", ex);
         }
+    }
+    private void startConfigureKeyManagerConfigurations(){
+        KeyManagerConfigurationDataRetriever keyManagerConfigurationDataRetriever  =
+                new KeyManagerConfigurationDataRetriever();
+        keyManagerConfigurationDataRetriever.startLoadKeyManagerConfigurations();
     }
 
     @Override

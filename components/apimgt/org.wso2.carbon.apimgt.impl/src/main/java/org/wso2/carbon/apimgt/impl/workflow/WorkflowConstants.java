@@ -24,6 +24,8 @@ public class WorkflowConstants {
 
     public static final String WF_TYPE_AM_SUBSCRIPTION_CREATION = "AM_SUBSCRIPTION_CREATION";
 
+    public static final String WF_TYPE_AM_SUBSCRIPTION_UPDATE = "AM_SUBSCRIPTION_UPDATE";
+
     public static final String WF_TYPE_AM_SUBSCRIPTION_DELETION = "AM_SUBSCRIPTION_DELETION";
 
     public static final String WF_TYPE_AM_APPLICATION_CREATION = "AM_APPLICATION_CREATION";
@@ -59,17 +61,21 @@ public class WorkflowConstants {
 
     public static final String SUBSCRIPTION_CREATION = "SubscriptionCreation";
 
+    public static final String SUBSCRIPTION_UPDATE = "SubscriptionUpdate";
+
     public static final String SUBSCRIPTION_DELETION = "SubscriptionDeletion";
 
     public static final String APPLICATION_DELETION = "ApplicationDeletion";
     
     public static final String API_STATE_CHANGE = "APIStateChange";
     
-    public static final String API_WF_SCOPE = "apim:api_workflow"; 
+    public static final String API_WF_SCOPE = "apim:api_workflow_approve";
 
     public static final String REGISTER_USER_WS_ACTION = "http://workflow.registeruser.apimgt.carbon.wso2.org/initiate";
 
     public static final String CREATE_SUBSCRIPTION_WS_ACTION = "http://workflow.subscription.apimgt.carbon.wso2" +
+            ".org/initiate";
+    public static final String UPDATE_SUBSCRIPTION_WS_ACTION = "http://workflow.subscription.apimgt.carbon.wso2" +
             ".org/initiate";
 
     public static final String CREATE_APPLICATION_WS_ACTION = "http://workflow.application.apimgt.carbon.wso2" +

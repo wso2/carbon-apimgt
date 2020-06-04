@@ -58,7 +58,11 @@
         "Roles": "admin,Internal/creator"
       },
       {
-        "Name": "apim:api_workflow",
+        "Name": "apim:api_workflow_view",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:api_workflow_approve",
         "Roles": "admin"
       },
       {
@@ -71,6 +75,10 @@
       },
       {
         "Name": "apim:api_import_export",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:api_product_import_export",
         "Roles": "admin"
       },
       {
@@ -222,24 +230,24 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:tenant_theme_manage",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:admin_operations",
         "Roles": "admin"
       },
       {
-        "Name": "registry:view",
-        "Roles": "admin,Internal/registry_admin,Internal/registry_user,Internal/registry_browser,Internal/creator,Internal/publisher"
+        "Name": "apim:shared_scope_manage",
+        "Roles": "admin"
       },
       {
-        "Name": "registry:write",
-        "Roles": "admin,Internal/registry_admin"
+        "Name": "apim:admin_alert_manage",
+        "Roles": "admin"
       },
       {
-        "Name": "registry:entry_view",
-        "Roles": "admin,Internal/registry_admin,Internal/registry_user,Internal/registry_browser,Internal/creator,Internal/publisher"
-      },
-      {
-        "Name": "registry:entry_write",
-        "Roles": "admin,Internal/registry_admin,Internal/registry_user"
+        "Name": "apim:bot_data",
+        "Roles": "admin"
       }
     ]
   },

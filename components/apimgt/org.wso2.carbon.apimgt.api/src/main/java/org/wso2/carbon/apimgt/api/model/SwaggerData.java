@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +36,7 @@ public class SwaggerData {
         private String authType;
         private String policy;
         private Scope scope;
+        private List<Scope> scopes = new ArrayList<>();
         private String amznResourceName;
         private int amznResourceTimeout;
 
@@ -93,6 +95,17 @@ public class SwaggerData {
         public void setAmznResourceTimeout(int amznResourceTimeout) {
             this.amznResourceTimeout = amznResourceTimeout;
         }
+
+        public List<Scope> getScopes() {
+
+            return scopes;
+        }
+
+        public void setScopes(List<Scope> scopes) {
+
+            this.scopes = scopes;
+        }
+
     }
 
     private String title;
@@ -127,6 +140,7 @@ public class SwaggerData {
             resource.authType = uriTemplate.getAuthType();
             resource.policy = uriTemplate.getThrottlingTier();
             resource.scope = uriTemplate.getScope();
+            resource.scopes = uriTemplate.retrieveAllScopes();
             resource.amznResourceName = uriTemplate.getAmznResourceName();
             resource.amznResourceTimeout = uriTemplate.getAmznResourceTimeout();
             resources.add(resource);
@@ -164,6 +178,7 @@ public class SwaggerData {
             resource.authType = uriTemplate.getAuthType();
             resource.policy = uriTemplate.getThrottlingTier();
             resource.scope = uriTemplate.getScope();
+            resource.scopes = uriTemplate.retrieveAllScopes();
             resource.amznResourceName = uriTemplate.getAmznResourceName();
             resource.amznResourceTimeout = uriTemplate.getAmznResourceTimeout();
             resources.add(resource);

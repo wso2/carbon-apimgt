@@ -1,0 +1,20 @@
+{
+  "name": "org.wso2.apimgt.notification.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "eventType",
+      "type": "STRING"
+    },
+    {
+      "name": "timestamp",
+      "type": "LONG"
+    },
+    {
+      "name": "event",
+      "type": "STRING"
+    }
+  ]
+}

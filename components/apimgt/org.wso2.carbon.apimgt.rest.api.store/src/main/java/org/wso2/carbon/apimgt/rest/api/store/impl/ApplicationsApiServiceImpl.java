@@ -23,7 +23,6 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -53,10 +52,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
+
 import javax.ws.rs.core.Response;
 
 /**
@@ -194,7 +191,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         String clientId = body.getConsumerKey();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            String clientSecret = apiConsumer.renewConsumerSecret(clientId);
+            String clientSecret = apiConsumer.renewConsumerSecret(clientId, APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
 
             ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
             applicationKeyDTO.setConsumerKey(clientId);
@@ -250,7 +247,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
                             username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
-                            jsonParams);
+                            jsonParams, APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
 
@@ -365,7 +362,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     jsonParams.addProperty(APIConstants.JSON_USERNAME, username);
                     OAuthApplicationInfo updatedData = apiConsumer.updateAuthClient(username, application.getName(),
                             keyType, body.getCallbackUrl(), null, null, null, body.getGroupId(),
-                            new Gson().toJson(jsonParams));
+                            new Gson().toJson(jsonParams), APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
                     ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
                     applicationKeyDTO.setCallbackUrl(updatedData.getCallBackURL());
                     JsonObject json = new Gson().fromJson(updatedData.getJsonString(), JsonObject.class);

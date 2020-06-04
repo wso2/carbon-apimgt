@@ -47,18 +47,19 @@ public class SQLConstants {
             "   AND MAP.CONSUMER_KEY   = ? ";
 
     public static final String GET_APPLICATION_REGISTRATION_SQL =
-            " SELECT REG_ID FROM AM_APPLICATION_REGISTRATION WHERE SUBSCRIBER_ID = ? AND APP_ID = ? AND TOKEN_TYPE = ?";
+            " SELECT REG_ID FROM AM_APPLICATION_REGISTRATION WHERE SUBSCRIBER_ID = ? AND APP_ID = ? AND TOKEN_TYPE = " +
+                    "? AND KEY_MANAGER = ?";
 
     public static final String ADD_APPLICATION_REGISTRATION_SQL =
             " INSERT INTO " +
             "   AM_APPLICATION_REGISTRATION (SUBSCRIBER_ID,WF_REF,APP_ID,TOKEN_TYPE,ALLOWED_DOMAINS," +
-            "VALIDITY_PERIOD,TOKEN_SCOPE,INPUTS) " +
-            " VALUES(?,?,?,?,?,?,?,?)";
+            "VALIDITY_PERIOD,TOKEN_SCOPE,INPUTS,KEY_MANAGER) " +
+            " VALUES(?,?,?,?,?,?,?,?,?)";
 
     public static final String ADD_APPLICATION_KEY_MAPPING_SQL =
             " INSERT INTO " +
-            "   AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,KEY_TYPE,STATE) " +
-            " VALUES(?,?,?)";
+            "   AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,KEY_TYPE,STATE,KEY_MANAGER,UUID) " +
+            " VALUES(?,?,?,?,?)";
 
     public static final String GET_OAUTH_APPLICATION_SQL =
             " SELECT CONSUMER_SECRET, USERNAME, TENANT_ID, APP_NAME, APP_NAME, CALLBACK_URL, GRANT_TYPES " +
@@ -150,7 +151,8 @@ public class SQLConstants {
                     "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
-                    "   AND SP.SUB_STATUS = '"+ APIConstants.SubscriptionStatus.UNBLOCKED +"'" + 
+                    "   AND (SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.UNBLOCKED +
+                    "' OR SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING + "')" +
                     "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND APP.APPLICATION_ID = ?";
 
@@ -171,7 +173,8 @@ public class SQLConstants {
                     "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
-                    "   AND SP.SUB_STATUS = '"+ APIConstants.SubscriptionStatus.UNBLOCKED +"'" + 
+                    "   AND (SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.UNBLOCKED +
+                    "' OR SP.SUB_STATUS = '" + APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING + "')" +
                     "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND APP.APPLICATION_ID = ?";
 
@@ -251,45 +254,6 @@ public class SQLConstants {
             "   API.API_PROVIDER" +
             " FROM ";
 
-    public static final String VALIDATE_KEY_DEFAULT_SUFFIX =
-            " IAT," + APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE + "ISAT," +
-            "   AM_SUBSCRIPTION SUB," +
-            "   AM_SUBSCRIBER SUBS," +
-            "   AM_APPLICATION APP," +
-            "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_API API," +
-            "   IDN_OAUTH_CONSUMER_APPS ICA" +
-            " WHERE " +
-            "   IAT.ACCESS_TOKEN = ? " +
-            "   AND API.CONTEXT = ? " +
-            "   AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
-            "   AND ICA.CONSUMER_KEY = AKM.CONSUMER_KEY " +
-            "   AND ICA.ID = IAT.CONSUMER_KEY_ID" +
-            "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-            "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-            "   AND API.API_ID = SUB.API_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
-
-    public static final String VALIDATE_KEY_VERSION_SUFFIX =
-            " IAT," + APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE + "ISAT," +
-            "   AM_SUBSCRIPTION SUB," +
-            "   AM_SUBSCRIBER SUBS," +
-            "   AM_APPLICATION APP," +
-            "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_API API," +
-            "   IDN_OAUTH_CONSUMER_APPS ICA" +
-            " WHERE " +
-            "   IAT.ACCESS_TOKEN = ? " +
-            "   AND API.CONTEXT = ? " +
-            "   AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
-            "   AND API.API_VERSION = ? " +
-            "   AND ICA.CONSUMER_KEY = AKM.CONSUMER_KEY " +
-            "   AND ICA.ID = IAT.CONSUMER_KEY_ID" +
-            "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-            "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-            "   AND API.API_ID = SUB.API_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
-
     public static final String VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
             " SELECT " +
             "   SUB.TIER_ID," +
@@ -311,6 +275,7 @@ public class SQLConstants {
             " WHERE " +
             "   API.CONTEXT = ? " +
             "   AND AKM.CONSUMER_KEY = ? " +
+            "   AND AKM.KEY_MANAGER = ? " +
             "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUB.API_ID" +
@@ -337,6 +302,7 @@ public class SQLConstants {
             " WHERE " +
             "   API.CONTEXT = ? " +
             "   AND AKM.CONSUMER_KEY = ? " +
+            "   AND AKM.KEY_MANAGER = ? " +
             "   AND API.API_VERSION = ? " +
             "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
@@ -370,6 +336,7 @@ public class SQLConstants {
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
+                    "   AND AKM.KEY_MANAGER = ? " +
                     "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
                     "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
                     "   AND API.API_ID = SUB.API_ID" +
@@ -404,6 +371,7 @@ public class SQLConstants {
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
+                    "   AND AKM.KEY_MANAGER = ? " +
                     "   AND APS.TENANT_ID = ? " +
                     "   AND API.API_VERSION = ? " +
                     "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
@@ -411,15 +379,6 @@ public class SQLConstants {
                     "   AND API.API_ID = SUB.API_ID" +
                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
                     "   AND APS.NAME = SUB.TIER_ID" ;
-
-    public static final String UPDATE_TOKEN_PREFIX = "UPDATE ";
-
-    public static final String UPDATE_TOKEN_SUFFIX =
-            " SET " +
-            "   TOKEN_STATE = ? " +
-            "   ,TOKEN_STATE_ID = ? " +
-            " WHERE " +
-            "   ACCESS_TOKEN = ?";
 
     public static final String ADD_SUBSCRIBER_SQL =
             " INSERT" +
@@ -466,11 +425,25 @@ public class SQLConstants {
             "   API_ID = ? " +
             "   AND APPLICATION_ID = ?";
 
+    public static final String RETRIEVE_SUBSCRIPTION_ID_SQL =
+            " SELECT " +
+            "   SUBSCRIPTION_ID " +
+            " FROM " +
+            "   AM_SUBSCRIPTION " +
+            " WHERE " +
+            "   UUID = ? ";
+
     public static final String ADD_SUBSCRIPTION_SQL =
             " INSERT INTO " +
             "   AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME, " +
-                    "UPDATED_TIME, UUID) " +
-            " VALUES (?,?,?,?,?,?,?,?,?)";
+            "   UPDATED_TIME, UUID, TIER_ID_PENDING) " +
+            " VALUES (?,?,?,?,?,?,?,?,?,?)";
+
+    public static final String UPDATE_SINGLE_SUBSCRIPTION_SQL =
+            " UPDATE AM_SUBSCRIPTION " +
+            " SET TIER_ID_PENDING = ? " +
+            " , SUB_STATUS = ? " +
+            " WHERE UUID = ?";
     
     public static final String GET_SUBSCRIPTION_UUID_SQL =
             " SELECT UUID " +
@@ -519,6 +492,7 @@ public class SQLConstants {
             "   API.API_TYPE AS API_TYPE, " +
             "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
+            "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   SUBS.UUID AS UUID, " +
@@ -539,6 +513,7 @@ public class SQLConstants {
             "   API.API_TYPE AS API_TYPE, " +
             "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
+            "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   SUBS.UUID AS UUID, " +
@@ -698,6 +673,7 @@ public class SQLConstants {
             "   API.API_NAME AS API_NAME, " +
             "   API.API_VERSION AS API_VERSION, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
+            "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
             "   APP.APPLICATION_ID AS APP_ID, " +
             "   APP.UUID AS APP_UUID, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
@@ -724,6 +700,7 @@ public class SQLConstants {
                     "   API.API_NAME AS API_NAME, " +
                     "   API.API_VERSION AS API_VERSION, " +
                     "   SUBS.TIER_ID AS TIER_ID, " +
+                    "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
                     "   APP.APPLICATION_ID AS APP_ID, " +
                     "   SUBS.SUB_STATUS AS SUB_STATUS, " +
                     "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
@@ -750,6 +727,7 @@ public class SQLConstants {
             "   API.API_NAME AS API_NAME, " +
             "   API.API_VERSION AS API_VERSION, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
+            "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
             "   APP.APPLICATION_ID AS APP_ID, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
@@ -893,12 +871,7 @@ public class SQLConstants {
             " ORDER BY IAT.TOKEN_ID";
 
     public static final String GET_CLIENT_OF_APPLICATION_SQL =
-            " SELECT  CONSUMER_KEY " +
-            " FROM AM_APPLICATION_KEY_MAPPING " +
-            " WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
-
-    public static final String GET_KEY_STATUS_OF_APPLICATION_SQL =
-            " SELECT STATE " +
+            " SELECT  CONSUMER_KEY,KEY_MANAGER " +
             " FROM AM_APPLICATION_KEY_MAPPING " +
             " WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
 
@@ -1131,6 +1104,13 @@ public class SQLConstants {
             " SET SUB_STATUS = ? " +
             " WHERE SUBSCRIPTION_ID = ?";
 
+    public static final String UPDATE_SUBSCRIPTION_STATUS_AND_TIER_SQL =
+            " UPDATE AM_SUBSCRIPTION " +
+                    " SET TIER_ID_PENDING = ? " +
+                    " , TIER_ID = ? " +
+                    " , SUB_STATUS = ? " +
+                    " WHERE SUBSCRIPTION_ID = ?";
+
     public static final String UPDATE_REFRESHED_APPLICATION_ACCESS_TOKEN_PREFIX = "UPDATE ";
 
     public static final String UPDATE_REFRESHED_APPLICATION_ACCESS_TOKEN_SUFFIX =
@@ -1157,18 +1137,20 @@ public class SQLConstants {
             " VALUES (?,?)";
 
     public static final String GET_REGISTRATION_APPROVAL_STATUS_SQL =
-            " SELECT STATE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE =?";
+            " SELECT KEY_MANAGER,STATE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE =?";
 
     public static final String UPDATE_APPLICAITON_KEY_TYPE_MAPPINGS_SQL =
-            " UPDATE AM_APPLICATION_KEY_MAPPING SET CONSUMER_KEY = ? WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
+            " UPDATE AM_APPLICATION_KEY_MAPPING SET CONSUMER_KEY = ? WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND " +
+                    "KEY_MANAGER = ?";
 
     public static final String ADD_APPLICATION_KEY_TYPE_MAPPING_SQL =
             " INSERT INTO " +
-            " AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,CONSUMER_KEY,KEY_TYPE,STATE,CREATE_MODE) " +
-            " VALUES (?,?,?,?,?)";
+            " AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,CONSUMER_KEY,KEY_TYPE,STATE,CREATE_MODE,KEY_MANAGER) " +
+            " VALUES (?,?,?,?,?,?)";
 
     public static final String UPDATE_APPLICATION_KEY_MAPPING_SQL =
-            " UPDATE AM_APPLICATION_KEY_MAPPING SET STATE = ? WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
+            " UPDATE AM_APPLICATION_KEY_MAPPING SET STATE = ? WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND " +
+                    "KEY_MANAGER=?";
 
     public static final String GET_SUBSCRIPTION_SQL =
             " SELECT " +
@@ -1405,58 +1387,6 @@ public class SQLConstants {
             "   API_ID =? " +
             " GROUP BY " +
             "   API_ID ";
-
-    public static final String ADD_ENDPOINT_REGISTRY_SQL =
-            "INSERT INTO ENDPOINT_REG (UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, REG_OWNER, READ_ROLE," +
-                    " WRITE_ROLE) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
-    public static final String UPDATE_ENDPOINT_REGISTRY_SQL =
-            "UPDATE ENDPOINT_REG " +
-                    "SET REG_NAME = ?, " +
-                    "REG_TYPE = ?, " +
-                    "REG_MODE = ?, " +
-                    "READ_ROLE = ? ," +
-                    "WRITE_ROLE = ? " +
-                    "WHERE UUID = ?";
-
-    public static final String DELETE_ENDPOINT_REGISTRY_SQL = "DELETE FROM ENDPOINT_REG WHERE UUID = ?";
-
-    public static final String GET_ENDPOINT_REGISTRY_BY_UUID =
-            " SELECT UUID, REG_NAME, REG_TYPE, REG_MODE, TENANT_ID, REG_OWNER, READ_ROLE, WRITE_ROLE, ID FROM " +
-                    "ENDPOINT_REG WHERE UUID = ? AND TENANT_ID = ?";
-
-    public static final String GET_ENDPOINT_REGISTRY_ENTRY_BY_UUID =
-            " SELECT UUID, ENTRY_NAME, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, SERVICE_URL, " +
-                    "ENDPOINT_DEFINITION, METADATA FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
-
-    public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY =
-            "SELECT E.UUID, E.ENTRY_NAME, E.DEFINITION_TYPE, E.DEFINITION_URL, E.METADATA, " +
-                    "E.SERVICE_TYPE, E.SERVICE_URL " +
-                    "FROM ENDPOINT_REG_ENTRY AS E, ENDPOINT_REG AS R " +
-                    "WHERE E.REG_ID=R.ID AND R.UUID=?";
-
-    public static final String ADD_ENDPOINT_REGISTRY_ENTRY_SQL =
-            "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, METADATA," +
-                    "SERVICE_TYPE, ENDPOINT_DEFINITION, REG_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    public static final String UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL =
-            "UPDATE ENDPOINT_REG_ENTRY SET " +
-                    "ENTRY_NAME = ?, " +
-                    "SERVICE_URL = ?, " +
-                    "DEFINITION_TYPE = ?, " +
-                    "DEFINITION_URL = ?, " +
-                    "METADATA = ?, " +
-                    "SERVICE_TYPE = ?, " +
-                    "ENDPOINT_DEFINITION = ? " +
-                    "WHERE UUID = ?";
-
-    public static final String DELETE_ENDPOINT_REGISTRY_ENTRY_SQL = "DELETE FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
-
-    public static final String IS_ENDPOINT_REGISTRY_NAME_EXISTS = "SELECT COUNT(UUID) AS ENDPOINT_REGISTRY_COUNT" +
-            " FROM ENDPOINT_REG WHERE LOWER(REG_NAME) = LOWER(?) AND TENANT_ID = ?";
-
-    public static final String IS_ENDPOINT_REGISTRY_ENTRY_NAME_EXISTS = "SELECT COUNT(UUID) AS REGISTRY_ENTRY_COUNT" +
-            " FROM ENDPOINT_REG_ENTRY WHERE LOWER(ENTRY_NAME) = LOWER(?) AND REG_ID = ?";
 
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
@@ -1719,8 +1649,9 @@ public class SQLConstants {
     public static final String GET_CONSUMER_KEY_OF_APPLICATION_SQL =
             " SELECT" +
             "   CONSUMER_KEY," +
-            "   CREATE_MODE" +
-            " FROM" +
+            "   CREATE_MODE," +
+            "   KEY_MANAGER" +
+                    " FROM" +
             "   AM_APPLICATION_KEY_MAPPING " +
             " WHERE" +
             "   APPLICATION_ID = ?";
@@ -1789,11 +1720,14 @@ public class SQLConstants {
     public static final String DELETE_APPLICATION_KEY_MAPPING_BY_CONSUMER_KEY_SQL =
             "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ?";
 
+    public static final String DELETE_APPLICATION_KEY_MAPPING_BY_UUID_SQL =
+            "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE UUID = ?";
+
     public static final String DELETE_APPLICATION_KEY_MAPPING_BY_APPLICATION_ID_SQL =
             "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
 
     public static final String REMOVE_FROM_APPLICATION_REGISTRANTS_SQL =
-            "DELETE FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ? AND TOKEN_TYPE = ?";
+            "DELETE FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ? AND TOKEN_TYPE = ? AND KEY_MANAGER = ?";
 
     public static final String GET_SUBSCRIBER_CASE_INSENSITIVE_SQL =
             " SELECT " +
@@ -1981,9 +1915,6 @@ public class SQLConstants {
             " AM_API_URL_MAPPING (API_ID,HTTP_METHOD,AUTH_SCHEME,URL_PATTERN,THROTTLING_TIER,MEDIATION_SCRIPT)" +
             " VALUES (?,?,?,?,?,?)";
 
-    public static final String ADD_OAUTH2_RESOURCE_SCOPE_SQL =
-            "INSERT INTO IDN_OAUTH2_RESOURCE_SCOPE (RESOURCE_PATH,SCOPE_ID,TENANT_ID) VALUES (?,?,?)";
-
     public static final String GET_APPLICATION_BY_NAME_PREFIX =
             " SELECT " +
             "   APP.APPLICATION_ID," +
@@ -2087,19 +2018,20 @@ public class SQLConstants {
 
     public static final String GET_ALL_URL_TEMPLATES_SQL =
             " SELECT    " +
-            "   AUM.HTTP_METHOD," +
-            "   AUM.AUTH_SCHEME," +
-            "   AUM.URL_PATTERN," +
-            "   AUM.THROTTLING_TIER," +
-            "   AUM.MEDIATION_SCRIPT " +
-            " FROM " +
-            "   AM_API_URL_MAPPING AUM, " +
-            "   AM_API API " +
-            " WHERE" +
-            "   API.CONTEXT= ? " +
-            "   AND API.API_VERSION = ? " +
-            "   AND AUM.API_ID = API.API_ID " +
-            " ORDER BY URL_MAPPING_ID";
+                    "   AUM.HTTP_METHOD," +
+                    "   AUM.AUTH_SCHEME," +
+                    "   AUM.URL_PATTERN," +
+                    "   AUM.THROTTLING_TIER," +
+                    "   AUM.MEDIATION_SCRIPT, " +
+                    "   AUM.URL_MAPPING_ID " +
+                    " FROM " +
+                    "   AM_API_URL_MAPPING AUM, " +
+                    "   AM_API API " +
+                    " WHERE" +
+                    "   API.CONTEXT= ? " +
+                    "   AND API.API_VERSION = ? " +
+                    "   AND AUM.API_ID = API.API_ID " +
+                    " ORDER BY URL_MAPPING_ID";
 
     public static final String UPDATE_API_SQL =
             "UPDATE AM_API " +
@@ -2188,11 +2120,13 @@ public class SQLConstants {
             "   AUM.URL_PATTERN," +
             "   AUM.HTTP_METHOD," +
             "   AUM.AUTH_SCHEME," +
-            "   AUM.THROTTLING_TIER, " +
-            "   AUM.MEDIATION_SCRIPT " +
+            "   AUM.THROTTLING_TIER," +
+            "   AUM.MEDIATION_SCRIPT," +
+            "   ARSM.SCOPE_NAME " +
             " FROM " +
             "   AM_API_URL_MAPPING AUM " +
             " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+            " LEFT OUTER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID" +
             " WHERE " +
             "  API.API_PROVIDER = ? AND " +
             "  API.API_NAME = ? AND " +
@@ -2208,9 +2142,11 @@ public class SQLConstants {
             "  AM_API API " +
             "  INNER JOIN AM_API_PRODUCT_MAPPING APM ON API.API_ID = APM.API_ID " +
             "  WHERE APM.URL_MAPPING_ID IN " +
-                    "(SELECT AUM.URL_MAPPING_ID " +
-                    "FROM AM_API_URL_MAPPING AUM, AM_API API WHERE API.API_PROVIDER = ? AND " +
-                    "API.API_NAME = ? AND API.API_VERSION = ?)";
+            "   (SELECT AUM.URL_MAPPING_ID " + 
+            "   FROM AM_API_URL_MAPPING AUM " + 
+            "   INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " + 
+            "   WHERE API.API_PROVIDER = ? AND " + 
+            "   API.API_NAME = ? AND API.API_VERSION = ?)";
 
     public static final String GET_AUTHORIZED_DOMAINS_PREFIX =
             "SELECT AKDM.AUTHZ_DOMAIN FROM AM_APP_KEY_DOMAIN_MAPPING AKDM, ";
@@ -2290,7 +2226,7 @@ public class SQLConstants {
             "   SUB.USER_ID," +
             "   REG.ALLOWED_DOMAINS," +
             "   REG.VALIDITY_PERIOD," +
-            "   REG.INPUTS" +
+            "   REG.INPUTS, REG.KEY_MANAGER" +
             " FROM " +
             "   AM_APPLICATION_REGISTRATION REG," +
             "   AM_APPLICATION APP," +
@@ -2411,7 +2347,7 @@ public class SQLConstants {
                     "   AND SUB_STATUS = ?";
 
     public static final String GET_REGISTRATION_WORKFLOW_SQL =
-            "SELECT WF_REF FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ? AND TOKEN_TYPE = ?";
+            "SELECT WF_REF FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ? AND TOKEN_TYPE = ? AND KEY_MANAGER = ?";
 
     public static final String GET_SUBSCRIPTION_STATUS_SQL =
             "SELECT SUB_STATUS FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
@@ -2448,71 +2384,25 @@ public class SQLConstants {
             " WHERE " +
             "   ES.API_ID = ? ";
 
-    public static final String ADD_SCOPE_ENTRY_SQL =
-            " INSERT INTO IDN_OAUTH2_SCOPE (NAME, DISPLAY_NAME , DESCRIPTION, TENANT_ID, SCOPE_TYPE) " +
-            " VALUES(?,?,?,?,?)";
-
-    public static final String ADD_SCOPE_LINK_SQL =
-            " INSERT INTO AM_API_SCOPES (API_ID, SCOPE_ID) VALUES (?,?)";
-
     public static final String ADD_PRODUCT_RESOURCE_MAPPING_SQL = "INSERT INTO AM_API_PRODUCT_MAPPING "
             + "(API_ID,URL_MAPPING_ID) " + "VALUES (?, ?)";
 
     public static final String DELETE_FROM_AM_API_PRODUCT_MAPPING_SQL = "DELETE FROM AM_API_PRODUCT_MAPPING WHERE "
             + "API_ID = ? ";
 
-    public static final String GET_API_SCOPES_SQL =
-            " SELECT A.SCOPE_ID, A.NAME, A.DISPLAY_NAME, A.DESCRIPTION, C.SCOPE_BINDING " +
-            " FROM  " +
-            " ((IDN_OAUTH2_SCOPE AS A  INNER JOIN  AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) " +
-            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) " +
-            " WHERE B.API_ID = ?";
-
-    public static final String GET_SCOPES_SQL =
-            " SELECT SCOPE_ID  " +
-                    " FROM  IDN_OAUTH2_SCOPE  " +
-                    " WHERE NAME = ? " +
-                    " AND TENANT_ID = ?";
-
-    public static final String ADD_SCOPE_ROLE_SQL =
-            "INSERT INTO IDN_OAUTH2_SCOPE_BINDING (SCOPE_ID, SCOPE_BINDING, BINDING_TYPE) values (?,?,?)";
-
-    public static final String GET_API_SCOPES_ORACLE_SQL =
-            "SELECT " +
-            "   A.SCOPE_ID, " +
-            "   A.NAME, " +
-            "   A.DISPLAY_NAME, " +
-            "   A.DESCRIPTION, " +
-            "   C.SCOPE_BINDING " +
-            " FROM  " +
-            " ((IDN_OAUTH2_SCOPE A  INNER JOIN  AM_API_SCOPES B ON A.SCOPE_ID = B.SCOPE_ID) " +
-            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING C ON B.SCOPE_ID = C.SCOPE_ID ) " +
-            " WHERE B.API_ID = ?";
-
     public static final String GET_SCOPE_BY_SUBSCRIBED_API_PREFIX =
-            "SELECT " +
-            "   DISTINCT A.NAME, " +
-            "   A.DISPLAY_NAME," +
-            "   A.DESCRIPTION," +
-            "   C.SCOPE_BINDING " +
-            " FROM  " +
-            " ((IDN_OAUTH2_SCOPE AS A  INNER JOIN  AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) " +
-            " LEFT JOIN  IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) " +
-            " WHERE " +
-            "   B.API_ID IN (";
+            "SELECT DISTINCT ARSM.SCOPE_NAME " +
+                    "FROM AM_API_RESOURCE_SCOPE_MAPPING AS ARSM INNER JOIN AM_API_URL_MAPPING AS AUM " +
+                    "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
+                    "WHERE AUM.API_ID IN (";
 
     public static final char GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX = ')';
 
     public static final String GET_SCOPE_BY_SUBSCRIBED_ID_ORACLE_SQL =
-            " SELECT " +
-            "   DISTINCT A.NAME, " +
-            "   A.DISPLAY_NAME, " +
-            "   A.DESCRIPTION, " +
-            "   C.SCOPE_BINDING " +
-            " FROM  " +
-            " ((IDN_OAUTH2_SCOPE A  INNER JOIN  AM_API_SCOPES B ON A.SCOPE_ID = B.SCOPE_ID) " +
-            " LEFT JOIN  IDN_OAUTH2_SCOPE_BINDING C ON B.SCOPE_ID = C.SCOPE_ID ) " +
-            " WHERE B.API_ID IN (";
+            "SELECT DISTINCT ARSM.SCOPE_NAME " +
+                    "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM INNER JOIN AM_API_URL_MAPPING AUM " +
+                    "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
+                    "WHERE AUM.API_ID IN (";
 
     public static final String GET_SCOPES_BY_SCOPE_KEY_SQL =
             "SELECT " +
@@ -2558,39 +2448,10 @@ public class SQLConstants {
 
     public static final String GET_SCOPES_BY_SCOPE_KEYS_SUFFIX = ") AND TENANT_ID = ?";
 
-    public static final String REMOVE_RESOURCE_SCOPE_SQL =
-            " DELETE " +
-                    " FROM " +
-                    "   IDN_OAUTH2_RESOURCE_SCOPE " +
-                    " WHERE " +
-                    "   SCOPE_ID IN ( " +
-                    "       SELECT SCOPE_ID FROM AM_API_SCOPES " + "WHERE API_ID = ? )";
-
-
-    public static final String REMOVE_SCOPE_SQL =
-            " DELETE " +
-            " FROM " +
-            "   IDN_OAUTH2_SCOPE " +
-            " WHERE " +
-            "   SCOPE_ID IN ( " +
-            "       SELECT SCOPE_ID FROM AM_API_SCOPES " + "WHERE API_ID = ? )";
-
     public static final String GET_RESOURCE_TO_SCOPE_MAPPING_SQL =
-            "SELECT " +
-            "   RS.RESOURCE_PATH, " +
-            "   S.NAME " +
-            " FROM " +
-            "   IDN_OAUTH2_RESOURCE_SCOPE RS " +
-            " INNER JOIN " +
-            "   IDN_OAUTH2_SCOPE S " +
-            " ON " +
-            "   S.SCOPE_ID = RS.SCOPE_ID " +
-            " INNER JOIN " +
-            "   AM_API_SCOPES A " +
-            " ON " +
-            "   A.SCOPE_ID = RS.SCOPE_ID " +
-            " WHERE" +
-            "   A.API_ID = ? ";
+            "SELECT AUM.URL_MAPPING_ID, ARSM.SCOPE_NAME FROM AM_API_URL_MAPPING AUM " +
+                    "LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
+                    "WHERE AUM.API_ID = ?";
 
     public static final String GET_SUBSCRIBED_APIS_FROM_CONSUMER_KEY =
         "SELECT SUB.API_ID "
@@ -2599,29 +2460,37 @@ public class SQLConstants {
 
     public static final String GET_SCOPE_ROLES_OF_APPLICATION_SQL =
             "SELECT "
-                    + "DISTINCT A.NAME, C.SCOPE_BINDING "
-                    + "FROM ((IDN_OAUTH2_SCOPE AS A INNER JOIN AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) "
-                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) WHERE B.API_ID IN (";
+                    + "DISTINCT A.NAME, D.SCOPE_BINDING "
+                    + "FROM (("
+                    + "IDN_OAUTH2_SCOPE AS A INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING AS B ON A.NAME = B.SCOPE_NAME "
+                    + "INNER JOIN AM_API_URL_MAPPING AS C ON B.URL_MAPPING_ID = C.URL_MAPPING_ID) "
+                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING AS D ON A.SCOPE_ID = D.SCOPE_ID) "
+                    + "WHERE C.API_ID IN (";
 
     public static final String GET_SCOPE_ROLES_OF_APPLICATION_ORACLE_SQL =
             "SELECT "
-                    + "DISTINCT A.NAME, C.SCOPE_BINDING "
-                    + "FROM ((IDN_OAUTH2_SCOPE A INNER JOIN AM_API_SCOPES B ON A.SCOPE_ID = B.SCOPE_ID) "
-                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING C ON B.SCOPE_ID = C.SCOPE_ID ) WHERE B.API_ID IN (";
+                    + "DISTINCT A.NAME, D.SCOPE_BINDING "
+                    + "FROM (("
+                    + "IDN_OAUTH2_SCOPE A INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING B ON A.NAME = B.SCOPE_NAME "
+                    + "INNER JOIN AM_API_URL_MAPPING C ON B.URL_MAPPING_ID = C.URL_MAPPING_ID) "
+                    + "LEFT JOIN IDN_OAUTH2_SCOPE_BINDING AS D ON A.SCOPE_ID = D.SCOPE_ID) "
+                    + "WHERE C.API_ID IN (";
 
     public static final String CLOSING_BRACE = ")";
 
     public static final String GET_SCOPES_FOR_API_LIST = "SELECT "
-            + "B.API_ID,A.SCOPE_ID, A.NAME, A.DESCRIPTION "
-            + "FROM IDN_OAUTH2_SCOPE AS A "
-            + "INNER JOIN AM_API_SCOPES AS B "
-            + "ON A.SCOPE_ID = B.SCOPE_ID WHERE B.API_ID IN ( $paramList )";
+            + "ARSM.SCOPE_NAME, AUM.API_ID "
+            + "FROM AM_API_RESOURCE_SCOPE_MAPPING AS ARSM "
+            + "INNER JOIN AM_API_URL_MAPPING AS AUM "
+            + "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID "
+            + "WHERE AUM.API_ID IN ( $paramList )";
 
     public static final String GET_SCOPES_FOR_API_LIST_ORACLE = "SELECT "
-            + "B.API_ID, A.SCOPE_ID, A.NAME, A.DESCRIPTION "
-            + "FROM IDN_OAUTH2_SCOPE A "
-            + "INNER JOIN AM_API_SCOPES B "
-            + "ON A.SCOPE_ID = B.SCOPE_ID WHERE B.API_ID IN ( $paramList )";
+            + "ARSM.SCOPE_NAME, AUM.API_ID "
+            + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM "
+            + "INNER JOIN AM_API_URL_MAPPING AUM "
+            + "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID "
+            + "WHERE AUM.API_ID IN ( $paramList )";
 
     public static final String GET_USERS_FROM_OAUTH_TOKEN_SQL =
             "SELECT " +
@@ -2635,18 +2504,6 @@ public class SQLConstants {
             "   AKM.CONSUMER_KEY = ? " +
             "   AND AKM.APPLICATION_ID = AA.APPLICATION_ID " +
             "   AND AA.SUBSCRIBER_ID = AMS.SUBSCRIBER_ID";
-
-    public static final String REMOVE_FROM_API_SCOPES_SQL =
-            "DELETE FROM AM_API_SCOPES WHERE API_ID = ?";
-
-    public static final String REMOVE_FROM_API_SCOPES_BY_SCOPE_ID_SQL =
-            "DELETE FROM AM_API_SCOPES WHERE SCOPE_ID = ?";
-
-    public static final String REMOVE_FROM_OAUTH_SCOPE_SQL =
-            "DELETE FROM IDN_OAUTH2_SCOPE  WHERE SCOPE_ID = ?";
-
-    public static final String REMOVE_FROM_OAUTH_RESOURCE_SQL =
-            "DELETE FROM IDN_OAUTH2_RESOURCE_SCOPE  WHERE SCOPE_ID = ?";
 
     public static final String REMOVE_SUBSCRIPTION_BY_APPLICATION_ID_SQL =
             "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ? ";
@@ -2676,24 +2533,6 @@ public class SQLConstants {
             "   IOCA.CONSUMER_KEY = ?" +
             "   AND IOAT.TOKEN_STATE = 'ACTIVE'";
 
-    public static final String GET_SCOPE_KEY_SQL =
-            "SELECT COUNT(SCOPE_ID) AS SCOPE_COUNT FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID" + " = ?";
-
-    public static final String GET_API_SCOPE_SQL =
-            "SELECT " +
-            "   API.API_ID, " +
-            "   API.API_NAME, " +
-            "   API.API_PROVIDER " +
-            " FROM " +
-            "   AM_API API, " +
-            "   IDN_OAUTH2_SCOPE IDN, " +
-            "   AM_API_SCOPES AMS " +
-            " WHERE " +
-            "   IDN.SCOPE_ID=AMS.SCOPE_ID " +
-            "   AND AMS.API_ID=API.API_ID " +
-            "   AND IDN.NAME = ? " +
-            "   AND IDN.tenant_id = ?";
-
     public static final String GET_CONTEXT_TEMPLATE_COUNT_SQL =
             "SELECT COUNT(CONTEXT_TEMPLATE) AS CTX_COUNT FROM AM_API WHERE LOWER(CONTEXT_TEMPLATE) = ?";
 
@@ -2704,11 +2543,11 @@ public class SQLConstants {
             "SELECT API_VERSION FROM AM_API WHERE CONTEXT_TEMPLATE = ? AND API_NAME = ?";
 
     public static final String GET_APPLICATION_MAPPING_FOR_CONSUMER_KEY_SQL =
-            "SELECT APPLICATION_ID FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY   = ?";
+            "SELECT APPLICATION_ID FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ? AND KEY_MANAGER = ?";
 
     public static final String GET_CONSUMER_KEY_BY_APPLICATION_AND_KEY_SQL =
             " SELECT " +
-            "   CONSUMER_KEY " +
+            "   CONSUMER_KEY,KEY_MANAGER " +
             " FROM " +
             "   AM_APPLICATION_KEY_MAPPING " +
             " WHERE " +
@@ -3256,6 +3095,11 @@ public class SQLConstants {
     public static final String GET_USER_ID = "SELECT USER_ID FROM AM_USER WHERE USER_NAME=?";
 
     public static final String ADD_USER_ID = "INSERT INTO AM_USER (USER_ID, USER_NAME) VALUES (?,?)";
+    public static final String GET_KEY_MAPPING_ID_FROM_APPLICATION =
+            "SELECT UUID FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND KEY_MANAGER = ?";
+    public static final String GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_APP_ID_KEY_MANAGER_SQL =
+            "SELECT CONSUMER_KEY FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND " +
+                    "KEY_MANAGER = ?";
 
     /** Throttle related constants**/
 
@@ -3346,31 +3190,31 @@ public class SQLConstants {
 				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY where APIPOLICY.NAME =?  AND APIPOLICY.TENANT_ID =? AND APIPOLICY.DEFAULT_QUOTA_TYPE = 'bandwidthVolume')"
 				+ " union "
 				+ " (SELECT count(*) as c"
-				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY , AM_CONDITION_GROUP cg where APIPOLICY.NAME =?  AND APIPOLICY.TENANT_ID =? AND cg.policy_id = APIPOLICY.policy_id AND cg.quota_type = 'bandwidthVolume')"
+				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY , AM_CONDITION_GROUP cg where APIPOLICY.NAME =?  AND APIPOLICY.TENANT_ID =? AND cg.POLICY_ID = APIPOLICY.POLICY_ID AND cg.QUOTA_TYPE = 'bandwidthVolume')"
 				+ " union "
 				+ " (SELECT count(*) as c"
 				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY, AM_API_URL_MAPPING RS, AM_CONDITION_GROUP cg where"
-				+ " RS.api_id = ? AND APIPOLICY.NAME = RS.throttling_tier AND APIPOLICY.TENANT_ID =? AND cg.policy_id = APIPOLICY.policy_id AND cg.quota_type = 'bandwidthVolume' "
+				+ " RS.API_ID = ? AND APIPOLICY.NAME = RS.THROTTLING_TIER AND APIPOLICY.TENANT_ID =? AND cg.POLICY_ID = APIPOLICY.POLICY_ID AND cg.QUOTA_TYPE = 'bandwidthVolume' "
 				+ " ) "
 				+ " union "
 				+ "  (SELECT count(*) as c"
 				+ " FROM AM_API_THROTTLE_POLICY APIPOLICY, AM_API_URL_MAPPING RS where "
-				+ " RS.api_id = ? AND APIPOLICY.NAME = RS.throttling_tier AND APIPOLICY.TENANT_ID =? AND APIPOLICY.DEFAULT_QUOTA_TYPE = 'bandwidthVolume') "
+				+ " RS.API_ID = ? AND APIPOLICY.NAME = RS.THROTTLING_TIER AND APIPOLICY.TENANT_ID =? AND APIPOLICY.DEFAULT_QUOTA_TYPE = 'bandwidthVolume') "
 				+ " union "
-				+ " (SELECT count(*) as c FROM AM_POLICY_SUBSCRIPTION SUBPOLICY WHERE SUBPOLICY.NAME= ? AND SUBPOLICY.tenant_id = ? AND SUBPOLICY.quota_type = 'bandwidthVolume')"
+				+ " (SELECT count(*) as c FROM AM_POLICY_SUBSCRIPTION SUBPOLICY WHERE SUBPOLICY.NAME= ? AND SUBPOLICY.TENANT_ID = ? AND SUBPOLICY.QUOTA_TYPE = 'bandwidthVolume')"
 				+ " union "
-				+ " (SELECT count(*) as c FROM AM_POLICY_APPLICATION APPPOLICY where APPPOLICY.NAME = ? AND APPPOLICY.tenant_id = ? AND APPPOLICY.quota_type = 'bandwidthVolume')"
+				+ " (SELECT count(*) as c FROM AM_POLICY_APPLICATION APPPOLICY where APPPOLICY.NAME = ? AND APPPOLICY.TENANT_ID = ? AND APPPOLICY.QUOTA_TYPE = 'bandwidthVolume')"
 				+ " ) x";
 
-		public static final String GET_CONDITION_GROUPS_FOR_POLICIES_SQL = "SELECT grp.CONDITION_GROUP_ID ,AUM.HTTP_METHOD,AUM.AUTH_SCHEME, pol.APPLICABLE_LEVEL, "
-				+ " AUM.URL_PATTERN,AUM.THROTTLING_TIER,AUM.MEDIATION_SCRIPT,AUM.URL_MAPPING_ID, pol.DEFAULT_QUOTA_TYPE  "
-				+ " FROM AM_API_URL_MAPPING AUM"
-				+ " INNER JOIN  AM_API API ON AUM.API_ID = API.API_ID"
-				+ " LEFT OUTER JOIN AM_API_THROTTLE_POLICY pol ON AUM.THROTTLING_TIER = pol.NAME "
-				+ " LEFT OUTER JOIN AM_CONDITION_GROUP grp ON pol.POLICY_ID  = grp.POLICY_ID"
-				+ " where API.CONTEXT= ? AND API.API_VERSION = ? AND pol.TENANT_ID = ?"
-				/*+ " GROUP BY AUM.HTTP_METHOD,AUM.URL_PATTERN, AUM.URL_MAPPING_ID"*/
-				+ " ORDER BY AUM.URL_MAPPING_ID";
+        public static final String GET_CONDITION_GROUPS_FOR_POLICIES_SQL = "SELECT grp.CONDITION_GROUP_ID ,AUM.HTTP_METHOD,AUM.AUTH_SCHEME, pol.APPLICABLE_LEVEL, "
+                + " AUM.URL_PATTERN,AUM.THROTTLING_TIER,AUM.MEDIATION_SCRIPT,AUM.URL_MAPPING_ID, pol.DEFAULT_QUOTA_TYPE  "
+                + " FROM AM_API_URL_MAPPING AUM"
+                + " INNER JOIN  AM_API API ON AUM.API_ID = API.API_ID"
+                + " LEFT OUTER JOIN AM_API_THROTTLE_POLICY pol ON AUM.THROTTLING_TIER = pol.NAME "
+                + " LEFT OUTER JOIN AM_CONDITION_GROUP grp ON pol.POLICY_ID  = grp.POLICY_ID"
+                + " where API.CONTEXT= ? AND API.API_VERSION = ? AND pol.TENANT_ID = ?"
+                /*+ " GROUP BY AUM.HTTP_METHOD,AUM.URL_PATTERN, AUM.URL_MAPPING_ID"*/
+                + " ORDER BY AUM.URL_MAPPING_ID";
 
         public static final String GET_CONDITION_GROUPS_FOR_POLICIES_IN_PRODUCTS_SQL = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, AUM.URL_PATTERN, AUM.THROTTLING_TIER, " +
                 "AUM.MEDIATION_SCRIPT, AUM.URL_MAPPING_ID, POL.APPLICABLE_LEVEL, GRP.CONDITION_GROUP_ID " +
@@ -3410,7 +3254,7 @@ public class SQLConstants {
         		+ " (select count(map.THROTTLING_TIER) as c from AM_API_URL_MAPPING map, AM_API api"
         		+ "  where map.THROTTLING_TIER = ? and api.API_PROVIDER like ?  and map.API_ID = api.API_ID)) x ";
 
-        public static final String TIER_ATTACHED_TO_APPLICATION = " SELECT count(APPLICATION_TIER) as c FROM AM_APPLICATION where APPLICATION_TIER = ? and CREATED_BY like ? ";
+        public static final String TIER_ATTACHED_TO_APPLICATION = " SELECT count(APPLICATION_TIER) as c FROM AM_APPLICATION where APPLICATION_TIER = ? ";
         
         public static final String GET_TIERS_WITH_BANDWIDTH_QUOTA_TYPE_SQL = "SELECT NAME "
                 + "FROM AM_API_THROTTLE_POLICY LEFT JOIN AM_CONDITION_GROUP "
@@ -3529,5 +3373,137 @@ public class SQLConstants {
         public static final String ADD_JWT_SIGNATURE = "INSERT INTO AM_REVOKED_JWT (UUID, SIGNATURE," +
                 "EXPIRY_TIMESTAMP, TENANT_ID, TOKEN_TYPE) VALUES(?,?,?,?,?)";
         public static final String DELETE_REVOKED_JWT = "DELETE FROM AM_REVOKED_JWT WHERE EXPIRY_TIMESTAMP < ?";
+    }
+
+    //Shared Scopes related constants
+    public static final String ADD_SHARED_SCOPE = "INSERT INTO AM_SHARED_SCOPE (NAME, UUID, TENANT_ID) VALUES (?,?,?)";
+    public static final String DELETE_SHARED_SCOPE = "DELETE FROM AM_SHARED_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
+    public static final String GET_SHARED_SCOPE_BY_UUID = "SELECT NAME FROM AM_SHARED_SCOPE WHERE UUID = ?";
+    public static final String GET_ALL_SHARED_SCOPE_KEYS_BY_TENANT = "SELECT NAME FROM AM_SHARED_SCOPE " +
+            "WHERE TENANT_ID = ?";
+    public static final String IS_SHARED_SCOPE_NAME_EXISTS = "SELECT 1 FROM AM_SHARED_SCOPE " +
+            "WHERE TENANT_ID = ? AND NAME = ?";
+    public static final String GET_ALL_SHARED_SCOPES_BY_TENANT = "SELECT UUID, NAME FROM AM_SHARED_SCOPE " +
+            "WHERE TENANT_ID = ?";
+    public static final String GET_SHARED_SCOPE_USAGE_COUNT_BY_TENANT =
+            "SELECT SS.NAME, SS.UUID, "
+                    + "(SELECT COUNT(*) FROM AM_API_RESOURCE_SCOPE_MAPPING RSM WHERE RSM.SCOPE_NAME=SS.NAME ) usage "
+                    + "FROM AM_SHARED_SCOPE SS "
+                    + "WHERE SS.TENANT_ID = ?";
+    public static final String GET_SHARED_SCOPE_API_USAGE_BY_TENANT =
+            "SELECT AA.API_ID, AA.API_NAME, AA.CONTEXT, AA.API_VERSION, AA.API_PROVIDER "
+                    + "FROM AM_SHARED_SCOPE ASSC, AM_API_RESOURCE_SCOPE_MAPPING AARSM, "
+                    + "AM_API_URL_MAPPING AAUM, AM_API AA "
+                    + "WHERE ASSC.NAME=AARSM.SCOPE_NAME AND "
+                    + "AARSM.URL_MAPPING_ID=AAUM.URL_MAPPING_ID AND "
+                    + "AAUM.API_ID=AA.API_ID AND "
+                    + "ASSC.UUID=? AND "
+                    + "ASSC.TENANT_ID=? "
+                    + "GROUP BY AA.API_NAME, AA.CONTEXT, AA.API_VERSION, AA.API_PROVIDER";
+
+    public static final String GET_SHARED_SCOPE_URI_USAGE_BY_TENANT =
+            "SELECT AAUM.URL_PATTERN, AAUM.HTTP_METHOD "
+                    + "FROM AM_SHARED_SCOPE ASSC, AM_API_RESOURCE_SCOPE_MAPPING AARSM, "
+                    + "AM_API_URL_MAPPING AAUM, AM_API AA "
+                    + "WHERE ASSC.NAME=AARSM.SCOPE_NAME AND "
+                    + "AARSM.URL_MAPPING_ID=AAUM.URL_MAPPING_ID AND "
+                    + "AAUM.API_ID=AA.API_ID AND "
+                    + "ASSC.UUID=? AND "
+                    + "ASSC.TENANT_ID=? AND "
+                    + "AA.API_ID=?";
+
+    //Resource Scope related constants
+    public static final String ADD_API_RESOURCE_SCOPE_MAPPING =
+            "INSERT INTO AM_API_RESOURCE_SCOPE_MAPPING (SCOPE_NAME, URL_MAPPING_ID, TENANT_ID) VALUES (?, ?, ?)";
+    public static final String IS_SCOPE_ATTACHED_LOCALLY =
+            "SELECT AM_API.API_NAME, AM_API.API_PROVIDER "
+                    + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM, AM_API "
+                    + "WHERE ARSM.SCOPE_NAME = ? AND "
+                    + "ARSM.TENANT_ID = ? AND "
+                    + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_SHARED_SCOPE GS WHERE GS.TENANT_ID = ?) AND "
+                    + "ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND "
+                    + "AUM.API_ID = AM_API.API_ID";
+    public static final String IS_SCOPE_ATTACHED =
+            "SELECT 1 FROM AM_API_RESOURCE_SCOPE_MAPPING WHERE SCOPE_NAME = ? AND TENANT_ID = ?";
+
+    public static final String REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL =
+            " DELETE FROM AM_API_RESOURCE_SCOPE_MAPPING "
+                    + "WHERE URL_MAPPING_ID IN ( SELECT URL_MAPPING_ID FROM AM_API_URL_MAPPING WHERE API_ID = ? )";
+
+    public static final String GET_UNVERSIONED_LOCAL_SCOPES_FOR_API_SQL =
+            "SELECT DISTINCT ARSM.SCOPE_NAME "
+                    + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM INNER JOIN AM_API_URL_MAPPING AUM "
+                    + "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID "
+                    + "WHERE AUM.API_ID = ? AND ARSM.TENANT_ID = ? AND "
+                    + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_SHARED_SCOPE GS WHERE GS.TENANT_ID = ?) AND "
+                    + "ARSM.SCOPE_NAME NOT IN ( "
+                    + "SELECT ARSM2.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM2 "
+                    + "INNER JOIN AM_API_URL_MAPPING AUM2 ON ARSM2.URL_MAPPING_ID = AUM2.URL_MAPPING_ID "
+                    + "WHERE AUM2.API_ID != ? AND ARSM2.TENANT_ID = ?)";
+
+    public static final String GET_VERSIONED_LOCAL_SCOPES_FOR_API_SQL =
+            "SELECT DISTINCT ARSM.SCOPE_NAME "
+                    + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM INNER JOIN AM_API_URL_MAPPING AUM "
+                    + "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID "
+                    + "WHERE AUM.API_ID = ? AND ARSM.TENANT_ID = ? AND "
+                    + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_SHARED_SCOPE GS WHERE GS.TENANT_ID = ?) AND "
+                    + "ARSM.SCOPE_NAME IN ( "
+                    + "SELECT ARSM2.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM2 "
+                    + "INNER JOIN AM_API_URL_MAPPING AUM2 ON ARSM2.URL_MAPPING_ID = AUM2.URL_MAPPING_ID "
+                    + "WHERE AUM2.API_ID != ? AND ARSM2.TENANT_ID = ?)";
+
+    public static final String GET_ALL_LOCAL_SCOPES_FOR_API_SQL =
+            "SELECT DISTINCT ARSM.SCOPE_NAME "
+                    + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM INNER JOIN AM_API_URL_MAPPING AUM "
+                    + "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID "
+                    + "WHERE AUM.API_ID = ? AND ARSM.TENANT_ID = ? AND "
+                    + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_SHARED_SCOPE GS WHERE GS.TENANT_ID = ?)";
+
+    public static final String GET_URL_TEMPLATES_WITH_SCOPES_FOR_API_SQL =
+            " SELECT AUM.URL_MAPPING_ID, "
+                    + "AUM.URL_PATTERN, "
+                    + "AUM.HTTP_METHOD, "
+                    + "AUM.AUTH_SCHEME, "
+                    + "AUM.THROTTLING_TIER, "
+                    + "AUM.MEDIATION_SCRIPT, "
+                    + "ARSM.SCOPE_NAME "
+                    + "FROM "
+                    + "AM_API_URL_MAPPING AUM "
+                    + "INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID "
+                    + "AND AUM.API_ID = ?";
+
+    public static final String GET_API_SCOPES_SQL =
+            " SELECT ARSM.SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM, AM_API_URL_MAPPING AUM "
+                    + "WHERE ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND AUM.API_ID = ?";
+
+    /**
+     * Static class to hold database queries related to key management.
+     */
+    public static class KeyMgtConstants {
+
+    }
+
+    //TODO: Need remove after KM seperation
+    public static final String
+            REMOVE_OAUTH2_RESOURCE_SCOPE_SQL =
+            " DELETE FROM IDN_OAUTH2_RESOURCE_SCOPE WHERE SCOPE_ID IN "
+                    + "(SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID = ?) "
+                    + "AND RESOURCE_PATH = ?";
+
+    public static final String ADD_OAUTH2_RESOURCE_SCOPE_SQL =
+            "INSERT INTO IDN_OAUTH2_RESOURCE_SCOPE (RESOURCE_PATH, SCOPE_ID, TENANT_ID) VALUES (?,?,?)";
+
+    public static final String GET_OAUTH2_SCOPE_ID_BY_NAME_SQL =
+            "SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
+    public static class KeyManagerSqlConstants {
+        public static final String ADD_KEY_MANAGER =
+                " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,TENANT_DOMAIN,ENABLED) VALUES " +
+                        "(?,?,?,?,?,?,?)";
+        public static final String UPDATE_KEY_MANAGER =
+                "UPDATE AM_KEY_MANAGER SET NAME = ?,DESCRIPTION = ?,TYPE = ?,CONFIGURATION = ?,TENANT_DOMAIN = ?," +
+                        "ENABLED = ? WHERE UUID = ?";
+
+        public static final String DELETE_KEY_MANAGER =
+                "DELETE FROM AM_KEY_MANAGER WHERE UUID = ? AND TENANT_DOMAIN = ?";
     }
 }

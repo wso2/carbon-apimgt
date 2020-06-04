@@ -18,15 +18,19 @@
 
 import React from 'react';
 import Select from '@material-ui/core/Select';
+import Checkbox from '@material-ui/core/Checkbox';
 import MenuItem from '@material-ui/core/MenuItem';
 import Chip from '@material-ui/core/Chip';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import { injectIntl } from 'react-intl';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import { injectIntl, FormattedMessage } from 'react-intl';
+import TextField from '@material-ui/core/TextField';
 import { Typography } from '@material-ui/core';
 import Switch from '@material-ui/core/Switch';
+
 
 const styles = (theme) => ({
     root: {
@@ -148,16 +152,18 @@ class Operation extends React.Component {
 
     /**
      *
-     * @param {*} e event triggered for handle  Scope Change
+     * @param {*} operationAction event triggered for handle  Scope Change
      */
-    handleScopeChange(e) {
+    handleScopeChange(operationAction) {
         const { operation } = this.props;
+        const { data } = operationAction;
+        const { value } = data || {};
+        const defValue = value[0];
         const newoperation = {
             ...operation,
             scopes: [...operation.scopes],
         };
-        const scope = (e.target.value === 'none' ? '' : e.target.value);
-        newoperation.scopes = [scope];
+        newoperation.scopes = defValue;
         this.props.handleUpdateList(newoperation);
     }
 
@@ -195,11 +201,11 @@ class Operation extends React.Component {
      */
     render() {
         const {
-            operation, theme, classes, apiPolicies, scopes, isOperationRateLimiting,
+            operation, theme, classes, apiPolicies, scopes, isOperationRateLimiting, sharedScopes, intl,
         } = this.props;
-        const noneScope = { name: 'none', description: '', bindings: null };
-        const dropdownScopes = [...scopes, noneScope];
+        const dropdownScopes = [...scopes];
         const { isSecurity } = this.state;
+        const filteredApiScopes = dropdownScopes.filter((sharedScope) => !sharedScope.shared);
         let chipColor = theme.custom.operationChipColor
             ? theme.custom.operationChipColor[operation.verb.toLowerCase()]
             : null;
@@ -247,24 +253,91 @@ class Operation extends React.Component {
                     </Select>
                 </TableCell>
                 <TableCell>
-                    <Select
-                        className={classes.dropDown}
-                        value={operation.scopes.length === 0 ? ['none'] : operation.scopes}
-                        onChange={this.handleScopeChange}
-                        inputProps={{
-                            name: 'scopes',
-                            id: 'age-simple',
+                    <TextField
+                        id='operation_scope'
+                        select
+                        SelectProps={{
+                            multiple: true,
+                            renderValue: (selected) => (Array.isArray(selected) ? selected.join(', ') : selected),
                         }}
+                        fullWidth
+                        label={dropdownScopes.length !== 0 || sharedScopes ? intl.formatMessage({
+                            id: 'Apis.Details.Operations.Operation.operation.scope.label.default',
+                            defaultMessage: 'Operation scope',
+                        }) : intl.formatMessage({
+                            id: 'Apis.Details.Operations.Operation.operation.scope.label.notAvailable',
+                            defaultMessage: 'No scope available',
+                        })}
+                        value={operation.scopes}
+                        onChange={({ target: { value } }) => this.handleScopeChange({
+                            data: { value: value ? [value] : [] },
+                        })}
+                        helperText={(
+                            <FormattedMessage
+                                id='Apis.Details.Operations.Operation.operation.scope.helperText'
+                                defaultMessage='Select a scope to control permissions to this operation'
+                            />
+                        )}
+                        margin='dense'
+                        variant='outlined'
                     >
-                        {dropdownScopes.map((tempScope) => (
+                        <ListSubheader>
+                            <FormattedMessage
+                                id='Apis.Details.Operations.Operation.operation.scope.select.local'
+                                defaultMessage='API Scopes'
+                            />
+                        </ListSubheader>
+                        {filteredApiScopes.length !== 0 ? filteredApiScopes.map((apiScope) => (
                             <MenuItem
-                                key={tempScope.name}
-                                value={tempScope.name}
+                                key={apiScope.scope.name}
+                                value={apiScope.scope.name}
+                                dense
                             >
-                                {tempScope.name}
+                                <Checkbox checked={operation.scopes.includes(apiScope.scope.name)} />
+                                {apiScope.scope.name}
                             </MenuItem>
-                        ))}
-                    </Select>
+                        )) : (
+                            <MenuItem
+                                value=''
+                                disabled
+                            >
+                                <em>
+                                    <FormattedMessage
+                                        id='Apis.Details.Operations.Operation.operation.no.api.scope.available'
+                                        defaultMessage='No API scopes available'
+                                    />
+                                </em>
+                            </MenuItem>
+                        )}
+                        <ListSubheader>
+                            <FormattedMessage
+                                id='Apis.Details.Operations.Operation.operation.scope.select.shared'
+                                defaultMessage='Shared Scopes'
+                            />
+                        </ListSubheader>
+                        {sharedScopes && sharedScopes.length !== 0 ? sharedScopes.map((sharedScope) => (
+                            <MenuItem
+                                key={sharedScope.scope.name}
+                                value={sharedScope.scope.name}
+                                dense
+                            >
+                                <Checkbox checked={operation.scopes.includes(sharedScope.scope.name)} />
+                                {sharedScope.scope.name}
+                            </MenuItem>
+                        )) : (
+                            <MenuItem
+                                value=''
+                                disabled
+                            >
+                                <em>
+                                    <FormattedMessage
+                                        id='Apis.Details.Operations.Operation.operation.no.sharedpi.scope.available'
+                                        defaultMessage='No shared scopes available'
+                                    />
+                                </em>
+                            </MenuItem>
+                        )}
+                    </TextField>
                 </TableCell>
                 <TableCell>
                     <Switch
@@ -304,6 +377,7 @@ Operation.propTypes = {
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,
+    sharedScopes: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(Operation));

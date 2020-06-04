@@ -17,11 +17,14 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import com.nimbusds.jwt.SignedJWT;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.apache.axiom.util.UIDGenerator;
@@ -39,7 +42,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
@@ -49,6 +51,7 @@ import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestResponseStreamDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -60,6 +63,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -187,22 +192,31 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                         headers.get(HttpHeaders.AUTHORIZATION));
             } else {
                 ctx.writeAndFlush(new TextWebSocketFrame(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE));
+                if (log.isDebugEnabled()) {
+                    log.debug("Authentication Failure for the websocket context: " + apiContextUri);
+                }
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             }
+        } else if ((msg instanceof CloseWebSocketFrame) || (msg instanceof PingWebSocketFrame)) {
+            //if the inbound frame is a closed frame, throttling, analytics will not be published.
+            ctx.fireChannelRead(msg);
         } else if (msg instanceof WebSocketFrame) {
-            boolean isThrottledOut = doThrottle(ctx, (WebSocketFrame) msg);
-            String clientIp = getRemoteIP(ctx);
 
-            if (isThrottledOut) {
+            boolean isAllowed = doThrottle(ctx, (WebSocketFrame) msg);
+
+            if (isAllowed) {
                 ctx.fireChannelRead(msg);
+                String clientIp = getRemoteIP(ctx);
+                // publish analytics events if analytics is enabled
+                if (APIUtil.isAnalyticsEnabled()) {
+                    publishRequestEvent(clientIp, true);
+                }
             } else {
                 ctx.writeAndFlush(new TextWebSocketFrame("Websocket frame throttled out"));
-            }
-
-            // publish analytics events if analytics is enabled
-            if (APIUtil.isAnalyticsEnabled()) {
-                publishRequestEvent(infoDTO, clientIp, isThrottledOut);
+                if (log.isDebugEnabled()) {
+                    log.debug("Inbound Websocket frame is throttled. " + ctx.channel().toString());
+                }
             }
         }
     }
@@ -243,14 +257,37 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 }
 
                 //Initial guess of a JWT token using the presence of a DOT.
-                isJwtToken = StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT) &&
-                        APIUtil.isValidJWT(apiKey);
+
+                SignedJWT signedJWT = null;
+                if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
+                    try {
+                        // Check if the header part is decoded
+                        Base64.getUrlDecoder().decode(apiKey.split("\\.")[0]);
+                        if (StringUtils.countMatches(apiKey, APIConstants.DOT) != 2) {
+                            log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
+                            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                    "Invalid JWT token");
+                        }
+                        signedJWT = SignedJWT.parse(apiKey);
+                        String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
+                                .getKeyManagerNameIfJwtValidatorExist(signedJWT);
+                        if (StringUtils.isNotEmpty(keyManager)){
+                            isJwtToken = true;
+                        }
+                    } catch ( ParseException e) {
+                        log.debug("Not a JWT token. Failed to decode the token header.", e);
+                    } catch (APIManagementException e) {
+                        log.error("error while check validation of JWt", e);
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+                    }
+                }
                 // Find the authentication scheme based on the token type
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
                     AuthenticationContext authenticationContext =
                             new JWTValidator(null, null).
-                                    authenticateForWebSocket(apiKey, apiContextUri, version);
+                                    authenticateForWebSocket(signedJWT, apiContextUri, version);
                     if(authenticationContext == null || !authenticationContext.isAuthenticated()) {
                         return false;
                     }
@@ -301,7 +338,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     }
                     String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
                     if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
-                        info = getApiKeyDataForWSClient(apiKey);
+                        info = getApiKeyDataForWSClient(apiKey,tenantDomain);
                     } else {
                         return false;
                     }
@@ -336,8 +373,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey) throws APISecurityException {
-        return new WebsocketWSClient().getAPIKeyData(apiContextUri, version, apiKey);
+    protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey, String tenantDomain) throws APISecurityException {
+
+        return new WebsocketWSClient().getAPIKeyData(apiContextUri, version, apiKey, tenantDomain);
     }
 
     protected APIManagerAnalyticsConfiguration getApiManagerAnalyticsConfiguration() {
@@ -405,6 +443,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     .isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
                             applicationLevelThrottleKey);
             if (isThrottled) {
+                if (APIUtil.isAnalyticsEnabled()) {
+                    publishThrottleEvent();
+                }
                 return false;
             }
         } finally {
@@ -431,11 +472,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     /**
      * Publish reuqest event to analytics server
      *
-     * @param infoDTO        API and Application data
      * @param clientIp       client's IP Address
      * @param isThrottledOut request is throttled out or not
      */
-    private void publishRequestEvent(APIKeyValidationInfoDTO infoDTO, String clientIp, boolean isThrottledOut) {
+    public void publishRequestEvent(String clientIp, boolean isThrottledOut) {
         long requestTime = System.currentTimeMillis();
         String useragent = headers.get(HttpHeaders.USER_AGENT);
 
@@ -490,6 +530,40 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             executionTime.setThrottlingLatency(0);
             requestPublisherDTO.setExecutionTime(executionTime);
             usageDataPublisher.publishEvent(requestPublisherDTO);
+        } catch (Exception e) {
+            // flow should not break if event publishing failed
+            log.error("Cannot publish event. " + e.getMessage(), e);
+        }
+
+    }
+
+    /*
+     * Publish throttle events.
+     */
+    private void publishThrottleEvent() {
+        long requestTime = System.currentTimeMillis();
+        String correlationID = UUID.randomUUID().toString();
+        try {
+            ThrottlePublisherDTO throttlePublisherDTO = new ThrottlePublisherDTO();
+            throttlePublisherDTO.setKeyType(infoDTO.getType());
+            throttlePublisherDTO.setTenantDomain(tenantDomain);
+            //throttlePublisherDTO.setApplicationConsumerKey(infoDTO.getConsumerKey());
+            throttlePublisherDTO.setApiname(infoDTO.getApiName());
+            throttlePublisherDTO.setVersion(infoDTO.getApiName() + ':' + version);
+            throttlePublisherDTO.setContext(apiContextUri);
+            throttlePublisherDTO.setApiCreator(infoDTO.getApiPublisher());
+            throttlePublisherDTO.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(infoDTO.getApiPublisher()));
+            throttlePublisherDTO.setApplicationName(infoDTO.getApplicationName());
+            throttlePublisherDTO.setApplicationId(infoDTO.getApplicationId());
+            throttlePublisherDTO.setSubscriber(infoDTO.getSubscriber());
+            throttlePublisherDTO.setThrottledTime(requestTime);
+            throttlePublisherDTO.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
+            throttlePublisherDTO.setThrottledOutReason("-");
+            throttlePublisherDTO.setUsername(infoDTO.getEndUserName());
+            throttlePublisherDTO.setCorrelationID(correlationID);
+            throttlePublisherDTO.setHostName(DataPublisherUtil.getHostAddress());
+            throttlePublisherDTO.setAccessToken("-");
+            usageDataPublisher.publishEvent(throttlePublisherDTO);
         } catch (Exception e) {
             // flow should not break if event publishing failed
             log.error("Cannot publish event. " + e.getMessage(), e);

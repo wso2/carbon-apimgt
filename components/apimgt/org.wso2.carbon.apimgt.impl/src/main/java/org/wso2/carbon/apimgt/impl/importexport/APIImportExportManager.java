@@ -24,9 +24,14 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportUtil;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIProductImportUtil;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIProductExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 
 import java.io.File;
@@ -59,19 +64,29 @@ public class APIImportExportManager {
     /**
      * This method is used to export the given API as an archive (zip file).
      *
-     * @param apiToReturn       Requested API to export
-     * @param isStatusPreserved Is API status preserved or not
-     * @param exportFormat      Export file format of the API
-     * @return Archive file for the requested API
-     * @throws APIImportExportException If an error occurs while exporting the API and creating the archive
+     * @param apiTypeWrapper    Requested API or API Product to export
+     * @param isStatusPreserved Is API or API Product  status preserved or not
+     * @param exportFormat      Export file format of the API or the API Product
+     * @return Archive file for the requested API or API Product
+     * @throws APIImportExportException If an error occurs while exporting the API or the API Product and creating the archive
      */
-    public File exportAPIArchive(API apiToReturn, boolean isStatusPreserved, ExportFormat exportFormat)
+    public File exportAPIOrAPIProductArchive(ApiTypeWrapper apiTypeWrapper, boolean isStatusPreserved, ExportFormat exportFormat)
             throws APIImportExportException {
-
-        APIIdentifier apiIdentifier = apiToReturn.getId();
-        String archiveBasePath = exportAPIArtifacts(apiToReturn, isStatusPreserved, exportFormat);
+        String archiveBasePath;
+        if (!apiTypeWrapper.isAPIProduct()) {
+            APIIdentifier apiIdentifier = apiTypeWrapper.getApi().getId();
+            archiveBasePath = exportAPIArtifacts(apiTypeWrapper.getApi(), isStatusPreserved, exportFormat);
+            if (log.isDebugEnabled()) {
+                log.debug("API" + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion() + " exported successfully");
+            }
+        } else {
+            APIProductIdentifier apiProductIdentifier = apiTypeWrapper.getApiProduct().getId();
+            archiveBasePath = exportAPIProductArtifacts(apiTypeWrapper.getApiProduct(), isStatusPreserved, exportFormat);
+            if (log.isDebugEnabled()) {
+                log.info("API Product" + apiProductIdentifier.getName() + "-" + apiProductIdentifier.getVersion() + " exported successfully");
+            }
+        }
         CommonUtil.archiveDirectory(archiveBasePath);
-        log.info("API" + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion() + " exported successfully");
         FileUtils.deleteQuietly(new File(archiveBasePath));
         return new File(archiveBasePath + APIConstants.ZIP_FILE_EXTENSION);
     }
@@ -88,12 +103,33 @@ public class APIImportExportManager {
             throws APIImportExportException {
 
         //create temp location for storing API data
-        File exportFolder = CommonUtil.createTempDirectory();
+        File exportFolder = CommonUtil.createTempDirectory(apiToReturn.getId());
         String exportAPIBasePath = exportFolder.toString();
         //Retrieve the API and related artifacts and populate the api folder in the temp location
         APIExportUtil.retrieveApiToExport(exportAPIBasePath, apiToReturn, apiProvider, loggedInUsername,
                 isStatusPreserved, exportFormat);
         return exportAPIBasePath;
+    }
+
+    /**
+     * This method is used to export the given API Product artifacts to the temp location.
+     *
+     * @param apiProductToReturn    Requested API  Product to export
+     * @param isStatusPreserved     Is API Product status preserved or not
+     * @param exportFormat          Export file format of the API Product
+     * @return tmp location for the exported API Product artifacts
+     * @throws APIImportExportException If an error occurs while exporting the API Product
+     */
+    public String exportAPIProductArtifacts(APIProduct apiProductToReturn, boolean isStatusPreserved, ExportFormat exportFormat)
+            throws APIImportExportException {
+
+        // Create temp location for storing API Product data
+        File exportFolder = CommonUtil.createTempDirectory(apiProductToReturn.getId());
+        String exportAPIProductBasePath = exportFolder.toString();
+        // Retrieve the API Product and related artifacts and populate the api folder in the temp location
+        APIProductExportUtil.retrieveApiProductToExport(exportAPIProductBasePath, apiProductToReturn, apiProvider, loggedInUsername,
+                isStatusPreserved, exportFormat);
+        return exportAPIProductBasePath;
     }
 
     /**
@@ -108,7 +144,7 @@ public class APIImportExportManager {
     public void importAPIArchive(InputStream uploadedInputStream, Boolean isProviderPreserved, Boolean overwrite)
             throws APIImportExportException {
         //Temporary directory is used to create the required folders
-        File importFolder = CommonUtil.createTempDirectory();
+        File importFolder = CommonUtil.createTempDirectory(null);
         String uploadFileName = APIImportExportConstants.UPLOAD_FILE_NAME;
         String absolutePath = importFolder.getAbsolutePath() + File.separator;
         CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
@@ -121,4 +157,32 @@ public class APIImportExportManager {
         FileUtils.deleteQuietly(new File(extractedFolderName));
     }
 
+    /**
+     * This method is used to import the given API Product archive file. Importing an API Product as a new API and overwriting an existing
+     * API Product both are supported.
+     *
+     * @param uploadedInputStream       Input stream for importing API archive file
+     * @param isProviderPreserved       Is API Provider preserved or not
+     * @param overwriteAPIProduct       Whether to overwrite an existing API Product (update API Product)
+     * @param overwriteAPIs             Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product.
+     * @param isImportAPIs              Whether to import the dependent APIs or not.
+     * @throws APIImportExportException If an error occurs while importing the API
+     */
+    public void importAPIProductArchive(InputStream uploadedInputStream, Boolean isProviderPreserved, Boolean overwriteAPIProduct,
+                                        Boolean overwriteAPIs, Boolean isImportAPIs)
+            throws APIImportExportException {
+        // Temporary directory is used to create the required folders
+        File importFolder = CommonUtil.createTempDirectory(null);
+        String uploadFileName = APIImportExportConstants.UPLOAD_FILE_NAME;
+        String absolutePath = importFolder.getAbsolutePath() + File.separator;
+        CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
+
+        String extractedFolderName = CommonUtil.extractArchive(new File(absolutePath + uploadFileName), absolutePath);
+
+        APIProductImportUtil.importAPIProduct(absolutePath + extractedFolderName, loggedInUsername, isProviderPreserved,
+                    apiProvider, overwriteAPIProduct, overwriteAPIs, isImportAPIs);
+
+        FileUtils.deleteQuietly(importFolder);
+        FileUtils.deleteQuietly(new File(extractedFolderName));
+    }
 }

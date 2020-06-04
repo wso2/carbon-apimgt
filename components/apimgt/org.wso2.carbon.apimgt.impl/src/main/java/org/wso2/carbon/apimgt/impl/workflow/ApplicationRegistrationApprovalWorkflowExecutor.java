@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+
 import java.util.List;
 
 /**
@@ -46,12 +47,13 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
         }
         ApplicationRegistrationWorkflowDTO appRegDTO = (ApplicationRegistrationWorkflowDTO) workflowDTO;
         Application application = appRegDTO.getApplication();
-        String callBackURL = appRegDTO.getCallbackUrl();
-        String applicationCallbackUrl = application.getCallbackUrl();
-        String applicationDescription = application.getDescription();
-        String message = "Approve request to create " + appRegDTO.getKeyType() + " keys for [ " + application.getName() +
-                " ] from application creator - " + appRegDTO.getUserName() + " with throttling tier - " + application.getTier();
+        String message = "Approve request to create " + appRegDTO.getKeyType() + " keys for " + application.getName() +
+                " from application creator - " + appRegDTO.getUserName() + " with throttling tier - " + application.getTier();
         workflowDTO.setWorkflowDescription(message);
+        workflowDTO.setProperties("keyType", appRegDTO.getKeyType());
+        workflowDTO.setProperties("applicationName", application.getName());
+        workflowDTO.setProperties("userName", appRegDTO.getUserName());
+        workflowDTO.setProperties("applicationTier", application.getTier());
         super.execute(workflowDTO);
 
         return new GeneralWorkflowResponse();

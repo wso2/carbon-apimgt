@@ -25,11 +25,11 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+
 import java.util.List;
 
 /**
  * Approval workflow for API Subscription.
- *
  */
 public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecutor {
 
@@ -57,11 +57,14 @@ public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecut
             log.debug("Executing Subscription Creation Webservice Workflow.. ");
         }
         SubscriptionWorkflowDTO subsWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
-        String callBackURL = subsWorkflowDTO.getCallbackUrl();
-        String message = "Approve API [" + subsWorkflowDTO.getApiName() + " - " + subsWorkflowDTO.getApiVersion() +
-                "] subscription creation request from subscriber - " + subsWorkflowDTO.getSubscriber() +
+        String message = "Approve API " + subsWorkflowDTO.getApiName() + " - " + subsWorkflowDTO.getApiVersion() +
+                " subscription creation request from subscriber - " + subsWorkflowDTO.getSubscriber() +
                 " for the application - " + subsWorkflowDTO.getApplicationName();
         workflowDTO.setWorkflowDescription(message);
+        workflowDTO.setProperties("apiName", subsWorkflowDTO.getApiName());
+        workflowDTO.setProperties("apiVersion", subsWorkflowDTO.getApiVersion());
+        workflowDTO.setProperties("subscriber", subsWorkflowDTO.getSubscriber());
+        workflowDTO.setProperties("applicationName", subsWorkflowDTO.getApplicationName());
         super.execute(workflowDTO);
 
         return new GeneralWorkflowResponse();

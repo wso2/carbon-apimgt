@@ -25,9 +25,9 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
+import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 
 public abstract class AbstractKeyValidationHandler implements KeyValidationHandler {
@@ -77,7 +77,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
             }
 
             state = dao.validateSubscriptionDetails(validationContext.getContext(), validationContext.getVersion(),
-                    dto.getConsumerKey(), dto);
+                    dto.getConsumerKey(), dto.getKeyManager(), dto);
 
             if (log.isDebugEnabled()) {
                 log.debug("After validating subscriptions : " + dto);
@@ -144,7 +144,8 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
     }
 
     @Override
-    public APIKeyValidationInfoDTO validateSubscription(String apiContext, String apiVersion, String consumerKey) {
+    public APIKeyValidationInfoDTO validateSubscription(String apiContext, String apiVersion, String consumerKey,
+                                                        String keyManager) {
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO =  new APIKeyValidationInfoDTO();
 
         try {
@@ -153,7 +154,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                 log.debug("Validation Info : { context : " + apiContext + " , " + "version : "
                         + apiVersion + " , consumerKey : " + consumerKey + " }");
             }
-            dao.validateSubscriptionDetails(apiContext, apiVersion, consumerKey, apiKeyValidationInfoDTO);
+            dao.validateSubscriptionDetails(apiContext, apiVersion, consumerKey, keyManager, apiKeyValidationInfoDTO);
             if (log.isDebugEnabled()) {
                 log.debug("After validating subscriptions");
             }

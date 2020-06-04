@@ -11,9 +11,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import javax.validation.constraints.*;
 
@@ -136,7 +136,7 @@ public enum VisibilityEnum {
 @XmlEnum(String.class)
 public enum SubscriptionAvailabilityEnum {
 
-    @XmlEnumValue("current_tenant") CURRENT_TENANT(String.valueOf("current_tenant")), @XmlEnumValue("all_tenants") ALL_TENANTS(String.valueOf("all_tenants")), @XmlEnumValue("specific_tenants") SPECIFIC_TENANTS(String.valueOf("specific_tenants"));
+    @XmlEnumValue("CURRENT_TENANT") CURRENT_TENANT(String.valueOf("CURRENT_TENANT")), @XmlEnumValue("ALL_TENANTS") ALL_TENANTS(String.valueOf("ALL_TENANTS")), @XmlEnumValue("SPECIFIC_TENANTS") SPECIFIC_TENANTS(String.valueOf("SPECIFIC_TENANTS"));
 
 
     private String value;
@@ -247,10 +247,11 @@ public enum EndpointImplementationTypeEnum {
 }
 
     private EndpointImplementationTypeEnum endpointImplementationType = EndpointImplementationTypeEnum.ENDPOINT;
-    private List<ScopeDTO> scopes = new ArrayList<>();
+    private List<APIScopeDTO> scopes = new ArrayList<>();
     private List<APIOperationsDTO> operations = new ArrayList<>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
     private List<String> categories = new ArrayList<>();
+    private Object keyManagers = null;
 
   /**
    * UUID of the api registry artifact 
@@ -777,7 +778,7 @@ public enum EndpointImplementationTypeEnum {
   }
 
   /**
-   * The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
+   * The subscription availability. Accepts one of the following. CURRENT_TENANT, ALL_TENANTS or SPECIFIC_TENANTS.
    **/
   public APIDTO subscriptionAvailability(SubscriptionAvailabilityEnum subscriptionAvailability) {
     this.subscriptionAvailability = subscriptionAvailability;
@@ -785,7 +786,7 @@ public enum EndpointImplementationTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "current_tenant", value = "The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.")
+  @ApiModelProperty(example = "CURRENT_TENANT", value = "The subscription availability. Accepts one of the following. CURRENT_TENANT, ALL_TENANTS or SPECIFIC_TENANTS.")
   @JsonProperty("subscriptionAvailability")
   public SubscriptionAvailabilityEnum getSubscriptionAvailability() {
     return subscriptionAvailability;
@@ -968,7 +969,7 @@ public enum EndpointImplementationTypeEnum {
   }
 
   /**
-   * Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.  &#x60;Simple REST Endpoint&#x60;   {     \&quot;endpoint_type\&quot;: \&quot;http\&quot;,     \&quot;sandbox_endpoints\&quot;:       {        \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/\&quot;     },     \&quot;production_endpoints\&quot;:       {        \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/\&quot;     }   }  &#x60;Loadbalanced Endpoint&#x60;    {     \&quot;endpoint_type\&quot;: \&quot;load_balance\&quot;,     \&quot;algoCombo\&quot;: \&quot;org.apache.synapse.endpoints.algorithms.RoundRobin\&quot;,     \&quot;sessionManagement\&quot;: \&quot;\&quot;,     \&quot;sandbox_endpoints\&quot;:       [                 {           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/1\&quot;        },                 {           \&quot;endpoint_type\&quot;: \&quot;http\&quot;,           \&quot;template_not_supported\&quot;: false,           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/2\&quot;        }     ],     \&quot;production_endpoints\&quot;:       [                 {           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/3\&quot;        },                 {           \&quot;endpoint_type\&quot;: \&quot;http\&quot;,           \&quot;template_not_supported\&quot;: false,           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/4\&quot;        }     ],     \&quot;sessionTimeOut\&quot;: \&quot;\&quot;,     \&quot;algoClassName\&quot;: \&quot;org.apache.synapse.endpoints.algorithms.RoundRobin\&quot;   }  &#x60;Failover Endpoint&#x60;    {     \&quot;production_failovers\&quot;:[        {           \&quot;endpoint_type\&quot;:\&quot;http\&quot;,           \&quot;template_not_supported\&quot;:false,           \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/1\&quot;        }     ],     \&quot;endpoint_type\&quot;:\&quot;failover\&quot;,     \&quot;sandbox_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/2\&quot;     },     \&quot;production_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/3\&quot;     },     \&quot;sandbox_failovers\&quot;:[        {           \&quot;endpoint_type\&quot;:\&quot;http\&quot;,           \&quot;template_not_supported\&quot;:false,           \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/4\&quot;        }     ]   }  &#x60;Default Endpoint&#x60;    {     \&quot;endpoint_type\&quot;:\&quot;default\&quot;,     \&quot;sandbox_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;default\&quot;     },     \&quot;production_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;default\&quot;     }   } 
+   * Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.  &#x60;Simple REST Endpoint&#x60;   {     \&quot;endpoint_type\&quot;: \&quot;http\&quot;,     \&quot;sandbox_endpoints\&quot;:       {        \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/\&quot;     },     \&quot;production_endpoints\&quot;:       {        \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/\&quot;     }   }  &#x60;Loadbalanced Endpoint&#x60;    {     \&quot;endpoint_type\&quot;: \&quot;load_balance\&quot;,     \&quot;algoCombo\&quot;: \&quot;org.apache.synapse.endpoints.algorithms.RoundRobin\&quot;,     \&quot;sessionManagement\&quot;: \&quot;\&quot;,     \&quot;sandbox_endpoints\&quot;:       [                 {           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/1\&quot;        },                 {           \&quot;endpoint_type\&quot;: \&quot;http\&quot;,           \&quot;template_not_supported\&quot;: false,           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/2\&quot;        }     ],     \&quot;production_endpoints\&quot;:       [                 {           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/3\&quot;        },                 {           \&quot;endpoint_type\&quot;: \&quot;http\&quot;,           \&quot;template_not_supported\&quot;: false,           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/4\&quot;        }     ],     \&quot;sessionTimeOut\&quot;: \&quot;\&quot;,     \&quot;algoClassName\&quot;: \&quot;org.apache.synapse.endpoints.algorithms.RoundRobin\&quot;   }  &#x60;Failover Endpoint&#x60;    {     \&quot;production_failovers\&quot;:[        {           \&quot;endpoint_type\&quot;:\&quot;http\&quot;,           \&quot;template_not_supported\&quot;:false,           \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/1\&quot;        }     ],     \&quot;endpoint_type\&quot;:\&quot;failover\&quot;,     \&quot;sandbox_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/2\&quot;     },     \&quot;production_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/3\&quot;     },     \&quot;sandbox_failovers\&quot;:[        {           \&quot;endpoint_type\&quot;:\&quot;http\&quot;,           \&quot;template_not_supported\&quot;:false,           \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/4\&quot;        }     ]   }  &#x60;Default Endpoint&#x60;    {     \&quot;endpoint_type\&quot;:\&quot;default\&quot;,     \&quot;sandbox_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;default\&quot;     },     \&quot;production_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;default\&quot;     }   }  &#x60;Endpoint from Endpoint Registry&#x60;   {     \&quot;endpoint_type\&quot;: \&quot;Registry\&quot;,     \&quot;endpoint_id\&quot;: \&quot;{registry-name:entry-name:version}\&quot;,   } 
    **/
   public APIDTO endpointConfig(Object endpointConfig) {
     this.endpointConfig = endpointConfig;
@@ -976,7 +977,7 @@ public enum EndpointImplementationTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "{\"endpoint_type\":\"http\",\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\"},\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\"}}", value = "Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.  `Simple REST Endpoint`   {     \"endpoint_type\": \"http\",     \"sandbox_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"     },     \"production_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"     }   }  `Loadbalanced Endpoint`    {     \"endpoint_type\": \"load_balance\",     \"algoCombo\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\",     \"sessionManagement\": \"\",     \"sandbox_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/1\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/2\"        }     ],     \"production_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/3\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/4\"        }     ],     \"sessionTimeOut\": \"\",     \"algoClassName\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\"   }  `Failover Endpoint`    {     \"production_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/1\"        }     ],     \"endpoint_type\":\"failover\",     \"sandbox_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/2\"     },     \"production_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/3\"     },     \"sandbox_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/4\"        }     ]   }  `Default Endpoint`    {     \"endpoint_type\":\"default\",     \"sandbox_endpoints\":{        \"url\":\"default\"     },     \"production_endpoints\":{        \"url\":\"default\"     }   } ")
+  @ApiModelProperty(example = "{\"endpoint_type\":\"http\",\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\"},\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\"}}", value = "Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.  `Simple REST Endpoint`   {     \"endpoint_type\": \"http\",     \"sandbox_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"     },     \"production_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"     }   }  `Loadbalanced Endpoint`    {     \"endpoint_type\": \"load_balance\",     \"algoCombo\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\",     \"sessionManagement\": \"\",     \"sandbox_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/1\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/2\"        }     ],     \"production_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/3\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/4\"        }     ],     \"sessionTimeOut\": \"\",     \"algoClassName\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\"   }  `Failover Endpoint`    {     \"production_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/1\"        }     ],     \"endpoint_type\":\"failover\",     \"sandbox_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/2\"     },     \"production_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/3\"     },     \"sandbox_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/4\"        }     ]   }  `Default Endpoint`    {     \"endpoint_type\":\"default\",     \"sandbox_endpoints\":{        \"url\":\"default\"     },     \"production_endpoints\":{        \"url\":\"default\"     }   }  `Endpoint from Endpoint Registry`   {     \"endpoint_type\": \"Registry\",     \"endpoint_id\": \"{registry-name:entry-name:version}\",   } ")
   @JsonProperty("endpointConfig")
   public Object getEndpointConfig() {
     return endpointConfig;
@@ -1004,7 +1005,7 @@ public enum EndpointImplementationTypeEnum {
 
   /**
    **/
-  public APIDTO scopes(List<ScopeDTO> scopes) {
+  public APIDTO scopes(List<APIScopeDTO> scopes) {
     this.scopes = scopes;
     return this;
   }
@@ -1012,10 +1013,10 @@ public enum EndpointImplementationTypeEnum {
   
   @ApiModelProperty(value = "")
   @JsonProperty("scopes")
-  public List<ScopeDTO> getScopes() {
+  public List<APIScopeDTO> getScopes() {
     return scopes;
   }
-  public void setScopes(List<ScopeDTO> scopes) {
+  public void setScopes(List<APIScopeDTO> scopes) {
     this.scopes = scopes;
   }
 
@@ -1069,6 +1070,24 @@ public enum EndpointImplementationTypeEnum {
   }
   public void setCategories(List<String> categories) {
     this.categories = categories;
+  }
+
+  /**
+   * API Key Managers 
+   **/
+  public APIDTO keyManagers(Object keyManagers) {
+    this.keyManagers = keyManagers;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "API Key Managers ")
+  @JsonProperty("keyManagers")
+  public Object getKeyManagers() {
+    return keyManagers;
+  }
+  public void setKeyManagers(Object keyManagers) {
+    this.keyManagers = keyManagers;
   }
 
 
@@ -1127,12 +1146,13 @@ public enum EndpointImplementationTypeEnum {
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(operations, API.operations) &&
         Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies) &&
-        Objects.equals(categories, API.categories);
+        Objects.equals(categories, API.categories) &&
+        Objects.equals(keyManagers, API.keyManagers);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers);
   }
 
   @Override
@@ -1187,6 +1207,7 @@ public enum EndpointImplementationTypeEnum {
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
+    sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("}");
     return sb.toString();
   }

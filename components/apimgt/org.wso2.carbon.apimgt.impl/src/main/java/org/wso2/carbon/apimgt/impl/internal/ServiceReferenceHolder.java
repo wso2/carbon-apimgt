@@ -16,10 +16,15 @@
 
 package org.wso2.carbon.apimgt.impl.internal;
 
+import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.UserRealm;
@@ -27,6 +32,11 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.security.KeyStore;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ServiceReferenceHolder {
 
@@ -41,6 +51,11 @@ public class ServiceReferenceHolder {
     private APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher;
     private KeyStore trustStore;
     private AccessTokenGenerator accessTokenGenerator;
+    private KeyManagerConfigurationService keyManagerConfigurationService;
+    private OAuthServerConfiguration oauthServerConfiguration;
+    private Map<String,JWTTransformer> jwtTransformerMap = new HashMap<>();
+    private Map<String,KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap  = new HashMap<>();
+    private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
 
     public static ConfigurationContextService getContextService() {
         return contextService;
@@ -130,5 +145,62 @@ public class ServiceReferenceHolder {
             AccessTokenGenerator accessTokenGenerator) {
 
         this.accessTokenGenerator = accessTokenGenerator;
+    }
+
+    public KeyManagerConfigurationService getKeyManagerConfigurationService() {
+
+        return keyManagerConfigurationService;
+    }
+
+    public void setKeyManagerConfigurationService(
+            KeyManagerConfigurationService keyManagerConfigurationService) {
+
+        this.keyManagerConfigurationService = keyManagerConfigurationService;
+    }
+
+    public void setOauthServerConfiguration(OAuthServerConfiguration oauthServerConfiguration) {
+        this.oauthServerConfiguration = oauthServerConfiguration;
+    }
+
+    public OAuthServerConfiguration getOauthServerConfiguration() {
+
+        return oauthServerConfiguration;
+    }
+
+    public void addJWTTransformer(String issuer, JWTTransformer jwtTransformer) {
+
+        jwtTransformerMap.put(issuer, jwtTransformer);
+    }
+
+    public void removeJWTTransformer(String issuer) {
+
+        jwtTransformerMap.remove(issuer);
+    }
+    public JWTTransformer getJWTTransformer(String issuer){
+        return jwtTransformerMap.get(issuer);
+    }
+
+    public void addKeyManagerConnectorConfiguration(String type,
+                                                    KeyManagerConnectorConfiguration keyManagerConnectorConfiguration) {
+        keyManagerConnectorConfigurationMap.put(type,keyManagerConnectorConfiguration);
+    }
+
+    public void removeKeyManagerConnectorConfiguration(String type) {
+        keyManagerConnectorConfigurationMap.remove(type);
+    }
+
+    public KeyManagerConnectorConfiguration getKeyManagerConnectorConfiguration(String type) {
+
+        return keyManagerConnectorConfigurationMap.get(type);
+    }
+
+    public Map<String, KeyManagerConnectorConfiguration> getKeyManagerConnectorConfigurations() {
+
+        return keyManagerConnectorConfigurationMap;
+    }
+
+    public Map<String, List<Notifier>> getNotifiersMap() {
+
+        return notifiersMap;
     }
 }

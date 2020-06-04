@@ -32,6 +32,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,6 @@ import java.util.ArrayList;
 
 /**
  * Approval workflow for API state change.
- *
  */
 public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
 
@@ -97,6 +97,11 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
                 apiStateWorkFlowDTO.setMetadata("ApiProvider", apiStateWorkFlowDTO.getApiProvider());
                 apiStateWorkFlowDTO.setMetadata("Invoker", apiStateWorkFlowDTO.getInvoker());
                 apiStateWorkFlowDTO.setMetadata("TenantId", String.valueOf(apiStateWorkFlowDTO.getTenantId()));
+
+                apiStateWorkFlowDTO.setProperties("application", apiStateWorkFlowDTO.getApiLCAction());
+                apiStateWorkFlowDTO.setProperties("apiName", apiStateWorkFlowDTO.getApiName());
+                apiStateWorkFlowDTO.setProperties("apiVersion", apiStateWorkFlowDTO.getApiVersion());
+                apiStateWorkFlowDTO.setProperties("apiProvider", apiStateWorkFlowDTO.getApiProvider());
                 super.execute(workflowDTO);
             } else {
                 // For any other states, act as simple workflow executor.
@@ -135,7 +140,6 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
             String invoker = workflow.getMetadata("Invoker");
             String currentStatus = workflow.getMetadata("CurrentState");
             int tenantId = workflowDTO.getTenantId();
-            //ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             try {
                 //tenant flow is already started from the rest api service impl. no need to start from here
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(invoker);

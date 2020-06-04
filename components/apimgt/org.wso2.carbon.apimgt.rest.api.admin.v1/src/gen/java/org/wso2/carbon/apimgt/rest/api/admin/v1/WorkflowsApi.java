@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.WorkflowsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.WorkflowsApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -36,13 +38,50 @@ public class WorkflowsApi  {
 WorkflowsApiService delegate = new WorkflowsApiServiceImpl();
 
 
+    @GET
+    @Path("/{externalWorkflowRef}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get details of a the pending workflow request according to the External Workflow Reference. ", notes = "Using this operation, you can retrieve complete details of a pending workflow request that either belongs to application creation, application subscription, application registration, api state change, user self sign up.. You need to provide the External_Workflow_Reference of the workflow Request to retrive it. ", response = WorkflowInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_workflow_view", description = "Retrive workflow requests")
+        })
+    }, tags={ "Workflows (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Requested Workflow Pending is returned ", response = WorkflowInfoDTO.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested workflow pendding process does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
+    public Response workflowsExternalWorkflowRefGet(@ApiParam(value = "from the externel workflow reference we decide what is the the pending request that the are requesting. ",required=true) @PathParam("externalWorkflowRef") String externalWorkflowRef, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.workflowsExternalWorkflowRefGet(externalWorkflowRef, ifNoneMatch, securityContext);
+    }
+
+    @GET
+    
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve All pending workflow processes ", notes = "This operation can be used to retrieve list of workflow pending processes. ", response = WorkflowListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_workflow_view", description = "Retrive workflow requests")
+        })
+    }, tags={ "Workflow (Collection)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Workflow pendding process list returned. ", response = WorkflowListDTO.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested user does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = ErrorDTO.class) })
+    public Response workflowsGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "We need to show the values of each workflow process separately .for that we use workflow type. Workflow type can be AM_APPLICATION_CREATION, AM_SUBSCRIPTION_CREATION,   AM_USER_SIGNUP, AM_APPLICATION_REGISTRATION_PRODUCTION, AM_APPLICATION_REGISTRATION_SANDBOX. ", allowableValues="AM_APPLICATION_CREATION, AM_SUBSCRIPTION_CREATION, AM_USER_SIGNUP, AM_APPLICATION_REGISTRATION_PRODUCTION, AM_APPLICATION_REGISTRATION_SANDBOX, AM_SUBSCRIPTION_DELETION, AM_APPLICATION_DELETION, AM_API_STATE")  @QueryParam("workflowType") String workflowType) throws APIManagementException{
+        return delegate.workflowsGet(limit, offset, accept, ifNoneMatch, workflowType, securityContext);
+    }
+
     @POST
     @Path("/update-workflow-status")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Update workflow status", notes = "This operation can be used to approve or reject a workflow task. ", response = WorkflowDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_workflow", description = "Manage workflows")
+            @AuthorizationScope(scope = "apim:api_workflow_approve", description = "Manage workflows")
         })
     }, tags={ "Workflows (Individual)" })
     @ApiResponses(value = { 

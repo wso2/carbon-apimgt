@@ -26,11 +26,11 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+
 import java.util.List;
 
 /**
  * Approval workflow for Application Creation.
- *
  */
 public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecutor {
 
@@ -53,10 +53,12 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
         }
         ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
         Application application = appWorkFlowDTO.getApplication();
-        String callBackURL = appWorkFlowDTO.getCallbackUrl();
-        String message = "Approve application [" + application.getName() + "] creation request from application creator -"
+        String message = "Approve application " + application.getName() + " creation request from application creator -"
                 + appWorkFlowDTO.getUserName() + " with throttling tier - " + application.getTier();
         workflowDTO.setWorkflowDescription(message);
+        workflowDTO.setProperties("applicationName", application.getName());
+        workflowDTO.setProperties("userName", appWorkFlowDTO.getUserName());
+        workflowDTO.setProperties("applicationTier", application.getTier());
         super.execute(workflowDTO);
 
         return new GeneralWorkflowResponse();

@@ -20,19 +20,36 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.impl.dto.TokenHandlingDto;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Mostly common features of  keyManager implementations will be handle here.
@@ -40,7 +57,8 @@ import java.util.Map;
  */
 public abstract class AbstractKeyManager implements KeyManager {
     private static Log log = LogFactory.getLog(AbstractKeyManager.class);
-
+    protected KeyManagerConfiguration configuration;
+    protected String tenantDomain;
     public AccessTokenRequest buildAccessTokenRequestFromJSON(String jsonInput, AccessTokenRequest tokenRequest)
             throws APIManagementException {
 
@@ -114,6 +132,7 @@ public abstract class AbstractKeyManager implements KeyManager {
                 }
                 //copy all params map in to OAuthApplicationInfo's Map object.
                 oAuthApplicationInfo.putAll(params);
+                validateOAuthAppCreationProperties(oAuthApplicationInfo);
                 return oAuthApplicationInfo;
             }
         } catch (ParseException e) {
@@ -153,6 +172,73 @@ public abstract class AbstractKeyManager implements KeyManager {
         return tokenRequest;
     }
 
+    @Override
+    public boolean canHandleToken(String accessToken) throws APIManagementException {
+
+        boolean result = false;
+        boolean canHandle = false;
+        Object tokenHandlingScript = configuration.getParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING);
+        if (tokenHandlingScript != null && StringUtils.isNotEmpty((String) tokenHandlingScript)) {
+            TokenHandlingDto[] tokenHandlers = new Gson().fromJson(
+                    (String) tokenHandlingScript, TokenHandlingDto[].class);
+            if (tokenHandlers.length == 0) {
+                return true;
+            }
+            for (TokenHandlingDto tokenHandler : tokenHandlers) {
+                if (tokenHandler.getEnable()) {
+                    if (TokenHandlingDto.TypeEnum.REFERENCE.equals(tokenHandler.getType())) {
+                        if (tokenHandler.getValue() != null &&
+                                StringUtils.isNotEmpty(String.valueOf(tokenHandler.getValue()))) {
+                            Pattern pattern = Pattern.compile((String) tokenHandler.getValue());
+                            Matcher matcher = pattern.matcher(accessToken);
+                            canHandle = matcher.find();
+                        }
+                    } else if (TokenHandlingDto.TypeEnum.JWT.equals(tokenHandler.getType()) &&
+                            accessToken.contains(APIConstants.DOT)) {
+                        Map<String, Map<String, String>> validationJson =
+                                (Map<String, Map<String, String>>) tokenHandler.getValue();
+                        try {
+                            SignedJWT signedJWT = SignedJWT.parse(accessToken);
+                            JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
+                            for (Map.Entry<String, Map<String, String>> entry : validationJson.entrySet()) {
+                                if (APIConstants.KeyManager.VALIDATION_ENTRY_JWT_BODY.equals(entry.getKey())) {
+                                    boolean state = false;
+                                    for (Map.Entry<String, String> e : entry.getValue().entrySet()) {
+                                        String key = e.getKey();
+                                        String value = e.getValue();
+                                        Object claimValue = jwtClaimsSet.getClaim(key);
+                                        if (claimValue != null) {
+                                            Pattern pattern = Pattern.compile(value);
+                                            Matcher matcher = pattern.matcher((String) claimValue);
+                                            state = matcher.find();
+                                        } else {
+                                            state = false;
+                                        }
+                                    }
+                                    canHandle = state;
+                                }
+                            }
+                        } catch (java.text.ParseException e) {
+                            log.warn("Error while parsing Token", e);
+                        }
+                    }
+                    if (canHandle) {
+                        result = true;
+                        break;
+                    }
+                }
+            }
+        } else {
+            result = true;
+        }
+        return result;
+    }
+
+    @Override
+    public void setTenantDomain(String tenantDomain) {
+        this.tenantDomain = tenantDomain;
+    }
+
     /**
      * common method to throw exceptions.
      *
@@ -163,5 +249,43 @@ public abstract class AbstractKeyManager implements KeyManager {
     protected void handleException(String msg, Exception e) throws APIManagementException {
         log.error(msg, e);
         throw new APIManagementException(msg, e);
+    }
+
+    protected void validateOAuthAppCreationProperties(OAuthApplicationInfo oAuthApplicationInfo)
+            throws APIManagementException {
+
+        String type = getType();
+        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(type)) {
+
+            List<String> missedRequiredValues = new ArrayList<>();
+            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration =
+                    ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfiguration(type);
+            if (keyManagerConnectorConfiguration != null) {
+                List<ConfigurationDto> applicationConfigurationDtoList =
+                        keyManagerConnectorConfiguration.getApplicationConfigurations();
+                Object additionalProperties =
+                        oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+                if (additionalProperties != null) {
+                    JsonObject additionalPropertiesJson =
+                            (JsonObject) new JsonParser().parse((String) additionalProperties);
+                    for (ConfigurationDto configurationDto : applicationConfigurationDtoList) {
+                        JsonElement value = additionalPropertiesJson.get(configurationDto.getName());
+                        if (value == null) {
+                            if (configurationDto.isRequired()) {
+                                missedRequiredValues.add(configurationDto.getName());
+                            }
+                        }
+                    }
+                    if (!missedRequiredValues.isEmpty()) {
+                        throw new APIManagementException("Missing required properties to create/update oauth " +
+                                "application",
+                                ExceptionCodes.KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION);
+                    }
+                }
+            } else {
+                throw new APIManagementException("Invalid Key Manager Type " + type,
+                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+            }
+        }
     }
 }
