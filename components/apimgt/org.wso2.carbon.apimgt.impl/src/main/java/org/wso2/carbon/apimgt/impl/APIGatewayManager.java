@@ -1,12 +1,12 @@
 /*
  * Copyright WSO2 Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -83,7 +83,6 @@ public class APIGatewayManager {
 	private boolean debugEnabled = log.isDebugEnabled();
 
     private final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
-
     private final String ENDPOINT_SANDBOX = "_SANDBOX_";
 
     private static final String PRODUCT_PREFIX = "prod";
@@ -105,208 +104,41 @@ public class APIGatewayManager {
 		return instance;
 	}
 
-	/**
-	 * Publishes an API to all configured Gateways.
-	 * 
-	 * @param api
-	 *            - The API to be published
-	 * @param builder
-	 *            - The template builder
-	 * @param tenantDomain
-	 *            - Tenant Domain of the publisher
-	 */
+    /**
+     * Publishes an API to all configured Gateways.
+     *
+     * @param api          - The API to be published
+     * @param builder      - The template builder
+     * @param tenantDomain - Tenant Domain of the publisher
+     */
     public Map<String, String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
 
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
         if (api.getEnvironments() == null) {
             return failedEnvironmentsMap;
         }
-        long startTime;
-        long endTime;
         if (debugEnabled) {
             log.debug("API to be published: " + api.getId());
-            log.debug("Number of environments to be published to: " + api.getEnvironments().size());
+            log.debug("Number of environments to be published to: " +
+                    (api.getEnvironments().size()) + api.getGatewayLabels().size());
         }
-        for (Label label : api.getGatewayLabels()){
 
-        }
         for (String environmentName : api.getEnvironments()) {
-            long startTimePublishToGateway = System.currentTimeMillis();
             Environment environment = environments.get(environmentName);
             //If the environment is removed from the configuration, continue without publishing
             if (environment == null) {
                 continue;
             }
-            APIGatewayAdminClient client;
-            GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
-            gatewayAPIDTO.setName(api.getId().getName());
-            gatewayAPIDTO.setVersion(api.getId().getVersion());
-            gatewayAPIDTO.setProvider(api.getId().getProviderName());
-            gatewayAPIDTO.setApiId(api.getUUID());
-            gatewayAPIDTO.setTenantDomain(tenantDomain);
-            gatewayAPIDTO.setOverride(true);
-            gatewayAPIDTO.setEnvironment(environmentName);
-
-
-            try {
-                gatewayAPIDTO.setGatewayLabel(api.getProperty("gateway_label"));
-            } catch (Exception e){
-                gatewayAPIDTO.setGatewayLabel(environmentName);
-            }
-
-
-            try {
-                String definition;
-                String operation;
-                client = new APIGatewayAdminClient(environment);
-                if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
-                    //Build schema with additional info
-                    GraphqlComplexityInfo graphqlComplexityInfo = APIUtil.getComplexityDetails(api);
-                    GraphQLSchemaDefinition schemaDefinition = new GraphQLSchemaDefinition();
-                    definition = schemaDefinition.buildSchemaWithAdditionalInfo(api, graphqlComplexityInfo);
-                    gatewayAPIDTO.setLocalEntriesToBeRemove(addStringToList(api.getUUID() + "_graphQL",
-                            gatewayAPIDTO.getLocalEntriesToBeRemove()));
-                    GatewayContentDTO graphqlLocalEntry = new GatewayContentDTO();
-                    graphqlLocalEntry.setName(api.getUUID() + "_graphQL");
-                    graphqlLocalEntry.setContent("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" +
-                            definition + "</localEntry>");
-                    gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(graphqlLocalEntry,
-                            gatewayAPIDTO.getLocalEntriesToBeAdd()));
-                    Set<URITemplate> uriTemplates = new HashSet<>();
-                    URITemplate template = new URITemplate();
-                    template.setAuthType("Any");
-                    template.setHTTPVerb("POST");
-                    template.setHttpVerbs("POST");
-                    template.setUriTemplate("/*");
-                    uriTemplates.add(template);
-                    api.setUriTemplates(uriTemplates);
-                } else if (api.getType() != null && (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
-                        || APIConstants.API_TYPE_SOAP.equals(api.getType())
-                        || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()))) {
-                    definition = api.getSwaggerDefinition();
-                    gatewayAPIDTO.setLocalEntriesToBeRemove(addStringToList(api.getUUID(),
-                            gatewayAPIDTO.getLocalEntriesToBeRemove()));
-                    GatewayContentDTO apiLocalEntry = new GatewayContentDTO();
-                    apiLocalEntry.setName(api.getUUID());
-                    apiLocalEntry.setContent("<localEntry key=\"" + api.getUUID() + "\">" +
-                            definition.replaceAll("&(?!amp;)", "&amp;").
-                                    replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-                            + "</localEntry>");
-                    gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(apiLocalEntry,
-                            gatewayAPIDTO.getLocalEntriesToBeAdd()));
-                }
-
-                // Retrieve ga-config from the registry and publish to gateway as a local entry
-                addGAConfigLocalEntry(gatewayAPIDTO, tenantDomain);
-
-                // If the API exists in the Gateway
-                // If the Gateway type is 'production' and a production url has
-                // not been specified
-                // Or if the Gateway type is 'sandbox' and a sandbox url has not
-                // been specified
-                startTime = System.currentTimeMillis();
-                if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) &&
-                        !APIUtil.isProductionEndpointsExists(api.getEndpointConfig())) ||
-                        (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) &&
-                                !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig()))) {
-                    if (debugEnabled) {
-                        log.debug("Not adding API to environment " + environment.getName() +
-                                " since its endpoint URL " + "cannot be found");
-                    }
-                    return failedEnvironmentsMap;
-                }
-                setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
-                setClientCertificatesToBeRemoved(api, tenantDomain, gatewayAPIDTO);
-                setEndpointsToBeRemoved(api, gatewayAPIDTO);
-                setAPIFaultSequencesToBeAdded(api, tenantDomain, gatewayAPIDTO);
-                setCustomSequencesToBeAdded(api, tenantDomain, gatewayAPIDTO);
-                setClientCertificatesToBeAdded(api, tenantDomain, gatewayAPIDTO);
-                if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
-                    //Add the API
-                    if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
-                        String prototypeScriptAPI = builder.getConfigStringForPrototypeScriptAPI(environment);
-                        gatewayAPIDTO.setApiDefinition(prototypeScriptAPI);
-                    } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
-                            .equalsIgnoreCase(api.getImplementation())) {
-                        String apiConfig = builder.getConfigStringForTemplate(environment);
-                        gatewayAPIDTO.setApiDefinition(apiConfig);
-                        JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
-                        if (!endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
-                                .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
-                            addEndpoints(api, builder, gatewayAPIDTO);
-                        }
-                    }
-
-                    if (api.isDefaultVersion()) {
-                        String defaultAPIConfig =
-                                builder.getConfigStringForDefaultAPITemplate(api.getId().getVersion());
-                        gatewayAPIDTO.setDefaultAPIDefinition(defaultAPIConfig);
-                    }
-                    setSecureVaultPropertyToBeAdded(api, gatewayAPIDTO);
-
-                    if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer()){
-                        client.deployAPI(gatewayAPIDTO);
-                    }
-
-                    ArtifactPublisher artifactPublisher = ServiceReferenceHolder.getInstance().getArtifactPublisher();
-
-                    try {
-                        if (artifactPublisher.isArtifactExists(gatewayAPIDTO)) {
-                            artifactPublisher.updateArtifacts(gatewayAPIDTO);
-                        } else {
-                            artifactPublisher.publishArtifacts(gatewayAPIDTO);
-                        }
-
-                        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-                        APIGatewayEvent apiGatewayEvent = new APIGatewayEvent(UUID.randomUUID().toString(),
-                                System.currentTimeMillis(),
-                                APIConstants.EventType.PUBLISH_API_IN_GATEWAY.name(), tenantId, gatewayAPIDTO.getName(),
-                                gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel(),
-                                APIConstants.GatewayArtifactSynchronizer.PUBLISH_EVENT_LABEL);
-                        APIUtil.sendNotification(apiGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
-                    } catch (ArtifactSynchronizerException e) {
-                        log.error("Error Publishing " + gatewayAPIDTO.getName() + " API from the Gateway");
-                    }
-
-                } else {
-                    deployWebsocketAPI(api, client);
-                }
-
-                endTime = System.currentTimeMillis();
-                if (debugEnabled) {
-                    log.debug("Publishing API (if the API does not exist in the Gateway) took " +
-                            (endTime - startTime) / 1000 + "  seconds");
-                }
-
-            } catch (AxisFault axisFault) {
-                /*
-                didn't throw this exception to handle multiple gateway publishing
-                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                therefore this didn't break the gateway publishing if one gateway unreachable
-                 */
-                failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
-                log.error("Error occurred when publish to gateway " + environmentName, axisFault);
-            } catch (APIManagementException | JSONException ex) {
-                /*
-                didn't throw this exception to handle multiple gateway publishing
-                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                therefore this didn't break the gateway publishing if one gateway unreachable
-                 */
-                log.error("Error occurred deploying sequences on " + environmentName, ex);
-                failedEnvironmentsMap.put(environmentName, ex.getMessage());
-            } catch (CertificateManagementException ex) {
-                log.error("Error occurred while adding/updating client certificate in " + environmentName, ex);
-                failedEnvironmentsMap.put(environmentName, ex.getMessage());
-            } catch (APITemplateException | XMLStreamException e1) {
-                log.error("Error occurred while Publishing API",e1);
-                failedEnvironmentsMap.put(environmentName, e1.getMessage());
-            }
-            long endTimePublishToGateway = System.currentTimeMillis();
-            if (debugEnabled) {
-                log.debug("Publishing to gateway : " + environmentName + " total time taken : " +
-                        (endTimePublishToGateway - startTimePublishToGateway) / 1000 + "  seconds");
-            }
+            failedEnvironmentsMap = publishToGatewayEnvironment(environment, api, builder, tenantDomain,
+                    failedEnvironmentsMap);
         }
+
+        for (Label label : api.getGatewayLabels()) {
+            Environment environment = getEnvironmentFromLabel(label);
+            failedEnvironmentsMap = publishToGatewayEnvironment(environment, api, builder, tenantDomain,
+                    failedEnvironmentsMap);
+        }
+
         updateRemovedClientCertificates(api, tenantDomain);
 
         // Extracting API details for the recommendation system
@@ -315,8 +147,196 @@ public class APIGatewayManager {
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
-
         return failedEnvironmentsMap;
+    }
+
+
+    private Map<String, String> publishToGatewayEnvironment (Environment environment, API api, APITemplateBuilder builder,
+                                                             String tenantDomain, Map<String, String> failedEnvironmentsMap){
+
+        long startTime;
+        long endTime;
+        long startTimePublishToGateway = System.currentTimeMillis();
+
+        GatewayAPIDTO gatewayAPIDTO;
+        try {
+            APIGatewayAdminClient client;
+            startTime = System.currentTimeMillis();
+            if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+                gatewayAPIDTO = createAPIGatewayDTO(api, builder, tenantDomain, environment);
+                if (gatewayAPIDTO == null) {
+                    return null;
+                } else {
+                    if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer()){
+                        client = new APIGatewayAdminClient(environment);
+                        client.deployAPI(gatewayAPIDTO);
+                    }
+
+                    ArtifactPublisher artifactPublisher = ServiceReferenceHolder.getInstance().getArtifactPublisher();
+                    if (artifactPublisher.isArtifactExists(gatewayAPIDTO)) {
+                        artifactPublisher.updateArtifacts(gatewayAPIDTO);
+                    } else {
+                        artifactPublisher.publishArtifacts(gatewayAPIDTO);
+                    }
+
+                    int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                    APIGatewayEvent apiGatewayEvent = new APIGatewayEvent(UUID.randomUUID().toString(),
+                            System.currentTimeMillis(),
+                            APIConstants.EventType.PUBLISH_API_IN_GATEWAY.name(), tenantId, gatewayAPIDTO.getName(),
+                            gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel(),
+                            APIConstants.GatewayArtifactSynchronizer.PUBLISH_EVENT_LABEL);
+                    APIUtil.sendNotification(apiGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+                }
+            } else {
+                client = new APIGatewayAdminClient(environment);
+                deployWebsocketAPI(api, client);
+            }
+            endTime = System.currentTimeMillis();
+            if (debugEnabled) {
+                log.debug("Publishing API (if the API does not exist in the Gateway) took " +
+                        (endTime - startTime) / 1000 + "  seconds");
+            }
+        } catch (AxisFault axisFault) {
+                /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway publishing if one gateway unreachable
+                 */
+            failedEnvironmentsMap.put(environment.getName(), axisFault.getMessage());
+            log.error("Error occurred when publish to gateway " + environment.getName(), axisFault);
+        } catch (APIManagementException | JSONException ex) {
+                /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway publishing if one gateway unreachable
+                 */
+            log.error("Error occurred deploying sequences on " + environment.getName(), ex);
+            failedEnvironmentsMap.put(environment.getName(), ex.getMessage());
+        } catch (CertificateManagementException ex) {
+            log.error("Error occurred while adding/updating client certificate in " + environment.getName(), ex);
+            failedEnvironmentsMap.put(environment.getName(), ex.getMessage());
+        } catch (APITemplateException | XMLStreamException e) {
+            log.error("Error occurred while Publishing API in FileBased Mode", e);
+            failedEnvironmentsMap.put(environment.getName(), e.getMessage());
+        } catch (ArtifactSynchronizerException e) {
+            failedEnvironmentsMap.put(environment.getName(), e.getMessage());
+            log.error("Error occurred while publishing API in InMemory Mmode");
+        }
+        long endTimePublishToGateway = System.currentTimeMillis();
+        if (debugEnabled) {
+            log.debug("Publishing to gateway : " + environment.getName() + " total time taken : " +
+                    (endTimePublishToGateway - startTimePublishToGateway) / 1000 + "  seconds");
+        }
+        return failedEnvironmentsMap;
+    }
+
+    private GatewayAPIDTO createAPIGatewayDTO (API api, APITemplateBuilder builder, String tenantDomain,
+                                               Environment environment)
+            throws APIManagementException, CertificateManagementException, APITemplateException, XMLStreamException {
+
+        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+        gatewayAPIDTO.setName(api.getId().getName());
+        gatewayAPIDTO.setVersion(api.getId().getVersion());
+        gatewayAPIDTO.setProvider(api.getId().getProviderName());
+        gatewayAPIDTO.setApiId(api.getUUID());
+        gatewayAPIDTO.setTenantDomain(tenantDomain);
+        gatewayAPIDTO.setOverride(true);
+        gatewayAPIDTO.setEnvironment(environment.getName());
+        gatewayAPIDTO.setGatewayLabel(environment.getName());
+
+        String definition;
+
+        if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
+            //Build schema with additional info
+            GraphqlComplexityInfo graphqlComplexityInfo = APIUtil.getComplexityDetails(api);
+            GraphQLSchemaDefinition schemaDefinition = new GraphQLSchemaDefinition();
+            definition = schemaDefinition.buildSchemaWithAdditionalInfo(api, graphqlComplexityInfo);
+            gatewayAPIDTO.setLocalEntriesToBeRemove(addStringToList(api.getUUID() + "_graphQL",
+                    gatewayAPIDTO.getLocalEntriesToBeRemove()));
+            GatewayContentDTO graphqlLocalEntry = new GatewayContentDTO();
+            graphqlLocalEntry.setName(api.getUUID() + "_graphQL");
+            graphqlLocalEntry.setContent("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" +
+                    definition + "</localEntry>");
+            gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(graphqlLocalEntry,
+                    gatewayAPIDTO.getLocalEntriesToBeAdd()));
+            Set<URITemplate> uriTemplates = new HashSet<>();
+            URITemplate template = new URITemplate();
+            template.setAuthType("Any");
+            template.setHTTPVerb("POST");
+            template.setHttpVerbs("POST");
+            template.setUriTemplate("/*");
+            uriTemplates.add(template);
+            api.setUriTemplates(uriTemplates);
+        } else if (api.getType() != null && (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
+                || APIConstants.API_TYPE_SOAP.equals(api.getType())
+                || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()))) {
+            definition = api.getSwaggerDefinition();
+            gatewayAPIDTO.setLocalEntriesToBeRemove(addStringToList(api.getUUID(),
+                    gatewayAPIDTO.getLocalEntriesToBeRemove()));
+
+            GatewayContentDTO apiLocalEntry = new GatewayContentDTO();
+            apiLocalEntry.setName(api.getUUID());
+            apiLocalEntry.setContent("<localEntry key=\"" + api.getUUID() + "\">" +
+                    definition.replaceAll("&(?!amp;)", "&amp;").
+                            replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                    + "</localEntry>");
+            gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(apiLocalEntry,
+                    gatewayAPIDTO.getLocalEntriesToBeAdd()));
+        }
+        // Retrieve ga-config from the registry and publish to gateway as a local entry
+        addGAConfigLocalEntry(gatewayAPIDTO, tenantDomain);
+
+        // If the API exists in the Gateway and If the Gateway type is 'production' and a production url has not been
+        // specified Or if the Gateway type is 'sandbox' and a sandbox url has not been specified
+
+        if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())
+                && !APIUtil.isProductionEndpointsExists(api.getEndpointConfig()))
+                || (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())
+                && !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig()))) {
+            if (debugEnabled) {
+                log.debug("Not adding API to environment " + environment.getName() + " since its endpoint URL "
+                        + "cannot be found");
+            }
+            return null;
+        }
+
+        setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
+        setClientCertificatesToBeRemoved(api, tenantDomain, gatewayAPIDTO);
+        setEndpointsToBeRemoved(api, gatewayAPIDTO);
+        setAPIFaultSequencesToBeAdded(api, tenantDomain, gatewayAPIDTO);
+        setCustomSequencesToBeAdded(api, tenantDomain, gatewayAPIDTO);
+        setClientCertificatesToBeAdded(api, tenantDomain, gatewayAPIDTO);
+
+        //Add the API
+        if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
+            String prototypeScriptAPI = builder.getConfigStringForPrototypeScriptAPI(environment);
+            gatewayAPIDTO.setApiDefinition(prototypeScriptAPI);
+        } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT.equalsIgnoreCase(api.getImplementation())) {
+            String apiConfig = builder.getConfigStringForTemplate(environment);
+            gatewayAPIDTO.setApiDefinition(apiConfig);
+            JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
+            if (!endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                    .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
+                addEndpoints(api, builder, gatewayAPIDTO);
+            }
+        }
+
+        if (api.isDefaultVersion()) {
+            String defaultAPIConfig = builder.getConfigStringForDefaultAPITemplate(api.getId().getVersion());
+            gatewayAPIDTO.setDefaultAPIDefinition(defaultAPIConfig);
+        }
+        setSecureVaultPropertyToBeAdded(api, gatewayAPIDTO);
+        return gatewayAPIDTO;
+    }
+
+    private Environment getEnvironmentFromLabel(Label label) {
+        Environment environment = new Environment();
+        environment.setName(label.getName());
+        environment.setDefault(true);
+        environment.setDescription(label.getDescription());
+        environment.setApiGatewayEndpoint(label.getAccessUrls().get(0));
+        environment.setWebsocketGatewayEndpoint(label.getAccessUrls().get(0));
+        return environment;
     }
 
     private void addGAConfigLocalEntry(GatewayAPIDTO gatewayAPIDTO, String tenantDomain)
@@ -562,10 +582,8 @@ public class APIGatewayManager {
 	/**
 	 * Removed an API from the configured Gateways
 	 * 
-	 * @param api
-	 *            - The API to be removed
-	 * @param tenantDomain
-	 *            - Tenant Domain of the publisher
+	 * @param api           - The API to be removed
+	 * @param tenantDomain  - Tenant Domain of the publisher
 	 */
     public Map<String, String> removeFromGateway(API api, String tenantDomain) {
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
@@ -600,8 +618,8 @@ public class APIGatewayManager {
                             log.debug("Removing API " + api.getId().getApiName() + " From environment " +
                                     environment.getName());
                         }
-                            setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
-                            setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
+                        setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
+                        setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
                     } else {
                         String fileName = api.getContext().replace('/', '-');
                         String[] fileNames = new String[2];
@@ -643,8 +661,7 @@ public class APIGatewayManager {
                     if gateway is unreachable we collect that environments into map with issue and show on popup in ui
                     therefore this didn't break the gateway unpublisihing if one gateway unreachable
                     */
-                    log.error("Error occurred when removing from gateway " + environmentName,
-                              axisFault);
+                    log.error("Error occurred when removing from gateway " + environmentName, axisFault);
                     failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
                 } catch (CertificateManagementException ex) {
                     log.error("Error occurred when deleting certificate from gateway" + environmentName, ex);
