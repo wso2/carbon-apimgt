@@ -38,6 +38,7 @@ import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom';
 import TenantTheme from 'AppComponents/TenantTheme/UploadTheme';
 import ListDetectedBotData from 'AppComponents/BotDetection/DetectedBotData/ListDetectedBotData';
 import ListEmails from 'AppComponents/BotDetection/EmailConfig/ListEmails';
+import ManageAlerts from 'AppComponents/ManageAlerts/ManageAlerts.jsx';
 
 const RouteMenuMapping = (intl) => [
     {
@@ -228,6 +229,15 @@ const RouteMenuMapping = (intl) => [
                 icon: <PhonelinkSetupIcon />,
             },
         ],
+    },
+    {
+        id: intl.formatMessage({
+            id: 'Base.RouteMenuMapping.manage.alerts',
+            defaultMessage: 'Manage Alerts',
+        }),
+        path: '/analytics/manage-alerts',
+        component: () => <ManageAlerts />,
+        icon: <PhonelinkSetupIcon />,
     },
 
 ];
