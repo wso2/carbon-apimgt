@@ -39,8 +39,15 @@ public class SettingsApiServiceImpl implements SettingsApiService {
 
     private static final Log log = LogFactory.getLog(SettingsApiServiceImpl.class);
 
+    /**
+     * Retrieves admin portal related server settings
+     *
+     * @param messageContext
+     * @return settings list
+     */
     @Override
     public Response settingsGet(MessageContext messageContext) {
+
         try {
             String username = RestApiUtil.getLoggedInUsername();
             boolean isUserAvailable = false;
@@ -48,7 +55,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
                 isUserAvailable = true;
             }
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO(isUserAvailable);
+            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingsToDTO(isUserAvailable);
             return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Admin Settings";
