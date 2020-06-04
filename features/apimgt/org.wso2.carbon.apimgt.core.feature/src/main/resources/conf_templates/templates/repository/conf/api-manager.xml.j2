@@ -1132,11 +1132,22 @@
              {% endif %}
          </ConfigurationRetriever>
      </KeyManagerConfigurations>
-     <SyncGatewayArtifacts>
-             <GatewayLabel>Gateway1</GatewayLabel>
-             <Pubisher>org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBDPublisher</Pubisher>
-             <Retriever>org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever</Retriever>
-             <SkipLocalCopy>false</SkipLocalCopy>
+
+    {% if apim.gateway.sync is defined %}
+    <SyncGatewayArtifacts>
+        {% if apim.gateway.sync.synchronizer is defined %}
+        <Synchronizer>{{apim.gateway.sync.synchronizer}}</Synchronizer>
+        {% endif %}
+        {% if apim.gateway.sync.gateway_label is defined %}
+        <GatewayLabel>{{apim.gateway.sync.gateway_label}}</GatewayLabel>
+        {% endif %}
+        {% if apim.gateway.sync.publisher is defined %}
+        <Publisher>{{apim.gateway.sync.publisher}}</Publisher>
+        {% endif %}
+        {% if apim.gateway.sync.retriever is defined %}
+        <Retriever>{{apim.gateway.sync.retriever}}</Retriever>
+        {% endif %}
     </SyncGatewayArtifacts>
+    {% endif %}
 
 </APIManager>
