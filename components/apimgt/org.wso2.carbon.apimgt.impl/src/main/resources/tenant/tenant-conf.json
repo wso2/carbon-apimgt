@@ -240,6 +240,10 @@
       {
         "Name": "apim:admin_alert_manage",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:bot_data",
+        "Roles": "admin"
       }
     ]
   },

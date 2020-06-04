@@ -1447,4 +1447,14 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If failed to validate
      */
     void validateSharedScopes(Set<Scope> scopes, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get the API and URI usages of the given shared scope
+     *
+     * @param uuid       UUID of the shared scope
+     * @param tenantId ID of the Tenant domain
+     * @throws APIManagementException If failed to validate
+     */
+    SharedScopeUsage getSharedScopeUsage(String uuid, int tenantId) throws APIManagementException;
+
 }
