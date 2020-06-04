@@ -26,7 +26,7 @@ public class SharedScopeUsedAPIResourceInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "/add", value = "")
   @JsonProperty("target")
   public String getTarget() {
     return target;
@@ -43,7 +43,7 @@ public class SharedScopeUsedAPIResourceInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "POST", value = "")
   @JsonProperty("verb")
   public String getVerb() {
     return verb;
