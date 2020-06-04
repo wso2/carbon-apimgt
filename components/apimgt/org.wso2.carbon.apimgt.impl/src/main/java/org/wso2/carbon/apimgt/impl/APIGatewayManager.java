@@ -50,7 +50,6 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactPublisher;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIGatewayEvent;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
@@ -114,29 +113,35 @@ public class APIGatewayManager {
     public Map<String, String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
 
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
-        if (api.getEnvironments() == null) {
-            return failedEnvironmentsMap;
-        }
+
         if (debugEnabled) {
             log.debug("API to be published: " + api.getId());
-            log.debug("Number of environments to be published to: " +
-                    (api.getEnvironments().size()) + api.getGatewayLabels().size());
-        }
-
-        for (String environmentName : api.getEnvironments()) {
-            Environment environment = environments.get(environmentName);
-            //If the environment is removed from the configuration, continue without publishing
-            if (environment == null) {
-                continue;
+            if (api.getEnvironments() != null) {
+                log.debug("Number of environments to be published to: " + (api.getEnvironments().size()));
             }
-            failedEnvironmentsMap = publishToGatewayEnvironment(environment, api, builder, tenantDomain,
-                    failedEnvironmentsMap);
+            if (api.getGatewayLabels() != null) {
+                log.debug("Number of labeled gateways to be published to: " + (api.getGatewayLabels().size()));
+            }
         }
 
-        for (Label label : api.getGatewayLabels()) {
-            Environment environment = getEnvironmentFromLabel(label);
-            failedEnvironmentsMap = publishToGatewayEnvironment(environment, api, builder, tenantDomain,
-                    failedEnvironmentsMap);
+        if (api.getEnvironments() != null) {
+            for (String environmentName : api.getEnvironments()) {
+                Environment environment = environments.get(environmentName);
+                //If the environment is removed from the configuration, continue without publishing
+                if (environment == null) {
+                    continue;
+                }
+                failedEnvironmentsMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain,
+                        failedEnvironmentsMap, false);
+            }
+        }
+
+        if (api.getGatewayLabels() != null) {
+            for (Label label : api.getGatewayLabels()) {
+                Environment environment = getEnvironmentFromLabel(label);
+                failedEnvironmentsMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain,
+                        failedEnvironmentsMap, true);
+            }
         }
 
         updateRemovedClientCertificates(api, tenantDomain);
@@ -151,8 +156,10 @@ public class APIGatewayManager {
     }
 
 
-    private Map<String, String> publishToGatewayEnvironment (Environment environment, API api, APITemplateBuilder builder,
-                                                             String tenantDomain, Map<String, String> failedEnvironmentsMap){
+    private Map<String, String> publishAPIToGatewayEnvironment(Environment environment, API api, APITemplateBuilder builder,
+                                                               String tenantDomain,
+                                                               Map<String, String> failedEnvironmentsMap,
+                                                               boolean gatewayFromLabel){
 
         long startTime;
         long endTime;
@@ -163,11 +170,11 @@ public class APIGatewayManager {
             APIGatewayAdminClient client;
             startTime = System.currentTimeMillis();
             if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
-                gatewayAPIDTO = createAPIGatewayDTO(api, builder, tenantDomain, environment);
+                gatewayAPIDTO = createAPIGatewayDTOtoPublishAPI(api, builder, tenantDomain, environment);
                 if (gatewayAPIDTO == null) {
                     return null;
                 } else {
-                    if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer()){
+                    if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer() && !gatewayFromLabel){
                         client = new APIGatewayAdminClient(environment);
                         client.deployAPI(gatewayAPIDTO);
                     }
@@ -230,8 +237,8 @@ public class APIGatewayManager {
         return failedEnvironmentsMap;
     }
 
-    private GatewayAPIDTO createAPIGatewayDTO (API api, APITemplateBuilder builder, String tenantDomain,
-                                               Environment environment)
+    private GatewayAPIDTO createAPIGatewayDTOtoPublishAPI (API api, APITemplateBuilder builder, String tenantDomain,
+                                                          Environment environment)
             throws APIManagementException, CertificateManagementException, APITemplateException, XMLStreamException {
 
         GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
@@ -241,7 +248,6 @@ public class APIGatewayManager {
         gatewayAPIDTO.setApiId(api.getUUID());
         gatewayAPIDTO.setTenantDomain(tenantDomain);
         gatewayAPIDTO.setOverride(true);
-        gatewayAPIDTO.setEnvironment(environment.getName());
         gatewayAPIDTO.setGatewayLabel(environment.getName());
 
         String definition;
@@ -586,90 +592,39 @@ public class APIGatewayManager {
 	 * @param tenantDomain  - Tenant Domain of the publisher
 	 */
     public Map<String, String> removeFromGateway(API api, String tenantDomain) {
+
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
-        String localEntryUUId = api.getUUID();
+
+        if (debugEnabled) {
+            log.debug("API to be published: " + api.getId());
+            if (api.getEnvironments() != null) {
+                log.debug("Number of environments to be published to: " + (api.getEnvironments().size()));
+            }
+            if (api.getGatewayLabels() != null) {
+                log.debug("Number of labeled gateways to be published to: " + (api.getGatewayLabels().size()));
+            }
+        }
         if (api.getEnvironments() != null) {
             for (String environmentName : api.getEnvironments()) {
-                try {
-                    Environment environment = environments.get(environmentName);
-                    //If the environment is removed from the configuration, continue without removing
-                    if (environment == null) {
-                        continue;
-                    }
-                    GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
-                    gatewayAPIDTO.setName(api.getId().getName());
-                    gatewayAPIDTO.setVersion(api.getId().getVersion());
-                    gatewayAPIDTO.setProvider(api.getId().getProviderName());
-                    gatewayAPIDTO.setTenantDomain(tenantDomain);
-                    gatewayAPIDTO.setOverride(true);
-                    gatewayAPIDTO.setEnvironment(environmentName);
-                    gatewayAPIDTO.setApiId(api.getUUID());
-                    try {
-                        gatewayAPIDTO.setGatewayLabel(api.getProperty("gateway_label"));
-                    } catch (Exception e){
-                        gatewayAPIDTO.setGatewayLabel(environmentName);
-                    }
-
-                    APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
-                    setClientCertificatesToBeRemoved(api, tenantDomain, gatewayAPIDTO);
-                    setEndpointsToBeRemoved(api, gatewayAPIDTO);
-                    if(!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
-                        if (debugEnabled) {
-                            log.debug("Removing API " + api.getId().getApiName() + " From environment " +
-                                    environment.getName());
-                        }
-                        setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
-                        setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
-                    } else {
-                        String fileName = api.getContext().replace('/', '-');
-                        String[] fileNames = new String[2];
-                        fileNames[0] = ENDPOINT_PRODUCTION + fileName;
-                        fileNames[1] = ENDPOINT_SANDBOX + fileName;
-                        gatewayAPIDTO.setSequencesToBeRemove(addStringToList(fileNames[0],
-                                gatewayAPIDTO.getSequencesToBeRemove()));
-                        gatewayAPIDTO.setSequencesToBeRemove(addStringToList(fileNames[1],
-                                gatewayAPIDTO.getSequencesToBeRemove()));
-                    }
-
-                    if (localEntryUUId != null && !localEntryUUId.isEmpty()) {
-                        if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
-                            localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
-                        }
-                        gatewayAPIDTO.setLocalEntriesToBeRemove(addStringToList(localEntryUUId,
-                                gatewayAPIDTO.getLocalEntriesToBeRemove()));
-                    }
-                    if (gatewayArtifactSynchronizerProperties.isSyncArtifacts()) {
-                        try {
-                            ServiceReferenceHolder.getInstance().getArtifactPublisher().updateArtifacts(gatewayAPIDTO);
-
-                            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-                            APIGatewayEvent apiGatewayEvent = new APIGatewayEvent(UUID.randomUUID().toString(),
-                                    System.currentTimeMillis(),
-                                    APIConstants.EventType.PUBLISH_API_IN_GATEWAY.name(), tenantId, gatewayAPIDTO.getName(),
-                                    gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel(),
-                                    APIConstants.GatewayArtifactSynchronizer.REMOVE_EVENT_LABEL);
-                            APIUtil.sendNotification(apiGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
-                        } catch (ArtifactSynchronizerException e) {
-                            log.error("Error removing " + gatewayAPIDTO.getName() + " API from the Gateway");
-                        }
-                    } else {
-                        client.unDeployAPI(gatewayAPIDTO);
-                    }
-                } catch (AxisFault axisFault) {
-                    /*
-                    didn't throw this exception to handle multiple gateway publishing
-                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                    therefore this didn't break the gateway unpublisihing if one gateway unreachable
-                    */
-                    log.error("Error occurred when removing from gateway " + environmentName, axisFault);
-                    failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
-                } catch (CertificateManagementException ex) {
-                    log.error("Error occurred when deleting certificate from gateway" + environmentName, ex);
-                    failedEnvironmentsMap.put(environmentName, ex.getMessage());
+                Environment environment = environments.get(environmentName);
+                //If the environment is removed from the configuration, continue without removing
+                if (environment == null) {
+                    continue;
                 }
+                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api,tenantDomain,environment,
+                        failedEnvironmentsMap, false);
             }
-            updateRemovedClientCertificates(api, tenantDomain);
         }
+
+        if (api.getGatewayLabels() != null) {
+            for (Label label : api.getGatewayLabels()) {
+                Environment environment = getEnvironmentFromLabel(label);
+                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api, tenantDomain, environment,
+                        failedEnvironmentsMap, true);
+            }
+        }
+
+        updateRemovedClientCertificates(api, tenantDomain);
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
@@ -677,17 +632,93 @@ public class APIGatewayManager {
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
-
         return failedEnvironmentsMap;
+    }
+
+    public Map<String,String> removeAPIFromGatewayEnvironment (API api, String tenantDomain, Environment environment,
+                                                               Map<String, String> failedEnvironmentsMap, boolean gatewayFromLabel){
+        try {
+            GatewayAPIDTO gatewayAPIDTO = createGatewayAPIDTOtoRemoveAPI(api, tenantDomain, environment);
+            if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer() && !gatewayFromLabel) {
+                APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
+                client.unDeployAPI(gatewayAPIDTO);
+            }
+
+            ServiceReferenceHolder.getInstance().getArtifactPublisher().updateArtifacts(gatewayAPIDTO);
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            APIGatewayEvent apiGatewayEvent = new APIGatewayEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(),
+                    APIConstants.EventType.PUBLISH_API_IN_GATEWAY.name(), tenantId, gatewayAPIDTO.getName(),
+                    gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel(),
+                    APIConstants.GatewayArtifactSynchronizer.REMOVE_EVENT_LABEL);
+            APIUtil.sendNotification(apiGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+        } catch (AxisFault axisFault) {
+            /*
+            didn't throw this exception to handle multiple gateway publishing if gateway is unreachable we collect
+            that environments into map with issue and show on popup in ui therefore this didn't break the gateway
+            unpublisihing if one gateway unreachable
+            */
+            log.error("Error occurred when removing from gateway in FileBased mode " + environment.getName(),
+                    axisFault);
+            failedEnvironmentsMap.put(environment.getName(), axisFault.getMessage());
+        } catch (CertificateManagementException ex) {
+            log.error("Error occurred when deleting certificate from gateway" + environment.getName(), ex);
+            failedEnvironmentsMap.put(environment.getName(), ex.getMessage());
+        } catch (ArtifactSynchronizerException e) {
+            log.error("Error occurred when removing from gateway in InMemory mode " + environment.getName(), e);
+            failedEnvironmentsMap.put(environment.getName(), e.getMessage());
+        }
+        return failedEnvironmentsMap;
+    }
+
+    public GatewayAPIDTO createGatewayAPIDTOtoRemoveAPI(API api, String tenantDomain, Environment environment)
+            throws CertificateManagementException {
+
+        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+        gatewayAPIDTO.setName(api.getId().getName());
+        gatewayAPIDTO.setVersion(api.getId().getVersion());
+        gatewayAPIDTO.setProvider(api.getId().getProviderName());
+        gatewayAPIDTO.setTenantDomain(tenantDomain);
+        gatewayAPIDTO.setOverride(true);
+        gatewayAPIDTO.setApiId(api.getUUID());
+        gatewayAPIDTO.setGatewayLabel(environment.getName());
+
+        setClientCertificatesToBeRemoved(api, tenantDomain, gatewayAPIDTO);
+        setEndpointsToBeRemoved(api, gatewayAPIDTO);
+        if(!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+            if (debugEnabled) {
+                log.debug("Removing API " + api.getId().getApiName() + " From environment " +
+                        environment.getName());
+            }
+            setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
+            setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
+        } else {
+            String fileName = api.getContext().replace('/', '-');
+            String[] fileNames = new String[2];
+            fileNames[0] = ENDPOINT_PRODUCTION + fileName;
+            fileNames[1] = ENDPOINT_SANDBOX + fileName;
+            gatewayAPIDTO.setSequencesToBeRemove(addStringToList(fileNames[0],
+                    gatewayAPIDTO.getSequencesToBeRemove()));
+            gatewayAPIDTO.setSequencesToBeRemove(addStringToList(fileNames[1],
+                    gatewayAPIDTO.getSequencesToBeRemove()));
+        }
+
+        String localEntryUUId = api.getUUID();
+        if (localEntryUUId != null && !localEntryUUId.isEmpty()) {
+            if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
+                localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
+            }
+            gatewayAPIDTO.setLocalEntriesToBeRemove(addStringToList(localEntryUUId,
+                    gatewayAPIDTO.getLocalEntriesToBeRemove()));
+        }
+        return gatewayAPIDTO;
     }
 
     /**
      * Removed an API Product from the configured Gateways
      *
-     * @param apiProduct
-     *            - The API Product to be removed
-     * @param tenantDomain
-     *            - Tenant Domain of the publisher
+     * @param apiProduct    - The API Product to be removed
+     * @param tenantDomain  - Tenant Domain of the publisher
      */
     public Map<String, String> removeFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs) {
         Map<String, String> failedEnvironmentsMap = new HashMap<>();
