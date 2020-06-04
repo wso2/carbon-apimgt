@@ -813,6 +813,8 @@ definitions:
         type: string
       httpMethod:
         type: string
+      urlPattern:
+        type: string
   #-----------------------------------------------------
   # The pagination resource
   #-----------------------------------------------------

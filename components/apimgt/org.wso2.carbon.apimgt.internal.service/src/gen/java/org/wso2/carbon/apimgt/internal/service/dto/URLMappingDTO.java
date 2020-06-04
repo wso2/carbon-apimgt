@@ -18,6 +18,7 @@ public class URLMappingDTO   {
     private String authScheme = null;
     private String throttlingPolicy = null;
     private String httpMethod = null;
+    private String urlPattern = null;
 
   /**
    **/
@@ -70,6 +71,23 @@ public class URLMappingDTO   {
     this.httpMethod = httpMethod;
   }
 
+  /**
+   **/
+  public URLMappingDTO urlPattern(String urlPattern) {
+    this.urlPattern = urlPattern;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("urlPattern")
+  public String getUrlPattern() {
+    return urlPattern;
+  }
+  public void setUrlPattern(String urlPattern) {
+    this.urlPattern = urlPattern;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -82,12 +100,13 @@ public class URLMappingDTO   {
     URLMappingDTO urLMapping = (URLMappingDTO) o;
     return Objects.equals(authScheme, urLMapping.authScheme) &&
         Objects.equals(throttlingPolicy, urLMapping.throttlingPolicy) &&
-        Objects.equals(httpMethod, urLMapping.httpMethod);
+        Objects.equals(httpMethod, urLMapping.httpMethod) &&
+        Objects.equals(urlPattern, urLMapping.urlPattern);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(authScheme, throttlingPolicy, httpMethod);
+    return Objects.hash(authScheme, throttlingPolicy, httpMethod, urlPattern);
   }
 
   @Override
@@ -98,6 +117,7 @@ public class URLMappingDTO   {
     sb.append("    authScheme: ").append(toIndentedString(authScheme)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    httpMethod: ").append(toIndentedString(httpMethod)).append("\n");
+    sb.append("    urlPattern: ").append(toIndentedString(urlPattern)).append("\n");
     sb.append("}");
     return sb.toString();
   }

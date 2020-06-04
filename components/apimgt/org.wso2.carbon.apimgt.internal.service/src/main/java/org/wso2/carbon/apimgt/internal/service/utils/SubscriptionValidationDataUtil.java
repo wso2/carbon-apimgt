@@ -68,6 +68,7 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setAuthScheme(urlMapping.getAuthScheme());
                 urlMappingDTO.setHttpMethod(urlMapping.getHttpMethod());
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
+                urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
                 urlMappingsDTO.add(urlMappingDTO);
             }
             apidto.setUrlMappings(urlMappingsDTO);
@@ -92,6 +93,7 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setAuthScheme(urlMapping.getAuthScheme());
                 urlMappingDTO.setHttpMethod(urlMapping.getHttpMethod());
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
+                urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
                 urlMappingsDTO.add(urlMappingDTO);
             }
             apidto.setUrlMappings(urlMappingsDTO);

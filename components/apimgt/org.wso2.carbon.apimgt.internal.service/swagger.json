@@ -968,6 +968,9 @@
         },
         "httpMethod" : {
           "type" : "string"
+        },
+        "urlPattern" : {
+          "type" : "string"
         }
       }
     },
