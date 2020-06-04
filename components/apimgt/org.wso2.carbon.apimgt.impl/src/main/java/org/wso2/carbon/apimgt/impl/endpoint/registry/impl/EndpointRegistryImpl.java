@@ -66,6 +66,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
+
             // if another registry with the given name or type already exists, fail the operation.
             if (registryDAO.isEndpointRegistryTypeExists(endpointRegistry.getType(), tenantId)) {
                 EndpointRegistryUtil.raiseResourceAlreadyExistsException("Endpoint Registry of type '"
@@ -92,7 +93,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
      * Returns details of an Endpoint Registry
      *
      * @param registryId   Registry Identifier
-     * @param tenantDomain
+     * @param tenantDomain Tenant domain
      * @return An EndpointRegistryInfo object related to the given identifier or null
      * @throws EndpointRegistryException if failed to get details of an Endpoint Registry
      */
@@ -126,7 +127,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
     /**
      * Returns details of all Endpoint Registries belong to a given tenant
      *
-     * @param tenantDomain
+     * @param tenantDomain Tenant domain
      * @return A list of EndpointRegistryInfo objects
      * @throws EndpointRegistryException if failed to get details of an Endpoint Registries
      */
@@ -241,6 +242,7 @@ public class EndpointRegistryImpl implements EndpointRegistry {
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
+
             // if another registry with the updated name or type already exists, fail the operation.
             if (!registryType.equals(endpointRegistryInfo.getType()) &&
                     registryDAO.isEndpointRegistryTypeExists(endpointRegistryInfo.getType(), tenantId)) {

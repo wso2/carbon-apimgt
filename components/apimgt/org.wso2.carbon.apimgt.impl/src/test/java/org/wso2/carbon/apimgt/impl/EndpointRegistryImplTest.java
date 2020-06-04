@@ -319,6 +319,7 @@ public class EndpointRegistryImplTest {
         endpointRegistryInfo.setUuid("abc1");
         endpointRegistryInfo.setRegistryId(1);
         endpointRegistryInfo.setName("Endpoint Registry 1");
+        endpointRegistryInfo.setDisplayName("Endpoint Registry 1");
         endpointRegistryInfo.setType("wso2");
         endpointRegistryInfo.setOwner(ADMIN_USERNAME);
 

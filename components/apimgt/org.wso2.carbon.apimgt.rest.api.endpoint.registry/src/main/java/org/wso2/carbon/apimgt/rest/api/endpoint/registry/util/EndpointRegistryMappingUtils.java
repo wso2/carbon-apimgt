@@ -63,11 +63,7 @@ public class EndpointRegistryMappingUtils {
         RegistryDTO registryDTO = new RegistryDTO();
         registryDTO.setId(registry.getUuid());
         registryDTO.setName(registry.getName());
-        if (StringUtils.isEmpty(registry.getDisplayName())) {
-            registryDTO.setDisplayName(registry.getName());
-        } else {
-            registryDTO.setDisplayName(registry.getDisplayName());
-        }
+        registryDTO.setDisplayName(registry.getDisplayName());
         registryDTO.setType(RegistryDTO.TypeEnum.fromValue(registry.getType()));
         registryDTO.setOwner(registry.getOwner());
         return registryDTO;
@@ -109,11 +105,7 @@ public class EndpointRegistryMappingUtils {
         EndpointRegistryEntry registryEntry = new EndpointRegistryEntry();
         registryEntry.setEntryId(entryUUID);
         registryEntry.setEntryName(registryEntryDTO.getEntryName());
-        if (StringUtils.isEmpty(registryEntryDTO.getDisplayName())) {
-            registryEntry.setDisplayName(registryEntryDTO.getEntryName());
-        } else {
-            registryEntry.setDisplayName(registryEntryDTO.getDisplayName());
-        }
+        registryEntry.setDisplayName(registryEntryDTO.getDisplayName());
         registryEntry.setVersion(registryEntryDTO.getVersion());
         registryEntry.setDescription(registryEntryDTO.getDescription());
         if (registryEntryDTO.getDefinitionType() != null) {
@@ -197,4 +189,39 @@ public class EndpointRegistryMappingUtils {
         return filterParams;
     }
 
+    /**
+     * Updates the displayName in a given EndpointRegistryInfo
+     *
+     * @param endpointRegistryInfo EndpointRegistryInfo object
+     * @param oldDisplayName       Old display name
+     */
+    public static void updateDisplayName(EndpointRegistryInfo endpointRegistryInfo, String oldDisplayName) {
+        if (StringUtils.isEmpty(endpointRegistryInfo.getDisplayName())) {
+            if (StringUtils.isNotEmpty(oldDisplayName)) {
+                // If the displayName is empty, set the old displayName
+                endpointRegistryInfo.setDisplayName(oldDisplayName);
+            } else {
+                // If the displayName is empty, set the registryName as the displayName
+                endpointRegistryInfo.setDisplayName(endpointRegistryInfo.getName());
+            }
+        }
+    }
+
+    /**
+     * Updates the displayName in a given EndpointRegistryEntry
+     *
+     * @param registryEntry  EndpointRegistryEntry object
+     * @param oldDisplayName Old display name
+     */
+    public static void updateDisplayName(EndpointRegistryEntry registryEntry, String oldDisplayName) {
+        if (StringUtils.isEmpty(registryEntry.getDisplayName())) {
+            if (StringUtils.isNotEmpty(oldDisplayName)) {
+                // If the displayName is empty, set the old displayName
+                registryEntry.setDisplayName(oldDisplayName);
+            } else {
+                // If the displayName is empty, set the entryName as the displayName
+                registryEntry.setDisplayName(registryEntry.getEntryName());
+            }
+        }
+    }
 }
