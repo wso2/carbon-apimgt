@@ -1,5 +1,4 @@
 /public/**
 /node_modules/**
 /coverage/**
-# Please comment the reason if you are  ignoring a file/directory here
 /source/Tests/**
