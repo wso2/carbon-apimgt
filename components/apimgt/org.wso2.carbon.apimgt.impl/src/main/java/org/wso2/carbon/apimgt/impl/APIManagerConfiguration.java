@@ -40,7 +40,6 @@ import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
@@ -1585,13 +1584,17 @@ public class APIManagerConfiguration {
             log.debug("GatewayArtifactsSynchronizer Deployer Element is not set. Set to default DB Deployer");
         }
 
+        gatewayArtifactSynchronizerProperties.getGatewayLabels()
+                .add(APIConstants.GatewayArtifactSynchronizer.DEFAULT_GATEWAY_LABEL);
         OMElement gatewayLabelElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.GATEWAY_LABEL_CONFIG));
         if (gatewayLabelElement != null) {
             String gatewayLabel = gatewayLabelElement.getText();
-            gatewayArtifactSynchronizerProperties.setGatewayLabel(gatewayLabel);
-        } else {
-            log.debug("GatewayArtifactsSynchronizer Gateway Label Element is not set. Set to default");
+            Set<String> labelsSet = new HashSet<>();
+            for (String label : gatewayLabel.split(",")){
+                labelsSet.add(label);
+            }
+            gatewayArtifactSynchronizerProperties.setGatewayLabels(labelsSet);
         }
     }
 

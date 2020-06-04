@@ -5,17 +5,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 
-public class APIDeployer {
 
-    private static Log log = LogFactory.getLog(APIDeployer.class);
+public class InMemoryAPIDeployer {
+
+    private static Log log = LogFactory.getLog(InMemoryAPIDeployer.class);
     APIGatewayAdmin apiGatewayAdmin;
 
-    public APIDeployer () {
+    public InMemoryAPIDeployer() {
 
         apiGatewayAdmin = new APIGatewayAdmin();
     }
@@ -27,12 +27,10 @@ public class APIDeployer {
                 .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
 
         if (gatewayArtifactSynchronizerProperties.isInMemoryArtifactSynchronizer()) {
-            if (gatewayArtifactSynchronizerProperties.getGatewayLabel().equals(label)
-                    || APIConstants.GatewayArtifactSynchronizer.DEFAULT_GATEWAY_LABEL.equals(label)) {
+            if (gatewayArtifactSynchronizerProperties.getGatewayLabels().contains(label)) {
                 try {
                     GatewayAPIDTO gatewayAPIDTO = ServiceReferenceHolder.getInstance().getArtifactRetriever()
                             .retrieveArtifacts(apiId, apiName, label);
-
                     apiGatewayAdmin.deployAPI(gatewayAPIDTO);
                     return true;
                 } catch (AxisFault | ArtifactSynchronizerException axisFault) {
@@ -49,8 +47,7 @@ public class APIDeployer {
                 .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
 
         if (gatewayArtifactSynchronizerProperties.isInMemoryArtifactSynchronizer()) {
-            if (gatewayArtifactSynchronizerProperties.getGatewayLabel().equals(label)
-                    || APIConstants.GatewayArtifactSynchronizer.DEFAULT_GATEWAY_LABEL.equals(label)) {
+            if (gatewayArtifactSynchronizerProperties.getGatewayLabels().contains(label)) {
                 try {
                     GatewayAPIDTO gatewayAPIDTO = ServiceReferenceHolder.getInstance().getArtifactRetriever()
                             .retrieveArtifacts(apiId, apiName, label);
