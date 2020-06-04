@@ -44,11 +44,11 @@ public class SettingsApiServiceImpl implements SettingsApiService {
      *
      * @param messageContext
      * @return settings list
+     * @throws APIManagementException
      */
     @Override
-    public Response settingsGet(MessageContext messageContext) {
+    public Response settingsGet(MessageContext messageContext) throws APIManagementException {
 
-        try {
             String username = RestApiUtil.getLoggedInUsername();
             boolean isUserAvailable = false;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
@@ -57,11 +57,6 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingsToDTO(isUserAvailable);
             return Response.ok().entity(settingsDTO).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving Admin Settings";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
     }
 
     /**
