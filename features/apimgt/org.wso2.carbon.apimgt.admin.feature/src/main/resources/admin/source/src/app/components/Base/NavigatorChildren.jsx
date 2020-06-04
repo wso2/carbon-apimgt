@@ -83,7 +83,7 @@ function NavigatorChildren(props) {
                 {navigationChildren && navigationChildren.map(({
                     id: childId, icon, path, active,
                 }) => (
-                    <Link component={RouterLink} to={path || '/'}>
+                    <Link component={RouterLink} to={path || '/'} style={{ textDecoration: 'none' }}>
                         <ListItem
                             key={childId}
                             button
