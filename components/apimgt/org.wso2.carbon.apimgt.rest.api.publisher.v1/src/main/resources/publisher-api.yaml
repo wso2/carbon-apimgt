@@ -8926,8 +8926,10 @@ definitions:
     properties:
       target:
         type: string
+        example: "/add"
       verb:
         type: string
+        example: "POST"
 
 #-----------------------------------------------------
 # The APIScope resource

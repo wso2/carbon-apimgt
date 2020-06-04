@@ -14715,12 +14715,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException If an error occurs while getting the usage details
      */
     public SharedScopeUsage getSharedScopeUsage(String uuid, int tenantId) throws APIManagementException {
-        Connection conn = null;
-        ResultSet apiUsageResultSet = null;
-        ResultSet uriUsageResultSet = null;
-        PreparedStatement psForApiUsage = null;
-        PreparedStatement psForUriUsage = null;
-        SharedScopeUsage sharedScopeUsage = null;
+        SharedScopeUsage sharedScopeUsage;
         List<API> usedApiList = new ArrayList<>();
         String sharedScopeName = getSharedScopeKeyByUUID(uuid);
 
@@ -14733,37 +14728,41 @@ public class ApiMgtDAO {
                     ExceptionCodes.from(ExceptionCodes.SHARED_SCOPE_NOT_FOUND, uuid));
         }
 
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            String sqlQueryForApiUsage = SQLConstants.GET_SHARED_SCOPE_API_USAGE_BY_TENANT;
-            psForApiUsage = conn.prepareStatement(sqlQueryForApiUsage);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement psForApiUsage = connection
+                        .prepareStatement(SQLConstants.GET_SHARED_SCOPE_API_USAGE_BY_TENANT)) {
             psForApiUsage.setString(1, uuid);
             psForApiUsage.setInt(2, tenantId);
-            apiUsageResultSet = psForApiUsage.executeQuery();
-            while (apiUsageResultSet.next()) {
-                String provider = apiUsageResultSet.getString("API_PROVIDER");
-                String apiName = apiUsageResultSet.getString("API_NAME");
-                String version = apiUsageResultSet.getString("API_VERSION");
-                APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, version);
-                API usedApi = new API(apiIdentifier);
-                usedApi.setContext(apiUsageResultSet.getString("CONTEXT"));
+            try (ResultSet apiUsageResultSet = psForApiUsage.executeQuery()) {
+                while (apiUsageResultSet.next()) {
+                    String provider = apiUsageResultSet.getString("API_PROVIDER");
+                    String apiName = apiUsageResultSet.getString("API_NAME");
+                    String version = apiUsageResultSet.getString("API_VERSION");
+                    APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, version);
+                    API usedApi = new API(apiIdentifier);
+                    usedApi.setContext(apiUsageResultSet.getString("CONTEXT"));
 
-                int apiId = apiUsageResultSet.getInt("API_ID");
-                Set<URITemplate> usedUriTemplates = new LinkedHashSet<>();
-                String sqlQueryForUriUsage = SQLConstants.GET_SHARED_SCOPE_URI_USAGE_BY_TENANT;
-                psForUriUsage = conn.prepareStatement(sqlQueryForUriUsage);
-                psForUriUsage.setString(1, uuid);
-                psForUriUsage.setInt(2, tenantId);
-                psForUriUsage.setInt(3, apiId);
-                uriUsageResultSet = psForUriUsage.executeQuery();
-                while (uriUsageResultSet.next()) {
-                    URITemplate usedUriTemplate = new URITemplate();
-                    usedUriTemplate.setUriTemplate(uriUsageResultSet.getString("URL_PATTERN"));
-                    usedUriTemplate.setHTTPVerb(uriUsageResultSet.getString("HTTP_METHOD"));
-                    usedUriTemplates.add(usedUriTemplate);
+                    try (PreparedStatement psForUriUsage = connection
+                                    .prepareStatement(SQLConstants.GET_SHARED_SCOPE_URI_USAGE_BY_TENANT)) {
+                        int apiId = apiUsageResultSet.getInt("API_ID");
+                        Set<URITemplate> usedUriTemplates = new LinkedHashSet<>();
+                        psForUriUsage.setString(1, uuid);
+                        psForUriUsage.setInt(2, tenantId);
+                        psForUriUsage.setInt(3, apiId);
+                        try (ResultSet uriUsageResultSet = psForUriUsage.executeQuery()) {
+                            while (uriUsageResultSet.next()) {
+                                URITemplate usedUriTemplate = new URITemplate();
+                                usedUriTemplate.setUriTemplate(uriUsageResultSet.getString("URL_PATTERN"));
+                                usedUriTemplate.setHTTPVerb(uriUsageResultSet.getString("HTTP_METHOD"));
+                                usedUriTemplates.add(usedUriTemplate);
+                            }
+                        }
+                        usedApi.setUriTemplates(usedUriTemplates);
+                        usedApiList.add(usedApi);
+                    } catch (SQLException e) {
+                        handleException("Failed to retrieve Resource usages of shared scope with scope ID" + uuid, e);
+                    }
                 }
-                usedApi.setUriTemplates(usedUriTemplates);
-                usedApiList.add(usedApi);
             }
 
             if (sharedScopeUsage != null) {
@@ -14772,10 +14771,7 @@ public class ApiMgtDAO {
 
             return sharedScopeUsage;
         } catch (SQLException e) {
-            handleException("Failed to retrieve usages of shared scope with scope ID" + uuid, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(psForApiUsage, conn, apiUsageResultSet);
-            APIMgtDBUtil.closeAllConnections(psForUriUsage, null, uriUsageResultSet);
+            handleException("Failed to retrieve API usages of shared scope with scope ID" + uuid, e);
         }
         return null;
     }
