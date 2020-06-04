@@ -38,6 +38,14 @@ import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom';
 import TenantTheme from 'AppComponents/TenantTheme/UploadTheme';
 import ListDetectedBotData from 'AppComponents/BotDetection/DetectedBotData/ListDetectedBotData';
 import ListEmails from 'AppComponents/BotDetection/EmailConfig/ListEmails';
+import GamesIcon from '@material-ui/icons/Games';
+import CategoryIcon from '@material-ui/icons/Category';
+import AndroidIcon from '@material-ui/icons/Android';
+import MailOutlineIcon from '@material-ui/icons/MailOutline';
+import PolicyIcon from '@material-ui/icons/Policy';
+import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
+import BlockIcon from '@material-ui/icons/Block';
+import AssignmentIcon from '@material-ui/icons/Assignment';
 
 const RouteMenuMapping = (intl) => [
     {
@@ -104,7 +112,7 @@ const RouteMenuMapping = (intl) => [
         }),
         path: '/settings/mg-labels',
         component: () => <MicrogatewayLabels />,
-        icon: <PhonelinkSetupIcon />,
+        icon: <GamesIcon />,
     },
     {
         id: intl.formatMessage({
@@ -113,7 +121,7 @@ const RouteMenuMapping = (intl) => [
         }),
         path: '/settings/api-categories',
         component: () => <APICategories />,
-        icon: <PhonelinkSetupIcon />,
+        icon: <CategoryIcon />,
     },
     {
         id: intl.formatMessage({
@@ -128,7 +136,7 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/settings/bot-detection/bot-detected-data-list',
                 component: () => <ListDetectedBotData />,
-                icon: <DnsRoundedIcon />,
+                icon: <AndroidIcon />,
             },
             {
                 id: intl.formatMessage({
@@ -137,7 +145,7 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/settings/bot-detection/bot-detection-email-configuration',
                 component: () => <ListEmails />,
-                icon: <PhonelinkSetupIcon />,
+                icon: <MailOutlineIcon />,
             },
         ],
     },
@@ -189,7 +197,7 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/throttling/advanced',
                 component: () => <AdvancedThrottlePolicies />,
-                icon: <SettingsIcon />,
+                icon: <PolicyIcon />,
             },
             {
                 id: intl.formatMessage({
@@ -198,7 +206,7 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/throttling/application',
                 component: () => <ApplicationThrottlingPolicies />,
-                icon: <TimerIcon />,
+                icon: <PhonelinkSetupIcon />,
             },
             {
                 id: intl.formatMessage({
@@ -207,7 +215,7 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/throttling/subscription',
                 component: () => <DemoTable />,
-                icon: <PhonelinkSetupIcon />,
+                icon: <ShoppingBasketIcon />,
             },
             {
                 id: intl.formatMessage({
@@ -216,7 +224,7 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/throttling/custom',
                 component: () => <CustomThrottlingPolicies />,
-                icon: <PhonelinkSetupIcon />,
+                icon: <AssignmentIcon />,
             },
             {
                 id: intl.formatMessage({
@@ -225,7 +233,7 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/throttling/blacklisted',
                 component: () => <BlacklistThrottlingPolicies />,
-                icon: <PhonelinkSetupIcon />,
+                icon: <BlockIcon />,
             },
         ],
     },
