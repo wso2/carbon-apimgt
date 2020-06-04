@@ -2,26 +2,27 @@
   "EnableMonetization" : false,
   "EnableRecommendation" : false,
   "IsUnlimitedTierPaid" : false,
-  "GatewayDeployments": {
-    "Type": "Kubernetes",
-    "ClassName": "org.wso2.carbon.apimgt.impl.containermgt.K8sManager",
-    "ClusterInfo": [
-      {
-        "ClusterId": "",
-        "DisplayName": "",
-        "Properties": {
-          "MasterURL": "",
-          "IngressURL": "",
-          "SAToken": "",
-          "Namespace": "default",
-          "Replicas": 1,
-          "BasicSecurityCustomResourceName": "",
-          "OauthSecurityCustomResourceName": "",
-          "JWTSecurityCustomResourceName": ""
+  "ContainerMgt": [
+    {
+      "Type": "Kubernetes",
+      "ContainerMgtInfo": [
+        {
+          "ClusterId": "",
+          "DisplayName": "",
+          "Properties": {
+            "MasterURL": "",
+            "IngressURL": "",
+            "SAToken": "",
+            "Namespace": "default",
+            "Replicas": 1,
+            "BasicSecurityCustomResourceName": "",
+            "OauthSecurityCustomResourceName": "",
+            "JWTSecurityCustomResourceName": ""
+          }
         }
-      }
-    ]
-  },
+      ]
+    }
+  ],
   "ExtensionHandlerPosition": "bottom",
   "RESTAPIScopes": {
     "Scope": [

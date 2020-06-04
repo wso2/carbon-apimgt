@@ -90,13 +90,13 @@ public class K8sManager implements ContainerManager {
      * @throws APIManagementException
      */
     @Override
-    public void changeLCStateCreatedToPublished(API api, APIIdentifier apiIdentifier)
+    public void changeLCStateCreatedToPublished(API api, APIIdentifier apiIdentifier, Registry registry)
             throws RegistryException, ParseException, APIManagementException {
 
         log.info("testing new API cr");
         if (!saToken.equals("") && !masterURL.equals("")) {
 
-            String[] configmapNames = deployConfigMap(api, apiIdentifier, openShiftClient, jwtSecurityCRName,
+            String[] configmapNames = deployConfigMap(api, apiIdentifier, registry, openShiftClient, jwtSecurityCRName,
                     oauthSecurityCRName, basicAuthSecurityCRName, false);
 
             applyAPICustomResourceDefinition(openShiftClient, configmapNames, replicas, apiIdentifier, true);
@@ -153,7 +153,7 @@ public class K8sManager implements ContainerManager {
      * @param clusterProperties Clusters which the API has published
      */
     @Override
-    public void apiRepublish(API api, APIIdentifier apiId, Map<String, String> clusterProperties)
+    public void apiRepublish(API api, APIIdentifier apiId, Registry registry,Map<String, String> clusterProperties)
             throws ParseException, RegistryException, APIManagementException {
 
         String apiName = apiId.getApiName();
@@ -164,7 +164,7 @@ public class K8sManager implements ContainerManager {
 
         OpenShiftClient client = new DefaultOpenShiftClient(config);
 
-        String[] configMapNames = deployConfigMap(api, apiId, client, clusterProperties.get(JWT_SECURITY_CR_NAME),
+        String[] configMapNames = deployConfigMap(api, apiId,registry, client, clusterProperties.get(JWT_SECURITY_CR_NAME),
                 clusterProperties.get(OAUTH2_SECURITY_CR_NAME), clusterProperties.get(BASICAUTH_SECURITY_CR_NAME),
                 true);
 
@@ -244,7 +244,7 @@ public class K8sManager implements ContainerManager {
 
     /**
      * To access the registry
-     * @return
+     * @return RegistryService
      */
     protected RegistryService getRegistryService() {
         return ServiceReferenceHolder.getInstance().getRegistryService();
@@ -332,11 +332,11 @@ public class K8sManager implements ContainerManager {
      * @throws APIManagementException
      * @throws ParseException
      */
-    private String[] deployConfigMap(API api, APIIdentifier apiIdentifier, OpenShiftClient client, String jwtSecurityCRName,
+    private String[] deployConfigMap(API api, APIIdentifier apiIdentifier, Registry registry, OpenShiftClient client, String jwtSecurityCRName,
                                    String oauthSecurityCRName, String basicAuthSecurityCRName, Boolean update)
             throws RegistryException, APIManagementException, ParseException {
 
-        Registry registry = getRegistryService().getGovernanceUserRegistry();
+//        Registry registry = getRegistryService().getGovernanceUserRegistry();
 
         SwaggerCreator swaggerCreator = new SwaggerCreator(basicAuthSecurityCRName, jwtSecurityCRName,
                 oauthSecurityCRName);

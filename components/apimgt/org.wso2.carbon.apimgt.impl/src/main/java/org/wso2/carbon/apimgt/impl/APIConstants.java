@@ -2297,4 +2297,11 @@ public final class APIConstants {
         public static final String GATEWAY_INSTRUCTION_REMOVE = "Remove";
 
     }
+
+    public static class ContainerMgtAttributes {
+        public static final String DEPLOYMENTS = "Deployments";
+        public static final String CONTAINER_MANAGEMENT = "ContainerMgt";
+        public static final String CONTAINER_MANAGEMENT_INFO ="ContainerMgtInfo";
+
+    }
 }

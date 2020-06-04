@@ -109,18 +109,6 @@ export default class Protected extends Component {
             });
             settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
         }
-        const deploymentPromise = api.getDeployments();
-        if (user) {
-            this.setState({ user });
-            deploymentPromise.then((deploymentsNew) => this.setState({ allDeployments: deploymentsNew }));
-        } else {
-            // If no user data available , Get the user info from existing token information
-            // This could happen when OAuth code authentication took place and could send
-            // user information via redirection
-            const userPromise = AuthManager.getUserFromToken();
-            userPromise.then((loggedUser) => this.setState({ user: loggedUser }));
-            deploymentPromise.then((deploymentsNew) => this.setState({ allDeployments: deploymentsNew }));
-        }
     }
 
     /**
@@ -206,7 +194,6 @@ export default class Protected extends Component {
         const checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
         + clientId + '&redirect_uri=https://' + window.location.host
         + Configurations.app.context + '/services/auth/callback/login';
-        const { allDeployments } = this.state;
 
         if (!user) {
             return (
@@ -230,7 +217,10 @@ export default class Protected extends Component {
                             height='0px'
                         />
                         {settings ? (
-                            <AppContextProvider value={{ settings, user, allDeployments }}>
+                            <AppContextProvider value={{
+                                settings, user,
+                            }}
+                            >
                                 <Switch>
                                     <Redirect exact from='/' to='/apis' />
                                     <Route path='/apis' component={DeferredAPIs} />

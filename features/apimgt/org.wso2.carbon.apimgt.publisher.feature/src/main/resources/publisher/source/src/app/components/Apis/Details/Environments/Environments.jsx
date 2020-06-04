@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import 'react-tagsinput/react-tagsinput.css';
@@ -38,6 +38,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 import MicroGateway from 'AppComponents/Apis/Details/Environments/MicroGateway';
 import Kubernetes from 'AppComponents/Apis/Details/Environments/Kubernetes';
+import API from 'AppData/api';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -60,24 +61,28 @@ export default function Environments() {
     const { settings } = useAppContext();
     const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
     const [selectedMgLabel, setSelectedMgLabel] = useState([...api.labels]);
-    const { allDeployments } = useAppContext();
     const [isUpdating, setUpdating] = useState(false);
-    const [selectedDeployments, setSelectedDeployments] = useState([...api.deployments]);
+    const [selectedDeployments, setSelectedDeployments] = useState([...api.deploymentEnvironments]);
+
+    const restApi = new API();
+    const [allDeployments, setAllDeployments] = useState([]);
+    useEffect(() => {
+        restApi.getDeployments()
+            .then((result) => {
+                setAllDeployments(result.body.list);
+            });
+    }, []);
 
     /**
      *
      * Handle the Environments save button action
      */
     function addEnvironments() {
-        console.log(api);
-        console.log(settings);
-        console.log(allDeployments);
-        console.log('swlectefjhdsf', selectedDeployments);
         setUpdating(true);
         updateAPI({
             gatewayEnvironments,
             labels: selectedMgLabel,
-            deployments: selectedDeployments,
+            deploymentEnvironments: selectedDeployments,
         })
             .then(() => Alert.info('API Update Successfully'))
             .catch((error) => {
@@ -175,16 +180,16 @@ export default function Environments() {
                     />
                 )}
             {
-                allDeployments.list
+                allDeployments
                  && (
-                     allDeployments.list.map((clusters) => (
+                     allDeployments.map((clusters) => (clusters.name === 'kubernetes' && (
                          <Kubernetes
-                             getDeployments={clusters}
+                             clusters={clusters}
                              selectedDeployments={selectedDeployments}
                              setSelectedDeployments={setSelectedDeployments}
-                             allDeployments={allDeployments}
+                             api={api}
                          />
-                     ))
+                     )))
                  )
             }
 

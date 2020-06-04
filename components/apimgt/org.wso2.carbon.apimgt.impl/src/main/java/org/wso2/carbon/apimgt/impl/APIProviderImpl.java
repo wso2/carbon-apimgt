@@ -36,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -89,6 +90,8 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Usage;
+//change it to the deployment model
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
@@ -105,6 +108,7 @@ import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerManager;
+import org.wso2.carbon.apimgt.impl.containermgt.K8sManager;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -159,12 +163,12 @@ import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBean
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.common.CommonConstants;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
-import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.CollectionImpl;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
@@ -182,6 +186,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -4099,14 +4104,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             /**
              * Delete the API in Kubernetes
              */
-            String content = getTenantConfigContent();
-            JSONParser jsonParser = new JSONParser();
-            JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
-            Map<String, Map<String, String>> allClusters = APIUtil.getClusterInfoFromConfig(tenantConf);
-            if (api.getDeployments().size() != 0) {
-                for (String clusterId : api.getDeployments()) {
-                    ContainerManager containerManager = getContainerManagerInstance();
-                    containerManager.deleteAPI(identifier, allClusters.get(clusterId));
+            JSONArray containerMgt = APIUtil.getAllClustersFromConfig();
+            Set<DeploymentEnvironments> deploymentEnvironments = api.getDeploymentEnvironments();
+            if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
+                for (DeploymentEnvironments deploymentEnvironment : deploymentEnvironments) {
+                    if (deploymentEnvironment.getType().equalsIgnoreCase(ContainerBasedConstants.DEPLOYMENT_ENV)) {
+                        if (!containerMgt.isEmpty() && deploymentEnvironment.getClusterNames().size() != 0) {
+
+                            for (Object containerMgtObj : containerMgt) {
+                                JSONObject containerMgtDetails = (JSONObject) containerMgtObj;
+                                if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString()
+                                        .equalsIgnoreCase(ContainerBasedConstants.DEPLOYMENT_ENV)) {
+                                    for (String clusterId : deploymentEnvironment.getClusterNames()) {
+                                        JSONArray containerMgtInfo = (JSONArray) containerMgtDetails
+                                                .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
+                                        for (Object containerMgtInfoObj : containerMgtInfo) {
+                                            JSONObject containerMgtInfoDetails = (JSONObject) containerMgtInfoObj;
+                                            if (containerMgtInfoDetails.get(ContainerBasedConstants.CLUSTER_ID)
+                                                    .toString().equalsIgnoreCase(clusterId)) {
+                                                ContainerManager containerManager =
+                                                        getContainerManagerInstance(containerMgtDetails
+                                                                .get(ContainerBasedConstants.CLASS_NAME).toString());
+                                                    containerManager.deleteAPI(identifier, containerMgtInfoDetails);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                        }
+                    }
                 }
             }
             if (log.isDebugEnabled()) {
@@ -4184,13 +4210,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Failed to execute workflow cleanup task ", e);
         } catch (InstantiationException e) {
             e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        } catch (UserStoreException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (ReflectiveOperationException e ) {
             e.printStackTrace();
         }
     }
@@ -5585,37 +5605,51 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     /**
                      * Kubernetes Implementations
                      */
-
-                    String content = getTenantConfigContent();
-                    JSONParser jsonParser = new JSONParser();
-                    JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
-                    Map<String, Map<String, String>> allClusters = APIUtil.getClusterInfoFromConfig(tenantConf);
-                    API api = getAPI(apiIdentifier);
-                    if (api.getDeployments().size() != 0) {
-                        for (String clusterId : api.getDeployments()) {
-                            Map<String, String> clusterProperties = allClusters.get(clusterId);
-                            ContainerManager containerManager = getContainerManagerInstance();
-
-                            if (action.equals(ContainerBasedConstants.BLOCK)) {
-
-                                containerManager.changeLCStateToBlocked(apiIdentifier, clusterProperties);
-
-                            } else if (action.equals(ContainerBasedConstants.DEMOTE_TO_CREATED)) {
-
-                                containerManager.changeLCStatePublishedToCreated(apiIdentifier, clusterProperties);
-
-                            } else if (action.equals(ContainerBasedConstants.REPUBLISH)) {
-
-                                String configmapName = apiIdentifier.getApiName().toLowerCase() +
-                                        apiIdentifier.getVersion();
-                                String[] configmapNames = new String[]{configmapName};
-                                containerManager.changeLCStateBlockedToRepublished(apiIdentifier,
-                                        clusterProperties, configmapNames);
-
-                            } else if (currentStatus.equals(ContainerBasedConstants.PUBLISHED)
-                                    && action.equals(ContainerBasedConstants.PUBLISH)) {
-
-                                containerManager.apiRepublish(getAPI(apiIdentifier), apiIdentifier, clusterProperties);
+                   String getDeployments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
+                    JSONArray containerMgt = APIUtil.getAllClustersFromConfig();
+                    Set<DeploymentEnvironments> deploymentEnvironments =  APIUtil.extractDeploymentsForAPI(getDeployments);
+                    if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
+                        for (DeploymentEnvironments deploymentEnvironment : deploymentEnvironments) {
+                            if (deploymentEnvironment.getType().equalsIgnoreCase(ContainerBasedConstants.DEPLOYMENT_ENV)) {
+                                //Get the configurations for selected clusters
+                                if (!containerMgt.isEmpty()) {
+                                    for (Object containerMgtObj : containerMgt) {
+                                        JSONObject containerMgtDetails = (JSONObject) containerMgtObj;
+                                        if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString()
+                                                .equalsIgnoreCase(ContainerBasedConstants.DEPLOYMENT_ENV)) {
+                                            for (String clusterId : deploymentEnvironment.getClusterNames()) {
+                                                JSONArray containerMgtInfo = (JSONArray) containerMgtDetails
+                                                        .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
+                                                for (Object containerMgtInfoObj : containerMgtInfo) {
+                                                    JSONObject containerMgtInfoDetails = (JSONObject) containerMgtInfoObj;
+                                                    if (containerMgtInfoDetails.get(ContainerBasedConstants.CLUSTER_ID)
+                                                            .toString().equalsIgnoreCase(clusterId)) {
+                                                        ContainerManager containerManager =
+                                                                getContainerManagerInstance(containerMgtDetails
+                                                                        .get(ContainerBasedConstants.CLASS_NAME).toString());
+                                                        if (action.equals(ContainerBasedConstants.BLOCK)) {
+                                                            containerManager.changeLCStateToBlocked(apiIdentifier,
+                                                                    containerMgtInfoDetails);
+                                                        } else if (action.equals(ContainerBasedConstants.DEMOTE_TO_CREATED)) {
+                                                            containerManager.changeLCStatePublishedToCreated(
+                                                                    apiIdentifier, containerMgtInfoDetails);
+                                                        } else if (action.equals(ContainerBasedConstants.REPUBLISH)) {
+                                                            String configmapName = apiIdentifier.getApiName().toLowerCase() +
+                                                                    apiIdentifier.getVersion();
+                                                            String[] configmapNames = new String[]{configmapName};
+                                                            containerManager.changeLCStateBlockedToRepublished(apiIdentifier,
+                                                                    containerMgtInfoDetails, configmapNames);
+                                                        } else if (currentStatus.equals(ContainerBasedConstants.PUBLISHED)
+                                                                && action.equals(ContainerBasedConstants.PUBLISH)) {
+                                                            containerManager.apiRepublish(getAPI(apiIdentifier),
+                                                                    apiIdentifier, registry, containerMgtInfoDetails);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -5650,18 +5684,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             return response;
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (UserStoreException e) {
-            e.printStackTrace();
         } catch (ParseException e) {
-            e.printStackTrace();
+            handleException("Couldn't parse tenant configuration for reading extension handler position", e);
         } catch (RegistryException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            handleException("Couldn't read tenant configuration from tenant registry", e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -8672,51 +8698,74 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void publishInPrivateJet(API api, APIIdentifier apiIdentifier)
-            throws ParseException, UserStoreException, org.wso2.carbon.registry.api.RegistryException,
-            IllegalAccessException, InstantiationException, ClassNotFoundException, APIManagementException {
+    public void publishInPrivateJet(API api, APIIdentifier apiIdentifier) throws APIManagementException {
 
-        Map<String, Map<String, String>> allClusters = getAllClustersFromConfig();
-
-        if (api.getDeployments().size() != 0) {
-
-            log.info("Publishing the [API] " + apiIdentifier.getApiName() + " in Kubernetes");
-            for (String clusterName : api.getDeployments()) {
-                Map<String, Map<String, String>> clusterDetails = allClusters.entrySet().stream()
-                        .filter(val -> val.getKey().equals(clusterName))
-                        .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()));
-                ContainerManager containerManager = getContainerManagerInstance();
-                containerManager.initManager(clusterDetails);
-
-                //how to change the LC state when have multiple clusters to deploy
-                containerManager.changeLCStateCreatedToPublished(api, apiIdentifier);
+        //get selected deployment Environments
+        Set<DeploymentEnvironments> deploymentEnvironments = api.getDeploymentEnvironments();
+        try {
+            //Get cluster configurations from tenant-conf.json/deployment.toml
+            JSONArray containerMgt = APIUtil.getAllClustersFromConfig();
+            if (deploymentEnvironments.size() != 0) {
+                for (DeploymentEnvironments deploymentEnvironment : deploymentEnvironments) {
+                    if (deploymentEnvironment.getType().equalsIgnoreCase(ContainerBasedConstants.DEPLOYMENT_ENV)) {
+                        if (!containerMgt.isEmpty()) {
+                            for (Object containerMgtObj : containerMgt) {
+                                JSONObject containerMgtDetails = (JSONObject) containerMgtObj;
+                                if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString()
+                                        .equalsIgnoreCase(ContainerBasedConstants.DEPLOYMENT_ENV)) {
+                                    log.info("Publishing the [API] " + apiIdentifier.getApiName() + " in Kubernetes");
+                                    for (String clusterName : deploymentEnvironment.getClusterNames()) {
+                                        JSONArray containerMgtInfo = (JSONArray) containerMgtDetails
+                                                .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
+                                        for (Object containerMgtInfoObj : containerMgtInfo) {
+                                            JSONObject containerMgtInfoDetails = (JSONObject) containerMgtInfoObj;
+                                            if (containerMgtInfoDetails.get(ContainerBasedConstants.CLUSTER_ID)
+                                                    .toString().equalsIgnoreCase(clusterName)) {
+                                                ContainerManager containerManager = getContainerManagerInstance(containerMgtDetails
+                                                        .get(ContainerBasedConstants.CLASS_NAME).toString());
+                                                containerManager.initManager(containerMgtInfoDetails);
+                                                containerManager.changeLCStateCreatedToPublished(api, apiIdentifier, registry);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
+        } catch (RegistryException e) {
+            handleException("Couldn't read tenant configuration from tenant registry", e);
+        } catch (UserStoreException e) {
+            handleException("Couldn't read tenant configuration from tenant registry", e);
+        } catch (ParseException e) {
+            handleException("Couldn't parse tenant configuration for reading extension handler position", e);
         }
     }
 
-    private ContainerManager getContainerManagerInstance()
-            throws UserStoreException, RegistryException, ParseException, ClassNotFoundException,
-            IllegalAccessException, InstantiationException {
-
-        String content = getTenantConfigContent();
-        JSONParser jsonParser = new JSONParser();
-        JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
-        String className = ((JSONObject) tenantConf.get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO))
-                .get(ContainerBasedConstants.CLASS_NAME).toString();
-
-        Class<ContainerManager> CloudManager = (Class<ContainerManager>) Class.forName(className);
-
-        return CloudManager.newInstance();
+    @Override
+    public List<DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException {
+        API existingAPI = getAPI(apiId);
+        Set<DeploymentEnvironments> deploymentEnvironments = existingAPI.getDeploymentEnvironments();
+        List<DeploymentStatus> deploymentStatusList = new ArrayList<DeploymentStatus>();
+        return deploymentStatusList;
     }
 
-    private Map<String, Map<String, String>> getAllClustersFromConfig() throws UserStoreException, RegistryException,
-            ParseException {
-
-        String content = getTenantConfigContent();
-        JSONParser jsonParser = new JSONParser();
-        JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
-
-        return APIUtil.getClusterInfoFromConfig(tenantConf);
+    /**
+     * This method returns an instance of ContainerManager
+     *
+     * @param className name of the specific class Ex: for kubernetes: k8sManager
+     * @return ContainerManager Obj
+     */
+    private ContainerManager getContainerManagerInstance(String className)
+            throws APIManagementException {
+        try {
+            Class<ContainerManager> CloudManager = (Class<ContainerManager>) Class.forName(className);
+            return CloudManager.getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException e) {
+            handleException("Error occurred while getting an instance of ContainerManager class ", e);
+        }
+        return null;
     }
 
     /**

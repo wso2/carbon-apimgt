@@ -37,18 +37,20 @@ public final class ContainerBasedConstants {
     public static final String MODE = "privateJet";
 
     public static final String MASTER_URL = "MasterURL";
+    public static final String INGRESS_URL = "IngressURL";
     public static final String NAMESPACE = "Namespace";
     public static final String REPLICAS = "Replicas";
     public static final String SATOKEN = "SAToken";
     public static final String JWT_SECURITY_CR_NAME = "JWTSecurityCustomResourceName";
     public static final String OAUTH2_SECURITY_CR_NAME = "OauthSecurityCustomResourceName";
     public static final String BASICAUTH_SECURITY_CR_NAME = "BasicSecurityCustomResourceName";
-    public static final String CLUSTER_NAME = "Name";
+    public static final String TYPE = "Type";
     public static final String CLUSTER_INFO = "ClusterInfo";
+    public static final String CONTAINER_MANAGEMENT_INFO = "ContainerMgtInfo";
     public static final String PROPERTIES = "Properties";
     public static final String CLUSTER_ID = "ClusterId";
     public static final String DISPLAY_NAME = "DisplayName";
-    public static final String CONTAINER_MANAGEMENT_INFO = "GatewayDeployments";
+    public static final String CONTAINER_MANAGEMENT = "ContainerMgt";
     public static final String CLASS_NAME = "ClassName";
     public static final String CLIENT_KEY_PASSPHRASE = "javax.net.ssl.keyStorePassword";
 

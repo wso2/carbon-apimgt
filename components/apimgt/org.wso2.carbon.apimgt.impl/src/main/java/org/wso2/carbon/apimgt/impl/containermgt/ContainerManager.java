@@ -22,6 +22,8 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
+import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -31,9 +33,9 @@ public interface ContainerManager {
 
     /**
      * Initialize the class
-     * @param parameterMap Map relating to the cluster information
+     * @param containerMgtInfoDetails Map relating to the cluster information
      */
-    void initManager(Map parameterMap);
+    void initManager(JSONObject containerMgtInfoDetails);
 
     /**
      * Initial publish of the API in cluster
@@ -44,48 +46,50 @@ public interface ContainerManager {
      * @throws ParseException
      * @throws APIManagementException
      */
-    void changeLCStateCreatedToPublished(API api, APIIdentifier apiIdentifier)
+    void changeLCStateCreatedToPublished(API api, APIIdentifier apiIdentifier, Registry registry)
             throws UserStoreException, RegistryException, ParseException, APIManagementException;
 
     /**
      * Deletes the API from all the clusters it had been deployed
      * @param apiId API Identifier
-     * @param clusterProperties Clusters which the API has published
+     * @param containerMgtInfoDetails Clusters which the API has published
      */
-    void deleteAPI(APIIdentifier apiId, Map<String, String> clusterProperties);
+    void deleteAPI(APIIdentifier apiId, JSONObject containerMgtInfoDetails);
 
     /**
      * Represents the LC change "Demote to created"
      * Deletes the API from clusters
      * @param apiId API Identifier
-     * @param clusterProperties Clusters which the API has published
+     * @param containerMgtInfoDetails Clusters which the API has published
      */
-    void changeLCStatePublishedToCreated(APIIdentifier apiId, Map<String, String> clusterProperties);
+    void changeLCStatePublishedToCreated(APIIdentifier apiId, JSONObject containerMgtInfoDetails);
 
     /**
      * Re-deploy an API
      * @param apiId API Identifier
-     * @param clusterProperties Clusters which the API has published
+     * @param containerMgtInfoDetails Clusters which the API has published
      */
-    void apiRepublish(API api, APIIdentifier apiId, Map<String, String> clusterProperties)
+    void apiRepublish(API api, APIIdentifier apiId, Registry registry, JSONObject containerMgtInfoDetails)
             throws ParseException, RegistryException, APIManagementException;
 
     /**
      * Represent sthe LC change Block
      * Deletes the API from the clusters
      * @param apiId API Identifier
-     * @param clusterProperties Clusters which the API has published
+     * @param containerMgtInfoDetails Clusters which the API has published
      */
-    void changeLCStateToBlocked(APIIdentifier apiId, Map<String, String> clusterProperties);
+    void changeLCStateToBlocked(APIIdentifier apiId, JSONObject containerMgtInfoDetails);
 
     /**
      * Represents the LC change Blocked --> Republish
      * Redeploy the API CR with "override : false"
      * @param apiId API Identifier
-     * @param clusterProperties Clusters which the API has published
+     * @param containerMgtInfoDetails Clusters which the API has published
      * @param configMapName Name of the Config Map
      */
-    void changeLCStateBlockedToRepublished(APIIdentifier apiId, Map<String, String> clusterProperties,
+    void changeLCStateBlockedToRepublished(APIIdentifier apiId, JSONObject containerMgtInfoDetails,
                                            String[] configMapName);
+
+    DeploymentStatus getPodStatus (APIIdentifier apiIdentifier, String clusterName);
 
 }
