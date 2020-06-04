@@ -630,6 +630,58 @@ class API extends Resource {
             .unsubscribeAllAlerts(this._requestMetaData());
         });
     }
+
+    getKeyManagersList() {
+        return this.client.then((client) => {
+            return client.apis['Key Manager (Collection)'].get_key_managers(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+        /**
+     * Get details of an Application Throttling Policy
+     */
+    keyManagerGet(keyManagerId) {
+        return this.client.then((client) => {
+            return client.apis['Key Manager (Individual)'].get_key_managers__keyManagerId_(
+                { keyManagerId: keyManagerId },
+                this._requestMetaData(),
+            );
+        });
+    }
+            /**
+     * Add an Key Manager
+     */
+    addKeyManager(body) {
+        return this.client.then((client) => {
+            const payload = {
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Key Manager (Collection)'].post_key_managers(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+             /**
+     * Update an Key Manager
+     */
+    updateKeyManager(keyManagerId, body) {
+        return this.client.then((client) => {
+            const payload = {
+                keyManagerId: keyManagerId,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Key Manager (Individual)'].put_key_managers__keyManagerId_(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+
 }
 
 API.CONSTS = {
