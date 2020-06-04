@@ -26,10 +26,12 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ScopesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.SharedScopeMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -165,6 +167,21 @@ public class ScopesApiServiceImpl implements ScopesApiService {
         Scope scope = apiProvider.getSharedScopeByUUID(scopeId, tenantDomain);
         ScopeDTO scopeDTO = SharedScopeMappingUtil.fromScopeToDTO(scope);
         return Response.ok().entity(scopeDTO).build();
+    }
+
+    @Override
+    public Response getSharedScopeUsages(String scopeId, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        if (StringUtils.isEmpty(scopeId)) {
+            throw new APIManagementException("Scope Id cannot be null or empty",
+                    ExceptionCodes.SHARED_SCOPE_ID_NOT_SPECIFIED);
+        }
+        SharedScopeUsage sharedScopeUsage = apiProvider.getSharedScopeUsage(scopeId, tenantId);
+        SharedScopeUsageDTO sharedScopeUsageDTO = SharedScopeMappingUtil.fromSharedScopeUsageToDTO(sharedScopeUsage);
+        return Response.ok().entity(sharedScopeUsageDTO).build();
     }
 
     /**
