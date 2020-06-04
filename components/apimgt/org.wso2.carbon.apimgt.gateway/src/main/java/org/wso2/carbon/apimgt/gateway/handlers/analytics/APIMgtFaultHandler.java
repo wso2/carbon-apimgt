@@ -71,6 +71,11 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             if (consumerKey == null || "".equals(consumerKey)) {
                 consumerKey = "None";
             }
+            String resourceTemplate = (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE);
+            if (resourceTemplate == null || "".equals(resourceTemplate)) {
+                resourceTemplate = "None";
+            }
+            faultPublisherDTO.setApiResourceTemplate(resourceTemplate);
             faultPublisherDTO.setApplicationConsumerKey(consumerKey);
             faultPublisherDTO.setApiContext((String) messageContext.getProperty(
                     APIMgtGatewayConstants.CONTEXT));
@@ -109,8 +114,13 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
                 applicationName = "None";
                 applicationId = "0";
             }
+            String applicationOwner = authContext.getSubscriber();
+            if (applicationOwner == null || "".equals(applicationOwner)) {
+                applicationOwner = "None";
+            }
             faultPublisherDTO.setApplicationName(applicationName);
             faultPublisherDTO.setApplicationId(applicationId);
+            faultPublisherDTO.setApplicationOwner(applicationOwner);
             String protocol = (String) messageContext.getProperty(
                     SynapseConstants.TRANSPORT_IN_NAME);
             faultPublisherDTO.setProtocol(protocol);

@@ -36,6 +36,8 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
         setContext(throttlePublisherDTO.getContext());
         setApiCreator(throttlePublisherDTO.getApiCreator());
         setApiCreatorTenantDomain(throttlePublisherDTO.getApiCreatorTenantDomain());
+        setApiResourceTemplate(throttlePublisherDTO.getApiResourceTemplate());
+        setApiMethod(throttlePublisherDTO.getApiMethod());
         setThrottledTime(throttlePublisherDTO.getThrottledTime());
         setApplicationName(throttlePublisherDTO.getApplicationName());
         setApplicationId(throttlePublisherDTO.getApplicationId());
@@ -49,10 +51,10 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
     }
 
     public Object createPayload() {
-        return new Object[] { getUsername(), getTenantDomain(), getApiname(),
-                getVersion(), getContext(), getApiCreator(), getApiCreatorTenantDomain(), getApplicationId(),
-                getApplicationName(), getSubscriber(), getThrottledOutReason(), getGatewayType(), getThrottledTime(),
-                getHostName(), DataPublisherUtil.toJsonString(getProperties()) };
+        return new Object[] { getUsername(), getTenantDomain(), getApiname(), getVersion(), getContext(),
+                getApiCreator(), getApiCreatorTenantDomain(), getApiResourceTemplate(), getApiMethod(),
+                getApplicationId(), getApplicationName(), getSubscriber(), getThrottledOutReason(), getGatewayType(),
+                getThrottledTime(), getHostName(), DataPublisherUtil.toJsonString(getProperties()) };
     }
 
     public Object createMetaData() {
@@ -86,6 +88,12 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
         }
         if (getApiCreatorTenantDomain() == null) {
             missingMandatoryValues.add("API creator tenant domain");
+        }
+        if (getApiResourceTemplate() == null) {
+            missingMandatoryValues.add("API resource template");
+        }
+        if (getApiMethod() == null) {
+            missingMandatoryValues.add("HTTP method");
         }
         if (getApplicationName() == null) {
             missingMandatoryValues.add("Application names");
