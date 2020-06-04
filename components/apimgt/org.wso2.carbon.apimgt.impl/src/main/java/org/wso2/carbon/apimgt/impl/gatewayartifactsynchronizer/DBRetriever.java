@@ -39,7 +39,7 @@ public class DBRetriever implements ArtifactRetriever {
 
         GatewayAPIDTO gatewayAPIDTO = null;
         try {
-            ByteArrayInputStream byteStream = apiMgtDAO.getAPIBlob(APIId, APIName, label);
+            ByteArrayInputStream byteStream = apiMgtDAO.getAPIBlob(APIId, label);
             ObjectInputStream objectStream = new ObjectInputStream(byteStream);
             gatewayAPIDTO = (GatewayAPIDTO) objectStream.readObject();
             if (log.isDebugEnabled()){

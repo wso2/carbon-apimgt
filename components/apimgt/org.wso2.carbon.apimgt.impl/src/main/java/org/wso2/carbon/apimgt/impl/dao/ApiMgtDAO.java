@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -15450,73 +15451,74 @@ public class ApiMgtDAO {
         }
     }
 
-    public void addAPIBlob(String APIId, String APIName, String gatewayLabel, ByteArrayInputStream bais,
+    public void addAPIBlob(GatewayAPIDTO gatewayAPIDTO, ByteArrayInputStream bais,
                            int streamLength) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_API_BLOB)) {
-            statement.setString(1, APIId);
-            statement.setString(2, APIName);
-            statement.setString(3, gatewayLabel);
-            statement.setBinaryStream(4, bais, streamLength);
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_API_ARTIFACT)) {
+            statement.setString(1, gatewayAPIDTO.getApiId());
+            statement.setString(2, gatewayAPIDTO.getName());
+            statement.setString(3, gatewayAPIDTO.getVersion());
+            statement.setString(4, gatewayAPIDTO.getTenantDomain());
+            statement.setString(5, gatewayAPIDTO.getProvider());
+            statement.setString(6, gatewayAPIDTO.getGatewayLabel());
+            statement.setBinaryStream(7, bais, streamLength);
             statement.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to add blob for " + APIName, e);
+            handleException("Failed to add artifacts for " + gatewayAPIDTO.getName(), e);
         }
     }
 
     public void updateAPIBlob(String APIId, String gatewayLabel, ByteArrayInputStream bais,
                            int streamLength) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_BLOB)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_ARTIFACT)) {
             statement.setBinaryStream(1, bais, streamLength);
             statement.setString(2, APIId);
             statement.setString(3, gatewayLabel);
             statement.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to update blob for API with ID " + APIId, e);
+            handleException("Failed to update artifacts of API with ID " + APIId, e);
         }
     }
 
-    public ByteArrayInputStream getAPIBlob(String APIId, String APIName, String label) throws APIManagementException {
+    public ByteArrayInputStream getAPIBlob(String APIId, String label) throws APIManagementException {
         ByteArrayInputStream baip = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_BLOB)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_ARTIFACT)) {
             statement.setString(1, APIId);
-            statement.setString(2, APIName);
-            statement.setString(3, label);
+            statement.setString(2, label);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 byte[] st = (byte[]) rs.getObject(1);
                 baip = new ByteArrayInputStream(st);
             }
         } catch (SQLException e) {
-            handleException("Failed to get API Blob user ID for " + APIName, e);
+            handleException("Failed to get artifacts of API with ID " + APIId, e);
         }
         return baip;
     }
 
     public void deleteAPIBlob(String APIId, String gatewayLabel) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_API_BLOB)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_API_ARTIFACT)) {
             statement.setString(1, APIId);
             statement.setString(2, gatewayLabel);
             statement.executeUpdate();
         } catch (SQLException e) {
-            handleException("Failed to delete blob of API with ID " + APIId, e);
+            handleException("Failed to delete artifacts of API with ID " + APIId, e);
         }
     }
 
-    public boolean isAPIBlobExists(String APIId, String APIName, String label) throws APIManagementException {
+    public boolean isAPIBlobExists(String APIId, String label) throws APIManagementException {
         boolean status = false;
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_BLOB)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_ARTIFACT)) {
             statement.setString(1, APIId);
-            statement.setString(2, APIName);
-            statement.setString(3, label);
+            statement.setString(2, label);
             ResultSet rs = statement.executeQuery();
             status = rs.next();
         } catch (SQLException e) {
-            handleException("Failed to get API Blob user ID for " + APIName, e);
+            handleException("Failed to get artifacts of API with ID " + APIId, e);
         }
         return status;
     }

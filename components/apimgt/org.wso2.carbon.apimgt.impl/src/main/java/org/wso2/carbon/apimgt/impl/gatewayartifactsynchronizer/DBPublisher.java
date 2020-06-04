@@ -46,8 +46,7 @@ public class DBPublisher implements ArtifactPublisher {
             objectOutputStream.writeObject(gatewayAPIDTO);
             byte[] gatewayAPIDTOAsBytes = byteArrayOutputStream.toByteArray();
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayAPIDTOAsBytes);
-            apiMgtDAO.addAPIBlob(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getName(), gatewayAPIDTO.getGatewayLabel(),
-                    byteArrayInputStream, gatewayAPIDTOAsBytes.length);
+            apiMgtDAO.addAPIBlob(gatewayAPIDTO, byteArrayInputStream, gatewayAPIDTOAsBytes.length);
             if (log.isDebugEnabled()){
                 log.debug("Successfully published Artifacts of " + gatewayAPIDTO.getName());
             }
@@ -86,8 +85,7 @@ public class DBPublisher implements ArtifactPublisher {
 
         boolean status;
         try {
-            status = apiMgtDAO.isAPIBlobExists(gatewayAPIDTO.getApiId(),gatewayAPIDTO.getName(),
-                    gatewayAPIDTO.getGatewayLabel());
+            status = apiMgtDAO.isAPIBlobExists(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel());
             if (log.isDebugEnabled()){
                 log.debug("Successfully read the status of Artifacts belongs to " + gatewayAPIDTO.getName());
             }
