@@ -39,6 +39,7 @@ import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom';
 import TenantTheme from 'AppComponents/TenantTheme/UploadTheme';
 import ListDetectedBotData from 'AppComponents/BotDetection/DetectedBotData/ListDetectedBotData';
 import ListEmails from 'AppComponents/BotDetection/EmailConfig/ListEmails';
+import KeyManagers from 'AppComponents/KeyManagers';
 import ManageAlerts from 'AppComponents/ManageAlerts/ManageAlerts.jsx';
 
 const RouteMenuMapping = (intl) => [
@@ -106,6 +107,15 @@ const RouteMenuMapping = (intl) => [
         }),
         path: '/settings/mg-labels',
         component: MicrogatewayLabels,
+        icon: <PhonelinkSetupIcon />,
+    },
+    {
+        id: intl.formatMessage({
+            id: 'Base.RouteMenuMapping.keymanagers',
+            defaultMessage: 'KeyManagers',
+        }),
+        path: '/settings/key-managers',
+        component: () => <KeyManagers />,
         icon: <PhonelinkSetupIcon />,
     },
     {
