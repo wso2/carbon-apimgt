@@ -29,6 +29,8 @@ public class ThrottlePublisherDTO {
     private String apiCreator;
     private String apiCreatorTenantDomain;
     private String applicationName;
+    private String apiResourceTemplate;
+    private String apiMethod;
     private String applicationId;
     private String subscriber;
     private long throttledTime; //The timestamp which throttle out event triggers
@@ -184,4 +186,19 @@ public class ThrottlePublisherDTO {
         this.properties = properties;
     }
 
+    public String getApiResourceTemplate() {
+        return apiResourceTemplate;
+    }
+
+    public void setApiResourceTemplate(String apiResourceTemplate) {
+        this.apiResourceTemplate = apiResourceTemplate;
+    }
+
+    public String getApiMethod() {
+        return apiMethod;
+    }
+
+    public void setApiMethod(String apiMethod) {
+        this.apiMethod = apiMethod;
+    }
 }

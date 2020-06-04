@@ -1,10 +1,17 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsageDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsedAPIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsedAPIResourceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -45,6 +52,42 @@ public class SharedScopeMappingUtil {
             scopeDTO.setBindings(Arrays.asList((roles).split(",")));
         }
         return scopeDTO;
+    }
+
+    /**
+     * Converts SharedScopeUsage object into SharedScopeUsageDTO object.
+     *
+     * @param sharedScopeUsage SharedScopeUsage object
+     * @return SharedScopeUsageDTO object
+     */
+    public static SharedScopeUsageDTO fromSharedScopeUsageToDTO(SharedScopeUsage sharedScopeUsage) {
+
+        SharedScopeUsageDTO sharedScopeUsageDTO = new SharedScopeUsageDTO();
+        sharedScopeUsageDTO.setId(sharedScopeUsage.getId());
+        sharedScopeUsageDTO.setName(sharedScopeUsage.getName());
+
+        List<SharedScopeUsedAPIInfoDTO> usedAPIInfoDTOList = new ArrayList<>();
+        for (API api: sharedScopeUsage.getApis()) {
+            APIIdentifier apiIdentifier = api.getId();
+            SharedScopeUsedAPIInfoDTO usedAPIInfoDTO = new SharedScopeUsedAPIInfoDTO();
+            usedAPIInfoDTO.setName(apiIdentifier.getName());
+            usedAPIInfoDTO.setVersion(apiIdentifier.getVersion());
+            usedAPIInfoDTO.setProvider(apiIdentifier.getProviderName());
+            usedAPIInfoDTO.setContext(api.getContext());
+
+            List<SharedScopeUsedAPIResourceInfoDTO> usedAPIResourceInfoDTOList = new ArrayList<>();
+            for (URITemplate uriTemplate: api.getUriTemplates()) {
+                SharedScopeUsedAPIResourceInfoDTO usedAPIResourceInfoDTO = new SharedScopeUsedAPIResourceInfoDTO();
+                usedAPIResourceInfoDTO.setTarget(uriTemplate.getUriTemplate());
+                usedAPIResourceInfoDTO.setVerb(uriTemplate.getHTTPVerb());
+                usedAPIResourceInfoDTOList.add(usedAPIResourceInfoDTO);
+            }
+            usedAPIInfoDTO.setUsedResourceList(usedAPIResourceInfoDTOList);
+            usedAPIInfoDTOList.add(usedAPIInfoDTO);
+        }
+        sharedScopeUsageDTO.setUsedApiList(usedAPIInfoDTOList);
+
+        return sharedScopeUsageDTO;
     }
 
     /**
