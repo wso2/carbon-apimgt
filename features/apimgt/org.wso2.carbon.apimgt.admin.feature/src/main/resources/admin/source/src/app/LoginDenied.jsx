@@ -95,7 +95,7 @@ class LoginDenied extends Component {
 
     /**
      *
-     * @returns {React.Component} Render Logout
+     * @returns {React.Component} Render LoginDenied
      * @memberof LoginDenied
      */
     render() {
