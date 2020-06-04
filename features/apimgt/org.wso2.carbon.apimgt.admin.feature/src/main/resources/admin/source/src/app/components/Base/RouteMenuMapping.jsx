@@ -26,6 +26,7 @@ import TimerIcon from '@material-ui/icons/Timer';
 import SettingsIcon from '@material-ui/icons/Settings';
 import PhonelinkSetupIcon from '@material-ui/icons/PhonelinkSetup';
 import HomeIcon from '@material-ui/icons/Home';
+import NotificationsIcon from '@material-ui/icons/Notifications';
 import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
 import DemoTable from 'AppComponents/AdminPages/Microgateways/List';
 import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
@@ -237,7 +238,7 @@ const RouteMenuMapping = (intl) => [
         }),
         path: '/analytics/manage-alerts',
         component: () => <ManageAlerts />,
-        icon: <PhonelinkSetupIcon />,
+        icon: <NotificationsIcon />,
     },
 
 ];
