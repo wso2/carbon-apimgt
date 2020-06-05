@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.internal.service.impl;
+package org.wso2.carbon.apimgt.internal.service.utils;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -291,7 +291,7 @@ public final class BlockConditionDBUtil {
      *
      * @return list fo revoked JWTs
      */
-    static RevokedJWTListDTO getRevokedJWTs() {
+    public static RevokedJWTListDTO getRevokedJWTs() {
 
         Connection conn = null;
         PreparedStatement ps = null;
