@@ -247,7 +247,7 @@ export default function GraphQLQueryAnalysis(props) {
                 <DialogTitle id='responsive-dialog-title'>
                     <Typography className={classes.subHeading} variant='h4'>
                         <FormattedMessage
-                            id='Apis.Details.Configurartion.components.QueryAnalysis'
+                            id='Apis.Details.Configurartion.components.QueryAnalysis.edit'
                             defaultMessage='Edit Custom Complexity Values'
                         />
                     </Typography>
