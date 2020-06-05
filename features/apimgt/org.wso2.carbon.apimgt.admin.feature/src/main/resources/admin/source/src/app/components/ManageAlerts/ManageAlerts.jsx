@@ -267,13 +267,14 @@ const ManageAlerts = (props) => {
         const supportedAlertsPromise = api.getSupportedAlertTypes();
         const subscribedAlertsPromise = api.getSubscribedAlertTypesByUser();
         Promise.all([supportedAlertsPromise, subscribedAlertsPromise]).then((response) => {
-            if (response[0].status === 204 || response[1].status === 204) {
+            const [supportedAlertsResponse, subscribedAlertsResponse] = response;
+            if (supportedAlertsResponse === 204 || subscribedAlertsResponse === 204) {
                 setAnalyticsEnabled(false);
             } else {
                 setAnalyticsEnabled(true);
-                setSubscribedAlerts(response[1].body.alerts);
-                setEmailsList(response[1].body.emailList);
-                setSupportedAlerts(response[0].body.alerts);
+                setSubscribedAlerts(subscribedAlertsResponse.body.alerts);
+                setEmailsList(subscribedAlertsResponse.body.emailList);
+                setSupportedAlerts(supportedAlertsResponse.body.alerts);
             }
         }).catch((err) => {
             setAnalyticsEnabled(false);
