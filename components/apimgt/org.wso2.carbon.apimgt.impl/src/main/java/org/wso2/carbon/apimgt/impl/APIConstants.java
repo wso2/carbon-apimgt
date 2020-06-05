@@ -1739,6 +1739,8 @@ public final class APIConstants {
         public static final String QUOTA_TYPE_BANDWIDTH = "bandwidthVolume";
         public static final String PERMITTED_IP = "permittedIP";
         public static final String PERMITTED_REFERER = "permittedReferer";
+        public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
+        public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";

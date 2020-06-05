@@ -11062,6 +11062,8 @@ public class ApiMgtDAO {
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
+                subPolicy.setGraphQLMaxDepth(rs.getInt(ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
+                subPolicy.setGraphQLMaxComplexity(rs.getInt(ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
                 subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
                 Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
                 monetizationPlanProperties.put(APIConstants.Monetization.FIXED_PRICE,
@@ -11128,6 +11130,8 @@ public class ApiMgtDAO {
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
+                subPolicy.setGraphQLMaxDepth(rs.getInt(ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
+                subPolicy.setGraphQLMaxComplexity(rs.getInt(ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
                 subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
                 subPolicy.setTierQuotaType(rs.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
                 Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
@@ -11485,6 +11489,8 @@ public class ApiMgtDAO {
                 policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 policy.setStopOnQuotaReach(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 policy.setBillingPlan(resultSet.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
+                policy.setGraphQLMaxDepth(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
+                policy.setGraphQLMaxComplexity(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
                 InputStream binary = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if (binary != null) {
                     byte[] customAttrib = APIUtil.toByteArray(binary);
@@ -11533,6 +11539,8 @@ public class ApiMgtDAO {
                 policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 policy.setStopOnQuotaReach(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 policy.setBillingPlan(resultSet.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
+                policy.setGraphQLMaxDepth(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
+                policy.setGraphQLMaxComplexity(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
                 InputStream binary = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if (binary != null) {
                     byte[] customAttrib = APIUtil.toByteArray(binary);
@@ -11963,12 +11971,15 @@ public class ApiMgtDAO {
      * @param policy updated policy object
      * @throws APIManagementException
      */
+
+
     public void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
         Connection connection = null;
         ResultSet rs = null;
         PreparedStatement updateStatement = null;
         boolean hasCustomAttrib = false;
         String updateQuery;
+        String checkEntry;
 
         try {
             if (policy.getCustomAttributes() != null) {
@@ -11976,11 +11987,13 @@ public class ApiMgtDAO {
             }
             if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
                 updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_SQL;
+                checkEntry = SQLConstants.GET_SUBSCRIPTION_POLICY_SQL;
                 if (hasCustomAttrib) {
                     updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL;
                 }
             } else if (!StringUtils.isBlank(policy.getUUID())) {
                 updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_BY_UUID_SQL;
+                checkEntry = SQLConstants.GET_SUBSCRIPTION_POLICY_BY_UUID_SQL;
                 if (hasCustomAttrib) {
                     updateQuery = SQLConstants.UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_BY_UUID_SQL;
                 }
@@ -12062,9 +12075,17 @@ public class ApiMgtDAO {
             }
             updateStatement.executeUpdate();
             int policyId = 0;
-            rs = updateStatement.getGeneratedKeys();
+            PreparedStatement ps1 = connection.prepareStatement(checkEntry);
+            if(!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
+                ps1.setString(1, policy.getPolicyName());
+                ps1.setInt(2, policy.getTenantId());
+            }
+            if(!StringUtils.isBlank(policy.getUUID())) {
+                ps1.setString(1, policy.getUUID());
+            }
+            rs = ps1.executeQuery();
             if (rs.next()) {
-                policyId = Integer.parseInt(rs.getString(1));
+                policyId = rs.getInt("POLICY_ID");
             }
             if(policy.getGraphQLMaxDepth() != 0 && policy.getGraphQLMaxComplexity() != 0){
                 updateGraphQLQueryAnalysisInfo(connection, policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity(), policyId);
@@ -12106,6 +12127,8 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, null, rs);
         }
     }
+
+
 
     /**
      * Updates global throttle policy in database
@@ -14375,7 +14398,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Add complexity details
+     * Add custom complexity details for a particular API
      *
      * @param apiIdentifier         APIIdentifier object to retrieve API ID
      * @param graphqlComplexityInfo GraphqlComplexityDetails object
@@ -14406,7 +14429,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Update complexity details
+     * Update custom complexity details for a particular API
      *
      * @param apiIdentifier         APIIdentifier object to retrieve API ID
      * @param graphqlComplexityInfo GraphqlComplexityDetails object
@@ -14435,7 +14458,7 @@ public class ApiMgtDAO {
 
 
     /**
-     * Get custom complexity details
+     * Get custom complexity details for a particular API
      *
      * @param apiIdentifier APIIdentifier object to retrieve API ID
      * @return info about the complexity details
@@ -14464,36 +14487,6 @@ public class ApiMgtDAO {
         }
         return graphqlComplexityInfo;
     }
-
-
-    /**
-     * Get the policy definition for a particular API
-     *
-     * @param apiIdentifier APIIdentifier object to retrieve API ID
-     * @return a new GraphqlPolicyDefinition object
-     * @throws APIManagementException
-     */
-
-    public GraphqlPolicyDefinition getPolicyDefinition(APIIdentifier apiIdentifier) throws APIManagementException {
-        GraphqlPolicyDefinition graphqlPolicyDefinition = new GraphqlPolicyDefinition();
-        String query = SQLConstants.GET_DEPTH_COMPLEXITY_DETAILS_SQL;
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-            int apiId = getAPIID(apiIdentifier, conn);
-            ps.setInt(1, apiId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    graphqlPolicyDefinition.setMaxDepth(rs.getInt("MAX_DEPTH"));
-                    graphqlPolicyDefinition.setMaxComplexity(rs.getInt("MAX_COMPLEXITY"));
-                    graphqlPolicyDefinition.setGraphqlComplexityInfo(getComplexityDetails(apiIdentifier));
-                }
-            }
-        } catch (SQLException ex) {
-            handleException("Error while retrieving query analysis info: ", ex);
-        }
-        return graphqlPolicyDefinition;
-    }
-
 
     /**
      * Configure email list

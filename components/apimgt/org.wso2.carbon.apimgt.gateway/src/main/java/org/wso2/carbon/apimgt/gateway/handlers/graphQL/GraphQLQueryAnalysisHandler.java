@@ -35,19 +35,11 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.usermgt.APIKeyMgtRemoteUserClient;
-import org.wso2.carbon.apimgt.gateway.handlers.security.usermgt.APIKeyMgtRemoteUserClientPool;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -69,15 +61,16 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
     }
 
 
+
+
     /**
      * This method returns the maximum query complexity value
      *
-     * @param policyDefinition json object which contains the policy
+     * @param messageContext   message context of the request
      * @return maximum query depth value if exists, or -1 to denote no complexity limitation
      */
-    private int  getMaxQueryDepth(JSONObject policyDefinition) {
-        Object depthObject = policyDefinition.get(APIConstants.QUERY_ANALYSIS_DEPTH);
-        Object maxQueryDepth = ((JSONObject) depthObject).get(APIConstants.MAXIMUM_QUERY_DEPTH);
+    private int  getMaxQueryDepth(MessageContext messageContext) {
+        Object maxQueryDepth = messageContext.getProperty(APIConstants.MAXIMUM_QUERY_DEPTH);
         if (maxQueryDepth != null) {
             return ((Long) maxQueryDepth).intValue();
         } else {
@@ -94,19 +87,14 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      * @return true, if the query is not blocked or false, if the query is blocked
      */
     private boolean analyseQuery(MessageContext messageContext, String payload) {
-        JSONParser jsonParser = new JSONParser();
-
         try {
-            String graphQLAccessControlPolicy =
-                    (String) messageContext.getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
-            JSONObject policyDefinition = (JSONObject) jsonParser.parse(graphQLAccessControlPolicy);
-            if (analyseQueryDepth(messageContext, payload, policyDefinition) &&
-                    analyseQueryComplexity(messageContext, payload, policyDefinition)) {
+            if (analyseQueryDepth(messageContext, payload) &&
+                    analyseQueryComplexity(messageContext, payload)) {
                 return true;
             } else {
                 return false;
             }
-        } catch (ParseException e) {
+        } catch (Exception e) {
             log.error("Policy definition parsing failed. " + e.getMessage(), e);
         }
         return false;
@@ -117,11 +105,10 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      *
      * @param messageContext   message context of the request
      * @param payload          payload of the request
-     * @param policyDefinition json object which contains the policy
      * @return true, if the query depth does not exceed the maximum value or false, if query depth exceeds the maximum
      */
-    private boolean analyseQueryDepth(MessageContext messageContext, String payload, JSONObject policyDefinition) {
-        int maxQueryDepth = getMaxQueryDepth(policyDefinition);
+    private boolean analyseQueryDepth(MessageContext messageContext, String payload) {
+        int maxQueryDepth = getMaxQueryDepth(messageContext);
 
             if (maxQueryDepth > 0) {
                 MaxQueryDepthInstrumentation maxQueryDepthInstrumentation =
@@ -176,12 +163,11 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      *
      * @param messageContext   message context of the request
      * @param payload          payload of the request
-     * @param policyDefinition json object which contains the policy
      * @return true, if query complexity does not exceed the maximum or false, if query complexity exceeds the maximum
      */
-    private boolean analyseQueryComplexity(MessageContext messageContext, String payload, JSONObject policyDefinition) {
+    private boolean analyseQueryComplexity(MessageContext messageContext, String payload) {
         FieldComplexityCalculator fieldComplexityCalculator = new FieldComplexityCalculatorImpl(messageContext);
-        int maxQueryComplexity = getMaxQueryComplexity(policyDefinition);
+        int maxQueryComplexity = getMaxQueryComplexity(messageContext);
 
         if (maxQueryComplexity > 0) {
             MaxQueryComplexityInstrumentation maxQueryComplexityInstrumentation =
@@ -236,12 +222,11 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
     /**
      * This method returns the maximum query complexity value
      *
-     * @param policyDefinition json object which contains the policy
+     * @param messageContext   message context of the request
      * @return maximum query complexity value if exists, or -1 to denote no complexity limitation
      */
-    private int getMaxQueryComplexity(JSONObject policyDefinition) {
-        Object complexityObject = policyDefinition.get(APIConstants.QUERY_ANALYSIS_COMPLEXITY);
-        Object maxQueryComplexity = ((JSONObject) complexityObject).get(APIConstants.MAXIMUM_QUERY_COMPLEXITY);
+    private int getMaxQueryComplexity(MessageContext messageContext) {
+        Object maxQueryComplexity = messageContext.getProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY);
         if (maxQueryComplexity != null) {
             return ((Long) maxQueryComplexity).intValue();
         } else {

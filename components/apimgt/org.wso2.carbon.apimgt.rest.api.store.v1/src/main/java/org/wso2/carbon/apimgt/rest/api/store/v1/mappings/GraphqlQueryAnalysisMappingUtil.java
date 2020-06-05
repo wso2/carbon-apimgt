@@ -35,4 +35,24 @@ public class GraphqlQueryAnalysisMappingUtil {
         return graphQLQueryComplexityInfoDTO;
     }
 
+    /**
+     * Converts a list of GraphqlSchemaType objects into a DTO object
+     *
+     * @param typeList List<GraphqlSchemaType>
+     * @return a new GraphQLSchemaTypeListDTO object corresponding to given list of GraphqlSchemaType objects
+     */
+    public static GraphQLSchemaTypeListDTO fromGraphqlSchemaTypeListtoDTO(List<GraphqlSchemaType> typeList) {
+        GraphQLSchemaTypeListDTO graphQLSchemaTypeListDTO = new GraphQLSchemaTypeListDTO();
+        List<GraphQLSchemaTypeDTO> graphQLSchemaTypeDTOList = new ArrayList<>();
+        for (GraphqlSchemaType graphqlSchemaType : typeList) {
+            GraphQLSchemaTypeDTO graphQLSchemaTypeDTO = new GraphQLSchemaTypeDTO();
+            List<String> fieldList = new ArrayList<>(graphqlSchemaType.getFieldList());
+            graphQLSchemaTypeDTO.setType(graphqlSchemaType.getType());
+            graphQLSchemaTypeDTO.setFieldList(fieldList);
+            graphQLSchemaTypeDTOList.add(graphQLSchemaTypeDTO);
+        }
+        graphQLSchemaTypeListDTO.setTypeList(graphQLSchemaTypeDTOList);
+        return graphQLSchemaTypeListDTO;
+    }
+
 }

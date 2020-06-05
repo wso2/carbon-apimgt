@@ -164,6 +164,7 @@ const styles = (theme) => {
             marginLeft: shiftToLeft,
             marginRight: shiftToRight,
             paddingBottom: theme.spacing(3),
+            overflowX: 'hidden',
         },
         contentExpandView: {
             display: 'flex',
@@ -173,6 +174,7 @@ const styles = (theme) => {
             marginLeft: shiftToLeftMinView,
             marginRight: shiftToRightMinView,
             paddingBottom: theme.spacing(3),
+            overflowX: 'hidden',
         },
         shiftLeft: {
             marginLeft: 0,

@@ -131,9 +131,10 @@ public class GraphQLSchemaDefinition {
      * build schema with additional info
      *
      * @param api api object
+     * @param graphqlComplexityInfo
      * @return schemaDefinition
      */
-    public String buildSchemaWithAdditionalInfo(API api, GraphqlPolicyDefinition graphqlPolicyDefinition) {
+    public String buildSchemaWithAdditionalInfo(API api, GraphqlComplexityInfo graphqlComplexityInfo) {
         Swagger swagger = null;
         Map<String, String> scopeRoleMap = new HashMap<>();
         Map<String, String> operationScopeMap = new HashMap<>();
@@ -268,7 +269,7 @@ public class GraphQLSchemaDefinition {
 
             if (operationAuthSchemeMap.size() > 0) {
                 // Constructing the policy definition
-                JSONObject jsonPolicyDefinition = policyDefinitionToJson(graphqlPolicyDefinition);
+                JSONObject jsonPolicyDefinition = policyDefinitionToJson(graphqlComplexityInfo);
                 String base64EncodedPolicyDefinition = Base64.getUrlEncoder().withoutPadding().
                         encodeToString(jsonPolicyDefinition.toJSONString().getBytes(Charset.defaultCharset()));
                 String policyDefinition = "type GraphQLAccessControlPolicy_WSO2 {\n" +
@@ -281,15 +282,15 @@ public class GraphQLSchemaDefinition {
     }
 
     /**
-     * Method to convert GraphqlPolicyDefinition object to a JSONObject
+     * Method to convert GraphqlComplexityInfo object to a JSONObject
      *
-     * @param graphqlPolicyDefinition GraphqlPolicyDefinition object
+     * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @return json object which contains the policy definition
      */
-    public JSONObject policyDefinitionToJson(GraphqlPolicyDefinition graphqlPolicyDefinition) {
+    public JSONObject policyDefinitionToJson(GraphqlComplexityInfo graphqlComplexityInfo) {
         JSONObject policyDefinition = new JSONObject();
         HashMap<String, HashMap<String, Integer>> customComplexityMap = new HashMap<>();
-        List<CustomComplexityDetails> list = graphqlPolicyDefinition.getGraphqlComplexityInfo().getList();
+        List<CustomComplexityDetails> list = graphqlComplexityInfo.getList();
         for (CustomComplexityDetails customComplexityDetails : list) {
             String type = customComplexityDetails.getType();
             String field = customComplexityDetails.getField();
@@ -303,10 +304,6 @@ public class GraphQLSchemaDefinition {
             }
         }
 
-        Map<String, Object> depthObject = new LinkedHashMap<>(1);
-        depthObject.put("max_query_depth", graphqlPolicyDefinition.getMaxDepth());
-
-        Map<String, Object> complexityObject = new LinkedHashMap<>(2);
         Map<String, Map<String, Object>> customComplexityObject = new LinkedHashMap<>(customComplexityMap.size());
         for (HashMap.Entry<String, HashMap<String, Integer>> entry : customComplexityMap.entrySet()) {
             HashMap<String, Integer> fieldValueMap = entry.getValue();
@@ -319,12 +316,8 @@ public class GraphQLSchemaDefinition {
             }
             customComplexityObject.put(type, fieldValueObject);
         }
-        complexityObject.put("max_query_complexity", graphqlPolicyDefinition.getMaxComplexity());
-        complexityObject.put("custom_complexity_values", customComplexityObject);
 
-        policyDefinition.put(APIConstants.QUERY_ANALYSIS_DEPTH, depthObject);
-        policyDefinition.put(APIConstants.QUERY_ANALYSIS_COMPLEXITY, complexityObject);
-
+        policyDefinition.put(APIConstants.QUERY_ANALYSIS_COMPLEXITY, customComplexityObject);
         return policyDefinition;
     }
 

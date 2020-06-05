@@ -19,8 +19,7 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
         try {
             String graphQLAccessControlPolicy = (String) messageContext.getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
             JSONObject jsonObject = (JSONObject) jsonParser.parse(graphQLAccessControlPolicy);
-            Object complexityObject = jsonObject.get(APIConstants.QUERY_ANALYSIS_COMPLEXITY);
-            policyDefinition = (JSONObject) ((JSONObject) complexityObject).get("custom_complexity_values");
+            policyDefinition = (JSONObject) jsonObject.get(APIConstants.QUERY_ANALYSIS_COMPLEXITY);
         } catch (ParseException e) {
             log.error("Policy definition parsing failed. " + e.getMessage(), e);
         }

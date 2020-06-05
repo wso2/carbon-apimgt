@@ -16,6 +16,7 @@
  * under the License.
  */
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -94,11 +95,11 @@ const useStyles = makeStyles(() => ({
 }));
 
 /**
- * The base component of the IN mediation policy.
+ * The base component of the GraphQL Query Analysis.
  * @param {any} props The props passed to the layout
  * @returns {any} HTML representation.
  */
-export default function AlertDialog(props) {
+export default function GraphQLQueryAnalysis(props) {
     const [open, setOpen] = useState(false);
     const classes = useStyles();
     const [api, updateAPI] = useAPI();
@@ -110,7 +111,8 @@ export default function AlertDialog(props) {
     const [typelist, setTypeList] = useState([]);
 
     /**
-     * Get Summation of field's complexity value in particular type
+     * Get Summation of field's complexity value of all types
+     * @param {Object of array} List
      */
     function findSummation(List) {
         const type = [...new Set(List.map((respond) => respond.type))];
@@ -157,7 +159,7 @@ export default function AlertDialog(props) {
     function editComplexity() {
         const apiId = api.id;
         const apiClient = new Api();
-        const promisedDepth = apiClient.updateGraphqlPoliciesComplexity(
+        const promisedComplexity = apiClient.updateGraphqlPoliciesComplexity(
             apiId, {
                 list: editlist,
             },
@@ -165,10 +167,10 @@ export default function AlertDialog(props) {
         updateAPI({ complexity });
         setComplexityAddDisabled(true);
         findSummation(state);
-        promisedDepth
+        promisedComplexity
             .then(() => {
                 Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.QueryAnalysis.UpdateComplexity.complexity.added.successfully',
+                    id: 'Apis.Details.Configurartion.components.QueryAnalysis.complexity.added.successfully',
                     defaultMessage: 'Complexity Values Updated successfully',
                 }));
             })
@@ -183,7 +185,9 @@ export default function AlertDialog(props) {
                 setComplexityAddDisabled(false);
             });
     }
-
+    /**
+     * set open state of the dialog box
+     */
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -303,3 +307,7 @@ export default function AlertDialog(props) {
         </>
     );
 }
+
+GraphQLQueryAnalysis.propTypes = {
+    complexity: PropTypes.shape({}).isRequired,
+};

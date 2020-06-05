@@ -105,7 +105,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -4949,16 +4949,18 @@ public final class APIUtil {
     }
 
     /**
-     * This method is used to retrieve policy definition details
+     * This method is used to retrieve complexity details
      *
      * @param api API
-     * @return GraphqlPolicyDefinition object that contains the policy details
+     * @return GraphqlComplexityInfo object that contains the complexity details
      * @throws APIManagementException
      */
-    public static GraphqlPolicyDefinition getPolicyDefinition(API api) throws APIManagementException {
+
+    public static GraphqlComplexityInfo getComplexityDetails(API api) throws  APIManagementException {
         APIIdentifier identifier = api.getId();
-        return ApiMgtDAO.getInstance().getPolicyDefinition(identifier);
+        return ApiMgtDAO.getInstance().getComplexityDetails(identifier);
     }
+
 
     public static boolean isAPIManagementEnabled() {
         return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("APIManagement.Enabled"));

@@ -361,14 +361,14 @@ public class SQLConstants {
                     "   APS.RATE_LIMIT_COUNT," +
                     "   APS.RATE_LIMIT_TIME_UNIT," +
                     "   APS.STOP_ON_QUOTA_REACH," +
-                    "   API.API_ID" +
+                    "   API.API_ID," +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
                     "   AM_APPLICATION APP," +
                     "   AM_APPLICATION_KEY_MAPPING AKM," +
                     "   AM_API API," +
-                    "   AM_POLICY_SUBSCRIPTION APS" +
+                    "   AM_POLICY_SUBSCRIPTION APS," +
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
@@ -395,14 +395,14 @@ public class SQLConstants {
                     "   APS.RATE_LIMIT_COUNT," +
                     "   APS.RATE_LIMIT_TIME_UNIT," +
                     "   APS.STOP_ON_QUOTA_REACH," +
-                    "   API.API_ID" +
+                    "   API.API_ID," +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
                     "   AM_APPLICATION APP," +
                     "   AM_APPLICATION_KEY_MAPPING AKM," +
                     "   AM_API API," +
-                    "   AM_POLICY_SUBSCRIPTION APS" +
+                    "   AM_POLICY_SUBSCRIPTION APS," +
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
@@ -412,7 +412,7 @@ public class SQLConstants {
                     "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
                     "   AND API.API_ID = SUB.API_ID" +
                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-                    "   AND APS.NAME = SUB.TIER_ID" ;
+                    "   AND APS.NAME = SUB.TIER_ID";
 
     public static final String UPDATE_TOKEN_PREFIX = "UPDATE ";
 
@@ -1882,24 +1882,6 @@ public class SQLConstants {
     public static final String ADD_CUSTOM_COMPLEXITY_DETAILS_SQL =
             "INSERT INTO AM_GRAPHQL_COMPLEXITY (UUID, API_ID, TYPE, FIELD, COMPLEXITY_VALUE) VALUES (?,?,?,?,?)";
 
-    public static final String GET_QUERY_ANALYSIS_SQL =
-            " SELECT" +
-            "   MAX_COMPLEXITY," +
-            "   MAX_DEPTH" +
-            " FROM" +
-            "   AM_GRAPHQL_QUERY_ANALYSIS " +
-            " WHERE" +
-            "   POLICY_ID = ?";
-
-    public static final String GET_DEPTH_COMPLEXITY_DETAILS_SQL =
-            "SELECT" +
-                    "   MAX_COMPLEXITY," +
-                    "   MAX_DEPTH" +
-                    " FROM" +
-                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
-                    " WHERE" +
-                    "   API_ID = ?";
-
     public static final String GET_CUSTOM_COMPLEXITY_DETAILS_SQL =
             " SELECT" +
             "   TYPE," +
@@ -1929,7 +1911,7 @@ public class SQLConstants {
             "   POLICY_ID = ?";
 
     public static final String REMOVE_FROM_GRAPHQL_QUERY_ANALYSIS_SQL =
-            "DELETE FROM AM_GRAPHQL_QUERY_ANALYSIS WHERE API_ID = ?";
+            "DELETE FROM AM_GRAPHQL_QUERY_ANALYSIS WHERE POLICY_ID = ?";
 
     public static final String REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL =
             "DELETE FROM AM_GRAPHQL_COMPLEXITY WHERE API_ID = ?";
@@ -2862,6 +2844,10 @@ public class SQLConstants {
                     "   * " +
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION " +
+                    "LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
+                    " ON "+
+                    "AM_POLICY_SUBSCRIPTION.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
                     " WHERE" +
                     "   TENANT_ID =?";
 
@@ -2870,6 +2856,10 @@ public class SQLConstants {
                     "   * " +
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION " +
+                    "LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
+                    " ON "+
+                    "AM_POLICY_SUBSCRIPTION.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
                     " WHERE" +
                     "  NAME IN (";
 
@@ -2920,8 +2910,12 @@ public class SQLConstants {
     public static final String GET_SUBSCRIPTION_POLICY_SQL =
             "SELECT "+
                     "* " +
-            "FROM " +
-                    "AM_POLICY_SUBSCRIPTION " +
+                    "FROM " +
+                    "   AM_POLICY_SUBSCRIPTION " +
+                    "LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
+                    " ON "+
+                    "AM_POLICY_SUBSCRIPTION.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
             "WHERE " +
                     "NAME = ? AND " +
                     "TENANT_ID =?";
@@ -2937,8 +2931,12 @@ public class SQLConstants {
     public static final String GET_SUBSCRIPTION_POLICY_BY_UUID_SQL =
             "SELECT "+
                     "* " +
-            "FROM " +
-                    "AM_POLICY_SUBSCRIPTION " +
+                    "FROM " +
+                    "   AM_POLICY_SUBSCRIPTION " +
+                    "LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS " +
+                    " ON "+
+                    "AM_POLICY_SUBSCRIPTION.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID " +
             "WHERE " +
                     "UUID = ?";
 

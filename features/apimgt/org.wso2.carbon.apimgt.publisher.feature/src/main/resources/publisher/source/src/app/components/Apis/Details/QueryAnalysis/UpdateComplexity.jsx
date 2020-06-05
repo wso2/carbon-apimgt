@@ -29,6 +29,7 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import TableRow from '@material-ui/core/TableRow';
+import PropTypes from 'prop-types';
 import TableBody from '@material-ui/core/TableBody';
 import TableHead from '@material-ui/core/TableHead';
 import Box from '@material-ui/core/Box';
@@ -41,6 +42,11 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+/**
+ *
+ * @param {any} props The props passed to the layout
+ * @returns {any} HTML representation.
+ */
 export default function UpdateComplexity(props) {
     const classes = useStyles();
     const [filterKeyWord, setFilter] = useState('');
@@ -48,9 +54,8 @@ export default function UpdateComplexity(props) {
         setState, typelist, state, editlist, setEditList,
     } = props;
 
-
     /**
-     * Filter the Types
+     * Filter the information by Types.
      */
 
     const setFilterByKeyWord = (event) => {
@@ -65,7 +70,7 @@ export default function UpdateComplexity(props) {
                         <TextField
                             id='outlined-full-width'
                             label='Type'
-                            placeholder='Filter Types'
+                            placeholder='Search By Types'
                             onChange={(e) => setFilterByKeyWord(e, typelist)}
                             fullWidth
                             variant='outlined'
@@ -92,7 +97,7 @@ export default function UpdateComplexity(props) {
                                 <Typography variant='subtitle2'>
                                     <FormattedMessage
                                         id='Apis.Details.QueryAnalysis.UpdateComplexity.fieldcomplexity'
-                                        defaultMessage='Field`s Complexity'
+                                        defaultMessage='Fields'
                                     />
                                 </Typography>
                             </TableCell>
@@ -192,3 +197,22 @@ export default function UpdateComplexity(props) {
         </>
     );
 }
+
+UpdateComplexity.propTypes = {
+    setState: PropTypes.func.isRequired,
+    setEditList: PropTypes.func.isRequired,
+    state: PropTypes.arrayOf(
+        PropTypes.shape({
+            type: PropTypes.string,
+            field: PropTypes.string,
+            complexityValue: PropTypes.number,
+        }),
+    ).isRequired,
+    typelist: PropTypes.arrayOf(
+        PropTypes.shape({
+            type: PropTypes.string,
+            summation: PropTypes.number,
+        }),
+    ).isRequired,
+    editlist: PropTypes.arrayOf.isRequired,
+};

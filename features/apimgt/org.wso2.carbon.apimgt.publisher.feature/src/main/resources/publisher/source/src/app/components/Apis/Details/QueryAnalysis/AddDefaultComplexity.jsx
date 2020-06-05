@@ -20,6 +20,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import { useIntl } from 'react-intl';
+import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Api from 'AppData/api';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -77,7 +78,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 /**
- * The base component of the IN mediation policy.
+ * The componet add deafult complexty values for all fields
  * @param {any} props The props passed to the layout
  * @returns {any} HTML representation.
  */
@@ -88,7 +89,7 @@ export default function AddDefaultComplexity(props) {
     const {
         complexity, setState, findSummation,
     } = props;
-    const [customcomplexitylist, setCustomComplexityList] = useState(null);
+    const [defaultList, setDefaultList] = useState(null);
 
 
     useEffect(() => {
@@ -109,29 +110,29 @@ export default function AddDefaultComplexity(props) {
                     });
                     return array;
                 });
-                setCustomComplexityList(array);
+                setDefaultList(array);
             });
     }, []);
 
     /**
-     * Set Default Field's Complexity Values
+     * Assign default complexity value of 1 for all fields.
      */
-    function addDefautlComplexity() {
+    function addDefaultComplexity() {
         const apiId = api.id;
         const apiClient = new Api();
         const promised = apiClient.addGraphqlPoliciesComplexity(
             apiId, {
-                list: customcomplexitylist,
+                list: defaultList,
             },
         );
         updateAPI({ complexity });
-        setState(customcomplexitylist);
-        findSummation(customcomplexitylist);
+        setState(defaultList);
+        findSummation(defaultList);
         promised
             .then(() => {
                 Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.QueryAnalysis.UpdateComplexity.default.complexity.added.successfully',
-                    defaultMessage: 'Default Custom Complexity Added successfully',
+                    id: 'Apis.Details.QueryAnalysis.AddDefaultComplexity.default.complexity.added.successfully',
+                    defaultMessage: 'Default Complexity Added successfully',
                 }));
             })
             .catch((error) => {
@@ -143,31 +144,32 @@ export default function AddDefaultComplexity(props) {
             });
     }
 
-    if (customcomplexitylist === null) {
+    if (defaultList === null) {
         return <Progress />;
     }
 
     return (
         <>
-            {customcomplexitylist === null ? (
+            {defaultList === null ? (
                 <CircularProgress size={16} classes={{ root: classes.progress }} />
             ) : (
                 <Button
-                    onClick={addDefautlComplexity}
+                    onClick={addDefaultComplexity}
                     disabled={
                         isRestricted(['apim:api_create'], api)
                     }
                     className={classes.editIcon}
                     size='small'
                 >
-
                     <SaveAltIcon />
-
-
                 </Button>
-
             )}
-
         </>
     );
 }
+
+AddDefaultComplexity.propTypes = {
+    complexity: PropTypes.shape({}).isRequired,
+    setState: PropTypes.func.isRequired,
+    findSummation: PropTypes.func.isRequired,
+};

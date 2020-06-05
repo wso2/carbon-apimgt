@@ -3286,6 +3286,42 @@ paths:
             Not Found.
             Requested API does not contain any complexity details.
 
+  ######################################################
+  # GraphQL Schema "Types and Fields" resource API
+  ######################################################
+  /apis/{apiId}/graphql-policies/complexity/types:
+
+    #-----------------------------------------------------
+    # Retrieve all types and fields of a GraphQL Schema
+    #-----------------------------------------------------
+    get:
+      summary: Retrieve types and fields of a GraphQL Schema
+      security:
+        - OAuth2Security: []
+      description: |
+        This operation can be used to retrieve all types and fields of the GraphQL Schema by providing the API id.
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - GraphQL Policies
+      responses:
+        200:
+          description: |
+            OK.
+            Types and fields returned successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              default: application/json
+              type: string
+          schema:
+            $ref: '#/definitions/GraphQLSchemaTypeList'
+        404:
+          description: |
+            Not Found.
+            Retrieving types and fields failed.
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -5310,6 +5346,36 @@ definitions:
         description: |
           The complexity value allocated for the associated field under the specified type
         example: 1
+
+  #-----------------------------------------------------
+  # The GraphQL Schema Type List resource
+  #-----------------------------------------------------
+  GraphQLSchemaTypeList:
+    title: List of types and corresponding fields of the GraphQL Schema
+    properties:
+      typeList:
+        type: array
+        items:
+          $ref: '#/definitions/GraphQLSchemaType'
+
+  #-----------------------------------------------------
+  # The GraphQL Schema Type resource
+  #-----------------------------------------------------
+  GraphQLSchemaType:
+    title: Single type and corresponding fields found within the GraphQL Schema
+    properties:
+      type:
+        type: string
+        description: |
+          Type found within the GraphQL Schema
+        example: "Country"
+      fieldList:
+        type: array
+        description: |
+          Array of fields under current type
+        items:
+          type: string
+        example: ["code","name"]
 
 #-----------------------------------------------------
 # END-OF-FILE

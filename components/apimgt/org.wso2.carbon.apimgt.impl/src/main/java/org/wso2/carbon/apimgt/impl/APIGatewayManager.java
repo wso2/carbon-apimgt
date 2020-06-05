@@ -38,7 +38,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlPolicyDefinition;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
@@ -142,9 +142,9 @@ public class APIGatewayManager {
                 client = new APIGatewayAdminClient(environment);
                 if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
                     //Build schema with additional info
-                    GraphqlPolicyDefinition graphqlPolicyDefinition = APIUtil.getPolicyDefinition(api);
+                    GraphqlComplexityInfo graphqlComplexityInfo = APIUtil.getComplexityDetails(api);
                     GraphQLSchemaDefinition schemaDefinition = new GraphQLSchemaDefinition();
-                    definition = schemaDefinition.buildSchemaWithAdditionalInfo(api, graphqlPolicyDefinition);
+                    definition = schemaDefinition.buildSchemaWithAdditionalInfo(api, graphqlComplexityInfo);
                     gatewayAPIDTO.setLocalEntriesToBeRemove(addStringToList(api.getUUID() + "_graphQL",
                             gatewayAPIDTO.getLocalEntriesToBeRemove()));
                     GatewayContentDTO graphqlLocalEntry = new GatewayContentDTO();

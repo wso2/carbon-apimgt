@@ -892,19 +892,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
 
-
-
-
-
-    /**
-     * Get role-depth mappings of a given API
-     *
-     * @param apiId          apiId
-     * @param messageContext message context
-     * @return Response with role-depth mappings of the GraphQL API
-     */
-
-
     // AWS Lambda: rest api operation to get ARNs
     @Override
     public Response apisApiIdAmznResourceNamesGet(String apiId, MessageContext messageContext) {

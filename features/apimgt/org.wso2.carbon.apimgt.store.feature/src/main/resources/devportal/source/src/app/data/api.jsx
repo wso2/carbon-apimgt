@@ -819,5 +819,20 @@ export default class API extends Resource {
         return promisePolicies.then(response => response.body);
     }
 
+    /**
+     * Retrieve all types and fields of a GraphQL Schema
+     */
+    getGraphqlPoliciesComplexityTypes(id) {
+        const promisePolicies = this.client.then(client => {
+            return client.apis['GraphQL Policies'].get_apis__apiId__graphql_policies_complexity_types(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promisePolicies.then(response => response.body);
+    }
+
     
 }
