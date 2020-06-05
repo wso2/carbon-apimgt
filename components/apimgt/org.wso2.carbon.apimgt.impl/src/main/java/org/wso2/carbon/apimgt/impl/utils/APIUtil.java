@@ -83,6 +83,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -99,6 +100,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -119,18 +121,18 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
-import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
@@ -142,15 +144,14 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
+import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
-import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -757,6 +758,12 @@ public final class APIUtil {
             api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
             //non empty URLs to API object
+            String keyManagers = artifact.getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
+            if (StringUtils.isNotEmpty(keyManagers)) {
+                api.setKeyManagers(new Gson().fromJson(keyManagers, List.class));
+            } else {
+                api.setKeyManagers(Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
+            }
             try {
                 api.setEnvironmentList(extractEnvironmentListForAPI(
                         artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
@@ -1328,6 +1335,9 @@ public final class APIUtil {
                 artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
                         api.getMonetizationProperties().toJSONString());
             }
+            if (api.getKeyManagers() != null) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS, new Gson().toJson(api.getKeyManagers()));
+            }
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -1687,13 +1697,13 @@ public final class APIUtil {
     /**
      * Utility method for creating storage path for an icon.
      *
-     * @param identifier APIIdentifier
+     * @param identifier Identifier
      * @return Icon storage path.
      */
-    public static String getIconPath(APIIdentifier identifier) {
+    public static String getIconPath(Identifier identifier) {
         String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+                identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
         return artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
     }
 
@@ -1842,15 +1852,25 @@ public final class APIUtil {
     /**
      * Utility method to get documentation path
      *
+     * @param id Identifier (API or API Product)
+     * @return Doc path
+     */
+    public static String getAPIOrAPIProductDocPath(Identifier id) {
+        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                id.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                id.getName() + RegistryConstants.PATH_SEPARATOR +
+                id.getVersion() + RegistryConstants.PATH_SEPARATOR +
+                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+    }
+
+    /**
+     * Utility method to get documentation path
+     *
      * @param apiId APIIdentifier
      * @return Doc path
      */
     public static String getAPIDocPath(APIIdentifier apiId) {
-        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiId.getApiName() + RegistryConstants.PATH_SEPARATOR +
-                apiId.getVersion() + RegistryConstants.PATH_SEPARATOR +
-                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+        return getAPIOrAPIProductDocPath(apiId);
     }
 
     /**
@@ -1979,38 +1999,6 @@ public final class APIUtil {
         throw new APIMgtAuthorizationFailedException(msg);
     }
 
-    public static SubscriberKeyMgtClient getKeyManagementClient() throws APIManagementException {
-
-        KeyManagerConfiguration configuration = KeyManagerHolder.getKeyManagerInstance().getKeyManagerConfiguration();
-        String serverURL = configuration.getParameter(APIConstants.AUTHSERVER_URL);
-        String username = configuration.getParameter(APIConstants.KEY_MANAGER_USERNAME);
-        String password = configuration.getParameter(APIConstants.KEY_MANAGER_PASSWORD);
-
-        if (serverURL == null) {
-            handleException("API key manager URL unspecified");
-        }
-
-        if (username == null || password == null) {
-            handleException("Authentication credentials for API key manager unspecified");
-        }
-
-        try {
-            return new SubscriberKeyMgtClient(serverURL, username, password);
-        } catch (Exception e) {
-            handleException("Error while initializing the subscriber key management client", e);
-            return null;
-        }
-    }
-
-    public static OAuthAdminClient getOauthAdminClient() throws APIManagementException {
-
-        try {
-            return new OAuthAdminClient();
-        } catch (Exception e) {
-            handleException("Error while initializing the OAuth admin client", e);
-            return null;
-        }
-    }
 
     public static UserInformationRecoveryClient getUserInformationRecoveryClient() throws APIManagementException {
 
@@ -2018,15 +2006,6 @@ public final class APIUtil {
             return new UserInformationRecoveryClient();
         } catch (Exception e) {
             handleException("Error while initializing the User information recovery client", e);
-            return null;
-        }
-    }
-
-    public static ApplicationManagementServiceClient getApplicationManagementServiceClient() throws APIManagementException {
-        try {
-            return new ApplicationManagementServiceClient();
-        } catch (Exception e) {
-            handleException("Error while initializing the Application Management Service client", e);
             return null;
         }
     }
@@ -3511,11 +3490,11 @@ public final class APIUtil {
     }
 
     public static boolean checkAccessTokenPartitioningEnabled() {
-        return OAuthServerConfiguration.getInstance().isAccessTokenPartitioningEnabled();
+        return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isAccessTokenPartitioningEnabled();
     }
 
     public static boolean checkUserNameAssertionEnabled() {
-        return OAuthServerConfiguration.getInstance().isUserNameAssertionEnabled();
+        return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isUserNameAssertionEnabled();
     }
 
     public static String[] getAvailableKeyStoreTables() throws APIManagementException {
@@ -3536,7 +3515,8 @@ public final class APIUtil {
     public static Map<String, String> getAvailableUserStoreDomainMappings() throws
             APIManagementException {
         Map<String, String> userStoreDomainMap = new HashMap<String, String>();
-        String domainsStr = OAuthServerConfiguration.getInstance().getAccessTokenPartitioningDomains();
+        String domainsStr =
+                ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getAccessTokenPartitioningDomains();
         if (domainsStr != null) {
             String[] userStoreDomainsArr = domainsStr.split(",");
             for (String anUserStoreDomainsArr : userStoreDomainsArr) {
@@ -3594,7 +3574,8 @@ public final class APIUtil {
     public static boolean isAccessTokenExpired(APIKeyValidationInfoDTO accessTokenDO) {
         long validityPeriod = accessTokenDO.getValidityPeriod();
         long issuedTime = accessTokenDO.getIssuedTime();
-        long timestampSkew = OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds() * 1000;
+        long timestampSkew =
+                ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getTimeStampSkewInSeconds() * 1000;
         long currentTime = System.currentTimeMillis();
 
         //If the validity period is not an never expiring value
@@ -4477,7 +4458,6 @@ public final class APIUtil {
 
             createAnalyticsRole(APIConstants.ANALYTICS_ROLE, tenantId);
             createSelfSignUpRoles(tenantId);
-            createEndpointRegistryRoles(tenantId);
         }
     }
 
@@ -4786,18 +4766,6 @@ public final class APIUtil {
         Permission[] analyticsPermissions = new Permission[]{
                 new Permission(APIConstants.Permissions.LOGIN, UserMgtConstants.EXECUTE_ACTION)};
         createRole(roleName, analyticsPermissions, tenantId);
-    }
-
-    /**
-     * Create Endpoint Registry roles in specified tenant
-     *
-     * @param tenantId id of the tenant
-     * @throws APIManagementException
-     */
-    public static void createEndpointRegistryRoles(int tenantId) throws APIManagementException {
-        createRole(APIConstants.ENDPOINT_REGISTRY_ADMIN_ROLE, null, tenantId);
-        createRole(APIConstants.ENDPOINT_REGISTRY_USER_ROLE, null, tenantId);
-        createRole(APIConstants.ENDPOINT_REGISTRY_BROWSER_ROLE, null, tenantId);
     }
 
     /**
@@ -5824,7 +5792,7 @@ public final class APIUtil {
 
         MessageDigest messageDigest = null;
         byte[] hash = null;
-        String hashAlgorithm = OAuthServerConfiguration.getInstance().getHashAlgorithm();
+        String hashAlgorithm = ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getHashAlgorithm();
         if (log.isDebugEnabled()) {
             log.debug("Getting the hash algorithm from the configuration: " + hashAlgorithm);
         }
@@ -9203,6 +9171,15 @@ public final class APIUtil {
         return conditionDtoList;
     }
 
+    public static KeyManagerConfiguration toKeyManagerConfiguration(String base64EncodedString)
+            throws APIManagementException {
+        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
+        String decodedString = new String(Base64.decodeBase64(base64EncodedString));
+        new Gson().fromJson(decodedString,Map.class);
+        Map configuration = new Gson().fromJson(decodedString, Map.class);
+        keyManagerConfiguration.setConfiguration(configuration);
+        return keyManagerConfiguration;
+    }
     /**
      * Get if there any tenant-specific application configurations from the tenant
      * registry
@@ -10659,6 +10636,140 @@ public final class APIUtil {
         }
         return temp;
     }
+
+    public static KeyManagerConfigurationDTO getAndSetDefaultKeyManagerConfiguration(
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
+
+        boolean clientSecretHashEnabled =
+                ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isClientSecretHashEnabled();
+        Set<String> availableGrantTypes =
+                ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getSupportedGrantTypes().keySet();
+        long validityPeriod = ServiceReferenceHolder.getInstance().getOauthServerConfiguration()
+                .getApplicationAccessTokenValidityPeriodInSeconds();
+        APIManagerConfigurationService config =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+        String issuerIdentifier = OAuthServerConfiguration
+                .getInstance().getOpenIDConnectIDTokenIssuerIdentifier();
+        if (config != null) {
+            APIManagerConfiguration apiManagerConfiguration = config.getAPIManagerConfiguration();
+            String enableTokenEncryption =
+                    apiManagerConfiguration.getFirstProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE);
+            if (keyManagerConfigurationDTO.getProperty(APIConstants.KeyManager.ENABLE_TOKEN_ENCRYPTION) == null) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE,
+                        Boolean.parseBoolean(enableTokenEncryption));
+                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.AUTHSERVER_URL)) {
+                    keyManagerConfigurationDTO.addProperty(APIConstants.AUTHSERVER_URL,
+                            apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL));
+                }
+                if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                        .containsKey(APIConstants.KEY_MANAGER_USERNAME)) {
+                    keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_USERNAME,
+                            apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME));
+                }
+                if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                        .containsKey(APIConstants.KEY_MANAGER_PASSWORD)) {
+                    keyManagerConfigurationDTO.addProperty(APIConstants.KEY_MANAGER_PASSWORD,
+                            apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD));
+                }
+                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.REVOKE_URL)) {
+                    keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL,
+                            apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_API_URL));
+                }
+                if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.TOKEN_URL)) {
+                    String revokeUrl = apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_API_URL);
+                    String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
+                    keyManagerConfigurationDTO.addProperty(APIConstants.TOKEN_URL, tokenUrl);
+                }
+
+            }
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE,
+                    new ArrayList<>(availableGrantTypes));
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.ENABLE_TOKEN_HASH)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_HASH, clientSecretHashEnabled);
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION,true);
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS)) {
+            keyManagerConfigurationDTO
+                    .addProperty(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, isMapExistingAuthAppsEnabled());
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION, true);
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.TOKEN_ENDPOINT)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_ENDPOINT,
+                    getTokenEndpoint().concat("/token"));
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                .containsKey(APIConstants.KeyManager.REVOKE_ENDPOINT)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.REVOKE_ENDPOINT,
+                    getTokenEndpoint().concat("/revoke"));
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD,
+                    String.valueOf(validityPeriod));
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_VALIDATION, true);
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                APIConstants.KeyManager.SELF_VALIDATE_JWT)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.SELF_VALIDATE_JWT, true);
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                APIConstants.KeyManager.ISSUER)) {
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ISSUER, issuerIdentifier);
+        }
+        if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
+                APIConstants.KeyManager.CLAIM_MAPPING)){
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CLAIM_MAPPING, getDefaultClaimMappings());
+        }
+        return keyManagerConfigurationDTO;
+    }
+
+    public static String getTokenEndpoint(){
+        Map<String, Environment> environments = APIUtil.getEnvironments();
+        if (environments.isEmpty()) {
+            return "https://localhost:8243";
+        } else {
+            String tokenEndpoint = null;
+            for (Map.Entry<String, Environment> entry : environments.entrySet()) {
+                Environment environment = environments.get(entry.getKey());
+                String apiGatewayEndpoint = environment.getApiGatewayEndpoint();
+                String[] gatewayEndpoints = apiGatewayEndpoint.split(",");
+                if (gatewayEndpoints.length >0){
+                    for (String gatewayEndpoint : gatewayEndpoints){
+                        if (gatewayEndpoint.contains("https")){
+                            tokenEndpoint =  gatewayEndpoint;
+                            break;
+                        }
+                    }
+                }
+                if (environment.isDefault()) {
+                    return tokenEndpoint;
+                }
+            }
+            return tokenEndpoint;
+        }
+    }
+
+    public static Map<String, KeyManagerConnectorConfiguration> getKeyManagerConfigurations() {
+
+        return ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfigurations();
+    }
+
     /**
      * Get scopes attached to the API.
      *
@@ -10687,9 +10798,30 @@ public final class APIUtil {
 
         Map<String, Scope> scopeToKeyMap = new HashMap<>();
         for (String scopeKey : scopeKeys) {
-            Scope scope = KeyManagerHolder.getKeyManagerInstance().getScopeByName(scopeKey, tenantDomain);
+            Scope scope = KeyManagerHolder.getKeyManagerInstance(tenantDomain).getScopeByName(scopeKey);
             scopeToKeyMap.put(scopeKey, scope);
         }
         return scopeToKeyMap;
+    }
+
+    public static KeyManagerConnectorConfiguration getKeyManagerConnectorConfigurationsByConnectorType(String type) {
+
+        return ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfiguration(type);
+    }
+
+    public static List<ClaimMappingDto> getDefaultClaimMappings() {
+
+        List<ClaimMappingDto> claimMappingDtoList = new ArrayList<>();
+        try (InputStream resourceAsStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("claimMappings/default-claim-mapping.json")) {
+            String content = IOUtils.toString(resourceAsStream);
+            Map<String, String> claimMapping = new Gson().fromJson(content, Map.class);
+            claimMapping.forEach((remoteClaim, localClaim) -> {
+                claimMappingDtoList.add(new ClaimMappingDto(remoteClaim, localClaim));
+            });
+        } catch (IOException e) {
+            log.error("Error while reading default-claim-mapping.json", e);
+        }
+        return claimMappingDtoList;
     }
 }

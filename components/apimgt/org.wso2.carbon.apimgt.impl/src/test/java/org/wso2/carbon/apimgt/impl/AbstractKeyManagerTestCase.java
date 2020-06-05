@@ -22,9 +22,15 @@ import org.compass.core.util.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.impl.factory.ModelKeyManagerForTest;
+
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -126,5 +132,121 @@ public class AbstractKeyManagerTestCase {
         assertEquals("XBPcXSfGK47WiEX7enchoP2Dcvga", accessTokenRequest.getClientId());
         assertEquals("4UD8VX8NaQMtrHCwqzI1tHJLPoca", accessTokenRequest.getClientSecret());
         assertEquals(1200, accessTokenRequest.getValidityPeriod());
+    }
+
+    @Test
+    public void testCanHandleToken() throws APIManagementException {
+
+        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
+        KeyManager keyManager = new ModelKeyManagerForTest();
+        keyManager.loadConfiguration(keyManagerConfiguration);
+        assertTrue(keyManager.canHandleToken(UUID.randomUUID().toString()));
+    }
+
+    @Test
+    public void testCanHandleTokenEmptyConfiguration() throws APIManagementException {
+
+        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
+        KeyManager keyManager = new ModelKeyManagerForTest();
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING, "[]");
+        keyManager.loadConfiguration(keyManagerConfiguration);
+        assertTrue(keyManager.canHandleToken(UUID.randomUUID().toString()));
+    }
+
+    @Test
+    public void testCanHandleTokenWithConfiguration() throws APIManagementException {
+
+        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
+                "[{\"enable\": true,\"type\": \"JWT\",\"value\": {\"body\": {\"iss\": \"https://localhost:9443\"}}}]");
+        KeyManager keyManager = new ModelKeyManagerForTest();
+        keyManager.loadConfiguration(keyManagerConfiguration);
+        assertFalse(keyManager.canHandleToken(UUID.randomUUID().toString()));
+    }
+    @Test
+    public void testCanHandleTokenWithConfigurationJWT() throws APIManagementException {
+
+        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
+                "[{\"enable\": true,\"type\": \"JWT\",\"value\": {\"body\": {\"iss\": \"https://localhost:9443\"}}}]");
+        KeyManager keyManager = new ModelKeyManagerForTest();
+        keyManager.loadConfiguration(keyManagerConfiguration);
+        assertTrue(keyManager.canHandleToken(
+                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" +
+                        ".eyJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo5NDQzIiwiaWF0IjoxNTkwMTM0NzIyLCJleHAiOjE2MjE2NzA3MjAsImF1ZC" +
+                        "I6Ind3dy5leGFtcGxlLmNvbSIsInN1YiI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJFbWFpbCI6ImJlZUBleGFtcGxlLmNvb" +
+                        "SJ9.HIxL7_WqeLPkxYdROAwRyL0YEY1YNJRfLghsaHEc7C4"));
+        assertFalse(keyManager.canHandleToken(
+                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo5NDQ0IiwiaWF0IjoxN" +
+                        "TkwMTM0NzIyLCJleHAiOjE2MjE2NzA3MjAsImF1ZCI6Ind3dy5leGFtcGxlLmNvbSIsInN1YiI6Impyb2NrZXRAZXhhb" +
+                        "XBsZS5jb20iLCJFbWFpbCI6ImJlZUBleGFtcGxlLmNvbSJ9.QjwcCl7Xs0zmioqsr85VQmW5lgRnkfba-v8OgKwhKyA"));
+    }
+
+    @Test
+    public void testCanHandleTokenWithConfigurationJWTMultipleClaim() throws APIManagementException {
+
+        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
+                "[{\"enable\": true,\"type\": \"JWT\",\"value\": {\"body\": {\"iss\": \"https://localhost:9443\"," +
+                        "\"domain\": \"abc.com\"}}}]");
+        KeyManager keyManager = new ModelKeyManagerForTest();
+        keyManager.loadConfiguration(keyManagerConfiguration);
+        assertTrue(keyManager.canHandleToken(
+                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo5NDQ0IiwiaWF0IjoxN" +
+                        "TkwMTM0NzIyLCJleHAiOjE2MjE2NzA3MjAsImF1ZCI6Ind3dy5leGFtcGxlLmNvbSIsInN1YiI6Impyb2NrZXRAZXhhbX" +
+                        "BsZS5jb20iLCJkb21haW4iOiJhYmMuY29tIn0.pHI2MUhvdGjcOj2yJ-05cHMwtx5kanMhO71m0wFhjic"));
+        assertFalse(keyManager.canHandleToken(
+                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" +
+                        ".eyJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo5NDQzIiwiaWF0IjoxNTkwMTM0NzIyLCJleHAiOjE2MjE2NzA3MjAsImF1ZC" +
+                        "I6Ind3dy5leGFtcGxlLmNvbSIsInN1YiI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJFbWFpbCI6ImJlZUBleGFtcGxlLmNvb" +
+                        "SJ9.HIxL7_WqeLPkxYdROAwRyL0YEY1YNJRfLghsaHEc7C4"));
+
+    }
+    @Test
+    public void testCanHandleTokenWithConfigurationJWTAndOpaue() throws APIManagementException {
+
+        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
+                "[{\"enable\": true,\"type\": \"JWT\",\"value\": {\"body\": {\"iss\": \"https://localhost:9443\"}}}," +
+                        "{\"enable\": true,\"type\": \"REFERENCE\",\"value\": \"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0" +
+                        "-9a-fA-F]{3}-[89ab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}\"}]");
+        KeyManager keyManager = new ModelKeyManagerForTest();
+        keyManager.loadConfiguration(keyManagerConfiguration);
+        assertTrue(keyManager.canHandleToken(
+                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" +
+                        ".eyJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo5NDQzIiwiaWF0IjoxNTkwMTM0NzIyLCJleHAiOjE2MjE2NzA3MjAsImF1ZC" +
+                        "I6Ind3dy5leGFtcGxlLmNvbSIsInN1YiI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJFbWFpbCI6ImJlZUBleGFtcGxlLmNvb" +
+                        "SJ9.HIxL7_WqeLPkxYdROAwRyL0YEY1YNJRfLghsaHEc7C4"));
+        assertTrue(keyManager.canHandleToken(UUID.randomUUID().toString()));
+    }
+    @Test
+    public void testCanHandleTokenWithConfigurationJWTAndOpaueDisableOne() throws APIManagementException {
+
+        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
+                "[{\"enable\": true,\"type\": \"JWT\",\"value\": {\"body\": {\"iss\": \"https://localhost:9443\"}}}," +
+                        "{\"enable\": false,\"type\": \"REFERENCE\",\"value\": " +
+                        "\"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0" +
+                        "-9a-fA-F]{3}-[89ab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}\"}]");
+        KeyManager keyManager = new ModelKeyManagerForTest();
+        keyManager.loadConfiguration(keyManagerConfiguration);
+        assertTrue(keyManager.canHandleToken(
+                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" +
+                        ".eyJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo5NDQzIiwiaWF0IjoxNTkwMTM0NzIyLCJleHAiOjE2MjE2NzA3MjAsImF1ZC" +
+                        "I6Ind3dy5leGFtcGxlLmNvbSIsInN1YiI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJFbWFpbCI6ImJlZUBleGFtcGxlLmNvb" +
+                        "SJ9.HIxL7_WqeLPkxYdROAwRyL0YEY1YNJRfLghsaHEc7C4"));
+        assertFalse(keyManager.canHandleToken(UUID.randomUUID().toString()));
+    }
+    @Test
+    public void testCanHandleTokenWithConfigurationJWTAndOpaueNegative() throws APIManagementException {
+
+        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
+        keyManagerConfiguration.addParameter(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
+                "[{\"enable\": true,\"type\": \"JWT\",\"value\": {\"body\": {\"iss\": \"https://localhost:9443\"}}}," +
+                        "{\"enable\": true,\"type\": \"REFERENCE\",\"value\": \"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0" +
+                        "-9a-fA-F]{3}-[89ab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}\"}]");
+        KeyManager keyManager = new ModelKeyManagerForTest();
+        keyManager.loadConfiguration(keyManagerConfiguration);
+        assertFalse(keyManager.canHandleToken("avffr.erwrwrwr.ergrtyttwre"));
     }
 }

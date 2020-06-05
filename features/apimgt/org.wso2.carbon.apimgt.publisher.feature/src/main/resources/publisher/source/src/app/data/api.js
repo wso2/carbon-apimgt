@@ -535,8 +535,9 @@ class API extends Resource {
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getAllScopes(offset = null, limit = null, callback = null) {
-        const promise_scopes = this.client.then(client => {
+    static getAllScopes(offset = null, limit = null, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promise_scopes = apiClient.then(client => {
             return client.apis['Scopes'].getSharedScopes(
                 { limit, offset},
                 this._requestMetaData(),

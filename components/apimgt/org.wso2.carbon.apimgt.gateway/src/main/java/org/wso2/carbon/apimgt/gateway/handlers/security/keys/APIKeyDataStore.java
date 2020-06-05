@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents the interface used by the APIKeyValidator to interact with the API
@@ -48,12 +49,15 @@ public interface APIKeyDataStore {
      * @param apiVersion A valid version of the API
      * @param apiKey An API key string - Not necessarily a valid key
      * @param requiredAuthenticationLevel - type of  key. can be one of 'Application or Application_User'
+     * @param tenantDomain teantDomain of API
+     * @param  keyManagers list of key managers assigned to API
      * @return an APIKeyValidationInfoDTO instance containing key validation data
      * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
      */
     APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
-                                                 String requiredAuthenticationLevel, String clientDomain,
-                                                 String matchingResource, String httpVerb) throws APISecurityException;
+                                          String requiredAuthenticationLevel, String clientDomain,
+                                          String matchingResource, String httpVerb, String tenantDomain,
+                                          List<String> keyManagers) throws APISecurityException;
 
     /**
      * Get API Resource URI Templates
@@ -82,10 +86,12 @@ public interface APIKeyDataStore {
      * @param context Context of an API
      * @param version A valid version of the API
      * @param consumerKey consumer key
+     * @param keyManager
      * @return an APIKeyValidationInfoDTO instance containing key validation data
      * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
      */
-    APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey)
+    APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
+                                                 String tenantDomain, String keyManager)
             throws APISecurityException;
 
     /**

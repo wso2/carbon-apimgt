@@ -24,6 +24,7 @@ import java.util.Map;
 public class AlertMgtConstants {
 
     public static final String PUBLISHER_AGENT = "publisher";
+    public static final String ADMIN_DASHBOARD_AGENT = "admin-dashboard";
     public static final String APIM_STAKEHOLDER_ALERT_APP = "APIM_STAKEHOLDER_ALERT";
     public static final String APIM_ALERT_CONFIG_APP = "APIM_CONFIGURATION_ALERT";
     public static final String API_NAME_KEY = "apiName";

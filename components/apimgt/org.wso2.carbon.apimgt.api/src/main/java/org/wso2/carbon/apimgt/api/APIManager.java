@@ -130,6 +130,15 @@ public interface APIManager {
     boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException;
 
     /**
+     * Checks the Availability of given APIProductIdentifier
+     *
+     * @param identifier APIProductIdentifier
+     * @return true, if already exists. False, otherwise
+     * @throws APIManagementException if failed to get API Product availability
+     */
+    boolean isAPIProductAvailable(APIProductIdentifier identifier) throws APIManagementException;
+
+    /**
      * Checks whether the given API context is already registered in the system
      *
      * @param context A String representing an API context
@@ -366,46 +375,6 @@ public interface APIManager {
      */
     Application getLightweightApplicationByUUID(String uuid) throws APIManagementException;
 
-    /**
-     * Check whether an application access token is already persist in database.
-     *
-     * @param accessToken
-     * @return
-     * @throws APIManagementException
-     */
-    boolean isApplicationTokenExists(String accessToken) throws APIManagementException;
-
-    /**
-     * Check whether an application access token is already revoked.
-     *
-     * @param accessToken
-     * @return
-     * @throws APIManagementException
-     */
-    boolean isApplicationTokenRevoked(String accessToken) throws APIManagementException;
-
-    /**
-     * Return information related to a specific access token
-     *
-     * @param accessToken AccessToken
-     * @return
-     * @throws APIManagementException
-     */
-    APIKey getAccessTokenData(String accessToken) throws APIManagementException;
-
-    /**
-    /**
-     * Return information related to access token by a searchTerm and searchType       *
-     *
-     *
-     * @param searchType
-     * @param searchTerm
-     * @param loggedInUser
-     * @return
-     * @throws APIManagementException
-     */
-    Map<Integer, APIKey> searchAccessToken(String searchType, String searchTerm, String loggedInUser)
-            throws APIManagementException;
 
     /**
      * Return subscribed APIs per access token

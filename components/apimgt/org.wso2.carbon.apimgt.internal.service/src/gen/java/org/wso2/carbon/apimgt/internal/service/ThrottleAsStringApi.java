@@ -39,9 +39,9 @@ ThrottleAsStringApiService delegate = new ThrottleAsStringApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "throttled events available", notes = "This will provide access to throttled events in database. ", response = String.class, tags={ "Shops" })
+    @ApiOperation(value = "throttled events available", notes = "This will provide access to throttled events in database. ", response = String.class, tags={ "Throttling" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "An array of shops around you", response = String.class),
+        @ApiResponse(code = 200, message = "throttle events string", response = String.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
     public Response throttleAsStringGet( @ApiParam(value = "**Search condition**.  You can search for an application by specifying the name as \"query\" attribute.  Eg. \"app1\" will match an application if the name is exactly \"app1\".  Currently this does not support wildcards. Given name must exactly match the application name. ")  @QueryParam("query") String query) throws APIManagementException{
         return delegate.throttleAsStringGet(query, securityContext);

@@ -28,46 +28,71 @@ import java.util.Map;
  * the values set in this Config.
  */
 public class KeyManagerConfiguration {
-    private Map<String, String> configuration = new HashMap<String, String>();
 
-    // If set to false, resource registration will not be enabled.
-    private boolean resourceRegistrationEnabled;
+    private String name;
+    private String type;
+    private boolean enabled;
+    private String tenantDomain;
 
-    // If set to false, input to set validity period will not be shown.
-    private boolean tokenValidityConfigurable;
+    private Map<String, Object> configuration = new HashMap<>();
 
-    // If set to false, pasting OAuth app details will not be supported.
-    private boolean manualModeSupported;
+    public void addParameter(String name, Object value) {
 
-    public boolean isResourceRegistrationEnabled() {
-        return resourceRegistrationEnabled;
-    }
-
-    public void setResourceRegistrationEnabled(boolean resourceRegistrationEnabled) {
-        this.resourceRegistrationEnabled = resourceRegistrationEnabled;
-    }
-
-    public boolean isTokenValidityConfigurable() {
-        return tokenValidityConfigurable;
-    }
-
-    public void setTokenValidityConfigurable(boolean tokenValidityConfigurable) {
-        this.tokenValidityConfigurable = tokenValidityConfigurable;
-    }
-
-    public boolean isManualModeSupported() {
-        return manualModeSupported;
-    }
-
-    public void setManualModeSupported(boolean manualModeSupported) {
-        this.manualModeSupported = manualModeSupported;
-    }
-
-    public void addParameter(String name, String value) {
         configuration.put(name, value);
     }
 
-    public String getParameter(String name) {
+    public Object getParameter(String name) {
+
         return configuration.get(name);
+    }
+
+    public void setConfiguration(Map<String, Object> configuration) {
+
+        this.configuration = configuration;
+    }
+
+    public String getName() {
+
+        return name;
+    }
+
+    public void setName(String name) {
+
+        this.name = name;
+    }
+
+    public String getType() {
+
+        return type;
+    }
+
+    public void setType(String type) {
+
+        this.type = type;
+    }
+
+    public boolean isEnabled() {
+
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+
+        this.enabled = enabled;
+    }
+
+    public String getTenantDomain() {
+
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+
+        this.tenantDomain = tenantDomain;
+    }
+
+    public Map<String, Object> getConfiguration() {
+
+        return configuration;
     }
 }

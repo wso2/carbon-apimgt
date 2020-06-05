@@ -212,15 +212,15 @@
         <Streams>
             <Request>
                 <Name>org.wso2.apimgt.statistics.request</Name>
-                <Version>3.1.0</Version>
+                <Version>3.2.0</Version>
             </Request>
             <Fault>
                 <Name>org.wso2.apimgt.statistics.fault</Name>
-                <Version>3.1.0</Version>
+                <Version>3.2.0</Version>
             </Fault>
             <Throttle>
                 <Name>org.wso2.apimgt.statistics.throttle</Name>
-                <Version>3.1.0</Version>
+                <Version>3.2.0</Version>
             </Throttle>
             <Workflow>
                 <Name>org.wso2.apimgt.statistics.workflow</Name>
@@ -449,10 +449,6 @@
             </WhiteListedURI>
             <WhiteListedURI>
                 <URI>/api/am/admin/{version}/swagger.yaml</URI>
-                <HTTPMethods>GET,HEAD</HTTPMethods>
-            </WhiteListedURI>
-            <WhiteListedURI>
-                <URI>/api/am/endpoint-registry/{version}/swagger.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
             <WhiteListedURI>

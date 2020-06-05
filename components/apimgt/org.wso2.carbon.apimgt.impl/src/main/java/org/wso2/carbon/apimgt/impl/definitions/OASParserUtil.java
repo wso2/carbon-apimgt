@@ -34,6 +34,8 @@ import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.parser.SwaggerParser;
+import io.swagger.util.Yaml;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
@@ -54,7 +56,10 @@ import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.ObjectMapperFactory;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.converter.SwaggerConverter;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,6 +72,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.openapitools.codegen.serializer.SerializerUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -82,6 +88,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
@@ -89,20 +96,25 @@ import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
 import java.util.stream.Collectors;
-
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Arrays;
+import java.util.UUID;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 /**
@@ -654,6 +666,81 @@ public class OASParserUtil {
         }
 
         return "";
+    }
+
+    public static File checkMasterSwagger(File archiveDirectory) throws APIManagementException {
+        File masterSwagger = null;
+        if ((new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_JSON)).exists()) {
+            masterSwagger = new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_JSON);
+            return masterSwagger;
+        } else if ((new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_YAML)).exists()) {
+            masterSwagger = new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_YAML);
+            return masterSwagger;
+        } else {
+            throw new APIManagementException("Could not find a master swagger file with the name of swagger.json " +
+                    "/swagger.yaml");
+        }
+    }
+
+    /**
+     * Extract the archive file and validates the openAPI definition
+     *
+     * @param inputStream   file as input stream
+     * @param returnContent whether to return the content of the definition in the response DTO
+     * @return APIDefinitionValidationResponse
+     * @throws APIManagementException if error occurred while parsing definition
+     */
+    public static APIDefinitionValidationResponse extractAndValidateOpenAPIArchive(InputStream inputStream,
+            boolean returnContent) throws APIManagementException {
+        String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator +
+                APIConstants.OPENAPI_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
+        String archivePath = path + File.separator + APIConstants.OPENAPI_ARCHIVE_ZIP_FILE;
+        String extractedLocation = APIFileUtil
+                .extractUploadedArchive(inputStream, APIConstants.OPENAPI_EXTRACTED_DIRECTORY, archivePath, path);
+        File[] listOfFiles = new File(extractedLocation).listFiles();
+        File archiveDirectory = null;
+        if (listOfFiles != null) {
+            for (File file: listOfFiles) {
+                if (file.isDirectory()) {
+                    archiveDirectory = file.getAbsoluteFile();
+                    break;
+                }
+            }
+        }
+        //verify whether the zipped input is archive or file.
+        if (archiveDirectory == null) {
+            throw new APIManagementException("Could not find an archive in the given ZIP file.");
+        }
+        File masterSwagger = checkMasterSwagger(archiveDirectory);
+        String content;
+        try {
+            InputStream masterInputStream = new FileInputStream(masterSwagger);
+            content = IOUtils.toString(masterInputStream, APIConstants.DigestAuthConstants.CHARSET);
+        } catch (IOException e) {
+            throw new APIManagementException("Error reading master swagger file" + e);
+        }
+        String openAPIContent = "";
+        SwaggerVersion version;
+        version = getSwaggerVersion(content);
+        String filePath = masterSwagger.getAbsolutePath();
+        if (SwaggerVersion.OPEN_API.equals(version)) {
+            OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+            ParseOptions options = new ParseOptions();
+            options.setResolve(true);
+            OpenAPI openAPI = openAPIV3Parser.read(filePath, null, options);
+            openAPIContent = SerializerUtils.toYamlString(openAPI);
+        } else if (SwaggerVersion.SWAGGER.equals(version)) {
+            SwaggerParser parser = new SwaggerParser();
+            Swagger swagger = parser.read(filePath, null, true);
+            try {
+                openAPIContent = Yaml.pretty().writeValueAsString(swagger);
+            } catch (IOException e) {
+                throw new APIManagementException("Error in converting swagger to openAPI content. " + e);
+            }
+        }
+        APIDefinitionValidationResponse apiDefinitionValidationResponse;
+        apiDefinitionValidationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
+        return apiDefinitionValidationResponse;
     }
 
     /**
@@ -1222,14 +1309,13 @@ public class OASParserUtil {
      * Preprocessing of scopes schemes to support multiple schemes other than 'default' type
      * This method will change the given definition
      *
-     * @param swaggerContent
-     * @return processedSwaggerContent
+     * @param swaggerContent String
+     * @return String
      */
     public static String preProcess(String swaggerContent) throws APIManagementException {
         //Load required properties from swagger to the API
         APIDefinition apiDefinition = getOASParser(swaggerContent);
-        String swaggerContentUpdated = apiDefinition.processOtherSchemeScopes(swaggerContent);
-        return swaggerContentUpdated;
+        return apiDefinition.processOtherSchemeScopes(swaggerContent);
     }
 
     /**
@@ -1237,53 +1323,43 @@ public class OASParserUtil {
      *
      * @param swaggerContent String
      * @param api            API
-     * @return URITemplate
+     * @param isBasepathExtractedFromSwagger boolean
+     * @return API
      */
     public static API setExtensionsToAPI(String swaggerContent, API api, boolean isBasepathExtractedFromSwagger) throws APIManagementException {
         APIDefinition apiDefinition = getOASParser(swaggerContent);
-        api = apiDefinition.setExtensionsToAPI(swaggerContent, api, isBasepathExtractedFromSwagger);
-        return api;
+        return apiDefinition.setExtensionsToAPI(swaggerContent, api, isBasepathExtractedFromSwagger);
     }
 
     /**
      * This method returns extension of basepath related to micro-gw
      *
-     * @param extensions Map<String, Object> extensions
-     * @return String String
+     * @param extensions Map<String, Object>
+     * @return String
      * @throws APIManagementException throws if an error occurred
      */
     public static String getBasePathFromSwagger(Map<String, Object> extensions) throws APIManagementException {
-        String basepath = null;
-        ObjectMapper mapper = new ObjectMapper();
-        if (extensions.containsKey(APIConstants.X_WSO2_BASEPATH)) {
-            Object object = extensions.get(APIConstants.X_WSO2_BASEPATH).toString();
-            basepath = mapper.convertValue(object, String.class);
-        }
-        return basepath;
+        Object basepath = extensions.get(APIConstants.X_WSO2_BASEPATH);
+        return basepath == null ? null : basepath.toString();
     }
 
     /**
      * This method returns extension of throttling tier related to micro-gw
      *
-     * @param extensions Map<String, Object> extensions
-     * @return String String
+     * @param extensions Map<String, Object>
+     * @return String
      * @throws APIManagementException throws if an error occurred
      */
     public static String getThrottleTierFromSwagger(Map<String, Object> extensions) throws APIManagementException {
-        String throttleTier = null;
-        ObjectMapper mapper = new ObjectMapper();
-        if (extensions.containsKey(APIConstants.X_WSO2_THROTTLING_TIER)) {
-            Object object = extensions.get(APIConstants.X_WSO2_THROTTLING_TIER).toString();
-            throttleTier = mapper.convertValue(object, String.class);
-        }
-        return throttleTier;
+        Object throttleTier = extensions.get(APIConstants.X_WSO2_THROTTLING_TIER);
+        return throttleTier == null ? null : throttleTier.toString();
     }
 
     /**
      * This method returns extension of transports(http,https) related to micro-gw
      *
-     * @param extensions Map<String, Object> extensions
-     * @return String getTransports
+     * @param extensions Map<String, Object>
+     * @return String
      * @throws APIManagementException throws if an error occurred
      */
     public static String getTransportsFromSwagger(Map<String, Object> extensions) throws APIManagementException {
@@ -1302,25 +1378,20 @@ public class OASParserUtil {
     /**
      * This method returns extension of mutualSSL related to micro-gw
      *
-     * @param extensions Map<String, Object> extensions
-     * @return String getMutualSSLEnabled
+     * @param extensions Map<String, Object>
+     * @return String
      * @throws APIManagementException throws if an error occurred
      */
     public static String getMutualSSLEnabledFromSwagger(Map<String, Object> extensions) throws APIManagementException {
-        String mutualSSl = null;
-        ObjectMapper mapper = new ObjectMapper();
-        if (extensions.containsKey(APIConstants.X_WSO2_MUTUAL_SSL)) {
-            Object object = extensions.get(APIConstants.X_WSO2_MUTUAL_SSL).toString();
-            mutualSSl = mapper.convertValue(object, String.class);
-        }
-        return mutualSSl;
+        Object mutualSSl = extensions.get(APIConstants.X_WSO2_MUTUAL_SSL);
+        return mutualSSl == null ? null : mutualSSl.toString();
     }
 
     /**
      * This method returns extension of CORS config related to micro-gw
      *
-     * @param extensions Map<String, Object> extensions
-     * @return CORSConfiguration getCorsConfig
+     * @param extensions Map<String, Object>
+     * @return CORSConfiguration
      * @throws APIManagementException throws if an error occurred
      */
     public static CORSConfiguration getCorsConfigFromSwagger(Map<String, Object> extensions) throws APIManagementException {
@@ -1354,8 +1425,8 @@ public class OASParserUtil {
     /**
      * This method returns extension of responseCache enabling check related to micro-gw
      *
-     * @param extensions Map<String, Object> extensions
-     * @return String getResponseCache
+     * @param extensions Map<String, Object>
+     * @return boolean
      * @throws APIManagementException throws if an error occurred
      */
     public static boolean getResponseCacheFromSwagger(Map<String, Object> extensions) throws APIManagementException {
@@ -1366,15 +1437,14 @@ public class OASParserUtil {
             ObjectNode cacheConfigNode = mapper.convertValue(responseCacheConfig, ObjectNode.class);
             responseCache = Boolean.parseBoolean(String.valueOf(cacheConfigNode.get(APIConstants.RESPONSE_CACHING_ENABLED)));
         }
-
         return responseCache;
     }
 
     /**
      * This method returns extension of cache timeout related to micro-gw
      *
-     * @param extensions Map<String, Object> extensions
-     * @return int cacheTimeOut
+     * @param extensions Map<String, Object>
+     * @return int
      * @throws APIManagementException throws if an error occurred
      */
     public static int getCacheTimeOutFromSwagger(Map<String, Object> extensions) throws APIManagementException {
@@ -1391,16 +1461,13 @@ public class OASParserUtil {
     /**
      * This method returns extension of custom authorization Header related to micro-gw
      *
-     * @param extensions Map<String, Object> extensions
-     * @return String authorizationHeader
+     * @param extensions Map<String, Object>
+     * @return String
      * @throws APIManagementException throws if an error occurred
      */
     public static String getAuthorizationHeaderFromSwagger(Map<String, Object> extensions) throws APIManagementException {
-        String authorizationHeader = null;
-        if (extensions.containsKey(APIConstants.X_WSO2_AUTH_HEADER)) {
-            authorizationHeader = extensions.get(APIConstants.X_WSO2_AUTH_HEADER).toString();
-        }
-        return authorizationHeader;
+        Object authorizationHeader = extensions.get(APIConstants.X_WSO2_AUTH_HEADER);
+        return authorizationHeader == null ? null : authorizationHeader.toString();
     }
 
 }

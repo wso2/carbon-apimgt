@@ -2,11 +2,11 @@
 # as a demonstration of an API spec in YAML
 swagger: '2.0'
 info:
-  title: Shop Around You API
-  description: This API allows you to find shops near you and get price estimation for products you need.
+  title: Internal Utility API
+  description: This API allows you to access internal data.
   version: "1.0.0"
 # the domain of the service
-host: shop.wso2.com
+host: apim.wso2.com
 # array of all schemes that your API supports
 schemes:
   - https
@@ -34,10 +34,10 @@ paths:
             Currently this does not support wildcards. Given name must exactly match the application name.
           type: string
       tags:
-        - Shops
+        - Throttling
       responses:
         200:
-          description: An array of shops around you
+          description: An array of Throttle Events
           schema:
             type: array
             items:
@@ -65,10 +65,10 @@ paths:
             Currently this does not support wildcards. Given name must exactly match the application name.
           type: string
       tags:
-        - Shops
+        - Throttling
       responses:
         200:
-          description: An array of shops around you
+          description: throttle events string
           schema:
             type: string
         default:
@@ -94,10 +94,10 @@ paths:
             Currently this does not support wildcards. Given name must exactly match the application name.
           type: string
       tags:
-        - Shops
+        - Throttling
       responses:
         200:
-          description: An array of shops around you
+          description: Throttle Event
           schema:
             $ref: '#/definitions/ThrottledEvent'
         default:
@@ -106,12 +106,14 @@ paths:
             $ref: '#/definitions/Error'
   /block:
     get:
-      summary: throttled events available
+      summary: blocking events available
       description: |
         This will provide access to throttled events in database.
+      tags:
+        - Throttling
       responses:
         200:
-          description: An array of shops around you
+          description: Block Conditions
           schema:
             type: object
             additionalProperties:
@@ -124,11 +126,27 @@ paths:
         This will provide access to key templates define in custom policies
       responses:
         200:
-          description: An array of shops around you
+          description: An array of Key Templates
           schema:
             type: array
             items:
               type: string
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /keymanagers:
+    get:
+      summary: An Array of key managers configured
+      description: |
+        this will provide key managers configured
+      responses:
+        200:
+          description: An array of key managers
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/KeyManager'
         default:
           description: Unexpected error
           schema:
@@ -140,7 +158,7 @@ paths:
         This will provide access to JTIs of revoked JWT tokens in database.
       responses:
         200:
-          description: An array of shops around you
+          description: An array of revoke JWTs
           schema:
             type: array
             items:
@@ -169,6 +187,210 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /apis:
+    get:
+      summary: Get all apis
+      description: |
+        This will provide access to apis in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: context
+          in: query
+          description: |
+            **Search condition**.
+             context of the api
+          type: string
+        - name: version
+          in: query
+          description: |
+            **Search condition**.
+             versio  of the api
+          type: string
+        - $ref: "#/parameters/Accept"
+      tags:
+      - Subscription Validation
+      responses:
+        200:
+          description: An array of APIs in the database
+          schema:
+            $ref: '#/definitions/APIList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /applications:
+    get:
+      summary: Get all applications
+      description: |
+        This will provide access to applications in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: appId
+          in: query
+          description: |
+            **Search condition**.
+             Application ID of the application
+          type: integer
+      tags:
+      - Subscription Validation
+      responses:
+        200:
+          description: An array of applications in the database
+          schema:
+            $ref: '#/definitions/ApplicationList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /subscriptions:
+    get:
+      summary: Get all subscriptions
+      description: |
+         This will provide access to subscriptions in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: apiId
+          in: query
+          description: |
+            **Search condition**.
+              Api ID  of the subscription
+          type: integer
+        - name: appId
+          in: query
+          description: |
+            **Search condition**.
+              Application ID  of the subscription
+          type: integer
+      tags:
+        - Subscription Validation
+      responses:
+        200:
+          description: An array of subscriptions in the database
+          schema:
+            $ref: '#/definitions/SubscriptionList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /subscription-policies:
+    get:
+      summary: Get all subscription throttling policies
+      description: |
+        This will provide access to subscription level throttling policies in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: policyName
+          in: query
+          description: |
+            **Search condition**.
+             Subscription policy name
+          type: string
+      tags:
+        - Subscription Validation
+      responses:
+        200:
+          description: An array of subscription policies in the database
+          schema:
+            $ref: '#/definitions/SubscriptionPolicyList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /application-policies:
+    get:
+      summary: Get all application throttling policies
+      description: |
+        This will provide access to application level throttling policies in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: policyName
+          in: query
+          description: |
+            **Search condition**.
+             Application policy name
+          type: string
+      tags:
+        - Subscription Validation
+      responses:
+        200:
+          description: An array of application policies in the database
+          schema:
+            $ref: '#/definitions/ApplicationPolicyList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api-policies:
+    get:
+      summary: Get all API throttling policies
+      description: |
+        This will provide access to api level throttling policies in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: policyName
+          in: query
+          description: |
+            **Search condition**.
+             Api policy name
+          type: string
+      tags:
+        - Subscription Validation
+      responses:
+        200:
+          description: An array of api policies in the database
+          schema:
+            $ref: '#/definitions/ApiPolicyList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /application-key-mappings:
+    get:
+      summary: Get all application key mappings
+      description: |
+        This will provide access to application vs key mappings in database.
+      parameters:
+      - $ref: '#/parameters/requestedTenant'
+      - name: consumerKey
+        in: query
+        description: |
+          **Search condition**.
+           Consumer Key of the application
+        type: string
+      tags:
+      - Subscription Validation
+      responses:
+        200:
+          description: An array of application key mappings in the database
+          schema:
+            $ref: '#/definitions/ApplicationKeyMappingList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+######################################################
+# Parameters - required by some of the APIs above
+######################################################
+parameters:
+  requestedTenant:
+    name: X-WSO2-Tenant
+    in: header
+    description: |
+      This is used to specify the tenant domain, where the resource need to be
+        retrieved from.
+    required: true
+    type: string
+  # The HTTP Accept header
+  Accept:
+    name: Accept
+    in: header
+    description: |
+      Media types acceptable for the response. Default is application/json.
+    default: application/json
+    type: string
+######################################################################
+# The resources used by some of the APIs above within the message body
+######################################################################
 definitions:
   ThrottledEvent:
     properties:
@@ -261,3 +483,360 @@ definitions:
         type: string
       id:
         type: integer
+  #-----------------------------------------------------
+  # The API List resource
+  #-----------------------------------------------------
+  APIList:
+    title: API List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of APIs returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/API'
+      pagination:
+        $ref: '#/definitions/Pagination'
+  #-----------------------------------------------------
+  # The API resource
+  #-----------------------------------------------------
+  API:
+    properties:
+      apiId:
+        type: integer
+      provider:
+        type: string
+        description: API Provider name.
+      name:
+        type: string
+        description: Name of the API
+      version:
+        type: string
+        description: Version of the API.
+      context:
+        type: string
+        description: Context of the API.
+      policy:
+        type: string
+        description: API level throttling policy.
+      urlMappings:
+        type: array
+        items:
+          $ref: '#/definitions/URLMapping'
+  #-----------------------------------------------------
+  # The Application List resource
+  #-----------------------------------------------------
+  ApplicationList:
+    title: Application List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Applications returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Application'
+      pagination:
+        $ref: '#/definitions/Pagination'
+  #-----------------------------------------------------
+  # The Application resource
+  #-----------------------------------------------------
+  Application:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      subName:
+        type: string
+      policy:
+        type: string
+        description: Application level throtting policy.
+      tokenType:
+        type: string
+        description: type of the token.
+        example: JWT
+      groupIds:
+        type: array
+        items:
+          $ref: '#/definitions/GroupId'
+        description: group ids associated with the application.
+        example: wso2
+      attributes:
+        type: array
+        items:
+          $ref: '#/definitions/ApplicationAttribute'
+
+  #-----------------------------------------------------
+  # The Application Attribute resource
+  #-----------------------------------------------------
+  GroupId:
+    title: Application Group Id
+    properties:
+      groupId:
+        type: string
+      applicationId:
+        type: integer
+
+  KeyManager:
+    properties:
+      name:
+        type: string
+      type:
+        type: string
+      enabled:
+        type: boolean
+      tenantDomain:
+        type: string
+      configuration:
+        type: object
+  #-----------------------------------------------------
+  # The Application Attribute resource
+  #-----------------------------------------------------
+  ApplicationAttribute:
+    title: Application attributes
+    properties:
+      applicationId:
+        type: integer
+        description: application ID of the attribute associated with
+        example: "1"
+      name:
+        type: string
+        description: name of the attribute
+      value:
+        type: string
+        description: the value of the attribute
+      tenant:
+        type: string
+        description: tenant domain
+        example: "wso2.com"
+
+  #-----------------------------------------------------
+  # The Subscription List resource
+  #-----------------------------------------------------
+  SubscriptionList:
+    title: Application List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Subscriptions returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Subscription'
+      pagination:
+        $ref: '#/definitions/Pagination'
+  #-----------------------------------------------------
+  # The Subscription resource
+  #-----------------------------------------------------
+  Subscription:
+    properties:
+      subscriptionId:
+        type: integer
+      policyId:
+        type: string
+      apiId:
+        type: integer
+      appId:
+        type: integer
+      subscriptionState:
+        type: string
+  #-----------------------------------------------------
+  # The ApplicationKeyMapping List resource
+  #-----------------------------------------------------
+  ApplicationKeyMappingList:
+    title: ApplicationKeyMapping List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of ApplicationKeyMappings returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ApplicationKeyMapping'
+      pagination:
+        $ref: '#/definitions/Pagination'
+  #-----------------------------------------------------
+  # The Application Key Mapping resource
+  #-----------------------------------------------------
+  ApplicationKeyMapping:
+    properties:
+      applicationId:
+        type: integer
+      consumerKey:
+        type: string
+      keyType:
+        type: string
+
+  #---------------------  --------------------------------
+  # The Throttle Policy resource
+  #-----------------------------------------------------
+  Policy:
+    properties:
+      id:
+        type: integer
+      tenantId:
+        type: integer
+      name:
+        type: string
+      quotaType:
+        type: string
+  #-----------------------------------------------------
+  # The SubscriptionPolicy List resource
+  #-----------------------------------------------------
+  SubscriptionPolicyList:
+    title: SubscriptionPolicy List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of SubscriptionPolices returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/SubscriptionPolicy'
+      pagination:
+        $ref: '#/definitions/Pagination'
+  #-----------------------------------------------------
+  # The Subscription Level Policy resource
+  #-----------------------------------------------------
+  SubscriptionPolicy:
+    allOf:
+    - $ref: '#/definitions/Policy'
+    properties:
+      rateLimitCount:
+        type: integer
+      rateLimitTimeUnit:
+        type: string
+      stopOnQuotaReach:
+        type: boolean
+  #-----------------------------------------------------
+  # The Application Policy List resource
+  #-----------------------------------------------------
+  ApplicationPolicyList:
+    title: ApplicationPolicy List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of ApplicationPolicies returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ApplicationPolicy'
+      pagination:
+        $ref: '#/definitions/Pagination'
+  #-----------------------------------------------------
+  # The Application Level Policy resource
+  #-----------------------------------------------------
+  ApplicationPolicy:
+    allOf:
+    - $ref: '#/definitions/Policy'
+  #-----------------------------------------------------
+  # The Api Policy List resource
+  #-----------------------------------------------------
+  ApiPolicyList:
+    title: ApiPolicy List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Api Policies returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ApiPolicy'
+      pagination:
+        $ref: '#/definitions/Pagination'
+
+  #-----------------------------------------------------
+  # The API Level Policy resource
+  #-----------------------------------------------------
+  ApiPolicy:
+    allOf:
+    - $ref: '#/definitions/Policy'
+    properties:
+      conditionGroups:
+        type: array
+        items:
+          $ref: '#/definitions/ApiPolicyConditionGroup'
+
+  #-----------------------------------------------------
+  # The API Policy Condition  Group resource
+  #-----------------------------------------------------
+  ApiPolicyConditionGroup:
+    properties:
+      policyId:
+        type: integer
+      quotaType:
+        type: string
+      conditionGroupId:
+        type: integer
+      condition:
+        type: array
+        items:
+          $ref: '#/definitions/Condition'
+
+  #-----------------------------------------------------
+  # The Throttle Policy Condition resource
+  #-----------------------------------------------------
+  Condition:
+    properties:
+      conditionType:
+        type: string
+      name:
+        type: string
+      value:
+        type: string
+      isInverted:
+        type: boolean
+  #-----------------------------------------------------
+  # The URL Mapping resource
+  #-----------------------------------------------------
+  URLMapping:
+    properties:
+      authScheme:
+        type: string
+      throttlingPolicy:
+        type: string
+      httpMethod:
+        type: string
+      urlPattern:
+        type: string
+  #-----------------------------------------------------
+  # The pagination resource
+  #-----------------------------------------------------
+  Pagination:
+    title: Pagination
+    properties:
+      offset:
+        type: integer
+        example: 0
+      limit:
+        type: integer
+        example: 1
+      total:
+        type: integer
+        example: 10
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.

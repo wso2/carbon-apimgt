@@ -23,10 +23,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.namespace.QName;
-
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -37,7 +33,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.json.simple.JSONObject;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
@@ -158,20 +153,7 @@ public class AMDefaultKeyManagerImplWrapper extends AMDefaultKeyManagerImpl {
         
         return oauth2ClientAppDTO;
     }
-    
-    @Override
-    protected OMElement getOAuthConfigElement() {
-        OMElement oauthElem = Mockito.mock(OMElement.class);
-        OMElement mockElement = OMAbstractFactory.getOMFactory().
-                createOMElement("AccessTokenDefaultValidityPeriod", null);
-        mockElement.setText("3600");
-        
-        Mockito.when(oauthElem.getFirstChildWithName(new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, 
-                                                     "AccessTokenDefaultValidityPeriod"))).thenReturn(mockElement);
-        
-        return oauthElem;
-    }
-    
+
     @Override
     protected boolean checkAccessTokenPartitioningEnabled() {
         return false;

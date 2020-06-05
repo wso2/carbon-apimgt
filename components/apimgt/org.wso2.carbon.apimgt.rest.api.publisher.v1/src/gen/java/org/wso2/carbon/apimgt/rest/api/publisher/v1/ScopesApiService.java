@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsageDTO;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ public interface ScopesApiService {
       public Response addSharedScope(ScopeDTO body, MessageContext messageContext) throws APIManagementException;
       public Response deleteSharedScope(String scopeId, MessageContext messageContext) throws APIManagementException;
       public Response getSharedScope(String scopeId, MessageContext messageContext) throws APIManagementException;
+      public Response getSharedScopeUsages(String scopeId, MessageContext messageContext) throws APIManagementException;
       public Response getSharedScopes(Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
       public Response updateSharedScope(String scopeId, ScopeDTO body, MessageContext messageContext) throws APIManagementException;
       public Response validateScope(String scopeId, MessageContext messageContext) throws APIManagementException;

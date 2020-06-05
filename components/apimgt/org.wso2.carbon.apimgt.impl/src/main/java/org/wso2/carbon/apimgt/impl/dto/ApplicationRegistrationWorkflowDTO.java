@@ -37,6 +37,7 @@ public class ApplicationRegistrationWorkflowDTO extends WorkflowDTO {
     private OAuthApplicationInfo applicationInfo;
     private AccessTokenInfo accessTokenInfo;
     private AccessTokenInfo accessToken;
+    private String keyManager;
 
     public OAuthApplicationInfo getApplicationInfo() {
         return applicationInfo;
@@ -137,4 +138,13 @@ public class ApplicationRegistrationWorkflowDTO extends WorkflowDTO {
         this.accessTokenInfo = accessTokenInfo;
     }
 
+    public void setKeyManager(String keyManager) {
+
+        this.keyManager = keyManager;
+    }
+
+    public String getKeyManager() {
+
+        return keyManager;
+    }
 }

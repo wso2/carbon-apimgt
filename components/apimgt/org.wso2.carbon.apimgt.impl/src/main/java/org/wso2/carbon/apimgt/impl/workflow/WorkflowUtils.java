@@ -18,7 +18,10 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
@@ -33,9 +36,14 @@ import java.util.UUID;
 
 public class WorkflowUtils {
 
-    public static void sendNotificationAfterWFComplete(WorkflowDTO workflowDTO, String wfType) {
+    public static void sendNotificationAfterWFComplete(WorkflowDTO workflowDTO, String wfType) throws APIManagementException {
         if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equalsIgnoreCase(wfType)) {
+            String applicationId = workflowDTO.getWorkflowReference();
+            int appId = Integer.parseInt(applicationId);
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            Application application = apiMgtDAO.getApplicationById(appId);
             ApplicationWorkflowDTO appWFDto = (ApplicationWorkflowDTO) workflowDTO;
+            appWFDto.setApplication(application);
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), appWFDto.getTenantId(),
                     appWFDto.getApplication().getId(), appWFDto.getApplication().getName(),

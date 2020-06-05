@@ -20,15 +20,32 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.BlockApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.RevokedjwtApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApikeyApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.ApisApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.ApplicationKeyMappingsApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.ApplicationPoliciesApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.ApplicationsApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.SubscriptionsApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.SubscriptionPoliciesApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.KeymanagersApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
         </jaxrs:providers>
     </jaxrs:server>
     <bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor" />
+    <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
+    <bean id="PostAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor" />
+    <!-- Out interceptors -->
+    <bean id="gZipInterceptor" class="org.apache.cxf.transport.common.gzip.GZIPOutInterceptor" />
+
     <cxf:bus>
         <cxf:inInterceptors>
+            <ref bean="PreAuthenticationInterceptor"/>
             <ref bean="AuthenticationInterceptor"/>
+            <ref bean="PostAuthenticationInterceptor"/>
         </cxf:inInterceptors>
+        <cxf:outInterceptors>
+            <ref bean="gZipInterceptor"/>
+        </cxf:outInterceptors>
     </cxf:bus>
 </beans>

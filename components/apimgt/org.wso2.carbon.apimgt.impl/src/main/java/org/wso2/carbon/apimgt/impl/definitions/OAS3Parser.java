@@ -48,6 +48,7 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.util.DeserializationUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -123,6 +124,7 @@ public class OAS3Parser extends APIDefinition {
         List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
         for (Map.Entry<String, PathItem> entry : swagger.getPaths().entrySet()) {
             int minResponseCode = 0;
+            String minResponseType = "";
             int responseCode = 0;
             String path = entry.getKey();
             //initializing apiResourceMediationPolicyObject
@@ -136,15 +138,17 @@ public class OAS3Parser extends APIDefinition {
             for (Operation op : operations) {
                 ArrayList<Integer> responseCodes = new ArrayList<Integer>();
                 //for each HTTP method get the verb
+                StringBuilder genCode = new StringBuilder();
+                StringBuilder responseSection = new StringBuilder();
                 for (Map.Entry<PathItem.HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
                     //add verb to apiResourceMediationPolicyObject
                     apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
                 }
-                StringBuilder genCode = new StringBuilder();
-                StringBuilder responseSection = new StringBuilder();
-                //for setting only one setPayload response
-                boolean setPayloadResponse = false;
                 for (String responseEntry : op.getResponses().keySet()) {
+                    //for setting only one setPayload response
+                    boolean setPayloadResponse = false;
+                    //to set string of mc.SetProperty and mc.SetPayload for each condition
+                    String mcPropertyAndPayloadSection = "";
                     if (!responseEntry.equals("default")) {
                         responseCode = Integer.parseInt(responseEntry);
                         responseCodes.add(responseCode);
@@ -153,20 +157,19 @@ public class OAS3Parser extends APIDefinition {
                     Content content = op.getResponses().get(responseEntry).getContent();
                     if (content != null) {
                         MediaType applicationJson = content.get(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-                        MediaType applicationXml = content.get(APPLICATION_XML_MEDIA_TYPE);
+                        MediaType applicationXml = content.get(APIConstants.APPLICATION_XML_MEDIA_TYPE);
                         if (applicationJson != null) {
                             Schema jsonSchema = applicationJson.getSchema();
                             if (jsonSchema != null) {
                                 String jsonExample = getJsonExample(jsonSchema, definitions);
                                 genCode.append(getGeneratedResponseVar(responseEntry, jsonExample, "json"));
                             }
-                            if (responseCode == minResponseCode && !setPayloadResponse){
-                                responseSection.append(getGeneratedSetResponse(responseEntry, "json"));
-                                setPayloadResponse = true;
-                                if (applicationXml != null) {
-                                    responseSection.append("\n\n/*").append(getGeneratedSetResponse(responseEntry, "xml")).append("*/\n\n");
-                                }
+                            mcPropertyAndPayloadSection = getGeneratedSetResponse(responseEntry, "json");
+                            responseSection.append(getGeneratedConditionsForResponseCodes(responseEntry, mcPropertyAndPayloadSection));
+                            if (responseCode == minResponseCode) {
+                                minResponseType = "json";
                             }
+                            setPayloadResponse = true;
                         }
                         if (applicationXml != null) {
                             Schema xmlSchema = applicationXml.getSchema();
@@ -174,28 +177,27 @@ public class OAS3Parser extends APIDefinition {
                                 String xmlExample = getXmlExample(xmlSchema, definitions);
                                 genCode.append(getGeneratedResponseVar(responseEntry, xmlExample, "xml"));
                             }
-                            if (responseCode == minResponseCode && !setPayloadResponse) {
-                                if (applicationJson == null) {
-                                    responseSection.append(getGeneratedSetResponse(responseEntry, "xml"));
-                                    setPayloadResponse = true;
+                            if (!setPayloadResponse) {
+                                mcPropertyAndPayloadSection = getGeneratedSetResponse(responseEntry, "xml");
+                                responseSection.append(getGeneratedConditionsForResponseCodes(responseEntry, mcPropertyAndPayloadSection));
+                                if (responseCode == minResponseCode) {
+                                    minResponseType = "xml";
                                 }
                             }
                         }
                         if (applicationJson == null && applicationXml == null) {
                             setDefaultGeneratedResponse(genCode);
                         }
-                    } else if (responseCode == minResponseCode && !setPayloadResponse) {
-                        setDefaultGeneratedResponse(genCode);
-                        setPayloadResponse = true;
                     }
                 }
-                genCode.append(responseSection);
+                //generated var payloads set to static script structure
+                String finalResponseSection = getGeneratedSetResponseForCodes(minResponseCode, minResponseType, responseSection.toString());
+                genCode.append(finalResponseSection);
                 String finalGenCode = genCode.toString();
                 apiResourceMediationPolicyObject.setContent(finalGenCode);
                 op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, genCode);
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
             }
-
             checkAndSetEmptyScope(swagger);
             returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
@@ -216,10 +218,9 @@ public class OAS3Parser extends APIDefinition {
      *           scopes: {}
      *           x-scopes-bindings: {}
      *
-     *
      * @param swagger OpenAPI object
      */
-    private void checkAndSetEmptyScope (OpenAPI swagger) {
+    private void checkAndSetEmptyScope(OpenAPI swagger) {
         Components comp = swagger.getComponents();
         Map<String, SecurityScheme> securitySchemeMap;
         SecurityScheme securityScheme;
@@ -240,8 +241,8 @@ public class OAS3Parser extends APIDefinition {
      * @param definitions definition
      * @return JsonExample
      */
-    private String getJsonExample(Schema model, Map<String, Schema> definitions){
-        Example example = ExampleBuilder.fromSchema(model,  definitions);
+    private String getJsonExample(Schema model, Map<String, Schema> definitions) {
+        Example example = ExampleBuilder.fromSchema(model, definitions);
         SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
         Json.mapper().registerModule(simpleModule);
         return Json.pretty(example);
@@ -254,10 +255,9 @@ public class OAS3Parser extends APIDefinition {
      * @param definitions definition
      * @return XmlExample
      */
-    private String getXmlExample(Schema model, Map<String, Schema> definitions){
-        Example example = ExampleBuilder.fromSchema(model,  definitions);
-        String rawXmlExample = new XmlExampleSerializer().serialize(example);
-        return rawXmlExample.replace("<?xml version='1.1' encoding='UTF-8'?>","");
+    private String getXmlExample(Schema model, Map<String, Schema> definitions) {
+        Example example = ExampleBuilder.fromSchema(model, definitions);
+        return new XmlExampleSerializer().serialize(example);
     }
 
     /**
@@ -291,8 +291,48 @@ public class OAS3Parser extends APIDefinition {
      * @return manualCode
      */
     private String getGeneratedSetResponse(String responseCode, String type) {
-        return "mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
-                "mc.setPayloadJSON(response" + responseCode + type + ");";
+        return "  mc.setProperty('HTTP_SC', \"" + responseCode + "\");\n" +
+                "  mc.setProperty('CONTENT_TYPE', 'application/" + type + "');\n" +
+                "  mc.setPayload" + type.toUpperCase() + "(response" + responseCode + type + ");";
+    }
+
+    /**
+     * Generates conditions for setting response code of mock payloads
+     *
+     * @param responseCode responseCode response code of payload
+     * @param getGeneratedSetResponseString string returned from "getGeneratedSetResponse"
+     * @return if conditions with "getGeneratedSetResponse" included
+     */
+    private String getGeneratedConditionsForResponseCodes(String responseCode, String getGeneratedSetResponseString) {
+        return "if (responseCode == " + responseCode + ") {\n\n" +
+                getGeneratedSetResponseString +
+                "\n\n} else ";
+    }
+
+    /**
+     * Generates Mock payload and set response for 501 response and null response code
+     * also includes getGeneratedIFsforCodes string of all included response codes
+     *
+     * @param minResponseCode minimum response code
+     * @param minResponseType type of minimum response code (json/xml)
+     * @param responseSectionString String of IF conditions of all response codes
+     * @return response section string with IF conditions and responses
+     */
+    private String getGeneratedSetResponseForCodes(int minResponseCode, String minResponseType, String responseSectionString) {
+        return "\nvar response501json = {\n" +
+                "\"code\" : 501," +
+                "\n\"description\" : " + "\"Not Implemented\"\n" +
+                "}\n\n" +
+                "var responseCode = mc.getProperty('query.param.responseCode');\n\n" +
+                responseSectionString +
+                " if (responseCode == null) {\n\n" +
+                "  mc.setProperty('HTTP_SC', \"" + minResponseCode + "\");\n" +
+                "  mc.setProperty('CONTENT_TYPE', 'application/" + minResponseType + "');\n" +
+                "  mc.setPayload" + minResponseType.toUpperCase() + "(response" + minResponseCode + minResponseType + ");\n\n" +
+                "} else {\n\n" +
+                "  mc.setProperty('CONTENT_TYPE', 'application/json');\n" +
+                "  mc.setPayloadJSON(response501json);\n\n" +
+                "}";
     }
 
     /**
@@ -564,7 +604,9 @@ public class OAS3Parser extends APIDefinition {
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
-        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, null);
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, options);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
             validationResponse.setValid(false);
             for (String message : parseAttemptForV3.getMessages()) {
@@ -1254,11 +1296,12 @@ public class OAS3Parser extends APIDefinition {
      * This method returns the boolean value which checks whether the swagger is included default security scheme or not
      *
      * @param swaggerContent resource json
-     * @return is default is given already
+     * @return boolean
      * @throws APIManagementException
      */
     private boolean isDefaultGiven(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
+
         Components components = openAPI.getComponents();
         if (components == null) {
             return false;
@@ -1278,14 +1321,12 @@ public class OAS3Parser extends APIDefinition {
      * This method will inject scopes of other schemes to the swagger definition
      *
      * @param swaggerContent resource json
-     * @return updated json string
+     * @return String
      * @throws APIManagementException
      */
     @Override
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
-        boolean isDefaultAvailable = isDefaultGiven(swaggerContent);
-
-        if (!isDefaultAvailable) {
+        if (!isDefaultGiven(swaggerContent)) {
             OpenAPI openAPI = getOpenAPI(swaggerContent);
             openAPI = injectOtherScopesToDefaultScheme(openAPI);
             openAPI = injectOtherResourceScopesToDefaultScheme(openAPI);
@@ -1298,7 +1339,7 @@ public class OAS3Parser extends APIDefinition {
      * This method returns the oauth scopes according to the given swagger(version 3)
      *
      * @param openAPI - OpenApi object
-     * @return scope set as all defaults
+     * @return OpenAPI
      * @throws APIManagementException
      */
     private OpenAPI injectOtherScopesToDefaultScheme(OpenAPI openAPI) throws APIManagementException {
@@ -1366,7 +1407,7 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param noneDefaultTypeFlow , OAuthflow
      * @param defaultTypeFlow,    OAuthflow
-     * @return scopes of given flow
+     * @return OAuthFlow
      */
     private OAuthFlow extractAndInjectScopesFromFlow(OAuthFlow noneDefaultTypeFlow, OAuthFlow defaultTypeFlow) {
         Scopes noneDefaultFlowScopes = noneDefaultTypeFlow.getScopes();
@@ -1377,12 +1418,10 @@ public class OAS3Parser extends APIDefinition {
         }
 
         for (Map.Entry<String, String> input : noneDefaultFlowScopes.entrySet()) {
-            String name = input.getKey();
-            String description = input.getValue();
             //Inject scopes set into default scheme
-            defaultFlowScopes.addString(name, description);
-            defaultTypeFlow.setScopes(defaultFlowScopes);
+            defaultFlowScopes.addString(input.getKey(), input.getValue());
         }
+        defaultTypeFlow.setScopes(defaultFlowScopes);
         //Check X-Scope Bindings
         Map<String, String> noneDefaultScopeBindings = null;
         Map<String, Object> defaultTypeExtension = defaultTypeFlow.getExtensions();
@@ -1397,9 +1436,7 @@ public class OAS3Parser extends APIDefinition {
                 defaultScopeBindings = new HashMap<>();
             }
             for (Map.Entry<String, String> roleInUse : noneDefaultScopeBindings.entrySet()) {
-                String noneDefaultTypeScope = roleInUse.getKey();
-                String noneDefaultTypeRole = roleInUse.getValue();
-                defaultScopeBindings.put(noneDefaultTypeScope, noneDefaultTypeRole);
+                defaultScopeBindings.put(roleInUse.getKey(), roleInUse.getValue());
             }
         }
         defaultTypeExtension.put(APIConstants.SWAGGER_X_SCOPES_BINDINGS, defaultScopeBindings);
@@ -1410,8 +1447,8 @@ public class OAS3Parser extends APIDefinition {
     /**
      * This method returns URI templates according to the given swagger file(Swagger version 3)
      *
-     * @param openAPI OpenAPI,isDefaultAvailable boolean
-     * @return URI Templates
+     * @param openAPI OpenAPI
+     * @return OpenAPI
      * @throws APIManagementException
      */
     private OpenAPI injectOtherResourceScopesToDefaultScheme(OpenAPI openAPI) throws APIManagementException {
@@ -1469,7 +1506,7 @@ public class OAS3Parser extends APIDefinition {
      * @param apiDefinition                  String
      * @param api                            API
      * @param isBasepathExtractedFromSwagger boolean
-     * @return URITemplate
+     * @return API
      */
     @Override
     public API setExtensionsToAPI(String apiDefinition, API api, boolean isBasepathExtractedFromSwagger) throws APIManagementException {
@@ -1481,12 +1518,12 @@ public class OAS3Parser extends APIDefinition {
 
         //Setup Custom auth header for API
         String authHeader = OASParserUtil.getAuthorizationHeaderFromSwagger(extensions);
-        if (authHeader != null) {
+        if (StringUtils.isNotBlank(authHeader)) {
             api.setAuthorizationHeader(authHeader);
         }
         //Setup mutualSSL configuration
         String mutualSSL = OASParserUtil.getMutualSSLEnabledFromSwagger(extensions);
-        if (StringUtils.isBlank(mutualSSL)) {
+        if (StringUtils.isNotBlank(mutualSSL)) {
             String securityList = api.getApiSecurity();
             if (StringUtils.isBlank(securityList)) {
                 securityList = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
@@ -1515,17 +1552,17 @@ public class OAS3Parser extends APIDefinition {
         }
         //Setup Transports
         String transports = OASParserUtil.getTransportsFromSwagger(extensions);
-        if (transports != null) {
+        if (StringUtils.isNotBlank(transports)) {
             api.setTransports(transports);
         }
         //Setup Throttlingtiers
         String throttleTier = OASParserUtil.getThrottleTierFromSwagger(extensions);
-        if (throttleTier != null) {
+        if (StringUtils.isNotBlank(throttleTier)) {
             api.setApiLevelPolicy(throttleTier);
         }
         //Setup Basepath
         String basePath = OASParserUtil.getBasePathFromSwagger(extensions);
-        if (basePath != null && isBasepathExtractedFromSwagger) {
+        if (StringUtils.isNotBlank(basePath) && isBasepathExtractedFromSwagger) {
             basePath = basePath.replace("{version}", api.getId().getVersion());
             api.setContextTemplate(basePath);
             api.setContext(basePath);

@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import com.nimbusds.jwt.SignedJWT;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
@@ -41,7 +42,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
@@ -63,6 +63,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -255,14 +257,37 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 }
 
                 //Initial guess of a JWT token using the presence of a DOT.
-                isJwtToken = StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT) &&
-                        APIUtil.isValidJWT(apiKey);
+
+                SignedJWT signedJWT = null;
+                if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
+                    try {
+                        // Check if the header part is decoded
+                        Base64.getUrlDecoder().decode(apiKey.split("\\.")[0]);
+                        if (StringUtils.countMatches(apiKey, APIConstants.DOT) != 2) {
+                            log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
+                            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                    "Invalid JWT token");
+                        }
+                        signedJWT = SignedJWT.parse(apiKey);
+                        String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
+                                .getKeyManagerNameIfJwtValidatorExist(signedJWT);
+                        if (StringUtils.isNotEmpty(keyManager)){
+                            isJwtToken = true;
+                        }
+                    } catch ( ParseException e) {
+                        log.debug("Not a JWT token. Failed to decode the token header.", e);
+                    } catch (APIManagementException e) {
+                        log.error("error while check validation of JWt", e);
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+                    }
+                }
                 // Find the authentication scheme based on the token type
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
                     AuthenticationContext authenticationContext =
                             new JWTValidator(null, null).
-                                    authenticateForWebSocket(apiKey, apiContextUri, version);
+                                    authenticateForWebSocket(signedJWT, apiContextUri, version);
                     if(authenticationContext == null || !authenticationContext.isAuthenticated()) {
                         return false;
                     }
@@ -313,7 +338,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     }
                     String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
                     if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
-                        info = getApiKeyDataForWSClient(apiKey);
+                        info = getApiKeyDataForWSClient(apiKey,tenantDomain);
                     } else {
                         return false;
                     }
@@ -348,8 +373,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey) throws APISecurityException {
-        return new WebsocketWSClient().getAPIKeyData(apiContextUri, version, apiKey);
+    protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey, String tenantDomain) throws APISecurityException {
+
+        return new WebsocketWSClient().getAPIKeyData(apiContextUri, version, apiKey, tenantDomain);
     }
 
     protected APIManagerAnalyticsConfiguration getApiManagerAnalyticsConfiguration() {
