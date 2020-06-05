@@ -26,16 +26,21 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
@@ -44,6 +49,8 @@ import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -283,7 +290,54 @@ public class APIKeyValidationService extends AbstractAdmin {
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date())
                     + " ,for:" + context);
         }
-        ArrayList<URITemplate> templates = ApiMgtDAO.getInstance().getAllURITemplates(context, version);
+        String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
+        if (tenantDomain == null) {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+        
+        ArrayList<URITemplate> templates = new ArrayList<URITemplate>();
+        //TODO old one had advanced throttling/normal config
+        SubscriptionDataStore store = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if(store == null) {
+            return templates;
+        }
+        API api = store.getApiByContextAndVersion(context, version);
+        if(api == null) {
+            return templates;  ////TODO check this
+        }
+        List<URLMapping> mapping = api.getResources("");//TODO fix the api object to not accept value
+        if(mapping == null) {
+            return templates;
+        }
+
+        URITemplate template;
+        for (URLMapping urlMapping : mapping) {
+            template = new URITemplate();
+            template.setHTTPVerb(urlMapping.getHttpMethod());
+            template.setAuthType(urlMapping.getAuthScheme());
+            template.setUriTemplate(urlMapping.getUrlPattern());
+            template.setThrottlingTier(urlMapping.getThrottlingPolicy());
+            
+            /// TODO Contains Dummy values. need to populate
+            List<String> tiers = new ArrayList<String>();
+            tiers.add(urlMapping.getThrottlingPolicy() + ">false"); //TODO fix this
+            template.setThrottlingTiers(tiers );
+            template.setApplicableLevel("apiLevel");//TODO fix this
+            
+            ConditionGroupDTO[] conditionGroups = new ConditionGroupDTO[1];
+            ConditionGroupDTO grp = new ConditionGroupDTO();
+            grp.setConditionGroupId("_default");
+            conditionGroups[0] = grp;
+            template.setConditionGroups(conditionGroups);
+
+            List<String> throttlingConditions = new ArrayList<String>();
+            throttlingConditions.add("_default");
+            template.setThrottlingConditions(throttlingConditions);
+            
+            /////////// Dummy values end ////////
+            
+            templates.add(template);  
+        }
         if (log.isDebugEnabled()) {
             log.debug("getAllURITemplates response from keyManager to gateway for:" + context + " at "
                     + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));

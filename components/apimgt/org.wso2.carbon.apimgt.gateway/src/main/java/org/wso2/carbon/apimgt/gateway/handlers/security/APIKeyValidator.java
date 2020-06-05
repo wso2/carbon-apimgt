@@ -713,18 +713,6 @@ public class APIKeyValidator {
         if (uriTemplates == null) {
             synchronized (this) {
                 if (uriTemplates == null) {
-                    String swagger = (String) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING);
-                    if (swagger != null) {
-                        APIDefinition oasParser;
-                        try {
-                            oasParser = OASParserUtil.getOASParser(swagger);
-                            uriTemplates = new ArrayList<>();
-                            uriTemplates.addAll(oasParser.getURITemplates(swagger));
-                            return uriTemplates;
-                        } catch (APIManagementException e) {
-                            log.error("Error while parsing swagger content to get URI Templates", e);
-                        }
-                    }
                     uriTemplates = dataStore.getAllURITemplates(context, apiVersion);
                 }
             }
