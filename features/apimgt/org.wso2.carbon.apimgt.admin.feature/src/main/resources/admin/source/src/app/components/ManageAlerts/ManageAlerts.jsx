@@ -36,6 +36,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
 import DescriptionIcon from '@material-ui/icons/Description';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import HelpBase from 'AppComponents/AdminPages/Addons/HelpBase';
@@ -65,9 +66,6 @@ const styles = (theme) => ({
     },
     configDialogHeading: {
         fontWeight: '600',
-    },
-    btnContainer: {
-        marginTop: theme.spacing(),
     },
     listItem: {
         marginLeft: theme.spacing(1),
@@ -473,48 +471,49 @@ const ManageAlerts = (props) => {
                                                 handleEmailDeletion(chip);
                                             }}
                                         />
-                                        <Grid
-                                            container
-                                            direction='row'
-                                            spacing={2}
-                                            className={classes.btnContainer}
-                                        >
-                                            <Grid item>
-                                                <Button
-                                                    disabled={emails.length === 0 || subscribedAlerts.length === 0}
-                                                    onClick={handleSubscribe}
-                                                    variant='contained'
-                                                    color='primary'
-                                                >
-                                                    {isInProgress.subscribing && <CircularProgress size={15} />}
+                                        <Box mt={2}>
+                                            <Grid
+                                                container
+                                                direction='row'
+                                                spacing={2}
+                                            >
+                                                <Grid item>
+                                                    <Button
+                                                        disabled={emails.length === 0 || subscribedAlerts.length === 0}
+                                                        onClick={handleSubscribe}
+                                                        variant='contained'
+                                                        color='primary'
+                                                    >
+                                                        {isInProgress.subscribing && <CircularProgress size={15} />}
                                             Save
-                                                </Button>
-                                            </Grid>
-                                            <Grid item>
-                                                <Button
-                                                    disabled={isInProgress.subscribing}
-                                                    color='primary'
-                                                    variant='contained'
-                                                    onClick={() => setUnsubscribeAll(true)}
-                                                >
-                                                    {isInProgress.unSubscribing && <CircularProgress size={15} />}
-                                            Unsubscribe All
-                                                </Button>
-                                            </Grid>
-                                            <Grid item>
-                                                <Link to='/'>
+                                                    </Button>
+                                                </Grid>
+                                                <Grid item>
                                                     <Button
                                                         disabled={isInProgress.subscribing}
+                                                        color='primary'
                                                         variant='contained'
-                                                        color='default'
+                                                        onClick={() => setUnsubscribeAll(true)}
                                                     >
-                                                        {isInProgress.unSubscribing
+                                                        {isInProgress.unSubscribing && <CircularProgress size={15} />}
+                                            Unsubscribe All
+                                                    </Button>
+                                                </Grid>
+                                                <Grid item>
+                                                    <Link to='/'>
+                                                        <Button
+                                                            disabled={isInProgress.subscribing}
+                                                            variant='contained'
+                                                            color='default'
+                                                        >
+                                                            {isInProgress.unSubscribing
                                                             && <CircularProgress size={15} />}
                                                     Cancel
-                                                    </Button>
-                                                </Link>
+                                                        </Button>
+                                                    </Link>
+                                                </Grid>
                                             </Grid>
-                                        </Grid>
+                                        </Box>
                                     </>
                                 )}
                         </div>
