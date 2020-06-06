@@ -87,6 +87,8 @@ public class APIGatewayManager {
     private static final String PRODUCT_PREFIX = "prod";
     private static final String PRODUCT_VERSION = "1.0.0";
 
+    private Set<String> publishedGateways;
+
     private APIGatewayManager() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
@@ -123,6 +125,9 @@ public class APIGatewayManager {
                 log.debug("Number of labeled gateways to be published to: " + (api.getGatewayLabels().size()));
             }
         }
+
+        publishedGateways = ServiceReferenceHolder.getInstance().getArtifactPublisher()
+                .getExistingLabelsForAPI(api.getUUID());
 
         if (api.getEnvironments() != null) {
             for (String environmentName : api.getEnvironments()) {
@@ -180,8 +185,9 @@ public class APIGatewayManager {
                     }
 
                     ArtifactPublisher artifactPublisher = ServiceReferenceHolder.getInstance().getArtifactPublisher();
-                    if (artifactPublisher.isArtifactExists(gatewayAPIDTO)) {
-                        artifactPublisher.updateArtifacts(gatewayAPIDTO);
+                    if (publishedGateways.contains(environment.getName())) {
+                        artifactPublisher.updateArtifacts(gatewayAPIDTO,APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_PUBLISH);
+                        publishedGateways.remove(environment.getName());
                     } else {
                         artifactPublisher.publishArtifacts(gatewayAPIDTO);
                     }
@@ -644,7 +650,8 @@ public class APIGatewayManager {
                 client.unDeployAPI(gatewayAPIDTO);
             }
 
-            ServiceReferenceHolder.getInstance().getArtifactPublisher().updateArtifacts(gatewayAPIDTO);
+            ServiceReferenceHolder.getInstance().getArtifactPublisher().updateArtifacts(gatewayAPIDTO,
+                    APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_REMOVE);
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             APIGatewayEvent apiGatewayEvent = new APIGatewayEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(),
