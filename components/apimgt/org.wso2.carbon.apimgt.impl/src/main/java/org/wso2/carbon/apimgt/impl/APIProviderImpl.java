@@ -1391,22 +1391,34 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             apiPublished.setOldOutSequence(oldApi.getOutSequence());
                             //old api contain what environments want to remove
                             Set<String> environmentsToRemove = new HashSet<String>(oldApi.getEnvironments());
+                            List<Label> labelsToRemove = new ArrayList<>(oldApi.getGatewayLabels());
                             //updated api contain what environments want to add
                             Set<String> environmentsToPublish = new HashSet<String>(apiPublished.getEnvironments());
+                            List<Label> labelsToPublish = new ArrayList<>(apiPublished.getGatewayLabels());
+
                             Set<String> environmentsRemoved = new HashSet<String>(oldApi.getEnvironments());
+                            List<Label> labelsRemoved = new ArrayList<>(oldApi.getGatewayLabels());
                             if (!environmentsToPublish.isEmpty() && !environmentsToRemove.isEmpty()) {
                                 // this block will sort what gateways have to remove and published
                                 environmentsRemoved.retainAll(environmentsToPublish);
                                 environmentsToRemove.removeAll(environmentsRemoved);
                             }
+
+                            if (!labelsToPublish.isEmpty() && !labelsToRemove.isEmpty()) {
+                                // this block will sort what gateways have to remove and published
+                                labelsRemoved.retainAll(labelsToPublish);
+                                labelsToRemove.removeAll(labelsRemoved);
+                            }
                             // map contain failed to publish Environments
                             Map<String, String> failedToPublishEnvironments = publishToGateway(apiPublished);
                             apiPublished.setEnvironments(environmentsToRemove);
+                            apiPublished.setGatewayLabels(labelsToRemove);
                             // map contain failed to remove Environments
                             Map<String, String> failedToRemoveEnvironments = removeFromGateway(apiPublished);
                             environmentsToPublish.removeAll(failedToPublishEnvironments.keySet());
                             environmentsToPublish.addAll(failedToRemoveEnvironments.keySet());
                             apiPublished.setEnvironments(environmentsToPublish);
+                            apiPublished.setGatewayLabels(labelsToPublish);
                             updateApiArtifact(apiPublished, true, false);
                             failedGateways.clear();
                             failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
