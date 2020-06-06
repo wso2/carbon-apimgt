@@ -15451,42 +15451,56 @@ public class ApiMgtDAO {
         }
     }
 
-    public void addAPIBlob(GatewayAPIDTO gatewayAPIDTO, ByteArrayInputStream bais,
-                           int streamLength) throws APIManagementException {
+    public void addGatewayPublishedAPIDetails(GatewayAPIDTO gatewayAPIDTO) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_API_ARTIFACT)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GW_PUBLISHED_API_DETAILS)) {
             statement.setString(1, gatewayAPIDTO.getApiId());
             statement.setString(2, gatewayAPIDTO.getName());
             statement.setString(3, gatewayAPIDTO.getVersion());
             statement.setString(4, gatewayAPIDTO.getTenantDomain());
             statement.setString(5, gatewayAPIDTO.getProvider());
-            statement.setString(6, gatewayAPIDTO.getGatewayLabel());
-            statement.setBinaryStream(7, bais, streamLength);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            if (e.getErrorCode() != 1062){
+                handleException("Failed to add artifacts for " + gatewayAPIDTO.getName(), e);
+            }
+        }
+    }
+
+    public void addGatewayPublishedAPIArtifacts(GatewayAPIDTO gatewayAPIDTO, ByteArrayInputStream bais,
+                           int streamLength) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GW_API_ARTIFACTS)) {
+            statement.setString(1, gatewayAPIDTO.getApiId());
+            statement.setString(2, gatewayAPIDTO.getGatewayLabel());
+            statement.setBinaryStream(3, bais, streamLength);
+            statement.setString(4, APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_PUBLISH);
             statement.executeUpdate();
         } catch (SQLException e) {
             handleException("Failed to add artifacts for " + gatewayAPIDTO.getName(), e);
         }
     }
 
-    public void updateAPIBlob(String APIId, String gatewayLabel, ByteArrayInputStream bais,
-                           int streamLength) throws APIManagementException {
+    public void updateGatewayPublishedAPIArtifacts(String APIId, String gatewayLabel, ByteArrayInputStream bais,
+                                                   int streamLength, String artifactType) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_ARTIFACT)) {
             statement.setBinaryStream(1, bais, streamLength);
-            statement.setString(2, APIId);
-            statement.setString(3, gatewayLabel);
+            statement.setString(2, artifactType);
+            statement.setString(3, APIId);
+            statement.setString(4, gatewayLabel);
             statement.executeUpdate();
         } catch (SQLException e) {
             handleException("Failed to update artifacts of API with ID " + APIId, e);
         }
     }
 
-    public ByteArrayInputStream getAPIBlob(String APIId, String label) throws APIManagementException {
+    public ByteArrayInputStream getGatewayPublishedAPIArtifacts(String APIId, String gatewayLabel) throws APIManagementException {
         ByteArrayInputStream baip = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_ARTIFACT)) {
             statement.setString(1, APIId);
-            statement.setString(2, label);
+            statement.setString(2, gatewayLabel);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 byte[] st = (byte[]) rs.getObject(1);
@@ -15498,9 +15512,23 @@ public class ApiMgtDAO {
         return baip;
     }
 
-    public void deleteAPIBlob(String APIId, String gatewayLabel) throws APIManagementException {
+    public void deleteGatewayPublishedAPIDetails(String APIId) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_API_ARTIFACT)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_GW_PUBLISHED_API_DETAILS)) {
+            statement.setString(1, APIId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            //One API can have several labels and blobs. Until all the labels are deleted, api details will not be
+            //removed from the db.
+            if (e.getErrorCode() != 1451) {
+                handleException("Failed to delete artifacts of API with ID " + APIId, e);
+            }
+        }
+    }
+
+    public void deleteGatewayPublishedAPIArtifacts(String APIId, String gatewayLabel) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_GW_PUBLISHED_API_ARTIFACTS)) {
             statement.setString(1, APIId);
             statement.setString(2, gatewayLabel);
             statement.executeUpdate();
@@ -15509,18 +15537,19 @@ public class ApiMgtDAO {
         }
     }
 
-    public boolean isAPIBlobExists(String APIId, String label) throws APIManagementException {
-        boolean status = false;
+    public Set<String> getExistingLabelsForAPI (String APIId) throws APIManagementException {
+        Set<String> labels = new HashSet<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_ARTIFACT)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_EXISTING_LABELS_FOR_API)) {
             statement.setString(1, APIId);
-            statement.setString(2, label);
             ResultSet rs = statement.executeQuery();
-            status = rs.next();
+            while (rs.next()) {
+                labels.add ((String) rs.getObject(1));
+            }
         } catch (SQLException e) {
             handleException("Failed to get artifacts of API with ID " + APIId, e);
         }
-        return status;
+        return labels;
     }
 
 }

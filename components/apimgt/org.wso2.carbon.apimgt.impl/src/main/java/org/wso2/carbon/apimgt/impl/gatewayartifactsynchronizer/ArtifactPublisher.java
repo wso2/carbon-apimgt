@@ -5,6 +5,8 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Connect
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.TestConnectionNotSupportedException;
 
+import java.util.Set;
+
 /**
  * This is a Artifact Publisher type. these interface let users to publish API artifacts to a storage.
  */
@@ -43,14 +45,14 @@ public interface ArtifactPublisher {
      * The init of the publisher, this will be called only once.
      * @throws ArtifactSynchronizerException if there are any errors in the process
      */
-    void updateArtifacts (GatewayAPIDTO gatewayAPIDTO) throws ArtifactSynchronizerException;
+    void updateArtifacts (GatewayAPIDTO gatewayAPIDTO, String artifactType) throws ArtifactSynchronizerException;
 
 
     /**
-     * This method will check whether the artifact exists in the storage
+     * This method will return all the existing labels related to the api
      * @throws ArtifactSynchronizerException if there are any errors in the process
      */
-    boolean isArtifactExists (GatewayAPIDTO gatewayAPIDTO) throws ArtifactSynchronizerException;
+    Set<String> getExistingLabelsForAPI(String apiId);
 
     /**
      * Will be called after all publishing is done, or when ConnectionUnavailableException is thrown

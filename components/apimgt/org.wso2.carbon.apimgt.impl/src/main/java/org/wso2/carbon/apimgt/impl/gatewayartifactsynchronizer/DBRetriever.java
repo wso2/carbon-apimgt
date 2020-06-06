@@ -39,7 +39,7 @@ public class DBRetriever implements ArtifactRetriever {
 
         GatewayAPIDTO gatewayAPIDTO = null;
         try {
-            ByteArrayInputStream byteStream = apiMgtDAO.getAPIBlob(APIId, label);
+            ByteArrayInputStream byteStream = apiMgtDAO.getGatewayPublishedAPIArtifacts(APIId, label);
             ObjectInputStream objectStream = new ObjectInputStream(byteStream);
             gatewayAPIDTO = (GatewayAPIDTO) objectStream.readObject();
             if (log.isDebugEnabled()){
@@ -55,7 +55,8 @@ public class DBRetriever implements ArtifactRetriever {
     public void deleteArtifacts(GatewayAPIDTO gatewayAPIDTO) throws ArtifactSynchronizerException{
 
         try {
-            apiMgtDAO.deleteAPIBlob(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel());
+            apiMgtDAO.deleteGatewayPublishedAPIArtifacts(gatewayAPIDTO.getApiId(),gatewayAPIDTO.getGatewayLabel());
+            apiMgtDAO.deleteGatewayPublishedAPIDetails(gatewayAPIDTO.getApiId());
             if (log.isDebugEnabled()){
                 log.debug("Successfully deleted Artifacts of " + gatewayAPIDTO.getName());
             }

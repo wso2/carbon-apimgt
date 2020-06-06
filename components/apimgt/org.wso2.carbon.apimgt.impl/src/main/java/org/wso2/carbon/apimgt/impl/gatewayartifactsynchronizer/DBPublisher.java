@@ -14,7 +14,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-
+import java.util.HashSet;
+import java.util.Set;
 
 public class DBPublisher implements ArtifactPublisher {
 
@@ -46,11 +47,11 @@ public class DBPublisher implements ArtifactPublisher {
             objectOutputStream.writeObject(gatewayAPIDTO);
             byte[] gatewayAPIDTOAsBytes = byteArrayOutputStream.toByteArray();
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayAPIDTOAsBytes);
-            apiMgtDAO.addAPIBlob(gatewayAPIDTO, byteArrayInputStream, gatewayAPIDTOAsBytes.length);
+            apiMgtDAO.addGatewayPublishedAPIDetails(gatewayAPIDTO);
+            apiMgtDAO.addGatewayPublishedAPIArtifacts(gatewayAPIDTO, byteArrayInputStream, gatewayAPIDTOAsBytes.length);
             if (log.isDebugEnabled()){
                 log.debug("Successfully published Artifacts of " + gatewayAPIDTO.getName());
             }
-
         } catch (IOException | APIManagementException e) {
             throw new ArtifactSynchronizerException("Error publishing Artifact of " + gatewayAPIDTO.getName() +
                     " API from DB", e);
@@ -59,7 +60,7 @@ public class DBPublisher implements ArtifactPublisher {
     }
 
     @Override
-    public void updateArtifacts(GatewayAPIDTO gatewayAPIDTO)
+    public void updateArtifacts(GatewayAPIDTO gatewayAPIDTO, String artifactType)
             throws ArtifactSynchronizerException {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -68,8 +69,8 @@ public class DBPublisher implements ArtifactPublisher {
             objectOutputStream.writeObject(gatewayAPIDTO);
             byte[] gatewayAPIDTOAsBytes = byteArrayOutputStream.toByteArray();
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayAPIDTOAsBytes);
-            apiMgtDAO.updateAPIBlob(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel(),
-                    byteArrayInputStream, gatewayAPIDTOAsBytes.length);
+            apiMgtDAO.updateGatewayPublishedAPIArtifacts(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel(),
+                    byteArrayInputStream, gatewayAPIDTOAsBytes.length, artifactType);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully updated Artifacts of " + gatewayAPIDTO.getName());
             }
@@ -81,19 +82,15 @@ public class DBPublisher implements ArtifactPublisher {
     }
 
     @Override
-    public boolean isArtifactExists(GatewayAPIDTO gatewayAPIDTO) throws ArtifactSynchronizerException {
-
-        boolean status;
+    public Set<String> getExistingLabelsForAPI(String apiId) {
+        Set<String> labelsSet = new HashSet<>();
         try {
-            status = apiMgtDAO.isAPIBlobExists(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel());
-            if (log.isDebugEnabled()){
-                log.debug("Successfully read the status of Artifacts belongs to " + gatewayAPIDTO.getName());
-            }
+            labelsSet = apiMgtDAO.getExistingLabelsForAPI(apiId);
         } catch (APIManagementException e) {
-            throw new ArtifactSynchronizerException("Error checking the Artifact status of " + gatewayAPIDTO.getName() +
-                    " API from DB", e);
+            log.error("Error getting labels for the API with ID " + apiId + " from DB", e);
         }
-        return status;
+
+        return labelsSet;
     }
 
     @Override
