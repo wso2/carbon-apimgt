@@ -42,7 +42,8 @@ MonetizationApiService delegate = new MonetizationApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Publish Usage Records", notes = "Publish Usage Records of Monetized APIs ", response = PublishStatusDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:monetization_usage_publish", description = "Retrieve and publish Monetization related usage records")
+            @AuthorizationScope(scope = "apim:monetization_usage_publish", description = "Retrieve and publish Monetization related usage records"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Monetization (Collection)",  })
     @ApiResponses(value = { 
@@ -60,7 +61,8 @@ MonetizationApiService delegate = new MonetizationApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the status of Monetization usage publisher", notes = "Get the status of Monetization usage publisher ", response = MonetizationUsagePublishInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:monetization_usage_publish", description = "Retrieve and publish Monetization related usage records")
+            @AuthorizationScope(scope = "apim:monetization_usage_publish", description = "Retrieve and publish Monetization related usage records"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Monetization (Collection)" })
     @ApiResponses(value = { 

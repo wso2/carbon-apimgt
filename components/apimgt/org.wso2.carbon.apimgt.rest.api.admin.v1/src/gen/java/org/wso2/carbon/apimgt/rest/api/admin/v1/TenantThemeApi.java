@@ -42,7 +42,8 @@ TenantThemeApiService delegate = new TenantThemeApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import a DevPortal Tenant Theme", notes = "This operation can be used to import a DevPortal tenant theme. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:tenant_theme_manage", description = "Manage tenant themes")
+            @AuthorizationScope(scope = "apim:tenant_theme_manage", description = "Manage tenant themes"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={  })
     @ApiResponses(value = { 
