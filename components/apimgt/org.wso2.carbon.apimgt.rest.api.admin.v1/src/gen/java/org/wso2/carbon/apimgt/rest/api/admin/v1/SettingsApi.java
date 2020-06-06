@@ -43,7 +43,8 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retreive admin settings", notes = "Retreive admin settings ", response = SettingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
+            @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Settings",  })
     @ApiResponses(value = { 
@@ -59,7 +60,8 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve scopes for a particular user", notes = "This operation will return the scope list of particular user In order to get it, we need to pass the userId as a query parameter ", response = ScopeSettingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
+            @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Settings" })
     @ApiResponses(value = { 
