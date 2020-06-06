@@ -1590,11 +1590,9 @@ public class APIManagerConfiguration {
                 .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.GATEWAY_LABEL_CONFIG));
         if (gatewayLabelElement != null) {
             String gatewayLabel = gatewayLabelElement.getText();
-            Set<String> labelsSet = new HashSet<>();
             for (String label : gatewayLabel.split(",")){
-                labelsSet.add(label);
+                gatewayArtifactSynchronizerProperties.getGatewayLabels().add(label);
             }
-            gatewayArtifactSynchronizerProperties.setGatewayLabels(labelsSet);
         }
     }
 

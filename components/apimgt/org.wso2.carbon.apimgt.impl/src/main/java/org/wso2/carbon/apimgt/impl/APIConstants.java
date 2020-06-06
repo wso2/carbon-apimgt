@@ -2288,6 +2288,8 @@ public final class APIConstants {
         public static final String REMOVE_EVENT_LABEL = "RemoveAPIInGateway";
         public static final String DEFAULT_PUBLISHER_NAME = "DefaultPublisher";
         public static final String DEFAULT_RETRIEVER_NAME = "DefaultRetriever";
+        public static final String ARTIFACT_STATUS_PUBLISH = "Publish";
+        public static final String ARTIFACT_STATUS_REMOVE = "Remove";
 
     }
 }
