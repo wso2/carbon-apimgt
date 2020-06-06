@@ -43,6 +43,7 @@
         <module>org.wso2.carbon.apimgt.rest.api.publisher.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.store.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.admin.feature</module>
+        <module>org.wso2.carbon.apimgt.rest.api.gateway.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.dcr.feature</module>
         <module>org.wso2.carbon.apimgt.scxml.feature</module>
         <module>org.wso2.carbon.apimgt.throttling.siddhi.extension.feature</module>
