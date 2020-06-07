@@ -631,6 +631,11 @@ class API extends Resource {
         });
     }
 
+
+
+    /**
+     * Get lis of keymanagers Registrered
+     */
     getKeyManagersList() {
         return this.client.then((client) => {
             return client.apis['Key Manager (Collection)'].get_key_managers(

@@ -22,6 +22,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import ClearIcon from '@material-ui/icons/Clear';
 import Alert from 'AppComponents/Shared/Alert';
+import { FormattedMessage } from 'react-intl';
 
 const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
@@ -31,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Trottling Policies dropdown selector used in minimized API Create form
+ * Add KeyValidation Types Form
  * @export
  * @param {*} props
  * @returns {React.Component}
@@ -40,7 +41,6 @@ export default function KeyValidation(props) {
     const classes = useStyles();
 
     const { tokenValidation, setTokenValidation } = props;
-    const [, setValidationError] = useState([]);
     const [jwtValue, setjwtValue] = useState({});
     const validate = (fieldName, value) => {
         let error = '';
@@ -49,7 +49,6 @@ export default function KeyValidation(props) {
         } else {
             error = '';
         }
-        setValidationError({ fieldName: error });
         return error;
     };
     const clearValues = () => {
@@ -64,9 +63,12 @@ export default function KeyValidation(props) {
         } else {
             let exist = false;
             if (tokenValidation.value && tokenValidation.value.body) {
-                Object.entries(tokenValidation.value.body).map(([key, val]) => {
-                    if (key === jwtValue.claimKey) {
-                        Alert.error(`Claim Mapping Already Exist with ${key}and Value ${val}`);
+                Object.entries(tokenValidation.value.body).map((entry) => {
+                    if (entry.key === jwtValue.claimKey) {
+                        Alert.error(<FormattedMessage
+                            id='Claim.Mapping.already.exists'
+                            defaultMessage='Claim Mapping Already Exist'
+                        />);
                         exist = true;
                         clearValues();
                     }
@@ -79,7 +81,9 @@ export default function KeyValidation(props) {
             } else {
                 const body = {};
                 body[jwtValue.claimKey] = jwtValue.claimValueRegex;
-                tokenValidation.value.body = body;
+                if (tokenValidation.value) {
+                    tokenValidation.value.body = body;
+                }
                 setTokenValidation(tokenValidation);
             }
             clearValues();
@@ -87,13 +91,13 @@ export default function KeyValidation(props) {
         }
     };
     const onChange = (e) => {
-        const { value } = e.target;
-        if (e.target.name === 'type') {
+        const { name, value } = e.target;
+        if (name === 'type') {
             tokenValidation.type = value;
-        } else if (e.target.name === 'value') {
+        } else if (name === 'value') {
             tokenValidation.value = value;
         }
-        if (e.target.value === 'JWT') {
+        if (value === 'JWT') {
             tokenValidation.value = { body: {} };
         }
         setTokenValidation(tokenValidation);
@@ -117,7 +121,7 @@ export default function KeyValidation(props) {
                     autoFocus
                     margin='dense'
                     name='value'
-                    label='Value'
+                    label=''
                     fullWidth
                     required
                     variant='outlined'
@@ -132,9 +136,24 @@ export default function KeyValidation(props) {
                         <Table className={classes.table} aria-label='simple table'>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Claim Key</TableCell>
-                                    <TableCell align='right'>Claim Value Regex</TableCell>
-                                    <TableCell align='right'>Action</TableCell>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Keymanager.KeyValidation.ClaimKey'
+                                            defaultMessage='Claim Key'
+                                        />
+                                    </TableCell>
+                                    <TableCell align='right'>
+                                        <FormattedMessage
+                                            id='Keymanager.KeyValidation.ClaimValue.Regex'
+                                            defaultMessage='Claim Value Regex'
+                                        />
+                                    </TableCell>
+                                    <TableCell align='right'>
+                                        <FormattedMessage
+                                            id='Keymanager.KeyValidation.Action'
+                                            defaultMessage='Action'
+                                        />
+                                    </TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -142,7 +161,12 @@ export default function KeyValidation(props) {
                                     <TableCell component='th' scope='row'>
                                         <TextField
                                             name='claimKey'
-                                            label='Claim Key'
+                                            label={(
+                                                <FormattedMessage
+                                                    id='Keymanager.KeyValidation.ClaimKey'
+                                                    defaultMessage='Claim Key'
+                                                />
+                                            )}
                                             variant='outlined'
                                             onChange={onCreateJWTmapping}
                                             value={jwtValue.claimKey}
@@ -151,7 +175,12 @@ export default function KeyValidation(props) {
                                     <TableCell align='right'>
                                         <TextField
                                             name='claimValueRegex'
-                                            label='Claim Value Regex'
+                                            label={(
+                                                <FormattedMessage
+                                                    id='Keymanager.KeyValidation.ClaimValue.Regex'
+                                                    defaultMessage='Claim Value Regex'
+                                                />
+                                            )}
                                             value={jwtValue.claimValueRegex}
                                             onChange={onCreateJWTmapping}
                                             variant='outlined'
@@ -162,7 +191,6 @@ export default function KeyValidation(props) {
                                             <Grid item>
                                                 <IconButton
                                                     id='add'
-                                                    aria-label='Add'
                                                     onClick={handleAddToList}
                                                 >
                                                     <AddCircleIcon />
@@ -171,7 +199,6 @@ export default function KeyValidation(props) {
                                             <Grid item>
                                                 <IconButton
                                                     id='clear'
-                                                    aria-label='Clear'
                                                     onClick={clearValues}
                                                 >
                                                     <ClearIcon />
@@ -187,7 +214,6 @@ export default function KeyValidation(props) {
                                 <TextField
                                     id={key}
                                     defaultValue={key}
-                                    label='Claim Key'
                                     variant='outlined'
                                     disabled
                                 />
@@ -196,7 +222,6 @@ export default function KeyValidation(props) {
                                 <TextField
                                     id={value}
                                     defaultValue={value}
-                                    label='Claim value Regex'
                                     variant='outlined'
                                     disabled
                                 />
@@ -204,7 +229,6 @@ export default function KeyValidation(props) {
                             <TableCell align='right'>
                                 <IconButton
                                     id='delete'
-                                    aria-label='Remove'
                                     onClick={() => { onDelete(key); }}
                                 >
                                     <DeleteIcon />
@@ -254,9 +278,15 @@ export default function KeyValidation(props) {
                         onChange={onChange}
                         classes={{ root: classes.slectRoot }}
                     >
-                        <MenuItem value='REFERENCE'>REFERENCE</MenuItem>
-                        <MenuItem value='JWT'>JWT</MenuItem>
-                        <MenuItem value='CUSTOM'>CUSTOM</MenuItem>
+                        <MenuItem value='REFERENCE'>
+                            <FormattedMessage id='KeyManager.KeyValidation.REFERENCE' defaultMessage='REFERENCE' />
+                        </MenuItem>
+                        <MenuItem value='JWT'>
+                            <FormattedMessage id='KeyManager.KeyValidation.JWT' defaultMessage='JWT' />
+                        </MenuItem>
+                        <MenuItem value='CUSTOM'>
+                            <FormattedMessage id='KeyManager.KeyValidation.CUSTOM' defaultMessage='CUSTOM' />
+                        </MenuItem>
                     </Select>
                 </FormControl>
             </Box>
@@ -270,5 +300,4 @@ export default function KeyValidation(props) {
 }
 KeyValidation.defaultProps = {
     required: false,
-    helperText: 'Add Key Manager Configuration',
 };
