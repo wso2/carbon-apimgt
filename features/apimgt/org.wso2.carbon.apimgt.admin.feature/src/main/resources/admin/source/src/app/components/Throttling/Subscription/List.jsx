@@ -28,7 +28,6 @@ import ListBase from 'AppComponents/AdminPages/Addons/ListBase';
 import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
-import AddEdit from 'AppComponents/Throttling/Application/AddEdit';
 import Delete from 'AppComponents/Throttling/Subscription/Delete';
 import API from 'AppData/api';
 import EditIcon from '@material-ui/icons/Edit';
@@ -191,6 +190,12 @@ export default function ListSubscriptionThrottlingPolicies() {
                 sort: false,
             },
         },
+        { // Id column has to be always the last.
+            name: 'policyId',
+            options: {
+                display: false,
+            },
+        },
     ];
 
     const emptyBoxProps = {
@@ -283,9 +288,9 @@ export default function ListSubscriptionThrottlingPolicies() {
             editComponentProps={{
                 icon: <EditIcon />,
                 title: 'Edit Subscription Policy',
+                routeTo: '/throttling/subscription/',
             }}
             DeleteComponent={Delete}
-            EditComponent={AddEdit}
         />
     );
 }

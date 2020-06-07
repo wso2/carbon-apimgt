@@ -244,6 +244,35 @@ class API extends Resource {
     }
 
     /**
+     * Update a Subscription Throttling Policy
+     */
+    updateSubscriptionThrottlingPolicy(policyId, body) {
+        return this.client.then((client) => {
+            const payload = {
+                policyId: policyId,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Subscription Policy (Individual)'].put_throttling_policies_subscription__policyId_(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get details of a Subscription Throttling Policy
+     */
+    subscriptionThrottlingPolicyGet(policyId) {
+        return this.client.then((client) => {
+            return client.apis['Subscription Policy (Individual)'].get_throttling_policies_subscription__policyId_(
+                { policyId: policyId },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
      * Add an Application Throttling Policy
      */
     addApplicationThrottlingPolicy(body) {

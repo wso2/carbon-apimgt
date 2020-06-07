@@ -307,6 +307,7 @@
   "Throttling.Subscription.Policy.policy.delete.error": "Subscription Rate Limiting Policy could not be deleted.",
   "Throttling.Subscription.Policy.policy.delete.success": "Subscription Rate Limiting Policy successfully deleted.",
   "Throttling.Subscription.Policy.policy.dialog.delete.error": "Subscription Rate Limiting Policy will be deleted.",
+  "Throttling.Subscription.Policy.policy.edit.success": "Subscription Rate Limiting Policy updated successfully.",
   "Throttling.Subscription.Policy.search.default": "Subscription Rate Limiting Policies",
   "Throttling.Subscription.billing.cycle": "Billing Cycle",
   "Throttling.Subscription.currency": "Currency",

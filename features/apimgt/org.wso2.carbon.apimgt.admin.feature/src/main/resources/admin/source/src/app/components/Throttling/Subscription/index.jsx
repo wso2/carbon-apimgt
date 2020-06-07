@@ -20,6 +20,7 @@ import React from 'react';
 import { withRouter, Switch, Route } from 'react-router-dom';
 import SubscriptionThrottlingPolicies from 'AppComponents/Throttling/Subscription/List';
 import AddEdit from 'AppComponents/Throttling/Subscription/AddEdit';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 
 /**
  * Render a list
@@ -30,6 +31,8 @@ function Tasks() {
         <Switch>
             <Route exact path='/throttling/subscription' component={SubscriptionThrottlingPolicies} />
             <Route exact path='/throttling/subscription/add' component={AddEdit} />
+            <Route path='/throttling/subscription/:id' component={AddEdit} />
+            <Route component={ResourceNotFound} />
         </Switch>
     );
 }
