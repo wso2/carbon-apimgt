@@ -219,7 +219,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Subscription Policies',
                 }),
                 path: '/throttling/subscription',
-                component: DemoTable,
+                component: () => <SubscriptionThrottlingPolicies />,
                 icon: <PhonelinkSetupIcon />,
             },
             {

@@ -34,13 +34,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-// import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import Switch from '@material-ui/core/Switch';
-// import Table from '@material-ui/core/Table';
-// import TableBody from '@material-ui/core/TableBody';
-// import TableCell from '@material-ui/core/TableCell';
-// import TableRow from '@material-ui/core/TableRow';
-// import AddCircle from '@material-ui/icons/AddCircle';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -127,6 +121,8 @@ function reducer(state, newValue) {
                 ...state,
                 graphQL: { ...state.graphQL, [field]: value },
             };
+        case 'editDetails':
+            return value;
         default:
             return newValue;
     }
@@ -140,7 +136,10 @@ function AddEdit(props) {
     const classes = useStyles();
     const intl = useIntl();
     const [saving, setSaving] = useState(false);
-    const { history } = props;
+    const { history, match: { params } } = props;
+    const restApi = new API();
+    const isEdit = (params.id !== null) && (params.id !== undefined);
+
     const [initialState, setInitialState] = useState({
         policyName: '',
         description: '',
@@ -174,10 +173,67 @@ function AddEdit(props) {
         },
     });
 
+    const [state, dispatch] = useReducer(reducer, initialState);
+
     useEffect(() => {
+        if (isEdit) {
+            restApi.subscriptionThrottlingPolicyGet(params.id).then((result) => {
+                let requestCountEdit = '';
+                let dataAmountEdit = '';
+                let timeUnitEdit = 'min';
+                let unitTimeEdit = '';
+                let typeEdit = 'REQUESTCOUNTLIMIT';
+                let dataUnitEdit = 'KB';
+                if (result.body.defaultLimit.requestCount !== null) {
+                    requestCountEdit = result.body.defaultLimit.requestCount.requestCount;
+                    timeUnitEdit = result.body.defaultLimit.requestCount.timeUnit;
+                    unitTimeEdit = result.body.defaultLimit.requestCount.unitTime;
+                    typeEdit = result.body.defaultLimit.requestCount.type;
+                } else if (result.body.defaultLimit.bandwidth != null) {
+                    dataAmountEdit = result.body.defaultLimit.bandwidth.dataAmount;
+                    dataUnitEdit = result.body.defaultLimit.bandwidth.dataUnit;
+                    timeUnitEdit = result.body.defaultLimit.bandwidth.timeUnit;
+                    unitTimeEdit = result.body.defaultLimit.bandwidth.unitTime;
+                    typeEdit = result.body.defaultLimit.bandwidth.type;
+                }
+                const editState = {
+                    policyName: result.body.policyName,
+                    description: result.body.description,
+                    defaultLimit: {
+                        requestCount: requestCountEdit,
+                        timeUnit: timeUnitEdit,
+                        unitTime: unitTimeEdit,
+                        type: typeEdit,
+                        dataAmount: dataAmountEdit,
+                        dataUnit: dataUnitEdit,
+                    },
+                    rateLimitCount: (result.body.rateLimitCount === 0) ? '' : result.body.rateLimitCount,
+                    rateLimitTimeUnit: (result.body.rateLimitCount === 0) ? 'sec' : result.body.rateLimitTimeUnit,
+                    billingPlan: result.body.billingPlan,
+                    monetization: {
+                        monetizationPlan: 'FIXEDRATE',
+                        fixedPrice: '',
+                        pricePerRequest: '',
+                        currencyType: '',
+                        billingCycle: 'week',
+                    },
+                    customAttributes: result.body.customAttributes,
+                    stopOnQuotaReach: result.body.stopOnQuotaReach,
+                    permissions: {
+                        roles: ['Internal/everyone'],
+                        permissionStatus: 'allow',
+                    },
+                    graphQL: {
+                        maxComplexity: result.body.graphQLMaxComplexity,
+                        maxDepth: result.body.graphQLMaxDepth,
+                    },
+                };
+                dispatch({ field: 'editDetails', value: editState });
+            });
+        }
         setInitialState({
-            policyName: 'name',
-            description: 'desciption',
+            policyName: '',
+            description: '',
             defaultLimit: {
                 requestCount: '',
                 timeUnit: 'min',
@@ -242,7 +298,6 @@ function AddEdit(props) {
         return error;
     };
 
-    const [state, dispatch] = useReducer(reducer, initialState);
     const {
         policyName,
         description,
@@ -274,7 +329,6 @@ function AddEdit(props) {
             maxDepth,
         },
     } = state;
-    const restApi = new API();
 
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
@@ -306,6 +360,8 @@ function AddEdit(props) {
             return (false);
         }
         let subscriptionThrottlingPolicy;
+        let promisedAddSubscriptionPolicy;
+
         if (type === 'REQUESTCOUNTLIMIT') {
             subscriptionThrottlingPolicy = {
                 policyName: state.policyName,
@@ -364,30 +420,58 @@ function AddEdit(props) {
                 },
             };
         }
-        const promisedAddSubscriptionPolicy = restApi.addSubscriptionThrottlingPolicy(
-            subscriptionThrottlingPolicy,
-        );
-        if (promisedAddSubscriptionPolicy) {
-            setSaving(true);
+
+        if (isEdit) {
+            const policyId = params.id;
+            promisedAddSubscriptionPolicy = restApi.updateSubscriptionThrottlingPolicy(policyId,
+                subscriptionThrottlingPolicy);
+            if (promisedAddSubscriptionPolicy) {
+                setSaving(true);
+            }
+            return promisedAddSubscriptionPolicy
+                .then(() => {
+                    Alert.success(intl.formatMessage({
+                        id: 'Throttling.Subscription.Policy.policy.edit.success',
+                        defaultMessage: 'Subscription Rate Limiting Policy updated successfully.',
+                    }));
+                    history.push('/throttling/subscription');
+                })
+                .catch((error) => {
+                    const { response } = error;
+                    if (response.body) {
+                        Alert.error(response.body.description);
+                    }
+                    return null;
+                })
+                .finally(() => {
+                    setSaving(false);
+                });
+        } else {
+            promisedAddSubscriptionPolicy = restApi.addSubscriptionThrottlingPolicy(
+                subscriptionThrottlingPolicy,
+            );
+            if (promisedAddSubscriptionPolicy) {
+                setSaving(true);
+            }
+            return promisedAddSubscriptionPolicy
+                .then(() => {
+                    Alert.success(intl.formatMessage({
+                        id: 'Throttling.Subscription.Policy.policy.add.success',
+                        defaultMessage: 'Subscription Rate Limiting Policy added successfully.',
+                    }));
+                    history.push('/throttling/subscription');
+                })
+                .catch((error) => {
+                    const { response } = error;
+                    if (response.body) {
+                        Alert.error(response.body.description);
+                    }
+                    return null;
+                })
+                .finally(() => {
+                    setSaving(false);
+                });
         }
-        return promisedAddSubscriptionPolicy
-            .then(() => {
-                Alert.success(intl.formatMessage({
-                    id: 'Throttling.Subscription.Policy.policy.add.success',
-                    defaultMessage: 'Subscription Rate Limiting Policy added successfully.',
-                }));
-                history.push('/throttling/subscription');
-            })
-            .catch((error) => {
-                const { response } = error;
-                if (response.body) {
-                    Alert.error(response.body.description);
-                }
-                return null;
-            })
-            .finally(() => {
-                setSaving(false);
-            });
     };
 
     return (
@@ -421,6 +505,7 @@ function AddEdit(props) {
                                 margin='dense'
                                 name='policyName'
                                 value={policyName}
+                                disabled={isEdit}
                                 onChange={onChange}
                                 InputProps={{
                                     id: 'policyName',
@@ -1036,9 +1121,22 @@ function AddEdit(props) {
     );
 }
 
+AddEdit.defaultProps = {
+    match: {
+        params: {
+            id: null,
+        },
+    },
+};
+
 AddEdit.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            id: PropTypes.string,
+        }),
+    }),
 };
 
 export default AddEdit;
