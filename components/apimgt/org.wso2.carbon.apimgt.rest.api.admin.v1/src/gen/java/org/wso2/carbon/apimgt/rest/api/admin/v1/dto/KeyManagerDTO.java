@@ -33,7 +33,7 @@ public class KeyManagerDTO   {
     private String issuer = null;
     private String scopeManagementEndpoint = null;
     private List<String> availableGrantTypes = new ArrayList<>();
-    private Boolean enableTokenGneration = null;
+    private Boolean enableTokenGeneration = null;
     private Boolean enableTokenEncryption = false;
     private Boolean enableTokenHashing = false;
     private Boolean enableMapOAuthConsumerApps = false;
@@ -288,19 +288,19 @@ public class KeyManagerDTO   {
 
   /**
    **/
-  public KeyManagerDTO enableTokenGneration(Boolean enableTokenGneration) {
-    this.enableTokenGneration = enableTokenGneration;
+  public KeyManagerDTO enableTokenGeneration(Boolean enableTokenGeneration) {
+    this.enableTokenGeneration = enableTokenGeneration;
     return this;
   }
 
   
   @ApiModelProperty(example = "true", value = "")
-  @JsonProperty("enableTokenGneration")
-  public Boolean isEnableTokenGneration() {
-    return enableTokenGneration;
+  @JsonProperty("enableTokenGeneration")
+  public Boolean isEnableTokenGeneration() {
+    return enableTokenGeneration;
   }
-  public void setEnableTokenGneration(Boolean enableTokenGneration) {
-    this.enableTokenGneration = enableTokenGneration;
+  public void setEnableTokenGeneration(Boolean enableTokenGeneration) {
+    this.enableTokenGeneration = enableTokenGeneration;
   }
 
   /**
@@ -514,7 +514,7 @@ public class KeyManagerDTO   {
         Objects.equals(issuer, keyManager.issuer) &&
         Objects.equals(scopeManagementEndpoint, keyManager.scopeManagementEndpoint) &&
         Objects.equals(availableGrantTypes, keyManager.availableGrantTypes) &&
-        Objects.equals(enableTokenGneration, keyManager.enableTokenGneration) &&
+        Objects.equals(enableTokenGeneration, keyManager.enableTokenGeneration) &&
         Objects.equals(enableTokenEncryption, keyManager.enableTokenEncryption) &&
         Objects.equals(enableTokenHashing, keyManager.enableTokenHashing) &&
         Objects.equals(enableMapOAuthConsumerApps, keyManager.enableMapOAuthConsumerApps) &&
@@ -530,7 +530,7 @@ public class KeyManagerDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, description, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, jwksEndpoint, issuer, scopeManagementEndpoint, availableGrantTypes, enableTokenGneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties);
+    return Objects.hash(id, name, type, description, introspectionEndpoint, clientRegistrationEndpoint, tokenEndpoint, revokeEndpoint, userInfoEndpoint, authorizeEndpoint, jwksEndpoint, issuer, scopeManagementEndpoint, availableGrantTypes, enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps, enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, consumerKeyClaim, scopesClaim, tokenValidation, enabled, additionalProperties);
   }
 
   @Override
@@ -552,7 +552,7 @@ public class KeyManagerDTO   {
     sb.append("    issuer: ").append(toIndentedString(issuer)).append("\n");
     sb.append("    scopeManagementEndpoint: ").append(toIndentedString(scopeManagementEndpoint)).append("\n");
     sb.append("    availableGrantTypes: ").append(toIndentedString(availableGrantTypes)).append("\n");
-    sb.append("    enableTokenGneration: ").append(toIndentedString(enableTokenGneration)).append("\n");
+    sb.append("    enableTokenGeneration: ").append(toIndentedString(enableTokenGeneration)).append("\n");
     sb.append("    enableTokenEncryption: ").append(toIndentedString(enableTokenEncryption)).append("\n");
     sb.append("    enableTokenHashing: ").append(toIndentedString(enableTokenHashing)).append("\n");
     sb.append("    enableMapOAuthConsumerApps: ").append(toIndentedString(enableMapOAuthConsumerApps)).append("\n");
