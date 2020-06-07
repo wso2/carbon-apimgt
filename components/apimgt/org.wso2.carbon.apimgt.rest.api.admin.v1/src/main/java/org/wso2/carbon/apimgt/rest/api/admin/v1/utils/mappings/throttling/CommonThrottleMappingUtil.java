@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.QueryParameterConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RequestCountLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitTypeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -264,79 +263,63 @@ public class CommonThrottleMappingUtil {
      * @return Derived Quota policy object from DTO
      * @throws UnsupportedThrottleLimitTypeException
      */
-    public static QuotaPolicy fromDTOToQuotaPolicy(ThrottleLimitTypeDTO dto)
+    public static QuotaPolicy fromDTOToQuotaPolicy(ThrottleLimitDTO dto)
             throws UnsupportedThrottleLimitTypeException {
 
-        ThrottleLimitDTO throttleLimit = getThrottleLimitType(dto);
+        String errorMessage;
         QuotaPolicy quotaPolicy = new QuotaPolicy();
-        quotaPolicy.setLimit(fromDTOToLimit(throttleLimit));
-        quotaPolicy.setType(mapQuotaPolicyTypeFromDTOToModel(throttleLimit.getType()));
+
+        switch (dto.getType()) {
+            case REQUESTCOUNTLIMIT: {
+                if (dto.getRequestCount() != null) {
+                    quotaPolicy.setLimit(fromDTOToRequestCountLimit(dto.getRequestCount()));
+                } else {
+                    errorMessage =
+                            constructThrottleLimitErrorMessage(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT, dto);
+                    throw new UnsupportedThrottleLimitTypeException(errorMessage);
+                }
+                break;
+            }
+            case BANDWIDTHLIMIT: {
+                if (dto.getBandwidth() != null) {
+                    quotaPolicy.setLimit(fromDTOToBandwidthLimit(dto.getBandwidth()));
+                } else {
+                    errorMessage =
+                            constructThrottleLimitErrorMessage(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT, dto);
+                    throw new UnsupportedThrottleLimitTypeException(errorMessage);
+                }
+                break;
+            }
+        }
+
+        quotaPolicy.setType(mapQuotaPolicyTypeFromDTOToModel(dto.getType()));
         return quotaPolicy;
     }
 
     /**
-     * Obtain Throttle Limit DTO object from Throttle Limit Type object
-     *
-     * @param dto Throttle Policy Default limit DTO object
-     * @return Throttle Limit DTO object
-     * @throws UnsupportedThrottleLimitTypeException
-     */
-    public static ThrottleLimitDTO getThrottleLimitType(ThrottleLimitTypeDTO dto)
-            throws UnsupportedThrottleLimitTypeException {
-
-        if (dto.getBandwidth() != null && dto.getRequestCount() != null) {
-            String msg = "Throttle limit types " + dto.getBandwidth().getClass().getName() + " and " +
-                    dto.getRequestCount().getClass().getName() + " cannot be specified at once";
-            throw new UnsupportedThrottleLimitTypeException(msg);
-        } else if (dto.getBandwidth() != null) {
-            return dto.getBandwidth();
-        } else if (dto.getRequestCount() != null) {
-            return dto.getRequestCount();
-        } else {
-            throw new UnsupportedThrottleLimitTypeException("A Throttle limit type has not been specified");
-        }
-    }
-
-    /**
-     * Converts a Quota Policy object into a Throttle Limit Type DTO object
+     * Converts a Quota Policy object into a Throttle Limit DTO object
      *
      * @param quotaPolicy Quota Policy object
-     * @return Throttle Limit Type DTO object derived from the Quota Policy object
+     * @return Throttle Limit DTO object derived from the Quota Policy object
      * @throws UnsupportedThrottleLimitTypeException
      */
-    public static ThrottleLimitTypeDTO fromQuotaPolicyToDTO(QuotaPolicy quotaPolicy)
+    public static ThrottleLimitDTO fromQuotaPolicyToDTO(QuotaPolicy quotaPolicy)
             throws UnsupportedThrottleLimitTypeException {
 
-        ThrottleLimitTypeDTO defaultLimitType = new ThrottleLimitTypeDTO();
+        ThrottleLimitDTO defaultLimitType = new ThrottleLimitDTO();
         if (PolicyConstants.REQUEST_COUNT_TYPE.equals(quotaPolicy.getType())) {
             RequestCountLimit requestCountLimit = (RequestCountLimit) quotaPolicy.getLimit();
+            defaultLimitType.setType(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT);
             defaultLimitType.setRequestCount(fromRequestCountLimitToDTO(requestCountLimit));
         } else if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaPolicy.getType())) {
             BandwidthLimit bandwidthLimit = (BandwidthLimit) quotaPolicy.getLimit();
+            defaultLimitType.setType(ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT);
             defaultLimitType.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
         } else {
             String msg = "Throttle limit type " + quotaPolicy.getType() + " is not supported";
             throw new UnsupportedThrottleLimitTypeException(msg);
         }
         return defaultLimitType;
-    }
-
-    /**
-     * Converts a Throttle Limit DTO object into a Limit object
-     *
-     * @param dto Throttle Limit DTO object
-     * @return Limit object derived from DTO
-     * @throws UnsupportedThrottleLimitTypeException
-     */
-    public static Limit fromDTOToLimit(ThrottleLimitDTO dto) throws UnsupportedThrottleLimitTypeException {
-        if (dto instanceof BandwidthLimitDTO) {
-            return fromDTOToBandwidthLimit((BandwidthLimitDTO) dto);
-        } else if (dto instanceof RequestCountLimitDTO) {
-            return fromDTOToRequestCountLimit((RequestCountLimitDTO) dto);
-        } else {
-            String msg = "Throttle limit type " + dto.getClass().getName() + " is not supported";
-            throw new UnsupportedThrottleLimitTypeException(msg);
-        }
     }
 
     /**
@@ -347,7 +330,8 @@ public class CommonThrottleMappingUtil {
      */
     public static BandwidthLimit fromDTOToBandwidthLimit(BandwidthLimitDTO dto) {
         BandwidthLimit bandwidthLimit = new BandwidthLimit();
-        bandwidthLimit = updateFieldsFromDTOToLimit(dto, bandwidthLimit);
+        bandwidthLimit.setTimeUnit(dto.getTimeUnit());
+        bandwidthLimit.setUnitTime(dto.getUnitTime());
         bandwidthLimit.setDataAmount(dto.getDataAmount());
         bandwidthLimit.setDataUnit(dto.getDataUnit());
         return bandwidthLimit;
@@ -357,11 +341,12 @@ public class CommonThrottleMappingUtil {
      * Converts a Request Count Limit DTO object into a Request Count model object
      *
      * @param dto Request Count Limit DTO object
-     * @return Request Count model object derived from DTO
+     * @return Request Count Limit model object derived from DTO
      */
     public static RequestCountLimit fromDTOToRequestCountLimit(RequestCountLimitDTO dto) {
         RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit = updateFieldsFromDTOToLimit(dto, requestCountLimit);
+        requestCountLimit.setTimeUnit(dto.getTimeUnit());
+        requestCountLimit.setUnitTime(dto.getUnitTime());
         requestCountLimit.setRequestCount(dto.getRequestCount());
         return requestCountLimit;
     }
@@ -374,8 +359,8 @@ public class CommonThrottleMappingUtil {
      */
     public static BandwidthLimitDTO fromBandwidthLimitToDTO(BandwidthLimit bandwidthLimit) {  //done
         BandwidthLimitDTO dto = new BandwidthLimitDTO();
-        dto = updateFieldsFromLimitToDTO(bandwidthLimit, dto);
-        dto.setType(ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT);
+        dto.setTimeUnit(bandwidthLimit.getTimeUnit());
+        dto.setUnitTime(bandwidthLimit.getUnitTime());
         dto.setDataAmount(bandwidthLimit.getDataAmount());
         dto.setDataUnit(bandwidthLimit.getDataUnit());
         return dto;
@@ -389,8 +374,8 @@ public class CommonThrottleMappingUtil {
      */
     public static RequestCountLimitDTO fromRequestCountLimitToDTO(RequestCountLimit requestCountLimit) { //done
         RequestCountLimitDTO dto = new RequestCountLimitDTO();
-        dto = updateFieldsFromLimitToDTO(requestCountLimit, dto);
-        dto.setType(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT);
+        dto.setTimeUnit(requestCountLimit.getTimeUnit());
+        dto.setUnitTime(requestCountLimit.getUnitTime());
         dto.setRequestCount(requestCountLimit.getRequestCount());
         return dto;
     }
@@ -513,36 +498,6 @@ public class CommonThrottleMappingUtil {
         dto.setInvertCondition(condition.isInvertCondition());
         dto.setClaimUrl(condition.getClaimUrl());
         dto.setAttribute(condition.getAttribute());
-        return dto;
-    }
-
-    /**
-     * Update common fields of Limit model object using Throttle Limit DTO object
-     * Fields update: timeUnit, unitTime
-     *
-     * @param dto   Throttle limit DTO object
-     * @param limit Limit object
-     * @param <T>   Type of Limit
-     * @return Limit model object with common fields updated
-     */
-    public static <T extends Limit> T updateFieldsFromDTOToLimit(ThrottleLimitDTO dto, T limit) {
-        limit.setTimeUnit(dto.getTimeUnit());
-        limit.setUnitTime(dto.getUnitTime());
-        return limit;
-    }
-
-    /**
-     * Update common fields of Throttle Limit DTO object using Limit model object
-     * Fields update: timeUnit, unitTime
-     *
-     * @param limit Limit model object
-     * @param dto   Throttle Limit DTO object
-     * @param <T>   Type of Throttle Limit object
-     * @return Throttle Limit DTO object with common fields updated
-     */
-    public static <T extends ThrottleLimitDTO> T updateFieldsFromLimitToDTO(Limit limit, T dto) {
-        dto.setTimeUnit(limit.getTimeUnit());
-        dto.setUnitTime(limit.getUnitTime());
         return dto;
     }
 
@@ -679,6 +634,21 @@ public class CommonThrottleMappingUtil {
                                                ThrottleConditionDTO dto) {
 
         return "Condition item corresponding to type " + typeEnum + " not provided\n"
+                + dto.toString();
+    }
+
+    /**
+     * Constructs an error message to indicate that the throttle limit object corresponding to the specified throttle
+     * limit type has not been provided
+     *
+     * @param typeEnum Throttle Limit DTO's Type Enum
+     * @param dto      Throttle Limit DTO object
+     * @return constructed error message
+     */
+    public static String constructThrottleLimitErrorMessage(ThrottleLimitDTO.TypeEnum typeEnum,
+                                               ThrottleLimitDTO dto) {
+
+        return "Throttle Limit object corresponding to type " + typeEnum + " not provided\n"
                 + dto.toString();
     }
 }

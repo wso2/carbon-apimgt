@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitTypeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -21,7 +21,7 @@ public class ConditionalGroupDTO   {
   
     private String description = null;
     private List<ThrottleConditionDTO> conditions = new ArrayList<>();
-    private ThrottleLimitTypeDTO limit = null;
+    private ThrottleLimitDTO limit = null;
 
   /**
    * Description of the Conditional Group
@@ -62,7 +62,7 @@ public class ConditionalGroupDTO   {
 
   /**
    **/
-  public ConditionalGroupDTO limit(ThrottleLimitTypeDTO limit) {
+  public ConditionalGroupDTO limit(ThrottleLimitDTO limit) {
     this.limit = limit;
     return this;
   }
@@ -71,10 +71,10 @@ public class ConditionalGroupDTO   {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("limit")
   @NotNull
-  public ThrottleLimitTypeDTO getLimit() {
+  public ThrottleLimitDTO getLimit() {
     return limit;
   }
-  public void setLimit(ThrottleLimitTypeDTO limit) {
+  public void setLimit(ThrottleLimitDTO limit) {
     this.limit = limit;
   }
 
