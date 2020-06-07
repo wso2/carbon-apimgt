@@ -4,7 +4,7 @@ import KeyValidation from './KeyValidation';
 
 
 /**
- * Trottling Policies dropdown selector used in minimized API Create form
+ * Key Validation entries form
  * @export
  * @param {*} props
  * @returns {React.Component}

@@ -115,7 +115,7 @@ const RouteMenuMapping = (intl) => [
             defaultMessage: 'KeyManagers',
         }),
         path: '/settings/key-managers',
-        component: () => <KeyManagers />,
+        component: KeyManagers,
         icon: <PhonelinkSetupIcon />,
     },
     {

@@ -8,10 +8,11 @@ import FormControl from '@material-ui/core/FormControl';
 import FormGroup from '@material-ui/core/FormGroup';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
+import { FormattedMessage } from 'react-intl';
 
 
 /**
- * Trottling Policies dropdown selector used in minimized API Create form
+ * Keymanager Connector configuration
  * @export
  * @param {*} props
  * @returns {React.Component}
@@ -19,21 +20,24 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 export default function KeyManagerConfiguration(props) {
     const { keymanagerConnectorConfigurations, additionalProperties, setAdditionalProperties } = props;
     const onChange = (e) => {
-        let { value } = e.target;
-        if (e.target.type === 'checkbox') {
-            if (additionalProperties[e.target.name]) {
-                value = additionalProperties[e.target.name];
+        let finalValue;
+        const { name, value, type } = e.target;
+        if (type === 'checkbox') {
+            if (additionalProperties[name]) {
+                finalValue = additionalProperties[name];
             } else {
-                value = [];
+                finalValue = [];
             }
             if (e.target.checked) {
-                value.push(e.target.value);
+                finalValue.push(value);
             } else {
                 const newValue = value.filter((v) => v !== e.target.value);
-                value = newValue;
+                finalValue = newValue;
             }
+        } else {
+            finalValue = value;
         }
-        setAdditionalProperties(e.target.name, value);
+        setAdditionalProperties(name, finalValue);
     };
     const getComponent = (keymanagerConnectorConfiguration) => {
         let value = '';
@@ -136,6 +140,10 @@ export default function KeyManagerConfiguration(props) {
         )));
 }
 KeyManagerConfiguration.defaultProps = {
+    keymanagerConnectorConfigurations: [],
     required: false,
-    helperText: 'Add Key Manager Configuration',
+    helperText: <FormattedMessage
+        id='KeyManager.Connector.Configuration.Helper.text'
+        defaultMessage='Add KeyManager Connector Configurations'
+    />,
 };

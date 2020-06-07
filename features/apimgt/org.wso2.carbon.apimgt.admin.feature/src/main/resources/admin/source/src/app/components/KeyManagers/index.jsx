@@ -12,8 +12,8 @@ function KeyManagers() {
     return (
         <Switch>
             <Route exact path='/settings/key-managers' component={ListKeyManagers} />
-            <Route path='/settings/key-managers/:id' component={AddEditKeyManager} />
-            <Route path='/settings/key-managers/create' component={AddEditKeyManager} />
+            <Route exact path='/settings/key-managers/create' component={AddEditKeyManager} />
+            <Route exact path='/settings/key-managers/:id' component={AddEditKeyManager} />
             <Route component={ResourceNotFound} />
         </Switch>
     );

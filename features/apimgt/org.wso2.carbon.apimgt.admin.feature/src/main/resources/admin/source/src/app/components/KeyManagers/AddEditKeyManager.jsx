@@ -165,9 +165,14 @@ function AddEditKeyManager(props) {
     const restApi = new API();
     const updateKeyManagerConnectorConfiguration = (keyManagerType) => {
         if (settings.keyManagerConfiguration) {
-            if (settings.keyManagerConfiguration[keyManagerType]) {
-                setKeyManagerConfiguration(settings.keyManagerConfiguration[keyManagerType]);
-            }
+            settings.keyManagerConfiguration.map(({ type: key, configurations }) => {
+                if (key === keyManagerType) {
+                    setKeyManagerConfiguration(configurations);
+                    return true;
+                } else {
+                    return false;
+                }
+            });
         }
     };
     useEffect(() => {

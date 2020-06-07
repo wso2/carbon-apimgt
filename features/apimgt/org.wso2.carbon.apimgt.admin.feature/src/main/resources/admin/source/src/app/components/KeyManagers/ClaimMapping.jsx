@@ -15,6 +15,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import ClearIcon from '@material-ui/icons/Clear';
 import Alert from 'AppComponents/Shared/Alert';
+import { FormattedMessage } from 'react-intl';
 
 const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
@@ -24,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Trottling Policies dropdown selector used in minimized API Create form
+ * Claim Mapping Creation Form
  * @export
  * @param {*} props
  * @returns {React.Component}
@@ -37,16 +38,17 @@ export default function ClaimMappings(props) {
     const [validationError, setValidationError] = useState([]);
 
     const onChange = (e) => {
-        if (e.target.id === 'remoteClaim') {
-            setRemoteClaim(e.target.value);
-        } else if (e.target.id === 'localClaim') {
-            setLocalClaim(e.target.value);
+        const { id, value } = e.target;
+        if (id === 'remoteClaim') {
+            setRemoteClaim(value);
+        } else if (id === 'localClaim') {
+            setLocalClaim(value);
         }
     };
     const validate = (fieldName, value) => {
         let error = '';
         if (value === null || value === '') {
-            error = 'Calim is Empty';
+            error = 'Claim is Empty';
         } else {
             error = '';
         }
@@ -67,9 +69,13 @@ export default function ClaimMappings(props) {
             return false;
         } else {
             let exist = false;
-            claimMappings.map(({ remoteClaim, localClaim }) => {
+            claimMappings.map(({ remoteClaim }) => {
                 if (remoteClaim === newRemoteClaim) {
-                    Alert.error('Claim Mapping Already Exist with local claim ' + localClaim);
+                    Alert.error(<FormattedMessage
+                        id='Claim.Mapping.already.exists'
+                        defaultMessage='Claim Mapping Already Exist'
+                    />);
+                    clearValues();
                     exist = true;
                 }
                 return false;
@@ -96,9 +102,15 @@ export default function ClaimMappings(props) {
                 <Table className={classes.table} aria-label='simple table'>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Remote Claim</TableCell>
-                            <TableCell align='right'>Local Claim</TableCell>
-                            <TableCell align='right'>Action</TableCell>
+                            <TableCell>
+                                <FormattedMessage id='Keymanager.Remote.Claim' defaultMessage='Remote Claim' />
+                            </TableCell>
+                            <TableCell align='right'>
+                                <FormattedMessage id='Keymanager.Local.Claim' defaultMessage='Local Claim' />
+                            </TableCell>
+                            <TableCell align='right'>
+                                <FormattedMessage id='Keymanager.Claim.Action' defaultMessage='Action' />
+                            </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -106,7 +118,12 @@ export default function ClaimMappings(props) {
                             <TableCell component='th' scope='row'>
                                 <TextField
                                     id='remoteClaim'
-                                    label='Remote Claim'
+                                    label={(
+                                        <FormattedMessage
+                                            id='Keymanager.Remote.Claim'
+                                            defaultMessage='Remote Claim'
+                                        />
+                                    )}
                                     variant='outlined'
                                     onChange={onChange}
                                     error={validationError.remoteClaim}
@@ -117,7 +134,12 @@ export default function ClaimMappings(props) {
                             <TableCell align='right'>
                                 <TextField
                                     id='localClaim'
-                                    label='Local Claim'
+                                    label={(
+                                        <FormattedMessage
+                                            id='Keymanager.Local.Claim'
+                                            defaultMessage='Local Claim'
+                                        />
+                                    )}
                                     value={newLocalClaim === null ? '' : newLocalClaim}
                                     onChange={onChange}
                                     error={validationError.localClaim}
@@ -154,7 +176,6 @@ export default function ClaimMappings(props) {
                                     <TextField
                                         id={remoteClaim}
                                         defaultValue={remoteClaim}
-                                        label='Remote Claim'
                                         variant='outlined'
                                         disabled
                                     />
@@ -163,7 +184,6 @@ export default function ClaimMappings(props) {
                                     <TextField
                                         id={localClaim}
                                         defaultValue={localClaim}
-                                        label='Local Claim'
                                         variant='outlined'
                                         disabled
                                     />
@@ -189,5 +209,5 @@ export default function ClaimMappings(props) {
 ClaimMappings.defaultProps = {
     claimMappings: [],
     required: false,
-    helperText: 'Add Claim Mappings',
+    helperText: (<FormattedMessage id='KeyManager.Claim.Helper.text' defaultMessage='Add Claim Mappings' />),
 };
