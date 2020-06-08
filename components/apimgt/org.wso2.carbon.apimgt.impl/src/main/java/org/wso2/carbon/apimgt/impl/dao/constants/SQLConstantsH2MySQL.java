@@ -246,11 +246,11 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.CREATED_TIME, " +
                     "   E.UPDATED_TIME " +
                     " FROM " +
-                    "   ENDPOINT_REG_ENTRY AS E, " +
-                    "   ENDPOINT_REG AS R " +
+                    "   SERVICE_CATALOG_ENTRY AS E, " +
+                    "   SERVICE_CATALOG AS C " +
                     " WHERE " +
-                    "   E.REG_ID=R.ID AND " +
-                    "   R.UUID=? " +
+                    "   E.CATALOG_ID = C.ID AND " +
+                    "   C.UUID = ? " +
                     "   AND " +
                     "       E.DISPLAY_NAME like ?" +
                     "   AND " +
@@ -279,11 +279,11 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.CREATED_TIME, " +
                     "   E.UPDATED_TIME " +
                     " FROM " +
-                    "   ENDPOINT_REG_ENTRY AS E, " +
-                    "   ENDPOINT_REG AS R " +
+                    "   SERVICE_CATALOG_ENTRY AS E, " +
+                    "   SERVICE_CATALOG AS C " +
                     " WHERE " +
-                    "   E.REG_ID=R.ID AND " +
-                    "   R.UUID=? " +
+                    "   E.CATALOG_ID = C.ID AND " +
+                    "   C.UUID = ? " +
                     "   AND " +
                     "       E.DISPLAY_NAME like ?" +
                     "   AND " +
@@ -314,11 +314,11 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.CREATED_TIME, " +
                     "   E.UPDATED_TIME " +
                     " FROM " +
-                    "   ENDPOINT_REG_ENTRY AS E, " +
-                    "   ENDPOINT_REG AS R " +
+                    "   SERVICE_CATALOG_ENTRY AS E, " +
+                    "   SERVICE_CATALOG AS C " +
                     " WHERE " +
-                    "   E.REG_ID=R.ID AND " +
-                    "   R.UUID=? " +
+                    "   E.CATALOG_ID = C.ID AND " +
+                    "   C.UUID = ? " +
                     "   AND " +
                     "       E.DISPLAY_NAME like ?" +
                     "   AND " +
@@ -349,11 +349,11 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   E.CREATED_TIME, " +
                     "   E.UPDATED_TIME " +
                     " FROM " +
-                    "   ENDPOINT_REG_ENTRY AS E, " +
-                    "   ENDPOINT_REG AS R " +
+                    "   SERVICE_CATALOG_ENTRY AS E, " +
+                    "   SERVICE_CATALOG AS C " +
                     " WHERE " +
-                    "   E.REG_ID=R.ID AND " +
-                    "   R.UUID=? " +
+                    "   E.CATALOG_ID = C.ID AND " +
+                    "   C.UUID = ? " +
                     "   AND " +
                     "       E.DISPLAY_NAME like ?" +
                     "   AND " +
