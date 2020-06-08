@@ -24,6 +24,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -705,22 +706,24 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response throttlingPoliciesCustomPost(CustomRuleDTO body, String contentType,
-                                                 MessageContext messageContext) {
+                                                 MessageContext messageContext) throws APIManagementException {
 
-        String errorMessage;
-
+        String propertyName;
         //Check if the required fields are blank
         if (StringUtils.isBlank(body.getPolicyName())) {
-            errorMessage = "Policy name of custom rule cannot be blank";
-            RestApiUtil.handleBadRequest(errorMessage, log);
+            propertyName = "policyName";
+            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
+                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
         }
         if (StringUtils.isBlank(body.getSiddhiQuery())) {
-            errorMessage = "Siddhi Query of custom rule cannot be blank";
-            RestApiUtil.handleBadRequest(errorMessage, log);
+            propertyName = "siddhiQuery";
+            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
+                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
         }
         if (StringUtils.isBlank(body.getKeyTemplate())) {
-            errorMessage = "Key Template of custom rule cannot be blank";
-            RestApiUtil.handleBadRequest(errorMessage, log);
+            propertyName = "keyTemplate";
+            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
+                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
         }
 
         try {
@@ -734,7 +737,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             try {
                 Policy policyIfExists = apiProvider.getGlobalPolicy(globalPolicy.getPolicyName());
                 if (policyIfExists != null) {
-                    RestApiUtil.handleResourceAlreadyExistsError("Custom rule with name " + globalPolicy.getPolicyName() + " already exists", log);
+                    RestApiUtil.handleResourceAlreadyExistsError(
+                            "Custom rule with name " + globalPolicy.getPolicyName() + " already exists", log);
                 }
             } catch (PolicyNotFoundException ignore) {
             }
@@ -744,12 +748,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //retrieve the new policy and send back as the response
             GlobalPolicy newGlobalPolicy = apiProvider.getGlobalPolicy(body.getPolicyName());
             CustomRuleDTO policyDTO = GlobalThrottlePolicyMappingUtil.fromGlobalThrottlePolicyToDTO(newGlobalPolicy);
-            return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL + "/" + policyDTO.getPolicyId())).entity(policyDTO).build();
+            return Response.created(
+                    new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL + "/" + policyDTO.getPolicyId()))
+                    .entity(policyDTO).build();
         } catch (APIManagementException e) {
-            errorMessage = "Error while adding a custom rule: " + body.getPolicyName();
+            String errorMessage = "Error while adding a custom rule: " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
-            errorMessage = "Error while retrieving Global Throttle policy location : " + body.getPolicyName();
+            String errorMessage = "Error while retrieving Global Throttle policy location : " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
