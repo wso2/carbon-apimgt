@@ -52,13 +52,13 @@ export default function ListBlacklistThrottlingPolicies() {
         /* This title is what as the title of the popup dialog box */
         title: intl.formatMessage({
             id: 'Throttling.Blacklist.Policy.List.addButtonProps.title',
-            defaultMessage: 'Select Item to Blacklist ',
+            defaultMessage: 'Select Item to Deny ',
         }),
     };
     const searchProps = {
         searchPlaceholder: intl.formatMessage({
             id: 'Throttling.Blacklist.Policy.List.search.default',
-            defaultMessage: 'Search by Blacklist Policy name',
+            defaultMessage: 'Search by Deny Policy name',
         }),
         active: true,
     };
@@ -78,7 +78,7 @@ export default function ListBlacklistThrottlingPolicies() {
                             <ListItemText primary={(
                                 <FormattedMessage
                                     id='Throttling.Blacklist.Policy.List.help.link.one'
-                                    defaultMessage='Blacklisting requests'
+                                    defaultMessage='Denying requests'
                                 />
                             )}
                             />
@@ -90,11 +90,11 @@ export default function ListBlacklistThrottlingPolicies() {
         pageStyle: 'half',
         title: intl.formatMessage({
             id: 'Throttling.Blacklist.Policy.search.default',
-            defaultMessage: 'Blacklist Policies',
+            defaultMessage: 'Deny Policies',
         }),
         EditTitle: intl.formatMessage({
             id: 'Throttling.Blacklist.Policy.search.default',
-            defaultMessage: 'Blacklist Policies',
+            defaultMessage: 'Deny Policies',
         }),
     };
 
@@ -235,15 +235,14 @@ export default function ListBlacklistThrottlingPolicies() {
             <Typography variant='body2' color='textSecondary' component='p'>
                 <FormattedMessage
                     id='Throttling.Blacklist.Policy.List.empty.content.blacklist.policies and abuse by'
-                    defaultMessage={'By blacklisting requests, you can protect servers from common attacks'
-                    + ' users.'}
+                    defaultMessage='Denying requests from malicious entities helps you to keep your servers safe'
                 />
             </Typography>),
         title: (
             <Typography gutterBottom variant='h5' component='h2'>
                 <FormattedMessage
                     id='Throttling.Blacklist.Policy.List.empty.title.blacklist.policies'
-                    defaultMessage='Blacklist Policies'
+                    defaultMessage='Deny Policies'
                 />
             </Typography>),
     };
