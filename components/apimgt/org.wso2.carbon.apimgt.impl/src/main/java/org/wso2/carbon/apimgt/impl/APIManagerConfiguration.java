@@ -1556,32 +1556,23 @@ public class APIManagerConfiguration {
 
     private void setGatewayArtifactsSynchronizerConfig (OMElement omElement){
 
-        gatewayArtifactSynchronizerProperties.setSyncArtifacts(true);
-        OMElement publisherElement = omElement.getFirstChildWithName(
-                new QName(APIConstants.GatewayArtifactSynchronizer.PUBLISHER_CONFIG));
-        if (publisherElement != null) {
-            String publisher = publisherElement.getText();
-            gatewayArtifactSynchronizerProperties.setPublisher(publisher);
+        gatewayArtifactSynchronizerProperties.setSyncEnabled(true);
+        OMElement saverElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.SAVER_CONFIG));
+        if (saverElement != null) {
+            String artifactSaver = saverElement.getText();
+            gatewayArtifactSynchronizerProperties.setSaverName(artifactSaver);
         } else {
-            log.debug("GatewayArtifactsSynchronizer Publisher Element is not set. Set to default DB Publisher");
+            log.debug("GatewayArtifactsSynchronizer Artifact saver Element is not set. Set to default DB Sever");
         }
 
         OMElement retrieverElement = omElement.getFirstChildWithName(
                 new QName(APIConstants.GatewayArtifactSynchronizer.RETRIEVER_CONFIG));
         if (retrieverElement != null) {
-            String retriever = retrieverElement.getText();
-            gatewayArtifactSynchronizerProperties.setRetriever(retriever);
+            String artifactRetriever = retrieverElement.getText();
+            gatewayArtifactSynchronizerProperties.setRetrieverName(artifactRetriever);
         } else {
-            log.debug("GatewayArtifactsSynchronizer Deployer Element is not set. Set to default DB Deployer");
-        }
-
-        OMElement synchronizerElement = omElement.getFirstChildWithName(
-                new QName(APIConstants.GatewayArtifactSynchronizer.SYNCHRONIZER_CONFIG));
-        if (synchronizerElement != null) {
-            String synchronizer = synchronizerElement.getText();
-            gatewayArtifactSynchronizerProperties.setArtifactSynchronizer(synchronizer);
-        } else {
-            log.debug("GatewayArtifactsSynchronizer Deployer Element is not set. Set to default DB Deployer");
+            log.debug("GatewayArtifactsSynchronizer Artifact retriver Element is not set. Set to default DB retriever");
         }
 
         gatewayArtifactSynchronizerProperties.getGatewayLabels()
@@ -1593,6 +1584,15 @@ public class APIManagerConfiguration {
             for (String label : gatewayLabel.split(",")){
                 gatewayArtifactSynchronizerProperties.getGatewayLabels().add(label);
             }
+        }
+
+        OMElement publishDirectlyToGatewayElement = omElement
+                .getFirstChildWithName(new QName("PublishDirectlyToGateway"));
+        if (publishDirectlyToGatewayElement != null) {
+            gatewayArtifactSynchronizerProperties.setPublishDirectlyToGateway(
+                    JavaUtils.isTrueExplicitly(publishDirectlyToGatewayElement.getText()));
+        } else {
+            log.debug("Publish directly to db is not set. Set to default true");
         }
     }
 

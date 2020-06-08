@@ -22,10 +22,10 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.notifier.events.APIGatewayEvent;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 
 import java.util.Enumeration;
@@ -42,6 +42,8 @@ public class GatewayJMSMessageListener implements MessageListener {
 
     private static final Log log = LogFactory.getLog(GatewayJMSMessageListener.class);
     private InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
+    GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
+            .getInstance().getAPIMConfiguration().getGatewayArtifactSynchronizerProperties();
 
     public void onMessage(Message message) {
 
@@ -89,18 +91,16 @@ public class GatewayJMSMessageListener implements MessageListener {
 
         byte[] eventDecoded = Base64.decodeBase64(event);
 
-        if (APIConstants.EventType.PUBLISH_API_IN_GATEWAY.name().equals(eventType)) {
-            APIGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded), APIGatewayEvent.class);
-            if (ServiceReferenceHolder.getInstance().getAPIMConfiguration().getGatewayArtifactSynchronizerProperties()
-                    .getGatewayLabels().contains(gatewayEvent.getGatewayLabel())) {
-
-                if (APIConstants.GatewayArtifactSynchronizer.PUBLISH_EVENT_LABEL.equals(gatewayEvent.getEventLabel())) {
-                    inMemoryApiDeployer.deployAPI(gatewayEvent.getApiName(), gatewayEvent.getGatewayLabel(),
-                            gatewayEvent.getApiId());
-                } else if (APIConstants.GatewayArtifactSynchronizer.REMOVE_EVENT_LABEL
-                        .equals(gatewayEvent.getEventLabel())) {
-                    inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiName(), gatewayEvent.getGatewayLabel(),
-                            gatewayEvent.getApiId());
+        if ((APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
+                || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType))
+                && gatewayArtifactSynchronizerProperties.isRetrieveFromStorage()) {
+            DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded),
+                    DeployAPIInGatewayEvent.class);
+            if (gatewayArtifactSynchronizerProperties.getGatewayLabels().contains(gatewayEvent.getGatewayLabel())) {
+                if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
+                    inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayEvent.getGatewayLabel());
+                } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
+                    inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayEvent.getGatewayLabel());
                 }
             }
         }

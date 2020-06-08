@@ -12,7 +12,7 @@ public class UndeployApiApiServiceImpl implements UndeployApiApiService {
     public Response undeployApiPost(String apiName, String label, String apiId, MessageContext messageContext) {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-        boolean status = inMemoryApiDeployer.unDeployAPI(apiName, label, apiId);
+        boolean status = inMemoryApiDeployer.unDeployAPI(apiId, label);
 
         JSONObject responseObj = new JSONObject();
         if (status) {

@@ -22,8 +22,7 @@ import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactPublisher;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -36,9 +35,7 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ServiceReferenceHolder {
 
@@ -57,7 +54,7 @@ public class ServiceReferenceHolder {
     private OAuthServerConfiguration oauthServerConfiguration;
     private Map<String,JWTTransformer> jwtTransformerMap = new HashMap<>();
     private Map<String,KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap  = new HashMap<>();
-    private ArtifactPublisher artifactPublisher;
+    private ArtifactSaver artifactSaver;
     private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
 
     public static ConfigurationContextService getContextService() {
@@ -207,11 +204,11 @@ public class ServiceReferenceHolder {
         return notifiersMap;
     }
 
-    public ArtifactPublisher getArtifactPublisher() {
-        return artifactPublisher;
+    public ArtifactSaver getArtifactSaver() {
+        return artifactSaver;
     }
 
-    public void setArtifactPublisher(ArtifactPublisher artifactPublisher) {
-        this.artifactPublisher = artifactPublisher;
+    public void setArtifactSaver(ArtifactSaver artifactSaver) {
+        this.artifactSaver = artifactSaver;
     }
 }

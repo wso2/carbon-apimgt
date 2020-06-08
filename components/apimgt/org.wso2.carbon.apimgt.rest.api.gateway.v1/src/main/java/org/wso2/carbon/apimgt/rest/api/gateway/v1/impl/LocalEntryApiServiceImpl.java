@@ -15,7 +15,7 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
     public Response localEntryGet(String apiName, String label, String apiId, MessageContext messageContext) {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-        GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiName, label, apiId);
+        GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
 
         JSONObject responseObj = new JSONObject();
         JSONArray localEntryArray = new JSONArray();

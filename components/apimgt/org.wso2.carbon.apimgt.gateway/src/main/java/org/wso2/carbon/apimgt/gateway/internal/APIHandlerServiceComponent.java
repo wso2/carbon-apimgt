@@ -411,24 +411,20 @@ public class APIHandlerServiceComponent {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
                         .getGatewayArtifactSynchronizerProperties();
 
-        if (gatewayArtifactSynchronizerProperties.getRetriever().equals(artifactRetriever.getType())) {
+        if (gatewayArtifactSynchronizerProperties.getRetrieverName().equals(artifactRetriever.getName())) {
             ServiceReferenceHolder.getInstance().setArtifactRetriever(artifactRetriever);
 
             try {
                 ServiceReferenceHolder.getInstance().getArtifactRetriever().init();
-                ServiceReferenceHolder.getInstance().getArtifactRetriever().testConnect();
-                ServiceReferenceHolder.getInstance().getArtifactRetriever().connect();
             } catch (Exception e) {
-                log.error("Error connecting with the ArtifactPublisher");
-                ServiceReferenceHolder.getInstance().getArtifactRetriever().disconnect();
-                ServiceReferenceHolder.getInstance().getArtifactRetriever().destroy();
+                log.error("Error connecting with the Artifact retriever");
+                unsetArtifactRetriever(null);
             }
         }
     }
 
     protected void unsetArtifactRetriever(ArtifactRetriever artifactRetriever) {
         ServiceReferenceHolder.getInstance().getArtifactRetriever().disconnect();
-        ServiceReferenceHolder.getInstance().getArtifactRetriever().destroy();
         ServiceReferenceHolder.getInstance().setArtifactRetriever(null);
 
     }

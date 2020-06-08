@@ -54,7 +54,7 @@ import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
 import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.AbstractKeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.impl.notifier.GatewayApisNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
@@ -71,9 +71,9 @@ import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactPublisher;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBPublisher;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBSaver;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
@@ -196,7 +196,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new ApplicationNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new ApplicationRegistrationNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new PolicyNotifier(), null);
-            bundleContext.registerService(Notifier.class.getName(), new GatewayApisNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new DeployAPIInGatewayNotifier(), null);
 
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
@@ -308,13 +308,13 @@ public class APIManagerComponent {
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
 
-            if (configuration.getGatewayArtifactSynchronizerProperties().isSyncArtifacts()) {
-                if (APIConstants.GatewayArtifactSynchronizer.DEFAULT_PUBLISHER_NAME
-                        .equals(configuration.getGatewayArtifactSynchronizerProperties().getPublisher())) {
-                    bundleContext.registerService(ArtifactPublisher.class.getName(), new DBPublisher(), null);
+            if (configuration.getGatewayArtifactSynchronizerProperties().isSyncEnabled()) {
+                if (APIConstants.GatewayArtifactSynchronizer.DEFAULT_SAVER_NAME
+                        .equals(configuration.getGatewayArtifactSynchronizerProperties().getSaverName())) {
+                    bundleContext.registerService(ArtifactSaver.class.getName(), new DBSaver(), null);
                 }
                 if (APIConstants.GatewayArtifactSynchronizer.DEFAULT_RETRIEVER_NAME
-                        .equals(configuration.getGatewayArtifactSynchronizerProperties().getRetriever())) {
+                        .equals(configuration.getGatewayArtifactSynchronizerProperties().getRetrieverName())) {
                     bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
                 }
             }
@@ -890,36 +890,32 @@ public class APIManagerComponent {
     }
 
     @Reference(
-            name = "gateway.artifact.publisher",
-            service = ArtifactPublisher.class,
+            name = "gateway.artifact.saver",
+            service = ArtifactSaver.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetArtifactPublisher")
-    protected void setArtifactPublisher(ArtifactPublisher artifactPublisher) {
+            unbind = "unsetArtifactSaver")
+    protected void setArtifactPublisher (ArtifactSaver artifactSaver) {
 
         GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                         .getGatewayArtifactSynchronizerProperties();
 
-        if (gatewayArtifactSynchronizerProperties.getPublisher().equals(artifactPublisher.getType())) {
-            ServiceReferenceHolder.getInstance().setArtifactPublisher(artifactPublisher);
+        if (gatewayArtifactSynchronizerProperties.getSaverName().equals(artifactSaver.getName())) {
+            ServiceReferenceHolder.getInstance().setArtifactSaver(artifactSaver);
 
             try {
-                ServiceReferenceHolder.getInstance().getArtifactPublisher().init();
-                ServiceReferenceHolder.getInstance().getArtifactPublisher().testConnect();
-                ServiceReferenceHolder.getInstance().getArtifactPublisher().connect();
+                ServiceReferenceHolder.getInstance().getArtifactSaver().init();
             } catch (Exception e) {
-                log.error("Error connecting with the ArtifactPublisher");
-                ServiceReferenceHolder.getInstance().getArtifactPublisher().disconnect();
-                ServiceReferenceHolder.getInstance().getArtifactPublisher().destroy();
+                log.error("Error connecting with the Artifact Saver");
+                unsetArtifactSaver(null);
             }
         }
     }
 
-    protected void unsetArtifactPublisher(ArtifactPublisher artifactPublisher) {
-        ServiceReferenceHolder.getInstance().getArtifactPublisher().disconnect();
-        ServiceReferenceHolder.getInstance().getArtifactPublisher().destroy();
-        ServiceReferenceHolder.getInstance().setArtifactPublisher(null);
+    protected void unsetArtifactSaver(ArtifactSaver artifactSaver) {
+        ServiceReferenceHolder.getInstance().getArtifactSaver().disconnect();
+        ServiceReferenceHolder.getInstance().setArtifactSaver(null);
     }
 
     /**

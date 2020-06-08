@@ -13,7 +13,7 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
     public Response apiArtifactGet(String apiName, String label, String apiId, MessageContext messageContext) {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-        GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiName, label, apiId);
+        GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
         String definition;
         JSONObject responseObj = new JSONObject();
         if (gatewayAPIDTO != null) {

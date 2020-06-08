@@ -2271,14 +2271,15 @@ public final class APIConstants {
         SUBSCRIPTIONS_CREATE,
         SUBSCRIPTIONS_UPDATE,
         SUBSCRIPTIONS_DELETE,
-        PUBLISH_API_IN_GATEWAY
+        DEPLOY_API_IN_GATEWAY,
+        REMOVE_API_FROM_GATEWAY
     }
 
     public static class GatewayArtifactSynchronizer{
 
         public static final String SYNC_GATEWAY_ARTIFACTS_CONFIG  = "SyncGatewayArtifacts";
-        public static final String PUBLISHER_CONFIG  = "Publisher";
-        public static final String RETRIEVER_CONFIG = "Retriever";
+        public static final String SAVER_CONFIG = "ArtifactSaver";
+        public static final String RETRIEVER_CONFIG = "ArtifactRetriever";
         public static final String SYNCHRONIZER_CONFIG = "Synchronizer";
         public static final String IN_MEMORY_SYNCHRONIZER = "InMemory";
         public static final String FILE_BASED_SYNCHRONIZER = "FileBased";
@@ -2286,7 +2287,7 @@ public final class APIConstants {
         public static final String DEFAULT_GATEWAY_LABEL = "DefaultGateway";
         public static final String PUBLISH_EVENT_LABEL = "PublishAPIInGateway";
         public static final String REMOVE_EVENT_LABEL = "RemoveAPIInGateway";
-        public static final String DEFAULT_PUBLISHER_NAME = "DefaultPublisher";
+        public static final String DEFAULT_SAVER_NAME = "DefaultSaver";
         public static final String DEFAULT_RETRIEVER_NAME = "DefaultRetriever";
         public static final String ARTIFACT_STATUS_PUBLISH = "Publish";
         public static final String ARTIFACT_STATUS_REMOVE = "Remove";

@@ -15,7 +15,7 @@ public class SequenceApiServiceImpl implements SequenceApiService {
     public Response sequenceGet(String apiName, String label, String apiId, MessageContext messageContext) {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-        GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiName, label, apiId);
+        GatewayAPIDTO gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
 
         JSONObject responseObj = new JSONObject();
         JSONArray sequencesArray = new JSONArray();

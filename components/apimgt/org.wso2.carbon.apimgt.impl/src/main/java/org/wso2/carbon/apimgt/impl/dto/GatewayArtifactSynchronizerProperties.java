@@ -7,40 +7,31 @@ import java.util.Set;
 
 public class GatewayArtifactSynchronizerProperties {
 
-    private boolean syncArtifacts = false;
-    private boolean fileBasedArtifactSynchronizer = true;
-    private String publisher = APIConstants.GatewayArtifactSynchronizer.DEFAULT_PUBLISHER_NAME;
-    private String retriever = APIConstants.GatewayArtifactSynchronizer.DEFAULT_RETRIEVER_NAME;
+    private boolean syncEnabled = false;
+    private boolean publishDirectlyToGateway = true;
+    private boolean retrieveFromStorage = false;
+    private String saverName = APIConstants.GatewayArtifactSynchronizer.DEFAULT_SAVER_NAME;
+    private String retrieverName = APIConstants.GatewayArtifactSynchronizer.DEFAULT_RETRIEVER_NAME;
     private Set<String> gatewayLabels = new HashSet<>();
 
-    public boolean isSyncArtifacts() {
+    public String getSaverName() {
 
-        return syncArtifacts;
+        return saverName;
     }
 
-    public void setSyncArtifacts(boolean syncArtifacts) {
+    public void setSaverName(String saverName) {
 
-        this.syncArtifacts = syncArtifacts;
+        this.saverName = saverName;
     }
 
-    public String getPublisher() {
+    public String getRetrieverName() {
 
-        return publisher;
+        return retrieverName;
     }
 
-    public void setPublisher(String publisher) {
+    public void setRetrieverName(String retrieverName) {
 
-        this.publisher = publisher;
-    }
-
-    public String getRetriever() {
-
-        return retriever;
-    }
-
-    public void setRetriever(String retriever) {
-
-        this.retriever = retriever;
+        this.retrieverName = retrieverName;
     }
 
     public Set<String> getGatewayLabels() {
@@ -53,20 +44,36 @@ public class GatewayArtifactSynchronizerProperties {
         this.gatewayLabels = gatewayLabels;
     }
 
-    public void setArtifactSynchronizer (String artifactSynchronizer){
+    public boolean isPublishDirectlyToGateway() {
 
-        if (APIConstants.GatewayArtifactSynchronizer.IN_MEMORY_SYNCHRONIZER.equals(artifactSynchronizer)){
-            this.fileBasedArtifactSynchronizer = false;
+        return publishDirectlyToGateway;
+    }
+
+    public void setPublishDirectlyToGateway(boolean publishDirectlyToGateway) {
+
+        this.publishDirectlyToGateway = publishDirectlyToGateway;
+    }
+
+    public boolean isRetrieveFromStorage() {
+
+        return retrieveFromStorage;
+    }
+
+    public void setRetrieveFromStorage(boolean retrieveFromStorage) {
+
+        this.retrieveFromStorage = retrieveFromStorage;
+    }
+
+    public boolean isSyncEnabled() {
+
+        return syncEnabled;
+    }
+
+    public void setSyncEnabled(boolean syncEnabled) {
+        if (syncEnabled){
+            setRetrieveFromStorage(true);
         }
-    }
 
-    public boolean isFileBasedArtifactSynchronizer(){
-
-        return this.fileBasedArtifactSynchronizer;
-    }
-
-    public boolean isInMemoryArtifactSynchronizer(){
-
-        return !this.fileBasedArtifactSynchronizer;
+        this.syncEnabled = syncEnabled;
     }
 }

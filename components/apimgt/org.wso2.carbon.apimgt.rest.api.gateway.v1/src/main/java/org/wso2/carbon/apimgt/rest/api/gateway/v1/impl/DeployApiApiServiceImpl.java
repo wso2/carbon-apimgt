@@ -10,10 +10,10 @@ import org.json.JSONObject;
 
 public class DeployApiApiServiceImpl implements DeployApiApiService {
 
-    public Response deployApiPost(String apiName, String label, String apiId, MessageContext messageContext) {
+    public Response deployApiPost(String apiName, String gatewayLabel, String apiId, MessageContext messageContext) {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-        boolean status = inMemoryApiDeployer.deployAPI(apiName, label, apiId);
+        boolean status = inMemoryApiDeployer.deployAPI(apiId, gatewayLabel);
 
         JSONObject responseObj = new JSONObject();
         if (status) {
