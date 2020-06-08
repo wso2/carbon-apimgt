@@ -55,6 +55,12 @@ public interface ArtifactPublisher {
     Set<String> getExistingLabelsForAPI(String apiId);
 
     /**
+     * This method will return if the API is published in any of the gateways
+     * @throws ArtifactSynchronizerException if there are any errors in the process
+     */
+    boolean isAPIPublished(String apiId);
+
+    /**
      * Will be called after all publishing is done, or when ConnectionUnavailableException is thrown
      */
     void disconnect();

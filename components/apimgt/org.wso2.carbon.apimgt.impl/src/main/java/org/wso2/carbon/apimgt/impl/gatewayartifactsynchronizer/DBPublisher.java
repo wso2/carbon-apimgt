@@ -94,6 +94,18 @@ public class DBPublisher implements ArtifactPublisher {
     }
 
     @Override
+    public boolean isAPIPublished(String apiId) {
+        boolean status = false;
+        try {
+            status = apiMgtDAO.isAPIPublished(apiId);
+        } catch (APIManagementException e) {
+            log.error("Error getting API Published status for the API with ID " + apiId + " from DB", e);
+        }
+
+        return status;
+    }
+
+    @Override
     public void disconnect() {
         //not required
     }

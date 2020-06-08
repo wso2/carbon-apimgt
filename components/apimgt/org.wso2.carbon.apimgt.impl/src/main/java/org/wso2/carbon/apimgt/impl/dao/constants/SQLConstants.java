@@ -3178,6 +3178,9 @@ public class SQLConstants {
     public static final String GET_EXISTING_LABELS_FOR_API = "SELECT GATEWAY_LABEL FROM AM_GW_API_ARTIFACTS WHERE " +
             "API_ID = ?";
 
+    public static final String CHECK_API_PUBLISHED_STATUS = "SELECT GATEWAY_LABEL FROM AM_GW_API_ARTIFACTS WHERE " +
+            "API_ID = ? AND ARTIFACT_TYPE = ?";
+
 
     /** Throttle related constants**/
 
