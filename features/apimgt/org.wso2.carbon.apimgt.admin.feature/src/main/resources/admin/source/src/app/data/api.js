@@ -686,6 +686,17 @@ class API extends Resource {
             );
         });
     }
+    /**
+     * Delete an Key Manager
+     */
+    deleteKeyManager(keyManagerId) {
+        return this.client.then((client) => {
+            return client.apis['Key Manager (Individual)'].delete_key_managers__keyManagerId_(
+                {keyManagerId:keyManagerId},
+                this._requestMetaData(),
+            );
+        });
+    }
 
 }
 
