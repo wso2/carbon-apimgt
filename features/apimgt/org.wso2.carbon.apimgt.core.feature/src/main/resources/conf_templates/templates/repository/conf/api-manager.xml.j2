@@ -1135,17 +1135,17 @@
 
     {% if apim.gateway.sync is defined %}
     <SyncGatewayArtifacts>
-        {% if apim.gateway.sync.synchronizer is defined %}
-        <Synchronizer>{{apim.gateway.sync.synchronizer}}</Synchronizer>
+        {% if apim.gateway.sync.gateway_labels is defined %}
+        <GatewayLabels>{{- apim.gateway.sync.gateway_labels.toList()|join(',') -}}</GatewayLabels>
         {% endif %}
-        {% if apim.gateway.sync.gateway_label is defined %}
-        <GatewayLabel>{{apim.gateway.sync.gateway_label}}</GatewayLabel>
+        {% if apim.gateway.sync.artifact_saver is defined %}
+        <ArtifactSaver>{{apim.gateway.sync.artifact_saver}}</ArtifactSaver>
         {% endif %}
-        {% if apim.gateway.sync.publisher is defined %}
-        <Publisher>{{apim.gateway.sync.publisher}}</Publisher>
+        {% if apim.gateway.sync.artifact_retriever is defined %}
+        <ArtifactRetriever>{{apim.gateway.sync.retriever}}</ArtifactRetriever>
         {% endif %}
-        {% if apim.gateway.sync.retriever is defined %}
-        <Retriever>{{apim.gateway.sync.retriever}}</Retriever>
+        {% if apim.gateway.sync.publish_directly_to_gateway is defined %}
+        <PublishDirectlyToGW>{{apim.gateway.sync.retriever}}</PublishDirectlyToGW>
         {% endif %}
     </SyncGatewayArtifacts>
     {% endif %}

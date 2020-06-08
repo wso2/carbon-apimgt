@@ -1587,7 +1587,7 @@ public class APIManagerConfiguration {
         }
 
         OMElement publishDirectlyToGatewayElement = omElement
-                .getFirstChildWithName(new QName("PublishDirectlyToGateway"));
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.PUBLISH_DIRECTLY_TO_GW_CONFIG));
         if (publishDirectlyToGatewayElement != null) {
             gatewayArtifactSynchronizerProperties.setPublishDirectlyToGateway(
                     JavaUtils.isTrueExplicitly(publishDirectlyToGatewayElement.getText()));

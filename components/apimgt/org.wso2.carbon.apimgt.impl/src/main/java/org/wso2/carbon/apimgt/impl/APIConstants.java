@@ -2280,13 +2280,9 @@ public final class APIConstants {
         public static final String SYNC_GATEWAY_ARTIFACTS_CONFIG  = "SyncGatewayArtifacts";
         public static final String SAVER_CONFIG = "ArtifactSaver";
         public static final String RETRIEVER_CONFIG = "ArtifactRetriever";
-        public static final String SYNCHRONIZER_CONFIG = "Synchronizer";
-        public static final String IN_MEMORY_SYNCHRONIZER = "InMemory";
-        public static final String FILE_BASED_SYNCHRONIZER = "FileBased";
+        public static final String PUBLISH_DIRECTLY_TO_GW_CONFIG = "PublishDirectlyToGW";
         public static final String GATEWAY_LABEL_CONFIG  = "GatewayLabel";
         public static final String DEFAULT_GATEWAY_LABEL = "DefaultGateway";
-        public static final String PUBLISH_EVENT_LABEL = "PublishAPIInGateway";
-        public static final String REMOVE_EVENT_LABEL = "RemoveAPIInGateway";
         public static final String DEFAULT_SAVER_NAME = "DefaultSaver";
         public static final String DEFAULT_RETRIEVER_NAME = "DefaultRetriever";
         public static final String ARTIFACT_STATUS_PUBLISH = "Publish";
