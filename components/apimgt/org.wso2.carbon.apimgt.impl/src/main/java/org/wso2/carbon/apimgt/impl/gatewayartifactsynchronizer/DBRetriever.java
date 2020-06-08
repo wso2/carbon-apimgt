@@ -7,8 +7,6 @@ import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ConnectionUnavailableException;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.TestConnectionNotSupportedException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,47 +23,21 @@ public class DBRetriever implements ArtifactRetriever {
     }
 
     @Override
-    public void testConnect() throws TestConnectionNotSupportedException, ConnectionUnavailableException {
-        //not required
-    }
-
-    @Override
-    public void connect() throws ConnectionUnavailableException {
-        //not required
-    }
-
-    @Override
-    public GatewayAPIDTO retrieveArtifacts(String APIId, String APIName, String label)
+    public GatewayAPIDTO retrieveArtifact(String APIId, String gatewayLabel)
             throws ArtifactSynchronizerException {
 
         GatewayAPIDTO gatewayAPIDTO = null;
         try {
-            ByteArrayInputStream byteStream = apiMgtDAO.getGatewayPublishedAPIArtifacts(APIId, label);
+            ByteArrayInputStream byteStream = apiMgtDAO.getGatewayPublishedAPIArtifacts(APIId, gatewayLabel);
             ObjectInputStream objectStream = new ObjectInputStream(byteStream);
             gatewayAPIDTO = (GatewayAPIDTO) objectStream.readObject();
             if (log.isDebugEnabled()) {
-                log.debug("Successfully retrieved Artifacts of " + gatewayAPIDTO.getName());
+                log.debug("Successfully retrieved Artifact of " + gatewayAPIDTO.getName());
             }
         } catch (APIManagementException | IOException | ClassNotFoundException e) {
-            throw new ArtifactSynchronizerException("Error retrieving Artifact of " + APIName + " API from DB", e);
+            throw new ArtifactSynchronizerException("Error retrieving Artifact belongs to  " + APIId + " from DB", e);
         }
         return gatewayAPIDTO;
-    }
-
-    @Override
-    public void deleteArtifacts(GatewayAPIDTO gatewayAPIDTO) throws ArtifactSynchronizerException {
-
-        try {
-            apiMgtDAO.deleteGatewayPublishedAPIArtifacts(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel());
-            apiMgtDAO.deleteGatewayPublishedAPIDetails(gatewayAPIDTO.getApiId());
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully deleted Artifacts of " + gatewayAPIDTO.getName());
-            }
-        } catch (APIManagementException e) {
-            throw new ArtifactSynchronizerException("Error deleting Artifacts of " + gatewayAPIDTO.getName()
-                    + " API from DB", e);
-        }
-
     }
 
     @Override
@@ -74,12 +46,7 @@ public class DBRetriever implements ArtifactRetriever {
     }
 
     @Override
-    public void destroy() {
-        //not required
-    }
-
-    @Override
-    public String getType() {
+    public String getName() {
 
         return APIConstants.GatewayArtifactSynchronizer.DEFAULT_RETRIEVER_NAME;
     }

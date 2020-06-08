@@ -2,8 +2,6 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ConnectionUnavailableException;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.TestConnectionNotSupportedException;
 
 /**
  * This is a Artifact Retriever type. this interface let users to retriever API artifacts from a storage.
@@ -18,49 +16,26 @@ public interface ArtifactRetriever {
     void init() throws ArtifactSynchronizerException;
 
     /**
-     * Used to test the connection
-     *
-     * @throws TestConnectionNotSupportedException if test connection is not supported by the retriever
-     * @throws ConnectionUnavailableException      if it cannot connect to the storage
-     */
-    void testConnect() throws TestConnectionNotSupportedException, ConnectionUnavailableException;
-
-    /**
-     * Will be called to connect to the storage before APIs are retrieved
-     *
-     * @throws ConnectionUnavailableException if it cannot connect to the storage
-     */
-    void connect() throws ConnectionUnavailableException;
-
-    /**
      * This method is used to retrieve data from the storage
      *
+     * @param APIId         - UUID of the API
+     * @param gatewayLabel  -  Label subscribed by the gateway
+     * @return DTO contains all the information about the API and gateway artifacts
      * @throws ArtifactSynchronizerException if there are any errors when retrieving the Artifacts
      */
-    GatewayAPIDTO retrieveArtifacts(String APIId, String APIName, String label) throws ArtifactSynchronizerException;
+    GatewayAPIDTO retrieveArtifact (String APIId, String gatewayLabel) throws ArtifactSynchronizerException;
 
     /**
-     * The init of the publisher, this will be called only once.
-     *
-     * @throws ArtifactSynchronizerException if there are any errors in the process
-     */
-    void deleteArtifacts(GatewayAPIDTO gatewayAPIDTO) throws ArtifactSynchronizerException;
-
-    /**
-     * Will be called after all publishing is done, or when ConnectionUnavailableException is thrown
+     * Will be called after all publishing is done or if init fails
      */
     void disconnect();
 
-    /**
-     * Will be called at the end to clean all the resources consumed
-     */
-    void destroy();
 
     /**
-     * The method to get notifier
+     * The method to get name of the retriever
      *
-     * @return type of the notifier
+     * @return Name of the retriever
      */
-    public String getType();
+     String getName();
 
 }

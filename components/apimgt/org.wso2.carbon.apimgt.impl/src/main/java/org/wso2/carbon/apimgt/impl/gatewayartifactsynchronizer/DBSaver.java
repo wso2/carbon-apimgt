@@ -7,8 +7,6 @@ import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ConnectionUnavailableException;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.TestConnectionNotSupportedException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -17,9 +15,9 @@ import java.io.ObjectOutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-public class DBPublisher implements ArtifactPublisher {
+public class DBSaver implements ArtifactSaver {
 
-    private static final Log log = LogFactory.getLog(DBPublisher.class);
+    private static final Log log = LogFactory.getLog(DBSaver.class);
     protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     @Override
@@ -28,17 +26,7 @@ public class DBPublisher implements ArtifactPublisher {
     }
 
     @Override
-    public void testConnect() throws TestConnectionNotSupportedException, ConnectionUnavailableException {
-        //not required
-    }
-
-    @Override
-    public void connect() throws ConnectionUnavailableException {
-        //not required
-    }
-
-    @Override
-    public void publishArtifacts(GatewayAPIDTO gatewayAPIDTO)
+    public void saveArtifact(GatewayAPIDTO gatewayAPIDTO)
             throws ArtifactSynchronizerException {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -60,7 +48,7 @@ public class DBPublisher implements ArtifactPublisher {
     }
 
     @Override
-    public void updateArtifacts(GatewayAPIDTO gatewayAPIDTO, String artifactType)
+    public void updateArtifact(GatewayAPIDTO gatewayAPIDTO, String gatewayInstruction)
             throws ArtifactSynchronizerException {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -70,7 +58,7 @@ public class DBPublisher implements ArtifactPublisher {
             byte[] gatewayAPIDTOAsBytes = byteArrayOutputStream.toByteArray();
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayAPIDTOAsBytes);
             apiMgtDAO.updateGatewayPublishedAPIArtifacts(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel(),
-                    byteArrayInputStream, gatewayAPIDTOAsBytes.length, artifactType);
+                    byteArrayInputStream, gatewayAPIDTOAsBytes.length, gatewayInstruction);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully updated Artifacts of " + gatewayAPIDTO.getName());
             }
@@ -95,31 +83,13 @@ public class DBPublisher implements ArtifactPublisher {
     }
 
     @Override
-    public boolean isAPIPublished(String apiId) {
-
-        boolean status = false;
-        try {
-            status = apiMgtDAO.isAPIPublished(apiId);
-        } catch (APIManagementException e) {
-            log.error("Error getting API Published status for the API with ID " + apiId + " from DB", e);
-        }
-
-        return status;
-    }
-
-    @Override
     public void disconnect() {
         //not required
     }
 
     @Override
-    public void destroy() {
-        //not required
-    }
+    public String getName() {
 
-    @Override
-    public String getType() {
-
-        return APIConstants.GatewayArtifactSynchronizer.DEFAULT_PUBLISHER_NAME;
+        return APIConstants.GatewayArtifactSynchronizer.DEFAULT_SAVER_NAME;
     }
 }

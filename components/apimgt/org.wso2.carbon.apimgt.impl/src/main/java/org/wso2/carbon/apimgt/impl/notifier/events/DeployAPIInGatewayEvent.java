@@ -1,14 +1,13 @@
 package org.wso2.carbon.apimgt.impl.notifier.events;
 
-public class APIGatewayEvent extends Event {
+public class APIDeployInGatewayEvent extends Event {
 
     private String gatewayLabel;
     private String apiName;
     private String apiId;
-    private String eventLabel;
 
-    public APIGatewayEvent(String eventId, long timestamp, String type, int tenantId, String apiName, String apiId,
-                    String gatewayLabel, String eventLabel) {
+    public APIDeployInGatewayEvent(String eventId, long timestamp, String type, int tenantId, String apiName, String apiId,
+                                   String gatewayLabel) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -17,7 +16,6 @@ public class APIGatewayEvent extends Event {
         this.apiName = apiName;
         this.apiId = apiId;
         this.gatewayLabel = gatewayLabel;
-        this.eventLabel = eventLabel;
 
     }
 
@@ -51,13 +49,4 @@ public class APIGatewayEvent extends Event {
         this.apiId = apiId;
     }
 
-    public String getEventLabel() {
-
-        return eventLabel;
-    }
-
-    public void setEventLabel(String eventLabel) {
-
-        this.eventLabel = eventLabel;
-    }
 }
