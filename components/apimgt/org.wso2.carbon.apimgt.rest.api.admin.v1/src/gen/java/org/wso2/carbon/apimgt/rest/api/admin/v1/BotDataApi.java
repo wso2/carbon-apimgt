@@ -42,7 +42,8 @@ BotDataApiService delegate = new BotDataApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add an Email", notes = "Here we can use this to configure email ", response = EmailDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails")
+            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={  })
     @ApiResponses(value = { 
@@ -59,7 +60,8 @@ BotDataApiService delegate = new BotDataApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete an configured email.", notes = "Delete an configured email from DB by pasing uuid. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails")
+            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={  })
     @ApiResponses(value = { 
@@ -76,7 +78,8 @@ BotDataApiService delegate = new BotDataApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all configured email list ", notes = "Get all email list which configured to trigger for BotData api email alert ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails")
+            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={  })
     @ApiResponses(value = { 

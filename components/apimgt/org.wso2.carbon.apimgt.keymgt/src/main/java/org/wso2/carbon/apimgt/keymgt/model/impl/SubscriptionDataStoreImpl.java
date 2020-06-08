@@ -57,6 +57,12 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private Map<String, SubscriptionPolicy> subscriptionPolicyMap;
     private Map<String, ApplicationPolicy> appPolicyMap;
     private Map<String, Subscription> subscriptionMap;
+    private boolean apisInitialized;
+    private boolean applicationsInitialized;
+    private boolean subscriptionsInitialized;
+    private boolean applicationKeysInitialized;
+    private boolean applicationPoliciesInitialized;
+    private boolean subscriptionPoliciesInitialized;
     public static final int LOADING_POOL_SIZE = 7;
     private String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(LOADING_POOL_SIZE);
@@ -130,7 +136,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 () -> {
                     try {
                         log.debug("Calling loadAllApis. ");
-                        return new SubscriptionDataLoaderImpl().loadAllApis(tenantDomain);
+                        List<API> apiList = new SubscriptionDataLoaderImpl().loadAllApis(tenantDomain);
+                        apisInitialized = true;
+                        return apiList;
                     } catch (APIManagementException e) {
                         log.error("Exception while loading APIs " + e);
                     }
@@ -143,7 +151,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 () -> {
                     try {
                         log.debug("Calling loadAllSubscriptions.");
-                        return new SubscriptionDataLoaderImpl().loadAllSubscriptions(tenantDomain);
+                        List<Subscription> subscriptionList =
+                                new SubscriptionDataLoaderImpl().loadAllSubscriptions(tenantDomain);
+                        subscriptionsInitialized = true;
+                        return subscriptionList;
                     } catch (APIManagementException e) {
                         log.error("Exception while loading Subscriptions " + e);
                     }
@@ -156,7 +167,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 () -> {
                     try {
                         log.debug("Calling loadAllApplications.");
-                        return new SubscriptionDataLoaderImpl().loadAllApplications(tenantDomain);
+                        List<Application> applicationList =
+                                new SubscriptionDataLoaderImpl().loadAllApplications(tenantDomain);
+                        applicationsInitialized = true;
+                        return applicationList;
                     } catch (APIManagementException e) {
                         log.error("Exception while loading Applications " + e);
                     }
@@ -170,7 +184,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                         () -> {
                             try {
                                 log.debug("Calling loadAllKeyMappings.");
-                                return new SubscriptionDataLoaderImpl().loadAllKeyMappings(tenantDomain);
+                                List<ApplicationKeyMapping> applicationKeyMappingList =
+                                        new SubscriptionDataLoaderImpl().loadAllKeyMappings(tenantDomain);
+                                applicationKeysInitialized = true;
+                                return applicationKeyMappingList;
                             } catch (APIManagementException e) {
                                 log.error("Exception while loading ApplicationKeyMapping " + e);
                             }
@@ -184,7 +201,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                         () -> {
                             try {
                                 log.debug("Calling loadAllSubscriptionPolicies.");
-                                return new SubscriptionDataLoaderImpl().loadAllSubscriptionPolicies(tenantDomain);
+                                List<SubscriptionPolicy> subscriptionPolicyList =
+                                        new SubscriptionDataLoaderImpl().loadAllSubscriptionPolicies(tenantDomain);
+                                subscriptionPoliciesInitialized = true;
+                                return subscriptionPolicyList;
                             } catch (APIManagementException e) {
                                 log.error("Exception while loading Subscription Policies " + e);
                             }
@@ -198,7 +218,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                         () -> {
                             try {
                                 log.debug("Calling loadAllAppPolicies.");
-                                return new SubscriptionDataLoaderImpl().loadAllAppPolicies(tenantDomain);
+                                List<ApplicationPolicy> applicationPolicyList =
+                                        new SubscriptionDataLoaderImpl().loadAllAppPolicies(tenantDomain);
+                                applicationPoliciesInitialized = true;
+                                return applicationPolicyList;
                             } catch (APIManagementException e) {
                                 log.error("Exception while loading Application Policies " + e);
                             }
@@ -249,5 +272,45 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 }
             }
         }
+    }
+
+    public boolean isApisInitialized() {
+
+        return apisInitialized;
+    }
+
+    public boolean isApplicationsInitialized() {
+
+        return applicationsInitialized;
+    }
+
+    public boolean isSubscriptionsInitialized() {
+
+        return subscriptionsInitialized;
+    }
+
+    public boolean isApplicationKeysInitialized() {
+
+        return applicationKeysInitialized;
+    }
+
+    public boolean isApplicationPoliciesInitialized() {
+
+        return applicationPoliciesInitialized;
+    }
+
+    public boolean isSubscriptionPoliciesInitialized() {
+
+        return subscriptionPoliciesInitialized;
+    }
+
+    public boolean isSubscriptionValidationDataInitialized() {
+
+        return apisInitialized &&
+                applicationsInitialized &&
+                subscriptionsInitialized &&
+                applicationKeysInitialized &&
+                applicationPoliciesInitialized &&
+                subscriptionPoliciesInitialized;
     }
 }

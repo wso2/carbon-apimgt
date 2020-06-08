@@ -873,6 +873,18 @@
     "SubscriptionPolicy" : {
       "allOf" : [ {
         "$ref" : "#/definitions/Policy"
+      }, {
+        "properties" : {
+          "rateLimitCount" : {
+            "type" : "integer"
+          },
+          "rateLimitTimeUnit" : {
+            "type" : "string"
+          },
+          "stopOnQuotaReach" : {
+            "type" : "boolean"
+          }
+        }
       } ]
     },
     "ApplicationPolicyList" : {
@@ -921,7 +933,7 @@
     "ApiPolicy" : {
       "allOf" : [ {
         "$ref" : "#/definitions/Policy"
-      } ]
+      }, { } ]
     },
     "ApiPolicyConditionGroup" : {
       "properties" : {

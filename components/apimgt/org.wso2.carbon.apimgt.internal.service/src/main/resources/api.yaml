@@ -713,13 +713,13 @@ definitions:
   SubscriptionPolicy:
     allOf:
     - $ref: '#/definitions/Policy'
-    properties:
-      rateLimitCount:
-        type: integer
-      rateLimitTimeUnit:
-        type: string
-      stopOnQuotaReach:
-        type: boolean
+    - properties:
+        rateLimitCount:
+          type: integer
+        rateLimitTimeUnit:
+          type: string
+        stopOnQuotaReach:
+          type: boolean
   #-----------------------------------------------------
   # The Application Policy List resource
   #-----------------------------------------------------
@@ -767,7 +767,7 @@ definitions:
   ApiPolicy:
     allOf:
     - $ref: '#/definitions/Policy'
-    properties:
+    - properties:
       conditionGroups:
         type: array
         items:
