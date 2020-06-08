@@ -346,8 +346,10 @@ public class APIGatewayManager {
         environment.setName(label.getName());
         environment.setDefault(true);
         environment.setDescription(label.getDescription());
-        environment.setApiGatewayEndpoint(label.getAccessUrls().get(0));
-        environment.setWebsocketGatewayEndpoint(label.getAccessUrls().get(0));
+        if (!label.getAccessUrls().isEmpty()) {
+            environment.setApiGatewayEndpoint(label.getAccessUrls().get(0));
+            environment.setWebsocketGatewayEndpoint(label.getAccessUrls().get(0));
+        }
         return environment;
     }
 
@@ -486,6 +488,9 @@ public class APIGatewayManager {
             log.debug("Number of environments to be published to: " + apiProduct.getEnvironments().size());
         }
 
+        publishedGateways = ServiceReferenceHolder.getInstance().getArtifactPublisher()
+                .getExistingLabelsForAPI(apiProduct.getUuid());
+
         for (String environmentName : apiProduct.getEnvironments()) {
             if (debugEnabled) {
                 startTimePublishToGateway = System.currentTimeMillis();
@@ -504,6 +509,8 @@ public class APIGatewayManager {
                 productAPIDto.setVersion(id.getVersion());
                 productAPIDto.setTenantDomain(tenantDomain);
                 productAPIDto.setOverride(false);
+                productAPIDto.setGatewayLabel(environmentName);
+                productAPIDto.setApiId(apiProduct.getUuid());
                 String definition = apiProduct.getDefinition();
                 productAPIDto.setLocalEntriesToBeRemove(addStringToList(apiProduct.getUuid(),
                         productAPIDto.getLocalEntriesToBeRemove()));
@@ -539,7 +546,27 @@ public class APIGatewayManager {
                     setAPIFaultSequencesToBeAdded(api, tenantDomain, productAPIDto);
                     setSecureVaultProperty(client, api, tenantDomain);
                 }
-                client.deployAPI(productAPIDto);
+
+                if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer()){
+                    client.deployAPI(productAPIDto);
+                }
+
+                ArtifactPublisher artifactPublisher = ServiceReferenceHolder.getInstance().getArtifactPublisher();
+                if (publishedGateways.contains(environment.getName())) {
+                    artifactPublisher.updateArtifacts(productAPIDto,APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_PUBLISH);
+                    publishedGateways.remove(environment.getName());
+                } else {
+                    artifactPublisher.publishArtifacts(productAPIDto);
+                }
+
+                int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                APIGatewayEvent apiGatewayEvent = new APIGatewayEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(),
+                        APIConstants.EventType.PUBLISH_API_IN_GATEWAY.name(), tenantId, productAPIDto.getName(),
+                        productAPIDto.getApiId(), productAPIDto.getGatewayLabel(),
+                        APIConstants.GatewayArtifactSynchronizer.PUBLISH_EVENT_LABEL);
+                APIUtil.sendNotification(apiGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+
                 if (debugEnabled) {
                     long endTime = System.currentTimeMillis();
                     log.debug("Publishing API (if the API does not exist in the Gateway) took " +
@@ -554,7 +581,10 @@ public class APIGatewayManager {
                 therefore this didn't break the gateway publishing if one gateway unreachable
                  */
                 failedEnvironmentsMap.put(environmentName, e.getMessage());
-                log.error("Error occurred when publish to gateway " + environmentName, e);
+                log.error("Error occurred when publish to gateway FileBased Synchronizer" + environmentName, e);
+            } catch (ArtifactSynchronizerException e) {
+                failedEnvironmentsMap.put(environmentName, e.getMessage());
+                log.error("Error occurred when publish to gateway using InMemory Synchronizer" + environmentName, e);
             }
 
             if (debugEnabled) {
@@ -743,8 +773,7 @@ public class APIGatewayManager {
                     if (environment == null) {
                         continue;
                     }
-
-                    APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
+                    productAPIGatewayAPIDTO.setGatewayLabel(environmentName);
 
                     for (API api : associatedAPIs) {
                         if (!APIStatus.PUBLISHED.getStatus().equals(api.getStatus())) {
@@ -754,15 +783,31 @@ public class APIGatewayManager {
                     }
                     productAPIGatewayAPIDTO.setLocalEntriesToBeRemove(addStringToList(apiProduct.getUuid(),
                             productAPIGatewayAPIDTO.getLocalEntriesToBeRemove()));
-                    client.unDeployAPI(productAPIGatewayAPIDTO);
+                    if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer()) {
+                        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
+                        client.unDeployAPI(productAPIGatewayAPIDTO);
+                    }
+
+                    ServiceReferenceHolder.getInstance().getArtifactPublisher().updateArtifacts(productAPIGatewayAPIDTO,
+                            APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_REMOVE);
+                    int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                    APIGatewayEvent apiGatewayEvent = new APIGatewayEvent(UUID.randomUUID().toString(),
+                            System.currentTimeMillis(),
+                            APIConstants.EventType.PUBLISH_API_IN_GATEWAY.name(), tenantId, productAPIGatewayAPIDTO.getName(),
+                            productAPIGatewayAPIDTO.getApiId(), productAPIGatewayAPIDTO.getGatewayLabel(),
+                            APIConstants.GatewayArtifactSynchronizer.REMOVE_EVENT_LABEL);
+                    APIUtil.sendNotification(apiGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+
                 } catch (AxisFault e) {
                     /*
                     didn't throw this exception to handle multiple gateway publishing
                     if gateway is unreachable we collect that environments into map with issue and show on popup in ui
                     therefore this didn't break the gateway unpublisihing if one gateway unreachable
                     */
-                    log.error("Error occurred when removing from gateway " + environmentName,
-                            e);
+                    log.error("Error occurred when removing from gateway in FileBased mode " + environmentName, e);
+                    failedEnvironmentsMap.put(environmentName, e.getMessage());
+                } catch (ArtifactSynchronizerException e) {
+                    log.error("Error occurred when removing from gateway in InMemory mode " + environmentName, e);
                     failedEnvironmentsMap.put(environmentName, e.getMessage());
                 }
             }
@@ -977,34 +1022,37 @@ public class APIGatewayManager {
 	/**
 	 * Checks whether the API has been published.
 	 * 
-	 * @param api
-	 *            - The API to be cheked.
-	 * @param tenantDomain
-	 *            - Tenant Domain of the publisher
-	 * @return True if the API is available in at least one Gateway. False if
-	 *         available in none.
+	 * @param api           - The API to be checked.
+	 * @param tenantDomain  - Tenant Domain of the publisher
+	 * @return True if the API is available in at least one Gateway. False if available in none.
 	 */
-    public boolean isAPIPublished(API api, String tenantDomain)throws APIManagementException {
-        for (Environment environment : environments.values()) {
-            try {
-                APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
-                // If the API exists in at least one environment, consider as
-                // published and return true.
-                APIIdentifier id = api.getId();
-                if (client.getApi(tenantDomain, id) != null) {
-                    return true;
-                }
-            } catch (AxisFault axisFault) {
-                /*
-                didn't throw this exception to check api available in all the environments
-                therefore we didn't throw exception to avoid if gateway unreachable affect
-                */
-                if (!APIConstants.CREATED.equals(api.getStatus())) {
-                    log.error("Error occurred when check api is published on gateway" + environment.getName(), axisFault);
+    public boolean isAPIPublished(API api, String tenantDomain) throws APIManagementException {
+
+        if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer()) {
+            for (Environment environment : environments.values()) {
+                try {
+                    APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
+                    // If the API exists in at least one environment, consider as
+                    // published and return true.
+                    APIIdentifier id = api.getId();
+                    if (client.getApi(tenantDomain, id) != null) {
+                        return true;
+                    }
+                } catch(AxisFault axisFault){
+                    /*
+                    didn't throw this exception to check api available in all the environments
+                    therefore we didn't throw exception to avoid if gateway unreachable affect
+                    */
+                    if (!APIConstants.CREATED.equals(api.getStatus())) {
+                        log.error("Error occurred when check api is published on gateway" + environment.getName(),
+                                axisFault);
+                    }
                 }
             }
+            return false;
+        } else {
+            return ServiceReferenceHolder.getInstance().getArtifactPublisher().isAPIPublished(api.getUUID());
         }
-        return false;
     }
     
     /**
