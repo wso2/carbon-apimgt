@@ -768,7 +768,7 @@ definitions:
     allOf:
     - $ref: '#/definitions/Policy'
     - properties:
-      conditionGroups:
+       conditionGroups:
         type: array
         items:
           $ref: '#/definitions/ApiPolicyConditionGroup'
