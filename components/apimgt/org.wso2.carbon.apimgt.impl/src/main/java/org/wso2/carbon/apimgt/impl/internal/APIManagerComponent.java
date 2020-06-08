@@ -308,12 +308,15 @@ public class APIManagerComponent {
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
 
-            if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                    .getGatewayArtifactSynchronizerProperties().isSyncArtifacts()) {
-
-                bundleContext.registerService(ArtifactPublisher.class.getName(), new DBPublisher(), null);
-                bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
-
+            if (configuration.getGatewayArtifactSynchronizerProperties().isSyncArtifacts()) {
+                if (APIConstants.GatewayArtifactSynchronizer.DEFAULT_PUBLISHER_NAME
+                        .equals(configuration.getGatewayArtifactSynchronizerProperties().getPublisher())) {
+                    bundleContext.registerService(ArtifactPublisher.class.getName(), new DBPublisher(), null);
+                }
+                if (APIConstants.GatewayArtifactSynchronizer.DEFAULT_RETRIEVER_NAME
+                        .equals(configuration.getGatewayArtifactSynchronizerProperties().getRetriever())) {
+                    bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
+                }
             }
 
         } catch (APIManagementException e) {
