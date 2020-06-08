@@ -328,6 +328,9 @@ class API extends Resource {
         });
     }
 
+    /**
+     * Get Subscription Throttling Policies
+     */
     getSubscritionPolicyList() {
         return this.client.then((client) => {
             return client.apis['Subscription Policy (Collection)'].get_throttling_policies_subscription(

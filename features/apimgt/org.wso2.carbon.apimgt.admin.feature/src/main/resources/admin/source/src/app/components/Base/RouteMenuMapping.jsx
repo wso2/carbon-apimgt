@@ -220,7 +220,7 @@ const RouteMenuMapping = (intl) => [
                 }),
                 path: '/throttling/subscription',
                 component: () => <SubscriptionThrottlingPolicies />,
-                icon: <PhonelinkSetupIcon />,
+                icon: <ShoppingBasketIcon />,
             },
             {
                 id: intl.formatMessage({
