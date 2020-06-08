@@ -42,7 +42,8 @@ TenantInfoApiService delegate = new TenantInfoApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get tenant id of the user ", notes = "This operation is to get tenant id of the provided user ", response = TenantInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:tenantInfo", description = "Retrieve tenant related information")
+            @AuthorizationScope(scope = "apim:tenantInfo", description = "Retrieve tenant related information"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Tenants" })
     @ApiResponses(value = { 

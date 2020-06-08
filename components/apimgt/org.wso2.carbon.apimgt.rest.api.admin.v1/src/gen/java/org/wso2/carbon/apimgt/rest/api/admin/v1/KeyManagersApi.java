@@ -43,7 +43,8 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all Key managers", notes = "Get all Key managers ", response = KeyManagerListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories")
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Key Manager (Collection)",  })
     @ApiResponses(value = { 
@@ -58,7 +59,8 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a Key Manager", notes = "Delete a Key Manager by keyManager id ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories")
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Key Manager (Individual)",  })
     @ApiResponses(value = { 
@@ -74,7 +76,8 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a Key Manager Configuration", notes = "Retrieve a single Key Manager Configuration. We should provide the Id of the KeyManager as a path parameter. ", response = KeyManagerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories")
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Key Manager (Individual)",  })
     @ApiResponses(value = { 
@@ -91,7 +94,8 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a Key Manager", notes = "Update a Key Manager by keyManager id ", response = KeyManagerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories")
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Key Manager (Individual)",  })
     @ApiResponses(value = { 
@@ -108,7 +112,8 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a new API Key Manager", notes = "Add a new API Key Manager ", response = KeyManagerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories")
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Key Manager (Collection)" })
     @ApiResponses(value = { 
