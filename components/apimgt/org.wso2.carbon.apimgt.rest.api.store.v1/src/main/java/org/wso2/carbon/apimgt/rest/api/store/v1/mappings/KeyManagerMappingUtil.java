@@ -38,6 +38,10 @@ public class KeyManagerMappingUtil {
             keyManagerInfoDTO.setEnableOAuthAppCreation(
                     jsonObject.get(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION).getAsBoolean());
         }
+        if (jsonObject.has(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION)){
+            keyManagerInfoDTO.setEnableTokenGeneration(
+                    jsonObject.get(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION).getAsBoolean());
+        }
         if (jsonObject.has(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS)){
             keyManagerInfoDTO.setEnableMapOAuthConsumerApps(
                     jsonObject.get(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS).getAsBoolean());
