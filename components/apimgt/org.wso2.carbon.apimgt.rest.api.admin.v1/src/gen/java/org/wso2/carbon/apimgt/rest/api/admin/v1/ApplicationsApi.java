@@ -42,7 +42,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Change Application Owner", notes = "This operation is used to change the owner of an Application. In order to change the owner of an application, we need to pass the new application owner as a query parameter ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:app_owner_change", description = "Retrieve and manage applications")
+            @AuthorizationScope(scope = "apim:app_owner_change", description = "Retrieve and manage applications"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Application",  })
     @ApiResponses(value = { 
@@ -60,7 +61,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/Search applications ", notes = "This operation can be used to retrieve list of applications that is belonged to the given user, If no user is provided then the application for the user associated with the provided access token will be returned. ", response = ApplicationListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:app_owner_change", description = "Retrieve and manage applications")
+            @AuthorizationScope(scope = "apim:app_owner_change", description = "Retrieve and manage applications"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Application (Collection)" })
     @ApiResponses(value = { 

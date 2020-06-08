@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Progress component test should comply with the snapshot 1`] = `
+<div
+  className="apim-dual-ring"
+>
+  <span
+    style={
+      Object {
+        "display": "block",
+        "marginLeft": "-33px",
+        "width": "200px",
+      }
+    }
+  >
+    
+  </span>
+</div>
+`;

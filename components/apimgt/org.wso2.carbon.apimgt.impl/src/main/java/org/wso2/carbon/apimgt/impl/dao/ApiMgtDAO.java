@@ -18,7 +18,11 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -28,6 +32,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
@@ -58,6 +63,7 @@ import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -78,6 +84,8 @@ import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
+import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
@@ -111,8 +119,10 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -5738,10 +5748,22 @@ public class ApiMgtDAO {
             prepStmt.setString(7, workflow.getTenantDomain());
             prepStmt.setString(8, workflow.getExternalWorkflowReference());
 
-            prepStmt.execute();
+            if (workflow.getMetadata() != null) {
+                byte[] metadataByte = workflow.getMetadata().toJSONString().getBytes("UTF-8");
+                prepStmt.setBlob(9, new ByteArrayInputStream(metadataByte));
+            } else {
+                prepStmt.setNull(9, java.sql.Types.BLOB);
+            }
 
+            if (workflow.getProperties() != null) {
+                byte[] propertiesByte = workflow.getProperties().toJSONString().getBytes("UTF-8");
+                prepStmt.setBlob(10, new ByteArrayInputStream(propertiesByte));
+            } else {
+                prepStmt.setNull(10, java.sql.Types.BLOB);
+            }
+            prepStmt.execute();
             connection.commit();
-        } catch (SQLException e) {
+        } catch (SQLException | UnsupportedEncodingException e) {
             handleException("Error while adding Workflow : " + workflow.getExternalWorkflowReference() + " to the " +
                     "database", e);
         } finally {
@@ -14622,6 +14644,251 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Remove the Pending workflow Requests using ExternalWorkflowReference
+     *
+     * @param workflowExtRef External Workflow Reference of Workflow Pending Request
+     * @throws APIManagementException
+     */
+    public void deleteWorkflowRequest(String workflowExtRef) throws APIManagementException {
+
+        String query = SQLConstants.DELETE_WORKFLOW_REQUEST_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            try {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, workflowExtRef);
+                prepStmt.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                handleException("Failed to delete the workflow request. ", e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to delete the workflow request. ", e);
+        }
+    }
+
+    /**
+     * Get the Pending workflow Request using ExternalWorkflowReference
+     *
+     * @param externalWorkflowRef
+     * @return workflow pending request
+     * @throws APIManagementException
+     */
+    public Workflow getworkflowReferenceByExternalWorkflowReference(String externalWorkflowRef) throws APIManagementException {
+
+        ResultSet rs = null;
+        Workflow workflow = new Workflow();
+        String sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS_BY_EXTERNALWORKFLOWREF;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            try {
+                prepStmt.setString(1, externalWorkflowRef);
+                rs = prepStmt.executeQuery();
+
+                while (rs.next()) {
+                    workflow.setWorkflowId(rs.getInt("WF_ID"));
+                    workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
+                    workflow.setWorkflowType(rs.getString("WF_TYPE"));
+                    String workflowstatus = rs.getString("WF_STATUS");
+                    workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
+                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
+                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
+                    workflow.setWorkflowStatusDesc(rs.getString("WF_STATUS_DESC"));
+                    workflow.setTenantId(rs.getInt("TENANT_ID"));
+                    workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                    workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+                    Blob metadatablob = rs.getBlob("WF_METADATA");
+
+                    byte[] metadataByte;
+                    if (metadatablob != null) {
+                        metadataByte = metadatablob.getBytes(1L, (int) metadatablob.length());
+                        InputStream targetStream = new ByteArrayInputStream(metadataByte);
+                        String metadata = APIMgtDBUtil.getStringFromInputStream(targetStream);
+                        Gson metadataGson = new Gson();
+                        JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
+                        workflow.setMetadata(metadataJson);
+                    } else {
+                        JSONObject metadataJson = new JSONObject();
+                        workflow.setMetadata(metadataJson);
+                    }
+                }
+            } catch (SQLException e) {
+                handleException("Error when retriving the workflow details. ", e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            }
+        } catch (SQLException e) {
+            handleException("Error when retriving the workflow details. ", e);
+        }
+        return workflow;
+    }
+
+    /**
+     * Get the Pending workflow Requests using WorkflowType for a particular tenant
+     *
+     * @param workflowType Type of the workflow pending request
+     * @param status       workflow status of workflow pending request
+     * @param tenantDomain tenantDomain of the user
+     * @return List of workflow pending request
+     * @throws APIManagementException
+     */
+    public Workflow[] getworkflows(String workflowType, String status, String tenantDomain) throws APIManagementException {
+
+        ResultSet rs = null;
+        Workflow[] workflows = null;
+        String sqlQuery;
+        if (workflowType != null) {
+            sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS_BY_WORKFLOW_TYPE;
+        } else {
+            sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            try {
+                if (workflowType != null) {
+                    prepStmt.setString(1, workflowType);
+                    prepStmt.setString(2, status);
+                    prepStmt.setString(3, tenantDomain);
+                } else {
+                    prepStmt.setString(1, status);
+                    prepStmt.setString(2, tenantDomain);
+                }
+                rs = prepStmt.executeQuery();
+
+                ArrayList<Workflow> workflowsList = new ArrayList<Workflow>();
+                Workflow workflow;
+                while (rs.next()) {
+                    workflow = new Workflow();
+                    workflow.setWorkflowId(rs.getInt("WF_ID"));
+                    workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
+                    workflow.setWorkflowType(rs.getString("WF_TYPE"));
+                    String workflowstatus = rs.getString("WF_STATUS");
+                    workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
+                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
+                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
+                    workflow.setWorkflowStatusDesc(rs.getString("WF_STATUS_DESC"));
+                    workflow.setTenantId(rs.getInt("TENANT_ID"));
+                    workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                    workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+                    workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+                    Blob metadataBlob = rs.getBlob("WF_METADATA");
+                    Blob propertiesBlob = rs.getBlob("WF_PROPERTIES");
+
+                    byte[] metadataByte;
+                    if (metadataBlob != null) {
+                        metadataByte = metadataBlob.getBytes(1L, (int) metadataBlob.length());
+                        InputStream targetStream = new ByteArrayInputStream(metadataByte);
+                        String metadata = APIMgtDBUtil.getStringFromInputStream(targetStream);
+                        Gson metadataGson = new Gson();
+                        JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
+                        workflow.setMetadata(metadataJson);
+                    } else {
+                        JSONObject metadataJson = new JSONObject();
+                        workflow.setMetadata(metadataJson);
+                    }
+
+                    byte[] propertiesByte;
+                    if (propertiesBlob != null) {
+                        propertiesByte = propertiesBlob.getBytes(1L, (int) propertiesBlob.length());
+                        InputStream propertiesTargetStream = new ByteArrayInputStream(propertiesByte);
+                        String properties = APIMgtDBUtil.getStringFromInputStream(propertiesTargetStream);
+                        Gson propertiesGson = new Gson();
+                        JSONObject propertiesJson = propertiesGson.fromJson(properties, JSONObject.class);
+                        workflow.setProperties(propertiesJson);
+                    } else {
+                        JSONObject propertiesJson = new JSONObject();
+                        workflow.setProperties(propertiesJson);
+                    }
+                    workflowsList.add(workflow);
+                }
+                workflows = workflowsList.toArray(new Workflow[workflowsList.size()]);
+            } catch (SQLException e) {
+                handleException("Error when retrieve all the workflow details. ", e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            }
+        } catch (SQLException e) {
+            handleException("Error when retrieve all the workflow details. ", e);
+        }
+        return workflows;
+    }
+
+    /**
+     * Get the Pending workflow Request using ExternalWorkflowReference for a particular tenant
+     *
+     * @param externelWorkflowRef of pending workflow request
+     * @param status              workflow status of workflow pending process
+     * @param tenantDomain        tenant domain of user
+     * @return workflow pending request
+     */
+    public Workflow getworkflowReferenceByExternalWorkflowReferenceID(String externelWorkflowRef, String status,
+                                                                      String tenantDomain) throws APIManagementException {
+        ResultSet rs = null;
+        Workflow workflow = new Workflow();
+        String sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS_BY_EXTERNAL_WORKFLOW_REFERENCE;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            try {
+                prepStmt.setString(1, externelWorkflowRef);
+                prepStmt.setString(2, status);
+                prepStmt.setString(3, tenantDomain);
+                rs = prepStmt.executeQuery();
+
+                while (rs.next()) {
+                    workflow.setWorkflowId(rs.getInt("WF_ID"));
+                    workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
+                    workflow.setWorkflowType(rs.getString("WF_TYPE"));
+                    String workflowstatus = rs.getString("WF_STATUS");
+                    workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
+                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
+                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
+                    workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+                    workflow.setTenantId(rs.getInt("TENANT_ID"));
+                    workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                    workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+                    Blob metadataBlob = rs.getBlob("WF_METADATA");
+                    Blob propertiesBlob = rs.getBlob("WF_PROPERTIES");
+
+                    byte[] metadataByte;
+                    if (metadataBlob != null) {
+                        metadataByte = metadataBlob.getBytes(1L, (int) metadataBlob.length());
+                        InputStream targetStream = new ByteArrayInputStream(metadataByte);
+                        String metadata = APIMgtDBUtil.getStringFromInputStream(targetStream);
+                        Gson metadataGson = new Gson();
+                        JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
+                        workflow.setMetadata(metadataJson);
+                    } else {
+                        JSONObject metadataJson = new JSONObject();
+                        workflow.setMetadata(metadataJson);
+                    }
+
+                    byte[] propertiesByte;
+                    if (propertiesBlob != null) {
+                        propertiesByte = propertiesBlob.getBytes(1L, (int) propertiesBlob.length());
+                        InputStream propertiesTargetStream = new ByteArrayInputStream(propertiesByte);
+                        String properties = APIMgtDBUtil.getStringFromInputStream(propertiesTargetStream);
+                        Gson propertiesGson = new Gson();
+                        JSONObject propertiesJson = propertiesGson.fromJson(properties, JSONObject.class);
+                        workflow.setProperties(propertiesJson);
+                    } else {
+                        JSONObject propertiesJson = new JSONObject();
+                        workflow.setProperties(propertiesJson);
+                    }
+                }
+            } catch (SQLException e) {
+                handleException("Error when retriving the workflow details. ", e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            }
+        } catch (SQLException e) {
+            handleException("Error when retriving the workflow details. ", e);
+        }
+        return workflow;
+    }
+
+    /**
      * Add shared scope.
      *
      * @param scope        Scope Object to add
@@ -14702,6 +14969,76 @@ public class ApiMgtDAO {
             handleException("Failed to get Shared Scope : " + uuid, e);
         }
         return scopeKey;
+    }
+
+    /***
+     * Get the API and URI usages of the given shared scope
+     *
+     * @param uuid Id of the shared scope
+     * @param tenantId tenant Id
+     * @return usgaes ofr the shaerd scope
+     * @throws APIManagementException If an error occurs while getting the usage details
+     */
+    public SharedScopeUsage getSharedScopeUsage(String uuid, int tenantId) throws APIManagementException {
+        SharedScopeUsage sharedScopeUsage;
+        List<API> usedApiList = new ArrayList<>();
+        String sharedScopeName = getSharedScopeKeyByUUID(uuid);
+
+        if (sharedScopeName != null) {
+            sharedScopeUsage = new SharedScopeUsage();
+            sharedScopeUsage.setId(uuid);
+            sharedScopeUsage.setName(sharedScopeName);
+        } else {
+            throw new APIMgtResourceNotFoundException("Shared Scope not found for scope ID: " + uuid,
+                    ExceptionCodes.from(ExceptionCodes.SHARED_SCOPE_NOT_FOUND, uuid));
+        }
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement psForApiUsage = connection
+                        .prepareStatement(SQLConstants.GET_SHARED_SCOPE_API_USAGE_BY_TENANT)) {
+            psForApiUsage.setString(1, uuid);
+            psForApiUsage.setInt(2, tenantId);
+            try (ResultSet apiUsageResultSet = psForApiUsage.executeQuery()) {
+                while (apiUsageResultSet.next()) {
+                    String provider = apiUsageResultSet.getString("API_PROVIDER");
+                    String apiName = apiUsageResultSet.getString("API_NAME");
+                    String version = apiUsageResultSet.getString("API_VERSION");
+                    APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, version);
+                    API usedApi = new API(apiIdentifier);
+                    usedApi.setContext(apiUsageResultSet.getString("CONTEXT"));
+
+                    try (PreparedStatement psForUriUsage = connection
+                                    .prepareStatement(SQLConstants.GET_SHARED_SCOPE_URI_USAGE_BY_TENANT)) {
+                        int apiId = apiUsageResultSet.getInt("API_ID");
+                        Set<URITemplate> usedUriTemplates = new LinkedHashSet<>();
+                        psForUriUsage.setString(1, uuid);
+                        psForUriUsage.setInt(2, tenantId);
+                        psForUriUsage.setInt(3, apiId);
+                        try (ResultSet uriUsageResultSet = psForUriUsage.executeQuery()) {
+                            while (uriUsageResultSet.next()) {
+                                URITemplate usedUriTemplate = new URITemplate();
+                                usedUriTemplate.setUriTemplate(uriUsageResultSet.getString("URL_PATTERN"));
+                                usedUriTemplate.setHTTPVerb(uriUsageResultSet.getString("HTTP_METHOD"));
+                                usedUriTemplates.add(usedUriTemplate);
+                            }
+                        }
+                        usedApi.setUriTemplates(usedUriTemplates);
+                        usedApiList.add(usedApi);
+                    } catch (SQLException e) {
+                        handleException("Failed to retrieve Resource usages of shared scope with scope ID" + uuid, e);
+                    }
+                }
+            }
+
+            if (sharedScopeUsage != null) {
+                sharedScopeUsage.setApis(usedApiList);
+            }
+
+            return sharedScopeUsage;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve API usages of shared scope with scope ID" + uuid, e);
+        }
+        return null;
     }
 
     /**

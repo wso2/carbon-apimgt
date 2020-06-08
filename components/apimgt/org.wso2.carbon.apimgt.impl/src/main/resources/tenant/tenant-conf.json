@@ -58,7 +58,15 @@
         "Roles": "admin,Internal/creator"
       },
       {
-        "Name": "apim:api_workflow",
+        "Name": "apim:api_workflow_view",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:api_workflow_approve",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:admin",
         "Roles": "admin"
       },
       {
@@ -239,6 +247,10 @@
       },
       {
         "Name": "apim:admin_alert_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:bot_data",
         "Roles": "admin"
       }
     ]

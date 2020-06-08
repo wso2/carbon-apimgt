@@ -1388,65 +1388,6 @@ public class SQLConstants {
             " GROUP BY " +
             "   API_ID ";
 
-    public static final String ADD_ENDPOINT_REGISTRY_SQL =
-            "INSERT INTO ENDPOINT_REG (UUID, REG_NAME, REG_TYPE, TENANT_ID, " +
-                    "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
-    public static final String UPDATE_ENDPOINT_REGISTRY_SQL =
-            "UPDATE ENDPOINT_REG " +
-                    "SET REG_NAME = ?, " +
-                    "REG_TYPE = ?, " +
-                    "UPDATED_BY = ?, " +
-                    "UPDATED_TIME = ? " +
-                    "WHERE UUID = ?";
-
-    public static final String DELETE_ENDPOINT_REGISTRY_SQL = "DELETE FROM ENDPOINT_REG WHERE UUID = ?";
-
-    public static final String GET_ENDPOINT_REGISTRY_BY_UUID =
-            " SELECT UUID, REG_NAME, REG_TYPE, TENANT_ID, ID, " +
-                    "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME FROM " +
-                    "ENDPOINT_REG WHERE UUID = ? AND TENANT_ID = ?";
-
-    public static final String GET_ENDPOINT_REGISTRY_ENTRY_BY_UUID =
-            " SELECT UUID, ENTRY_NAME, ENTRY_VERSION, DEFINITION_TYPE, DEFINITION_URL, SERVICE_TYPE, " +
-                    "SERVICE_CATEGORY, PRODUCTION_SERVICE_URL, SANDBOX_SERVICE_URL, ENDPOINT_DEFINITION, METADATA, " +
-                    "CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME, REG_ID FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
-
-    public static final String ADD_ENDPOINT_REGISTRY_ENTRY_SQL =
-            "INSERT INTO ENDPOINT_REG_ENTRY (UUID, ENTRY_NAME, ENTRY_VERSION, PRODUCTION_SERVICE_URL, " +
-                    "SANDBOX_SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, METADATA, SERVICE_TYPE, SERVICE_CATEGORY, " +
-                    "ENDPOINT_DEFINITION, REG_ID, CREATED_BY, UPDATED_BY, CREATED_TIME, UPDATED_TIME) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    public static final String UPDATE_ENDPOINT_REGISTRY_ENTRY_SQL =
-            "UPDATE ENDPOINT_REG_ENTRY SET " +
-                    "ENTRY_NAME = ?, " +
-                    "ENTRY_VERSION = ?, " +
-                    "PRODUCTION_SERVICE_URL = ?, " +
-                    "SANDBOX_SERVICE_URL = ?, " +
-                    "DEFINITION_TYPE = ?, " +
-                    "DEFINITION_URL = ?, " +
-                    "METADATA = ?, " +
-                    "SERVICE_TYPE = ?, " +
-                    "SERVICE_CATEGORY = ?, " +
-                    "ENDPOINT_DEFINITION = ?, " +
-                    "UPDATED_BY = ?, " +
-                    "UPDATED_TIME = ? " +
-                    "WHERE UUID = ?";
-
-    public static final String DELETE_ENDPOINT_REGISTRY_ENTRY_SQL = "DELETE FROM ENDPOINT_REG_ENTRY WHERE UUID = ?";
-
-    public static final String IS_ENDPOINT_REGISTRY_NAME_EXISTS = "SELECT COUNT(UUID) AS ENDPOINT_REGISTRY_COUNT" +
-            " FROM ENDPOINT_REG WHERE LOWER(REG_NAME) = LOWER(?) AND TENANT_ID = ?";
-
-    public static final String IS_ENDPOINT_REGISTRY_ENTRY_NAME_EXISTS = "SELECT COUNT(UUID) AS REGISTRY_ENTRY_COUNT" +
-            " FROM ENDPOINT_REG_ENTRY WHERE LOWER(ENTRY_NAME) = LOWER(?) AND REG_ID = ?";
-
-    public static final String IS_ENDPOINT_REGISTRY_ENTRY_NAME_AND_VERSION_EXISTS = "SELECT COUNT(UUID) AS" +
-            " REGISTRY_ENTRY_COUNT" +
-            " FROM ENDPOINT_REG_ENTRY WHERE LOWER(ENTRY_NAME) = LOWER(?) AND LOWER(ENTRY_VERSION) = LOWER(?)" +
-            " AND REG_ID = ?";
-
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
             "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME, " +
@@ -1906,8 +1847,8 @@ public class SQLConstants {
 
     public static final String ADD_WORKFLOW_ENTRY_SQL =
             " INSERT INTO AM_WORKFLOWS (WF_REFERENCE,WF_TYPE,WF_STATUS,WF_CREATED_TIME,WF_STATUS_DESC,TENANT_ID," +
-            "TENANT_DOMAIN,WF_EXTERNAL_REFERENCE)" +
-            " VALUES (?,?,?,?,?,?,?,?)";
+            "TENANT_DOMAIN,WF_EXTERNAL_REFERENCE,WF_METADATA,WF_PROPERTIES)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_WORKFLOW_ENTRY_SQL =
             " UPDATE AM_WORKFLOWS " +
@@ -1922,6 +1863,33 @@ public class SQLConstants {
 
     public static final String GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_REF_SQL =
             "SELECT * FROM AM_WORKFLOWS WHERE WF_REFERENCE=? AND WF_TYPE=?";
+
+    public static final String ADD_PAYLOAD_SQL =
+            " UPDATE AM_WORKFLOWS " +
+                    " SET " +
+                    "   WF_METADATA = ?, " +
+                    "   WF_PROPERTIES = ?, " +
+                    "   WF_STATUS_DESC = ? " +
+                    " WHERE " +
+                    "    WF_EXTERNAL_REFERENCE = ?";
+
+    public static final String DELETE_WORKFLOW_REQUEST_SQL=
+            " DELETE FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE = ?";
+
+    public static final String GET_ALL_WORKFLOW_DETAILS_BY_EXTERNALWORKFLOWREF =
+            " SELECT  * FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE = ?";
+
+    public static final String GET_ALL_WORKFLOW_DETAILS_BY_WORKFLOW_TYPE =
+            " SELECT  * FROM AM_WORKFLOWS WHERE WF_TYPE = ? AND  WF_STATUS = ? AND TENANT_DOMAIN = ?";
+
+    public static final String GET_ALL_WORKFLOW_DETAILS =
+            " SELECT  * FROM AM_WORKFLOWS WHERE WF_STATUS = ? AND TENANT_DOMAIN = ?";
+
+    public static final String GET_ALL_WORKFLOW_DETAILS_BY_EXTERNAL_WORKFLOW_REFERENCE =
+            " SELECT  * FROM AM_WORKFLOWS " +
+            " WHERE WF_EXTERNAL_REFERENCE = ? " +
+            " AND WF_STATUS = ? " +
+            " AND TENANT_DOMAIN = ?";
 
     public static final String UPDATE_PUBLISHED_DEFAULT_VERSION_SQL =
             " UPDATE AM_API_DEFAULT_VERSION " +
@@ -3422,6 +3390,27 @@ public class SQLConstants {
                     + "(SELECT COUNT(*) FROM AM_API_RESOURCE_SCOPE_MAPPING RSM WHERE RSM.SCOPE_NAME=SS.NAME ) usage "
                     + "FROM AM_SHARED_SCOPE SS "
                     + "WHERE SS.TENANT_ID = ?";
+    public static final String GET_SHARED_SCOPE_API_USAGE_BY_TENANT =
+            "SELECT AA.API_ID, AA.API_NAME, AA.CONTEXT, AA.API_VERSION, AA.API_PROVIDER "
+                    + "FROM AM_SHARED_SCOPE ASSC, AM_API_RESOURCE_SCOPE_MAPPING AARSM, "
+                    + "AM_API_URL_MAPPING AAUM, AM_API AA "
+                    + "WHERE ASSC.NAME=AARSM.SCOPE_NAME AND "
+                    + "AARSM.URL_MAPPING_ID=AAUM.URL_MAPPING_ID AND "
+                    + "AAUM.API_ID=AA.API_ID AND "
+                    + "ASSC.UUID=? AND "
+                    + "ASSC.TENANT_ID=? "
+                    + "GROUP BY AA.API_NAME, AA.CONTEXT, AA.API_VERSION, AA.API_PROVIDER";
+
+    public static final String GET_SHARED_SCOPE_URI_USAGE_BY_TENANT =
+            "SELECT AAUM.URL_PATTERN, AAUM.HTTP_METHOD "
+                    + "FROM AM_SHARED_SCOPE ASSC, AM_API_RESOURCE_SCOPE_MAPPING AARSM, "
+                    + "AM_API_URL_MAPPING AAUM, AM_API AA "
+                    + "WHERE ASSC.NAME=AARSM.SCOPE_NAME AND "
+                    + "AARSM.URL_MAPPING_ID=AAUM.URL_MAPPING_ID AND "
+                    + "AAUM.API_ID=AA.API_ID AND "
+                    + "ASSC.UUID=? AND "
+                    + "ASSC.TENANT_ID=? AND "
+                    + "AA.API_ID=?";
 
     //Resource Scope related constants
     public static final String ADD_API_RESOURCE_SCOPE_MAPPING =

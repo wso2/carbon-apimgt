@@ -42,13 +42,13 @@ TenantThemeApiService delegate = new TenantThemeApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import a DevPortal Tenant Theme", notes = "This operation can be used to import a DevPortal tenant theme. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:tenant_theme_manage", description = "Manage tenant themes")
+            @AuthorizationScope(scope = "apim:tenant_theme_manage", description = "Manage tenant themes"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Ok. Theme Imported Successfully. ", response = Void.class),
         @ApiResponse(code = 403, message = "Forbidden. Not Authorized to import. ", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Tenant does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error. Error in importing Theme. ", response = ErrorDTO.class) })
     public Response tenantThemeImportPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) throws APIManagementException{
         return delegate.tenantThemeImportPost(fileInputStream, fileDetail, securityContext);

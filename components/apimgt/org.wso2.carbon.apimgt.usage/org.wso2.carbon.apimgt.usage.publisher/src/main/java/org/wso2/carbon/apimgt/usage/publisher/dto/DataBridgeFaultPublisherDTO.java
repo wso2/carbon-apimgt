@@ -31,6 +31,7 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         setApiVersion(faultPublisherDTO.getApiVersion());
         setApiName(faultPublisherDTO.getApiName());
         setApiResourcePath(faultPublisherDTO.getApiResourcePath());
+        setApiResourceTemplate(faultPublisherDTO.getApiResourceTemplate());
         setApiMethod(faultPublisherDTO.getApiMethod());
         setApiVersion(faultPublisherDTO.getApiVersion());
         setErrorCode(faultPublisherDTO.getErrorCode());
@@ -41,6 +42,7 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         setHostname(DataPublisherUtil.getHostAddress());
         setApiCreator(faultPublisherDTO.getApiCreator());
         setApplicationName(faultPublisherDTO.getApplicationName());
+        setApplicationOwner(faultPublisherDTO.getApplicationOwner());
         setApplicationId(faultPublisherDTO.getApplicationId());
         setProtocol(faultPublisherDTO.getProtocol());
         setMetaClientType(faultPublisherDTO.getMetaClientType());
@@ -50,11 +52,11 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
     }
 
     public Object createPayload() {
-        return new Object[] { getApplicationConsumerKey(), getApiName(), getApiVersion(),
-                getApiContext(), getApiResourcePath(), getApiMethod(), getApiCreator(), 
-                getUsername(), getApiCreatorTenantDomain(), getUserTenantDomain(), getHostname(), getApplicationId(), getApplicationName(),
-                getProtocol(), getErrorCode(), getErrorMessage(), getRequestTimestamp(),
-                DataPublisherUtil.toJsonString(getProperties()) };
+        return new Object[] { getApplicationConsumerKey(), getApiName(), getApiVersion(), getApiContext(),
+                getApiResourcePath(), getApiResourceTemplate(), getApiMethod(), getApiCreator(), getUsername(),
+                getApiCreatorTenantDomain(), getUserTenantDomain(), getHostname(), getApplicationId(),
+                getApplicationName(), getApplicationOwner(), getProtocol(), getErrorCode(), getErrorMessage(),
+                getRequestTimestamp(), DataPublisherUtil.toJsonString(getProperties()) };
     }
 
     public Object createMetaData() {
@@ -85,6 +87,9 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         if (getApiResourcePath() == null) {
             missingMandatoryValues.add("API resource path");
         }
+        if (getApiResourceTemplate() == null) {
+            missingMandatoryValues.add("API resource template");
+        }
         if (getApiMethod() == null) {
             missingMandatoryValues.add("API method");
         }
@@ -99,6 +104,9 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         }
         if (getApplicationId() == null) {
             missingMandatoryValues.add("Application ID");
+        }
+        if (getApplicationOwner() == null) {
+            missingMandatoryValues.add("Application owner");
         }
         if (getHostname() == null) {
             missingMandatoryValues.add("API hostname");
