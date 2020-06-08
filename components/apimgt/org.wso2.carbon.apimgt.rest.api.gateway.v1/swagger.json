@@ -147,6 +147,262 @@
         "x-wso2-request" : "POST https://127.0.0.1:9443/api/am/gateway/v1/undeploy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response" : "HTTP/1.1 200 OK"
       }
+    },
+    "/api-artifact" : {
+      "get" : {
+        "tags" : [ "Get API Artifact" ],
+        "summary" : "Get API artifact from the storage",
+        "description" : "This operation is used to get the API artifact from the storage\n",
+        "parameters" : [ {
+          "name" : "apiName",
+          "in" : "query",
+          "description" : "Name of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "label",
+          "in" : "query",
+          "description" : "Label of the API Gateway\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nAPI artifact successfully retrieved from the storage.\n",
+            "schema" : {
+              "$ref" : "#/definitions/DeployResponse"
+            }
+          },
+          "202" : {
+            "description" : "Accepted.\nThe request has been accepted.\n",
+            "schema" : {
+              "$ref" : "#/definitions/DeployResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested API does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "412" : {
+            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "security" : [ {
+          "OAuth2Security" : [ "apim:api_publish" ]
+        } ],
+        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\"",
+        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response" : "HTTP/1.1 200 OK"
+      }
+    },
+    "/local-entry" : {
+      "get" : {
+        "tags" : [ "Get API Artifact" ],
+        "summary" : "Get Local Entry from the storage",
+        "description" : "This operation is used to get local entry from the storage\n",
+        "parameters" : [ {
+          "name" : "apiName",
+          "in" : "query",
+          "description" : "Name of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "label",
+          "in" : "query",
+          "description" : "Label of the API Gateway\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nLocal entry for the API successfully retrieved from the storage.\n",
+            "schema" : {
+              "$ref" : "#/definitions/DeployResponse"
+            }
+          },
+          "202" : {
+            "description" : "Accepted.\nThe request has been accepted.\n",
+            "schema" : {
+              "$ref" : "#/definitions/DeployResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested API does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "412" : {
+            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "security" : [ {
+          "OAuth2Security" : [ "apim:api_publish" ]
+        } ],
+        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/local-entry?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\"",
+        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v1/local-entry?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response" : "HTTP/1.1 200 OK"
+      }
+    },
+    "/sequence" : {
+      "get" : {
+        "tags" : [ "Get API Sequences" ],
+        "summary" : "Get sequences from the storage",
+        "description" : "This operation is used to get the API sequence from the storage\n",
+        "parameters" : [ {
+          "name" : "apiName",
+          "in" : "query",
+          "description" : "Name of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "label",
+          "in" : "query",
+          "description" : "Label of the API Gateway\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nSequences for the API successfully retrieved from the storage.\n",
+            "schema" : {
+              "$ref" : "#/definitions/DeployResponse"
+            }
+          },
+          "202" : {
+            "description" : "Accepted.\nThe request has been accepted.\n",
+            "schema" : {
+              "$ref" : "#/definitions/DeployResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested API does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "412" : {
+            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "security" : [ {
+          "OAuth2Security" : [ "apim:api_publish" ]
+        } ],
+        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/sequence?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\"",
+        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v1/sequence?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response" : "HTTP/1.1 200 OK"
+      }
+    },
+    "/end-points" : {
+      "get" : {
+        "tags" : [ "Get API Artifact" ],
+        "summary" : "Get end-points from the storage for the API",
+        "description" : "This operation is used to get the end-points from the storage\n",
+        "parameters" : [ {
+          "name" : "apiName",
+          "in" : "query",
+          "description" : "Name of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "label",
+          "in" : "query",
+          "description" : "Label of the API Gateway\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nEnd-points successfully retrieved from the storage for the API.\n",
+            "schema" : {
+              "$ref" : "#/definitions/DeployResponse"
+            }
+          },
+          "202" : {
+            "description" : "Accepted.\nThe request has been accepted.\n",
+            "schema" : {
+              "$ref" : "#/definitions/DeployResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested API does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "412" : {
+            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "security" : [ {
+          "OAuth2Security" : [ "apim:api_publish" ]
+        } ],
+        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/end-points?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\"",
+        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v1/end-points?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response" : "HTTP/1.1 200 OK"
+      }
     }
   },
   "securityDefinitions" : {

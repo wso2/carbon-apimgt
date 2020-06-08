@@ -16,6 +16,11 @@
         <jaxrs:serviceBeans>
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.v1.SwaggerYamlApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.v1.DeployApiApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.v1.UndeployApiApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.v1.ApiArtifactApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.v1.EndPointsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.v1.LocalEntryApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.v1.SequenceApi"/>
 
         </jaxrs:serviceBeans>
         <jaxrs:providers>

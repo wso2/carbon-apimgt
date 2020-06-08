@@ -64,4 +64,28 @@ public class InMemoryAPIDeployer {
         return false;
     }
 
+    public GatewayAPIDTO getAPIArtifact (String apiName, String label, String apiId) {
+
+        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
+
+        GatewayAPIDTO gatewayAPIDTO = null;
+
+        if (gatewayArtifactSynchronizerProperties.isInMemoryArtifactSynchronizer()) {
+            if (gatewayArtifactSynchronizerProperties.getGatewayLabels().contains(label)) {
+                try {
+                    gatewayAPIDTO = ServiceReferenceHolder.getInstance().getArtifactRetriever()
+                            .retrieveArtifacts(apiId, apiName, label);
+
+                    //if there are more than one gateway subscribed to one label, removing the artifact from the
+                    // storage will stop other gateways undeploying the api
+                    //ServiceReferenceHolder.getInstance().getArtifactRetriever().deleteArtifacts(gatewayAPIDTO);
+                } catch (ArtifactSynchronizerException axisFault) {
+                    log.error(axisFault);
+                }
+            }
+        }
+        return gatewayAPIDTO;
+    }
+
 }

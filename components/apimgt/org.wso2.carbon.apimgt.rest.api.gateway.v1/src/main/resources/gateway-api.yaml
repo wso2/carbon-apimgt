@@ -131,7 +131,7 @@ paths:
   /undeploy-api:
 
     #-----------------------------------------------------
-    # Uneploy the API in the Gateway
+    # Undeploy the API in the Gateway
     #-----------------------------------------------------
     post:
       security:
@@ -167,6 +167,270 @@ paths:
           description: |
             OK.
             API successfully undeployed from the Gateway.
+          schema:
+            $ref: '#/definitions/DeployResponse'
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.
+          schema:
+            $ref: '#/definitions/DeployResponse'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+  /api-artifact:
+
+    #-----------------------------------------------------
+    # Get API Artifact
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Get API artifact from the storage
+      description: |
+        This operation is used to get the API artifact from the storage
+      parameters:
+        - name: apiName
+          description: |
+            Name of the API
+          in: query
+          type: string
+          required: true
+        - name: label
+          description: |
+            Label of the API Gateway
+          in: query
+          type: string
+          required: true
+        - $ref: '#/parameters/apiId-Q'
+
+      tags:
+        - Get API Artifact
+      responses:
+        200:
+          description: |
+            OK.
+            API artifact successfully retrieved from the storage.
+          schema:
+            $ref: '#/definitions/DeployResponse'
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.
+          schema:
+            $ref: '#/definitions/DeployResponse'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+  /local-entry:
+
+    #-----------------------------------------------------
+    # Get local entry for the API
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/local-entry?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/gateway/v1/local-entry?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Get Local Entry from the storage
+      description: |
+        This operation is used to get local entry from the storage
+      parameters:
+        - name: apiName
+          description: |
+            Name of the API
+          in: query
+          type: string
+          required: true
+        - name: label
+          description: |
+            Label of the API Gateway
+          in: query
+          type: string
+          required: true
+        - $ref: '#/parameters/apiId-Q'
+
+      tags:
+        - Get API Artifact
+      responses:
+        200:
+          description: |
+            OK.
+            Local entry for the API successfully retrieved from the storage.
+          schema:
+            $ref: '#/definitions/DeployResponse'
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.
+          schema:
+            $ref: '#/definitions/DeployResponse'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+  /sequence:
+
+    #-----------------------------------------------------
+    # Get sequence for the API
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/sequence?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/gateway/v1/sequence?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Get sequences from the storage
+      description: |
+        This operation is used to get the API sequence from the storage
+      parameters:
+        - name: apiName
+          description: |
+            Name of the API
+          in: query
+          type: string
+          required: true
+        - name: label
+          description: |
+            Label of the API Gateway
+          in: query
+          type: string
+          required: true
+        - $ref: '#/parameters/apiId-Q'
+
+      tags:
+        - Get API Sequences
+      responses:
+        200:
+          description: |
+            OK.
+            Sequences for the API successfully retrieved from the storage.
+          schema:
+            $ref: '#/definitions/DeployResponse'
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.
+          schema:
+            $ref: '#/definitions/DeployResponse'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+  /end-points:
+
+    #-----------------------------------------------------
+    # Get API Artifact
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/end-points?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/gateway/v1/end-points?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Get end-points from the storage for the API
+      description: |
+        This operation is used to get the end-points from the storage
+      parameters:
+        - name: apiName
+          description: |
+            Name of the API
+          in: query
+          type: string
+          required: true
+        - name: label
+          description: |
+            Label of the API Gateway
+          in: query
+          type: string
+          required: true
+        - $ref: '#/parameters/apiId-Q'
+
+      tags:
+        - Get API Artifact
+      responses:
+        200:
+          description: |
+            OK.
+            End-points successfully retrieved from the storage for the API.
           schema:
             $ref: '#/definitions/DeployResponse'
         202:
