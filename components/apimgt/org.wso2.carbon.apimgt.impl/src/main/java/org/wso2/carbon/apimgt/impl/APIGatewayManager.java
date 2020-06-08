@@ -71,23 +71,19 @@ import java.util.*;
 
 public class APIGatewayManager {
 
-	private static final Log log = LogFactory.getLog(APIGatewayManager.class);
-
-	private static APIGatewayManager instance;
+    private static final Log log = LogFactory.getLog(APIGatewayManager.class);
+    private boolean debugEnabled = log.isDebugEnabled();
+    private static APIGatewayManager instance;
 
     private Map<String, Environment> environments;
+    private Set<String> publishedGateways;
     private RecommendationEnvironment recommendationEnvironment;
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
 
-	private boolean debugEnabled = log.isDebugEnabled();
-
     private final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
     private final String ENDPOINT_SANDBOX = "_SANDBOX_";
-
     private static final String PRODUCT_PREFIX = "prod";
     private static final String PRODUCT_VERSION = "1.0.0";
-
-    private Set<String> publishedGateways;
 
     private APIGatewayManager() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -160,11 +156,11 @@ public class APIGatewayManager {
         return failedEnvironmentsMap;
     }
 
-
-    private Map<String, String> publishAPIToGatewayEnvironment(Environment environment, API api, APITemplateBuilder builder,
+    private Map<String, String> publishAPIToGatewayEnvironment(Environment environment, API api,
+                                                               APITemplateBuilder builder,
                                                                String tenantDomain,
                                                                Map<String, String> failedEnvironmentsMap,
-                                                               boolean gatewayFromLabel){
+                                                               boolean gatewayFromLabel) {
 
         long startTime;
         long endTime;
@@ -179,14 +175,15 @@ public class APIGatewayManager {
                 if (gatewayAPIDTO == null) {
                     return null;
                 } else {
-                    if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer() && !gatewayFromLabel){
+                    if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer() && !gatewayFromLabel) {
                         client = new APIGatewayAdminClient(environment);
                         client.deployAPI(gatewayAPIDTO);
                     }
 
                     ArtifactPublisher artifactPublisher = ServiceReferenceHolder.getInstance().getArtifactPublisher();
                     if (publishedGateways.contains(environment.getName())) {
-                        artifactPublisher.updateArtifacts(gatewayAPIDTO,APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_PUBLISH);
+                        artifactPublisher.updateArtifacts(gatewayAPIDTO,
+                                APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_PUBLISH);
                         publishedGateways.remove(environment.getName());
                     } else {
                         artifactPublisher.publishArtifacts(gatewayAPIDTO);
@@ -243,7 +240,7 @@ public class APIGatewayManager {
         return failedEnvironmentsMap;
     }
 
-    private GatewayAPIDTO createAPIGatewayDTOtoPublishAPI (API api, APITemplateBuilder builder, String tenantDomain,
+    private GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(API api, APITemplateBuilder builder, String tenantDomain,
                                                           Environment environment)
             throws APIManagementException, CertificateManagementException, APITemplateException, XMLStreamException {
 
@@ -342,6 +339,7 @@ public class APIGatewayManager {
     }
 
     private Environment getEnvironmentFromLabel(Label label) {
+
         Environment environment = new Environment();
         environment.setName(label.getName());
         environment.setDefault(true);
@@ -355,6 +353,7 @@ public class APIGatewayManager {
 
     private void addGAConfigLocalEntry(GatewayAPIDTO gatewayAPIDTO, String tenantDomain)
             throws APIManagementException {
+
         String content = APIUtil.getGAConfigFromRegistry(tenantDomain);
 
         if (StringUtils.isNotEmpty(content)) {
@@ -396,7 +395,7 @@ public class APIGatewayManager {
 
         boolean isSecureVaultEnabled =
                 Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
+                        getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
         if (api.isEndpointSecured() && isSecureVaultEnabled) {
             String secureVaultAlias =
                     api.getId().getProviderName() + "--" + api.getId().getApiName() + api.getId().getVersion();
@@ -460,17 +459,14 @@ public class APIGatewayManager {
     /**
      * Publishes an API Product to all configured Gateways.
      *
-     * @param apiProduct
-     *            - The API Product to be published
-     * @param builder
-     *            - The template builder
-     * @param tenantDomain
-     *            - Tenant Domain of the publisher
-     * @param associatedAPIs
-     *            - APIs associated with the current API Product
+     * @param apiProduct     - The API Product to be published
+     * @param builder        - The template builder
+     * @param tenantDomain   - Tenant Domain of the publisher
+     * @param associatedAPIs - APIs associated with the current API Product
      */
     public Map<String, String> publishToGateway(APIProduct apiProduct, APITemplateBuilder builder, String tenantDomain,
                                                 Set<API> associatedAPIs) {
+
         Map<String, String> failedEnvironmentsMap = new HashMap<>(0);
 
         if (apiProduct.getEnvironments() == null) {
@@ -547,13 +543,14 @@ public class APIGatewayManager {
                     setSecureVaultProperty(client, api, tenantDomain);
                 }
 
-                if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer()){
+                if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer()) {
                     client.deployAPI(productAPIDto);
                 }
 
                 ArtifactPublisher artifactPublisher = ServiceReferenceHolder.getInstance().getArtifactPublisher();
                 if (publishedGateways.contains(environment.getName())) {
-                    artifactPublisher.updateArtifacts(productAPIDto,APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_PUBLISH);
+                    artifactPublisher.updateArtifacts(productAPIDto,
+                            APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_PUBLISH);
                     publishedGateways.remove(environment.getName());
                 } else {
                     artifactPublisher.publishArtifacts(productAPIDto);
@@ -598,6 +595,7 @@ public class APIGatewayManager {
     }
 
     public Map<String, String> updateLocalEntry(APIProduct apiProduct, String tenantDomain) {
+
         Map<String, String> failedEnvironmentsMap = new HashMap<>();
 
         for (String environmentName : apiProduct.getEnvironments()) {
@@ -621,12 +619,12 @@ public class APIGatewayManager {
         return failedEnvironmentsMap;
     }
 
-	/**
-	 * Removed an API from the configured Gateways
-	 * 
-	 * @param api           - The API to be removed
-	 * @param tenantDomain  - Tenant Domain of the publisher
-	 */
+    /**
+     * Remove an API from the configured Gateways
+     *
+     * @param api          - The API to be removed
+     * @param tenantDomain - Tenant Domain of the publisher
+     */
     public Map<String, String> removeFromGateway(API api, String tenantDomain) {
 
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
@@ -647,7 +645,7 @@ public class APIGatewayManager {
                 if (environment == null) {
                     continue;
                 }
-                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api,tenantDomain,environment,
+                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api, tenantDomain, environment,
                         failedEnvironmentsMap, false);
             }
         }
@@ -671,8 +669,10 @@ public class APIGatewayManager {
         return failedEnvironmentsMap;
     }
 
-    public Map<String,String> removeAPIFromGatewayEnvironment (API api, String tenantDomain, Environment environment,
-                                                               Map<String, String> failedEnvironmentsMap, boolean gatewayFromLabel){
+    public Map<String, String> removeAPIFromGatewayEnvironment(API api, String tenantDomain, Environment environment,
+                                                               Map<String, String> failedEnvironmentsMap,
+                                                               boolean gatewayFromLabel) {
+
         try {
             GatewayAPIDTO gatewayAPIDTO = createGatewayAPIDTOtoRemoveAPI(api, tenantDomain, environment);
             if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer() && !gatewayFromLabel) {
@@ -722,7 +722,7 @@ public class APIGatewayManager {
 
         setClientCertificatesToBeRemoved(api, tenantDomain, gatewayAPIDTO);
         setEndpointsToBeRemoved(api, gatewayAPIDTO);
-        if(!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+        if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
             if (debugEnabled) {
                 log.debug("Removing API " + api.getId().getApiName() + " From environment " +
                         environment.getName());
@@ -754,10 +754,11 @@ public class APIGatewayManager {
     /**
      * Removed an API Product from the configured Gateways
      *
-     * @param apiProduct    - The API Product to be removed
-     * @param tenantDomain  - Tenant Domain of the publisher
+     * @param apiProduct   - The API Product to be removed
+     * @param tenantDomain - Tenant Domain of the publisher
      */
     public Map<String, String> removeFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs) {
+
         Map<String, String> failedEnvironmentsMap = new HashMap<>();
         GatewayAPIDTO productAPIGatewayAPIDTO = new GatewayAPIDTO();
         productAPIGatewayAPIDTO.setName(apiProduct.getId().getName());
@@ -793,7 +794,8 @@ public class APIGatewayManager {
                     int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
                     APIGatewayEvent apiGatewayEvent = new APIGatewayEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(),
-                            APIConstants.EventType.PUBLISH_API_IN_GATEWAY.name(), tenantId, productAPIGatewayAPIDTO.getName(),
+                            APIConstants.EventType.PUBLISH_API_IN_GATEWAY.name(), tenantId,
+                            productAPIGatewayAPIDTO.getName(),
                             productAPIGatewayAPIDTO.getApiId(), productAPIGatewayAPIDTO.getGatewayLabel(),
                             APIConstants.GatewayArtifactSynchronizer.REMOVE_EVENT_LABEL);
                     APIUtil.sendNotification(apiGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
@@ -886,6 +888,7 @@ public class APIGatewayManager {
      * @param api
      */
     public void createNewWebsocketApiVersion(GenericArtifact artifact, API api) {
+
         try {
             APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
             APIGatewayAdminClient client;
@@ -981,9 +984,8 @@ public class APIGatewayManager {
         return seq;
     }
 
-
-
     public Map<String, String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
+
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
         LocalEntryAdminClient localEntryAdminClient;
         String localEntryUUId = api.getUUID();
@@ -996,7 +998,7 @@ public class APIGatewayManager {
                     if (client.getDefaultApi(tenantDomain, id) != null) {
                         if (debugEnabled) {
                             log.debug("Removing Default API " + api.getId().getApiName() + " From environment " +
-                                      environment.getName());
+                                    environment.getName());
                         }
                         client.deleteDefaultApi(tenantDomain, api.getId());
                     }
@@ -1019,13 +1021,13 @@ public class APIGatewayManager {
         return failedEnvironmentsMap;
     }
 
-	/**
-	 * Checks whether the API has been published.
-	 * 
-	 * @param api           - The API to be checked.
-	 * @param tenantDomain  - Tenant Domain of the publisher
-	 * @return True if the API is available in at least one Gateway. False if available in none.
-	 */
+    /**
+     * Checks whether the API has been published.
+     *
+     * @param api          - The API to be checked.
+     * @param tenantDomain - Tenant Domain of the publisher
+     * @return True if the API is available in at least one Gateway. False if available in none.
+     */
     public boolean isAPIPublished(API api, String tenantDomain) throws APIManagementException {
 
         if (gatewayArtifactSynchronizerProperties.isFileBasedArtifactSynchronizer()) {
@@ -1038,7 +1040,7 @@ public class APIGatewayManager {
                     if (client.getApi(tenantDomain, id) != null) {
                         return true;
                     }
-                } catch(AxisFault axisFault){
+                } catch (AxisFault axisFault) {
                     /*
                     didn't throw this exception to check api available in all the environments
                     therefore we didn't throw exception to avoid if gateway unreachable affect
@@ -1054,15 +1056,16 @@ public class APIGatewayManager {
             return ServiceReferenceHolder.getInstance().getArtifactPublisher().isAPIPublished(api.getUUID());
         }
     }
-    
+
     /**
      * Get the endpoint Security type of the published API
-     * 
-     * @param api - The API to be checked.
+     *
+     * @param api          - The API to be checked.
      * @param tenantDomain - Tenant Domain of the publisher
      * @return Endpoint security type; Basic or Digest
      */
     public String getAPIEndpointSecurityType(API api, String tenantDomain) throws APIManagementException {
+
         for (Environment environment : environments.values()) {
             try {
                 APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
@@ -1085,7 +1088,7 @@ public class APIGatewayManager {
                 // therefore we didn't throw exception to avoid if gateway unreachable affect
                 if (!APIConstants.CREATED.equals(api.getStatus())) {
                     log.error("Error occurred when check api endpoint security type on gateway"
-                                    + environment.getName(), axisFault);
+                            + environment.getName(), axisFault);
                 }
             }
         }
@@ -1125,6 +1128,7 @@ public class APIGatewayManager {
      */
     private void setClientCertificatesToBeAdded(API api, String tenantDomain, GatewayAPIDTO gatewayAPIDTO)
             throws CertificateManagementException {
+
         if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
             return;
         }
@@ -1149,6 +1153,7 @@ public class APIGatewayManager {
      * @param tenantDomain Tenant domain of the API.
      */
     private void updateRemovedClientCertificates(API api, String tenantDomain) {
+
         if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
             return;
         }
@@ -1194,12 +1199,12 @@ public class APIGatewayManager {
         }
     }
 
-	/**
-	 * Get the specified in/out sequences from api object
-	 * 
-	 * @param api -API object
-	 * @param tenantDomain
-	 * @throws APIManagementException
+    /**
+     * Get the specified in/out sequences from api object
+     *
+     * @param api          -API object
+     * @param tenantDomain
+     * @throws APIManagementException
      */
     private void setCustomSequencesToBeAdded(API api, String tenantDomain, GatewayAPIDTO gatewayAPIDTO)
             throws APIManagementException {
@@ -1207,9 +1212,9 @@ public class APIGatewayManager {
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())) {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
-                if(tenantDomain != null && !"".equals(tenantDomain)){
+                if (tenantDomain != null && !"".equals(tenantDomain)) {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                } else    {
+                } else {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
                             (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
                 }
@@ -1217,7 +1222,7 @@ public class APIGatewayManager {
 
                 if (APIUtil.isSequenceDefined(api.getInSequence())) {
                     addSequence(api, tenantId, gatewayAPIDTO, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN,
-                            APIConstants.API_CUSTOM_SEQ_IN_EXT,api.getInSequence());
+                            APIConstants.API_CUSTOM_SEQ_IN_EXT, api.getInSequence());
                 }
 
                 if (APIUtil.isSequenceDefined(api.getOutSequence())) {
@@ -1229,8 +1234,7 @@ public class APIGatewayManager {
                 String msg = "Error in deploying the sequence to gateway";
                 log.error(msg, e);
                 throw new APIManagementException(msg);
-            }
-            finally {
+            } finally {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
@@ -1250,7 +1254,7 @@ public class APIGatewayManager {
             GatewayContentDTO sequenceDto = new GatewayContentDTO();
             sequenceDto.setName(inSeqExt);
             sequenceDto.setContent(APIUtil.convertOMtoString(inSequence));
-            gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(sequenceDto,gatewayAPIDTO.getSequenceToBeAdd()));
+            gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(sequenceDto, gatewayAPIDTO.getSequenceToBeAdd()));
         }
 
     }
@@ -1290,7 +1294,8 @@ public class APIGatewayManager {
             //If a fault sequence has be defined.
             if (APIUtil.isSequenceDefined(faultSequenceName)) {
                 int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-                gatewayAPIDTO.setSequencesToBeRemove(addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
+                gatewayAPIDTO
+                        .setSequencesToBeRemove(addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
 
                 //Get the fault sequence xml
                 OMElement faultSequence = APIUtil.getCustomSequence(faultSequenceName, tenantId,
@@ -1314,7 +1319,8 @@ public class APIGatewayManager {
                             gatewayAPIDTO.getSequenceToBeAdd()));
                 }
             } else {
-                gatewayAPIDTO.setSequencesToBeRemove(addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
+                gatewayAPIDTO
+                        .setSequencesToBeRemove(addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
             }
         } catch (XMLStreamException e) {
             throw new APIManagementException("Error while updating the fault sequence at the Gateway", e);
@@ -1325,39 +1331,40 @@ public class APIGatewayManager {
         }
     }
 
-
     /**
      * Store the secured endpoint username password to registry
+     *
      * @param api
      * @param tenantDomain
      * @throws APIManagementException
      */
-	private void setSecureVaultProperty(APIGatewayAdminClient securityAdminClient, API api, String tenantDomain)
+    private void setSecureVaultProperty(APIGatewayAdminClient securityAdminClient, API api, String tenantDomain)
             throws APIManagementException {
-		boolean isSecureVaultEnabled = Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-		                                                    getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
-		if (api.isEndpointSecured() && isSecureVaultEnabled) {
-			try {							
-				securityAdminClient.setSecureVaultProperty(api, tenantDomain);
-			} catch (Exception e) {
-				String msg = "Error in setting secured password.";
+
+        boolean isSecureVaultEnabled =
+                Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                        getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
+        if (api.isEndpointSecured() && isSecureVaultEnabled) {
+            try {
+                securityAdminClient.setSecureVaultProperty(api, tenantDomain);
+            } catch (Exception e) {
+                String msg = "Error in setting secured password.";
                 log.error(msg + ' ' + e.getLocalizedMessage(), e);
-				throw new APIManagementException(msg);
-			}
-		}
-	}
+                throw new APIManagementException(msg);
+            }
+        }
+    }
+
     /**
      * Construct the timeout, suspendOnFailure, markForSuspension to add suspend
      * configuration to the websocket endpoint (Simply assign config values according to the endpoint-template)
      *
      * @param api
-     *
-     * @param urlType
-     *            - Whether production or sandbox
+     * @param urlType - Whether production or sandbox
      * @return timeout, suspendOnFailure, markForSuspension which will use to construct the endpoint configuration
-     *
      */
     private String[] websocketEndpointConfig(API api, String urlType) throws JSONException {
+
         JSONObject obj = new JSONObject(api.getEndpointConfig());
         JSONObject endpointObj = null;
 
@@ -1384,7 +1391,7 @@ public class APIGatewayManager {
                 endpointObj.get("actionSelect") + "</responseAction>\n" : "";
         String timeout = duration + "\n" + responseAction;
         String retryErrorCode;
-        String suspendErrorCode ;
+        String suspendErrorCode;
 
         if (validateJSONObjKey("suspendDuration", endpointObj)) {
             //Avoid suspending the endpoint when suspend duration is zero
@@ -1422,13 +1429,13 @@ public class APIGatewayManager {
      * @param endpointObj   WebSocket endpoint config JSONObject
      * @param errorCodeType The error code type (retryErroCode/suspendErrorCode)
      * @return The parsed error codes
-     *
      */
     private String parseWsEndpointConfigErrorCodes(JSONObject endpointObj, String errorCodeType) {
+
         if (endpointObj.has(errorCodeType)) {
             //When there are/is multiple/single retry error codes
             if (endpointObj.get(errorCodeType) instanceof JSONArray &&
-                    ((JSONArray)endpointObj.get(errorCodeType)).length() != 0) {
+                    ((JSONArray) endpointObj.get(errorCodeType)).length() != 0) {
                 StringBuilder codeListBuilder = new StringBuilder();
                 for (int i = 0; i < endpointObj.getJSONArray(errorCodeType).length(); i++) {
                     codeListBuilder.append(endpointObj.getJSONArray(errorCodeType).get(i).toString()).append(",");
@@ -1445,12 +1452,12 @@ public class APIGatewayManager {
     /**
      * Checks if a given key is available in the endpoint config and if it's value is a valid String
      *
-     * @param key Key that needs to be validated
+     * @param key         Key that needs to be validated
      * @param endpointObj Endpoint config JSON object
      * @return True if the given key is available with a valid String value
-     *
      */
     private boolean validateJSONObjKey(String key, JSONObject endpointObj) {
+
         return endpointObj.has(key) && endpointObj.get(key) instanceof String &&
                 StringUtils.isNotEmpty(endpointObj.getString(key));
     }
@@ -1476,11 +1483,13 @@ public class APIGatewayManager {
     public void setEndpointsToBeRemoved(API api, GatewayAPIDTO gatewayAPIDTO) {
 
         String endpointName = api.getId().getApiName() + "--v" + api.getId().getVersion();
-        gatewayAPIDTO.setEndpointEntriesToBeRemove(addStringToList(endpointName + "_API" + APIConstants.API_DATA_SANDBOX_ENDPOINTS.replace("_endpoints", "") + "Endpoint"
+        gatewayAPIDTO.setEndpointEntriesToBeRemove(addStringToList(
+                endpointName + "_API" + APIConstants.API_DATA_SANDBOX_ENDPOINTS.replace("_endpoints", "") + "Endpoint"
                 , gatewayAPIDTO.getEndpointEntriesToBeRemove()));
-        gatewayAPIDTO.setEndpointEntriesToBeRemove(addStringToList(endpointName + "_API" + APIConstants.API_DATA_PRODUCTION_ENDPOINTS.replace("_endpoints", "") + "Endpoint"
+        gatewayAPIDTO.setEndpointEntriesToBeRemove(addStringToList(
+                endpointName + "_API" + APIConstants.API_DATA_PRODUCTION_ENDPOINTS.replace("_endpoints", "") +
+                        "Endpoint"
                 , gatewayAPIDTO.getEndpointEntriesToBeRemove()));
     }
-
 
 }

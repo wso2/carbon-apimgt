@@ -35,14 +35,15 @@ public class DBRetriever implements ArtifactRetriever {
     }
 
     @Override
-    public GatewayAPIDTO retrieveArtifacts(String APIId, String APIName, String label) throws ArtifactSynchronizerException {
+    public GatewayAPIDTO retrieveArtifacts(String APIId, String APIName, String label)
+            throws ArtifactSynchronizerException {
 
         GatewayAPIDTO gatewayAPIDTO = null;
         try {
             ByteArrayInputStream byteStream = apiMgtDAO.getGatewayPublishedAPIArtifacts(APIId, label);
             ObjectInputStream objectStream = new ObjectInputStream(byteStream);
             gatewayAPIDTO = (GatewayAPIDTO) objectStream.readObject();
-            if (log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Successfully retrieved Artifacts of " + gatewayAPIDTO.getName());
             }
         } catch (APIManagementException | IOException | ClassNotFoundException e) {
@@ -52,12 +53,12 @@ public class DBRetriever implements ArtifactRetriever {
     }
 
     @Override
-    public void deleteArtifacts(GatewayAPIDTO gatewayAPIDTO) throws ArtifactSynchronizerException{
+    public void deleteArtifacts(GatewayAPIDTO gatewayAPIDTO) throws ArtifactSynchronizerException {
 
         try {
-            apiMgtDAO.deleteGatewayPublishedAPIArtifacts(gatewayAPIDTO.getApiId(),gatewayAPIDTO.getGatewayLabel());
+            apiMgtDAO.deleteGatewayPublishedAPIArtifacts(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel());
             apiMgtDAO.deleteGatewayPublishedAPIDetails(gatewayAPIDTO.getApiId());
-            if (log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Successfully deleted Artifacts of " + gatewayAPIDTO.getName());
             }
         } catch (APIManagementException e) {

@@ -38,7 +38,7 @@ public class DBPublisher implements ArtifactPublisher {
     }
 
     @Override
-    public void publishArtifacts (GatewayAPIDTO gatewayAPIDTO)
+    public void publishArtifacts(GatewayAPIDTO gatewayAPIDTO)
             throws ArtifactSynchronizerException {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -49,7 +49,7 @@ public class DBPublisher implements ArtifactPublisher {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayAPIDTOAsBytes);
             apiMgtDAO.addGatewayPublishedAPIDetails(gatewayAPIDTO);
             apiMgtDAO.addGatewayPublishedAPIArtifacts(gatewayAPIDTO, byteArrayInputStream, gatewayAPIDTOAsBytes.length);
-            if (log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Successfully published Artifacts of " + gatewayAPIDTO.getName());
             }
         } catch (IOException | APIManagementException e) {
@@ -75,7 +75,7 @@ public class DBPublisher implements ArtifactPublisher {
                 log.debug("Successfully updated Artifacts of " + gatewayAPIDTO.getName());
             }
         } catch (APIManagementException | IOException e) {
-            throw new ArtifactSynchronizerException ("Error updating Artifact of " + gatewayAPIDTO.getName() +
+            throw new ArtifactSynchronizerException("Error updating Artifact of " + gatewayAPIDTO.getName() +
                     " API", e);
         }
 
@@ -83,6 +83,7 @@ public class DBPublisher implements ArtifactPublisher {
 
     @Override
     public Set<String> getExistingLabelsForAPI(String apiId) {
+
         Set<String> labelsSet = new HashSet<>();
         try {
             labelsSet = apiMgtDAO.getExistingLabelsForAPI(apiId);
@@ -95,6 +96,7 @@ public class DBPublisher implements ArtifactPublisher {
 
     @Override
     public boolean isAPIPublished(String apiId) {
+
         boolean status = false;
         try {
             status = apiMgtDAO.isAPIPublished(apiId);
@@ -118,6 +120,6 @@ public class DBPublisher implements ArtifactPublisher {
     @Override
     public String getType() {
 
-         return APIConstants.GatewayArtifactSynchronizer.DEFAULT_PUBLISHER_NAME;
+        return APIConstants.GatewayArtifactSynchronizer.DEFAULT_PUBLISHER_NAME;
     }
 }

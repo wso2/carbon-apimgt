@@ -9,7 +9,6 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 
-
 public class InMemoryAPIDeployer {
 
     private static Log log = LogFactory.getLog(InMemoryAPIDeployer.class);
@@ -20,8 +19,7 @@ public class InMemoryAPIDeployer {
         apiGatewayAdmin = new APIGatewayAdmin();
     }
 
-
-    public boolean deployAPI (String apiName, String label, String apiId) {
+    public boolean deployAPI(String apiName, String label, String apiId) {
 
         GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
                 .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
@@ -41,10 +39,11 @@ public class InMemoryAPIDeployer {
         return false;
     }
 
-    public boolean unDeployAPI (String apiName, String label, String apiId) {
+    public boolean unDeployAPI(String apiName, String label, String apiId) {
 
-        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
+        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
+                ServiceReferenceHolder.getInstance()
+                        .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
 
         if (gatewayArtifactSynchronizerProperties.isInMemoryArtifactSynchronizer()) {
             if (gatewayArtifactSynchronizerProperties.getGatewayLabels().contains(label)) {
@@ -64,10 +63,11 @@ public class InMemoryAPIDeployer {
         return false;
     }
 
-    public GatewayAPIDTO getAPIArtifact (String apiName, String label, String apiId) {
+    public GatewayAPIDTO getAPIArtifact(String apiName, String label, String apiId) {
 
-        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
+        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
+                ServiceReferenceHolder.getInstance()
+                        .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
 
         GatewayAPIDTO gatewayAPIDTO = null;
 
