@@ -1,6 +1,6 @@
 <div class="main-content">
 
-        <h2>LifecycleState</h2>
+        <h2>DeployResponse</h2>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -21,45 +21,30 @@
                 <tbody>
                     <tr>
                         <td class="parameter">
-                            <p>state</p>
+                            <p>deployStatus</p>
                             <p class="param-required">
+                                required
                                 
-                                optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">This attribute declares whether deployment task is successfull or failed. </p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">Created</p></td>
+                        <td class="parameter"> <p class="marked">DEPLOYED</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>checkItems</p>
+                            <p>jsonPayload</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">Attributes that returned after the api deployment </p></td>
                         <td class="parameter">
-                                <a href="#!/models#array">array</a>
-                        </td>
-                        <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked"></p></td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <p>availableTransitions</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td class="parameter"><p class="marked"></p></td>
-                        <td class="parameter">
-                                <a href="#!/models#array">array</a>
+                                <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>

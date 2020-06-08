@@ -20,6 +20,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
-public interface DeployApiApiService {
-      public Response deployApiPost(String apiName, String label, String apiId, MessageContext messageContext) throws APIManagementException;
+public interface UndeployApiApiService {
+      public Response undeployApiPost(String apiName, String label, String apiId, MessageContext messageContext) throws APIManagementException;
 }

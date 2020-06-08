@@ -95,20 +95,20 @@ paths:
         - $ref: '#/parameters/apiId-Q'
 
       tags:
-        - API Lifecycle
+        - Deploy API
       responses:
         200:
           description: |
             OK.
             API successfully deployed in the Gateway.
           schema:
-            $ref: '#/definitions/WorkflowResponse'
+            $ref: '#/definitions/DeployResponse'
         202:
           description: |
             Accepted.
             The request has been accepted.
           schema:
-            $ref: '#/definitions/WorkflowResponse'
+            $ref: '#/definitions/DeployResponse'
         400:
           description: |
             Bad Request.
@@ -121,10 +121,70 @@ paths:
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
-        409:
+        412:
           description: |
-            Conflict.
-            Pending workflow task exists.
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+  /undeploy-api:
+
+    #-----------------------------------------------------
+    # Uneploy the API in the Gateway
+    #-----------------------------------------------------
+    post:
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/deploy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\""
+      x-wso2-request: |
+        POST https://127.0.0.1:9443/api/am/gateway/v1/undeploy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Uneploy the API in the gateway
+      description: |
+        This operation is used to undeploy an API in the gateway.
+      parameters:
+        - name: apiName
+          description: |
+            Name of the API
+          in: query
+          type: string
+          required: true
+        - name: label
+          description: |
+            Label of the API Gateway
+          in: query
+          type: string
+          required: true
+        - $ref: '#/parameters/apiId-Q'
+
+      tags:
+        - Undeploy API
+      responses:
+        200:
+          description: |
+            OK.
+            API successfully undeployed from the Gateway.
+          schema:
+            $ref: '#/definitions/DeployResponse'
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.
+          schema:
+            $ref: '#/definitions/DeployResponse'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
         412:
@@ -156,63 +216,25 @@ parameters:
 ######################################################
 definitions:
   #-----------------------------------------------------
-  # The workflow executor's response resource
+  # The deploy response resource
   #-----------------------------------------------------
-  WorkflowResponse:
-    title: workflow Response
+  DeployResponse:
+    title: Deploy API Response
     required:
-      - workflowStatus
+      - deployStatus
     properties:
-      workflowStatus:
+      deployStatus:
         description: |
-          This attribute declares whether this workflow task is approved or rejected.
+          This attribute declares whether deployment task is successfull or failed.
         type: string
         enum:
-          - CREATED
-          - APPROVED
-          - REJECTED
-          - REGISTERED
-        example: APPROVED
+          - DEPLOYED
+          - ERROR
+        example: DEPLOYED
       jsonPayload:
         description: |
-          Attributes that returned after the workflow execution
+          Attributes that returned after the api deployment
         type: string
-      lifecycleState:
-        $ref: '#/definitions/LifecycleState'
-
-  #-----------------------------------------------------
-  # The Lifecycle state resource
-  #-----------------------------------------------------
-  LifecycleState:
-    title:  Lifecycle State
-    properties:
-      state:
-        type: string
-        example: "Created"
-      checkItems:
-        type: array
-        items:
-          properties:
-            name:
-              type: string
-              example: "Deprecate old versions after publish the API"
-            value:
-              type: boolean
-              example: false
-            requiredStates:
-              type: array
-              items:
-                type: string
-      availableTransitions:
-        type: array
-        items:
-          properties:
-            event:
-              type: string
-              example: "Promote"
-            targetState:
-              type: string
-              example: "Created"
 
   #-----------------------------------------------------
   # The Error resource

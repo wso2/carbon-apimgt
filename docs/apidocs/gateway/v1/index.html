@@ -75,15 +75,27 @@
             <h3>Resources</h3>
             <ul class="nav nav-stacked fixed">
                         <hr/>
-                        <span class="class-name">API Lifecycle</span>
+                        <span class="class-name">Deploy API</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-deployApiPost"><a href="#!/operations#APILifecycle#deployApiPost">Deploy the API in the gateway</a></li>
+                                        <li id="op-deployApiPost"><a href="#!/operations#DeployAPI#deployApiPost">Deploy the API in the gateway</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Undeploy API</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-undeployApiPost"><a href="#!/operations#UndeployAPI#undeployApiPost">Uneploy the API in the gateway</a></li>
                             </ul>
                         </li>
             </ul>
             <h3>Definitions</h3>
             <ul class="nav nav-stacked fixed">
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-DeployResponse"><a href="#!/models#DeployResponse">DeployResponse</a></li>
+                            </ul>
+                        </li>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-Error"><a href="#!/models#Error">Error</a></li>
@@ -92,26 +104,6 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-ErrorListItem"><a href="#!/models#ErrorListItem">ErrorListItem</a></li>
-                            </ul>
-                        </li>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                <li id="def-LifecycleState"><a href="#!/models#LifecycleState">LifecycleState</a></li>
-                            </ul>
-                        </li>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                <li id="def-LifecycleState_availableTransitions"><a href="#!/models#LifecycleState_availableTransitions">LifecycleState_availableTransitions</a></li>
-                            </ul>
-                        </li>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                <li id="def-LifecycleState_checkItems"><a href="#!/models#LifecycleState_checkItems">LifecycleState_checkItems</a></li>
-                            </ul>
-                        </li>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                <li id="def-WorkflowResponse"><a href="#!/models#WorkflowResponse">WorkflowResponse</a></li>
                             </ul>
                         </li>
             </ul>

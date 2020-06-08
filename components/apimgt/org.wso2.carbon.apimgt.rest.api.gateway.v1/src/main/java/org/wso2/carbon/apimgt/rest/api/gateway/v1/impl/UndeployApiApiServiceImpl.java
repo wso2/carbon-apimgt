@@ -1,15 +1,29 @@
 package org.wso2.carbon.apimgt.rest.api.gateway.v1.impl;
 
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
-import org.apache.cxf.jaxrs.ext.MessageContext;
-import javax.ws.rs.core.Response;
-import org.json.JSONObject;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.*;
 
-public class DeployApiApiServiceImpl implements DeployApiApiService {
-    public Response deployApiPost(String apiName, String label, String apiId, MessageContext messageContext) {
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.MessageContext;
+
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.DeployResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.ErrorDTO;
+
+import java.util.List;
+
+import java.io.InputStream;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
+
+public class UndeployApiApiServiceImpl implements UndeployApiApiService {
+
+    public Response undeployApiPost(String apiName, String label, String apiId, MessageContext messageContext) {
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-        boolean status = inMemoryApiDeployer.deployAPI(apiName, label, apiId);
+        boolean status = inMemoryApiDeployer.unDeployAPI(apiName, label, apiId);
 
         JSONObject responseObj = new JSONObject();
         if (status) {

@@ -22,7 +22,7 @@
   "paths" : {
     "/deploy-api" : {
       "post" : {
-        "tags" : [ "API Lifecycle" ],
+        "tags" : [ "Deploy API" ],
         "summary" : "Deploy the API in the gateway",
         "description" : "This operation is used to deploy and API in the gateway.\n",
         "parameters" : [ {
@@ -48,13 +48,13 @@
           "200" : {
             "description" : "OK.\nAPI successfully deployed in the Gateway.\n",
             "schema" : {
-              "$ref" : "#/definitions/WorkflowResponse"
+              "$ref" : "#/definitions/DeployResponse"
             }
           },
           "202" : {
             "description" : "Accepted.\nThe request has been accepted.\n",
             "schema" : {
-              "$ref" : "#/definitions/WorkflowResponse"
+              "$ref" : "#/definitions/DeployResponse"
             }
           },
           "400" : {
@@ -65,12 +65,6 @@
           },
           "404" : {
             "description" : "Not Found.\nRequested API does not exist.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          },
-          "409" : {
-            "description" : "Conflict.\nPending workflow task exists.\n",
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
@@ -89,6 +83,70 @@
         "x-wso2-request" : "POST https://127.0.0.1:9443/api/am/gateway/v1/deploy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response" : "HTTP/1.1 200 OK"
       }
+    },
+    "/undeploy-api" : {
+      "post" : {
+        "tags" : [ "Undeploy API" ],
+        "summary" : "Uneploy the API in the gateway",
+        "description" : "This operation is used to undeploy an API in the gateway.\n",
+        "parameters" : [ {
+          "name" : "apiName",
+          "in" : "query",
+          "description" : "Name of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "label",
+          "in" : "query",
+          "description" : "Label of the API Gateway\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nAPI successfully undeployed from the Gateway.\n",
+            "schema" : {
+              "$ref" : "#/definitions/DeployResponse"
+            }
+          },
+          "202" : {
+            "description" : "Accepted.\nThe request has been accepted.\n",
+            "schema" : {
+              "$ref" : "#/definitions/DeployResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested API does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "412" : {
+            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "security" : [ {
+          "OAuth2Security" : [ "apim:api_publish" ]
+        } ],
+        "x-wso2-curl" : "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/deploy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\"",
+        "x-wso2-request" : "POST https://127.0.0.1:9443/api/am/gateway/v1/undeploy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&apiName=PizzaAPI&label=Food\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response" : "HTTP/1.1 200 OK"
+      }
     }
   },
   "securityDefinitions" : {
@@ -102,71 +160,21 @@
     }
   },
   "definitions" : {
-    "WorkflowResponse" : {
-      "required" : [ "workflowStatus" ],
+    "DeployResponse" : {
+      "required" : [ "deployStatus" ],
       "properties" : {
-        "workflowStatus" : {
+        "deployStatus" : {
           "type" : "string",
-          "example" : "APPROVED",
-          "description" : "This attribute declares whether this workflow task is approved or rejected.\n",
-          "enum" : [ "CREATED", "APPROVED", "REJECTED", "REGISTERED" ]
+          "example" : "DEPLOYED",
+          "description" : "This attribute declares whether deployment task is successfull or failed.\n",
+          "enum" : [ "DEPLOYED", "ERROR" ]
         },
         "jsonPayload" : {
           "type" : "string",
-          "description" : "Attributes that returned after the workflow execution\n"
-        },
-        "lifecycleState" : {
-          "$ref" : "#/definitions/LifecycleState"
+          "description" : "Attributes that returned after the api deployment\n"
         }
       },
-      "title" : "workflow Response"
-    },
-    "LifecycleState" : {
-      "properties" : {
-        "state" : {
-          "type" : "string",
-          "example" : "Created"
-        },
-        "checkItems" : {
-          "type" : "array",
-          "items" : {
-            "type" : "object",
-            "properties" : {
-              "name" : {
-                "type" : "string",
-                "example" : "Deprecate old versions after publish the API"
-              },
-              "value" : {
-                "type" : "boolean",
-                "example" : false
-              },
-              "requiredStates" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "string"
-                }
-              }
-            }
-          }
-        },
-        "availableTransitions" : {
-          "type" : "array",
-          "items" : {
-            "type" : "object",
-            "properties" : {
-              "event" : {
-                "type" : "string",
-                "example" : "Promote"
-              },
-              "targetState" : {
-                "type" : "string",
-                "example" : "Created"
-              }
-            }
-          }
-        }
-      },
-      "title" : "Lifecycle State"
+      "title" : "Deploy API Response"
     },
     "Error" : {
       "required" : [ "code", "message" ],
