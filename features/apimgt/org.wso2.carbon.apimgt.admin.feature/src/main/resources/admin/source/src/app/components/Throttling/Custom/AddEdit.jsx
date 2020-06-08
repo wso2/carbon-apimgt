@@ -352,7 +352,8 @@ function AddEdit(props) {
                             )}
                         />
                         <FormHelperText className={classes.helperText}>
-                        Eg: $userId, $apiContext, $apiVersion, $resourceKey, $appTenant, $apiTenant, $appId, $clientIp
+                            Eg: $userId, $apiContext, $apiVersion, $resourceKey, $appTenant, $apiTenant,
+                            $appId, $clientIp
                         </FormHelperText>
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
