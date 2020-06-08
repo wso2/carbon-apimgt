@@ -32,11 +32,8 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.message.BasicNameValuePair;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.token.TokenRevocationNotifier;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -66,27 +63,12 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
         //Variables related to Realtime Notifier
         String realtimeNotifierTTL = properties.getProperty("ttl", DEFAULT_TTL);
         long expiryTimeForJWT = Long.parseLong(properties.getProperty("expiryTime"));
-        Object[] objects = new Object[] { revokedToken, realtimeNotifierTTL, expiryTimeForJWT};
+        Object[] objects = new Object[]{revokedToken, realtimeNotifierTTL, expiryTimeForJWT};
         Event tokenRevocationMessage = new Event(APIConstants.TOKEN_REVOCATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        boolean isTenantFlowStarted = false;
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                        setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            }
-            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
-                    .publish(APIConstants.TOKEN_REVOCATION_EVENT_PUBLISHER, Collections.EMPTY_MAP,
-                            tokenRevocationMessage);
-            log.debug("Successfully sent the revoked token notification on realtime");
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
+        APIUtil.publishEvent(APIConstants.TOKEN_REVOCATION_EVENT_PUBLISHER, Collections.EMPTY_MAP,
+                tokenRevocationMessage);
+        log.debug("Successfully sent the revoked token notification on realtime");
     }
 
     /**

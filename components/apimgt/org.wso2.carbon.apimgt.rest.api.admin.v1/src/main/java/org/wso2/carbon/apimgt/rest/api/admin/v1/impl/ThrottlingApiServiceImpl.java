@@ -16,6 +16,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -104,6 +105,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     @Override
     public Response throttlingPoliciesAdvancedPost(AdvancedThrottlePolicyDTO body, String contentType,
                                                    MessageContext messageContext) {
+
+        if (StringUtils.isBlank(body.getPolicyName())) {
+            String errorMessage = "Policy name of advanced throttle policy cannot be blank";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+        }
+
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String userName = RestApiUtil.getLoggedInUsername();
@@ -293,6 +300,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     @Override
     public Response throttlingPoliciesApplicationPost(ApplicationThrottlePolicyDTO body, String contentType,
                                                       MessageContext messageContext) {
+
+        if (StringUtils.isBlank(body.getPolicyName())) {
+            String errorMessage = "Policy name of application throttle policy cannot be blank";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+        }
+
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
@@ -486,6 +499,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     @Override
     public Response throttlingPoliciesSubscriptionPost(SubscriptionThrottlePolicyDTO body, String contentType,
                                                        MessageContext messageContext) {
+
+        if (StringUtils.isBlank(body.getPolicyName())) {
+            String errorMessage = "Policy name of subscription throttle policy cannot be blank";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+        }
+
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
@@ -687,6 +706,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     @Override
     public Response throttlingPoliciesCustomPost(CustomRuleDTO body, String contentType,
                                                  MessageContext messageContext) {
+
+        if (StringUtils.isBlank(body.getPolicyName())) {
+            String errorMessage = "Policy name of custom rule cannot be blank";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+        }
+
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 

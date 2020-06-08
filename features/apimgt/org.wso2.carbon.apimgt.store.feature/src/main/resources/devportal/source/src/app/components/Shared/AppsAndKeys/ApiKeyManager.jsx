@@ -317,7 +317,7 @@ class ApiKeyManager extends React.Component {
                         </Typography>
                             <Typography variant="body1" component="p" className={classes.cardBody}>
                               <FormattedMessage
-                                id="Shared.AppsAndKeys.ViewKeys.apiKeyRestriction.ip.example.content"
+                                id="Shared.AppsAndKeys.ViewKeys.apiKeyRestriction.ip.example.content.message"
                                 defaultMessage={
                                   "A specific URL with an exact path: {url1}{linebreak}Any URL in a single subdomain, using a wildcard asterisk (*): {url2}{linebreak}Any subdomain or path URLs in a single domain, using wildcard asterisks (*): {url3}"
                                 }

@@ -35,6 +35,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -46,15 +47,20 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
+import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
+import org.wso2.carbon.apimgt.impl.keymgt.AbstractKeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
@@ -75,6 +81,7 @@ import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -125,7 +132,7 @@ public class APIManagerComponent {
     // TODO refactor caching implementation
     private static final Log log = LogFactory.getLog(APIManagerComponent.class);
 
-    private ServiceRegistration registration;
+    ServiceRegistration registration;
 
     private static TenantRegistryLoader tenantRegistryLoader;
 
@@ -187,6 +194,13 @@ public class APIManagerComponent {
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
+            KeyManagerConfigurationServiceImpl keyManagerConfigurationService = new KeyManagerConfigurationServiceImpl();
+            registration = componentContext.getBundleContext().registerService(KeyManagerConfigurationService.class,
+                    keyManagerConfigurationService,null);
+            JWTValidationService jwtValidationService = new JWTValidationServiceImpl();
+            registration = componentContext.getBundleContext().registerService(JWTValidationService.class,
+                    jwtValidationService, null);
+            ServiceReferenceHolder.getInstance().setKeyManagerConfigurationService(keyManagerConfigurationService);
             APIStatusObserverList.getInstance().init(configuration);
             log.debug("Reading Analytics Configuration from file...");
             // This method is called in two places. Mostly by the time activate hits,
@@ -237,8 +251,8 @@ public class APIManagerComponent {
             } catch (APIManagementException e) {
                 log.error("Failed to convert NULL THROTTLING_TIERS to Unlimited");
             }
-            // Initialise KeyManager.
-            KeyManagerHolder.initializeKeyManager(configuration);
+//            // Initialise KeyManager.
+//            KeyManagerHolder.initializeKeyManager(configuration);
             // Initialise sql constants
             SQLConstantManagerFactory.initializeSQLConstantManager();
             // Initialize PasswordResolver
@@ -292,6 +306,7 @@ public class APIManagerComponent {
             log.fatal("Error while Creating the database", e);
         }
     }
+
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
@@ -734,6 +749,93 @@ public class APIManagerComponent {
             }
         }
     }
+
+    /**
+     * Initialize the Oauth Server configuration Service Service dependency
+     *
+     * @param oauthServerConfiguration Output EventAdapter Service reference
+     */
+    @Reference(
+            name = "oauth.config.service",
+            service = OAuthServerConfiguration.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOauthServerConfiguration")
+    protected void setOauthServerConfiguration(OAuthServerConfiguration oauthServerConfiguration) {
+        ServiceReferenceHolder.getInstance().setOauthServerConfiguration(oauthServerConfiguration);
+    }
+
+    /**
+     * De-reference the Oauth Server configuration Service dependency.
+     *
+     * @param oAuthServerConfiguration
+     */
+    protected void unsetOauthServerConfiguration(OAuthServerConfiguration oAuthServerConfiguration) {
+        ServiceReferenceHolder.getInstance().setOauthServerConfiguration(null);
+    }
+
+    /**
+     * Initialize the JWTTransformer Server configuration Service Service dependency
+     *
+     * @param jwtTransformer {@link JWTTransformer} service reference.
+     */
+    @Reference(
+            name = "jwt.transformer.service",
+            service = JWTTransformer.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeJWTTransformer")
+    protected void addJWTTransformer(JWTTransformer jwtTransformer) {
+
+        ServiceReferenceHolder.getInstance().addJWTTransformer(jwtTransformer.getIssuer(), jwtTransformer);
+    }
+
+    /**
+     * De-reference the JWTTransformer service
+     *
+     * @param jwtTransformer
+     */
+    protected void removeJWTTransformer(JWTTransformer jwtTransformer) {
+        ServiceReferenceHolder.getInstance().removeJWTTransformer(jwtTransformer.getIssuer());
+    }
+
+    /**
+     * Initialize the KeyManager Connector configuration Service Service dependency
+     *
+     * @param keyManagerConnectorConfiguration {@link KeyManagerConnectorConfiguration} service reference.
+     */
+    @Reference(
+            name = "keyManager.connector.service",
+            service = KeyManagerConnectorConfiguration.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeKeyManagerConnectorConfiguration")
+    protected void addKeyManagerConnectorConfiguration(
+            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration, Map<String, Object> properties) {
+
+        if (properties.containsKey(APIConstants.KeyManager.KEY_MANAGER_TYPE)) {
+            String type = (String) properties.get(APIConstants.KeyManager.KEY_MANAGER_TYPE);
+            if (keyManagerConnectorConfiguration instanceof AbstractKeyManagerConnectorConfiguration) {
+                ((AbstractKeyManagerConnectorConfiguration) keyManagerConnectorConfiguration).setKeyManagerType(type);
+            }
+            ServiceReferenceHolder.getInstance().addKeyManagerConnectorConfiguration(type,
+                    keyManagerConnectorConfiguration);
+        }
+    }
+
+    /**
+     * De-reference the JWTTransformer service
+     *
+     * @param keyManagerConnectorConfiguration
+     */
+    protected void removeKeyManagerConnectorConfiguration(
+            KeyManagerConnectorConfiguration keyManagerConnectorConfiguration, Map<String, Object> properties) {
+        if (properties.containsKey(APIConstants.KeyManager.KEY_MANAGER_TYPE)){
+            String type = (String) properties.get(APIConstants.KeyManager.KEY_MANAGER_TYPE);
+            ServiceReferenceHolder.getInstance().removeKeyManagerConnectorConfiguration(type);
+        }
+    }
+
 
     private void setupAccessTokenGenerator(){
 

@@ -17,7 +17,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 public class APIKey {
-    
+    private String mappingId;
     private String consumerKey;
     private String consumerSecret;
     private String accessToken;
@@ -30,7 +30,8 @@ public class APIKey {
     private String state;
     private String callbackUrl;
     private String grantTypes;
-    private String additionalProperties;
+    private Object additionalProperties;
+    private String keyManager;
 
     public String getState() {
         return state;
@@ -125,11 +126,29 @@ public class APIKey {
         this.grantTypes = grantTypes;
     }
 
-	public String getAdditionalProperties() {
+	public Object getAdditionalProperties() {
 		return additionalProperties;
 	}
 
-	public void setAdditionalProperties(String additionalProperties) {
+	public void setAdditionalProperties(Object additionalProperties) {
 		this.additionalProperties = additionalProperties;
 	}
+
+    public void setKeyManager(String keyManager) {
+        this.keyManager = keyManager;
+    }
+
+    public String getKeyManager() {
+        return keyManager;
+    }
+
+    public String getMappingId() {
+
+        return mappingId;
+    }
+
+    public void setMappingId(String mappingId) {
+
+        this.mappingId = mappingId;
+    }
 }

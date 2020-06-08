@@ -41,7 +41,7 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
     }
 
     public boolean mediate(MessageContext messageContext) {
-        
+
         if (publisher == null) {
             this.initializeDataPublisher();
         }
@@ -84,6 +84,10 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                         APIMgtGatewayConstants.CONTEXT));
                 throttlePublisherDTO.setApiCreator((String) messageContext.getProperty(
                         APIMgtGatewayConstants.API_PUBLISHER));
+                throttlePublisherDTO
+                        .setApiMethod((String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
+                throttlePublisherDTO
+                        .setApiResourceTemplate((String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE));
                 String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
                 String applicationId = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_ID);
                 if (applicationName == null || "".equals(applicationName)) {
@@ -105,7 +109,7 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                 throttlePublisherDTO.setHostName(GatewayUtils.getHostName(messageContext));
                 Map<String, String> properties = Utils.getCustomAnalyticsProperties(messageContext);
                 throttlePublisherDTO.setProperties(properties);
-                
+
                 if (log.isDebugEnabled()) {
                     log.debug("Publishing throttling event from gateway to analytics for: "
                             + messageContext.getProperty(APIMgtGatewayConstants.CONTEXT) + " with ID: "

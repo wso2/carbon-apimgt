@@ -91,6 +91,7 @@ securityDefinitions:
       apim:tenant_theme_manage: Manage tenant themes
       apim:admin_operations: Manage API categories
       apim:admin_settings: Retrieve admin settings
+      apim:admin_alert_manage: Manage admin alerts
 
 ######################################################
 # The "API Collection" resource APIs
@@ -1307,7 +1308,7 @@ paths:
       x-wso2-request: |
         GET https://localhost:9443/api/am/admin/v1/throttling/policies/advanced
         Authorization: Bearer aa5195d9-3977-33f4-839e-5779dabfe826
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"count\": 4,\r\n  \"list\": [\r\n    {\r\n      \"policyId\": \"85c69cbe-05b7-4293-abff-56f424d51c9c\",\r\n      \"policyName\": \"50KPerMin\",\r\n      \"displayName\": \"50KPerMin\",\r\n      \"description\": \"Allows 50000 requests per minute\",\r\n      \"isDeployed\": true,\r\n      \"defaultLimit\": {\r\n        \"type\": \"RequestCountLimit\",\r\n        \"timeUnit\": \"min\",\r\n        \"unitTime\": 1,\r\n        \"requestCount\": 50000\r\n      }\r\n    },\r\n    {\r\n      \"policyId\": \"46062a74-edfa-431a-a418-7cb52595baf8\",\r\n      \"policyName\": \"20KPerMin\",\r\n      \"displayName\": \"20KPerMin\",\r\n      \"description\": \"Allows 20000 requests per minute\",\r\n      \"isDeployed\": true,\r\n      \"defaultLimit\": {\r\n        \"type\": \"RequestCountLimit\",\r\n        \"timeUnit\": \"min\",\r\n        \"unitTime\": 1,\r\n        \"requestCount\": 20000\r\n      }\r\n    },\r\n    {\r\n      \"policyId\": \"0637089f-2128-4a26-9bee-ffb6d85f0f81\",\r\n      \"policyName\": \"10KPerMin\",\r\n      \"displayName\": \"10KPerMin\",\r\n      \"description\": \"Allows 10000 requests per minute\",\r\n      \"isDeployed\": true,\r\n      \"defaultLimit\": {\r\n        \"type\": \"RequestCountLimit\",\r\n        \"timeUnit\": \"min\",\r\n        \"unitTime\": 1,\r\n        \"requestCount\": 10000\r\n      }\r\n    },\r\n    {\r\n      \"policyId\": \"c461d87e-dba1-4f57-bc5a-67b97025c1c8\",\r\n      \"policyName\": \"Unlimited\",\r\n      \"displayName\": \"Unlimited\",\r\n      \"description\": \"Allows unlimited requests\",\r\n      \"isDeployed\": true,\r\n      \"defaultLimit\": {\r\n        \"type\": \"RequestCountLimit\",\r\n        \"timeUnit\": \"min\",\r\n        \"unitTime\": 1,\r\n        \"requestCount\": 2147483647\r\n      }\r\n    }\r\n  ]\r\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"count\": 4,\r\n  \"list\": [\r\n    {\r\n      \"policyId\": \"85c69cbe-05b7-4293-abff-56f424d51c9c\",\r\n      \"policyName\": \"50KPerMin\",\r\n      \"displayName\": \"50KPerMin\",\r\n      \"description\": \"Allows 50000 requests per minute\",\r\n      \"isDeployed\": true,\r\n      \"defaultLimit\": {\r\n        \"requestCount\": {\r\n          \"type\": \"REQUESTCOUNTLIMIT\",\r\n          \"timeUnit\": \"min\",\r\n          \"unitTime\": 1,\r\n          \"requestCount\": 50000\r\n        },\r\n        \"bandwidth\": null\r\n      }\r\n    },\r\n    {\r\n      \"policyId\": \"46062a74-edfa-431a-a418-7cb52595baf8\",\r\n      \"policyName\": \"20KPerMin\",\r\n      \"displayName\": \"20KPerMin\",\r\n      \"description\": \"Allows 20000 requests per minute\",\r\n      \"isDeployed\": true,\r\n      \"defaultLimit\": {\r\n        \"requestCount\": {\r\n          \"type\": \"REQUESTCOUNTLIMIT\",\r\n          \"timeUnit\": \"min\",\r\n          \"unitTime\": 1,\r\n          \"requestCount\": 20000\r\n        },\r\n        \"bandwidth\": null\r\n      }\r\n    },\r\n    {\r\n      \"policyId\": \"0637089f-2128-4a26-9bee-ffb6d85f0f81\",\r\n      \"policyName\": \"10KPerMin\",\r\n      \"displayName\": \"10KPerMin\",\r\n      \"description\": \"Allows 10000 requests per minute\",\r\n      \"isDeployed\": true,\r\n      \"defaultLimit\": {\r\n        \"requestCount\": {\r\n          \"type\": \"REQUESTCOUNTLIMIT\",\r\n          \"timeUnit\": \"min\",\r\n          \"unitTime\": 1,\r\n          \"requestCount\": 10000\r\n        },\r\n        \"bandwidth\": null\r\n      }\r\n    },\r\n    {\r\n      \"policyId\": \"c461d87e-dba1-4f57-bc5a-67b97025c1c8\",\r\n      \"policyName\": \"Unlimited\",\r\n      \"displayName\": \"Unlimited\",\r\n      \"description\": \"Allows unlimited requests\",\r\n      \"isDeployed\": true,\r\n      \"defaultLimit\": {\r\n        \"requestCount\": {\r\n          \"type\": \"REQUESTCOUNTLIMIT\",\r\n          \"timeUnit\": \"min\",\r\n          \"unitTime\": 1,\r\n          \"requestCount\": 2147483647\r\n        },\r\n        \"bandwidth\": null\r\n      }\r\n    }\r\n  ]\r\n}"
       security:
         - OAuth2Security:
             - apim:tier_view
@@ -1358,8 +1359,8 @@ paths:
 #-----------------------------------------------------
     post:
       x-wso2-curl: "curl -k -X POST -H \"Authorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v1/throttling/policies/advanced -d @data.json"
-      x-wso2-request: "POST https://localhost:9443/api/am/admin/v1/throttling/policies/advanced\r\nAuthorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\r\nContent-Type: application/json\r\n\r\n{\r\n   \"policyName\": \"100KBP2Min\",\r\n   \"displayName\": \"100KBP2Min\",\r\n   \"description\": \"description of the policy\",\r\n   \"defaultLimit\":    {\r\n      \"type\": \"BandwidthLimit\",\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100,\r\n      \"dataUnit\": \"KB\"\r\n   },\r\n   \"conditionalGroups\":    [\r\n            {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":          [\r\n                        {\r\n               \"type\": \"IPCondition\",\r\n               \"invertCondition\": false,\r\n               \"ipConditionType\": \"IPSpecific\",\r\n               \"specificIP\": \"10.100.1.22\",\r\n               \"startingIP\": null,\r\n               \"endingIP\": null\r\n            },\r\n                        {\r\n               \"type\": \"HeaderCondition\",\r\n               \"invertCondition\": false,\r\n               \"headerName\": \"Location\",\r\n               \"headerValue\": \"google.com\"\r\n            },\r\n                        {\r\n               \"type\": \"HeaderCondition\",\r\n               \"invertCondition\": false,\r\n               \"headerName\": \"Host\",\r\n               \"headerValue\": \"10.100.7.77\"\r\n            },\r\n                        {\r\n               \"type\": \"QueryParameterCondition\",\r\n               \"invertCondition\": false,\r\n               \"parameterName\": \"name\",\r\n               \"parameterValue\": \"admin\"\r\n            },\r\n                        {\r\n               \"type\": \"QueryParameterCondition\",\r\n               \"invertCondition\": false,\r\n               \"parameterName\": \"lastAccess\",\r\n               \"parameterValue\": \"25-02-2016\"\r\n            },\r\n                        {\r\n               \"type\": \"JWTClaimsCondition\",\r\n               \"invertCondition\": true,\r\n               \"claimUrl\": \"claimUrl0\",\r\n               \"attribute\": \"claimAttr0\"\r\n            },\r\n                        {\r\n               \"type\": \"JWTClaimsCondition\",\r\n               \"invertCondition\": true,\r\n               \"claimUrl\": \"claimUrl1\",\r\n               \"attribute\": \"claimAttr\"\r\n            }\r\n         ],\r\n         \"limit\":          {\r\n            \"type\": \"RequestCountLimit\",\r\n            \"timeUnit\": \"sec\",\r\n            \"unitTime\": 60,\r\n            \"requestCount\": 0\r\n         }\r\n      },\r\n            {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\": [         {\r\n            \"type\": \"IPCondition\",\r\n            \"invertCondition\": true,\r\n            \"ipConditionType\": \"IPRange\",\r\n            \"specificIP\": null,\r\n            \"startingIP\": \"0.0.0.0\",\r\n            \"endingIP\": \"1.1.1.1\"\r\n         }],\r\n         \"limit\":          {\r\n            \"type\": \"RequestCountLimit\",\r\n            \"timeUnit\": \"sec\",\r\n            \"unitTime\": 60,\r\n            \"requestCount\": 0\r\n         }\r\n      }\r\n   ]\r\n}"
-      x-wso2-response: "HTTP/1.1 201 Created\r\nLocation: https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/a0c9f368-b7d2-4eec-a757-f67034160208\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyId\": \"a0c9f368-b7d2-4eec-a757-f67034160208\",\r\n  \"policyName\": \"100KBP2Min\",\r\n  \"displayName\": \"100KBP2Min\",\r\n  \"description\": \"description of the policy\",\r\n  \"isDeployed\": true,\r\n  \"defaultLimit\": {\r\n    \"type\": \"BandwidthLimit\",\r\n    \"timeUnit\": \"min\",\r\n    \"unitTime\": 2,\r\n    \"dataAmount\": 100,\r\n    \"dataUnit\": \"KB\"\r\n  },\r\n  \"conditionalGroups\": [\r\n    {\r\n      \"description\": \"Sample description about condition group\",\r\n      \"conditions\": [\r\n        {\r\n          \"type\": \"IPCondition\",\r\n          \"invertCondition\": false,\r\n          \"ipConditionType\": \"IPSpecific\",\r\n          \"specificIP\": \"10.100.1.22\",\r\n          \"startingIP\": null,\r\n          \"endingIP\": null\r\n        },\r\n        {\r\n          \"type\": \"HeaderCondition\",\r\n          \"invertCondition\": false,\r\n          \"headerName\": \"Location\",\r\n          \"headerValue\": \"google.com\"\r\n        },\r\n        {\r\n          \"type\": \"HeaderCondition\",\r\n          \"invertCondition\": false,\r\n          \"headerName\": \"Host\",\r\n          \"headerValue\": \"10.100.7.77\"\r\n        },\r\n        {\r\n          \"type\": \"QueryParameterCondition\",\r\n          \"invertCondition\": false,\r\n          \"parameterName\": \"name\",\r\n          \"parameterValue\": \"admin\"\r\n        },\r\n        {\r\n          \"type\": \"QueryParameterCondition\",\r\n          \"invertCondition\": false,\r\n          \"parameterName\": \"lastAccess\",\r\n          \"parameterValue\": \"25-02-2016\"\r\n        },\r\n        {\r\n          \"type\": \"JWTClaimsCondition\",\r\n          \"invertCondition\": true,\r\n          \"claimUrl\": \"claimUrl0\",\r\n          \"attribute\": \"claimAttr0\"\r\n        },\r\n        {\r\n          \"type\": \"JWTClaimsCondition\",\r\n          \"invertCondition\": true,\r\n          \"claimUrl\": \"claimUrl1\",\r\n          \"attribute\": \"claimAttr\"\r\n        }\r\n      ],\r\n      \"limit\": {\r\n        \"type\": \"RequestCountLimit\",\r\n        \"timeUnit\": \"sec\",\r\n        \"unitTime\": 60,\r\n        \"requestCount\": 0\r\n      }\r\n    },\r\n    {\r\n      \"description\": \"Sample description about condition group\",\r\n      \"conditions\": [\r\n        {\r\n          \"type\": \"IPCondition\",\r\n          \"invertCondition\": true,\r\n          \"ipConditionType\": \"IPRange\",\r\n          \"specificIP\": null,\r\n          \"startingIP\": \"0.0.0.0\",\r\n          \"endingIP\": \"1.1.1.1\"\r\n        }\r\n      ],\r\n      \"limit\": {\r\n        \"type\": \"RequestCountLimit\",\r\n        \"timeUnit\": \"sec\",\r\n        \"unitTime\": 60,\r\n        \"requestCount\": 0\r\n      }\r\n    }\r\n  ]\r\n}"
+      x-wso2-request: "POST https://localhost:9443/api/am/admin/v1/throttling/policies/advanced\r\nAuthorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyName\": \"100KBP2Min\",\r\n  \"displayName\": \"100KBP2Min\",\r\n  \"description\": \"description of the policy\",\r\n  \"defaultLimit\": {\r\n    \"requestCount\": null,\r\n    \"bandwidth\": {\r\n      \"type\": \"BANDWIDTHLIMIT\",\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100\r\n      \"dataUnit\": KB\r\n    }\r\n  },\r\n  \"conditionalGroups\":    [\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":          [\r\n                          {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"HeaderCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"headerName\": \"Location\",\r\n               \"headerValue\": \"google.com\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"HeaderCondition\":   {\r\n               \"invertCondition\": \"false\",\r\n               \"headerName\": \"Host\",\r\n               \"headerValue\": \"10.100.7.77\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"IPCONDITION\",\r\n             \"IPCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"ipConditionType\": \"IPSPECIFIC\",\r\n               \"specificIP\": \"10.100.1.22\",\r\n               \"startingIP\": null,\r\n               \"endingIP\": null\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"QueryParameterCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"parameterName\": \"name\",\r\n               \"parameterValue\": \"admin\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"QueryParameterCondition\": {\r\n               \"invertCondition\": \"false\",  \r\n               \"parameterName\": \"lastAccess\",\r\n               \"parameterValue\": \"25-02-2016\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"JWTClaimsCondition\": {\r\n               \"invertCondition\": \"true\",\r\n               \"claimUrl\": \"claimUrl0\",\r\n               \"attribute\": \"claimAttr0\",\r\n             }  \r\n           },\r\n                          {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"JWTClaimsCondition\": {\r\n               \"invertCondition\": \"true\",\r\n               \"claimUrl\": \"claimUrl1\",  \r\n               \"attribute\": \"claimAttr\",\r\n             }\r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"requestCount\": {\r\n              \"type\": \"REQUESTCOUNTLIMIT\",\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n          }\r\n      },\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":          [\r\n                          {\r\n             \"type\": \"IPCONDITION\",\r\n             \"IPCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"ipConditionType\": \"IPRANGE\",\r\n               \"specificIP\": null,\r\n               \"startingIP\": \"0.0.0.0\",\r\n               \"endingIP\": \"1.1.1.1\"\r\n             }\r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"requestCount\": {\r\n              \"type\": \"REQUESTCOUNTLIMIT\",\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n         }\r\n      }\r\n   ]\r\n}"
+      x-wso2-response: "HTTP/1.1 201 Created\r\nLocation: https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/a0c9f368-b7d2-4eec-a757-f67034160208\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyId\": \"a0c9f368-b7d2-4eec-a757-f67034160208\",\r\n  \"policyName\": \"100KBP2Min\",\r\n  \"displayName\": \"100KBP2Min\",\r\n  \"description\": \"description of the policy\",\r\n  \"isDeployed\": true,\r\n  \"defaultLimit\": {\r\n    \"requestCount\": null,\r\n    \"bandwidth\": {\r\n      \"type\": \"BANDWIDTHLIMIT\",\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100\r\n      \"dataUnit\": KB\r\n    }\r\n  },\r\n  \"conditionalGroups\":  [\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":  [\r\n           {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"HeaderCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"headerName\": \"Location\",\r\n               \"headerValue\": \"google.com\",\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"HeaderCondition\":   {\r\n               \"invertCondition\": \"false\",\r\n               \"headerName\": \"Host\",\r\n               \"headerValue\": \"10.100.7.77\",\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"IPCONDITION\",\r\n             \"IPCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"ipConditionType\": \"IPSPECIFIC\",\r\n               \"specificIP\": \"10.100.1.22\",\r\n               \"startingIP\": null,\r\n               \"endingIP\": null\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"QueryParameterCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"parameterName\": \"name\",\r\n               \"parameterValue\": \"admin\",\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"QueryParameterCondition\": {\r\n               \"invertCondition\": \"false\",  \r\n               \"parameterName\": \"lastAccess\",\r\n               \"parameterValue\": \"25-02-2016\",\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"JWTClaimsCondition\": {\r\n               \"invertCondition\": \"true\",\r\n               \"claimUrl\": \"claimUrl0\",\r\n               \"attribute\": \"claimAttr0\",\r\n             }  \r\n           },\r\n           {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"JWTClaimsCondition\": {\r\n               \"invertCondition\": \"true\",\r\n               \"claimUrl\": \"claimUrl1\",  \r\n               \"attribute\": \"claimAttr\",\r\n             }\r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"requestCount\": {\r\n              \"type\": \"REQUESTCOUNTLIMIT\",\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n          }\r\n      },\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":  [\r\n           {\r\n             \"type\": \"IPCONDITION\",\r\n             \"IPCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"ipConditionType\": \"IPRANGE\",\r\n               \"specificIP\": null,\r\n               \"startingIP\": \"0.0.0.0\",\r\n               \"endingIP\": \"1.1.1.1\"\r\n             }\r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"requestCount\": {\r\n              \"type\": \"REQUESTCOUNTLIMIT\",\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n         }\r\n      }\r\n   ]\r\n}"
       security:
         - OAuth2Security:
             - apim:tier_manage
@@ -1423,7 +1424,7 @@ paths:
       x-wso2-request: |
         GET https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/ea4ee02d-6cfb-4eea-9e30-3f548783160b
         Authorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyId\": \"ea4ee02d-6cfb-4eea-9e30-3f548783160b\",\r\n  \"policyName\": \"50KPerMin\",\r\n  \"displayName\": \"50KPerMin\",\r\n  \"description\": \"Allows 50000 requests per minute\",\r\n  \"isDeployed\": true,\r\n  \"defaultLimit\": {\r\n    \"type\": \"RequestCountLimit\",\r\n    \"timeUnit\": \"min\",\r\n    \"unitTime\": 1,\r\n    \"requestCount\": 50000\r\n  },\r\n  \"conditionalGroups\": []\r\n}\r\n"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyId\": \"ea4ee02d-6cfb-4eea-9e30-3f548783160b\",\r\n  \"policyName\": \"50KPerMin\",\r\n  \"displayName\": \"50KPerMin\",\r\n  \"description\": \"Allows 50000 requests per minute\",\r\n  \"isDeployed\": true,\r\n  \"defaultLimit\": {\r\n    \"requestCount\": {\r\n      \"type\": \"REQUESTCOUNTLIMIT\",\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 1,\r\n      \"requestCount\": 50000\r\n    },\r\n    \"bandwidth\": null\r\n  },\r\n  \"conditionalGroups\": []\r\n}\r\n"
       security:
         - OAuth2Security:
             - apim:tier_view
@@ -1519,8 +1520,8 @@ paths:
 #-----------------------------------------------------
     put:
       x-wso2-curl: "curl -k -X PUT -H \"Authorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/a0c9f368-b7d2-4eec-a757-f67034160208 -d @data.json"
-      x-wso2-request: "PUT https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/a0c9f368-b7d2-4eec-a757-f67034160208\r\nAuthorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\r\nContent-Type: application/json\r\n\r\n{\r\n   \"policyName\": \"100KBP2Min\",\r\n   \"displayName\": \"100KBP2Min\",\r\n   \"description\": \"description of the policy\",\r\n   \"defaultLimit\":    {\r\n      \"type\": \"BandwidthLimit\",\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100,\r\n      \"dataUnit\": \"KB\"\r\n   },\r\n   \"conditionalGroups\":    [\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":          [\r\n                        {\r\n               \"type\": \"IPCondition\",\r\n               \"invertCondition\": false,\r\n               \"ipConditionType\": \"IPSpecific\",\r\n               \"specificIP\": \"10.100.1.22\",\r\n               \"startingIP\": null,\r\n               \"endingIP\": null\r\n            },\r\n                        {\r\n               \"type\": \"HeaderCondition\",\r\n               \"invertCondition\": false,\r\n               \"headerName\": \"Host\",\r\n               \"headerValue\": \"10.100.7.77\"\r\n            },\r\n                        {\r\n               \"type\": \"QueryParameterCondition\",\r\n               \"invertCondition\": false,\r\n               \"parameterName\": \"name\",\r\n               \"parameterValue\": \"admin\"\r\n            },\r\n                        {\r\n               \"type\": \"JWTClaimsCondition\",\r\n               \"invertCondition\": true,\r\n               \"claimUrl\": \"claimUrl0\",\r\n               \"attribute\": \"claimAttr0\"\r\n            }\r\n         ],\r\n         \"limit\":          {\r\n            \"type\": \"RequestCountLimit\",\r\n            \"timeUnit\": \"sec\",\r\n            \"unitTime\": 60,\r\n            \"requestCount\": 0\r\n         }\r\n      }\r\n   ]\r\n}"
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyId\": \"a0c9f368-b7d2-4eec-a757-f67034160208\",\r\n  \"policyName\": \"100KBP2Min\",\r\n  \"displayName\": \"100KBP2Min\",\r\n  \"description\": \"description of the policy\",\r\n  \"isDeployed\": true,\r\n  \"defaultLimit\": {\r\n    \"type\": \"BandwidthLimit\",\r\n    \"timeUnit\": \"min\",\r\n    \"unitTime\": 2,\r\n    \"dataAmount\": 100,\r\n    \"dataUnit\": \"KB\"\r\n  },\r\n  \"conditionalGroups\": [\r\n    {\r\n      \"description\": \"Sample description about condition group\",\r\n      \"conditions\": [\r\n        {\r\n          \"type\": \"IPCondition\",\r\n          \"invertCondition\": false,\r\n          \"ipConditionType\": \"IPSpecific\",\r\n          \"specificIP\": \"10.100.1.22\",\r\n          \"startingIP\": null,\r\n          \"endingIP\": null\r\n        },\r\n        {\r\n          \"type\": \"HeaderCondition\",\r\n          \"invertCondition\": false,\r\n          \"headerName\": \"Host\",\r\n          \"headerValue\": \"10.100.7.77\"\r\n        },\r\n        {\r\n          \"type\": \"QueryParameterCondition\",\r\n          \"invertCondition\": false,\r\n          \"parameterName\": \"name\",\r\n          \"parameterValue\": \"admin\"\r\n        },\r\n        {\r\n          \"type\": \"JWTClaimsCondition\",\r\n          \"invertCondition\": true,\r\n          \"claimUrl\": \"claimUrl0\",\r\n          \"attribute\": \"claimAttr0\"\r\n        }\r\n      ],\r\n      \"limit\": {\r\n        \"type\": \"RequestCountLimit\",\r\n        \"timeUnit\": \"sec\",\r\n        \"unitTime\": 60,\r\n        \"requestCount\": 0\r\n      }\r\n    }\r\n  ]\r\n}"
+      x-wso2-request: "PUT https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/a0c9f368-b7d2-4eec-a757-f67034160208\r\nAuthorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\r\nContent-Type: application/json\r\n\r\n{\r\n   \"policyName\": \"100KBP2Min\",\r\n   \"displayName\": \"100KBP2Min\",\r\n   \"description\": \"description of the policy\",\r\n   \"defaultLimit\": {\r\n    \"requestCount\": null,\r\n    \"bandwidth\": {\r\n      \"type\": \"BANDWIDTHLIMIT\",\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100\r\n      \"dataUnit\": KB    }\r\n  },\r\n   \"conditionalGroups\":    [\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":          [\r\n                         {\r\n             \"type\": \"IPCONDITION\",\r\n             \"IPCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"ipConditionType\": \"IPSPECIFIC\",\r\n               \"specificIP\": \"10.100.1.22\",\r\n               \"startingIP\": null,\r\n               \"endingIP\": null\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"HeaderCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"headerName\": \"Host\",\r\n               \"headerValue\": \"10.100.7.77\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"QueryParameterCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"parameterName\": \"name\",\r\n               \"parameterValue\": \"admin\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"JWTClaimsCondition\": {\r\n               \"invertCondition\": \"true\",\r\n               \"claimUrl\": \"claimUrl0\",\r\n               \"attribute\": \"claimAttr0\",\r\n             }  \r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"requestCount\": {\r\n              \"type\": \"REQUESTCOUNTLIMIT\",\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n         }\r\n      }\r\n   ]\r\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyId\": \"a0c9f368-b7d2-4eec-a757-f67034160208\",\r\n  \"policyName\": \"100KBP2Min\",\r\n  \"displayName\": \"100KBP2Min\",\r\n  \"description\": \"description of the policy\",\r\n  \"isDeployed\": true,\r\n  \"defaultLimit\": {\r\n    \"requestCount\": null,\r\n    \"bandwidth\": {\r\n      \"type\": \"BANDWIDTHLIMIT\",\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100\r\n      \"dataUnit\": KB    }\r\n  },\r\n  \"conditionalGroups\": [\r\n    {\r\n      \"description\": \"Sample description about condition group\",\r\n      \"conditions\": [\r\n        {\r\n          \"type\": \"IPCONDITION\",\r\n          \"IPCondition\": {\r\n            \"invertCondition\": \"false\",\r\n             \"ipConditionType\": \"IPSPECIFIC\",\r\n             \"specificIP\": \"10.100.1.22\",\r\n             \"startingIP\": null,\r\n            \"endingIP\": null\r\n           }\r\n        },\r\n        {\r\n          \"type\": \"HEADERCONDITION\",\r\n          \"HeaderCondition\": {\r\n            \"invertCondition\": \"false\",\r\n             \"headerName\": \"Host\",\r\n            \"headerValue\": \"10.100.7.77\",\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"QUERYPARAMETERCONDITION\",\r\n          \"QueryParameterCondition\": {\r\n            \"invertCondition\": \"false\",\r\n            \"parameterName\": \"name\",\r\n            \"parameterValue\": \"admin\",\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"JWTCLAIMSCONDITION\",\r\n          \"JWTClaimsCondition\": {\r\n            \"invertCondition\": \"true\",\r\n            \"claimUrl\": \"claimUrl0\",\r\n            \"attribute\": \"claimAttr0\",\r\n          }\r\n        }\r\n      ],\r\n      \"limit\": {\r\n        \"requestCount\": {\r\n          \"type\": \"REQUESTCOUNTLIMIT\",\r\n          \"timeUnit\": \"sec\",\r\n          \"unitTime\": 60,\r\n          \"requestCount\": 0\r\n        },\r\n         \"bandwidth\": null\r\n      }\r\n    }\r\n  ]\r\n}"
       security:
         - OAuth2Security:
             - apim:tier_manage
@@ -3129,6 +3130,196 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ####################################################
+  # The Admin alert  management REST API
+  ####################################################
+  '/alert-types':
+    #--------------------------------------------------
+    # Retrieve the list of admin alert types
+    #--------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:admin_alert_manage
+      operationId: getAdminAlertTypes
+      summary: |
+        Get the list of admin alert types.
+      description: |
+        This operation is used to get the list of supportd alert types for the apim admin dashboard
+      tags:
+        - Alerts
+      responses:
+        200:
+          description: |
+            OK.
+            The list of admin alert types are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertTypesList'
+        500:
+          description: |
+            Internal Server Error.
+            An internal server error occurred while retrieving the alert types.
+          schema:
+            $ref: '#/definitions/Error'
+
+  '/alert-subscriptions':
+    #--------------------------------------------------
+    # Retrieve the list of alerts subscribed by the admin user
+    #--------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:admin_alert_manage
+      summary: |
+        Get the list of API Admin alert types subscribed by the user.
+      operationId: getSubscribedAlertTypes
+      description: |
+        This operation is used to get the list of subscribed alert types by the user.
+      tags:
+        - Alert Subscriptions
+      responses:
+        200:
+          description: |
+            OK.
+            The list of subscribed alert types are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertsSubscription'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #--------------------------------------------------
+    # Subscribe to the selected alert types by the user.
+    #--------------------------------------------------
+    put:
+      security:
+        - OAuth2Security:
+            - apim:admin_alert_manage
+      summary: |
+        Subscribe to an admin alert.
+      operationId: subscribeToAlerts
+      description: |
+        This operation is used to subscribe to admin alerts
+      parameters:
+        - in: body
+          name: body
+          description:
+            The alerts list and the email list to subscribe.
+          required: true
+          schema:
+            $ref: '#/definitions/AlertsSubscription'
+      tags:
+        - Alert Subscriptions
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with the newly subscribed alerts.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertsSubscription'
+        400:
+          description: |
+            Bad Request.
+            Invalid Request or request validation failure.
+        500:
+          description: |
+            Internal Server Error
+            An internal server error occurred while subscribing to alerts.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #--------------------------------------------------
+    # Unsubscribe the user from all the admin alerts types
+    #--------------------------------------------------
+    delete:
+      security:
+        - OAuth2Security:
+            - apim:admin_alert_manage
+      summary: |
+        Unsubscribe user from all the admin alert types.
+      operationId: unsubscribeAllAlerts
+      description: |
+        This operation is used to unsubscribe the respective user from all the admin alert types.
+      tags:
+        - Alert Subscriptions
+      responses:
+        200:
+          description: |
+            OK.
+            The user is unsubscribed from the alerts successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        500:
+          description: |
+            Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+
+  /settings/scopes/{scope}:
+    #-----------------------------------------------------
+    # Retrieve scope settings
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:admin_settings
+      x-wso2-curl: "curl -k -X GET \"https://localhost:9443/api/am/admin/v1/settings/scopes/apim:subscribe?username=john\" -H \"accept: application/json\" -H \"Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
+      x-wso2-request: "GET https://localhost:9443/api/am/admin/v1/settings/scopes/apim:subscribe?username=john Authorization: Bearer 8e8edc50-4a70-3fec-af00-ce08097012ab"
+      x-wso2-response: "{\n  \"name\":\"apim:subscribe\"  \n}\n"
+      summary: Retrieve scopes for a particular user
+      description: |
+        This operation will return the scope list of particular user
+        In order to get it, we need to pass the userId as a query parameter
+      parameters:
+        - name: username
+          in: query
+          type: string
+          required: true
+        - $ref : '#/parameters/scope'
+      tags:
+        - Settings
+      responses:
+        200:
+          description: |
+            OK.
+            Particular scope exists for the given user.
+          schema:
+            $ref: '#/definitions/ScopeSettings'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested user does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # The Tenant Theme resource APIs
 ######################################################
@@ -3167,23 +3358,209 @@ paths:
             Not Authorized to import.
           schema:
             $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not Found.
-            Tenant does not exist.
-          schema:
-            $ref: '#/definitions/Error'
         500:
           description: |
             Internal Server Error.
             Error in importing Theme.
           schema:
             $ref: '#/definitions/Error'
+  ######################################################
+  # The "Key Manager Collection" resource API
+  ######################################################
+  /key-managers:
+
+    #-----------------------------------------------------
+    # Retrieve all key managers
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:admin_operations
+
+      summary: Get all Key managers
+      description: |
+        Get all Key managers
+      tags:
+        - Key Manager (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            KeyManagers returned
+          schema:
+            $ref: '#/definitions/KeyManagerList'
+
+    #-----------------------------------------------------
+    # Add a Key Manager
+    #-----------------------------------------------------
+    post:
+      security:
+        - OAuth2Security:
+            - apim:admin_operations
+      summary: Add a new API Key Manager
+      description: |
+        Add a new API Key Manager
+      parameters:
+        - in: body
+          name: body
+          description: |
+            Key Manager object that should to be added
+          required: true
+          schema:
+            $ref: '#/definitions/KeyManager'
+      tags:
+        - Key Manager (Collection)
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+          schema:
+            $ref: '#/definitions/KeyManager'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+
+  ######################################################
+  # The "Individual KeyManager" resource APIs
+  ######################################################
+
+  /key-managers/{keyManagerId}:
+
+    #-----------------------------------------------------
+    # Retrieve a certain Key Manager Resource
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:admin_operations
+      summary: Get a Key Manager Configuration
+      description: |
+        Retrieve a single Key Manager Configuration. We should provide the Id of the KeyManager as a path parameter.
+      parameters:
+        - $ref: '#/parameters/keyManagerId'
+      tags:
+        - Key Manager (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            KeyManager Configuration returned
+          schema:
+            $ref: '#/definitions/KeyManager'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        404:
+          description: |
+            Not Found.
+            Requested KeyManager Configuration does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+    #-----------------------------------------------------
+    # Update a Key Manager
+    #-----------------------------------------------------
+    put:
+      security:
+        - OAuth2Security:
+            - apim:admin_operations
+      summary: Update a Key Manager
+      description: |
+        Update a Key Manager by keyManager id
+      parameters:
+        - $ref: '#/parameters/keyManagerId'
+        - in: body
+          name: body
+          description: |
+            Key Manager object with updated information
+          required: true
+          schema:
+            $ref: '#/definitions/KeyManager'
+      tags:
+        - Key Manager (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Label updated.
+          schema:
+            $ref: '#/definitions/KeyManager'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+    #-----------------------------------------------------
+    # Delete a Key Manager
+    #-----------------------------------------------------
+    delete:
+      security:
+        - OAuth2Security:
+            - apim:admin_operations
+      summary: Delete a Key Manager
+      description: |
+        Delete a Key Manager by keyManager id
+      parameters:
+        - $ref: '#/parameters/keyManagerId'
+      tags:
+        - Key Manager (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Key Manager successfully deleted.
+        404:
+          description: |
+            Not Found.
+            Key Manager to be deleted does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+
 
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
+
+  # Group Identifier of the application
+  username:
+    name: username
+    in: query
+    description: |
+      username of the new application owner
+    required: true
+    type: string
+
+# Scope Name
+  scope:
+    name: scope
+    in: path
+    description: |
+      scope name to be validated
+    required: true
+    type: string
 
 # Label Id
 # Specified as part of the path expression
@@ -3349,6 +3726,16 @@ parameters:
     in: path
     description: |
       API Category UUID
+    type: string
+    required: true
+
+  # Key Manager Id
+  # Specified as part of the path expression
+  keyManagerId:
+    name: keyManagerId
+    in: path
+    description: |
+      Key Manager UUID
     type: string
     required: true
 
@@ -3578,6 +3965,7 @@ definitions:
         type: integer
         description: Maximum Depth of the GraphQL query
         example: 10
+
 #-----------------------------------------------------
 # The Subscription Throttling Policy List resource
 #-----------------------------------------------------
@@ -3653,56 +4041,89 @@ definitions:
         example: |
           [
             {
-               "type": "IPCondition",
-               "invertCondition": false,
-               "ipConditionType": "IPSpecific",
-               "specificIP": "10.100.1.22",
-               "startingIP": null,
-               "endingIP": null
-            },
-            {
-               "type": "HeaderCondition",
-               "invertCondition": false,
-               "headerName": "Location",
-               "headerValue": "google.com"
+              "type": "HEADERCONDITION",
+              "headerCondition":
+              {
+                "invertCondition": false,
+                "headerName": "Host",
+                "headerValue": "10.100.7.77"
+              }
+          	},
+          	{
+              "type": "IPCONDITION",
+              "ipCondition":
+              {
+                "invertCondition": false,
+                "ipConditionType": "IPSPECIFIC",
+                "specificIP": "10.100.1.22",
+                "startingIP": null,
+                "endingIP": null
+              }
+          	},
+          	{
+              "type": "QUERYPARAMETERCONDITION",
+              "queryParameterCondition":
+              {
+                "invertCondition": false,
+                "parameterName": "name",
+                "parameterValue": "admin"
+              }
+          	},
+          	{
+              "type": "JWTCLAIMSCONDITION",
+              "jwtClaimsCondition":
+              {
+                "invertCondition": true,
+                "claimUrl": "claimUrl0",
+                "attribute": "claimAttr0"
+              }
             }
           ]
       limit:
         $ref: '#/definitions/ThrottleLimitType'
 
 #-----------------------------------------------------
-# The Throttling Condition resource
+# The Throttling Condition Base resource
 #-----------------------------------------------------
-  ThrottleCondition:
-    discriminator: type
-    x-wso2-subtypes:
-      - HeaderCondition
-      - IPCondition
-      - JWTClaimsCondition
-      - QueryParameterCondition
-    title: Conditions used for Throttling
-    description: Throttling Conditions
-    required:
-      - type
+  ThrottleConditionBase:
+    title: Throttling Condition Base
     properties:
-      type:
-        type: string
-        enum:
-          - HeaderCondition
-          - IPCondition
-          - JWTClaimsCondition
-          - QueryParameterCondition
-        description: |
-          Type of the thottling condition.
-          Allowed values are HeaderCondition, IPCondition, JWTClaimsCondition, QueryParameterCondition
       invertCondition:
         type: boolean
         default: false
         description: |
           Specifies whether inversion of the condition to be matched against the request.
 
-          **Note:** When you add conditional groups for advanced throttling policies, this paramater should have the same value (`true` or `false`)
-          for the same type of conditional group.
+          **Note:** When you add conditional groups for advanced throttling policies, this paramater should have the
+          same value ('true' or 'false') for the same type of conditional group.
+
+#-----------------------------------------------------
+# The Throttling Condition resource
+#-----------------------------------------------------
+  ThrottleCondition:
+    title: Throttling Conditions
+    description: Conditions used for Throttling
+    required:
+      - type
+    properties:
+      type:
+        type: string
+        enum:
+          - HEADERCONDITION
+          - IPCONDITION
+          - JWTCLAIMSCONDITION
+          - QUERYPARAMETERCONDITION
+        description: |
+          Type of the throttling condition. Allowed values are "HEADERCONDITION", "IPCONDITION", "JWTCLAIMSCONDITION"
+          and "QUERYPARAMETERCONDITION".
+      headerCondition:
+        $ref: '#/definitions/HeaderCondition'
+      ipCondition:
+        $ref: '#/definitions/IPCondition'
+      jwtClaimsCondition:
+        $ref: '#/definitions/JWTClaimsCondition'
+      queryParameterCondition:
+        $ref: '#/definitions/QueryParameterCondition'
 
 #-----------------------------------------------------
 # The Throttling HTTP Header Condition resource
@@ -3713,7 +4134,7 @@ definitions:
       - headerName
       - headerValue
     allOf:
-      - $ref: '#/definitions/ThrottleCondition'
+      - $ref: '#/definitions/ThrottleConditionBase'
       - properties:
           headerName:
             type: string
@@ -3730,7 +4151,7 @@ definitions:
     required:
       - specificIP
     allOf:
-      - $ref: '#/definitions/ThrottleCondition'
+      - $ref: '#/definitions/ThrottleConditionBase'
       - properties:
           ipConditionType:
             type: string
@@ -3757,7 +4178,7 @@ definitions:
       - claimUrl
       - attribute
     allOf:
-      - $ref: '#/definitions/ThrottleCondition'
+      - $ref: '#/definitions/ThrottleConditionBase'
       - properties:
           claimUrl:
             type: string
@@ -3775,7 +4196,7 @@ definitions:
       - parameterName
       - parameterValue
     allOf:
-      - $ref: '#/definitions/ThrottleCondition'
+      - $ref: '#/definitions/ThrottleConditionBase'
       - properties:
           parameterName:
             type: string
@@ -3789,9 +4210,6 @@ definitions:
 #-----------------------------------------------------
   ThrottleLimit :
     discriminator: type
-    x-wso2-subtypes:
-      - RequestCountLimit
-      - BandwidthLimit
     required:
       - type
       - timeUnit
@@ -3820,7 +4238,7 @@ definitions:
 # The Throttling Limit Type resource
 #-----------------------------------------------------
   ThrottleLimitType:
-    title: Application Throttling Policy Default Limit
+    title: Throttling Limit Type
     properties:
       requestCount:
         $ref: '#/definitions/RequestCountLimit'
@@ -4185,20 +4603,20 @@ definitions:
   # The publish status resource
   #-----------------------------------------------------
   MonetizationUsagePublishInfo:
-   title: Usage publish status
-   properties:
-     state:
-       type: string
-       description: State of usage publish job
-     status:
-       type: string
-       description: Status of usage publish job
-     startedTime:
-       type: string
-       description: Timestamp of the started time of the Job
-     lastPublsihedTime:
-       type: string
-       description: Timestamp of the last published time
+    title: Usage publish status
+    properties:
+      state:
+        type: string
+        description: State of usage publish job
+      status:
+        type: string
+        description: Status of usage publish job
+      startedTime:
+        type: string
+        description: Timestamp of the started time of the Job
+      lastPublsihedTime:
+        type: string
+        description: Timestamp of the last published time
 
   #-----------------------------------------------------
   # The workflow response resource
@@ -4275,7 +4693,7 @@ definitions:
   APICategory:
     title: API Category
     required:
-    - name
+      - name
     properties:
       id:
         type: string
@@ -4330,10 +4748,282 @@ definitions:
         type: array
         items:
           type: string
+      keyManagerConfiguration:
+        type: array
+        items:
+          properties:
+            type:
+              type: string
+              example: 'wso2is'
+            configurations:
+              type: array
+              items:
+                $ref: '#/definitions/KeyManagerConfiguration'
       analyticsEnabled:
         type: boolean
         description: To determine whether analytics is enabled or not
         example: false
+
+  #-----------------------------------------------------
+  # The KeyManager resource
+  #-----------------------------------------------------
+  KeyManager:
+    title: Key Manager
+    required:
+      - name
+      - type
+    properties:
+      id:
+        type: string
+        example: "01234567-0123-0123-0123-012345678901"
+      name:
+        type: string
+        example: "WSO2 IS"
+      type:
+        type: string
+        example: "IS"
+      description:
+        type: string
+        example: "This is a key manager for Developers"
+      introspectionEndpoint:
+        type: string
+        example: ""
+      clientRegistrationEndpoint:
+        type: string
+        example: ""
+      tokenEndpoint:
+        type: string
+        example: ""
+      revokeEndpoint:
+        type: string
+        example: ""
+      userInfoEndpoint:
+        type: string
+        example: ""
+      authorizeEndpoint:
+        type: string
+        example: ""
+      jwksEndpoint:
+        type: string
+        example: ""
+      issuer:
+        type: string
+        example: ""
+      scopeManagementEndpoint:
+        type: string
+        example: ""
+      availableGrantTypes:
+        type: array
+        items:
+          type: string
+          example: "client_credentials"
+      enableTokenGneration:
+        type: boolean
+        example: true
+      enableTokenEncryption:
+        type: boolean
+        example: false
+        default: false
+      enableTokenHashing:
+        type: boolean
+        example: false
+        default: false
+      enableMapOAuthConsumerApps:
+        type: boolean
+        example: false
+        default: false
+      enableOAuthAppCreation:
+        type: boolean
+        example: false
+        default: false
+      enableSelfValidationJWT:
+        type: boolean
+        example: true
+        default: true
+      claimMapping:
+        type: array
+        items:
+          $ref: '#/definitions/ClaimMappingEntry'
+      consumerKeyClaim:
+        type: string
+        example: 'azp'
+      scopesClaim:
+        type: string
+        example: 'scp'
+      tokenValidation:
+        type: array
+        items:
+          $ref: '#/definitions/TokenValidation'
+      enabled:
+        type: boolean
+        example: true
+      additionalProperties:
+        type: object
+
+  #-----------------------------------------------------
+  # The KeyManager resource
+  #-----------------------------------------------------
+  KeyManagerInfo:
+    title: Key Manager Info
+    required:
+      - name
+      - type
+    properties:
+      id:
+        type: string
+        example: "01234567-0123-0123-0123-012345678901"
+      name:
+        type: string
+        example: "WSO2 IS"
+      type:
+        type: string
+        example: "IS"
+      description:
+        type: string
+        example: "This is a key manager for Developers"
+      enabled:
+        type: boolean
+        example: true
+
+  #-----------------------------------------------------
+  # The KeyManager resource
+  #-----------------------------------------------------
+  KeyManagerConfiguration:
+    title: Key Manager Configuration
+    properties:
+      name:
+        type: string
+        example: "consumer_key"
+      label:
+        type: string
+        example: "Consumer Key"
+      type:
+        type: string
+        example: "select"
+      required:
+        type: boolean
+        example: true
+      mask:
+        type: boolean
+        example: true
+      multiple:
+        type: boolean
+        example: true
+      tooltip:
+        type: string
+        example: "Entet username to connect to key manager"
+      default:
+        type: object
+        example: "admin"
+      values:
+        type: array
+        items:
+          type: object
+
+  #-----------------------------------------------------
+  # The KeyManager List resource
+  #-----------------------------------------------------
+  KeyManagerList:
+    title: Key Manager List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Key managers returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/KeyManagerInfo'
+  #-----------------------------------------------------
+  # The Claim Mapping Resource
+  #-----------------------------------------------------
+
+  ClaimMappingEntry:
+    title: Claim Mapping Configuration
+    properties:
+      remoteClaim:
+        type: string
+        example: "http://idp.org/username"
+      localClaim:
+        type: string
+        example: "http://wso2.org/username"
+
+  TokenValidation:
+    title: Token handling Configuration
+    properties:
+      id:
+        type: integer
+      enable:
+        type: boolean
+        example: false
+        default: true
+      type:
+        type: string
+        enum:
+          - REFERENCE
+          - JWT
+          - CUSTOM
+      value:
+        type: object
+
+  #-----------------------------------------------------
+  # The Scope Settings resource
+  #-----------------------------------------------------
+  ScopeSettings:
+    title: Settings
+    properties:
+      name:
+        type: string
+        items:
+          type: string
+
+
+    #----------------------------------------------
+  # The Alert list resource.
+  #----------------------------------------------
+  AlertTypesList:
+    title: Alert Types List
+    properties:
+      count:
+        type: integer
+        description: The number of alerts
+        example: 3
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/AlertType'
+
+  #----------------------------------------------
+  # The AlertType resource.
+  #----------------------------------------------
+  AlertType:
+    title: Alert Type
+    properties:
+      id:
+        type: string
+        description: The alert Id
+        example: 1
+      name:
+        type: string
+        description: The name of the alert.
+        example: "AbnormalRequestTime"
+
+  #-----------------------------------------------
+  # The Alerts Subscription resource definition.
+  #-----------------------------------------------
+  AlertsSubscription:
+    title: Alerts Subscription
+    properties:
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/AlertType'
+      emailList:
+        type: array
+        items:
+          type: string
+          example: "admin@wso2.com"
 
 #-----------------------------------------------------
 # END-OF-FILE

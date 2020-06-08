@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import org.checkerframework.checker.units.qual.K;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,10 +30,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -53,7 +54,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutorTest {
     private OAuthApplicationInfo oAuthApplicationInfo;
 
     @Before
-    public void init() {
+    public void init() throws APIManagementException {
         PowerMockito.mockStatic(ApiMgtDAO.class);
         PowerMockito.mockStatic(KeyManagerHolder.class);
         apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
@@ -66,8 +67,12 @@ public class ApplicationRegistrationSimpleWorkflowExecutorTest {
         workflowDTO.setWorkflowReference("1");
         workflowDTO.setApplication(application);
         workflowDTO.setAppInfoDTO(oAuthAppRequest);
+        workflowDTO.setKeyManager("default");
+
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
+        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super", "default")).thenReturn(keyManager);
+        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
+        Mockito.when(keyManager.getKeyManagerConfiguration()).thenReturn(keyManagerConfiguration);
         applicationRegistrationSimpleWorkflowExecutor = new ApplicationRegistrationSimpleWorkflowExecutor();
 
     }
