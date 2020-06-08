@@ -583,6 +583,53 @@ class API extends Resource {
             }),
         );
     }
+
+    /**
+     * @static
+     * Get the supported alert types for admin
+     * @return {Promise}
+     * */
+    getSupportedAlertTypes() {
+        return this.client.then((client) => {
+            return client.apis.Alerts.getAdminAlertTypes(this._requestMetaData());
+        });
+    }
+
+    /**
+     * @static
+     * Get the subscribed alert types by the current user.
+     * @returns {Promise}
+     * */
+    getSubscribedAlertTypesByUser() {
+        return this.client.then((client) => {
+            return client.apis['Alert Subscriptions']
+            .getSubscribedAlertTypes(this._requestMetaData());
+        });
+    }
+
+    /**
+     * @static
+     * Subscribe to the provided set of alerts.
+     * @return {Promise}
+     * */
+    subscribeAlerts(alerts) {
+        return this.client.then((client) => {
+            return client.apis['Alert Subscriptions']
+            .subscribeToAlerts({ body: alerts }, this._requestMetaData());
+        });
+    }
+
+    /**
+     * @static
+     * Unsubscribe from all the alerts.
+     * @return {Promise}
+     * */
+    unsubscribeAlerts() {
+        return this.client.then((client) => {
+            return client.apis['Alert Subscriptions']
+            .unsubscribeAllAlerts(this._requestMetaData());
+        });
+    }
 }
 
 API.CONSTS = {
