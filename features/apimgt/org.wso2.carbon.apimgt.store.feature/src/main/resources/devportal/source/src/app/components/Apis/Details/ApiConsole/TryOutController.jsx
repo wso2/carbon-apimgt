@@ -112,7 +112,9 @@ function TryOutController(props) {
     const [isUpdating, setIsUpdating] = useState(false);
     const [notFound, setNotFound] = useState(false);
     const [subscriptions, setSubscriptions] = useState([]);
-    const [selectedApplication, setSelectedApplication] = useState([]);
+    const [selectedApplication, setSelectedApplication] = useState();
+    const [keyManagers, setKeyManagers] = useState([]);
+    const [selectedKeyManager, setSelectedKeyManager] = useState('Default');
     const { api } = useContext(ApiContext);
     const apiID = api.id;
     const restApi = new Api();
@@ -120,7 +122,7 @@ function TryOutController(props) {
     useEffect(() => {
         let selectedEnvironments;
         let subscriptionsList;
-        let selectedApplicationList;
+        let newSelectedApplication;
         let keys;
         let selectedKeyTypes = 'PRODUCTION';
         let accessToken;
@@ -131,20 +133,22 @@ function TryOutController(props) {
                 || item.status === 'PROD_ONLY_BLOCKED');
 
                 if (subscriptionsList && subscriptionsList.length > 0) {
-                    selectedApplicationList = subscriptionsList[0].applicationId;
-                    Application.get(selectedApplicationList)
+                    newSelectedApplication = subscriptionsList[0].applicationId;
+                    Application.get(newSelectedApplication)
                         .then((application) => {
                             return application.getKeys();
                         })
                         .then((appKeys) => {
-                            if (appKeys.get('SANDBOX')) {
+                            if (appKeys.get(selectedKeyManager)
+                                && appKeys.get(selectedKeyManager).keyType === 'SANDBOX') {
                                 selectedKeyTypes = 'SANDBOX';
-                                ({ accessToken } = appKeys.get('SANDBOX').token);
-                            } else if (appKeys.get('PRODUCTION')) {
+                                ({ accessToken } = appKeys.get(selectedKeyManager).token);
+                            } else if (appKeys.get(selectedKeyManager)
+                                && appKeys.get(selectedKeyManager).keyType === 'PRODUCTION') {
                                 selectedKeyTypes = 'PRODUCTION';
-                                ({ accessToken } = appKeys.get('PRODUCTION').token);
+                                ({ accessToken } = appKeys.get(selectedKeyManager).token);
                             }
-                            setSelectedApplication(selectedApplicationList);
+                            setSelectedApplication(newSelectedApplication);
                             setSubscriptions(subscriptionsList);
                             setKeys(appKeys);
                             setSelectedEnvironment(selectedEnvironments, false);
@@ -156,7 +160,7 @@ function TryOutController(props) {
                             }
                         });
                 } else {
-                    setSelectedApplication(selectedApplicationList);
+                    setSelectedApplication(newSelectedApplication);
                     setSubscriptions(subscriptionsList);
                     setKeys(keys);
                     setSelectedEnvironment(selectedEnvironment, false);
@@ -168,7 +172,7 @@ function TryOutController(props) {
                     setSelectedKeyType(selectedKeyType, false);
                 }
             } else {
-                setSelectedApplication(selectedApplicationList);
+                setSelectedApplication(newSelectedApplication);
                 setSubscriptions(subscriptionsList);
                 setKeys(keys);
                 setSelectedEnvironment(selectedEnvironment, false);
@@ -188,6 +192,22 @@ function TryOutController(props) {
                 setNotFound(true);
             }
         });
+        const promisedKeyManagers = restApi.getKeyManagers();
+        promisedKeyManagers
+            .then((response) => {
+                const responseKeyManagerList = [];
+                response.body.list.map((item) => responseKeyManagerList.push(item));
+                setKeyManagers(responseKeyManagerList);
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    setNotFound(true);
+                }
+            });
     }, []);
 
 
@@ -199,6 +219,7 @@ function TryOutController(props) {
         const applicationPromise = Application.get(selectedApplication);
         applicationPromise
             .then((application) => application.generateToken(
+                selectedKeyManager,
                 selectedKeyType,
                 3600,
                 scopes,
@@ -280,10 +301,10 @@ function TryOutController(props) {
                 return application.getKeys();
             })
             .then((appKeys) => {
-                if (appKeys.get(keyType)) {
-                    ({ accessToken } = appKeys.get(keyType).token);
+                if (appKeys.get(selectedKeyManager) && appKeys.get(selectedKeyManager).keyType === keyType) {
+                    ({ accessToken } = appKeys.get(selectedKeyManager).token);
                 }
-                if (appKeys.get(keyType) === 'PRODUCTION') {
+                if (appKeys.get(selectedKeyManager).keyType === 'PRODUCTION') {
                     setProductionAccessToken(accessToken);
                 } else {
                     setSandboxAccessToken(accessToken);
@@ -315,9 +336,10 @@ function TryOutController(props) {
             case 'selectedApplication':
                 setProductionAccessToken('');
                 setSandboxAccessToken('');
-                setProductionApiKey('');
-                setSandboxApiKey('');
                 setSelectedApplication(value);
+                break;
+            case 'selectedKeyManager':
+                setSelectedKeyManager(value);
                 break;
             case 'selectedKeyType':
                 if (!productionAccessToken || !sandboxAccessToken) {
@@ -455,7 +477,9 @@ function TryOutController(props) {
                                         subscriptions={subscriptions}
                                         handleChanges={handleChanges}
                                         selectedApplication={selectedApplication}
+                                        selectedKeyManager={selectedKeyManager}
                                         selectedKeyType={selectedKeyType}
+                                        keyManagers={keyManagers}
                                     />
                                 )}
                                 {subscriptions && subscriptions.length === 0 && (
