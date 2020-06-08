@@ -87,7 +87,7 @@ function reducer(state, newValue) {
             return { ...state, [field]: value };
         case 'scopeManagementEndpoint':
             return { ...state, [field]: value };
-        case 'enableTokenGneration':
+        case 'enableTokenGeneration':
             return { ...state, [field]: value };
         case 'enableTokenEncryption':
             return { ...state, [field]: value };
@@ -137,7 +137,7 @@ function AddEditKeyManager(props) {
         issuer: '',
         scopeManagementEndpoint: '',
         availableGrantTypes: [],
-        enableTokenGneration: true,
+        enableTokenGeneration: true,
         enableTokenEncryption: false,
         enableTokenHashing: false,
         enableMapOAuthConsumerApps: true,
@@ -156,7 +156,7 @@ function AddEditKeyManager(props) {
         tokenEndpoint, revokeEndpoint,
         userInfoEndpoint, authorizeEndpoint,
         jwksEndpoint, issuer, scopeManagementEndpoint, availableGrantTypes,
-        enableTokenGneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps,
+        enableTokenGeneration, enableTokenEncryption, enableTokenHashing, enableMapOAuthConsumerApps,
         enableOAuthAppCreation, enableSelfValidationJWT, claimMapping, tokenValidation, additionalProperties,
     } = state;
     const [validationError, setValidationError] = useState([]);
@@ -193,7 +193,7 @@ function AddEditKeyManager(props) {
                     issuer: result.body.issuer,
                     scopeManagementEndpoint: result.body.scopeManagementEndpoint,
                     availableGrantTypes: result.body.availableGrantTypes,
-                    enableTokenGneration: result.body.enableTokenGneration,
+                    enableTokenGeneration: result.body.enableTokenGeneration,
                     enableTokenEncryption: result.body.enableTokenEncryption,
                     enableTokenHashing: result.body.enableTokenHashing,
                     enableMapOAuthConsumerApps: result.body.enableMapOAuthConsumerApps,
@@ -268,7 +268,7 @@ function AddEditKeyManager(props) {
             issuer: state.issuer,
             scopeManagementEndpoint: state.scopeManagementEndpoint,
             availableGrantTypes: state.availableGrantTypes,
-            enableTokenGneration: state.enableTokenGneration,
+            enableTokenGeneration: state.enableTokenGeneration,
             enableTokenEncryption: state.enableTokenEncryption,
             enableTokenHashing: state.enableTokenHashing,
             enableMapOAuthConsumerApps: state.enableMapOAuthConsumerApps,
@@ -529,9 +529,9 @@ function AddEditKeyManager(props) {
                                 value='EnableTokenGeneration'
                                 control={(
                                     <Checkbox
-                                        checked={enableTokenGneration}
+                                        checked={enableTokenGeneration}
                                         onChange={onChange}
-                                        name='enableTokenGneration'
+                                        name='enableTokenGeneration'
                                         color='primary'
                                     />
                                 )}

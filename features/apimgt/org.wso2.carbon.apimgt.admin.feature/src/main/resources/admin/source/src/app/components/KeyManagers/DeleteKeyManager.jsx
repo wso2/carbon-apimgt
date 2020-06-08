@@ -29,7 +29,7 @@ import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
  * @param {JSON} props component props.
  * @returns {JSX} Loading animation.
  */
-function Delete({ dataRow }) {
+function Delete({ updateList, dataRow }) {
     const { id } = dataRow;
 
     const formSaveCallback = () => {
@@ -48,6 +48,9 @@ function Delete({ dataRow }) {
                 })
                 .catch((error) => {
                     reject(error.response.body.description);
+                })
+                .finally(() => {
+                    updateList();
                 });
         });
         return promiseAPICall;
@@ -70,6 +73,7 @@ function Delete({ dataRow }) {
     );
 }
 Delete.propTypes = {
+    updateList: PropTypes.number.isRequired,
     dataRow: PropTypes.shape({
         id: PropTypes.number.isRequired,
     }).isRequired,
