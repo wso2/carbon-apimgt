@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.cxf.message.Message;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -708,23 +709,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesCustomPost(CustomRuleDTO body, String contentType,
                                                  MessageContext messageContext) throws APIManagementException {
 
-        String propertyName;
-        //Check if the required fields are blank
-        if (StringUtils.isBlank(body.getPolicyName())) {
-            propertyName = "policyName";
-            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
-                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
-        }
-        if (StringUtils.isBlank(body.getSiddhiQuery())) {
-            propertyName = "siddhiQuery";
-            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
-                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
-        }
-        if (StringUtils.isBlank(body.getKeyTemplate())) {
-            propertyName = "keyTemplate";
-            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
-                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
-        }
+        RestApiAdminUtils
+                .validateCustomRuleRequiredProperties(body, (String) messageContext.get(Message.HTTP_REQUEST_METHOD));
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -810,7 +796,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     @Override
     public Response throttlingPoliciesCustomRuleIdPut(String ruleId, CustomRuleDTO body, String contentType,
                                                       String ifMatch, String ifUnmodifiedSince,
-                                                      MessageContext messageContext) {
+                                                      MessageContext messageContext) throws APIManagementException {
+
+        RestApiAdminUtils
+                .validateCustomRuleRequiredProperties(body, (String) messageContext.get(Message.HTTP_REQUEST_METHOD));
+
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
