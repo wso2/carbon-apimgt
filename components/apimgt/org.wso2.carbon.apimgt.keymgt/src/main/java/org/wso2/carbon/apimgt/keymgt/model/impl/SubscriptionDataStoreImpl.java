@@ -279,19 +279,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         return apisInitialized;
     }
 
-    public void setApisInitialized(boolean apisInitialized) {
-
-        this.apisInitialized = apisInitialized;
-    }
-
     public boolean isApplicationsInitialized() {
 
         return applicationsInitialized;
-    }
-
-    public void setApplicationsInitialized(boolean applicationsInitialized) {
-
-        this.applicationsInitialized = applicationsInitialized;
     }
 
     public boolean isSubscriptionsInitialized() {
@@ -299,19 +289,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         return subscriptionsInitialized;
     }
 
-    public void setSubscriptionsInitialized(boolean subscriptionsInitialized) {
-
-        this.subscriptionsInitialized = subscriptionsInitialized;
-    }
-
     public boolean isApplicationKeysInitialized() {
 
         return applicationKeysInitialized;
-    }
-
-    public void setApplicationKeysInitialized(boolean applicationKeysInitialized) {
-
-        this.applicationKeysInitialized = applicationKeysInitialized;
     }
 
     public boolean isApplicationPoliciesInitialized() {
@@ -319,18 +299,18 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         return applicationPoliciesInitialized;
     }
 
-    public void setApplicationPoliciesInitialized(boolean applicationPoliciesInitialized) {
-
-        this.applicationPoliciesInitialized = applicationPoliciesInitialized;
-    }
-
     public boolean isSubscriptionPoliciesInitialized() {
 
         return subscriptionPoliciesInitialized;
     }
 
-    public void setSubscriptionPoliciesInitialized(boolean subscriptionPoliciesInitialized) {
+    public boolean isSubscriptionValidationDataInitialized() {
 
-        this.subscriptionPoliciesInitialized = subscriptionPoliciesInitialized;
+        return apisInitialized &&
+                applicationsInitialized &&
+                subscriptionsInitialized &&
+                applicationKeysInitialized &&
+                applicationPoliciesInitialized &&
+                subscriptionPoliciesInitialized;
     }
 }
