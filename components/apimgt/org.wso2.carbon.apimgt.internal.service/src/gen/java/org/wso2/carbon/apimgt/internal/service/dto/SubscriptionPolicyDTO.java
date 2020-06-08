@@ -20,6 +20,9 @@ public class SubscriptionPolicyDTO   {
     private Integer tenantId = null;
     private String name = null;
     private String quotaType = null;
+    private Integer rateLimitCount = null;
+    private String rateLimitTimeUnit = null;
+    private Boolean stopOnQuotaReach = null;
 
   /**
    **/
@@ -89,6 +92,57 @@ public class SubscriptionPolicyDTO   {
     this.quotaType = quotaType;
   }
 
+  /**
+   **/
+  public SubscriptionPolicyDTO rateLimitCount(Integer rateLimitCount) {
+    this.rateLimitCount = rateLimitCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("rateLimitCount")
+  public Integer getRateLimitCount() {
+    return rateLimitCount;
+  }
+  public void setRateLimitCount(Integer rateLimitCount) {
+    this.rateLimitCount = rateLimitCount;
+  }
+
+  /**
+   **/
+  public SubscriptionPolicyDTO rateLimitTimeUnit(String rateLimitTimeUnit) {
+    this.rateLimitTimeUnit = rateLimitTimeUnit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("rateLimitTimeUnit")
+  public String getRateLimitTimeUnit() {
+    return rateLimitTimeUnit;
+  }
+  public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
+    this.rateLimitTimeUnit = rateLimitTimeUnit;
+  }
+
+  /**
+   **/
+  public SubscriptionPolicyDTO stopOnQuotaReach(Boolean stopOnQuotaReach) {
+    this.stopOnQuotaReach = stopOnQuotaReach;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("stopOnQuotaReach")
+  public Boolean isStopOnQuotaReach() {
+    return stopOnQuotaReach;
+  }
+  public void setStopOnQuotaReach(Boolean stopOnQuotaReach) {
+    this.stopOnQuotaReach = stopOnQuotaReach;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -102,12 +156,15 @@ public class SubscriptionPolicyDTO   {
     return Objects.equals(id, subscriptionPolicy.id) &&
         Objects.equals(tenantId, subscriptionPolicy.tenantId) &&
         Objects.equals(name, subscriptionPolicy.name) &&
-        Objects.equals(quotaType, subscriptionPolicy.quotaType);
+        Objects.equals(quotaType, subscriptionPolicy.quotaType) &&
+        Objects.equals(rateLimitCount, subscriptionPolicy.rateLimitCount) &&
+        Objects.equals(rateLimitTimeUnit, subscriptionPolicy.rateLimitTimeUnit) &&
+        Objects.equals(stopOnQuotaReach, subscriptionPolicy.stopOnQuotaReach);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, name, quotaType);
+    return Objects.hash(id, tenantId, name, quotaType, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach);
   }
 
   @Override
@@ -119,6 +176,9 @@ public class SubscriptionPolicyDTO   {
     sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
+    sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");
+    sb.append("    rateLimitTimeUnit: ").append(toIndentedString(rateLimitTimeUnit)).append("\n");
+    sb.append("    stopOnQuotaReach: ").append(toIndentedString(stopOnQuotaReach)).append("\n");
     sb.append("}");
     return sb.toString();
   }

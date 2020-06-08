@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
  */
 public class SubscriptionPolicy extends Policy {
 
-    private Policy allOf = null;
     private Integer rateLimitCount = null;
     private String rateLimitTimeUnit = null;
     private Boolean stopOnQuotaReach = null;
@@ -58,16 +57,6 @@ public class SubscriptionPolicy extends Policy {
     public void setStopOnQuotaReach(boolean stopOnQuotaReach) {
 
         this.stopOnQuotaReach = stopOnQuotaReach;
-    }
-
-    public Policy getAllOf() {
-
-        return allOf;
-    }
-
-    public void setAllOf(Policy allOf) {
-
-        this.allOf = allOf;
     }
 
     @Override
