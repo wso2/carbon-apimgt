@@ -223,7 +223,7 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.blacklisted.items',
-                    defaultMessage: 'Blacklist Policies',
+                    defaultMessage: 'Deny Policies',
                 }),
                 path: '/throttling/blacklisted',
                 component: BlacklistThrottlingPolicies,

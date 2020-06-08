@@ -44,7 +44,7 @@ function Delete(props) {
                 return (
                     <FormattedMessage
                         id='Throttling.Blacklist.Policy.policy.delete.success'
-                        defaultMessage='Blacklist Policy successfully deleted.'
+                        defaultMessage='Deny Policy successfully deleted.'
                     />
                 );
             })
@@ -52,7 +52,7 @@ function Delete(props) {
                 return (
                     <FormattedMessage
                         id='Throttling.Blacklist.Policy.policy.delete.error'
-                        defaultMessage='Blacklist Policy could not be deleted.'
+                        defaultMessage='Deny Policy could not be deleted.'
                     />
                 );
             });
@@ -70,7 +70,7 @@ function Delete(props) {
             <DialogContentText>
                 <FormattedMessage
                     id='Throttling.Blacklist.Policy.policy.dialog.delete.error'
-                    defaultMessage='Blacklist Policy will be deleted.'
+                    defaultMessage='Deny Policy will be deleted.'
                 />
             </DialogContentText>
         </FormDialogBase>
