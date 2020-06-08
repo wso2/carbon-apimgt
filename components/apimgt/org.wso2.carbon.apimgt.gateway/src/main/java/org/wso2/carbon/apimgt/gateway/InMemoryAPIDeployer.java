@@ -52,7 +52,9 @@ public class InMemoryAPIDeployer {
                     GatewayAPIDTO gatewayAPIDTO = ServiceReferenceHolder.getInstance().getArtifactRetriever()
                             .retrieveArtifacts(apiId, apiName, label);
                     apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
-                    ServiceReferenceHolder.getInstance().getArtifactRetriever().deleteArtifacts(gatewayAPIDTO);
+                    //if there are more than one gateway subscribed to one label, removing the artifact from the
+                    // storage will stop other gateways undeploying the api
+                    //ServiceReferenceHolder.getInstance().getArtifactRetriever().deleteArtifacts(gatewayAPIDTO);
                     return true;
                 } catch (AxisFault | ArtifactSynchronizerException axisFault) {
                     log.error(axisFault);
