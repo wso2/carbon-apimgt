@@ -20,7 +20,7 @@ import React, { useReducer, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
 import {
@@ -515,4 +515,4 @@ AddEdit.propTypes = {
     title: PropTypes.shape({}).isRequired,
 };
 
-export default injectIntl(AddEdit);
+export default AddEdit;

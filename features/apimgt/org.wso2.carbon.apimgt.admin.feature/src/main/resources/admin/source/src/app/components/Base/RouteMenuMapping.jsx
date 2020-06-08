@@ -55,7 +55,7 @@ const RouteMenuMapping = (intl) => [
         }),
         icon: <HomeIcon />,
         path: '/dashboard',
-        component: <Dashboard />,
+        component: () => <Dashboard />,
         exact: true,
     },
     {
