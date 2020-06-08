@@ -54,6 +54,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
@@ -224,19 +225,30 @@ public class ImportApiServiceImpl implements ImportApiService {
             }
 
             // decode Oauth secrets
-            OAuthApplicationInfo productionOAuthApplicationInfo = applicationDetails.getOAuthApp(PRODUCTION);
-            if (productionOAuthApplicationInfo != null) {
-                String encodedConsumerSecretBytes = productionOAuthApplicationInfo.getClientSecret();
-                String decodedConsumerSecret = new String(Base64.decodeBase64(encodedConsumerSecretBytes));
-                productionOAuthApplicationInfo.setClientSecret(decodedConsumerSecret);
-                applicationDetails.addKey(getAPIKeyFromOauthApp(PRODUCTION, productionOAuthApplicationInfo));
+            Map<String, OAuthApplicationInfo>
+                    keyManagerWiseProductionOauthApplicationInfo = applicationDetails.getOAuthApp(PRODUCTION);
+            if (keyManagerWiseProductionOauthApplicationInfo != null) {
+                keyManagerWiseProductionOauthApplicationInfo.forEach((keyManagerName, oAuthApplicationInfo) -> {
+                    String encodedConsumerSecretBytes = oAuthApplicationInfo.getClientSecret();
+                    String decodedConsumerSecret = new String(Base64.decodeBase64(encodedConsumerSecretBytes));
+                    oAuthApplicationInfo.setClientSecret(decodedConsumerSecret);
+                    APIKey apiKeyFromOauthApp = getAPIKeyFromOauthApp(PRODUCTION, oAuthApplicationInfo);
+                    apiKeyFromOauthApp.setKeyManager(keyManagerName);
+                    applicationDetails.addKey(apiKeyFromOauthApp);
+                });
+
             }
-            OAuthApplicationInfo sandboxOAuthApplicationInfo = applicationDetails.getOAuthApp(SANDBOX);
-            if (sandboxOAuthApplicationInfo != null) {
-                String encodedConsumerSecretBytes = sandboxOAuthApplicationInfo.getClientSecret();
-                String decodedConsumerSecret = new String(Base64.decodeBase64(encodedConsumerSecretBytes));
-                sandboxOAuthApplicationInfo.setClientSecret(decodedConsumerSecret);
-                applicationDetails.addKey(getAPIKeyFromOauthApp(SANDBOX, sandboxOAuthApplicationInfo));
+            Map<String, OAuthApplicationInfo> keyManagerWiseSandboxOauthApplicationInfo =
+                    applicationDetails.getOAuthApp(SANDBOX);
+            if (keyManagerWiseSandboxOauthApplicationInfo != null) {
+                keyManagerWiseSandboxOauthApplicationInfo.forEach((keyManagerName, sandboxOAuthApplicationInfo) -> {
+                    String encodedConsumerSecretBytes = sandboxOAuthApplicationInfo.getClientSecret();
+                    String decodedConsumerSecret = new String(Base64.decodeBase64(encodedConsumerSecretBytes));
+                    sandboxOAuthApplicationInfo.setClientSecret(decodedConsumerSecret);
+                    APIKey apiKeyFromOauthApp = getAPIKeyFromOauthApp(SANDBOX, sandboxOAuthApplicationInfo);
+                    apiKeyFromOauthApp.setKeyManager(keyManagerName);
+                    applicationDetails.addKey(apiKeyFromOauthApp);
+                });
             }
 
             if (!StringUtils.isBlank(appOwner)) {

@@ -68,7 +68,7 @@ public class WebsocketWSClientTestCase {
         try {
             WebsocketWSClient websocketWSClient = new WebsocketWSClient();
             APIKeyValidationInfoDTO apiKeyValidationInfoDTOActual = websocketWSClient.getAPIKeyData("/ishara",
-                    "1.0", "PhoneVerify");
+                    "1.0", "PhoneVerify","carbon.super");
         } catch (APISecurityException e) {
             Assert.assertTrue(e.getMessage().startsWith("Error while accessing backend services for API key validation"));
         }
@@ -123,13 +123,15 @@ public class WebsocketWSClientTestCase {
 
         websocketWSClient.setKeyValidationServiceStub(apiKeyValidationServiceStub);
         Mockito.when(apiKeyValidationServiceStub.validateKeyforHandshake("/ishara", "1.0",
-                "PhoneVerify")).thenReturn(apiKeyValidationInfoDTO1);
-        APIKeyValidationInfoDTO apiKeyValidationInfoDTOActual = websocketWSClient.getAPIKeyData("/ishara", "1.0", "PhoneVerify");
+                "PhoneVerify","carbon.super",new String[]{"all"})).thenReturn(apiKeyValidationInfoDTO1);
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTOActual = websocketWSClient.getAPIKeyData("/ishara", "1.0",
+                "PhoneVerify","carbon.super");
         Assert.assertTrue(apiKeyValidationInfoDTOActual.isAuthorized());
 
         //when scopes are set
         Mockito.when(apiKeyValidationInfoDTO1.getScopes()).thenReturn(new String[]{"scope1", "scope2"});
-        APIKeyValidationInfoDTO apiKeyValidationInfoDTOActual1 = websocketWSClient.getAPIKeyData("/ishara", "1.0", "PhoneVerify");
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTOActual1 =
+                websocketWSClient.getAPIKeyData("/ishara", "1.0", "PhoneVerify","carbon.super");
         Assert.assertTrue(apiKeyValidationInfoDTOActual1.isAuthorized());
     }
 }

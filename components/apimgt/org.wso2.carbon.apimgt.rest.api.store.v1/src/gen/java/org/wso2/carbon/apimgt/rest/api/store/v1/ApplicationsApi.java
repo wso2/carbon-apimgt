@@ -277,6 +277,120 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         return delegate.applicationsApplicationIdMapKeysPost(applicationId, body, securityContext);
     }
 
+    @GET
+    @Path("/{applicationId}/oauth-keys")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve all application keys", notes = "Retrieve keys (Consumer key/secret) of application ", response = ApplicationKeyListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage applications"),
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+        })
+    }, tags={ "Application Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Keys are returned. ", response = ApplicationKeyListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The resource does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdOauthKeysGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId) throws APIManagementException{
+        return delegate.applicationsApplicationIdOauthKeysGet(applicationId, securityContext);
+    }
+
+    @POST
+    @Path("/{applicationId}/oauth-keys/{keyMappingId}/clean-up")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Clean up application keys", notes = "Clean up keys after failed key generation of an application ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage applications"),
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+        })
+    }, tags={ "Application Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Clean up is performed ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdOauthKeysKeyMappingIdCleanUpPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping. ",required=true) @PathParam("keyMappingId") String keyMappingId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.applicationsApplicationIdOauthKeysKeyMappingIdCleanUpPost(applicationId, keyMappingId, ifMatch, securityContext);
+    }
+
+    @POST
+    @Path("/{applicationId}/oauth-keys/{keyMappingId}/generate-token")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Generate application token", notes = "Generate an access token for application by client_credentials grant type ", response = ApplicationTokenDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage applications"),
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+        })
+    }, tags={ "Application Tokens",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Token is generated. ", response = ApplicationTokenDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdOauthKeysKeyMappingIdGenerateTokenPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping. ",required=true) @PathParam("keyMappingId") String keyMappingId, @ApiParam(value = "Application token generation request object " ,required=true) ApplicationTokenGenerateRequestDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.applicationsApplicationIdOauthKeysKeyMappingIdGenerateTokenPost(applicationId, keyMappingId, body, ifMatch, securityContext);
+    }
+
+    @GET
+    @Path("/{applicationId}/oauth-keys/{keyMappingId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get key details of a given type ", notes = "This operation can be used to retrieve key details of an individual application specifying the key type in the URI. ", response = ApplicationKeyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage applications"),
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+        })
+    }, tags={ "Application Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Keys of given type are returned. ", response = ApplicationKeyDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The resource does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdOauthKeysKeyMappingIdGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping. ",required=true) @PathParam("keyMappingId") String keyMappingId,  @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId) throws APIManagementException{
+        return delegate.applicationsApplicationIdOauthKeysKeyMappingIdGet(applicationId, keyMappingId, groupId, securityContext);
+    }
+
+    @PUT
+    @Path("/{applicationId}/oauth-keys/{keyMappingId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update grant types and callback url of an application ", notes = "This operation can be used to update grant types and callback url of an application. (Consumer Key and Consumer Secret are ignored) Upon succesfull you will retrieve the updated key details as the response. ", response = ApplicationKeyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage applications"),
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+        })
+    }, tags={ "Application Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Ok. Grant types or/and callback url is/are updated. ", response = ApplicationKeyDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdOauthKeysKeyMappingIdPut(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping. ",required=true) @PathParam("keyMappingId") String keyMappingId, @ApiParam(value = "Grant types/Callback URL update request object " ,required=true) ApplicationKeyDTO body) throws APIManagementException{
+        return delegate.applicationsApplicationIdOauthKeysKeyMappingIdPut(applicationId, keyMappingId, body, securityContext);
+    }
+
+    @POST
+    @Path("/{applicationId}/oauth-keys/{keyMappingId}/regenerate-secret")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Re-generate consumer secret ", notes = "This operation can be used to re generate consumer secret for an application for the give key type ", response = ApplicationKeyReGenerateResponseDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage applications"),
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+        })
+    }, tags={ "Application Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Keys are re generated. ", response = ApplicationKeyReGenerateResponseDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met (Will be supported in future). ", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdOauthKeysKeyMappingIdRegenerateSecretPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping. ",required=true) @PathParam("keyMappingId") String keyMappingId) throws APIManagementException{
+        return delegate.applicationsApplicationIdOauthKeysKeyMappingIdRegenerateSecretPost(applicationId, keyMappingId, securityContext);
+    }
+
     @PUT
     @Path("/{applicationId}")
     @Consumes({ "application/json" })

@@ -17,7 +17,12 @@
 package org.wso2.carbon.apimgt.keymgt.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler;
+import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ServiceReferenceHolder {
 
@@ -25,7 +30,7 @@ public class ServiceReferenceHolder {
 
     private APIManagerConfigurationService amConfigurationService;
     private OutputEventAdapterService outputEventAdapterService;
-
+    private Map<String, KeyValidationHandler> keyValidationHandlerMap = new ConcurrentHashMap<>();
     private ServiceReferenceHolder() {
 
     }
@@ -48,5 +53,25 @@ public class ServiceReferenceHolder {
 
     public void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
         this.outputEventAdapterService = outputEventAdapterService;
+    }
+
+    public void addKeyValidationHandler(String tenantDomain, KeyValidationHandler keyValidationHandler) {
+
+        keyValidationHandlerMap.put(tenantDomain, keyValidationHandler);
+    }
+
+    public void removeKeyValidationHandler(String tenantDomain) {
+
+        keyValidationHandlerMap.remove(tenantDomain);
+    }
+
+    public KeyValidationHandler getKeyValidationHandler(String tenantDomain) {
+
+        if (keyValidationHandlerMap.containsKey(tenantDomain)) {
+            return keyValidationHandlerMap.get(tenantDomain);
+        }
+        DefaultKeyValidationHandler defaultKeyValidationHandler = new DefaultKeyValidationHandler();
+        keyValidationHandlerMap.put(tenantDomain, defaultKeyValidationHandler);
+        return defaultKeyValidationHandler;
     }
 }

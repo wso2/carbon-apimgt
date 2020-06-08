@@ -26,15 +26,15 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.security.AuthenticationException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
-import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+
+import java.io.EOFException;
+import java.util.List;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
-import java.io.EOFException;
-import java.util.List;
 
 public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
 
@@ -146,9 +146,9 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
 
             ErrorHandler selectedErrorHandler = null;
             List<Throwable> throwableList = ExceptionUtils.getThrowableList(e);
-            for (Throwable t: throwableList) {
+            for (Throwable t : throwableList) {
                 if (t instanceof APIManagementException) {
-                    APIManagementException apimException = (APIManagementException)t;
+                    APIManagementException apimException = (APIManagementException) t;
                     ErrorHandler errorHandler = apimException.getErrorHandler();
                     if (errorHandler != null) {
                         if (selectedErrorHandler == null) {
@@ -165,8 +165,17 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
 
             if (selectedErrorHandler != null) {
                 // logs the error as the error may be not logged by the origin
-                log.error("A defined exception has been captured and mapped to an HTTP response " +
-                        "by the global exception mapper ", e);
+                if (selectedErrorHandler.printStackTrace()) {
+                    log.error("A defined exception has been captured and mapped to an HTTP response " +
+                            "by the global exception mapper ", e);
+                } else {
+                    log.error(e);
+                    if (log.isDebugEnabled()) {
+                        log.debug("A defined exception has been captured and mapped to an HTTP response " +
+                                "by the global exception mapper ", e);
+                    }
+                }
+
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(selectedErrorHandler);
                 return Response
                         .status(Response.Status.fromStatusCode(selectedErrorHandler.getHttpStatusCode()))

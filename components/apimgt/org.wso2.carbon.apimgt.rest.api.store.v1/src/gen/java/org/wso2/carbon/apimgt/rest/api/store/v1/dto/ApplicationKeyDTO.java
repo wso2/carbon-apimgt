@@ -18,6 +18,8 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class ApplicationKeyDTO   {
   
+    private String keyMappingId = null;
+    private String keyManager = null;
     private String consumerKey = null;
     private String consumerSecret = null;
     private List<String> supportedGrantTypes = new ArrayList<>();
@@ -59,7 +61,43 @@ public enum KeyTypeEnum {
     private KeyTypeEnum keyType = null;
     private String groupId = null;
     private ApplicationTokenDTO token = null;
-    private String additionalProperties = null;
+    private Object additionalProperties = null;
+
+  /**
+   * Key Manager Mapping UUID
+   **/
+  public ApplicationKeyDTO keyMappingId(String keyMappingId) {
+    this.keyMappingId = keyMappingId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Key Manager Mapping UUID")
+  @JsonProperty("keyMappingId")
+  public String getKeyMappingId() {
+    return keyMappingId;
+  }
+  public void setKeyMappingId(String keyMappingId) {
+    this.keyMappingId = keyMappingId;
+  }
+
+  /**
+   * Key Manager Name
+   **/
+  public ApplicationKeyDTO keyManager(String keyManager) {
+    this.keyManager = keyManager;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Key Manager Name")
+  @JsonProperty("keyManager")
+  public String getKeyManager() {
+    return keyManager;
+  }
+  public void setKeyManager(String keyManager) {
+    this.keyManager = keyManager;
+  }
 
   /**
    * Consumer key of the application
@@ -207,7 +245,7 @@ public enum KeyTypeEnum {
   /**
    * additionalProperties (if any).
    **/
-  public ApplicationKeyDTO additionalProperties(String additionalProperties) {
+  public ApplicationKeyDTO additionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
@@ -215,10 +253,10 @@ public enum KeyTypeEnum {
   
   @ApiModelProperty(value = "additionalProperties (if any).")
   @JsonProperty("additionalProperties")
-  public String getAdditionalProperties() {
+  public Object getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(String additionalProperties) {
+  public void setAdditionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 
@@ -232,7 +270,9 @@ public enum KeyTypeEnum {
       return false;
     }
     ApplicationKeyDTO applicationKey = (ApplicationKeyDTO) o;
-    return Objects.equals(consumerKey, applicationKey.consumerKey) &&
+    return Objects.equals(keyMappingId, applicationKey.keyMappingId) &&
+        Objects.equals(keyManager, applicationKey.keyManager) &&
+        Objects.equals(consumerKey, applicationKey.consumerKey) &&
         Objects.equals(consumerSecret, applicationKey.consumerSecret) &&
         Objects.equals(supportedGrantTypes, applicationKey.supportedGrantTypes) &&
         Objects.equals(callbackUrl, applicationKey.callbackUrl) &&
@@ -245,7 +285,7 @@ public enum KeyTypeEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(consumerKey, consumerSecret, supportedGrantTypes, callbackUrl, keyState, keyType, groupId, token, additionalProperties);
+    return Objects.hash(keyMappingId, keyManager, consumerKey, consumerSecret, supportedGrantTypes, callbackUrl, keyState, keyType, groupId, token, additionalProperties);
   }
 
   @Override
@@ -253,6 +293,8 @@ public enum KeyTypeEnum {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApplicationKeyDTO {\n");
     
+    sb.append("    keyMappingId: ").append(toIndentedString(keyMappingId)).append("\n");
+    sb.append("    keyManager: ").append(toIndentedString(keyManager)).append("\n");
     sb.append("    consumerKey: ").append(toIndentedString(consumerKey)).append("\n");
     sb.append("    consumerSecret: ").append(toIndentedString(consumerSecret)).append("\n");
     sb.append("    supportedGrantTypes: ").append(toIndentedString(supportedGrantTypes)).append("\n");

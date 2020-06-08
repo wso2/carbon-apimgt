@@ -874,7 +874,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/import-graphql-schema")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Import API Definition", notes = "This operation can be used to create api from api definition.  API definition is GraphQL Schema ", response = APIDTO.class, authorizations = {
+    @ApiOperation(value = "Import API Definition", notes = "This operation can be used to create api from api definition.APIMgtDAOTest  API definition is GraphQL Schema ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })

@@ -262,14 +262,14 @@ class SubscriptionTableData extends React.Component {
                                              : (status === 'ON_HOLD')
                                             ? (
                                                 <FormattedMessage
-                                                    id='Applications.Details.SubscriptionTableData.update.throttling.policy.blocked'
+                                                    id='Applications.Details.SubscriptionTableData.update.throttling.policy.onHold'
                                                     defaultMessage='Subscription is currently ON_HOLD state. You need to get approval to the subscription before editing the tier'
                                                 />
                                             )
                                              : (status === 'REJECTED')
                                             ? (
                                                 <FormattedMessage
-                                                    id='Applications.Details.SubscriptionTableData.update.throttling.policy.blocked'
+                                                    id='Applications.Details.SubscriptionTableData.update.throttling.policy.rejected'
                                                     defaultMessage='Subscription is currently REJECTED state. You need to get approval to the subscription before editing the tier'
                                                 />
                                             )

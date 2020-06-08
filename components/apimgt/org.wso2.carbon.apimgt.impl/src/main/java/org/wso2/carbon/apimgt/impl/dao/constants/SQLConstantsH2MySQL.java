@@ -229,7 +229,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " limit ? , ? "+
                     " )x ";
 
-    public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY =
+    public static final String GET_ALL_ENTRIES_OF_SERVICE_CATALOG =
             " SELECT " +
                     "   E.UUID, " +
                     "   E.ENTRY_NAME, " +
@@ -262,7 +262,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " ORDER BY $1 $2 " +
                     " LIMIT ?, ? ";
 
-    public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_NAME =
+    public static final String GET_ALL_ENTRIES_OF_SERVICE_CATALOG_WITH_NAME =
             " SELECT " +
                     "   E.UUID, " +
                     "   E.ENTRY_NAME, " +
@@ -297,7 +297,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " ORDER BY $1 $2 " +
                     " LIMIT ?, ? ";
 
-    public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_VERSION =
+    public static final String GET_ALL_ENTRIES_OF_SERVICE_CATALOG_WITH_VERSION =
             " SELECT " +
                     "   E.UUID, " +
                     "   E.ENTRY_NAME, " +
@@ -332,7 +332,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " ORDER BY $1 $2 " +
                     " LIMIT ?, ? ";
 
-    public static final String GET_ALL_ENTRIES_OF_ENDPOINT_REGISTRY_WITH_VERSION_AND_NAME =
+    public static final String GET_ALL_ENTRIES_OF_SERVICE_CATALOG_WITH_VERSION_AND_NAME =
             " SELECT " +
                     "   E.UUID, " +
                     "   E.ENTRY_NAME, " +

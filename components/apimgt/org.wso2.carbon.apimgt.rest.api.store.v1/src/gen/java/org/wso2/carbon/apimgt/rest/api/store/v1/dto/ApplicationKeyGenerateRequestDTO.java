@@ -51,13 +51,14 @@ public enum KeyTypeEnum {
 }
 
     private KeyTypeEnum keyType = null;
+    private String keyManager = null;
     private List<String> grantTypesToBeSupported = new ArrayList<>();
     private String callbackUrl = null;
     private List<String> scopes = new ArrayList<>();
     private String validityTime = null;
     private String clientId = null;
     private String clientSecret = null;
-    private String additionalProperties = null;
+    private Object additionalProperties = null;
 
   /**
    **/
@@ -75,6 +76,24 @@ public enum KeyTypeEnum {
   }
   public void setKeyType(KeyTypeEnum keyType) {
     this.keyType = keyType;
+  }
+
+  /**
+   * key Manager to Generate Keys
+   **/
+  public ApplicationKeyGenerateRequestDTO keyManager(String keyManager) {
+    this.keyManager = keyManager;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "key Manager to Generate Keys")
+  @JsonProperty("keyManager")
+  public String getKeyManager() {
+    return keyManager;
+  }
+  public void setKeyManager(String keyManager) {
+    this.keyManager = keyManager;
   }
 
   /**
@@ -188,18 +207,18 @@ public enum KeyTypeEnum {
   /**
    * Additional properties needed.
    **/
-  public ApplicationKeyGenerateRequestDTO additionalProperties(String additionalProperties) {
+  public ApplicationKeyGenerateRequestDTO additionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
 
   
-  @ApiModelProperty(example = "", value = "Additional properties needed.")
+  @ApiModelProperty(example = "\"\"", value = "Additional properties needed.")
   @JsonProperty("additionalProperties")
-  public String getAdditionalProperties() {
+  public Object getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(String additionalProperties) {
+  public void setAdditionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 
@@ -214,6 +233,7 @@ public enum KeyTypeEnum {
     }
     ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequest = (ApplicationKeyGenerateRequestDTO) o;
     return Objects.equals(keyType, applicationKeyGenerateRequest.keyType) &&
+        Objects.equals(keyManager, applicationKeyGenerateRequest.keyManager) &&
         Objects.equals(grantTypesToBeSupported, applicationKeyGenerateRequest.grantTypesToBeSupported) &&
         Objects.equals(callbackUrl, applicationKeyGenerateRequest.callbackUrl) &&
         Objects.equals(scopes, applicationKeyGenerateRequest.scopes) &&
@@ -225,7 +245,7 @@ public enum KeyTypeEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyType, grantTypesToBeSupported, callbackUrl, scopes, validityTime, clientId, clientSecret, additionalProperties);
+    return Objects.hash(keyType, keyManager, grantTypesToBeSupported, callbackUrl, scopes, validityTime, clientId, clientSecret, additionalProperties);
   }
 
   @Override
@@ -234,6 +254,7 @@ public enum KeyTypeEnum {
     sb.append("class ApplicationKeyGenerateRequestDTO {\n");
     
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
+    sb.append("    keyManager: ").append(toIndentedString(keyManager)).append("\n");
     sb.append("    grantTypesToBeSupported: ").append(toIndentedString(grantTypesToBeSupported)).append("\n");
     sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");

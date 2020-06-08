@@ -28,14 +28,11 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.transformer.DefaultJWTTransformer;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
@@ -49,10 +46,9 @@ import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
@@ -69,8 +65,6 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 @Component(
          name = "org.wso2.carbon.apimgt.handlers", 
@@ -81,7 +75,6 @@ public class APIHandlerServiceComponent {
 
     private APIKeyValidatorClientPool clientPool;
 
-    private APIManagerConfiguration configuration = new APIManagerConfiguration();
 
     private ServiceRegistration registration;
 
@@ -99,17 +92,14 @@ public class APIHandlerServiceComponent {
             if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(APISecurityUtils.getKeyValidatorClientType())) {
                 clientPool = APIKeyValidatorClientPool.getInstance();
             }
-            String filePath = getFilePath();
-            configuration.load(filePath);
-            ServiceReferenceHolder.getInstance()
-                    .setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl(configuration));
-            ServiceReferenceHolder.getInstance().setThrottleProperties(configuration.getThrottleProperties());
-            String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+            APIManagerConfiguration apiManagerConfiguration =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+            String gatewayType = apiManagerConfiguration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
             if ("Synapse".equalsIgnoreCase(gatewayType)) {
                 // Register Tenant service creator to deploy tenant specific common synapse configurations
                 TenantServiceCreator listener = new TenantServiceCreator();
                 bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
-                if (configuration.getThrottleProperties().isEnabled()) {
+                if (apiManagerConfiguration.getThrottleProperties().isEnabled()) {
                     ServiceReferenceHolder.getInstance().setThrottleDataPublisher(new ThrottleDataPublisher());
                     ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
                     APIThrottleDataServiceImpl throttleDataServiceImpl =
@@ -124,7 +114,7 @@ public class APIHandlerServiceComponent {
                     ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
                     log.debug("APIThrottleDataService Registered...");
                     // start web service throttle data retriever as separate thread and start it.
-                    if (configuration.getThrottleProperties().getBlockCondition().isEnabled()) {
+                    if (apiManagerConfiguration.getThrottleProperties().getBlockCondition().isEnabled()) {
                         BlockingConditionRetriever webServiceThrottleDataRetriever = new BlockingConditionRetriever();
                         webServiceThrottleDataRetriever.startWebServiceThrottleDataRetriever();
                         KeyTemplateRetriever webServiceBlockConditionsRetriever = new KeyTemplateRetriever();
@@ -140,15 +130,7 @@ public class APIHandlerServiceComponent {
 
                 // Set APIM Gateway JWT Generator
 
-                JWTConfigurationDto jwtConfigurationDto = configuration.getJwtConfigurationDto();
-                Properties defaultClaimMappings = new Properties();
-                InputStream resourceAsStream =
-                        this.getClass().getClassLoader().getResourceAsStream("default-claim-mapping.properties");
-                defaultClaimMappings.load(resourceAsStream);
 
-                JWTTransformer jwtTransformer = new DefaultJWTTransformer(jwtConfigurationDto, defaultClaimMappings);
-                registration = context.getBundleContext()
-                        .registerService(JWTTransformer.class.getName(), jwtTransformer, null);
                 registration =
                         context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
                                 new APIMgtGatewayJWTGeneratorImpl(), null);
@@ -163,7 +145,7 @@ public class APIHandlerServiceComponent {
                 ServiceReferenceHolder.getInstance().setTracer(ServiceReferenceHolder.getInstance().getTracingService()
                         .buildTracer(APIMgtGatewayConstants.SERVICE_NAME));
             }
-        } catch (APIManagementException | IOException e) {
+        } catch (IOException e) {
             log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
         }
         // Create caches for the super tenant
@@ -264,6 +246,25 @@ public class APIHandlerServiceComponent {
             log.debug("API manager configuration service unbound from the API handlers");
         }
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
+    }
+    @Reference(
+            name = "api.manager.jwt.validation.service",
+            service = org.wso2.carbon.apimgt.impl.jwt.JWTValidationService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetJWTValidationService")
+    protected void setJWTValidationService(JWTValidationService jwtValidationService) {
+        if (log.isDebugEnabled()) {
+            log.debug("JWT Validation service bound to the API handlers");
+        }
+        ServiceReferenceHolder.getInstance().setJwtValidationService(jwtValidationService);
+    }
+
+    protected void unsetJWTValidationService(JWTValidationService jwtValidationService) {
+        if (log.isDebugEnabled()) {
+            log.debug("JWT Validation service unbound to the API handlers");
+        }
+        ServiceReferenceHolder.getInstance().setJwtValidationService(null);
     }
 
     protected String getFilePath() {
@@ -375,21 +376,7 @@ public class APIHandlerServiceComponent {
         ServiceReferenceHolder.getInstance().setMediationSecurityAdminService(null);
     }
 
-    @Reference(
-            name = "jwt.transformer.service.component",
-            service = JWTTransformer.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetJWTTransformer")
-    protected void setJWTTransformer(JWTTransformer jwtTransformer) {
 
-        ServiceReferenceHolder.getInstance().getJwtTransformerMap().put(jwtTransformer.getIssuer(), jwtTransformer);
-    }
-
-    protected void unsetJWTTransformer(JWTTransformer jwtTransformer) {
-
-        ServiceReferenceHolder.getInstance().getJwtTransformerMap().remove(jwtTransformer.getIssuer());
-    }
 
 
     @Reference(

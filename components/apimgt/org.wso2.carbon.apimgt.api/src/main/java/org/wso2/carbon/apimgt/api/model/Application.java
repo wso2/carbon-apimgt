@@ -35,7 +35,13 @@ public class Application {
     private Subscriber subscriber;
     private Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
     private List<APIKey> keys = new ArrayList<APIKey>();
-    private Map<String, OAuthApplicationInfo> oauthApps = new HashMap<String, OAuthApplicationInfo>();
+    private Map<String, Map<String,OAuthApplicationInfo>> keyManagerWiseOAuthApp = new HashMap<>();
+
+    public Map<String, Map<String, OAuthApplicationInfo>> getKeyManagerWiseOAuthApp() {
+
+        return keyManagerWiseOAuthApp;
+    }
+
     private String tier;
     private String tierQuotaType;
     private String callbackUrl;
@@ -50,7 +56,7 @@ public class Application {
     private String tokenType;
     private String keyType;
     private int subscriptionCount;
-
+    private String keyManager;
     public String getCreatedTime() {
         return createdTime;
     }
@@ -144,20 +150,28 @@ public class Application {
         this.applicationAttributes = applicationAttributes;
     }
 
-    protected Map<String, OAuthApplicationInfo> getOAuthApp() {
-        return oauthApps;
+
+
+    public Map<String, OAuthApplicationInfo> getOAuthApp(String keyType) {
+        return keyManagerWiseOAuthApp.get(keyType);
     }
 
-    public OAuthApplicationInfo getOAuthApp(String keyType) {
-        return oauthApps.get(keyType);
+    public void addOAuthApp(String keyType,String keyManager,OAuthApplicationInfo oAuthApplicationInfo){
+
+        Map<String, OAuthApplicationInfo> keyTypeWiseOauthApp = keyManagerWiseOAuthApp.getOrDefault(keyType,
+                new HashMap<>());
+        keyTypeWiseOauthApp.put(keyManager,oAuthApplicationInfo);
+        keyManagerWiseOAuthApp.put(keyType,keyTypeWiseOauthApp);
     }
 
-    public void addOAuthApp(String keyType, OAuthApplicationInfo oAuthApplication) {
-        oauthApps.put(keyType, oAuthApplication);
-    }
+    public OAuthApplicationInfo getOAuthApp(String keyType, String keyManager) {
 
+        Map<String, OAuthApplicationInfo> keyManagerWiseOauthAPP =
+                keyManagerWiseOAuthApp.getOrDefault(keyType, new HashMap<>());
+        return keyManagerWiseOauthAPP.get(keyManager);
+    }
     public void clearOAuthApps() {
-        oauthApps.clear();
+        keyManagerWiseOAuthApp.clear();
     }
 
     public int getId() {
@@ -284,5 +298,15 @@ public class Application {
 
     public void setTierQuotaType(String tierQuotaType) {
         this.tierQuotaType = tierQuotaType;
+    }
+
+    public String getKeyManager() {
+
+        return keyManager;
+    }
+
+    public void setKeyManager(String keyManager) {
+
+        this.keyManager = keyManager;
     }
 }

@@ -70,6 +70,7 @@ function Operation(props) {
         verb,
         arns,
         resolvedSpec,
+        sharedScopes,
     } = props;
     const [isExpanded, setIsExpanded] = useState(false);
     const useStyles = makeStyles((theme) => {
@@ -272,6 +273,7 @@ function Operation(props) {
                             spec={spec}
                             target={target}
                             verb={verb}
+                            sharedScopes={sharedScopes}
                         />
                         {!hideParameters && (
                             <Parameters
@@ -350,6 +352,7 @@ Operation.propTypes = {
     operationRateLimits: PropTypes.arrayOf(PropTypes.shape({})),
     arns: PropTypes.shape([]).isRequired,
     resolvedSpec: PropTypes.shape({}).isRequired,
+    sharedScopes: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 };
 
 export default React.memo(Operation);

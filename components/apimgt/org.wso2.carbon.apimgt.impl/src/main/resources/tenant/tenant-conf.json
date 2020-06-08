@@ -238,6 +238,8 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:admin_alert_manage",
+        "Roles": "admin"
         "Name": "service_catalog:view",
         "Roles": "admin,Internal/service_catalog_admin,Internal/service_catalog_user,Internal/service_catalog_viewer,Internal/creator,Internal/publisher"
       },
@@ -252,6 +254,8 @@
       {
         "Name": "service_catalog:entry_write",
         "Roles": "admin,Internal/service_catalog_admin,Internal/service_catalog_user"
+        "Name": "apim:bot_data",
+        "Roles": "admin"
       }
     ]
   },

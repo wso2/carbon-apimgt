@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -52,6 +53,7 @@ public class ApplicationKeyMappingUtil {
     public static ApplicationKeyDTO fromApplicationKeyToDTO(Map<String, Object> keyDetails, String applicationKeyType) {
         ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
         applicationKeyDTO.setConsumerKey((String) keyDetails.get(APIConstants.FrontEndParameterNames.CONSUMER_KEY));
+        applicationKeyDTO.setKeyMappingId((String) keyDetails.get(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID));
         applicationKeyDTO
                 .setConsumerSecret((String) keyDetails.get(APIConstants.FrontEndParameterNames.CONSUMER_SECRET));
         applicationKeyDTO.setKeyState((String) keyDetails.get(APIConstants.FrontEndParameterNames.KEY_STATE));
@@ -71,8 +73,14 @@ public class ApplicationKeyMappingUtil {
 
                     Object additionalPropertiesObj = appDetailsJsonObj.get(APIConstants.JSON_ADDITIONAL_PROPERTIES);
                     if (additionalPropertiesObj != null) {
-                        String additionalProperties = (String) additionalPropertiesObj;
-                        applicationKeyDTO.setAdditionalProperties(additionalProperties);
+                        if (additionalPropertiesObj instanceof JSONObject){
+                            Map additionalPropertiesMap = new HashMap();
+                            additionalPropertiesMap.putAll((Map) additionalPropertiesObj);
+                            applicationKeyDTO.setAdditionalProperties(additionalPropertiesMap);
+                        }else if (additionalPropertiesObj instanceof String){
+                            applicationKeyDTO.setAdditionalProperties(additionalPropertiesObj);
+                        }
+
                     }
                     
                 }
@@ -107,6 +115,8 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setConsumerKey(apiKey.getConsumerKey());
         applicationKeyDTO.setConsumerSecret(apiKey.getConsumerSecret());
         applicationKeyDTO.setKeyState(apiKey.getState());
+        applicationKeyDTO.setKeyManager(apiKey.getKeyManager());
+        applicationKeyDTO.setKeyMappingId(apiKey.getMappingId());
         if (apiKey.getGrantTypes() != null) {
             applicationKeyDTO.setSupportedGrantTypes(Arrays.asList(apiKey.getGrantTypes().split(" ")));
         } else {

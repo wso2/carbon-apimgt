@@ -1,0 +1,36 @@
+{
+  "name": "org.wso2.apimgt.keymgt.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "Key Manager information",
+  "payloadData": [
+    {
+      "name": "event_type",
+      "type": "STRING"
+    },
+    {
+      "name": "action",
+      "type": "STRING"
+    },
+    {
+      "name": "name",
+      "type": "STRING"
+    },
+    {
+      "name": "type",
+      "type": "STRING"
+    },
+    {
+      "name": "enabled",
+      "type": "BOOL"
+    },
+    {
+      "name": "value",
+      "type": "STRING"
+    },
+    {
+      "name": "tenantDomain",
+      "type": "STRING"
+    }
+  ]
+}
