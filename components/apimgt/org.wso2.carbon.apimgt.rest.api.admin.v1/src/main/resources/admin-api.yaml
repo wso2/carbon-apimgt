@@ -1368,8 +1368,8 @@ paths:
 #-----------------------------------------------------
     post:
       x-wso2-curl: "curl -k -X POST -H \"Authorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v1/throttling/policies/advanced -d @data.json"
-      x-wso2-request: "POST https://localhost:9443/api/am/admin/v1/throttling/policies/advanced\r\nAuthorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyName\": \"100KBP2Min\",\r\n  \"displayName\": \"100KBP2Min\",\r\n  \"description\": \"description of the policy\",\r\n  \"defaultLimit\": {\r\n    \"type\": \"BANDWIDTHLIMIT\",\r\n    \"requestCount\": null,\r\n    \"bandwidth\": {\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100\r\n      \"dataUnit\": KB\r\n    }\r\n  },\r\n  \"conditionalGroups\":    [\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":          [\r\n                          {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"HeaderCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"headerName\": \"Location\",\r\n               \"headerValue\": \"google.com\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"HeaderCondition\":   {\r\n               \"invertCondition\": \"false\",\r\n               \"headerName\": \"Host\",\r\n               \"headerValue\": \"10.100.7.77\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"IPCONDITION\",\r\n             \"IPCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"ipConditionType\": \"IPSPECIFIC\",\r\n               \"specificIP\": \"10.100.1.22\",\r\n               \"startingIP\": null,\r\n               \"endingIP\": null\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"QueryParameterCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"parameterName\": \"name\",\r\n               \"parameterValue\": \"admin\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"QueryParameterCondition\": {\r\n               \"invertCondition\": \"false\",  \r\n               \"parameterName\": \"lastAccess\",\r\n               \"parameterValue\": \"25-02-2016\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"JWTClaimsCondition\": {\r\n               \"invertCondition\": \"true\",\r\n               \"claimUrl\": \"claimUrl0\",\r\n               \"attribute\": \"claimAttr0\",\r\n             }  \r\n           },\r\n                          {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"JWTClaimsCondition\": {\r\n               \"invertCondition\": \"true\",\r\n               \"claimUrl\": \"claimUrl1\",  \r\n               \"attribute\": \"claimAttr\",\r\n             }\r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"type\": \"REQUESTCOUNTLIMIT\",\r\n            \"requestCount\": {\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n          }\r\n      },\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":          [\r\n                          {\r\n             \"type\": \"IPCONDITION\",\r\n             \"IPCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"ipConditionType\": \"IPRANGE\",\r\n               \"specificIP\": null,\r\n               \"startingIP\": \"0.0.0.0\",\r\n               \"endingIP\": \"1.1.1.1\"\r\n             }\r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"type\": \"REQUESTCOUNTLIMIT\",\r\n            \"requestCount\": {\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n         }\r\n      }\r\n   ]\r\n}"
-      x-wso2-response: "HTTP/1.1 201 Created\r\nLocation: https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/a0c9f368-b7d2-4eec-a757-f67034160208\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyId\": \"a0c9f368-b7d2-4eec-a757-f67034160208\",\r\n  \"policyName\": \"100KBP2Min\",\r\n  \"displayName\": \"100KBP2Min\",\r\n  \"description\": \"description of the policy\",\r\n  \"isDeployed\": true,\r\n  \"defaultLimit\": {\r\n    \"type\": \"BANDWIDTHLIMIT\",\r\n    \"requestCount\": null,\r\n    \"bandwidth\": {\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100\r\n      \"dataUnit\": KB\r\n    }\r\n  },\r\n  \"conditionalGroups\":  [\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":  [\r\n           {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"HeaderCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"headerName\": \"Location\",\r\n               \"headerValue\": \"google.com\",\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"HeaderCondition\":   {\r\n               \"invertCondition\": \"false\",\r\n               \"headerName\": \"Host\",\r\n               \"headerValue\": \"10.100.7.77\",\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"IPCONDITION\",\r\n             \"IPCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"ipConditionType\": \"IPSPECIFIC\",\r\n               \"specificIP\": \"10.100.1.22\",\r\n               \"startingIP\": null,\r\n               \"endingIP\": null\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"QueryParameterCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"parameterName\": \"name\",\r\n               \"parameterValue\": \"admin\",\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"QueryParameterCondition\": {\r\n               \"invertCondition\": \"false\",  \r\n               \"parameterName\": \"lastAccess\",\r\n               \"parameterValue\": \"25-02-2016\",\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"JWTClaimsCondition\": {\r\n               \"invertCondition\": \"true\",\r\n               \"claimUrl\": \"claimUrl0\",\r\n               \"attribute\": \"claimAttr0\",\r\n             }  \r\n           },\r\n           {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"JWTClaimsCondition\": {\r\n               \"invertCondition\": \"true\",\r\n               \"claimUrl\": \"claimUrl1\",  \r\n               \"attribute\": \"claimAttr\",\r\n             }\r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"type\": \"REQUESTCOUNTLIMIT\",\r\n            \"requestCount\": {\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n          }\r\n      },\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":  [\r\n           {\r\n             \"type\": \"IPCONDITION\",\r\n             \"IPCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"ipConditionType\": \"IPRANGE\",\r\n               \"specificIP\": null,\r\n               \"startingIP\": \"0.0.0.0\",\r\n               \"endingIP\": \"1.1.1.1\"\r\n             }\r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"type\": \"REQUESTCOUNTLIMIT\",\r\n            \"requestCount\": {\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n         }\r\n      }\r\n   ]\r\n}"
+      x-wso2-request: "POST https://localhost:9443/api/am/admin/v1/throttling/policies/advanced\r\nAuthorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyName\": \"100KBP2Min\",\r\n  \"displayName\": \"100KBP2Min\",\r\n  \"description\": \"description of the policy\",\r\n  \"defaultLimit\": {\r\n    \"type\": \"BANDWIDTHLIMIT\",\r\n    \"requestCount\": null,\r\n    \"bandwidth\": {\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100\r\n      \"dataUnit\": KB\r\n    }\r\n  },\r\n  \"conditionalGroups\":    [\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":          [\r\n                          {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"headerCondition\": {\r\n               \"headerName\": \"Location\",\r\n               \"headerValue\": \"google.com\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"headerCondition\":   {\r\n               \"headerName\": \"Host\",\r\n               \"headerValue\": \"10.100.7.77\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"IPCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"ipCondition\": {\r\n               \"ipConditionType\": \"IPSPECIFIC\",\r\n               \"specificIP\": \"10.100.1.22\",\r\n               \"startingIP\": null,\r\n               \"endingIP\": null\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"queryParameterCondition\": {\r\n               \"parameterName\": \"name\",\r\n               \"parameterValue\": \"admin\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"queryParameterCondition\": {\r\n               \"parameterName\": \"lastAccess\",\r\n               \"parameterValue\": \"25-02-2016\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"invertCondition\": \"true\",\r\n             \"jwtClaimsCondition\": {\r\n               \"claimUrl\": \"claimUrl0\",\r\n               \"attribute\": \"claimAttr0\",\r\n             }  \r\n           },\r\n                          {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"invertCondition\": \"true\",\r\n             \"jwtClaimsCondition\": {\r\n               \"claimUrl\": \"claimUrl1\",  \r\n               \"attribute\": \"claimAttr\",\r\n             }\r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"type\": \"REQUESTCOUNTLIMIT\",\r\n            \"requestCount\": {\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n          }\r\n      },\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":          [\r\n                          {\r\n             \"type\": \"IPCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"ipCondition\": {\r\n               \"ipConditionType\": \"IPRANGE\",\r\n               \"specificIP\": null,\r\n               \"startingIP\": \"0.0.0.0\",\r\n               \"endingIP\": \"1.1.1.1\"\r\n             }\r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"type\": \"REQUESTCOUNTLIMIT\",\r\n            \"requestCount\": {\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n         }\r\n      }\r\n   ]\r\n}"
+      x-wso2-response: "HTTP/1.1 201 Created\r\nLocation: https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/a0c9f368-b7d2-4eec-a757-f67034160208\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyId\": \"a0c9f368-b7d2-4eec-a757-f67034160208\",\r\n  \"policyName\": \"100KBP2Min\",\r\n  \"displayName\": \"100KBP2Min\",\r\n  \"description\": \"description of the policy\",\r\n  \"isDeployed\": true,\r\n  \"defaultLimit\": {\r\n    \"type\": \"BANDWIDTHLIMIT\",\r\n    \"requestCount\": null,\r\n    \"bandwidth\": {\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100\r\n      \"dataUnit\": KB\r\n    }\r\n  },\r\n  \"conditionalGroups\":  [\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":  [\r\n           {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"headerCondition\": {\r\n               \"headerName\": \"Location\",\r\n               \"headerValue\": \"google.com\",\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"headerCondition\":   {\r\n               \"headerName\": \"Host\",\r\n               \"headerValue\": \"10.100.7.77\",\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"IPCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"ipCondition\": {\r\n               \"ipConditionType\": \"IPSPECIFIC\",\r\n               \"specificIP\": \"10.100.1.22\",\r\n               \"startingIP\": null,\r\n               \"endingIP\": null\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"queryParameterCondition\": {\r\n               \"parameterName\": \"name\",\r\n               \"parameterValue\": \"admin\",\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"queryParameterCondition\": {\r\n               \"parameterName\": \"lastAccess\",\r\n               \"parameterValue\": \"25-02-2016\",\r\n             }\r\n           },\r\n           {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"invertCondition\": \"true\",\r\n             \"jwtClaimsCondition\": {\r\n               \"claimUrl\": \"claimUrl0\",\r\n               \"attribute\": \"claimAttr0\",\r\n             }  \r\n           },\r\n           {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"invertCondition\": \"true\",\r\n             \"jwtClaimsCondition\": {\r\n               \"claimUrl\": \"claimUrl1\",  \r\n               \"attribute\": \"claimAttr\",\r\n             }\r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"type\": \"REQUESTCOUNTLIMIT\",\r\n            \"requestCount\": {\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n          }\r\n      },\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":  [\r\n           {\r\n             \"type\": \"IPCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"ipCondition\": {\r\n               \"ipConditionType\": \"IPRANGE\",\r\n               \"specificIP\": null,\r\n               \"startingIP\": \"0.0.0.0\",\r\n               \"endingIP\": \"1.1.1.1\"\r\n             }\r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"type\": \"REQUESTCOUNTLIMIT\",\r\n            \"requestCount\": {\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n         }\r\n      }\r\n   ]\r\n}"
       security:
         - OAuth2Security:
             - apim:admin
@@ -1528,8 +1528,8 @@ paths:
 #-----------------------------------------------------
     put:
       x-wso2-curl: "curl -k -X PUT -H \"Authorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/a0c9f368-b7d2-4eec-a757-f67034160208 -d @data.json"
-      x-wso2-request: "PUT https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/a0c9f368-b7d2-4eec-a757-f67034160208\r\nAuthorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\r\nContent-Type: application/json\r\n\r\n{\r\n   \"policyName\": \"100KBP2Min\",\r\n   \"displayName\": \"100KBP2Min\",\r\n   \"description\": \"description of the policy\",\r\n   \"defaultLimit\": {\r\n    \"type\": \"BANDWIDTHLIMIT\",\r\n    \"requestCount\": null,\r\n    \"bandwidth\": {\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100\r\n      \"dataUnit\": KB    }\r\n  },\r\n   \"conditionalGroups\":    [\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":          [\r\n                         {\r\n             \"type\": \"IPCONDITION\",\r\n             \"IPCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"ipConditionType\": \"IPSPECIFIC\",\r\n               \"specificIP\": \"10.100.1.22\",\r\n               \"startingIP\": null,\r\n               \"endingIP\": null\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"HeaderCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"headerName\": \"Host\",\r\n               \"headerValue\": \"10.100.7.77\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"QueryParameterCondition\": {\r\n               \"invertCondition\": \"false\",\r\n               \"parameterName\": \"name\",\r\n               \"parameterValue\": \"admin\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"JWTClaimsCondition\": {\r\n               \"invertCondition\": \"true\",\r\n               \"claimUrl\": \"claimUrl0\",\r\n               \"attribute\": \"claimAttr0\",\r\n             }  \r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"type\": \"REQUESTCOUNTLIMIT\",\r\n            \"requestCount\": {\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n         }\r\n      }\r\n   ]\r\n}"
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyId\": \"a0c9f368-b7d2-4eec-a757-f67034160208\",\r\n  \"policyName\": \"100KBP2Min\",\r\n  \"displayName\": \"100KBP2Min\",\r\n  \"description\": \"description of the policy\",\r\n  \"isDeployed\": true,\r\n  \"defaultLimit\": {\r\n    \"type\": \"BANDWIDTHLIMIT\",\r\n    \"requestCount\": null,\r\n    \"bandwidth\": {\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100\r\n      \"dataUnit\": KB    }\r\n  },\r\n  \"conditionalGroups\": [\r\n    {\r\n      \"description\": \"Sample description about condition group\",\r\n      \"conditions\": [\r\n        {\r\n          \"type\": \"IPCONDITION\",\r\n          \"IPCondition\": {\r\n            \"invertCondition\": \"false\",\r\n             \"ipConditionType\": \"IPSPECIFIC\",\r\n             \"specificIP\": \"10.100.1.22\",\r\n             \"startingIP\": null,\r\n            \"endingIP\": null\r\n           }\r\n        },\r\n        {\r\n          \"type\": \"HEADERCONDITION\",\r\n          \"HeaderCondition\": {\r\n            \"invertCondition\": \"false\",\r\n             \"headerName\": \"Host\",\r\n            \"headerValue\": \"10.100.7.77\",\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"QUERYPARAMETERCONDITION\",\r\n          \"QueryParameterCondition\": {\r\n            \"invertCondition\": \"false\",\r\n            \"parameterName\": \"name\",\r\n            \"parameterValue\": \"admin\",\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"JWTCLAIMSCONDITION\",\r\n          \"JWTClaimsCondition\": {\r\n            \"invertCondition\": \"true\",\r\n            \"claimUrl\": \"claimUrl0\",\r\n            \"attribute\": \"claimAttr0\",\r\n          }\r\n        }\r\n      ],\r\n      \"limit\": {\r\n        \"type\": \"REQUESTCOUNTLIMIT\",\r\n        \"requestCount\": {\r\n          \"timeUnit\": \"sec\",\r\n          \"unitTime\": 60,\r\n          \"requestCount\": 0\r\n        },\r\n         \"bandwidth\": null\r\n      }\r\n    }\r\n  ]\r\n}"
+      x-wso2-request: "PUT https://localhost:9443/api/am/admin/v1/throttling/policies/advanced/a0c9f368-b7d2-4eec-a757-f67034160208\r\nAuthorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\r\nContent-Type: application/json\r\n\r\n{\r\n   \"policyName\": \"100KBP2Min\",\r\n   \"displayName\": \"100KBP2Min\",\r\n   \"description\": \"description of the policy\",\r\n   \"defaultLimit\": {\r\n    \"type\": \"BANDWIDTHLIMIT\",\r\n    \"requestCount\": null,\r\n    \"bandwidth\": {\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100\r\n      \"dataUnit\": KB    }\r\n  },\r\n   \"conditionalGroups\":    [\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":          [\r\n                         {\r\n             \"type\": \"IPCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"ipCondition\": {\r\n               \"ipConditionType\": \"IPSPECIFIC\",\r\n               \"specificIP\": \"10.100.1.22\",\r\n               \"startingIP\": null,\r\n               \"endingIP\": null\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"HEADERCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"headerCondition\": {\r\n               \"headerName\": \"Host\",\r\n               \"headerValue\": \"10.100.7.77\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"QUERYPARAMETERCONDITION\",\r\n             \"invertCondition\": \"false\",\r\n             \"queryParameterCondition\": {\r\n               \"parameterName\": \"name\",\r\n               \"parameterValue\": \"admin\",\r\n             }\r\n           },\r\n                          {\r\n             \"type\": \"JWTCLAIMSCONDITION\",\r\n             \"invertCondition\": \"true\",\r\n             \"jwtClaimsCondition\": {\r\n               \"claimUrl\": \"claimUrl0\",\r\n               \"attribute\": \"claimAttr0\",\r\n             }  \r\n           }\r\n         ],\r\n         \"limit\": {\r\n            \"type\": \"REQUESTCOUNTLIMIT\",\r\n            \"requestCount\": {\r\n              \"timeUnit\": \"sec\",\r\n              \"unitTime\": 60,\r\n              \"requestCount\": 0\r\n            },\r\n            \"bandwidth\": null\r\n         }\r\n      }\r\n   ]\r\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyId\": \"a0c9f368-b7d2-4eec-a757-f67034160208\",\r\n  \"policyName\": \"100KBP2Min\",\r\n  \"displayName\": \"100KBP2Min\",\r\n  \"description\": \"description of the policy\",\r\n  \"isDeployed\": true,\r\n  \"defaultLimit\": {\r\n    \"type\": \"BANDWIDTHLIMIT\",\r\n    \"requestCount\": null,\r\n    \"bandwidth\": {\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100\r\n      \"dataUnit\": KB    }\r\n  },\r\n  \"conditionalGroups\": [\r\n    {\r\n      \"description\": \"Sample description about condition group\",\r\n      \"conditions\": [\r\n        {\r\n          \"type\": \"IPCONDITION\",\r\n          \"invertCondition\": \"false\",\r\n          \"ipCondition\": {\r\n            \"ipConditionType\": \"IPSPECIFIC\",\r\n            \"specificIP\": \"10.100.1.22\",\r\n            \"startingIP\": null,\r\n            \"endingIP\": null\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"HEADERCONDITION\",\r\n          \"invertCondition\": \"false\",\r\n          \"headerCondition\": {\r\n            \"headerName\": \"Host\",\r\n            \"headerValue\": \"10.100.7.77\",\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"QUERYPARAMETERCONDITION\",\r\n          \"invertCondition\": \"false\",\r\n          \"queryParameterCondition\": {\r\n            \"parameterName\": \"name\",\r\n            \"parameterValue\": \"admin\",\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"JWTCLAIMSCONDITION\",\r\n          \"invertCondition\": \"true\",\r\n          \"jwtClaimsCondition\": {\r\n            \"claimUrl\": \"claimUrl0\",\r\n            \"attribute\": \"claimAttr0\",\r\n          }\r\n        }\r\n      ],\r\n      \"limit\": {\r\n        \"type\": \"REQUESTCOUNTLIMIT\",\r\n        \"requestCount\": {\r\n          \"timeUnit\": \"sec\",\r\n          \"unitTime\": 60,\r\n          \"requestCount\": 0\r\n        },\r\n         \"bandwidth\": null\r\n      }\r\n    }\r\n  ]\r\n}"
       security:
         - OAuth2Security:
             - apim:admin
@@ -4064,11 +4064,11 @@ definitions:
 #-----------------------------------------------------
   AdvancedThrottlePolicy :
     title: Advanced Throttling Policy
-    required:
-      - defaultLimit
     allOf:
       - $ref: '#/definitions/ThrottlePolicy'
-      - properties:
+      - required:
+        - defaultLimit
+        properties:
           defaultLimit:
             $ref: '#/definitions/ThrottleLimit'
           conditionalGroups:
@@ -4247,7 +4247,7 @@ definitions:
 #-----------------------------------------------------
 # The Conditional Group resource
 #-----------------------------------------------------
-  ConditionalGroup :
+  ConditionalGroup:
     title: Conditional Groups for Throttling
     required:
       - limit
@@ -4258,6 +4258,7 @@ definitions:
         description: Description of the Conditional Group
       conditions:
         type: array
+        minItems: 1
         items:
           $ref: '#/definitions/ThrottleCondition'
         description: |
@@ -4267,18 +4268,18 @@ definitions:
           [
             {
               "type": "HEADERCONDITION",
+              "invertCondition": false,
               "headerCondition":
               {
-                "invertCondition": false,
                 "headerName": "Host",
                 "headerValue": "10.100.7.77"
               }
           	},
           	{
               "type": "IPCONDITION",
+              "invertCondition": false,
               "ipCondition":
               {
-                "invertCondition": false,
                 "ipConditionType": "IPSPECIFIC",
                 "specificIP": "10.100.1.22",
                 "startingIP": null,
@@ -4287,18 +4288,18 @@ definitions:
           	},
           	{
               "type": "QUERYPARAMETERCONDITION",
+              "invertCondition": false,
               "queryParameterCondition":
               {
-                "invertCondition": false,
                 "parameterName": "name",
                 "parameterValue": "admin"
               }
           	},
           	{
               "type": "JWTCLAIMSCONDITION",
+              "invertCondition": true,
               "jwtClaimsCondition":
               {
-                "invertCondition": true,
                 "claimUrl": "claimUrl0",
                 "attribute": "claimAttr0"
               }
@@ -4306,21 +4307,6 @@ definitions:
           ]
       limit:
         $ref: '#/definitions/ThrottleLimit'
-
-#-----------------------------------------------------
-# The Throttling Condition Base resource
-#-----------------------------------------------------
-  ThrottleConditionBase:
-    title: Throttling Condition Base
-    properties:
-      invertCondition:
-        type: boolean
-        default: false
-        description: |
-          Specifies whether inversion of the condition to be matched against the request.
-
-          **Note:** When you add conditional groups for advanced throttling policies, this paramater should have the
-          same value ('true' or 'false') for the same type of conditional group.
 
 #-----------------------------------------------------
 # The Throttling Condition resource
@@ -4341,6 +4327,14 @@ definitions:
         description: |
           Type of the throttling condition. Allowed values are "HEADERCONDITION", "IPCONDITION", "JWTCLAIMSCONDITION"
           and "QUERYPARAMETERCONDITION".
+      invertCondition:
+        type: boolean
+        default: false
+        description: |
+          Specifies whether inversion of the condition to be matched against the request.
+
+          **Note:** When you add conditional groups for advanced throttling policies, this paramater should have the
+          same value ('true' or 'false') for the same type of conditional group.
       headerCondition:
         $ref: '#/definitions/HeaderCondition'
       ipCondition:
@@ -4354,19 +4348,17 @@ definitions:
 # The Throttling HTTP Header Condition resource
 #-----------------------------------------------------
   HeaderCondition:
-    title: HTTP Headerc based throttling condition
+    title: HTTP Header based throttling condition
     required:
       - headerName
       - headerValue
-    allOf:
-      - $ref: '#/definitions/ThrottleConditionBase'
-      - properties:
-          headerName:
-            type: string
-            description: Name of the header
-          headerValue:
-            type: string
-            description: Value of the header
+    properties:
+      headerName:
+        type: string
+        description: Name of the header
+      headerValue:
+        type: string
+        description: Value of the header
 
 #-----------------------------------------------------
 # The Throttling IP Condition resource
@@ -4375,24 +4367,22 @@ definitions:
     title: IP based throttling condition
     required:
       - specificIP
-    allOf:
-      - $ref: '#/definitions/ThrottleConditionBase'
-      - properties:
-          ipConditionType:
-            type: string
-            enum:
-              - IPRange
-              - IPSpecific
-            description: Type of the IP condition. Allowed values are "IPRange" and "IPSpecific"
-          specificIP:
-            type: string
-            description: Specific IP when "IPSpecific" is used as the ipConditionType
-          startingIP:
-            type: string
-            description: Staring IP when "IPRange" is used as the ipConditionType
-          endingIP:
-            type: string
-            description: Ending IP when "IPRange" is used as the ipConditionType
+    properties:
+      ipConditionType:
+        type: string
+        enum:
+          - IPRANGE
+          - IPSPECIFIC
+        description: Type of the IP condition. Allowed values are "IPRANGE" and "IPSPECIFIC"
+      specificIP:
+        type: string
+        description: Specific IP when "IPSPECIFIC" is used as the ipConditionType
+      startingIP:
+        type: string
+        description: Staring IP when "IPRANGE" is used as the ipConditionType
+      endingIP:
+        type: string
+        description: Ending IP when "IPRANGE" is used as the ipConditionType
 
 #-----------------------------------------------------
 # The JWT Claims Condition resource
@@ -4402,15 +4392,13 @@ definitions:
     required:
       - claimUrl
       - attribute
-    allOf:
-      - $ref: '#/definitions/ThrottleConditionBase'
-      - properties:
-          claimUrl:
-            type: string
-            description: JWT claim URL
-          attribute:
-            type: string
-            description: Attribute to be matched
+    properties:
+      claimUrl:
+        type: string
+        description: JWT claim URL
+      attribute:
+        type: string
+        description: Attribute to be matched
 
 #-----------------------------------------------------
 # The Query Parameter Condition resource
@@ -4420,15 +4408,13 @@ definitions:
     required:
       - parameterName
       - parameterValue
-    allOf:
-      - $ref: '#/definitions/ThrottleConditionBase'
-      - properties:
-          parameterName:
-            type: string
-            description: Name of the query parameter
-          parameterValue:
-            type: string
-            description: Value of the query parameter to be matched
+    properties:
+      parameterName:
+        type: string
+        description: Name of the query parameter
+      parameterValue:
+        type: string
+        description: Value of the query parameter to be matched
 
 #-----------------------------------------------------
 # The Throttling Limit Base resource
