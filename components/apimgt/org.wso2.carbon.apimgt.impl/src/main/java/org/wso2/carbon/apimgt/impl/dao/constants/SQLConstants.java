@@ -326,13 +326,19 @@ public class SQLConstants {
                     "   APS.RATE_LIMIT_TIME_UNIT," +
                     "   APS.STOP_ON_QUOTA_REACH," +
                     "   API.API_ID," +
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_DEPTH,"+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_COMPLEXITY" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
                     "   AM_APPLICATION APP," +
                     "   AM_APPLICATION_KEY_MAPPING AKM," +
                     "   AM_API API," +
-                    "   AM_POLICY_SUBSCRIPTION APS," +
+                    "   AM_POLICY_SUBSCRIPTION APS" +
+                    " LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS"+
+                    " ON "+
+                    "   APS.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID "+
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
@@ -361,13 +367,19 @@ public class SQLConstants {
                     "   APS.RATE_LIMIT_TIME_UNIT," +
                     "   APS.STOP_ON_QUOTA_REACH," +
                     "   API.API_ID," +
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_DEPTH,"+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_COMPLEXITY" +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
                     "   AM_APPLICATION APP," +
                     "   AM_APPLICATION_KEY_MAPPING AKM," +
                     "   AM_API API," +
-                    "   AM_POLICY_SUBSCRIPTION APS," +
+                    "   AM_POLICY_SUBSCRIPTION APS" +
+                    " LEFT OUTER JOIN "+
+                    "   AM_GRAPHQL_QUERY_ANALYSIS"+
+                    " ON "+
+                    "   APS.POLICY_ID = AM_GRAPHQL_QUERY_ANALYSIS.POLICY_ID "+
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +

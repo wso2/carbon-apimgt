@@ -72,7 +72,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
     private int  getMaxQueryDepth(MessageContext messageContext) {
         Object maxQueryDepth = messageContext.getProperty(APIConstants.MAXIMUM_QUERY_DEPTH);
         if (maxQueryDepth != null) {
-            return ((Long) maxQueryDepth).intValue();
+            return ((Integer) maxQueryDepth).intValue();
         } else {
             log.error("Maximum query depth was not allocated");
             return -1;
@@ -228,7 +228,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
     private int getMaxQueryComplexity(MessageContext messageContext) {
         Object maxQueryComplexity = messageContext.getProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY);
         if (maxQueryComplexity != null) {
-            return ((Long) maxQueryComplexity).intValue();
+            return ((Integer) maxQueryComplexity).intValue();
         } else {
             log.error("Maximum query complexity was not allocated");
             return -1;

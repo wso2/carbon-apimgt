@@ -13152,12 +13152,22 @@ public class ApiMgtDAO {
                         spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
                     }
                     boolean stopOnQuotaReach = rs.getBoolean("STOP_ON_QUOTA_REACH");
+                    int graphQLMaxDepth = 0;
+                    if(rs.getInt("MAX_DEPTH") > 0) {
+                        graphQLMaxDepth = rs.getInt("MAX_DEPTH");
+                    }
+                    int graphQLMaxComplexity = 0;
+                    if(rs.getInt("MAX_COMPLEXITY") > 0) {
+                        graphQLMaxComplexity = rs.getInt("MAX_COMPLEXITY");
+                    }
                     List<String> list = new ArrayList<String>();
                     list.add(apiLevelThrottlingKey);
                     infoDTO.setSpikeArrestLimit(spikeArrest);
                     infoDTO.setSpikeArrestUnit(spikeArrestUnit);
                     infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
                     infoDTO.setSubscriberTenantDomain(subscriberTenant);
+                    infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);
+                    infoDTO.setGraphQLMaxComplexity(graphQLMaxComplexity);
                     if (apiTier != null && apiTier.trim().length() > 0) {
                         infoDTO.setApiTier(apiTier);
                     }

@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import org.wso2.carbon.apimgt.internal.service.dto.GraphQLQueryDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.PolicyDTO;
 import javax.validation.constraints.*;
 
@@ -20,6 +21,8 @@ public class SubscriptionPolicyDTO   {
     private Integer tenantId = null;
     private String name = null;
     private String quotaType = null;
+    private Integer graphQLMaxComplexity = null;
+    private Integer graphQLMaxDepth = null;
 
   /**
    **/
@@ -89,6 +92,42 @@ public class SubscriptionPolicyDTO   {
     this.quotaType = quotaType;
   }
 
+  /**
+   * Maximum Complexity of the GraphQL query
+   **/
+  public SubscriptionPolicyDTO graphQLMaxComplexity(Integer graphQLMaxComplexity) {
+    this.graphQLMaxComplexity = graphQLMaxComplexity;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "400", value = "Maximum Complexity of the GraphQL query")
+  @JsonProperty("graphQLMaxComplexity")
+  public Integer getGraphQLMaxComplexity() {
+    return graphQLMaxComplexity;
+  }
+  public void setGraphQLMaxComplexity(Integer graphQLMaxComplexity) {
+    this.graphQLMaxComplexity = graphQLMaxComplexity;
+  }
+
+  /**
+   * Maximum Depth of the GraphQL query
+   **/
+  public SubscriptionPolicyDTO graphQLMaxDepth(Integer graphQLMaxDepth) {
+    this.graphQLMaxDepth = graphQLMaxDepth;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "10", value = "Maximum Depth of the GraphQL query")
+  @JsonProperty("graphQLMaxDepth")
+  public Integer getGraphQLMaxDepth() {
+    return graphQLMaxDepth;
+  }
+  public void setGraphQLMaxDepth(Integer graphQLMaxDepth) {
+    this.graphQLMaxDepth = graphQLMaxDepth;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -102,12 +141,14 @@ public class SubscriptionPolicyDTO   {
     return Objects.equals(id, subscriptionPolicy.id) &&
         Objects.equals(tenantId, subscriptionPolicy.tenantId) &&
         Objects.equals(name, subscriptionPolicy.name) &&
-        Objects.equals(quotaType, subscriptionPolicy.quotaType);
+        Objects.equals(quotaType, subscriptionPolicy.quotaType) &&
+        Objects.equals(graphQLMaxComplexity, subscriptionPolicy.graphQLMaxComplexity) &&
+        Objects.equals(graphQLMaxDepth, subscriptionPolicy.graphQLMaxDepth);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, name, quotaType);
+    return Objects.hash(id, tenantId, name, quotaType, graphQLMaxComplexity, graphQLMaxDepth);
   }
 
   @Override
@@ -119,6 +160,8 @@ public class SubscriptionPolicyDTO   {
     sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
+    sb.append("    graphQLMaxComplexity: ").append(toIndentedString(graphQLMaxComplexity)).append("\n");
+    sb.append("    graphQLMaxDepth: ").append(toIndentedString(graphQLMaxDepth)).append("\n");
     sb.append("}");
     return sb.toString();
   }
