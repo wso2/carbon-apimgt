@@ -101,6 +101,7 @@ public class RestApiUtil {
     private static Set<URITemplate> storeResourceMappings;
     private static Set<URITemplate> publisherResourceMappings;
     private static Set<URITemplate> adminAPIResourceMappings;
+    private static Set<URITemplate> serviceCatalogAPIResourceMappings;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> uriToHttpMethodsMap;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> ETagSkipListURIToHttpMethodsMap;
     public static final ThreadLocal userThreadLocal = new ThreadLocal();
@@ -1389,6 +1390,39 @@ public class RestApiUtil {
     }
 
     /**
+     * This is static method to return URI Templates map of Service Catalog REST API.
+     * This content need to load only one time and keep it in memory as content will not change
+     * during runtime.
+     *
+     * @return URITemplate set associated with Service Catalog REST API
+     */
+    public static Set<URITemplate> getServiceCatalogAPIResourceMappings() {
+
+        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER,
+                RestApiConstants.REST_API_SERVICE_CATALOG_CONTEXT,
+                RestApiConstants.REST_API_SERVICE_CATALOG_VERSION));
+
+        if (serviceCatalogAPIResourceMappings != null) {
+            return serviceCatalogAPIResourceMappings;
+        } else {
+            try {
+                String definition;
+                    definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/service-catalog-api.yaml"),
+                                    "UTF-8");
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+                //Get URL templates from swagger content we created
+                serviceCatalogAPIResourceMappings = oasParser.getURITemplates(definition);
+            } catch (APIManagementException e) {
+                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
+            } catch (IOException e) {
+                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
+            }
+            return serviceCatalogAPIResourceMappings;
+        }
+    }
+
+    /**
      * Returns the white-listed URIs and associated HTTP methods for REST API by reading api-manager.xml configuration
      *
      * @return A Dictionary with the white-listed URIs and the associated HTTP methods
@@ -1624,6 +1658,8 @@ public class RestApiUtil {
             uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION_0);
         } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT_FULL_1)) {
             uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION_1);
+        } else if (basePath.contains(RestApiConstants.REST_API_SERVICE_CATALOG_CONTEXT)) {
+            uriTemplates = RestApiUtil.getServiceCatalogAPIResourceMappings();
         }
         return uriTemplates;
     }

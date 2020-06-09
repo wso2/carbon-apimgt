@@ -240,6 +240,8 @@
       {
         "Name": "apim:admin_alert_manage",
         "Roles": "admin"
+      },
+      {
         "Name": "service_catalog:view",
         "Roles": "admin,Internal/service_catalog_admin,Internal/service_catalog_user,Internal/service_catalog_viewer,Internal/creator,Internal/publisher"
       },
@@ -248,12 +250,26 @@
         "Roles": "admin,Internal/service_catalog_admin"
       },
       {
+        "Name": "service_catalog:create",
+        "Roles": "admin,Internal/service_catalog_admin,Internal/service_catalog_creator"
+      },
+      {
+        "Name": "service_catalog:manage",
+        "Roles": "admin,Internal/service_catalog_admin,Internal/service_catalog_manager"
+      },
+      {
+        "Name": "service_catalog:delete",
+        "Roles": "admin,Internal/service_catalog_admin,Internal/service_catalog_delete"
+      },
+      {
         "Name": "service_catalog:entry_view",
         "Roles": "admin,Internal/service_catalog_admin,Internal/service_catalog_user,Internal/service_catalog_viewer,Internal/creator,Internal/publisher"
       },
       {
         "Name": "service_catalog:entry_write",
         "Roles": "admin,Internal/service_catalog_admin,Internal/service_catalog_user"
+      },
+      {
         "Name": "apim:bot_data",
         "Roles": "admin"
       }
