@@ -313,4 +313,63 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 applicationPoliciesInitialized &&
                 subscriptionPoliciesInitialized;
     }
+
+    @Override
+    public void addOrUpdateSubscription(Subscription subscription) {
+        subscriptionMap.put(subscription.getCacheKey(), subscription);
+    }
+    @Override
+    public void removeSubscription(Subscription subscription) {
+        subscriptionMap.remove(subscription.getCacheKey());
+    }
+
+    @Override
+    public void addOrUpdateAPI(API api) {
+        apiMap.put(api.getCacheKey(), api);
+    }
+    
+    @Override
+    public void removeAPI(API api) {
+        apiMap.remove(api.getCacheKey());
+    }
+    
+    @Override
+    public void addOrUpdateApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping) {
+        applicationKeyMappingMap.put(applicationKeyMapping.getCacheKey(), applicationKeyMapping);
+    }
+    
+    @Override
+    public void removeApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping) {
+        applicationKeyMappingMap.remove(applicationKeyMapping.getCacheKey());
+    }
+    
+    @Override
+    public void addOrUpdateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) {
+        subscriptionPolicyMap.put(subscriptionPolicy.getCacheKey(), subscriptionPolicy);
+    }
+    
+    @Override
+    public void addOrUpdateApplicationPolicy(ApplicationPolicy applicationPolicy) {
+        appPolicyMap.put(applicationPolicy.getCacheKey(), applicationPolicy);
+    }
+    
+    @Override
+    public void removeApplicationPolicy(ApplicationPolicy applicationPolicy) {
+        appPolicyMap.remove(applicationPolicy.getCacheKey());
+    }
+    
+    @Override
+    public void removeSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) {
+        subscriptionPolicyMap.remove(subscriptionPolicy.getCacheKey());
+    }
+    
+    @Override
+    public void addOrUpdateApplication(Application application) {
+        applicationMap.put(application.getId(), application);
+    }
+    
+    @Override
+    public void removeApplication(Application application) {
+        applicationMap.remove(application.getId());
+    }
 }

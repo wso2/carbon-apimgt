@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.events.APIMOAuthEventInterceptor;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
@@ -40,6 +41,7 @@ import org.wso2.carbon.apimgt.keymgt.issuers.PermissionBasedScopeIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.RoleBasedScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.listeners.KeyManagerUserOperationListener;
 import org.wso2.carbon.apimgt.keymgt.listeners.ServerStartupListener;
+import org.wso2.carbon.apimgt.keymgt.service.KeyManagerDataServiceImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
@@ -124,6 +126,10 @@ public class APIKeyMgtServiceComponent {
                 log.debug("Permission based scope Issuer and Role based scope issuers are loaded.");
             }
             ScopesIssuer.loadInstance(whitelist);
+            // Register KeyManagerDataService
+            serviceRegistration = ctxt.getBundleContext().registerService(KeyManagerDataService.class.getName(),
+                    new KeyManagerDataServiceImpl(), null);
+            
             if (log.isDebugEnabled()) {
                 log.debug("Identity API Key Mgt Bundle is started.");
             }
