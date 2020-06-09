@@ -674,6 +674,27 @@ class API extends Resource {
     }
 
     /**
+     * Get usages of a particular scope
+     * @param scopeId {String} UUID of the scope
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSharedScopeUsages(scopeId, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promise_scopes = apiClient.then(client => {
+            return client.apis['Scopes'].getSharedScopeUsages(
+                { scopeId },
+                this._requestMetaData(),
+            );
+        });
+        if (callback) {
+            return promise_scopes.then(callback);
+        } else {
+            return promise_scopes;
+        }
+    }
+
+    /**
      * Update a scope of an API
      * @param {String} api_id - UUID of the API in which the scopes is needed
      * @param {String} scopeName - Name of the scope
