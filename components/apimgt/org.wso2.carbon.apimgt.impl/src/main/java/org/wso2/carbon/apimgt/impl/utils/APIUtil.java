@@ -4778,6 +4778,9 @@ public final class APIUtil {
         createRole(APIConstants.SERVICE_CATALOG_ADMIN_ROLE, null, tenantId);
         createRole(APIConstants.SERVICE_CATALOG_USER_ROLE, null, tenantId);
         createRole(APIConstants.SERVICE_CATALOG_VIEWER_ROLE, null, tenantId);
+        createRole(APIConstants.SERVICE_CATALOG_CREATOR_ROLE, null, tenantId);
+        createRole(APIConstants.SERVICE_CATALOG_MANAGER_ROLE, null, tenantId);
+        createRole(APIConstants.SERVICE_CATALOG_DELETE_ROLE, null, tenantId);
     }
 
     /**
