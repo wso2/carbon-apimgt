@@ -656,7 +656,7 @@ class API extends Resource {
     /**
      * Get a particular scope
      * @param scopeId {String} UUID of the scope
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @param callback {function} Function which needs to be called upon success of the scope retrieval
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSharedScopeDetails(scopeId, callback = null) {
@@ -676,7 +676,7 @@ class API extends Resource {
     /**
      * Get usages of a particular scope
      * @param scopeId {String} UUID of the scope
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @param callback {function} Function which needs to be called upon success of the scope usage retrieval
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getSharedScopeUsages(scopeId, callback = null) {
