@@ -2562,8 +2562,36 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
-# The BotDetectedData API resources
+# The Bot Detected Data API resources
 ######################################################
+
+  /botData:
+  #-----------------------------------------------------
+  # Get bot detected data
+  #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:bot_data
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer 8739edc7-7c95-34d5-895a-398fe5dd5972\" https://localhost:9443/api/am/admin/v1/botData/getEmailList -H \"accept: application/json\""
+      produces:
+        - application/json
+      summary: |
+        Get all bot detected data
+      description: |
+        Get all bot detected data
+      responses:
+        200:
+          description: |
+            OK.
+            Bot detected data returned.
+        404:
+          description: |
+            Not Found.
+            Requested Data does not exist.
+          schema:
+            $ref: '#/definitions/Error'
 
   #-----------------------------------------------------
   # Get configured email list

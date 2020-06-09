@@ -22,6 +22,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.BotDataApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EmailDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -68,6 +69,23 @@ public class BotDataApiServiceImpl implements BotDataApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error when getting email ";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Get all bot detected data
+     *
+     * @param messageContext
+     * @return list of bot detected data
+     * @throws APIManagementException
+     */
+    @Override
+    public Response botDataGet(MessageContext messageContext) throws APIManagementException {
+
+        if (APIUtil.isAnalyticsEnabled()) {
+            List<BotDetectionData> botDetectionDataList = new APIAdminImpl().retrieveSavedBotData();
+            return Response.ok().entity(botDetectionDataList).build();
         }
         return null;
     }

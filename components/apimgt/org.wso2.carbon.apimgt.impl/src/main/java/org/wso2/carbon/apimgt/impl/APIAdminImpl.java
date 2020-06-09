@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -35,7 +37,9 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
+import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
@@ -429,6 +433,38 @@ public class APIAdminImpl implements APIAdmin {
     public void deleteBotDataEmailList(String uuid) throws APIManagementException, SQLException {
 
         apiMgtDAO.deleteBotDataEmailList(uuid);
+    }
+
+    /**
+     * Retrieve all bot detected data
+     *
+     * @return list of bot detected data
+     * @throws APIManagementException
+     */
+    public List<BotDetectionData> retrieveSavedBotData() throws APIManagementException {
+
+        List<BotDetectionData> botDetectionDatalist = new ArrayList<>();
+        String appName = AlertMgtConstants.APIM_ALERT_BOT_DETECTION_APP;
+        String query = SQLConstants.BotDataConstants.GET_BOT_DETECTED_DATA;
+
+        JSONObject botDataJsonObject = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        if (botDataJsonObject != null) {
+            JSONArray botDataJsonArray = (JSONArray) botDataJsonObject.get("records");
+            if (botDataJsonArray != null && botDataJsonArray.size() != 0) {
+                for (Object botData : botDataJsonArray) {
+                    JSONArray values = (JSONArray) botData;
+                    BotDetectionData botDetectionData = new BotDetectionData();
+                    botDetectionData.setCurrentTime((Long) values.get(0));
+                    botDetectionData.setMessageID((String) values.get(1));
+                    botDetectionData.setApiMethod((String) values.get(2));
+                    botDetectionData.setHeaderSet((String) values.get(3));
+                    botDetectionData.setMessageBody((String) values.get(4));
+                    botDetectionData.setClientIp((String) values.get(5));
+                    botDetectionDatalist.add(botDetectionData);
+                }
+            }
+        }
+        return botDetectionDatalist;
     }
 
     public APICategory addCategory(APICategory category, String userName) throws APIManagementException {

@@ -73,6 +73,23 @@ BotDataApiService delegate = new BotDataApiServiceImpl();
     }
 
     @GET
+    
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get all bot detected data ", notes = "Get all bot detected data ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:bot_data", description = "Manage emails"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+        })
+    }, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Bot detected data returned. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested Data does not exist. ", response = ErrorDTO.class) })
+    public Response botDataGet() throws APIManagementException{
+        return delegate.botDataGet(securityContext);
+    }
+
+    @GET
     @Path("/getEmailList")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })

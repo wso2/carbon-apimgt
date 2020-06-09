@@ -23,5 +23,6 @@ import javax.ws.rs.core.SecurityContext;
 public interface BotDataApiService {
       public Response botDataAddEmailPost(EmailDTO body, MessageContext messageContext) throws APIManagementException;
       public Response botDataDeleteEmailDelete(String uuid, MessageContext messageContext) throws APIManagementException;
+      public Response botDataGet(MessageContext messageContext) throws APIManagementException;
       public Response botDataGetEmailListGet(String tenantDomain, MessageContext messageContext) throws APIManagementException;
 }
