@@ -76,9 +76,11 @@ public class APIGatewayManager {
     private static APIGatewayManager instance;
 
     private Map<String, Environment> environments;
-    private Set<String> publishedGateways;
+    private Set<String> publishedGateways = new HashSet<>();
     private RecommendationEnvironment recommendationEnvironment;
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
+    private ArtifactSaver artifactSaver;
+    private boolean saveArtifactsToStorage = false;
 
     private final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
     private final String ENDPOINT_SANDBOX = "_SANDBOX_";
@@ -91,6 +93,10 @@ public class APIGatewayManager {
         environments = config.getApiGatewayEnvironments();
         this.recommendationEnvironment = config.getApiRecommendationEnvironment();
         this.gatewayArtifactSynchronizerProperties = config.getGatewayArtifactSynchronizerProperties();
+        this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
+        if (artifactSaver != null && config.getGatewayArtifactSynchronizerProperties().isSyncEnabled()){
+            this.saveArtifactsToStorage = true;
+        }
 
     }
 
@@ -123,7 +129,9 @@ public class APIGatewayManager {
             }
         }
 
-        publishedGateways = ServiceReferenceHolder.getInstance().getArtifactSaver().getExistingLabelsForAPI(api.getUUID());
+        if (saveArtifactsToStorage) {
+            publishedGateways = artifactSaver.getExistingLabelsForAPI(api.getUUID());
+        }
 
         if (api.getEnvironments() != null) {
             for (String environmentName : api.getEnvironments()) {
@@ -143,15 +151,6 @@ public class APIGatewayManager {
                 failedEnvironmentsMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain,
                         failedEnvironmentsMap, true);
             }
-        }
-
-        updateRemovedClientCertificates(api, tenantDomain);
-
-        // Extracting API details for the recommendation system
-        if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(api, tenantDomain);
-            Thread recommendationThread = new Thread(extractor);
-            recommendationThread.start();
         }
         return failedEnvironmentsMap;
     }
@@ -191,23 +190,24 @@ public class APIGatewayManager {
                         client.deployAPI(gatewayAPIDTO);
                     }
 
-                    ArtifactSaver artifactPublisher = ServiceReferenceHolder.getInstance().getArtifactSaver();
-                    if (publishedGateways.contains(environment.getName())) {
-                        artifactPublisher.updateArtifact(gatewayAPIDTO,
-                                APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_PUBLISH);
-                        publishedGateways.remove(environment.getName());
-                    } else {
-                        artifactPublisher.saveArtifact(gatewayAPIDTO);
-                    }
+                    if (saveArtifactsToStorage) {
+                        if (publishedGateways.contains(environment.getName())) {
+                            artifactSaver.updateArtifact(gatewayAPIDTO,
+                                    APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
+                            publishedGateways.remove(environment.getName());
+                        } else {
+                            artifactSaver.saveArtifact(gatewayAPIDTO);
+                        }
 
-                    int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-                    DeployAPIInGatewayEvent
-                            deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                            System.currentTimeMillis(),
-                            APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantId, gatewayAPIDTO.getName(),
-                            gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel());
-                    APIUtil.sendNotification(
-                            deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+                        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                        DeployAPIInGatewayEvent
+                                deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+                                System.currentTimeMillis(),
+                                APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantId, gatewayAPIDTO.getName(),
+                                gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel());
+                        APIUtil.sendNotification(
+                                deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+                    }
                 }
             } else {
                 client = new APIGatewayAdminClient(environment);
@@ -233,11 +233,11 @@ public class APIGatewayManager {
             log.error("Error occurred while adding/updating client certificate in " + environment.getName(), ex);
             failedEnvironmentsMap.put(environment.getName(), ex.getMessage());
         } catch (APITemplateException | XMLStreamException e) {
-            log.error("Error occurred while Publishing API in FileBased Mode", e);
+            log.error("Error occurred while Publishing API directly to Gateway", e);
             failedEnvironmentsMap.put(environment.getName(), e.getMessage());
         } catch (ArtifactSynchronizerException e) {
             failedEnvironmentsMap.put(environment.getName(), e.getMessage());
-            log.error("Error occurred while publishing API in InMemory Mmode");
+            log.error("Error occurred while saving API artifacts to the Storage");
         }
         long endTimePublishToGateway = System.currentTimeMillis();
         if (debugEnabled) {
@@ -512,8 +512,9 @@ public class APIGatewayManager {
             log.debug("Number of environments to be published to: " + apiProduct.getEnvironments().size());
         }
 
-        publishedGateways = ServiceReferenceHolder.getInstance().getArtifactSaver()
-                .getExistingLabelsForAPI(apiProduct.getUuid());
+        if (saveArtifactsToStorage) {
+            publishedGateways = artifactSaver.getExistingLabelsForAPI(apiProduct.getUuid());
+        }
 
         for (String environmentName : apiProduct.getEnvironments()) {
             if (debugEnabled) {
@@ -575,23 +576,24 @@ public class APIGatewayManager {
                     client.deployAPI(productAPIDto);
                 }
 
-                ArtifactSaver artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
-                if (publishedGateways.contains(environment.getName())) {
-                    artifactSaver.updateArtifact(productAPIDto,
-                            APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_PUBLISH);
-                    publishedGateways.remove(environment.getName());
-                } else {
-                    artifactSaver.saveArtifact(productAPIDto);
-                }
+                if (saveArtifactsToStorage) {
+                    if (publishedGateways.contains(environment.getName())) {
+                        artifactSaver.updateArtifact(productAPIDto,
+                                APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
+                        publishedGateways.remove(environment.getName());
+                    } else {
+                        artifactSaver.saveArtifact(productAPIDto);
+                    }
 
-                int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-                DeployAPIInGatewayEvent
-                        deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(),
-                        APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantId, productAPIDto.getName(),
-                        productAPIDto.getApiId(), productAPIDto.getGatewayLabel());
-                APIUtil.sendNotification(
-                        deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+                    int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                    DeployAPIInGatewayEvent
+                            deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+                            System.currentTimeMillis(),
+                            APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantId, productAPIDto.getName(),
+                            productAPIDto.getApiId(), productAPIDto.getGatewayLabel());
+                    APIUtil.sendNotification(
+                            deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+                }
 
                 if (debugEnabled) {
                     long endTime = System.currentTimeMillis();
@@ -607,10 +609,10 @@ public class APIGatewayManager {
                 therefore this didn't break the gateway publishing if one gateway unreachable
                  */
                 failedEnvironmentsMap.put(environmentName, e.getMessage());
-                log.error("Error occurred when publish to gateway FileBased Synchronizer" + environmentName, e);
+                log.error("Error occurred when publishing API directly to gateway" + environmentName, e);
             } catch (ArtifactSynchronizerException e) {
                 failedEnvironmentsMap.put(environmentName, e.getMessage());
-                log.error("Error occurred when publish to gateway using InMemory Synchronizer" + environmentName, e);
+                log.error("Error occurred when saving API Product artifacts to storage" + environmentName, e);
             }
 
             if (debugEnabled) {
@@ -719,29 +721,32 @@ public class APIGatewayManager {
                 client.unDeployAPI(gatewayAPIDTO);
             }
 
-            ServiceReferenceHolder.getInstance().getArtifactSaver().updateArtifact(gatewayAPIDTO,
-                    APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_REMOVE);
-            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            DeployAPIInGatewayEvent
-                    deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                    System.currentTimeMillis(),
-                    APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantId, gatewayAPIDTO.getName(),
-                    gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel());
-            APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+            if (saveArtifactsToStorage) {
+                artifactSaver.updateArtifact(gatewayAPIDTO,
+                        APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_REMOVE);
+                int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                DeployAPIInGatewayEvent
+                        deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+                        System.currentTimeMillis(),
+                        APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantId, gatewayAPIDTO.getName(),
+                        gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel());
+                APIUtil.sendNotification(deployAPIInGatewayEvent,
+                        APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+            }
         } catch (AxisFault axisFault) {
             /*
             didn't throw this exception to handle multiple gateway publishing if gateway is unreachable we collect
             that environments into map with issue and show on popup in ui therefore this didn't break the gateway
             unpublisihing if one gateway unreachable
             */
-            log.error("Error occurred when removing from gateway in FileBased mode " + environment.getName(),
+            log.error("Error occurred when removing API directly from the gateway " + environment.getName(),
                     axisFault);
             failedEnvironmentsMap.put(environment.getName(), axisFault.getMessage());
         } catch (CertificateManagementException ex) {
             log.error("Error occurred when deleting certificate from gateway" + environment.getName(), ex);
             failedEnvironmentsMap.put(environment.getName(), ex.getMessage());
         } catch (ArtifactSynchronizerException e) {
-            log.error("Error occurred when removing from gateway in InMemory mode " + environment.getName(), e);
+            log.error("Error occurred when updating the remove instruction in the storage " + environment.getName(), e);
             failedEnvironmentsMap.put(environment.getName(), e.getMessage());
         }
         return failedEnvironmentsMap;
@@ -836,17 +841,19 @@ public class APIGatewayManager {
                         client.unDeployAPI(productAPIGatewayAPIDTO);
                     }
 
-                    ServiceReferenceHolder.getInstance().getArtifactSaver().updateArtifact(productAPIGatewayAPIDTO,
-                            APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_REMOVE);
-                    int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-                    DeployAPIInGatewayEvent
-                            deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                            System.currentTimeMillis(),
-                            APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantId,
-                            productAPIGatewayAPIDTO.getName(),
-                            productAPIGatewayAPIDTO.getApiId(), productAPIGatewayAPIDTO.getGatewayLabel());
-                    APIUtil.sendNotification(
-                            deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+                    if (saveArtifactsToStorage) {
+                        artifactSaver.updateArtifact(productAPIGatewayAPIDTO,
+                                APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_REMOVE);
+                        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                        DeployAPIInGatewayEvent
+                                deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+                                System.currentTimeMillis(),
+                                APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantId,
+                                productAPIGatewayAPIDTO.getName(),
+                                productAPIGatewayAPIDTO.getApiId(), productAPIGatewayAPIDTO.getGatewayLabel());
+                        APIUtil.sendNotification(
+                                deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+                    }
 
                 } catch (AxisFault e) {
                     /*
@@ -854,10 +861,10 @@ public class APIGatewayManager {
                     if gateway is unreachable we collect that environments into map with issue and show on popup in ui
                     therefore this didn't break the gateway unpublisihing if one gateway unreachable
                     */
-                    log.error("Error occurred when removing from gateway in FileBased mode " + environmentName, e);
+                    log.error("Error occurred when removing API product directly from the gateway" + environmentName, e);
                     failedEnvironmentsMap.put(environmentName, e.getMessage());
                 } catch (ArtifactSynchronizerException e) {
-                    log.error("Error occurred when removing from gateway in InMemory mode " + environmentName, e);
+                    log.error("Error occurred when updating the remove instructions in storage " + environmentName, e);
                     failedEnvironmentsMap.put(environmentName, e.getMessage());
                 }
             }
@@ -1099,11 +1106,12 @@ public class APIGatewayManager {
                     }
                 }
             }
-            return false;
         } else {
-            return !ServiceReferenceHolder.getInstance().getArtifactSaver().getExistingLabelsForAPI(api.getUUID())
-                    .isEmpty();
+            if (saveArtifactsToStorage){
+                return !artifactSaver.getExistingLabelsForAPI(api.getUUID()).isEmpty();
+            }
         }
+        return false;
     }
 
     /**
