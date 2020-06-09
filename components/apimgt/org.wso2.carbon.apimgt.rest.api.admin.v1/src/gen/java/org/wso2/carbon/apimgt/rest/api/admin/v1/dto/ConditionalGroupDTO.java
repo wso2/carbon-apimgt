@@ -53,7 +53,7 @@ public class ConditionalGroupDTO   {
   @ApiModelProperty(example = "\"[\\n  {\\n    \\\"type\\\": \\\"HEADERCONDITION\\\",\\n    \\\"invertCondition\\\": false,\\n    \\\"headerCondition\\\":\\n    {\\n      \\\"headerName\\\": \\\"Host\\\",\\n      \\\"headerValue\\\": \\\"10.100.7.77\\\"\\n    }\\n\\t},\\n\\t{\\n    \\\"type\\\": \\\"IPCONDITION\\\",\\n    \\\"invertCondition\\\": false,\\n    \\\"ipCondition\\\":\\n    {\\n      \\\"ipConditionType\\\": \\\"IPSPECIFIC\\\",\\n      \\\"specificIP\\\": \\\"10.100.1.22\\\",\\n      \\\"startingIP\\\": null,\\n      \\\"endingIP\\\": null\\n    }\\n\\t},\\n\\t{\\n    \\\"type\\\": \\\"QUERYPARAMETERCONDITION\\\",\\n    \\\"invertCondition\\\": false,\\n    \\\"queryParameterCondition\\\":\\n    {\\n      \\\"parameterName\\\": \\\"name\\\",\\n      \\\"parameterValue\\\": \\\"admin\\\"\\n    }\\n\\t},\\n\\t{\\n    \\\"type\\\": \\\"JWTCLAIMSCONDITION\\\",\\n    \\\"invertCondition\\\": true,\\n    \\\"jwtClaimsCondition\\\":\\n    {\\n      \\\"claimUrl\\\": \\\"claimUrl0\\\",\\n      \\\"attribute\\\": \\\"claimAttr0\\\"\\n    }\\n  }\\n]\\n\"", required = true, value = "Individual throttling conditions. They can be defined as either HeaderCondition, IPCondition, JWTClaimsCondition, QueryParameterCondition Please see schemas of each of those throttling condition in Definitions section. ")
   @JsonProperty("conditions")
   @NotNull
- @Size(min=1)  public List<ThrottleConditionDTO> getConditions() {
+  public List<ThrottleConditionDTO> getConditions() {
     return conditions;
   }
   public void setConditions(List<ThrottleConditionDTO> conditions) {

@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RequestCountLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
@@ -150,16 +151,17 @@ public class CommonThrottleMappingUtil {
 
         if (throttleConditionDTOs != null) {
             for (ThrottleConditionDTO dto : throttleConditionDTOs) {
-                ThrottleConditionDTO.TypeEnum typeEnum = dto.getType();
-                if (typeEnum != null) {
-                    switch (typeEnum) {
+                ThrottleConditionDTO.TypeEnum conditionType = dto.getType();
+                if (conditionType != null) {
+                    switch (conditionType) {
                         case HEADERCONDITION: {
                             if (dto.getHeaderCondition() != null) {
                                 conditions.add(fromDTOToHeaderCondition(dto.getHeaderCondition(),
                                         dto.isInvertCondition()));
                             } else {
                                 errorMessage =
-                                        constructErrorMessage(ThrottleConditionDTO.TypeEnum.HEADERCONDITION, dto);
+                                        RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                                ThrottleConditionDTO.TypeEnum.HEADERCONDITION) + dto.toString();
                                 throw new UnsupportedThrottleConditionTypeException(errorMessage);
                             }
                             break;
@@ -169,7 +171,8 @@ public class CommonThrottleMappingUtil {
                                 conditions.add(fromDTOToIPCondition(dto.getIpCondition(), dto.isInvertCondition()));
                             } else {
                                 errorMessage =
-                                        constructErrorMessage(ThrottleConditionDTO.TypeEnum.IPCONDITION, dto);
+                                        RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                                ThrottleConditionDTO.TypeEnum.IPCONDITION) + dto.toString();
                                 throw new UnsupportedThrottleConditionTypeException(errorMessage);
                             }
                             break;
@@ -180,8 +183,8 @@ public class CommonThrottleMappingUtil {
                                         dto.isInvertCondition()));
                             } else {
                                 errorMessage =
-                                        constructErrorMessage(ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION,
-                                                dto);
+                                        RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                                ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION) + dto.toString();
                                 throw new UnsupportedThrottleConditionTypeException(errorMessage);
                             }
                             break;
@@ -192,7 +195,8 @@ public class CommonThrottleMappingUtil {
                                         dto.isInvertCondition()));
                             } else {
                                 errorMessage =
-                                        constructErrorMessage(ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION, dto);
+                                        RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                                ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION) + dto.toString();
                                 throw new UnsupportedThrottleConditionTypeException(errorMessage);
                             }
                             break;
@@ -271,31 +275,38 @@ public class CommonThrottleMappingUtil {
 
         String errorMessage;
         QuotaPolicy quotaPolicy = new QuotaPolicy();
+        ThrottleLimitDTO.TypeEnum limitType = dto.getType();
 
-        switch (dto.getType()) {
-            case REQUESTCOUNTLIMIT: {
-                if (dto.getRequestCount() != null) {
-                    quotaPolicy.setLimit(fromDTOToRequestCountLimit(dto.getRequestCount()));
-                } else {
-                    errorMessage =
-                            constructThrottleLimitErrorMessage(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT, dto);
-                    throw new UnsupportedThrottleLimitTypeException(errorMessage);
+        if (limitType != null) {
+            switch (dto.getType()) {
+                case REQUESTCOUNTLIMIT: {
+                    if (dto.getRequestCount() != null) {
+                        quotaPolicy.setLimit(fromDTOToRequestCountLimit(dto.getRequestCount()));
+                    } else {
+                        errorMessage =
+                                RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                        ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT) + dto.toString();
+                        throw new UnsupportedThrottleLimitTypeException(errorMessage);
+                    }
+                    break;
                 }
-                break;
-            }
-            case BANDWIDTHLIMIT: {
-                if (dto.getBandwidth() != null) {
-                    quotaPolicy.setLimit(fromDTOToBandwidthLimit(dto.getBandwidth()));
-                } else {
-                    errorMessage =
-                            constructThrottleLimitErrorMessage(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT, dto);
-                    throw new UnsupportedThrottleLimitTypeException(errorMessage);
+                case BANDWIDTHLIMIT: {
+                    if (dto.getBandwidth() != null) {
+                        quotaPolicy.setLimit(fromDTOToBandwidthLimit(dto.getBandwidth()));
+                    } else {
+                        errorMessage =
+                                RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                        ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT) + dto.toString();
+                        throw new UnsupportedThrottleLimitTypeException(errorMessage);
+                    }
+                    break;
                 }
-                break;
             }
+            quotaPolicy.setType(mapQuotaPolicyTypeFromDTOToModel(dto.getType()));
+        } else {
+            errorMessage = "defaultLimit 'type' property has not been specified\n" + dto.toString();
+            throw new UnsupportedThrottleLimitTypeException(errorMessage);
         }
-
-        quotaPolicy.setType(mapQuotaPolicyTypeFromDTOToModel(dto.getType()));
         return quotaPolicy;
     }
 
@@ -629,34 +640,5 @@ public class CommonThrottleMappingUtil {
             default:
                 return null;
         }
-    }
-
-    /**
-     * Constructs an error message to indicate that condition item corresponding to a condition type is not provided
-     *
-     * @param typeEnum Throttle Condition Type DTO's Type Enum
-     * @param dto      Throttle Conditiom Type DTO onject
-     * @return constructed error message
-     */
-    public static String constructErrorMessage(ThrottleConditionDTO.TypeEnum typeEnum,
-                                               ThrottleConditionDTO dto) {
-
-        return "Condition item corresponding to type " + typeEnum + " not provided\n"
-                + dto.toString();
-    }
-
-    /**
-     * Constructs an error message to indicate that the throttle limit object corresponding to the specified throttle
-     * limit type has not been provided
-     *
-     * @param typeEnum Throttle Limit DTO's Type Enum
-     * @param dto      Throttle Limit DTO object
-     * @return constructed error message
-     */
-    public static String constructThrottleLimitErrorMessage(ThrottleLimitDTO.TypeEnum typeEnum,
-                                                            ThrottleLimitDTO dto) {
-
-        return "Throttle Limit object corresponding to type " + typeEnum + " not provided\n"
-                + dto.toString();
     }
 }

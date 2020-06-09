@@ -4110,11 +4110,11 @@ definitions:
 #-----------------------------------------------------
   ApplicationThrottlePolicy:
     title: Application Throttling Policy
-    required:
-      - defaultLimit
     allOf:
       - $ref: '#/definitions/ThrottlePolicy'
-      - properties:
+      - required:
+        - defaultLimit
+        properties:
           defaultLimit:
             $ref: '#/definitions/ThrottleLimit'
 
@@ -4139,12 +4139,12 @@ definitions:
 #-----------------------------------------------------
   SubscriptionThrottlePolicy:
     title: Subscription Throttling Policy
-    required:
-      - defaultLimit
     allOf:
       - $ref: '#/definitions/ThrottlePolicy'
       - $ref: '#/definitions/GraphQLQuery'
-      - properties:
+      - required:
+        - defaultLimit
+        properties:
           defaultLimit:
             $ref: '#/definitions/ThrottleLimit'
           monetization:
@@ -4258,7 +4258,6 @@ definitions:
         description: Description of the Conditional Group
       conditions:
         type: array
-        minItems: 1
         items:
           $ref: '#/definitions/ThrottleCondition'
         description: |

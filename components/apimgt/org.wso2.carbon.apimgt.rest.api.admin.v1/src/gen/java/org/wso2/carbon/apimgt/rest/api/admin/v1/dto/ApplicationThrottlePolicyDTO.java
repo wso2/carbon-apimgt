@@ -27,8 +27,9 @@ public class ApplicationThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("defaultLimit")
+  @NotNull
   public ThrottleLimitDTO getDefaultLimit() {
     return defaultLimit;
   }
