@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
 
 /**
 *
-* @param {any} props Props for view usage function.
+* @param {any} props Props for view usage in APIs function.
 * @returns {any} Returns the rendered UI for view scope usages.
 */
 export default function UsageViewAPI(props) {

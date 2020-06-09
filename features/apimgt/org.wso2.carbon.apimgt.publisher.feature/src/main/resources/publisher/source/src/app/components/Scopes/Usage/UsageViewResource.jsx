@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
 
 /**
 *
-* @param {any} props Props for view usage function.
+* @param {any} props Props for view usage in resources function.
 * @returns {any} Returns the rendered UI for view scope usages.
 */
 export default function UsageViewResource(props) {

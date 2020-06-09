@@ -226,28 +226,6 @@ class Listing extends React.Component {
     }
 
     /**
-     * Fetches scope data
-     *
-     * @memberof ScopesTable
-     */
-    fetchScopeUsage() {
-        const { page, rowsPerPage } = this.state;
-        const promisedScopes = API.getAllScopes(page * rowsPerPage, rowsPerPage);
-
-        promisedScopes
-            .then((response) => {
-                this.setState({
-                    scopes: response.body.list,
-                    totalScopes: response.body.pagination.total,
-                });
-            })
-            .catch((errorMessage) => {
-                console.error(errorMessage);
-                Alert.error(JSON.stringify(errorMessage));
-            });
-    }
-
-    /**
      * handleChangePage handle change in selected page
      *
      * @param {any} page selected page
