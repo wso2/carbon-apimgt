@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -19,6 +21,7 @@ public class URLMappingDTO   {
     private String throttlingPolicy = null;
     private String httpMethod = null;
     private String urlPattern = null;
+    private List<String> scopes = new ArrayList<>();
 
   /**
    **/
@@ -88,6 +91,23 @@ public class URLMappingDTO   {
     this.urlPattern = urlPattern;
   }
 
+  /**
+   **/
+  public URLMappingDTO scopes(List<String> scopes) {
+    this.scopes = scopes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("scopes")
+  public List<String> getScopes() {
+    return scopes;
+  }
+  public void setScopes(List<String> scopes) {
+    this.scopes = scopes;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -101,12 +121,13 @@ public class URLMappingDTO   {
     return Objects.equals(authScheme, urLMapping.authScheme) &&
         Objects.equals(throttlingPolicy, urLMapping.throttlingPolicy) &&
         Objects.equals(httpMethod, urLMapping.httpMethod) &&
-        Objects.equals(urlPattern, urLMapping.urlPattern);
+        Objects.equals(urlPattern, urLMapping.urlPattern) &&
+        Objects.equals(scopes, urLMapping.scopes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(authScheme, throttlingPolicy, httpMethod, urlPattern);
+    return Objects.hash(authScheme, throttlingPolicy, httpMethod, urlPattern, scopes);
   }
 
   @Override
@@ -118,6 +139,7 @@ public class URLMappingDTO   {
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    httpMethod: ").append(toIndentedString(httpMethod)).append("\n");
     sb.append("    urlPattern: ").append(toIndentedString(urlPattern)).append("\n");
+    sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

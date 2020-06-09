@@ -29,7 +29,8 @@ public class Policy implements CacheableEntity<String> {
 
     public enum POLICY_TYPE {
         SUBSCRIPTION,
-        APPLICATION
+        APPLICATION,
+        API
     }
     private Integer id = null;
     private Integer tenantId = null;
