@@ -8,8 +8,8 @@ import java.util.Set;
 public class GatewayArtifactSynchronizerProperties {
 
     private boolean syncEnabled = false;
-    private boolean publishDirectlyToGateway = true;
-    private boolean retrieveFromStorage = false;
+    private boolean publishDirectlyToGatewayEnabled = true;
+    private boolean retrieveFromStorageEnabled = false;
     private String saverName = APIConstants.GatewayArtifactSynchronizer.DEFAULT_SAVER_NAME;
     private String retrieverName = APIConstants.GatewayArtifactSynchronizer.DEFAULT_RETRIEVER_NAME;
     private Set<String> gatewayLabels = new HashSet<>();
@@ -44,24 +44,24 @@ public class GatewayArtifactSynchronizerProperties {
         this.gatewayLabels = gatewayLabels;
     }
 
-    public boolean isPublishDirectlyToGateway() {
+    public boolean isPublishDirectlyToGatewayEnabled() {
 
-        return publishDirectlyToGateway;
+        return publishDirectlyToGatewayEnabled;
     }
 
-    public void setPublishDirectlyToGateway(boolean publishDirectlyToGateway) {
+    public void setPublishDirectlyToGatewayEnabled(boolean publishDirectlyToGatewayEnabled) {
 
-        this.publishDirectlyToGateway = publishDirectlyToGateway;
+        this.publishDirectlyToGatewayEnabled = publishDirectlyToGatewayEnabled;
     }
 
-    public boolean isRetrieveFromStorage() {
+    public boolean isRetrieveFromStorageEnabled() {
 
-        return retrieveFromStorage;
+        return retrieveFromStorageEnabled;
     }
 
-    public void setRetrieveFromStorage(boolean retrieveFromStorage) {
+    public void setRetrieveFromStorageEnabled(boolean retrieveFromStorageEnabled) {
 
-        this.retrieveFromStorage = retrieveFromStorage;
+        this.retrieveFromStorageEnabled = retrieveFromStorageEnabled;
     }
 
     public boolean isSyncEnabled() {
@@ -70,9 +70,6 @@ public class GatewayArtifactSynchronizerProperties {
     }
 
     public void setSyncEnabled(boolean syncEnabled) {
-        if (syncEnabled){
-            setRetrieveFromStorage(true);
-        }
 
         this.syncEnabled = syncEnabled;
     }

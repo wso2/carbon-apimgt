@@ -1142,10 +1142,13 @@
         <ArtifactSaver>{{apim.gateway.sync.artifact_saver}}</ArtifactSaver>
         {% endif %}
         {% if apim.gateway.sync.artifact_retriever is defined %}
-        <ArtifactRetriever>{{apim.gateway.sync.retriever}}</ArtifactRetriever>
+        <ArtifactRetriever>{{apim.gateway.sync.artifact_retriever}}</ArtifactRetriever>
         {% endif %}
         {% if apim.gateway.sync.publish_directly_to_gateway is defined %}
-        <PublishDirectlyToGW>{{apim.gateway.sync.retriever}}</PublishDirectlyToGW>
+        <PublishDirectlyToGW>{{apim.gateway.sync.publish_directly_to_gateway}}</PublishDirectlyToGW>
+        {% endif %}
+        {% if apim.gateway.sync.read_from_storage is defined %}
+        <RetrieveFromStorage>{{apim.gateway.sync.read_from_storage}}</RetrieveFromStorage>
         {% endif %}
     </SyncGatewayArtifacts>
     {% endif %}

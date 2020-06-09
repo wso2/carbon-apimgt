@@ -93,7 +93,7 @@ public class GatewayJMSMessageListener implements MessageListener {
 
         if ((APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
                 || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType))
-                && gatewayArtifactSynchronizerProperties.isRetrieveFromStorage()) {
+                && gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded),
                     DeployAPIInGatewayEvent.class);
             if (gatewayArtifactSynchronizerProperties.getGatewayLabels().contains(gatewayEvent.getGatewayLabel())) {

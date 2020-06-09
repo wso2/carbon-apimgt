@@ -2281,6 +2281,7 @@ public final class APIConstants {
         public static final String SAVER_CONFIG = "ArtifactSaver";
         public static final String RETRIEVER_CONFIG = "ArtifactRetriever";
         public static final String PUBLISH_DIRECTLY_TO_GW_CONFIG = "PublishDirectlyToGW";
+        public static final String RETRIEVE_FROM_STORAGE_CONFIG = "RetrieveFromStorage";
         public static final String GATEWAY_LABELS_CONFIG = "GatewayLabels";
         public static final String DEFAULT_SAVER_NAME = "DefaultSaver";
         public static final String DEFAULT_RETRIEVER_NAME = "DefaultRetriever";

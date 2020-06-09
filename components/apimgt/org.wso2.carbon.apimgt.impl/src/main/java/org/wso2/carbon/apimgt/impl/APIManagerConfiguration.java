@@ -1587,10 +1587,19 @@ public class APIManagerConfiguration {
         OMElement publishDirectlyToGatewayElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.PUBLISH_DIRECTLY_TO_GW_CONFIG));
         if (publishDirectlyToGatewayElement != null) {
-            gatewayArtifactSynchronizerProperties.setPublishDirectlyToGateway(
+            gatewayArtifactSynchronizerProperties.setPublishDirectlyToGatewayEnabled(
                     JavaUtils.isTrueExplicitly(publishDirectlyToGatewayElement.getText()));
         } else {
-            log.debug("Publish directly to db is not set. Set to default true");
+            log.debug("Publish directly to gateway is not set. Set to default true");
+        }
+
+        OMElement retrieveFromStorageElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.RETRIEVE_FROM_STORAGE_CONFIG));
+        if (retrieveFromStorageElement != null) {
+            gatewayArtifactSynchronizerProperties.setRetrieveFromStorageEnabled(
+                    JavaUtils.isTrueExplicitly(retrieveFromStorageElement.getText()));
+        } else {
+            log.debug("Retrieve from storage is not set. Set to default false");
         }
     }
 
