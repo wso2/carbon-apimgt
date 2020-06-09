@@ -192,7 +192,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             String[] grantTypes = grantString.split(",");
             clientInfo.setGrantTypes(Arrays.asList(grantTypes));
         }
-        if (info.getCallBackURL() != null) {
+        if (StringUtils.isNotEmpty(info.getCallBackURL())) {
             String callBackURL = info.getCallBackURL();
             String[] callbackURLs = callBackURL.trim().split("\\s*,\\s*");
             clientInfo.setRedirectUris(Arrays.asList(callbackURLs));
@@ -234,14 +234,17 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         } else {
             tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
+
         String accessToken = getAccessTokenForKeyMgt();
         String authorizationHeader = getBearerAuthorizationHeader(accessToken);
 
         if (StringUtils.isNotEmpty(applicationName) && StringUtils.isNotEmpty(keyType)) {
+            // Replace the domain name separator with an underscore for secondary user stores
             String domain = UserCoreUtil.extractDomainFromName(userId);
             if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
                 userId = userId.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
+            // Construct the application name subsequent to replacing email domain separator
             applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(userId), applicationName, keyType);
         } else {
             throw new APIManagementException("Missing required information for OAuth application update.");
@@ -290,7 +293,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String accessToken = getAccessTokenForKeyMgt();
         String authorizationHeader = getBearerAuthorizationHeader(accessToken);
 
-        //todo: handle 404 in case clientid not found
         try {
             if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
                 dcrClient.deleteApplication(authorizationHeader, consumerKey);
