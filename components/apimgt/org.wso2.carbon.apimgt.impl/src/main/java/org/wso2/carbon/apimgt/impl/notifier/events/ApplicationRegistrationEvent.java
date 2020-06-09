@@ -30,7 +30,7 @@ public class ApplicationRegistrationEvent extends Event {
     private String consumerKey;
     private String keyType;
 
-    public ApplicationRegistrationEvent(String eventId, long timestamp, String type, int tenantId,int applicationId,
+    public ApplicationRegistrationEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, int applicationId,
                                         String consumerKey, String keyType) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
@@ -39,6 +39,7 @@ public class ApplicationRegistrationEvent extends Event {
         this.applicationId = applicationId;
         this.consumerKey = consumerKey;
         this.keyType = keyType;
+        this.tenantDomain = tenantDomain;
     }
 
     @Override
@@ -50,7 +51,8 @@ public class ApplicationRegistrationEvent extends Event {
                 ", eventId='" + eventId + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", type='" + type + '\'' +
-                ", tenantId=" + tenantId +
+                ", tenantId=" + tenantId + '\'' +
+                ", tenantDomain=" + tenantDomain +
                 '}';
     }
 

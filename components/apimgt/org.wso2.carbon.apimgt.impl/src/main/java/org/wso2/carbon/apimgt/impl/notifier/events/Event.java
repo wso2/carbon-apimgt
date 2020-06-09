@@ -29,6 +29,15 @@ public abstract class Event implements Serializable {
     public long timeStamp;
     public String type;
     public int tenantId;
+    public String tenantDomain;
+
+    public String getTenantDomain() {
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+        this.tenantDomain = tenantDomain;
+    }
 
     public String getEventId() {
         return eventId;

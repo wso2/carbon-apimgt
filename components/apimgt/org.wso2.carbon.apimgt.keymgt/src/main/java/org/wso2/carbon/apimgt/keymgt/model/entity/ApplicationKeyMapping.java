@@ -75,4 +75,10 @@ public class ApplicationKeyMapping implements CacheableEntity<String> {
 
         return getConsumerKey();
     }
+
+    @Override
+    public String toString() {
+        return "ApplicationKeyMapping [consumerKey=" + consumerKey + ", keyType=" + keyType + ", wfState=" + wfState
+                + ", applicationId=" + applicationId + "]";
+    }
 }

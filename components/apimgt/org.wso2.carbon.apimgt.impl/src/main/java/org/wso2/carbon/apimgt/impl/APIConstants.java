@@ -2211,4 +2211,10 @@ public final class APIConstants {
         SUBSCRIPTIONS_UPDATE,
         SUBSCRIPTIONS_DELETE
     }
+    
+    public enum PolicyType {
+        API,
+        APPLICATION,
+        SUBSCRIPTION
+    }
 }

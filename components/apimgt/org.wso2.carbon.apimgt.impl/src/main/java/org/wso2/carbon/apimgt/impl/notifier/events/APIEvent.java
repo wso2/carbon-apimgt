@@ -33,13 +33,12 @@ public class APIEvent extends Event {
     private String apiType;
     private String apiStatus;
 
-    public APIEvent(String eventId, long timestamp, String type, int tenantId, String apiName, int apiId,
+    public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,String apiName, int apiId,
                     String apiVersion, String apiType, String apiContext, String apiProvider, String apiStatus) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
         this.tenantId = tenantId;
-
         this.apiId = apiId;
         this.apiVersion = apiVersion;
         this.apiName = apiName;
@@ -47,6 +46,7 @@ public class APIEvent extends Event {
         this.apiContext = apiContext;
         this.apiProvider = apiProvider;
         this.apiStatus = apiStatus;
+        this.tenantDomain = tenantDomain;
     }
 
     @Override
@@ -62,7 +62,8 @@ public class APIEvent extends Event {
                 ", eventId='" + eventId + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", type='" + type + '\'' +
-                ", tenantId=" + tenantId +
+                ", tenantId=" + tenantId + '\'' +
+                ", tenantDomain=" + tenantDomain +
                 '}';
     }
 

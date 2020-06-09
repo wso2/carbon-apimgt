@@ -31,8 +31,8 @@ public class ApplicationEvent extends Event {
     private String applicationPolicy;
     private String groupId;
 
-    public ApplicationEvent(String eventId, long timestamp, String type, int tenantId,int applicationId,
-                            String applicationName, String tokenType, String applicationPolicy, String groupId) {
+    public ApplicationEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
+            int applicationId, String applicationName, String tokenType, String applicationPolicy, String groupId) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -42,6 +42,7 @@ public class ApplicationEvent extends Event {
         this.tokenType = tokenType;
         this.applicationPolicy = applicationPolicy;
         this.groupId = groupId;
+        this.tenantDomain = tenantDomain;
     }
 
     @Override
@@ -55,7 +56,8 @@ public class ApplicationEvent extends Event {
                 ", eventId='" + eventId + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", type='" + type + '\'' +
-                ", tenantId=" + tenantId +
+                ", tenantId=" + tenantId + '\'' +
+                ", tenantDomain=" + tenantDomain +
                 '}';
     }
 

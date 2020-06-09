@@ -20,11 +20,13 @@ package org.wso2.carbon.apimgt.impl.notifier.events;
 
 import java.util.Objects;
 
+import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
+
 /**
  * An Event Object which can holds the data related to Subscription Policy which are required
  * for the validation purpose in a gateway.
  */
-public class SubscriptionPolicyEvent extends Event {
+public class SubscriptionPolicyEvent extends Event implements PolicyEvent {
     private int policyId;
     private String policyName;
     private String quotaType;
@@ -32,9 +34,9 @@ public class SubscriptionPolicyEvent extends Event {
     private String rateLimitTimeUnit;
     private boolean stopOnQuotaReach;
 
-    public SubscriptionPolicyEvent(String eventId, long timestamp, String type, int tenantId, int policyId,
-                                   String policyName, String quotaType, int rateLimitCount, String rateLimitTimeUnit,
-                                   boolean stopOnQuotaReach) {
+    public SubscriptionPolicyEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
+            int policyId, String policyName, String quotaType, int rateLimitCount, String rateLimitTimeUnit,
+            boolean stopOnQuotaReach) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -45,6 +47,7 @@ public class SubscriptionPolicyEvent extends Event {
         this.rateLimitCount = rateLimitCount;
         this.rateLimitTimeUnit = rateLimitTimeUnit;
         this.stopOnQuotaReach = stopOnQuotaReach;
+        this.tenantDomain = tenantDomain;
     }
 
     @Override
@@ -59,7 +62,8 @@ public class SubscriptionPolicyEvent extends Event {
                 ", eventId='" + eventId + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", type='" + type + '\'' +
-                ", tenantId=" + tenantId +
+                ", tenantId=" + tenantId + '\'' +
+                ", tenantDomain=" + tenantDomain +
                 '}';
     }
 
@@ -127,5 +131,10 @@ public class SubscriptionPolicyEvent extends Event {
 
     public void setStopOnQuotaReach(boolean stopOnQuotaReach) {
         this.stopOnQuotaReach = stopOnQuotaReach;
+    }
+
+    @Override
+    public PolicyType getPolicyType() {
+        return PolicyType.SUBSCRIPTION;
     }
 }

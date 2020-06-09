@@ -26,35 +26,38 @@ import java.util.Objects;
  */
 public class SubscriptionEvent extends Event {
     private int subscriptionId;
-    private String apiName;
+    private int apiId;
     private int applicationId;
     private String policyId;
     private String subscriptionState;
 
-    public SubscriptionEvent(String eventId, long timestamp, String type, int tenantId, int subscriptionId, String apiName, int applicationId, String policyId, String subscriptionState) {
+    public SubscriptionEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
+            int subscriptionId, int apiId, int applicationId, String policyId, String subscriptionState) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
         this.tenantId = tenantId;
         this.subscriptionId = subscriptionId;
-        this.apiName = apiName;
+        this.apiId = apiId;
         this.applicationId = applicationId;
         this.policyId = policyId;
         this.subscriptionState = subscriptionState;
+        this.tenantDomain = tenantDomain;
     }
 
     @Override
     public String toString() {
         return "SubscriptionEvent{" +
                 "subscriptionId=" + subscriptionId +
-                ", apiName='" + apiName + '\'' +
+                ", apiId='" + apiId + '\'' +
                 ", applicationId=" + applicationId +
                 ", policyId='" + policyId + '\'' +
                 ", subscriptionState='" + subscriptionState + '\'' +
                 ", eventId='" + eventId + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", type='" + type + '\'' +
-                ", tenantId=" + tenantId +
+                ", tenantId=" + tenantId + '\'' +
+                ", tenantDomain=" + tenantDomain +
                 '}';
     }
 
@@ -65,14 +68,14 @@ public class SubscriptionEvent extends Event {
         SubscriptionEvent that = (SubscriptionEvent) o;
         return getSubscriptionId() == that.getSubscriptionId() &&
                 getApplicationId() == that.getApplicationId() &&
-                getApiName().equals(that.getApiName()) &&
+                getApiId() == (that.getApiId()) &&
                 getPolicyId().equals(that.getPolicyId()) &&
                 getSubscriptionState().equals(that.getSubscriptionState());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getSubscriptionId(), getApiName(), getApplicationId(), getPolicyId(), getSubscriptionState());
+        return Objects.hash(getSubscriptionId(), getApiId(), getApplicationId(), getPolicyId(), getSubscriptionState());
     }
 
     public int getSubscriptionId() {
@@ -83,12 +86,12 @@ public class SubscriptionEvent extends Event {
         this.subscriptionId = subscriptionId;
     }
 
-    public String getApiName() {
-        return apiName;
+    public int getApiId() {
+        return apiId;
     }
 
-    public void setApiName(String apiUUID) {
-        this.apiName = apiName;
+    public void setApiName(int apiId) {
+        this.apiId = apiId;
     }
 
     public int getApplicationId() {
