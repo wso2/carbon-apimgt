@@ -15458,6 +15458,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs
      */
     public void addGatewayPublishedAPIDetails(GatewayAPIDTO gatewayAPIDTO) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GW_PUBLISHED_API_DETAILS)) {
             statement.setString(1, gatewayAPIDTO.getApiId());
@@ -15467,7 +15468,7 @@ public class ApiMgtDAO {
             statement.setString(5, gatewayAPIDTO.getProvider());
             statement.executeUpdate();
         } catch (SQLException e) {
-            if (e.getErrorCode() != 1062){
+            if (e.getErrorCode() != 1062) {
                 handleException("Failed to add artifacts for " + gatewayAPIDTO.getName(), e);
             }
         }
@@ -15482,13 +15483,14 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs
      */
     public void addGatewayPublishedAPIArtifacts(GatewayAPIDTO gatewayAPIDTO, ByteArrayInputStream bais,
-                           int streamLength) throws APIManagementException {
+                                                int streamLength) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GW_API_ARTIFACTS)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GW_API_ARTIFACT)) {
             statement.setString(1, gatewayAPIDTO.getApiId());
             statement.setString(2, gatewayAPIDTO.getGatewayLabel());
             statement.setBinaryStream(3, bais, streamLength);
-            statement.setString(4, APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_PUBLISH);
+            statement.setString(4, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
             statement.executeUpdate();
         } catch (SQLException e) {
             handleException("Failed to add artifacts for " + gatewayAPIDTO.getName(), e);
@@ -15498,15 +15500,17 @@ public class ApiMgtDAO {
     /**
      * Update the details of the APIs published in the Gateway
      *
-     * @param APIId                 - UUID of the API
-     * @param gatewayLabel          - Gateway label of the API
-     * @param bais                  - Byte array Input stream of the serializide gatewayAPIDTO
-     * @param streamLength          - Length of the stream
-     * @param gatewayInstruction    - Instruction to the gateways to whether to publish or remove the API
+     * @param APIId              - UUID of the API
+     * @param gatewayLabel       - Gateway label of the API
+     * @param bais               - Byte array Input stream of the serializide gatewayAPIDTO
+     * @param streamLength       - Length of the stream
+     * @param gatewayInstruction - Instruction to the gateways to whether to publish or remove the API
      * @throws APIManagementException if an error occurs
      */
     public void updateGatewayPublishedAPIArtifacts(String APIId, String gatewayLabel, ByteArrayInputStream bais,
-                                                   int streamLength, String gatewayInstruction) throws APIManagementException {
+                                                   int streamLength, String gatewayInstruction)
+            throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_ARTIFACT)) {
             statement.setBinaryStream(1, bais, streamLength);
@@ -15519,20 +15523,23 @@ public class ApiMgtDAO {
         }
     }
 
-
     /**
      * Retrieve the blob of the API
      *
-     * @param APIId                 - UUID of the API
-     * @param gatewayLabel          - Gateway label of the API
+     * @param APIId        - UUID of the API
+     * @param gatewayLabel - Gateway label of the API
      * @throws APIManagementException if an error occurs while adding resource scope to IDN table
      */
-    public ByteArrayInputStream getGatewayPublishedAPIArtifacts(String APIId, String gatewayLabel) throws APIManagementException {
+    public ByteArrayInputStream getGatewayPublishedAPIArtifacts(String APIId, String gatewayLabel,
+                                                                String gatewayInstruction)
+            throws APIManagementException {
+
         ByteArrayInputStream baip = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_ARTIFACT)) {
             statement.setString(1, APIId);
             statement.setString(2, gatewayLabel);
+            statement.setString(3, gatewayInstruction);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 byte[] st = (byte[]) rs.getObject(1);
@@ -15544,22 +15551,22 @@ public class ApiMgtDAO {
         return baip;
     }
 
-
     /**
      * Get all the valid labels for an API with the gateway instruction 'publish'
      *
      * @param APIId - UUID of the API
      * @throws APIManagementException if an error occurs while adding resource scope to IDN table
      */
-    public Set<String> getExistingLabelsForAPI (String APIId) throws APIManagementException {
+    public Set<String> getExistingLabelsForAPI(String APIId) throws APIManagementException {
+
         Set<String> labels = new HashSet<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_EXISTING_LABELS_FOR_API)) {
             statement.setString(1, APIId);
-            statement.setString(2, APIConstants.GatewayArtifactSynchronizer.ARTIFACT_STATUS_PUBLISH);
+            statement.setString(2, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                labels.add ((String) rs.getObject(1));
+                labels.add((String) rs.getObject(1));
             }
         } catch (SQLException e) {
             handleException("Failed to get artifacts of API with ID " + APIId, e);
