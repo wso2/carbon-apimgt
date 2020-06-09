@@ -56,9 +56,15 @@ const styles = {
 };
 
 const useStyles = makeStyles(() => ({
+    root: {
+        width: '100%',
+        flexDirection: 'row',
+        display: 'flex',
+    },
     usageDialogHeader: {
         fontWeight: '600',
         fontSize: 'h6.fontSize',
+        marginRight: 10,
     },
     buttonIcon: {
         marginRight: 10,
@@ -89,13 +95,17 @@ function Usage(props) {
     };
 
     const dialogTitle = (
-        <Typography variant='h5' className={classes.usageDialogHeader}>
-            <FormattedMessage
-                id='Scopes.Usage.Usage.usage'
-                defaultMessage='Usages of '
-            />
-            {scopeName}
-        </Typography>
+        <div className={classes.root}>
+            <Typography compnent='div' variant='h5' className={classes.usageDialogHeader}>
+                <FormattedMessage
+                    id='Scopes.Usage.Usage.usage'
+                    defaultMessage='Usages of'
+                />
+            </Typography>
+            <Typography compnent='div' variant='h5' className={classes.usageDialogHeader}>
+                {scopeName}
+            </Typography>
+        </div>
     );
     const dialogContent = (
         <UsageViewAPI scopeUsage={usage} />
