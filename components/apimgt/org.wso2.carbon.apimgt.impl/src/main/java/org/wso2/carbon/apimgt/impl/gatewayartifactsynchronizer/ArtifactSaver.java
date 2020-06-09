@@ -6,12 +6,12 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 import java.util.Set;
 
 /**
- * This is a Artifact Publisher type. these interface let users to publish API artifacts to a storage.
+ * This is a Artifact Saver type. these interface let users to save API artifacts to a storage.
  */
 public interface ArtifactSaver {
 
     /**
-     * The init of the publisher, this will be called only once.
+     * The init of the Artifact saver, this will be called only once.
      *
      * @throws ArtifactSynchronizerException if there are any configuration errors
      */
@@ -28,8 +28,8 @@ public interface ArtifactSaver {
     /**
      * This method is used to update artifact of an API already exists in the storage
      *
-     * @param gatewayAPIDTO         - DTO contains all the information about the API and gateway artifacts
-     * @param gatewayInstruction    - Instruction to gateway whether to deploy or undeploy the API with given artifact
+     * @param gatewayAPIDTO      - DTO contains all the information about the API and gateway artifacts
+     * @param gatewayInstruction - Instruction to gateway whether to deploy or undeploy the API with given artifact
      * @throws ArtifactSynchronizerException if there are any errors in the process
      */
     void updateArtifact(GatewayAPIDTO gatewayAPIDTO, String gatewayInstruction) throws ArtifactSynchronizerException;
@@ -37,7 +37,7 @@ public interface ArtifactSaver {
     /**
      * This method will return all the existing gateway labels related to the API
      *
-     * @param apiId     - UUID of the API
+     * @param apiId - UUID of the API
      * @return All the existing labels related to the api
      */
     Set<String> getExistingLabelsForAPI(String apiId);
@@ -47,11 +47,10 @@ public interface ArtifactSaver {
      */
     void disconnect();
 
-
     /**
-     * The method to get the name of saver implementation
+     * This method will return the name of artifact saver implementation
      *
-     * @return Name of the saver
+     * @return Name of the Artifact saver
      */
     String getName();
 

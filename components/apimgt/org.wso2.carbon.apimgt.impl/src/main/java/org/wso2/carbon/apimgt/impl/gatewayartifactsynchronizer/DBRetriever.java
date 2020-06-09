@@ -23,12 +23,13 @@ public class DBRetriever implements ArtifactRetriever {
     }
 
     @Override
-    public GatewayAPIDTO retrieveArtifact(String APIId, String gatewayLabel)
+    public GatewayAPIDTO retrieveArtifact(String APIId, String gatewayLabel, String gatewayInstruction)
             throws ArtifactSynchronizerException {
 
         GatewayAPIDTO gatewayAPIDTO = null;
         try {
-            ByteArrayInputStream byteStream = apiMgtDAO.getGatewayPublishedAPIArtifacts(APIId, gatewayLabel);
+            ByteArrayInputStream byteStream =
+                    apiMgtDAO.getGatewayPublishedAPIArtifacts(APIId, gatewayLabel, gatewayInstruction);
             ObjectInputStream objectStream = new ObjectInputStream(byteStream);
             gatewayAPIDTO = (GatewayAPIDTO) objectStream.readObject();
             if (log.isDebugEnabled()) {
