@@ -1575,10 +1575,8 @@ public class APIManagerConfiguration {
             log.debug("GatewayArtifactsSynchronizer Artifact retriver Element is not set. Set to default DB retriever");
         }
 
-        gatewayArtifactSynchronizerProperties.getGatewayLabels()
-                .add(APIConstants.GatewayArtifactSynchronizer.DEFAULT_GATEWAY_LABEL);
         OMElement gatewayLabelElement = omElement
-                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.GATEWAY_LABEL_CONFIG));
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.GATEWAY_LABELS_CONFIG));
         if (gatewayLabelElement != null) {
             String gatewayLabel = gatewayLabelElement.getText();
             for (String label : gatewayLabel.split(",")){
