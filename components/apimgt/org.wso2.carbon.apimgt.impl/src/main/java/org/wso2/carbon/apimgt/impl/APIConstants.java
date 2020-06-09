@@ -127,6 +127,9 @@ public final class APIConstants {
     public static final String SERVICE_CATALOG_ADMIN_ROLE = "Internal/service_catalog_admin";
     public static final String SERVICE_CATALOG_USER_ROLE = "Internal/service_catalog_user";
     public static final String SERVICE_CATALOG_VIEWER_ROLE = "Internal/service_catalog_viewer";
+    public static final String SERVICE_CATALOG_CREATOR_ROLE = "Internal/service_catalog_creator";
+    public static final String SERVICE_CATALOG_MANAGER_ROLE = "Internal/service_catalog_manager";
+    public static final String SERVICE_CATALOG_DELETE_ROLE = "Internal/service_catalog_delete";
 
     public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
 
