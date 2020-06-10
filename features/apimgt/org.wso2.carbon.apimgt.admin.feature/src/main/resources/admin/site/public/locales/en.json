@@ -139,7 +139,7 @@
   "Base.RouteMenuMapping.bot.detection.data": "Bot Detection Data",
   "Base.RouteMenuMapping.configure.emails": "Configure Emails",
   "Base.RouteMenuMapping.custom.throttling.policies": "Custom Policies",
-  "Base.RouteMenuMapping.dashboard": "Admin Dashboard",
+  "Base.RouteMenuMapping.dashboard": "Dashboard",
   "Base.RouteMenuMapping.keymanagers": "KeyManagers",
   "Base.RouteMenuMapping.manage.alerts": "Manage Alerts",
   "Base.RouteMenuMapping.microgateways": "Microgateways",

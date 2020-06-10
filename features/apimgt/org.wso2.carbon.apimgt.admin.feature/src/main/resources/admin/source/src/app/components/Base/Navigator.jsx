@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
@@ -73,10 +74,15 @@ function Navigator(props) {
         classes, history, ...other
     } = props;
     const intl = useIntl();
+    const { settings } = useAppContext();
+    const isAnalyticsEnabled = settings.analyticsEnabled;
     const matchMenuPath = (currentRoute, pathToMatch) => {
         return (currentRoute.indexOf(pathToMatch) !== -1);
     };
-    const routeMenuMapping = RouteMenuMapping(intl);
+    let routeMenuMapping = RouteMenuMapping(intl);
+    if (!isAnalyticsEnabled) {
+        routeMenuMapping = RouteMenuMapping(intl).filter((menu) => menu.id !== 'Manage Alerts');
+    }
     const updateAllRoutePaths = (path) => {
         for (let i = 0; i < routeMenuMapping.length; i++) {
             const childRoutes = routeMenuMapping[i].children;
