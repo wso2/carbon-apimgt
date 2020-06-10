@@ -4100,7 +4100,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 contextCache.remove(context);
                 contextCache.put(context, Boolean.FALSE);
             }
-            apiMgtDAO.deleteAPI(identifier);
+            deleteAPI(api);
             /**
              * Delete the API in Kubernetes
              */
@@ -4208,10 +4208,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Failed to remove the API from : " + path, e);
         } catch (WorkflowException e) {
             handleException("Failed to execute workflow cleanup task ", e);
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (ReflectiveOperationException e ) {
-            e.printStackTrace();
         }
     }
 
@@ -5520,6 +5516,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact apiArtifact = getAPIArtifact(apiIdentifier);
             String targetStatus;
             if (apiArtifact != null) {
+
                 String providerName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
                 String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
                 String apiContext = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
@@ -5596,7 +5593,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + ", API Version " + apiIdentifier.getVersion() + ", New Status : " + targetStatus;
                         log.debug(logMessage);
                     }
-
                     APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                             APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), tenantId, apiName, apiId, apiVersion,
                             apiType, apiContext, providerName, targetStatus);

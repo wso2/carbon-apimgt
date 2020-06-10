@@ -33,9 +33,11 @@ public final class ContainerBasedConstants {
 
     public static final String CRD_KIND = "API";
 
+    public static final String DEPLOYMENT_ENVIRONMENTS = "DeploymentEnvironments";
+    public static final String DEPLOYMENT_ENV = "kubernetes";
+
     public static final String SWAGGER = "swagger";
     public static final String MODE = "privateJet";
-
     public static final String MASTER_URL = "MasterURL";
     public static final String INGRESS_URL = "IngressURL";
     public static final String NAMESPACE = "Namespace";

@@ -118,15 +118,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
-import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.IDPConfiguration;
-import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
-import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
-import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
@@ -10090,6 +10082,7 @@ public final class APIUtil {
     /**
      * Checks whether the given token is a valid JWT by parsing header and validating the
      * header,payload,signature format
+     *
      * @param token the token to be validated
      * @return true if valid JWT
      */
@@ -10116,6 +10109,7 @@ public final class APIUtil {
     /**
      * Get signature of  given JWT token. This method should be called only after validating whether the token is
      * JWT via isValidJWT method.
+     *
      * @param token jwt token.
      * @return signature of the jwt token.
      */
@@ -10127,6 +10121,7 @@ public final class APIUtil {
 
     /**
      * Extracts the tenant domain of the subject in a given JWT
+     *
      * @param token jwt token
      * @return tenant domain of the the sub claim
      */
@@ -10171,13 +10166,15 @@ public final class APIUtil {
         }
         return publicCert;
     }
-        /**
-         * Verify the JWT token signature.
-         *
-         * This method only used for API Key revocation which contains some duplicate logic in GatewayUtils class.
-         * @param splitToken The JWT token which is split into [header, payload, signature]
-         * @return whether the signature is verified or or not
-         */
+
+    /**
+     * Verify the JWT token signature.
+     * <p>
+     * This method only used for API Key revocation which contains some duplicate logic in GatewayUtils class.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature is verified or or not
+     */
     public static boolean verifyTokenSignature(String[] splitToken, Certificate certificate,
                                                String signatureAlgorithm) throws APIManagementException {
         // Retrieve public key from the certificate
@@ -10379,6 +10376,7 @@ public final class APIUtil {
 
     /**
      * Validates the API category names to be attached to an API
+     *
      * @param categories
      * @param tenantDomain
      * @return
@@ -10630,6 +10628,7 @@ public final class APIUtil {
         }
 
     }
+
     /**
      * Returns the user claims for the given user.
      *

@@ -94,7 +94,7 @@ public class APIExecutor implements Execution {
         boolean executed = false;
         String user = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-     
+
         String userWithDomain = user;
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(domain)) {
             userWithDomain = user + APIConstants.EMAIL_DOMAIN_SEPARATOR + domain;
@@ -134,19 +134,19 @@ public class APIExecutor implements Execution {
         } catch (RegistryException e) {
             log.error("Failed to get the generic artifact while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
-                                "APIManagementException:" + e.getMessage());
+                    "APIManagementException:" + e.getMessage());
         } catch (APIManagementException e) {
             log.error("Failed to publish service to API store while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
-                                "APIManagementException:" + e.getMessage());
+                    "APIManagementException:" + e.getMessage());
         } catch (FaultGatewaysException e) {
             log.error("Failed to publish service gateway while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
-                                "FaultGatewaysException:" + e.getFaultMap());
+                    "FaultGatewaysException:" + e.getFaultMap());
         } catch (UserStoreException e) {
             log.error("Failed to get tenant Id while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
-                                "APIManagementException:" + e.getMessage());
+                    "APIManagementException:" + e.getMessage());
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -160,14 +160,14 @@ public class APIExecutor implements Execution {
         }
         return executed;
     }
-    
+
     private boolean changeLifeCycle(RequestContext context, API api, Resource apiResource, Registry registry,
                                     APIProvider apiProvider, GenericArtifact apiArtifact, String targetState)
             throws APIManagementException, FaultGatewaysException, org.wso2.carbon.registry.api.RegistryException, IllegalAccessException, ParseException, InstantiationException, ClassNotFoundException, UserStoreException {
         boolean executed;
 
         String oldStatus = APIUtil.getLcStateFromArtifact(apiArtifact);
-        String newStatus = (targetState != null)? targetState.toUpperCase(): targetState;
+        String newStatus = (targetState != null) ? targetState.toUpperCase() : targetState;
 
         boolean isCurrentCreatedOrPrototyped = APIConstants.CREATED.equals(oldStatus) ||
                 APIConstants.PROTOTYPED.equals(oldStatus);
@@ -225,8 +225,7 @@ public class APIExecutor implements Execution {
 
         boolean deprecateOldVersions = false;
         boolean makeKeysForwardCompatible = false;
-        boolean publishInPrivateJet = false;
-        int deprecateOldVersionsCheckListOrder = 0, makeKeysForwardCompatibleCheckListOrder = 1, publishInPrivateJetCheckListOrder = 2;
+        int deprecateOldVersionsCheckListOrder = 0, makeKeysForwardCompatibleCheckListOrder = 1;
         //If the API status is CREATED/PROTOTYPED ,check for check list items of lifecycle
         if (isCurrentCreatedOrPrototyped) {
             CheckListItemBean[] checkListItemBeans = GovernanceUtils
@@ -237,8 +236,6 @@ public class APIExecutor implements Execution {
                         deprecateOldVersionsCheckListOrder = checkListItemBean.getOrder();
                     } else if (APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM.equals(checkListItemBean.getName())) {
                         makeKeysForwardCompatibleCheckListOrder = checkListItemBean.getOrder();
-                    } else if (PUBLISH_IN_PRIVATE_JET_MODE.equals(checkListItemBean.getName())) {
-                        publishInPrivateJetCheckListOrder = checkListItemBean.getOrder();
                     }
                 }
             }
@@ -246,15 +243,13 @@ public class APIExecutor implements Execution {
                     .isLCItemChecked(deprecateOldVersionsCheckListOrder, APIConstants.API_LIFE_CYCLE);
             makeKeysForwardCompatible = !(apiArtifact
                     .isLCItemChecked(makeKeysForwardCompatibleCheckListOrder, APIConstants.API_LIFE_CYCLE));
-            publishInPrivateJet = (apiArtifact
-                    .isLCItemChecked(publishInPrivateJetCheckListOrder, APIConstants.API_LIFE_CYCLE));
         }
 
         if (isStateTransitionToPublished) {
             if (makeKeysForwardCompatible) {
                 apiProvider.makeAPIKeysForwardCompatible(api);
             }
-            if(deprecateOldVersions) {
+            if (deprecateOldVersions) {
                 String provider = APIUtil.replaceEmailDomain(api.getId().getProviderName());
 
                 List<API> apiList = apiProvider.getAPIsByProvider(provider);
@@ -268,13 +263,8 @@ public class APIExecutor implements Execution {
                     }
                 }
             }
-//            List<String> clusters = new ArrayList<String>();
-            //getting clusters to publish API from the publisher UI
-//            clusters.add("gke_apim-kube_us-central1-a_privatejet-mode-test");
-//            clusters.add("docker-desktop");
-//            clusters.add("minikube");
-            if (publishInPrivateJet) {
-                log.info("API executor publish in privatejet mode ////////////////////////");
+            //Deploy API in selected cloud clusters
+            if (api.getDeploymentEnvironments() != null && !api.getDeploymentEnvironments().isEmpty()) {
                 apiProvider.publishInPrivateJet(api, api.getId());
             }
         }

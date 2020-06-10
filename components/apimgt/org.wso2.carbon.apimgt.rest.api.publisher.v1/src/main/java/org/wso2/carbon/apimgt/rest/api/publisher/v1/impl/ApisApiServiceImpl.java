@@ -120,7 +120,37 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
@@ -948,12 +978,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (!APIUtil.validateAPICategories(apiCategories, RestApiUtil.getLoggedInUserTenantDomain())) {
                     RestApiUtil.handleBadRequest("Invalid API Category name(s) defined", log);
                 }
-            }
-
-            //Get selected cluster info
-            List<String> selectedClusters = body.getDeployments();
-            if (body.getDeployments() != null) {
-                String errorMessage = RestApiPublisherUtils.validateAdditionalProperties(body.getAdditionalProperties());
             }
 
             apiProvider.manageAPI(apiToUpdate);
@@ -4250,6 +4274,19 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
         return null;
+    }
+
+    /**
+     * Retrieve deployment status of APIs in cloud clusters
+     * @return Deployment status response
+     */
+    @Override
+    public Response deploymentsGetStatus(String apiId,MessageContext messageContext) throws APIManagementException{
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+        //APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        DeploymentStatusListDTO deploymentStatusListDTO = APIMappingUtil.fromDeploymentStatustoDTO(apiIdentifier);
+        return Response.ok().entity(deploymentStatusListDTO).build();
     }
 
     private APIDTO getAPIByID(String apiId) {

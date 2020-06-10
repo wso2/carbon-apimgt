@@ -18,41 +18,36 @@
 
 package org.wso2.carbon.apimgt.impl.containermgt;
 
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
-import io.fabric8.kubernetes.api.model.DoneableConfigMap;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinitionList;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
 import org.wso2.carbon.apimgt.impl.containermgt.k8scrd.*;
+import org.wso2.carbon.apimgt.impl.containermgt.k8scrd.Status;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 
-import java.io.File;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants.*;
 
@@ -72,12 +67,12 @@ public class K8sManager implements ContainerManager {
 
     /**
      * This would initialize the class
-     * @param parameterMap parameters that describe above attributes
+     * @param containerMgtInfoDetails parameters that describe above attributes
      */
     @Override
-    public void initManager(Map parameterMap) {
+    public void initManager(JSONObject containerMgtInfoDetails) {
 
-        setValues(parameterMap);
+        setValues(containerMgtInfoDetails);
         setClient();
     }
 
@@ -87,13 +82,12 @@ public class K8sManager implements ContainerManager {
      * @param apiIdentifier API Identifier
      * @throws RegistryException
      * @throws ParseException
-     * @throws APIManagementException
+     * @throws APIManagementException error while deploying API in Kubernetes
      */
     @Override
     public void changeLCStateCreatedToPublished(API api, APIIdentifier apiIdentifier, Registry registry)
-            throws RegistryException, ParseException, APIManagementException {
+            throws ParseException, APIManagementException {
 
-        log.info("testing new API cr");
         if (!saToken.equals("") && !masterURL.equals("")) {
 
             String[] configmapNames = deployConfigMap(api, apiIdentifier, registry, openShiftClient, jwtSecurityCRName,
@@ -107,20 +101,25 @@ public class K8sManager implements ContainerManager {
             log.warn("Master URL and/or Service-account Token hasn't been Provided."
                     + " The [API] " + apiIdentifier.getApiName() + " will not be Published in Kubernetes");
         }
+//        getPodStatus(openShiftClient,apiIdentifier);
     }
 
     /**
      * Deletes the API from all the clusters it had been deployed
      * @param apiId API Identifier
-     * @param clusterProperties Clusters which the API has published
+     * @param containerMgtInfoDetails Clusters which the API has published
      */
     @Override
-    public void deleteAPI(APIIdentifier apiId, Map<String, String> clusterProperties) {
+    public void deleteAPI(APIIdentifier apiId, JSONObject containerMgtInfoDetails) {
 
         String apiName = apiId.getApiName();
 
-        Config config = new ConfigBuilder().withMasterUrl(clusterProperties.get(MASTER_URL))
-                .withOauthToken(clusterProperties.get(SATOKEN)).withNamespace(clusterProperties.get(NAMESPACE))
+        JSONObject propreties = (JSONObject) containerMgtInfoDetails.get(PROPERTIES);
+
+        Config config = new ConfigBuilder()
+                .withMasterUrl(propreties.get(ContainerBasedConstants.MASTER_URL).toString().replace("\\", ""))
+                .withOauthToken(propreties.get(ContainerBasedConstants.SATOKEN).toString())
+                .withNamespace(propreties.get(ContainerBasedConstants.NAMESPACE).toString())
                 .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
 
         OpenShiftClient client = new DefaultOpenShiftClient(config);
@@ -139,33 +138,38 @@ public class K8sManager implements ContainerManager {
      * Represents the LC change "Demote to created"
      * Deletes the API from clusters
      * @param apiId API Identifier
-     * @param clusterProperties Clusters which the API has published
+     * @param containerMgtInfoDetails Clusters which the API has published
      */
     @Override
-    public void changeLCStatePublishedToCreated(APIIdentifier apiId, Map<String, String> clusterProperties) {
+    public void changeLCStatePublishedToCreated(APIIdentifier apiId, JSONObject containerMgtInfoDetails) {
 
-        deleteAPI(apiId, clusterProperties);
+        deleteAPI(apiId, containerMgtInfoDetails);
     }
 
     /**
      * Re-deploy an API
      * @param apiId API Identifier
-     * @param clusterProperties Clusters which the API has published
+     * @param containerMgtInfoDetails Clusters which the API has published
      */
     @Override
-    public void apiRepublish(API api, APIIdentifier apiId, Registry registry,Map<String, String> clusterProperties)
-            throws ParseException, RegistryException, APIManagementException {
+    public void apiRepublish(API api, APIIdentifier apiId, Registry registry, JSONObject containerMgtInfoDetails)
+            throws ParseException, APIManagementException {
 
         String apiName = apiId.getApiName();
+        JSONObject propreties = (JSONObject) containerMgtInfoDetails.get(PROPERTIES);
 
-        Config config = new ConfigBuilder().withMasterUrl(clusterProperties.get(MASTER_URL))
-                .withOauthToken(clusterProperties.get(SATOKEN)).withNamespace(clusterProperties.get(NAMESPACE))
+        Config config = new ConfigBuilder()
+                .withMasterUrl(propreties.get(MASTER_URL).toString().replace("\\", ""))
+                .withOauthToken(propreties.get(SATOKEN).toString())
+                .withNamespace(propreties.get(ContainerBasedConstants.NAMESPACE).toString())
                 .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
 
         OpenShiftClient client = new DefaultOpenShiftClient(config);
 
-        String[] configMapNames = deployConfigMap(api, apiId,registry, client, clusterProperties.get(JWT_SECURITY_CR_NAME),
-                clusterProperties.get(OAUTH2_SECURITY_CR_NAME), clusterProperties.get(BASICAUTH_SECURITY_CR_NAME),
+        String[] configMapNames = deployConfigMap(api, apiId,registry, client,
+                propreties.get(JWT_SECURITY_CR_NAME).toString(),
+                propreties.get(OAUTH2_SECURITY_CR_NAME).toString(),
+                propreties.get(BASICAUTH_SECURITY_CR_NAME).toString(),
                 true);
 
         CustomResourceDefinition crd = client.customResourceDefinitions().withName(API_CRD_NAME).get();
@@ -189,34 +193,37 @@ public class K8sManager implements ContainerManager {
      * Represent sthe LC change Block
      * Deletes the API from the clusters
      * @param apiId API Identifier
-     * @param clusterProperties Clusters which the API has published
+     * @param containerMgtInfoDetails Clusters which the API has published
      */
     @Override
-    public void changeLCStateToBlocked(APIIdentifier apiId, Map<String, String> clusterProperties) {
+    public void changeLCStateToBlocked(APIIdentifier apiId, JSONObject containerMgtInfoDetails) {
 
-        deleteAPI(apiId, clusterProperties);
+        deleteAPI(apiId, containerMgtInfoDetails);
     }
 
     /**
      * Represents the LC change Blocked --> Republish
      * Redeploy the API CR with "override : false"
      * @param apiId API Identifier
-     * @param clusterProperties Clusters which the API has published
+     * @param containerMgtInfoDetails Clusters which the API has published
      * @param configMapName Name of the Config Map
      */
     @Override
-    public void changeLCStateBlockedToRepublished(APIIdentifier apiId, Map<String, String> clusterProperties,
+    public void changeLCStateBlockedToRepublished(APIIdentifier apiId, JSONObject containerMgtInfoDetails,
                                                   String[] configMapName) {
 
         String apiName = apiId.getApiName();
 
+        JSONObject propreties = (JSONObject) containerMgtInfoDetails.get(ContainerBasedConstants.PROPERTIES);
 
-        Config config = new ConfigBuilder().withMasterUrl(clusterProperties.get(MASTER_URL))
-                .withOauthToken(clusterProperties.get(SATOKEN)).withNamespace(clusterProperties.get(NAMESPACE))
+        Config config = new ConfigBuilder()
+                .withMasterUrl(propreties.get(MASTER_URL).toString().replace("\\", ""))
+                .withOauthToken(propreties.get(SATOKEN).toString())
+                .withNamespace(propreties.get(NAMESPACE).toString())
                 .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
 
         OpenShiftClient client = new DefaultOpenShiftClient(config);
-        applyAPICustomResourceDefinition(client, configMapName, Integer.parseInt(clusterProperties.get(REPLICAS))
+        applyAPICustomResourceDefinition(client, configMapName, Integer.parseInt(propreties.get(REPLICAS).toString())
                 , apiId, false);
         CustomResourceDefinition crd = client.customResourceDefinitions().withName(API_CRD_NAME).get();
 
@@ -286,9 +293,14 @@ public class K8sManager implements ContainerManager {
                 DoneableAPICustomResourceDefinition, Resource<APICustomResourceDefinition,
                 DoneableAPICustomResourceDefinition>> apiCrdClient = getCRDClient(client, apiCustomResourceDefinition);
 
+        // assigning values and creating API cr
         Definition definition = new Definition();
+        Interceptors interceptors = new Interceptors();
+        interceptors.setBallerina(new String[]{});
+        interceptors.setJava(new String[]{});
         definition.setType(SWAGGER);
         definition.setSwaggerConfigmapNames(configmapNames);
+        definition.setInterceptors(interceptors);
 
         APICustomResourceDefinitionSpec apiCustomResourceDefinitionSpec = new APICustomResourceDefinitionSpec();
         apiCustomResourceDefinitionSpec.setDefinition(definition);
@@ -296,7 +308,6 @@ public class K8sManager implements ContainerManager {
         apiCustomResourceDefinitionSpec.setReplicas(replicas);
         apiCustomResourceDefinitionSpec.setOverride(override);
         apiCustomResourceDefinitionSpec.setUpdateTimeStamp("");
-//        apiCustomResourceDefinitionSpec.setVersion(apiIdentifier.getVersion());
 
         Status status = new Status();
 
@@ -309,9 +320,6 @@ public class K8sManager implements ContainerManager {
         meta.setName(apiIdentifier.getApiName().toLowerCase());
         meta.setNamespace(client.getNamespace());
         apiCustomResourceDef.setMetadata(meta);
-
-        log.info("api cr ",apiCustomResourceDef);
-
         apiCrdClient.createOrReplace(apiCustomResourceDef);
 
         log.info("Created [API-CR] apis.wso2.com/" + apiCustomResourceDef.getMetadata().getName() + " for the "
@@ -327,23 +335,20 @@ public class K8sManager implements ContainerManager {
      * @param oauthSecurityCRName , Security kind name related to OAuth2
      * @param basicAuthSecurityCRName , Security kind name related to BasicAuth
      * @param update , checks whether the configmap needs to be updated or deploy independently
-     * @return
-     * @throws RegistryException
+     * @return swaggerConfigmapNames
      * @throws APIManagementException
      * @throws ParseException
      */
     private String[] deployConfigMap(API api, APIIdentifier apiIdentifier, Registry registry, OpenShiftClient client, String jwtSecurityCRName,
                                    String oauthSecurityCRName, String basicAuthSecurityCRName, Boolean update)
-            throws RegistryException, APIManagementException, ParseException {
-
-//        Registry registry = getRegistryService().getGovernanceUserRegistry();
+            throws APIManagementException, ParseException {
 
         SwaggerCreator swaggerCreator = new SwaggerCreator(basicAuthSecurityCRName, jwtSecurityCRName,
                 oauthSecurityCRName);
         String swagger = swaggerCreator.
                 getOASDefinitionForPrivateJetMode(api, OASParserUtil.getAPIDefinition(apiIdentifier, registry));
 
-        String configmapName = apiIdentifier.getApiName().toLowerCase() + apiIdentifier.getVersion();
+        String configmapName = apiIdentifier.getApiName().toLowerCase() + "-swagger";
 
         if (update) {
 
@@ -380,22 +385,75 @@ public class K8sManager implements ContainerManager {
     }
 
     /**
-     * Sets the attributes of the object
-     * @param parameterMap Cluster info in Map<clusterName, clusterInfo> format
+     * Gets the deployment status information of an API and sets details to DeploymentStatus Object
+     * @param apiIdentifier , APIIdentifier
+     * @param clusterName , name of the cluster that the API is deployed
      */
-    private void setValues(Map<String, Map<String, String>> parameterMap) {
+    public DeploymentStatus getPodStatus (APIIdentifier apiIdentifier, String clusterName){
+        DeploymentStatus deploymentStatus = new DeploymentStatus();
+        List<Map<String,String>> podsInfo = new ArrayList<>();
+        int numberOfRunningPods =0;
 
-        String clusterName = parameterMap.keySet().iterator().next();
-        Map<String, String> clusterInfo = parameterMap.get(clusterName);
+        Map<String, String> lablesMap = new HashMap<String, String>(){{
+            put("app", apiIdentifier.getApiName().toLowerCase());
+        }};
 
-        this.masterURL = clusterInfo.get(MASTER_URL);
-        this.saToken = clusterInfo.get(SATOKEN);
-        this.namespace = clusterInfo.get(NAMESPACE);
-        this.replicas = Integer.parseInt(clusterInfo.get(REPLICAS));
-        this.clusterName = clusterName;
-        this.jwtSecurityCRName = clusterInfo.get(JWT_SECURITY_CR_NAME);
-        this.oauthSecurityCRName = clusterInfo.get(OAUTH2_SECURITY_CR_NAME);
-        this.basicAuthSecurityCRName = clusterInfo.get(BASICAUTH_SECURITY_CR_NAME);
+        PodList podList = openShiftClient.pods().inNamespace(openShiftClient.getNamespace()).withLabels(lablesMap).list();
+        for (Pod pod : podList.getItems()){
+            Map<String, String> podStatus = new HashMap<>();
+           podStatus.put("podName", pod.getMetadata().getName());
+           podStatus.put("status", pod.getStatus().getPhase());
+           podStatus.put("creationTimestamp", pod.getMetadata().getCreationTimestamp());
+           if (pod.getStatus().getPhase().equals("Running")){
+               numberOfRunningPods++;
+           }
+           int numberOfContainersPerPod =0;
+           List<ContainerStatus> podStatuses = pod.getStatus().getContainerStatuses();
+            for (ContainerStatus containerStatus : podStatuses){
+                if (containerStatus.getReady()){
+                    numberOfContainersPerPod++;
+                }
+                String ready = numberOfContainersPerPod + "/" + podStatuses.size();
+                podStatus.put("ready", ready);
+            }
+            podsInfo.add(podStatus);
+       }
+
+        deploymentStatus.setPodsRunning(numberOfRunningPods);
+        deploymentStatus.setPodStatus(podsInfo);
+        deploymentStatus.setClusterName(clusterName);
+
+        return deploymentStatus;
+    }
+
+    /**
+     * Sets the attributes of the object
+     * @param containerMgtInfoDetails Cluster info in Map<clusterName, clusterInfo> format
+     */
+    private void setValues(JSONObject containerMgtInfoDetails) {
+
+        this.clusterName = containerMgtInfoDetails.get(ContainerBasedConstants.CLUSTER_ID).toString();
+        JSONObject properties = (JSONObject) containerMgtInfoDetails.get(ContainerBasedConstants.PROPERTIES);
+        this.masterURL = properties.get(ContainerBasedConstants.MASTER_URL).toString().replace("\\", "");
+        this.saToken = properties.get(ContainerBasedConstants.SATOKEN).toString();
+        this.namespace = properties.get(ContainerBasedConstants.NAMESPACE).toString();
+        this.replicas = Integer.parseInt(properties.get(ContainerBasedConstants.REPLICAS).toString());
+        if (properties.get(ContainerBasedConstants.JWT_SECURITY_CR_NAME) != null){
+            this.jwtSecurityCRName = properties.get(ContainerBasedConstants.JWT_SECURITY_CR_NAME).toString();
+        } else {
+            this.jwtSecurityCRName = "";
+        }
+        if (properties.get(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME) != null){
+            this.basicAuthSecurityCRName = properties.get(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME).toString();
+        } else {
+            this.basicAuthSecurityCRName = "";
+        }
+        if(properties.get(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME) != null){
+            this.oauthSecurityCRName =  properties.get(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME).toString();
+        } else {
+            this.oauthSecurityCRName = "";
+        }
+
     }
 
     /**

@@ -84,7 +84,7 @@ public class APIManagerConfiguration {
     private static final String EMAIL_LOGIN = "EmailLogin";
     private static final String PRIMARY_LOGIN = "primary";
     private static final String CLAIM_URI = "ClaimUri";
-    private static final String TOKEN_REVOCATION_NOTIFIERS ="TokenRevocationNotifiers";
+    private static final String TOKEN_REVOCATION_NOTIFIERS = "TokenRevocationNotifiers";
     private static final String REALTIME_NOTIFIER = "RealtimeNotifier";
     private static final String PERSISTENT_NOTIFIER = "PersistentNotifier";
     private static final String TOKEN_REVOCATION_NOTIFIERS_PASSWORD = "TokenRevocationNotifiers.Notifier.Password";
@@ -495,8 +495,8 @@ public class APIManagerConfiguration {
                 setRuntimeArtifactsSyncPublisherConfig(element);
             } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_RUNTIME_ARTIFACTS_GATEWAY_CONFIG.equals(localName)) {
                 setRuntimeArtifactsSyncGatewayConfig(element);
-            } else if (APIConstants.ContainerMgtAttributes.CONTAINER_MANAGEMENT.equals(localName)){
-                setContainerMgtConfigurations (element);
+            } else if (APIConstants.ContainerMgtAttributes.CONTAINER_MANAGEMENT.equals(localName)) {
+                setContainerMgtConfigurations(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -588,7 +588,9 @@ public class APIManagerConfiguration {
         return monetizationAttributes;
     }
 
-    public JSONArray getContainerMgtAttributes() {return  containerMgtAttributes; }
+    public JSONArray getContainerMgtAttributes() {
+        return containerMgtAttributes;
+    }
 
     /**
      * Read the primary/secondary login configuration
@@ -715,6 +717,7 @@ public class APIManagerConfiguration {
 
     /**
      * set workflow related configurations
+     *
      * @param element
      */
     private void setWorkflowProperties(OMElement element) {
@@ -1315,6 +1318,7 @@ public class APIManagerConfiguration {
 
     /**
      * To populate Monetization Additional Attributes
+     *
      * @param element
      */
     private void setMonetizationAdditionalAttributes(OMElement element) {
@@ -1352,6 +1356,7 @@ public class APIManagerConfiguration {
 
     /**
      * To populate recommendation related configurations
+     *
      * @param element
      */
     private void setRecommendationConfigurations(OMElement element) {
