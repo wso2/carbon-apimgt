@@ -334,7 +334,7 @@ public class SubscriptionValidationSQLConstants {
                     "  API.API_TIER," +
                     "  API.API_VERSION," +
                     "  API.CONTEXT, " +
-                    "  URL.MAPPING_ID," +
+                    "  URL.URL_MAPPING_ID," +
                     "  URL.HTTP_METHOD," +
                     "  URL.AUTH_SCHEME," +
                     "  URL.URL_PATTERN," +

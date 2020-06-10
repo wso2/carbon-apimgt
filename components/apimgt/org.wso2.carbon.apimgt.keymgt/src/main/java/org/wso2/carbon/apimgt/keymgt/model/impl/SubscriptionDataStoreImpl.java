@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Policy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 
@@ -327,7 +328,17 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     public void addOrUpdateAPI(API api) {
         apiMap.put(api.getCacheKey(), api);
     }
-    
+
+    @Override
+    public void addOrUpdateAPIWithUrlTemplates(API api) {
+        try {
+            API newAPI = new SubscriptionDataLoaderImpl().getApi(api.getContext(), api.getApiVersion());
+            apiMap.put(api.getCacheKey(), newAPI);
+        } catch (DataLoadingException e) {
+            log.error("Exception while loading api for " + api.getContext() + " " + api.getApiVersion(), e);
+        }
+
+    }
     @Override
     public void removeAPI(API api) {
         apiMap.remove(api.getCacheKey());

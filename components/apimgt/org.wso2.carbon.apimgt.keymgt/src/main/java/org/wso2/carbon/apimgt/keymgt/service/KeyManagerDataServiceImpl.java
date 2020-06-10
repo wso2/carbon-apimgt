@@ -58,7 +58,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
-        store.addOrUpdateAPI(getAPIFromAPIEvent(event));
+        store.addOrUpdateAPIWithUrlTemplates(getAPIFromAPIEvent(event));
     }
 
     @Override

@@ -251,10 +251,10 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                                 String apiTier = api.getApiTier();
                                 String subscriberUserId = sub.getSubscriptionId();
                                 String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
-                                int apiId = api.getApiId(); // TODO remove
+                                //int apiId = api.getApiId(); // TODO remove
                                 int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
                                 
-                                int apiTenantId = APIUtil.getTenantId(api.getApiProvider());// TODO remove
+                                //int apiTenantId = APIUtil.getTenantId(api.getApiProvider());// TODO remove
                                 ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(),
                                         subscriberTenantId); // TODO check tenant id ////
                                 
@@ -271,7 +271,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
 
                                 //TODO this must implement as a part of throttling implementation.
                                 int spikeArrest = 0;
-                                String apiLevelThrottlingKey = "api_level_throttling_key"; ////??????? TODO ????
+                                String apiLevelThrottlingKey = "api_level_throttling_key";
                                 
                                 if (subPolicy.getRateLimitCount() > 0) {
                                     spikeArrest = subPolicy.getRateLimitCount(); 

@@ -321,6 +321,7 @@ public class SubscriptionValidationDAO {
                 urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
                 urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
                 urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
+                urlMapping.setUrlPattern(resultSet.getString("URL_PATTERN"));
                 api.addResource(urlMapping);
 
             }

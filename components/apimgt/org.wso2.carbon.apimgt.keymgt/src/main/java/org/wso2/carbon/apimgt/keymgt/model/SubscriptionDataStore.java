@@ -86,6 +86,8 @@ public interface SubscriptionDataStore {
     void addOrUpdateSubscription(Subscription subscription);
 
     void addOrUpdateAPI(API api);
+    
+    void addOrUpdateAPIWithUrlTemplates(API api);
 
     void addOrUpdateApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping);
     
