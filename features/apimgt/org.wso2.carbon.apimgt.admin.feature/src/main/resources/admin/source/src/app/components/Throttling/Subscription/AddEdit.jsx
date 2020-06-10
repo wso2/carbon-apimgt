@@ -46,6 +46,7 @@ import AddCircle from '@material-ui/icons/AddCircle';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import API from 'AppData/api';
+import Joi from '@hapi/joi';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -277,27 +278,48 @@ function AddEdit(props) {
 
     const validate = (fieldName, value) => {
         let error = '';
+        const schema = Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/);
         switch (fieldName) {
             case 'policyName':
                 if (value === '') {
-                    error = 'Name is Empty';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Subscription.Policy.policy.name.empty.error.msg',
+                        defaultMessage: 'Name is Empty',
+                    });
                 } else if (value.indexOf(' ') !== -1) {
-                    error = 'Name contains spaces';
+                    error = intl.formatMessage({
+                        id: 'Throttling.Subscription.Policy.policy.name.space.error.msg',
+                        defaultMessage: 'Name contains spaces',
+                    });
+                } else if (schema.validate(value).error) {
+                    error = intl.formatMessage({
+                        id: 'Throttling.Subscription.Policy.policy.name.invalid.character.error.msg',
+                        defaultMessage: 'Name contains one or more illegal characters',
+                    });
                 } else {
                     error = '';
                 }
                 setValidationError({ policyName: error });
                 break;
             case 'requestCount':
-                error = value === '' ? 'Request Count is Empty' : '';
+                error = value === '' ? intl.formatMessage({
+                    id: 'Throttling.Subscription.Policy.policy.request.count.empty.error.msg',
+                    defaultMessage: 'Request Count is Empty',
+                }) : '';
                 setValidationError({ requestCount: error });
                 break;
             case 'dataAmount':
-                error = value === '' ? 'Data Amount is Empty' : '';
+                error = value === '' ? intl.formatMessage({
+                    id: 'Throttling.Subscription.Policy.policy.data.amount.empty.error.msg',
+                    defaultMessage: 'Data Bandwidth amount is Empty',
+                }) : '';
                 setValidationError({ dataAmount: error });
                 break;
             case 'unitTime':
-                error = value === '' ? 'Unit Time is Empty' : '';
+                error = value === '' ? intl.formatMessage({
+                    id: 'Throttling.Subscription.Policy.policy.unit.time.empty.error.msg',
+                    defaultMessage: 'Unit Time is Empty',
+                }) : '';
                 setValidationError({ unitTime: error });
                 break;
             default:
