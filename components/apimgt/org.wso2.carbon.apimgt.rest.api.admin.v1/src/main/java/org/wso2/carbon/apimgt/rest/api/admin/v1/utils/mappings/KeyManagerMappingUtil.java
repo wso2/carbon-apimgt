@@ -102,7 +102,7 @@ public class KeyManagerMappingUtil {
             jsonObject.remove(APIConstants.KeyManager.USERINFO_ENDPOINT);
         }
         JsonElement authorizeEndpoint = jsonObject.get(APIConstants.KeyManager.AUTHORIZE_ENDPOINT);
-        if (userInfoEndpoint != null) {
+        if (authorizeEndpoint != null) {
             keyManagerDTO.setAuthorizeEndpoint(authorizeEndpoint.getAsString());
             jsonObject.remove(APIConstants.KeyManager.AUTHORIZE_ENDPOINT);
         }
