@@ -120,7 +120,7 @@ export default function ConditionalGroup(props) {
                             <span>JWT Claim</span>
                         </Box>
                         <Typography variant='caption'>
-                                Condition Policies active for Group
+                            Condition Policies active for Group
                             { ` ${executionFlow.id}` }
                         </Typography>
                     </div>

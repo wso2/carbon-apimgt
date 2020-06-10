@@ -39,9 +39,9 @@ BlockApiService delegate = new BlockApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "throttled events available", notes = "This will provide access to throttled events in database. ", response = BlockConditionsDTO.class, responseContainer = "Map", tags={  })
+    @ApiOperation(value = "blocking events available", notes = "This will provide access to throttled events in database. ", response = BlockConditionsDTO.class, responseContainer = "Map", tags={ "Throttling" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "An array of shops around you", response = BlockConditionsDTO.class, responseContainer = "Map") })
+        @ApiResponse(code = 200, message = "Block Conditions", response = BlockConditionsDTO.class, responseContainer = "Map") })
     public Response blockGet() throws APIManagementException{
         return delegate.blockGet(securityContext);
     }

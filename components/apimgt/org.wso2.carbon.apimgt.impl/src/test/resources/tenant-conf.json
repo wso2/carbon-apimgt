@@ -66,6 +66,10 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:admin",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:app_owner_change",
         "Roles": "admin"
       },

@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
-import { injectIntl, FormattedMessage } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
 
 /**
@@ -44,7 +44,7 @@ function Delete(props) {
                 return (
                     <FormattedMessage
                         id='Throttling.Blacklist.Policy.policy.delete.success'
-                        defaultMessage='Blacklist Policy successfully deleted.'
+                        defaultMessage='Deny Policy successfully deleted.'
                     />
                 );
             })
@@ -52,7 +52,7 @@ function Delete(props) {
                 return (
                     <FormattedMessage
                         id='Throttling.Blacklist.Policy.policy.delete.error'
-                        defaultMessage='Blacklist Policy could not be deleted.'
+                        defaultMessage='Deny Policy could not be deleted.'
                     />
                 );
             });
@@ -70,7 +70,7 @@ function Delete(props) {
             <DialogContentText>
                 <FormattedMessage
                     id='Throttling.Blacklist.Policy.policy.dialog.delete.error'
-                    defaultMessage='Blacklist Policy will be deleted.'
+                    defaultMessage='Deny Policy will be deleted.'
                 />
             </DialogContentText>
         </FormDialogBase>
@@ -85,4 +85,4 @@ Delete.propTypes = {
         conditionId: PropTypes.number.isRequired,
     }).isRequired,
 };
-export default injectIntl(Delete);
+export default Delete;

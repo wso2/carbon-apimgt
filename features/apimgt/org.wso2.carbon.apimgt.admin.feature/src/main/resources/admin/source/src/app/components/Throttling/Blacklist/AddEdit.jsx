@@ -20,7 +20,7 @@ import React, { useReducer, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
 import {
@@ -208,7 +208,7 @@ function AddEdit(props) {
                 return (
                     <FormattedMessage
                         id='Throttling.Blacklist.Policy.policy.add.success'
-                        defaultMessage='Blacklist Policy added successfully.'
+                        defaultMessage='Deny Policy added successfully.'
                     />
                 );
             })
@@ -227,7 +227,7 @@ function AddEdit(props) {
     return (
         <FormDialogBase
             title={title}
-            saveButtonText='Blacklist'
+            saveButtonText='Deny'
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
@@ -447,4 +447,4 @@ AddEdit.propTypes = {
     title: PropTypes.shape({}).isRequired,
 };
 
-export default injectIntl(AddEdit);
+export default AddEdit;
