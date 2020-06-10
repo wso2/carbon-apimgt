@@ -62,6 +62,13 @@ public class InMemoryAPIDeployer {
         return false;
     }
 
+    /**
+     * Deploy an API in the gateway using the deployAPI method in gateway admin
+     *
+     * @param assignedGatewayLabels - The labels which the gateway subscribed to
+     * @return True if all API artifacts retrieved from the storage and successfully deployed without any error. else
+     * false
+     */
     public boolean deployAllAPIsAtGatewayStartup (Set<String> assignedGatewayLabels) {
 
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {

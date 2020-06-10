@@ -15527,7 +15527,15 @@ public class ApiMgtDAO {
         return baip;
     }
 
-    public List<ByteArrayInputStream> getAllGatewayPublishedAPIArtifacts(String label) throws APIManagementException {
+    /**
+     * Retrieve the list of blobs of the APIs for a given label
+     *
+     * @param gatewayLabel - Gateway label of the API
+     * @throws APIManagementException if an error occurs
+     */
+    public List<ByteArrayInputStream> getAllGatewayPublishedAPIArtifacts(String label)
+            throws APIManagementException {
+
         List<ByteArrayInputStream> baip = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_ALL_API_ARTIFACT)) {
