@@ -87,8 +87,5 @@ Delete.propTypes = {
         description: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired,
     }),
-    selectedPolicyName: PropTypes.shape({
-        name: PropTypes.number.isRequired,
-    }).isRequired,
 };
 export default Delete;
