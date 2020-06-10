@@ -3095,14 +3095,14 @@ public abstract class AbstractAPIManager implements APIManager {
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
                 if (keyManager != null) {
                     OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
-                    if (StringUtils.isNotEmpty(apiKey.getAppMetadata())){
-                        OAuthApplicationInfo storedOAuthApplicationInfo = new Gson().fromJson(apiKey.getAppMetadata()
-                                ,OAuthApplicationInfo.class);
-                        if (oAuthApplicationInfo == null){
+                    if (StringUtils.isNotEmpty(apiKey.getAppMetaData())) {
+                        OAuthApplicationInfo storedOAuthApplicationInfo = new Gson().fromJson(apiKey.getAppMetaData()
+                                , OAuthApplicationInfo.class);
+                        if (oAuthApplicationInfo == null) {
                             oAuthApplicationInfo = storedOAuthApplicationInfo;
-                        }else{
+                        } else {
 
-                            if (StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL())){
+                            if (StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL())) {
                                 oAuthApplicationInfo.setCallBackURL(storedOAuthApplicationInfo.getCallBackURL());
                             }
                             if (oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) == null &&

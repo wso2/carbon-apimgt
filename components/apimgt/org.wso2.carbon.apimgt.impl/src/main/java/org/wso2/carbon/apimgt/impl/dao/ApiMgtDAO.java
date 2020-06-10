@@ -8710,33 +8710,33 @@ public class ApiMgtDAO {
         return false;
     }
 
-    public Set<APIKey> getKeyMappingsFromApplicationId(int applicationId) throws APIManagementException{
-        final String query = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE,STATE,APP_INFO FROM AM_APPLICATION_KEY_MAPPING " +
-                "WHERE APPLICATION_ID=?";
-        Set<APIKey> apiKeyList  = new HashSet<>();
-        try(Connection connection = APIMgtDBUtil.getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement(query)){
-            preparedStatement.setInt(1,applicationId);
-            try(ResultSet resultSet = preparedStatement.executeQuery()){
-             while (resultSet.next()){
-                 APIKey apiKey = new APIKey() ;
-                 apiKey.setMappingId(resultSet.getString("UUID"));
-                 apiKey.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
-                 apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
-                 apiKey.setType(resultSet.getString("KEY_TYPE"));
-                 apiKey.setState(resultSet.getString("STATE"));
-                 try (InputStream appInfo = resultSet.getBinaryStream("APP_INFO")) {
-                     if (appInfo != null){
-                         apiKey.setAppMetadata(IOUtils.toString(appInfo));
-                     }
-                 } catch (IOException e) {
-                     log.error("Error while retrieving metadata", e);
-                 }
-                 apiKeyList.add(apiKey);
-             }
+    public Set<APIKey> getKeyMappingsFromApplicationId(int applicationId) throws APIManagementException {
+
+        Set<APIKey> apiKeyList = new HashSet<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement(SQLConstants.GET_KEY_MAPPING_INFO_FROM_APP_ID)) {
+            preparedStatement.setInt(1, applicationId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    APIKey apiKey = new APIKey();
+                    apiKey.setMappingId(resultSet.getString("UUID"));
+                    apiKey.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
+                    apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
+                    apiKey.setType(resultSet.getString("KEY_TYPE"));
+                    apiKey.setState(resultSet.getString("STATE"));
+                    try (InputStream appInfo = resultSet.getBinaryStream("APP_INFO")) {
+                        if (appInfo != null) {
+                            apiKey.setAppMetaData(IOUtils.toString(appInfo));
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while retrieving metadata", e);
+                    }
+                    apiKeyList.add(apiKey);
+                }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error while Retrieving Key Mappings ",e);
+            throw new APIManagementException("Error while Retrieving Key Mappings ", e);
         }
         return apiKeyList;
     }
@@ -8820,7 +8820,7 @@ public class ApiMgtDAO {
     public void updateApplicationKeyTypeMetaData(int applicationId, String keyType, String keyManagerName,
                                                  OAuthApplicationInfo updatedAppInfo) throws APIManagementException {
 
-        if (applicationId != -1 && updatedAppInfo != null) {
+        if (applicationId > 0 && updatedAppInfo != null) {
             String addApplicationKeyMapping = SQLConstants.UPDATE_APPLICATION_KEY_TYPE_MAPPINGS_METADATA_SQL;
 
             try (Connection connection = APIMgtDBUtil.getConnection()) {
