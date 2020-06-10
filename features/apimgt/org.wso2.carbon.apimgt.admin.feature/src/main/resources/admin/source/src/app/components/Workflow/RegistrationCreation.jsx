@@ -46,8 +46,13 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
 import API from 'AppData/api';
-import NativeSelect from '@material-ui/core/NativeSelect';
 import Button from '@material-ui/core/Button';
+import * as dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+import CheckIcon from '@material-ui/icons/Check';
+import ClearIcon from '@material-ui/icons/Clear';
+import Box from '@material-ui/core/Box';
 
 const useStyles = makeStyles((theme) => ({
     searchBar: {
@@ -65,6 +70,14 @@ const useStyles = makeStyles((theme) => ({
     button: {
         borderColor: 'rgba(255, 255, 255, 0.7)',
     },
+    approveButton: {
+        textDecoration: 'none',
+        backgroundColor: theme.palette.success.light,
+    },
+    rejectButton: {
+        textDecoration: 'none',
+        backgroundColor: theme.palette.error.light,
+    },
 }));
 
 /**
@@ -75,7 +88,8 @@ const useStyles = makeStyles((theme) => ({
 function ListLabels() {
     const intl = useIntl();
     const [data, setData] = useState(null);
-    const [lists, setlists] = useState([]);
+    const classes = useStyles();
+    const [searchText, setSearchText] = useState('');
 
     /**
     * Mock API call
@@ -84,19 +98,14 @@ function ListLabels() {
     function apiCall() {
         return new Promise((resolve, reject) => {
             const restApi = new API();
-            restApi
-                .workflowsGet('AM_APPLICATION_CREATION')
+            const promise1 = restApi.workflowsGet('AM_APPLICATION_REGISTRATION_PRODUCTION');
+            const promise2 = restApi.workflowsGet('AM_APPLICATION_REGISTRATION_SANDBOX');
+            Promise.all([promise1, promise2])
                 .then((result) => {
-                    const workflowlist = result.body.list;
-                    const array = [];
-                    workflowlist.map((respond) => {
-                        const obj = {};
-                        obj.referenceId = respond.referenceId;
-                        obj.status = 'APPROVED';
-                        array.push(obj);
-                        return array;
-                    });
-                    setlists(array);
+                    const registrationProduction = result[0].body.list;
+                    const registrationSandbox = result[1].body.list;
+                    const workflowlist = registrationProduction.concat(registrationSandbox);
+
                     resolve(workflowlist);
                 })
                 .catch((error) => {
@@ -104,6 +113,7 @@ function ListLabels() {
                 });
         });
     }
+
 
     const fetchData = () => {
     // Fetch data from backend
@@ -121,25 +131,9 @@ function ListLabels() {
         fetchData();
     }, []);
 
-    const onChange = (referenceId, e) => {
-        lists.map((res) => {
-            if (res.referenceId === referenceId) {
-                res.status = e.target.value;
-            }
-            return res.status;
-        });
-    };
-
-    const onClick = (referenceId) => {
+    const updateStatus = (referenceId, value) => {
         const body = {};
-        let status;
-        lists.map((res) => {
-            if (res.referenceId === referenceId) {
-                status = res.status;
-            }
-            return status;
-        });
-        body.status = status;
+        body.status = value;
         body.attributes = {};
         body.description = 'Approve workflow request.';
 
@@ -158,6 +152,7 @@ function ListLabels() {
             .catch((error) => {
                 const { response } = error;
                 if (response.body) {
+                    response.body.description = 'Unable to complete registration creation approve/reject process';
                     throw (response.body.description);
                 }
                 return null;
@@ -165,39 +160,6 @@ function ListLabels() {
             .finally(() => {
                 fetchData();
             });
-    };
-
-    const timeAgo = (prevDate) => {
-        const diff = Number(new Date()) - prevDate;
-        const minute = 60 * 1000;
-        const hour = minute * 60;
-        const day = hour * 24;
-        const month = day * 30;
-        const year = day * 365;
-        switch (true) {
-            case diff < minute: {
-                const seconds = Math.round(diff / 1000);
-                return `${seconds} ${seconds > 1 ? 'seconds' : 'second'} ago`;
-            }
-            case diff < hour: {
-                return Math.round(diff / minute) + ' minutes ago';
-            }
-            case diff < day: {
-                return Math.round(diff / hour) + ' hours ago';
-            }
-            case diff < month: {
-                return Math.round(diff / day) + ' days ago';
-            }
-            case diff < year: {
-                return Math.round(diff / month) + ' months ago';
-            }
-            case diff > year: {
-                return Math.round(diff / year) + ' years ago';
-            }
-            default: {
-                return '';
-            }
-        }
     };
 
     const pageProps = {
@@ -215,46 +177,8 @@ function ListLabels() {
                         >
                             <ListItemText primary={(
                                 <FormattedMessage
-                                    id='AdminPages.Microgateways.List.help.link.one'
-                                    defaultMessage='Create a Microgateway label'
-                                />
-                            )}
-                            />
-
-                        </Link>
-                    </ListItem>
-                    <ListItem button>
-                        <ListItemIcon>
-                            <DescriptionIcon />
-                        </ListItemIcon>
-                        <Link
-                            target='_blank'
-                            href={Configurations.app.docUrl
-                        + 'learn/api-microgateway/grouping-apis-with-labels/#grouping-apis-with-microgateway-labels'}
-                        >
-                            <ListItemText primary={(
-                                <FormattedMessage
-                                    id='AdminPages.Microgateways.List.help.link.two'
-                                    defaultMessage='Assign the Microgateway label to an API'
-                                />
-                            )}
-                            />
-
-                        </Link>
-                    </ListItem>
-                    <ListItem button>
-                        <ListItemIcon>
-                            <DescriptionIcon />
-                        </ListItemIcon>
-                        <Link
-                            target='_blank'
-                            href={Configurations.app.docUrl
-                        + 'learn/api-microgateway/grouping-apis-with-labels/#grouping-apis-with-microgateway-labels'}
-                        >
-                            <ListItemText primary={(
-                                <FormattedMessage
-                                    id='AdminPages.Microgateways.List.help.link.three'
-                                    defaultMessage='View the Microgateway labels'
+                                    id='Workflow.RegistrationCreation.link.one'
+                                    defaultMessage='Create a application registration workflow request'
                                 />
                             )}
                             />
@@ -268,10 +192,10 @@ function ListLabels() {
         pageStyle='full' = Take the full content area.
         pageStyle='paperLess' = Avoid from displaying background paper. ( For dashbord we need this )
         */
-        pageStyle: 'full',
+        pageStyle: 'half',
         title: intl.formatMessage({
-            id: 'Workflow.ApplicationCreation.title.applicationcreation',
-            defaultMessage: 'Application Creation - Approval Tasks',
+            id: 'Workflow.RegistrationCreation.title.registrationcreation',
+            defaultMessage: 'Registration Creation - Approval Tasks',
         }),
     };
 
@@ -280,75 +204,80 @@ function ListLabels() {
             name: 'description',
             label: 'Description',
             options: {
-                filter: false,
                 sort: false,
+                display: false,
             },
         },
         {
-            name: 'workflowStatus',
-            label: 'Status',
-            options: {
-                filter: false,
-                sort: false,
-            },
-        },
-        {
-            name: 'elapsed time',
-            label: 'Elapsed time',
+            name: 'application',
+            label: 'Application',
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
                     const dataRow = data[tableMeta.rowIndex];
-                    const { createdTime } = dataRow;
-                    const prevDate = new Date(createdTime).getTime();
-
+                    const { properties } = dataRow;
                     return (
                         <div>
-                            {timeAgo(prevDate)}
+                            {properties.applicationName}
                         </div>
                     );
                 },
             },
         },
         {
-            name: 'createdTime',
-            label: 'Created On',
+            name: 'applicationTier',
+            label: 'Throtting Policy',
             options: {
-                filter: false,
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
                     const dataRow = data[tableMeta.rowIndex];
-                    const { createdTime } = dataRow;
-                    const date = new Date(createdTime);
-                    const datestring = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-'
-                    + ('0' + date.getDate()).slice(-2) + ' ' + ('0' + date.getHours()).slice(-2) + ':'
-                    + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2);
-
+                    const { properties } = dataRow;
                     return (
                         <div>
-                            {datestring}
+                            {properties.applicationTier}
                         </div>
                     );
                 },
             },
         },
         {
-            name: 'UpdateStatus',
-            label: 'Update Status',
+            name: 'keyType',
+            label: 'Key Type',
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
-                    const options = ['APPROVED', 'REJECTED'];
                     const dataRow = data[tableMeta.rowIndex];
-                    const { referenceId } = dataRow;
+                    const { properties } = dataRow;
                     return (
                         <div>
-                            <NativeSelect
-                                value={[lists.find((x) => x.referenceId === referenceId)].status}
-                                onChange={(e) => onChange(referenceId, e)}
-                            >
-                                {options.map((option) => <option key={option} value={option}>{option}</option>)}
-                            </NativeSelect>
+                            {properties.keyType}
+                        </div>
+                    );
+                },
+            },
+        },
+        {
+            name: 'creater',
+            label: 'Created by',
+            options: {
+                sort: false,
+                customBodyRender: (value, tableMeta) => {
+                    const dataRow = data[tableMeta.rowIndex];
+                    const { properties } = dataRow;
+                    const { createdTime } = dataRow;
+                    dayjs.extend(relativeTime);
+                    const time = dayjs(createdTime).fromNow();
+                    dayjs.extend(localizedFormat);
+                    const format = dayjs(createdTime).format('LLL');
+                    return (
+                        <div>
+                            {properties.userName}
+                            <br />
+                            <Tooltip title={format}>
+                                <Typography color='textSecondary'>
+                                    {time}
+                                </Typography>
+                            </Tooltip>
                         </div>
                     );
                 },
@@ -364,20 +293,33 @@ function ListLabels() {
                     const { referenceId } = dataRow;
                     return (
                         <div>
-                            <Button
-                                variant='contained'
-                                color='primary'
-                                onClick={() => onClick(referenceId)}
-                            >
-                            Complete
-                            </Button>
+                            <Box component='span' m={1}>
+                                <Button
+                                    className={classes.approveButton}
+                                    variant='contained'
+                                    size='small'
+                                    onClick={() => updateStatus(referenceId, 'APPROVED')}
+                                >
+                                    <CheckIcon />
+                                    Approve
+                                </Button>
+                                &nbsp;&nbsp;
+                                <Button
+                                    className={classes.rejectButton}
+                                    variant='contained'
+                                    size='small'
+                                    onClick={() => updateStatus(referenceId, 'REJECTED')}
+                                >
+                                    <ClearIcon />
+                                    Reject
+                                </Button>
+                            </Box>
                         </div>
                     );
                 },
             },
         },
     ];
-
 
     const addButtonProps = {};
     const addButtonOverride = null;
@@ -392,13 +334,10 @@ function ListLabels() {
 
     const searchActive = true;
     const searchPlaceholder = intl.formatMessage({
-        id: 'Workflow.applicationcreation.search.default',
+        id: 'Workflow.RegistrationCreation.search.default',
         defaultMessage: 'Search by workflow request description',
     });
 
-
-    const classes = useStyles();
-    const [searchText, setSearchText] = useState('');
 
     const filterData = (event) => {
         setSearchText(event.target.value);
@@ -432,18 +371,18 @@ function ListLabels() {
                         <CardContent>
                             <Typography gutterBottom variant='h5' component='h2'>
                                 <FormattedMessage
-                                    id='Workflow.ApplicationCreation.List.empty.title.applicationcreations'
-                                    defaultMessage='Application Creation'
+                                    id='Workflow.ApplicationRegistration.List.empty.title.applicationregistrations'
+                                    defaultMessage='Application Registration'
                                 />
 
                             </Typography>
                             <Typography variant='body2' color='textSecondary' component='p'>
                                 <FormattedMessage
-                                    id='Workflow.ApplicationCreation.List.empty.content.applicationcreations'
-                                    defaultMessage={'There are no workflow pending requests for application creation.'
-                                    + 'It is possible to approve or reject workflow pending requests of application'
-                                    + 'creation. Workflow Approval Executor need to be enabled'
-                                    + 'to introduce this approve reject process into system'}
+                                    id='Workflow.ApplicationRegistration.List.empty.content.applicationregistrations'
+                                    defaultMessage={'There are no workflow pending requests for application '
+                                    + 'registration. It is possible to approve or reject workflow pending requests of '
+                                    + 'application registration. Workflow Approval Executor need to be enabled to '
+                                    + 'introduce this approve reject process into system'}
                                 />
                             </Typography>
                         </CardContent>
