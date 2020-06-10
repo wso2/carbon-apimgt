@@ -1156,7 +1156,7 @@
         </GatewayLabels>
         {% endif %}
         {% if apim.sync_runtime_artifacts.gateway.artifact_retriever is defined %}
-        <ArtifactRetriever>{{apim.sync_runtime_artifacts.artifact_retriever}}</ArtifactRetriever>
+        <ArtifactRetriever>{{apim.sync_runtime_artifacts.gateway.artifact_retriever}}</ArtifactRetriever>
         {% endif %}
     </SyncRuntimeArtifactsGateway>
     {% endif %}
