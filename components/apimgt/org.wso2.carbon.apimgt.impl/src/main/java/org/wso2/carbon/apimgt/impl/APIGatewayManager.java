@@ -187,7 +187,7 @@ public class APIGatewayManager {
             if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
                 gatewayAPIDTO = createAPIGatewayDTOtoPublishAPI(environment, api, builder, tenantDomain);
                 if (gatewayAPIDTO == null) {
-                    return null;
+                    return failedGatewaysMap;
                 } else {
                     if (gatewayArtifactSynchronizerProperties.isPublishDirectlyToGatewayEnabled()) {
                         if (!isGatewayDefinedAsALabel) {
