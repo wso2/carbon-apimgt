@@ -170,7 +170,7 @@ function AddEdit(props) {
                 if (value === '') {
                     error = intl.formatMessage({
                         id: 'Throttling.Custom.Policy.policy.name.empty',
-                        defaultMessage: 'Name is Emptys',
+                        defaultMessage: 'Name is Empty',
                     });
                 } else if (value.indexOf(' ') !== -1) {
                     error = intl.formatMessage({
@@ -179,7 +179,7 @@ function AddEdit(props) {
                     });
                 } else if (schema.validate(value).error) {
                     error = intl.formatMessage({
-                        id: 'Throttling.Custom.Policy.policy..name.invalid.character',
+                        id: 'Throttling.Custom.Policy.policy.name.invalid.character',
                         defaultMessage: 'Name contains one or more illegal characters',
                     });
                 } else {
