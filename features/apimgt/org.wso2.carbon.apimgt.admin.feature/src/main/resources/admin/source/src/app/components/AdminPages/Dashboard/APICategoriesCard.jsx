@@ -33,7 +33,7 @@ import Divider from '@material-ui/core/Divider';
 const useStyles = makeStyles(() => ({
     root: {
         minWidth: 275,
-        minHeight: 250,
+        minHeight: 270,
         textAlign: 'center',
 
     },
@@ -122,7 +122,7 @@ export default function APICategoriesCard() {
                     <Divider light />
 
                     {/* Listing last 4 categories on the card */}
-
+                    {/* todoL impl to display at most 4 categories only */}
                     {apiCategoriesList.map((category) => {
                         return (
                             <Box display='flex' alignItems='center'>

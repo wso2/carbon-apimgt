@@ -21,6 +21,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import APICategoriesCard from 'AppComponents/AdminPages/Dashboard/APICategoriesCard';
+import RateLimitingCard from 'AppComponents/AdminPages/Dashboard/RateLimitingCard';
 
 const useStyles = makeStyles(() => ({
     rootGrid: {
@@ -39,6 +40,10 @@ export default function Dashboard() {
         <ContentBase title='Dashboard' pageStyle='paperLess'>
             <div className={classes.rootGrid}>
                 <Grid container spacing={3} justify='center'>
+                    <Grid item xs={6}>
+                        <RateLimitingCard />
+                    </Grid>
+
                     <Grid item xs={6}>
                         <APICategoriesCard />
                     </Grid>
