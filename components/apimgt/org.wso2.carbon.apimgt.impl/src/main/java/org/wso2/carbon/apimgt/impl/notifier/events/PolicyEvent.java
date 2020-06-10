@@ -20,6 +20,10 @@ package org.wso2.carbon.apimgt.impl.notifier.events;
 
 import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
 
-public interface PolicyEvent {
-    public PolicyType getPolicyType();
+public class PolicyEvent extends Event {
+    protected PolicyType policyType;
+
+    public PolicyType getPolicyType() {
+        return policyType;
+    }
 }

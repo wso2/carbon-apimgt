@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
  * An Event Object which can holds the data related to API Policy which are required
  * for the validation purpose in a gateway.
  */
-public class APIPolicyEvent extends Event implements PolicyEvent{
+public class APIPolicyEvent extends PolicyEvent {
     private int policyId;
     private String policyName;
     private String quotaType;
@@ -41,6 +41,7 @@ public class APIPolicyEvent extends Event implements PolicyEvent{
         this.policyName = policyName;
         this.quotaType = quotaType;
         this.tenantDomain = tenantDomain;
+        this.policyType = PolicyType.API;
     }
 
     @Override
@@ -94,11 +95,5 @@ public class APIPolicyEvent extends Event implements PolicyEvent{
 
     public void setQuotaType(String quotaType) {
         this.quotaType = quotaType;
-    }
-
-    @Override
-    public PolicyType getPolicyType() {
-        return PolicyType.API;
-    }
-    
+    }    
 }

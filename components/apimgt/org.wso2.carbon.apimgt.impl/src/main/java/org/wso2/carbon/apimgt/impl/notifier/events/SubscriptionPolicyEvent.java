@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
  * An Event Object which can holds the data related to Subscription Policy which are required
  * for the validation purpose in a gateway.
  */
-public class SubscriptionPolicyEvent extends Event implements PolicyEvent {
+public class SubscriptionPolicyEvent extends PolicyEvent {
     private int policyId;
     private String policyName;
     private String quotaType;
@@ -48,6 +48,7 @@ public class SubscriptionPolicyEvent extends Event implements PolicyEvent {
         this.rateLimitTimeUnit = rateLimitTimeUnit;
         this.stopOnQuotaReach = stopOnQuotaReach;
         this.tenantDomain = tenantDomain;
+        this.policyType = PolicyType.SUBSCRIPTION;
     }
 
     @Override
@@ -131,10 +132,5 @@ public class SubscriptionPolicyEvent extends Event implements PolicyEvent {
 
     public void setStopOnQuotaReach(boolean stopOnQuotaReach) {
         this.stopOnQuotaReach = stopOnQuotaReach;
-    }
-
-    @Override
-    public PolicyType getPolicyType() {
-        return PolicyType.SUBSCRIPTION;
     }
 }
