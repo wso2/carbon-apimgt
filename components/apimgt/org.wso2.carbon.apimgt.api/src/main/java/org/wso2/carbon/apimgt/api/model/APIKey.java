@@ -32,6 +32,7 @@ public class APIKey {
     private String grantTypes;
     private Object additionalProperties;
     private String keyManager;
+    private String appMetadata;
 
     public String getState() {
         return state;
@@ -150,5 +151,15 @@ public class APIKey {
     public void setMappingId(String mappingId) {
 
         this.mappingId = mappingId;
+    }
+
+    public String getAppMetadata() {
+
+        return appMetadata;
+    }
+
+    public void setAppMetadata(String appMetadata) {
+
+        this.appMetadata = appMetadata;
     }
 }
