@@ -1367,9 +1367,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.UPDATED, this.username);
 
-                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            boolean gatewayExists;
+            if (config.getGatewayArtifactSynchronizerProperties().isPublishDirectlyToGatewayEnabled()) {
+                gatewayExists = config.getApiGatewayEnvironments().size() > 0;
+            } else {
+                gatewayExists = config.getApiGatewayEnvironments().size() > 0 || getAllLabels(tenantDomain).size() > 0;
+
+            }
                 String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
                 boolean isAPIPublished = false;
                 // gatewayType check is required when API Management is deployed on other servers to avoid synapse
