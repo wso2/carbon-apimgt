@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
-import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 
 /**
@@ -21,10 +20,10 @@ public interface ArtifactRetriever {
      * @param APIId              - UUID of the API
      * @param gatewayLabel       - Label subscribed by the gateway
      * @param gatewayInstruction - Whether this is to publish or remove the API from gateway
-     * @return DTO contains all the information about the API and gateway artifacts
+     * @return A String contains all the information about the API and gateway artifacts
      * @throws ArtifactSynchronizerException if there are any errors when retrieving the Artifacts
      */
-    GatewayAPIDTO retrieveArtifact(String APIId, String gatewayLabel, String gatewayInstruction)
+    String retrieveArtifact(String APIId, String gatewayLabel, String gatewayInstruction)
             throws ArtifactSynchronizerException;
 
     /**

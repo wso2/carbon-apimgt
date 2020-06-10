@@ -1,21 +1,15 @@
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
-import com.google.gson.Gson;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.HashSet;
-import java.util.Set;
 
 public class DBSaver implements ArtifactSaver {
 
@@ -28,56 +22,51 @@ public class DBSaver implements ArtifactSaver {
     }
 
     @Override
-    public void saveArtifact(GatewayAPIDTO gatewayAPIDTO)
+    public void saveArtifact(String gatewayRuntimeArtifacts, String gatewayInstruction)
             throws ArtifactSynchronizerException {
 
         try {
-            byte[] gatewayAPIDTOAsBytes = new Gson().toJson(gatewayAPIDTO).getBytes();
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayAPIDTOAsBytes);
-            if (!apiMgtDAO.isAPIDetailsExists(gatewayAPIDTO.getApiId())) {
-                apiMgtDAO.addGatewayPublishedAPIDetails(gatewayAPIDTO);
+            JSONObject artifactObject = new JSONObject(gatewayRuntimeArtifacts);
+            String apiId = (String) artifactObject.get("apiId");
+            String apiName = (String) artifactObject.get("name");
+            String version = (String) artifactObject.get("version");
+            String tenantDomain = (String) artifactObject.get("tenantDomain");
+            String gatewayLabel = (String) artifactObject.get("gatewayLabel");
+
+            byte[] gatewayRuntimeArtifactsAsBytes = gatewayRuntimeArtifacts.getBytes();
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayRuntimeArtifactsAsBytes);
+            if (!apiMgtDAO.isAPIDetailsExists(apiId)) {
+                apiMgtDAO.addGatewayPublishedAPIDetails(apiId, apiName,
+                        version, tenantDomain);
             }
-            apiMgtDAO.addGatewayPublishedAPIArtifacts(gatewayAPIDTO, byteArrayInputStream, gatewayAPIDTOAsBytes.length);
+
+            String dbQuery;
+            if (apiMgtDAO.isAPIArtifactExists(apiId, gatewayLabel)) {
+                dbQuery = SQLConstants.UPDATE_API_ARTIFACT;
+            } else {
+                dbQuery = SQLConstants.ADD_GW_API_ARTIFACT;
+            }
+            apiMgtDAO.addGatewayPublishedAPIArtifacts(apiId, gatewayLabel,
+                    byteArrayInputStream, gatewayRuntimeArtifactsAsBytes.length, gatewayInstruction, dbQuery);
+
             if (log.isDebugEnabled()) {
-                log.debug("Successfully saved Artifacts of " + gatewayAPIDTO.getName());
+                log.debug("Successfully saved Artifacts of " + apiName);
             }
         } catch (APIManagementException e) {
-            throw new ArtifactSynchronizerException("Error saving Artifact of " + gatewayAPIDTO.getName() +
-                    " API to the DB", e);
+            throw new ArtifactSynchronizerException("Error saving Artifacts to the DB", e);
         }
 
     }
 
     @Override
-    public void updateArtifact(GatewayAPIDTO gatewayAPIDTO, String gatewayInstruction)
-            throws ArtifactSynchronizerException {
+    public boolean isAPIPublished(String apiId) {
 
         try {
-            byte[] gatewayAPIDTOAsBytes = new Gson().toJson(gatewayAPIDTO).getBytes();
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayAPIDTOAsBytes);
-            apiMgtDAO.updateGatewayPublishedAPIArtifacts(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel(),
-                    byteArrayInputStream, gatewayAPIDTOAsBytes.length, gatewayInstruction);
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully updated Artifacts of " + gatewayAPIDTO.getName());
-            }
+            return apiMgtDAO.isAPIPublishedInAnyGateway(apiId);
         } catch (APIManagementException e) {
-            throw new ArtifactSynchronizerException("Error updating Artifact of " + gatewayAPIDTO.getName() +
-                    " API", e);
+            log.error("Error checking API with ID " + apiId + " is published in any gateway", e);
         }
-
-    }
-
-    @Override
-    public Set<String> getExistingLabelsForAPI(String apiId) {
-
-        Set<String> labelsSet = new HashSet<>();
-        try {
-            labelsSet = apiMgtDAO.getExistingLabelsForAPI(apiId);
-        } catch (APIManagementException e) {
-            log.error("Error getting labels for the API with ID " + apiId + " from DB", e);
-        }
-
-        return labelsSet;
+        return false;
     }
 
     @Override

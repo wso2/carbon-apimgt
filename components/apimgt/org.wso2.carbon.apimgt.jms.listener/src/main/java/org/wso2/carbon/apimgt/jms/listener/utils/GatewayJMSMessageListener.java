@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -96,11 +97,13 @@ public class GatewayJMSMessageListener implements MessageListener {
                 && gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded),
                     DeployAPIInGatewayEvent.class);
-            if (gatewayArtifactSynchronizerProperties.getGatewayLabels().contains(gatewayEvent.getGatewayLabel())) {
+            gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
+            if (!gatewayEvent.getGatewayLabels().isEmpty()) {
+                String gatewayLabel = gatewayEvent.getGatewayLabels().iterator().next();
                 if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
-                    inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayEvent.getGatewayLabel());
+                    inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
                 } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
-                    inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayEvent.getGatewayLabel());
+                    inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
                 }
             }
         }

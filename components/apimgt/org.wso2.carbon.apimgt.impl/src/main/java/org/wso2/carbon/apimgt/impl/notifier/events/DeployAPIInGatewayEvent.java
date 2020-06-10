@@ -1,42 +1,32 @@
 package org.wso2.carbon.apimgt.impl.notifier.events;
 
+import java.util.Set;
+
 public class DeployAPIInGatewayEvent extends Event {
 
-    private String gatewayLabel;
-    private String apiName;
     private String apiId;
+    private Set<String> gatewayLabels;
 
-    public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, int tenantId, String apiName, String apiId,
-                                   String gatewayLabel) {
+    public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, int tenantId, String apiId,
+                                   Set<String> gatewayLabels) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
         this.tenantId = tenantId;
 
-        this.apiName = apiName;
         this.apiId = apiId;
-        this.gatewayLabel = gatewayLabel;
+        this.gatewayLabels = gatewayLabels;
 
     }
 
-    public String getGatewayLabel() {
+    public Set<String> getGatewayLabels() {
 
-        return gatewayLabel;
+        return gatewayLabels;
     }
 
-    public void setGatewayLabel(String gatewayLabel) {
+    public void setGatewayLabels(Set<String> gatewayLabels) {
 
-        this.gatewayLabel = gatewayLabel;
-    }
-
-    public String getApiName() {
-
-        return apiName;
-    }
-
-    public void setApiName(String apiName) {
-
-        this.apiName = apiName;
+        this.gatewayLabels = gatewayLabels;
     }
 
     public String getApiId() {
