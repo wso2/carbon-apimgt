@@ -319,13 +319,13 @@ ExceptionCodes implements ErrorHandler {
             "Key Manager name cannot be empty", 400,"Key Manager name cannot be empty"),
     KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION(901405, "Key Manager doesn't support generating OAuth applications", 400,
             "Key Manager doesn't support generating OAuth applications"),
-    KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION(901406, "Key Manager doesn't support token generation", 400,
+    KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION(901405, "Key Manager doesn't support token generation", 400,
             "Key Manager doesn't support token generation"),
-    KEY_MANAGER_NOT_ENABLED(901407, "Key Manager is not enabled in the system", 400,
+    KEY_MANAGER_NOT_ENABLED(901406, "Key Manager is not enabled in the system", 400,
             "Key Manager is not enabled in the system"),
-    KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901408, "Required application properties are missing", 400,
+    KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901407, "Required application properties are missing", 400,
             "Required application properties are missing"),
-    KEY_MAPPING_ALREADY_EXIST(901409, "Application already Registered", 409, "Application already Registered");
+    KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered");
 
 
     private final long errorCode;

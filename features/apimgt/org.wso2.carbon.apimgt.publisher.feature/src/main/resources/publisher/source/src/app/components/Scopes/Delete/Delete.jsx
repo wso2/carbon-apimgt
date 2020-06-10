@@ -71,7 +71,7 @@ function Delete(props) {
         promisedScopeDelete
             .then(() => {
                 Alert.info(intl.formatMessage({
-                    id: 'Scopes.Delete.Delete.api.scope.deleted.successfully',
+                    id: 'Scopes.Delete.Delete.scope.deleted.successfully',
                     defaultMessage: 'API Scope deleted successfully!',
                 }));
                 setOpenLocal(!open);
