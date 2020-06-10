@@ -12,6 +12,10 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 /**
  * This class contains the methods used to retrieve artifacts from a storage and deploy and undeploy the API in gateway
  */
@@ -50,6 +54,37 @@ public class InMemoryAPIDeployer {
                     return true;
                 } catch (AxisFault | ArtifactSynchronizerException e) {
                     log.error("Error deploying " + apiId + " in Gateway", e);
+                }
+            } else {
+                log.error("Artifact retriever not found");
+            }
+        }
+        return false;
+    }
+
+    public boolean deployAllAPIsAtGatewayStartup (Set<String> assignedGatewayLabels) {
+
+        if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
+            if (artifactRetriever != null) {
+                try {
+                    for (Iterator<String> it = assignedGatewayLabels.iterator(); it.hasNext();) {
+                        String label = it.next();
+                        List<String> gatewayRuntimeArtifacts = ServiceReferenceHolder
+                                .getInstance().getArtifactRetriever().retrieveAllArtifacts(label);
+                        for (String APIruntimeArtifact :gatewayRuntimeArtifacts){
+                            GatewayAPIDTO gatewayAPIDTO = null;
+                            try {
+                                gatewayAPIDTO = new Gson().fromJson(APIruntimeArtifact, GatewayAPIDTO.class);
+                                apiGatewayAdmin.deployAPI(gatewayAPIDTO);
+                            } catch (AxisFault axisFault) {
+                                log.error("Error in deploying" + gatewayAPIDTO.getName()+ " to the Gateway ");
+                                continue;
+                            }
+                        }
+                    }
+                    return true;
+                } catch (ArtifactSynchronizerException e ) {
+                    log.error("Error  deploying APIs to the Gateway " + e );
                 }
             } else {
                 log.error("Artifact retriever not found");
