@@ -15527,6 +15527,26 @@ public class ApiMgtDAO {
         return baip;
     }
 
+    public List<ByteArrayInputStream> getAllGatewayPublishedAPIArtifacts(String label) throws APIManagementException {
+        List<ByteArrayInputStream> baip = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_ALL_API_ARTIFACT)) {
+            statement.setString(1, label);
+            statement.setString(2, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                byte[] st = (byte[]) rs.getObject(1);
+                ByteArrayInputStream byteArrayInputStream= new ByteArrayInputStream(st);
+                baip.add(byteArrayInputStream);
+                log.info("Retrieved an api from DB");
+            }
+            return baip;
+        } catch (SQLException e) {
+            handleException("Failed to get artifacts " , e);
+        }
+        return baip;
+    }
+
     /**
      * Check whether the API is published in any of the Gateways
      *
