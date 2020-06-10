@@ -70,7 +70,7 @@ export default function APICategoriesCard() {
         <Card className={classes.root}>
             <CardContent>
 
-                <Box mt={2}>
+                <Box>
                     <CategoryIcon color='secondary' style={{ fontSize: 60 }} />
                 </Box>
 
@@ -78,6 +78,7 @@ export default function APICategoriesCard() {
             API Category based grouping
                 </Typography>
 
+                {/* todo make the learn more link */}
                 <Typography variant='body2' component='p'>
             API categories allow API providers to categorize APIs
              that have similar attributes. When a categorized API
@@ -95,7 +96,7 @@ export default function APICategoriesCard() {
                         href='settings/api-categories'
                     >
                 Add new Category
-                        <LaunchIcon fontSize='small' />
+                        <LaunchIcon fontSize='inherit' />
                     </Button>
                 </Box>
             </CardContent>
