@@ -36,11 +36,6 @@
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1</artifactId>
             <type>war</type>
         </dependency>
@@ -84,14 +79,6 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.wso2.carbon.apimgt</groupId>
-                                    <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
-                                    <overWrite>true</overWrite>
-                                    <type>war</type>
-                                    <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>api#am#publisher#v0.16.war</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.wso2.carbon.apimgt</groupId>
                                     <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1</artifactId>
                                     <overWrite>true</overWrite>
                                     <type>war</type>
@@ -119,7 +106,6 @@
                                 <resource>
                                     <directory>resources</directory>
                                     <includes>
-                                        <include>api#am#publisher#v0.16.war</include>
                                         <include>api#am#publisher.war</include>
                                         <include>p2.inf</include>
                                         <include>build.properties</include>

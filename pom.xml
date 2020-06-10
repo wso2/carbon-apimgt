@@ -624,26 +624,12 @@
                 <type>war</type>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
-                <type>war</type>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.rest.api.store.v1</artifactId>
                 <type>war</type>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
-                <type>war</type>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1</artifactId>
