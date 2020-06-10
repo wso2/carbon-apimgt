@@ -1409,12 +1409,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 labelsRemoved.retainAll(labelsToPublish);
                                 labelsToRemove.removeAll(labelsRemoved);
                             }
-                            // map contain failed to publish Environments
-                            Map<String, String> failedToPublishEnvironments = publishToGateway(apiPublished);
                             apiPublished.setEnvironments(environmentsToRemove);
                             apiPublished.setGatewayLabels(labelsToRemove);
                             // map contain failed to remove Environments
                             Map<String, String> failedToRemoveEnvironments = removeFromGateway(apiPublished);
+
+                            apiPublished.setEnvironments(environmentsToPublish);
+                            apiPublished.setGatewayLabels(labelsToPublish);
+                            // map contain failed to publish Environments
+                            Map<String, String> failedToPublishEnvironments = publishToGateway(apiPublished);
+
                             environmentsToPublish.removeAll(failedToPublishEnvironments.keySet());
                             environmentsToPublish.addAll(failedToRemoveEnvironments.keySet());
                             apiPublished.setEnvironments(environmentsToPublish);
