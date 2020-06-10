@@ -6999,7 +6999,7 @@ public class ApiMgtDAO {
      * @return An object of {@code ConditionGroupDTO} type.
      * @throws APIManagementException
      */
-    private ConditionGroupDTO createConditionGroupDTO(int conditionGroup) throws APIManagementException {
+    public ConditionGroupDTO createConditionGroupDTO(int conditionGroup) throws APIManagementException {
         List<Condition> conditions = getConditions(conditionGroup);
         ArrayList<ConditionDTO> conditionDTOs = new ArrayList<ConditionDTO>(conditions.size());
         for (Condition condition : conditions) {
