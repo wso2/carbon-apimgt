@@ -44,7 +44,7 @@ public class API implements CacheableEntity<String> {
         urlMappings.add(resource);
     }
 
-    public List<URLMapping> getResources(String urlMapping) {
+    public List<URLMapping> getResources() {
 
         return urlMappings;
     }

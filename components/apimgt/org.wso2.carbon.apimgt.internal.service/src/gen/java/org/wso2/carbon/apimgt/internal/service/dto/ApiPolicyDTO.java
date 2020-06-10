@@ -2,6 +2,9 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.PolicyDTO;
 import javax.validation.constraints.*;
 
@@ -20,6 +23,7 @@ public class ApiPolicyDTO   {
     private Integer tenantId = null;
     private String name = null;
     private String quotaType = null;
+    private List<ApiPolicyConditionGroupDTO> conditionGroups = new ArrayList<>();
 
   /**
    **/
@@ -89,6 +93,23 @@ public class ApiPolicyDTO   {
     this.quotaType = quotaType;
   }
 
+  /**
+   **/
+  public ApiPolicyDTO conditionGroups(List<ApiPolicyConditionGroupDTO> conditionGroups) {
+    this.conditionGroups = conditionGroups;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("conditionGroups")
+  public List<ApiPolicyConditionGroupDTO> getConditionGroups() {
+    return conditionGroups;
+  }
+  public void setConditionGroups(List<ApiPolicyConditionGroupDTO> conditionGroups) {
+    this.conditionGroups = conditionGroups;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -102,12 +123,13 @@ public class ApiPolicyDTO   {
     return Objects.equals(id, apiPolicy.id) &&
         Objects.equals(tenantId, apiPolicy.tenantId) &&
         Objects.equals(name, apiPolicy.name) &&
-        Objects.equals(quotaType, apiPolicy.quotaType);
+        Objects.equals(quotaType, apiPolicy.quotaType) &&
+        Objects.equals(conditionGroups, apiPolicy.conditionGroups);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, name, quotaType);
+    return Objects.hash(id, tenantId, name, quotaType, conditionGroups);
   }
 
   @Override
@@ -119,6 +141,7 @@ public class ApiPolicyDTO   {
     sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
+    sb.append("    conditionGroups: ").append(toIndentedString(conditionGroups)).append("\n");
     sb.append("}");
     return sb.toString();
   }
