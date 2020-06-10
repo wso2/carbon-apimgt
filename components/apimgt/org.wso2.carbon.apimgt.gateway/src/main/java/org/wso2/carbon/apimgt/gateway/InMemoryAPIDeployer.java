@@ -75,6 +75,7 @@ public class InMemoryAPIDeployer {
                             GatewayAPIDTO gatewayAPIDTO = null;
                             try {
                                 gatewayAPIDTO = new Gson().fromJson(APIruntimeArtifact, GatewayAPIDTO.class);
+                                log.info("Deploying synapse artifacts of " + gatewayAPIDTO.getName());
                                 apiGatewayAdmin.deployAPI(gatewayAPIDTO);
                             } catch (AxisFault axisFault) {
                                 log.error("Error in deploying" + gatewayAPIDTO.getName()+ " to the Gateway ");
