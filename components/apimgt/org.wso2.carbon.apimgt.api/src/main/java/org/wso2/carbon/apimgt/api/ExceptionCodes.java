@@ -325,7 +325,12 @@ ExceptionCodes implements ErrorHandler {
             "Key Manager is not enabled in the system"),
     KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901407, "Required application properties are missing", 400,
             "Required application properties are missing"),
-    KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered");
+    KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered"),
+
+    //Scope related
+    SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),
+    SCOPE_NOT_FOUND(901501, "Scope Not Found", 404, "Scope does not exist"),
+    USER_NOT_FOUND(901502, "User Not Found", 404, "User does not exist");
 
 
     private final long errorCode;

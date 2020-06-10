@@ -48,6 +48,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.TenantThemeApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.AlertTypesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.AlertSubscriptionsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.SystemScopesApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
