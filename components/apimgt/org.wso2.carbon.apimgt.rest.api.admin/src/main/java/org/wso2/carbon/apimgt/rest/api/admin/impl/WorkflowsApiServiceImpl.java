@@ -19,10 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Workflow;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
@@ -31,9 +28,6 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils;
 import org.wso2.carbon.apimgt.rest.api.admin.WorkflowsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.WorkflowInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.WorkflowListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.WorkflowMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -49,63 +43,6 @@ import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENA
 public class WorkflowsApiServiceImpl extends WorkflowsApiService {
 
     private static final Log log = LogFactory.getLog(WorkflowsApiService.class);
-
-    /**
-     * This is used to get the workflow pending request according to ExternalWorkflowReference
-     *
-     * @param externalWorkflowRef is the unique identifier for workflow request
-     * @param ifNoneMatch         If-None-Match header value
-     * @return
-     */
-    @Override
-    public Response workflowsExternalWorkflowRefGet(String externalWorkflowRef, String ifNoneMatch) {
-        WorkflowInfoDTO workflowinfoDTO;
-        try {
-            Workflow workflow;
-            String status = "CREATED";
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIAdmin apiAdmin = new APIAdminImpl();
-            workflow = apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef, status, tenantDomain);
-            workflowinfoDTO = WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow);
-            return Response.ok().entity(workflowinfoDTO).build();
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving workflow request by the " +
-                    "external workflow reference. ", e, log);
-        }
-        return null;
-    }
-
-    /**
-     * This is used to get the workflow pending requests
-     *
-     * @param limit        maximum number of workflow returns
-     * @param offset       starting index
-     * @param accept       accept header value
-     * @param ifNoneMatch  If-None-Match header value
-     * @param workflowType is the the type of the workflow request. (e.g: Application Creation, Application Subscription etc.)
-     * @return
-     */
-    @Override
-    public Response workflowsGet(Integer limit, Integer offset, String accept, String ifNoneMatch, String workflowType) {
-
-        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        WorkflowListDTO workflowListDTO;
-        try {
-            Workflow[] workflows;
-            String status = "CREATED";
-            APIAdmin apiAdmin = new APIAdminImpl();
-            workflows = apiAdmin.getworkflows(workflowType, status, tenantDomain);
-            workflowListDTO = WorkflowMappingUtil.fromWorkflowsToDTO(workflows, limit, offset);
-            WorkflowMappingUtil.setPaginationParams(workflowListDTO, limit, offset,
-                    workflows.length);
-            return Response.ok().entity(workflowListDTO).build();
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving workflow requests. ", e, log);
-        }
-        return null;
-    }
 
     /**
      * This is used to update the workflow status
