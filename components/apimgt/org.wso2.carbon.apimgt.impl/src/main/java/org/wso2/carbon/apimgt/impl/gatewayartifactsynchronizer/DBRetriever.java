@@ -10,6 +10,8 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DBRetriever implements ArtifactRetriever {
 
@@ -38,6 +40,25 @@ public class DBRetriever implements ArtifactRetriever {
             throw new ArtifactSynchronizerException("Error retrieving Artifact belongs to  " + APIId + " from DB", e);
         }
         return gatewayRuntimeArtifacts;
+    }
+
+    @Override
+    public List<String> retrieveAllArtifacts(String label) throws ArtifactSynchronizerException {
+        List<String> gatewayRuntimeArtifactsArray = new ArrayList<>();
+        try {
+            List<ByteArrayInputStream> baip = apiMgtDAO.getAllGatewayPublishedAPIArtifacts(label);
+            for (ByteArrayInputStream byteStream :baip){
+                byte[] bytes = ByteStreams.toByteArray(byteStream);
+                String  gatewayRuntimeArtifacts = new String(bytes);
+                gatewayRuntimeArtifactsArray.add(gatewayRuntimeArtifacts);
+            }
+            if (log.isDebugEnabled()){
+                log.debug("Successfully retrieved Artifacts from DB");
+            }
+        } catch (APIManagementException | IOException e) {
+            throw new ArtifactSynchronizerException("Error retrieving Artifact from DB", e);
+        }
+        return gatewayRuntimeArtifactsArray;
     }
 
     @Override

@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 
+import java.util.List;
+
 /**
  * This is a Artifact Retriever type. this interface let users to retriever API artifacts from a storage.
  */
@@ -24,6 +26,16 @@ public interface ArtifactRetriever {
      * @throws ArtifactSynchronizerException if there are any errors when retrieving the Artifacts
      */
     String retrieveArtifact(String APIId, String gatewayLabel, String gatewayInstruction)
+            throws ArtifactSynchronizerException;
+
+    /**
+     * This method is used to retrieve data from the storage
+     *
+     * @param gatewayLabel       - Label subscribed by the gateway
+     * @return A List of String contains all the information about the APIs and their corresponding gateway artifacts
+     * @throws ArtifactSynchronizerException if there are any errors when retrieving the Artifacts
+     */
+     List<String> retrieveAllArtifacts(String gatewayLabel)
             throws ArtifactSynchronizerException;
 
     /**
