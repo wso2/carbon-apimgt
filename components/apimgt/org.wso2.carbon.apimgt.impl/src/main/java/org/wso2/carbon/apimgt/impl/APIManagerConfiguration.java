@@ -489,8 +489,10 @@ public class APIManagerConfiguration {
                 setGlobalCacheInvalidationConfiguration(element);
             } else if (APIConstants.KeyManager.KEY_MANAGER_CONFIGURATIONS.equals(localName)) {
                 setKeyManagerConfigurationsDto(element);
-            } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_GATEWAY_ARTIFACTS_CONFIG.equals(localName)) {
-                setGatewayArtifactsSynchronizerConfig(element);
+            } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_RUNTIME_ARTIFACTS_PUBLISHER_CONFIG.equals(localName)) {
+                setRuntimeArtifactsSyncPublisherConfig(element);
+            } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_RUNTIME_ARTIFACTS_GATEWAY_CONFIG.equals(localName)) {
+                setRuntimeArtifactsSyncGatewayConfig(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -1554,34 +1556,24 @@ public class APIManagerConfiguration {
     }
 
 
-    private void setGatewayArtifactsSynchronizerConfig (OMElement omElement){
+    private void setRuntimeArtifactsSyncPublisherConfig (OMElement omElement){
 
-        gatewayArtifactSynchronizerProperties.setSyncEnabled(true);
+        OMElement enableElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.ENABLE_CONFIG));
+        if (enableElement != null) {
+            gatewayArtifactSynchronizerProperties.setSaveArtifactsEnabled(
+                    JavaUtils.isTrueExplicitly(enableElement.getText()));
+        } else {
+            log.debug("Save to storage is not set. Set to default false");
+        }
+
         OMElement saverElement = omElement.getFirstChildWithName(
                 new QName(APIConstants.GatewayArtifactSynchronizer.SAVER_CONFIG));
         if (saverElement != null) {
             String artifactSaver = saverElement.getText();
             gatewayArtifactSynchronizerProperties.setSaverName(artifactSaver);
         } else {
-            log.debug("GatewayArtifactsSynchronizer Artifact saver Element is not set. Set to default DB Sever");
-        }
-
-        OMElement retrieverElement = omElement.getFirstChildWithName(
-                new QName(APIConstants.GatewayArtifactSynchronizer.RETRIEVER_CONFIG));
-        if (retrieverElement != null) {
-            String artifactRetriever = retrieverElement.getText();
-            gatewayArtifactSynchronizerProperties.setRetrieverName(artifactRetriever);
-        } else {
-            log.debug("GatewayArtifactsSynchronizer Artifact retriver Element is not set. Set to default DB retriever");
-        }
-
-        OMElement gatewayLabelElement = omElement
-                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.GATEWAY_LABELS_CONFIG));
-        if (gatewayLabelElement != null) {
-            String gatewayLabel = gatewayLabelElement.getText();
-            for (String label : gatewayLabel.split(",")){
-                gatewayArtifactSynchronizerProperties.getGatewayLabels().add(label);
-            }
+            log.debug("Artifact saver Element is not set. Set to default DB Saver");
         }
 
         OMElement publishDirectlyToGatewayElement = omElement
@@ -1593,13 +1585,39 @@ public class APIManagerConfiguration {
             log.debug("Publish directly to gateway is not set. Set to default true");
         }
 
-        OMElement retrieveFromStorageElement = omElement
-                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.RETRIEVE_FROM_STORAGE_CONFIG));
-        if (retrieveFromStorageElement != null) {
+    }
+
+    private void setRuntimeArtifactsSyncGatewayConfig (OMElement omElement){
+
+        OMElement enableElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.ENABLE_CONFIG));
+        if (enableElement != null) {
             gatewayArtifactSynchronizerProperties.setRetrieveFromStorageEnabled(
-                    JavaUtils.isTrueExplicitly(retrieveFromStorageElement.getText()));
+                    JavaUtils.isTrueExplicitly(enableElement.getText()));
         } else {
             log.debug("Retrieve from storage is not set. Set to default false");
+        }
+
+        OMElement retrieverElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.RETRIEVER_CONFIG));
+        if (retrieverElement != null) {
+            String artifactRetriever = retrieverElement.getText();
+            gatewayArtifactSynchronizerProperties.setRetrieverName(artifactRetriever);
+        } else {
+            log.debug("Artifact retriever Element is not set. Set to default DB Retriever");
+        }
+
+        OMElement gatewayLabelElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.GATEWAY_LABELS_CONFIG));
+        if (gatewayLabelElement != null) {
+            Iterator labelsIterator = gatewayLabelElement
+                    .getChildrenWithLocalName(APIConstants.GatewayArtifactSynchronizer.LABEL_CONFIG);
+            while (labelsIterator.hasNext()) {
+                OMElement labelElement = (OMElement) labelsIterator.next();
+                if (labelElement != null) {
+                    gatewayArtifactSynchronizerProperties.getGatewayLabels().add(labelElement.getText());
+                }
+            }
         }
     }
 

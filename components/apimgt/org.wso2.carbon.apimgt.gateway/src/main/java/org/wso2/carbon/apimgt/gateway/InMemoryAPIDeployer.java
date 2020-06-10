@@ -37,7 +37,8 @@ public class InMemoryAPIDeployer {
      */
     public boolean deployAPI(String apiId, String gatewayLabel) {
 
-        if (gatewayArtifactSynchronizerProperties.getGatewayLabels().contains(gatewayLabel)) {
+        if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled() &&
+                gatewayArtifactSynchronizerProperties.getGatewayLabels().contains(gatewayLabel)) {
             if (artifactRetriever != null) {
                 try {
                     GatewayAPIDTO gatewayAPIDTO = artifactRetriever
@@ -64,7 +65,8 @@ public class InMemoryAPIDeployer {
      */
     public boolean unDeployAPI(String apiId, String gatewayLabel) {
 
-        if (gatewayArtifactSynchronizerProperties.getGatewayLabels().contains(gatewayLabel)) {
+        if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled() &&
+                gatewayArtifactSynchronizerProperties.getGatewayLabels().contains(gatewayLabel)) {
             if (artifactRetriever != null) {
                 try {
                     GatewayAPIDTO gatewayAPIDTO = artifactRetriever

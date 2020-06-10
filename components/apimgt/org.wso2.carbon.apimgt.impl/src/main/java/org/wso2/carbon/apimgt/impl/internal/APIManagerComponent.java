@@ -308,12 +308,14 @@ public class APIManagerComponent {
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
 
-            if (configuration.getGatewayArtifactSynchronizerProperties().isSyncEnabled()) {
-                if (APIConstants.GatewayArtifactSynchronizer.DEFAULT_SAVER_NAME
+            if (configuration.getGatewayArtifactSynchronizerProperties().isSaveArtifactsEnabled()) {
+                if (APIConstants.GatewayArtifactSynchronizer.DB_SAVER_NAME
                         .equals(configuration.getGatewayArtifactSynchronizerProperties().getSaverName())) {
                     bundleContext.registerService(ArtifactSaver.class.getName(), new DBSaver(), null);
                 }
-                if (APIConstants.GatewayArtifactSynchronizer.DEFAULT_RETRIEVER_NAME
+            }
+            if (configuration.getGatewayArtifactSynchronizerProperties().isRetrieveFromStorageEnabled()) {
+                if (APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME
                         .equals(configuration.getGatewayArtifactSynchronizerProperties().getRetrieverName())) {
                     bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
                 }
@@ -895,13 +897,14 @@ public class APIManagerComponent {
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetArtifactSaver")
-    protected void setArtifactPublisher (ArtifactSaver artifactSaver) {
+    protected void setArtifactSaver (ArtifactSaver artifactSaver) {
 
         GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                         .getGatewayArtifactSynchronizerProperties();
 
-        if (gatewayArtifactSynchronizerProperties.getSaverName().equals(artifactSaver.getName())) {
+        if (gatewayArtifactSynchronizerProperties.isSaveArtifactsEnabled()
+                && gatewayArtifactSynchronizerProperties.getSaverName().equals(artifactSaver.getName())) {
             ServiceReferenceHolder.getInstance().setArtifactSaver(artifactSaver);
 
             try {

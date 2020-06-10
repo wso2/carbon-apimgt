@@ -18,7 +18,7 @@ public interface ArtifactSaver {
     void init() throws ArtifactSynchronizerException;
 
     /**
-     * This method is used to publish a deployable artifact of an API to the storage
+     * This method is used to save deployable artifact of an API to the storage
      *
      * @param gatewayAPIDTO - DTO contains all the information about the API and gateway artifacts
      * @throws ArtifactSynchronizerException if there are any errors in the process

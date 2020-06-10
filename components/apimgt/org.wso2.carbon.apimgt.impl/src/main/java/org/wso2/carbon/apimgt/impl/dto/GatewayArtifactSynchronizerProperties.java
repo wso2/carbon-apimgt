@@ -7,11 +7,11 @@ import java.util.Set;
 
 public class GatewayArtifactSynchronizerProperties {
 
-    private boolean syncEnabled = false;
+    private boolean saveArtifactsEnabled = false;
     private boolean publishDirectlyToGatewayEnabled = true;
     private boolean retrieveFromStorageEnabled = false;
-    private String saverName = APIConstants.GatewayArtifactSynchronizer.DEFAULT_SAVER_NAME;
-    private String retrieverName = APIConstants.GatewayArtifactSynchronizer.DEFAULT_RETRIEVER_NAME;
+    private String saverName = APIConstants.GatewayArtifactSynchronizer.DB_SAVER_NAME;
+    private String retrieverName = APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME;
     private Set<String> gatewayLabels = new HashSet<>();
 
     public String getSaverName() {
@@ -64,13 +64,14 @@ public class GatewayArtifactSynchronizerProperties {
         this.retrieveFromStorageEnabled = retrieveFromStorageEnabled;
     }
 
-    public boolean isSyncEnabled() {
+    public boolean isSaveArtifactsEnabled() {
 
-        return syncEnabled;
+        return saveArtifactsEnabled;
     }
 
-    public void setSyncEnabled(boolean syncEnabled) {
+    public void setSaveArtifactsEnabled(boolean saveArtifactsEnabled) {
 
-        this.syncEnabled = syncEnabled;
+        this.saveArtifactsEnabled = saveArtifactsEnabled;
     }
+
 }

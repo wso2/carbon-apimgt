@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
+import com.google.gson.Gson;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -29,20 +31,19 @@ public class DBSaver implements ArtifactSaver {
     public void saveArtifact(GatewayAPIDTO gatewayAPIDTO)
             throws ArtifactSynchronizerException {
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-            objectOutputStream.writeObject(gatewayAPIDTO);
-            byte[] gatewayAPIDTOAsBytes = byteArrayOutputStream.toByteArray();
+            byte[] gatewayAPIDTOAsBytes = Base64.encodeBase64(new Gson().toJson(gatewayAPIDTO).getBytes());
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayAPIDTOAsBytes);
-            apiMgtDAO.addGatewayPublishedAPIDetails(gatewayAPIDTO);
+            if (!apiMgtDAO.isAPIDetailsExists(gatewayAPIDTO.getApiId())) {
+                apiMgtDAO.addGatewayPublishedAPIDetails(gatewayAPIDTO);
+            }
             apiMgtDAO.addGatewayPublishedAPIArtifacts(gatewayAPIDTO, byteArrayInputStream, gatewayAPIDTOAsBytes.length);
             if (log.isDebugEnabled()) {
-                log.debug("Successfully published Artifacts of " + gatewayAPIDTO.getName());
+                log.debug("Successfully saved Artifacts of " + gatewayAPIDTO.getName());
             }
-        } catch (IOException | APIManagementException e) {
-            throw new ArtifactSynchronizerException("Error publishing Artifact of " + gatewayAPIDTO.getName() +
-                    " API from DB", e);
+        } catch (APIManagementException e) {
+            throw new ArtifactSynchronizerException("Error saving Artifact of " + gatewayAPIDTO.getName() +
+                    " API to the DB", e);
         }
 
     }
@@ -51,18 +52,15 @@ public class DBSaver implements ArtifactSaver {
     public void updateArtifact(GatewayAPIDTO gatewayAPIDTO, String gatewayInstruction)
             throws ArtifactSynchronizerException {
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-            objectOutputStream.writeObject(gatewayAPIDTO);
-            byte[] gatewayAPIDTOAsBytes = byteArrayOutputStream.toByteArray();
+            byte[] gatewayAPIDTOAsBytes = Base64.encodeBase64(new Gson().toJson(gatewayAPIDTO).getBytes());
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayAPIDTOAsBytes);
             apiMgtDAO.updateGatewayPublishedAPIArtifacts(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getGatewayLabel(),
                     byteArrayInputStream, gatewayAPIDTOAsBytes.length, gatewayInstruction);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully updated Artifacts of " + gatewayAPIDTO.getName());
             }
-        } catch (APIManagementException | IOException e) {
+        } catch (APIManagementException e) {
             throw new ArtifactSynchronizerException("Error updating Artifact of " + gatewayAPIDTO.getName() +
                     " API", e);
         }
@@ -90,6 +88,6 @@ public class DBSaver implements ArtifactSaver {
     @Override
     public String getName() {
 
-        return APIConstants.GatewayArtifactSynchronizer.DEFAULT_SAVER_NAME;
+        return APIConstants.GatewayArtifactSynchronizer.DB_SAVER_NAME;
     }
 }

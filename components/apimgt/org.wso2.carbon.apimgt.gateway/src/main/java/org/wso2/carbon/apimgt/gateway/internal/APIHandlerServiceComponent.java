@@ -411,7 +411,8 @@ public class APIHandlerServiceComponent {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
                         .getGatewayArtifactSynchronizerProperties();
 
-        if (gatewayArtifactSynchronizerProperties.getRetrieverName().equals(artifactRetriever.getName())) {
+        if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()
+                && gatewayArtifactSynchronizerProperties.getRetrieverName().equals(artifactRetriever.getName())) {
             ServiceReferenceHolder.getInstance().setArtifactRetriever(artifactRetriever);
 
             try {

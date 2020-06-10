@@ -94,7 +94,7 @@ public class APIGatewayManager {
         this.recommendationEnvironment = config.getApiRecommendationEnvironment();
         this.gatewayArtifactSynchronizerProperties = config.getGatewayArtifactSynchronizerProperties();
         this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
-        if (artifactSaver != null && config.getGatewayArtifactSynchronizerProperties().isSyncEnabled()){
+        if (artifactSaver != null && config.getGatewayArtifactSynchronizerProperties().isSaveArtifactsEnabled()){
             this.saveArtifactsToStorage = true;
         }
 
@@ -140,7 +140,7 @@ public class APIGatewayManager {
                 if (environment == null) {
                     continue;
                 }
-                failedEnvironmentsMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain,
+                failedEnvironmentsMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain, false,
                         failedEnvironmentsMap);
             }
         }
@@ -148,7 +148,7 @@ public class APIGatewayManager {
         if (api.getGatewayLabels() != null) {
             for (Label label : api.getGatewayLabels()) {
                 Environment environment = getEnvironmentFromLabel(label);
-                failedEnvironmentsMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain,
+                failedEnvironmentsMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain, true,
                         failedEnvironmentsMap);
             }
         }
@@ -158,16 +158,18 @@ public class APIGatewayManager {
     /**
      * Publishes an API to a given environment
      *
-     * @param environment           - Gateway environment
-     * @param api                   - The API to be published
-     * @param builder               - The template builder
-     * @param tenantDomain          - Tenant Domain of the publisher
-     * @param failedEnvironmentsMap - This map will be updated with the environment if the publishing failed
+     * @param environment               - Gateway environment
+     * @param api                       - The API to be published
+     * @param builder                   - The template builder
+     * @param tenantDomain              - Tenant Domain of the publisher
+     * @param isGatewayDefinedAsALabel  - Whether the environment is from a label or not. If it is from a label,
+     *                                  directly publishing to gateway will not happen
+     * @param failedEnvironmentsMap     - This map will be updated with the environment if the publishing failed
      * @return failedEnvironmentsMap
      */
     private Map<String, String> publishAPIToGatewayEnvironment(Environment environment, API api,
                                                                APITemplateBuilder builder,
-                                                               String tenantDomain,
+                                                               String tenantDomain, boolean isGatewayDefinedAsALabel,
                                                                Map<String, String> failedEnvironmentsMap) {
 
         long startTime;
@@ -183,19 +185,23 @@ public class APIGatewayManager {
                 if (gatewayAPIDTO == null) {
                     return null;
                 } else {
-                    if (gatewayArtifactSynchronizerProperties.isPublishDirectlyToGatewayEnabled()
-                            && environment.getServerURL() != null) {
-                        client = new APIGatewayAdminClient(environment);
-                        client.deployAPI(gatewayAPIDTO);
+                    if (gatewayArtifactSynchronizerProperties.isPublishDirectlyToGatewayEnabled()) {
+                        if (!isGatewayDefinedAsALabel) {
+                            client = new APIGatewayAdminClient(environment);
+                            client.deployAPI(gatewayAPIDTO);
+                        } else {
+                            failedEnvironmentsMap.put(environment.getName(),"Labels cannot be published directly to " +
+                                    "Gateway");
+                        }
                     }
 
                     if (saveArtifactsToStorage) {
                         if (publishedGateways.contains(environment.getName())) {
                             artifactSaver.updateArtifact(gatewayAPIDTO,
                                     APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-                            publishedGateways.remove(environment.getName());
                         } else {
                             artifactSaver.saveArtifact(gatewayAPIDTO);
+                            publishedGateways.add(environment.getName());
                         }
 
                         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
@@ -352,6 +358,7 @@ public class APIGatewayManager {
         setSecureVaultPropertyToBeAdded(api, gatewayAPIDTO);
         return gatewayAPIDTO;
     }
+
 
     /**
      * Create an environment object from a label
@@ -676,7 +683,7 @@ public class APIGatewayManager {
                 if (environment == null) {
                     continue;
                 }
-                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api, tenantDomain, environment,
+                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api, tenantDomain, environment, false,
                         failedEnvironmentsMap);
             }
         }
@@ -684,7 +691,7 @@ public class APIGatewayManager {
         if (api.getGatewayLabels() != null) {
             for (Label label : api.getGatewayLabels()) {
                 Environment environment = getEnvironmentFromLabel(label);
-                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api, tenantDomain, environment,
+                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api, tenantDomain, environment, true,
                         failedEnvironmentsMap);
             }
         }
@@ -703,19 +710,21 @@ public class APIGatewayManager {
     /**
      * Remove an API from a given environment
      *
-     * @param api                   - The API to be published
-     * @param tenantDomain          - Tenant Domain of the publisher
-     * @param environment           - Gateway environment
-     * @param failedEnvironmentsMap - This map will be updated with the environment if the publishing failed
+     * @param api                       - The API to be published
+     * @param tenantDomain              - Tenant Domain of the publisher
+     * @param environment               - Gateway environment
+     * @param isGatewayDefinedAsALabel  - Whether the environment is from a label or not
+     * @param failedEnvironmentsMap     - This map will be updated with the environment if the publishing failed
      * @return failedEnvironmentsMap
      */
     public Map<String, String> removeAPIFromGatewayEnvironment(API api, String tenantDomain, Environment environment,
+                                                               boolean isGatewayDefinedAsALabel,
                                                                Map<String, String> failedEnvironmentsMap) {
 
         try {
             GatewayAPIDTO gatewayAPIDTO = createGatewayAPIDTOtoRemoveAPI(api, tenantDomain, environment);
             if (gatewayArtifactSynchronizerProperties.isPublishDirectlyToGatewayEnabled()
-                    && environment.getServerURL() != null) {
+                    && !isGatewayDefinedAsALabel) {
                 APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
                 client.unDeployAPI(gatewayAPIDTO);
             }

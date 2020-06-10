@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
+import com.google.common.io.ByteStreams;
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -10,7 +12,6 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 
 public class DBRetriever implements ArtifactRetriever {
 
@@ -30,12 +31,12 @@ public class DBRetriever implements ArtifactRetriever {
         try {
             ByteArrayInputStream byteStream =
                     apiMgtDAO.getGatewayPublishedAPIArtifacts(APIId, gatewayLabel, gatewayInstruction);
-            ObjectInputStream objectStream = new ObjectInputStream(byteStream);
-            gatewayAPIDTO = (GatewayAPIDTO) objectStream.readObject();
+            byte[] bytes =  ByteStreams.toByteArray(byteStream);
+            gatewayAPIDTO = new Gson().fromJson(new String(bytes), GatewayAPIDTO.class);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully retrieved Artifact of " + gatewayAPIDTO.getName());
             }
-        } catch (APIManagementException | IOException | ClassNotFoundException e) {
+        } catch (APIManagementException | IOException e) {
             throw new ArtifactSynchronizerException("Error retrieving Artifact belongs to  " + APIId + " from DB", e);
         }
         return gatewayAPIDTO;
@@ -49,6 +50,6 @@ public class DBRetriever implements ArtifactRetriever {
     @Override
     public String getName() {
 
-        return APIConstants.GatewayArtifactSynchronizer.DEFAULT_RETRIEVER_NAME;
+        return APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME;
     }
 }

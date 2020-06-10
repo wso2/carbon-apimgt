@@ -1133,24 +1133,32 @@
          </ConfigurationRetriever>
      </KeyManagerConfigurations>
 
-    {% if apim.gateway.sync is defined %}
-    <SyncGatewayArtifacts>
-        {% if apim.gateway.sync.gateway_labels is defined %}
-        <GatewayLabels>{{- apim.gateway.sync.gateway_labels.toList()|join(',') -}}</GatewayLabels>
+    {% if apim.sync_runtime_artifacts.publisher is defined %}
+    <SyncRuntimeArtifactsPublisher>
+        <Enable>true</Enable>
+        {% if apim.sync_runtime_artifacts.publisher.artifact_saver is defined %}
+        <ArtifactSaver>{{apim.sync_runtime_artifacts.publisher.artifact_saver}}</ArtifactSaver>
         {% endif %}
-        {% if apim.gateway.sync.artifact_saver is defined %}
-        <ArtifactSaver>{{apim.gateway.sync.artifact_saver}}</ArtifactSaver>
+        {% if apim.sync_runtime_artifacts.publisher.publish_directly_to_gateway is defined %}
+        <PublishDirectlyToGW>{{apim.sync_runtime_artifacts.publisher.publish_directly_to_gateway}}</PublishDirectlyToGW>
         {% endif %}
-        {% if apim.gateway.sync.artifact_retriever is defined %}
-        <ArtifactRetriever>{{apim.gateway.sync.artifact_retriever}}</ArtifactRetriever>
+    </SyncRuntimeArtifactsPublisher>
+    {% endif %}
+
+    {% if apim.sync_runtime_artifacts.gateway is defined %}
+    <SyncRuntimeArtifactsGateway>
+        <Enable>true</Enable>
+        {% if apim.sync_runtime_artifacts.gateway.gateway_labels is defined %}
+        <GatewayLabels>
+            {% for attribute in apim.sync_runtime_artifacts.gateway.gateway_labels %}
+            <Label>{{attribute}}</Label>
+            {% endfor %}
+        </GatewayLabels>
         {% endif %}
-        {% if apim.gateway.sync.publish_directly_to_gateway is defined %}
-        <PublishDirectlyToGW>{{apim.gateway.sync.publish_directly_to_gateway}}</PublishDirectlyToGW>
+        {% if apim.sync_runtime_artifacts.gateway.artifact_retriever is defined %}
+        <ArtifactRetriever>{{apim.sync_runtime_artifacts.artifact_retriever}}</ArtifactRetriever>
         {% endif %}
-        {% if apim.gateway.sync.read_from_storage is defined %}
-        <RetrieveFromStorage>{{apim.gateway.sync.read_from_storage}}</RetrieveFromStorage>
-        {% endif %}
-    </SyncGatewayArtifacts>
+    </SyncRuntimeArtifactsGateway>
     {% endif %}
 
 </APIManager>
