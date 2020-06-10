@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -271,10 +272,10 @@ public class SubscriptionValidationDAO {
             PreparedStatement ps;
             if (tenantDomain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ST_APIS_SQL);
-                ps.setString(1, "/t%");
+                ps.setString(1, APIConstants.TENANT_PREFIX + "%");
             } else {
                 ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APIS_SQL);
-                ps.setString(1, "/t/" + tenantDomain + "%");
+                ps.setString(1, APIConstants.TENANT_PREFIX + tenantDomain + "%");
             }
             ResultSet resultSet = ps.executeQuery();
             populateAPIList(resultSet, apiList);
@@ -334,6 +335,7 @@ public class SubscriptionValidationDAO {
     private void populateAPIList(ResultSet resultSet, List<API> apiList) throws SQLException {
 
         Map<Integer, API> temp = new ConcurrentHashMap<>();
+        Map<Integer, URLMapping> tempUrls = new ConcurrentHashMap<>();
         while (resultSet.next()) {
             int apiId = resultSet.getInt("API_ID");
             API api = temp.get(apiId);
@@ -346,14 +348,23 @@ public class SubscriptionValidationDAO {
                 api.setVersion(resultSet.getString("API_VERSION"));
                 api.setContext(resultSet.getString("CONTEXT"));
                 temp.put(apiId, api);
+                tempUrls = new ConcurrentHashMap<>();
                 apiList.add(api);
             }
-            URLMapping urlMapping = new URLMapping();
-            urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
-            urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-            urlMapping.setThrottlingPolicy(resultSet.getString("THROTTLING_TIER"));
-            urlMapping.setUrlPattern(resultSet.getString("URL_PATTERN"));
-            api.addResource(urlMapping);
+            int urlId = resultSet.getInt("URL_MAPPING_ID");
+            URLMapping urlMapping = null;
+            urlMapping = tempUrls.get(urlId);
+            if (urlMapping == null) {
+                urlMapping = new URLMapping();
+                urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
+                urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
+                urlMapping.setThrottlingPolicy(resultSet.getString("THROTTLING_TIER"));
+
+                urlMapping.setUrlPattern(resultSet.getString("URL_PATTERN"));
+                tempUrls.put(urlId, urlMapping);
+                api.addResource(urlMapping);
+            }
+            urlMapping.addScope(resultSet.getString("URL_MAPPING_ID"));
         }
     }
 
