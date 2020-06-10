@@ -246,12 +246,30 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         return api;
     }
     private ApplicationPolicy getApplicationPolicyFromApplicationPolicyEvent(ApplicationPolicyEvent event) {
-        // TODO Auto-generated method stub
-        return null;
+        ApplicationPolicy policy = new ApplicationPolicy();
+        policy.setId(event.getPolicyId());
+        policy.setQuotaType(event.getQuotaType());
+        policy.setTenantId(event.getTenantId());
+        policy.setTierName(event.getPolicyName());
+        if(log.isDebugEnabled()) {
+            log.debug("Event: " + event.toString());
+            log.debug("Converted : " + policy.toString());
+        }
+        return policy;
     }
     private SubscriptionPolicy getSubscriptionPolicyFromSubscriptionPolicyEvent(SubscriptionPolicyEvent event) {
-        // TODO Auto-generated method stub
-        return null;
+        SubscriptionPolicy policy = new SubscriptionPolicy();
+        policy.setId(event.getPolicyId());
+        policy.setQuotaType(event.getQuotaType());
+        policy.setRateLimitCount(event.getRateLimitCount());
+        policy.setRateLimitTimeUnit(event.getRateLimitTimeUnit());
+        policy.setStopOnQuotaReach(event.isStopOnQuotaReach());
+        policy.setTenantId(event.getTenantId());
+        policy.setTierName(event.getPolicyName());
+        if(log.isDebugEnabled()) {
+            log.debug("Event: " + event.toString());
+            log.debug("Converted : " + policy.toString());
+        }
+        return policy;
     }
-
 }
