@@ -60,147 +60,12 @@ const RouteMenuMapping = (intl) => [
     {
         id: intl.formatMessage({
             id: 'Base.RouteMenuMapping.dashboard',
-            defaultMessage: 'Admin Dashboard',
+            defaultMessage: 'Dashboard',
         }),
         icon: <HomeIcon />,
         path: '/dashboard',
         component: () => <Dashboard />,
         exact: true,
-    },
-    {
-        id: intl.formatMessage({
-            id: 'Base.RouteMenuMapping.tasks',
-            defaultMessage: 'Tasks',
-        }),
-        children: [
-            {
-                id: intl.formatMessage({
-                    id: 'Base.RouteMenuMapping.user.creation',
-                    defaultMessage: 'User Creation',
-                }),
-                path: '/tasks/user-creation',
-                component: () => <UserCreation />,
-                icon: <PeopleIcon />,
-            },
-            {
-                id: intl.formatMessage({
-                    id: 'Base.RouteMenuMapping.application.creation',
-                    defaultMessage: 'Application Creation',
-                }),
-                path: '/tasks/application-creation',
-                component: () => <ApplicationCreation />,
-                icon: <DnsRoundedIcon />,
-            },
-            {
-                id: intl.formatMessage({
-                    id: 'Base.RouteMenuMapping.subscription.creation',
-                    defaultMessage: 'Subscription Creation',
-                }),
-                path: '/tasks/subscription-creation',
-                component: () => <SubscriptionCreation />,
-                icon: <PermMediaOutlinedIcon />,
-            },
-            {
-                id: 'Application Registration',
-                path: '/tasks/application-registration',
-                component: () => <RegistrationCreation />,
-                icon: <PublicIcon />,
-            },
-            {
-                id: 'API State Change',
-                path: '/tasks/api-state-change',
-                component: () => <APIStateChange />,
-                icon: <SettingsEthernetIcon />,
-            },
-        ],
-    },
-    {
-        id: intl.formatMessage({
-            id: 'Base.RouteMenuMapping.microgateways',
-            defaultMessage: 'Microgateways',
-        }),
-        path: '/settings/mg-labels',
-        component: MicrogatewayLabels,
-        icon: <GamesIcon />,
-    },
-    {
-        id: intl.formatMessage({
-            id: 'Base.RouteMenuMapping.keymanagers',
-            defaultMessage: 'KeyManagers',
-        }),
-        path: '/settings/key-managers',
-        component: KeyManagers,
-        icon: <PhonelinkSetupIcon />,
-    },
-    {
-        id: intl.formatMessage({
-            id: 'Base.RouteMenuMapping.api.categories',
-            defaultMessage: 'API Categories',
-        }),
-        path: '/settings/api-categories',
-        component: APICategories,
-        icon: <CategoryIcon />,
-    },
-    {
-        id: intl.formatMessage({
-            id: 'Base.RouteMenuMapping.bot.detection',
-            defaultMessage: 'Bot Detection',
-        }),
-        children: [
-            {
-                id: intl.formatMessage({
-                    id: 'Base.RouteMenuMapping.bot.detection.data',
-                    defaultMessage: 'Bot Detection Data',
-                }),
-                path: '/settings/bot-detection/bot-detected-data-list',
-                component: ListDetectedBotData,
-                icon: <AndroidIcon />,
-            },
-            {
-                id: intl.formatMessage({
-                    id: 'Base.RouteMenuMapping.configure.emails',
-                    defaultMessage: 'Configure Emails',
-                }),
-                path: '/settings/bot-detection/bot-detection-email-configuration',
-                component: ListEmails,
-                icon: <MailOutlineIcon />,
-            },
-        ],
-    },
-    {
-        id: intl.formatMessage({
-            id: 'Base.RouteMenuMapping.settings',
-            defaultMessage: 'Settings',
-        }),
-        children: [
-            {
-                id: intl.formatMessage({
-                    id: 'Base.RouteMenuMapping.applications',
-                    defaultMessage: 'Applications',
-                }),
-                path: '/settings/applications',
-                component: ListApplications,
-                icon: <SettingsIcon />,
-            },
-            {
-                id: intl.formatMessage({
-                    id: 'Base.RouteMenuMapping.scope.mapping',
-                    defaultMessage: 'Scope Mapping',
-                }),
-                path: '/settings/scope-mapping',
-                component: DemoTable,
-                icon: <TimerIcon />,
-            },
-            {
-                id: intl.formatMessage({
-                    id: 'Base.RouteMenuMapping.tenant.theme',
-                    defaultMessage: 'Tenant Theme',
-                }),
-                path: '/settings/devportal-theme',
-                component: TenantTheme,
-                icon: <PhonelinkSetupIcon />,
-            },
-        ],
     },
     {
         id: intl.formatMessage({
@@ -257,12 +122,147 @@ const RouteMenuMapping = (intl) => [
     },
     {
         id: intl.formatMessage({
+            id: 'Base.RouteMenuMapping.microgateways',
+            defaultMessage: 'Microgateways',
+        }),
+        path: '/settings/mg-labels',
+        component: MicrogatewayLabels,
+        icon: <GamesIcon />,
+    },
+    {
+        id: intl.formatMessage({
+            id: 'Base.RouteMenuMapping.api.categories',
+            defaultMessage: 'API Categories',
+        }),
+        path: '/settings/api-categories',
+        component: APICategories,
+        icon: <CategoryIcon />,
+    },
+    {
+        id: intl.formatMessage({
+            id: 'Base.RouteMenuMapping.keymanagers',
+            defaultMessage: 'KeyManagers',
+        }),
+        path: '/settings/key-managers',
+        component: KeyManagers,
+        icon: <PhonelinkSetupIcon />,
+    },
+    {
+        id: intl.formatMessage({
             id: 'Base.RouteMenuMapping.manage.alerts',
             defaultMessage: 'Manage Alerts',
         }),
         path: '/analytics/manage-alerts',
         component: ManageAlerts,
         icon: <NotificationsIcon />,
+    },
+    {
+        id: intl.formatMessage({
+            id: 'Base.RouteMenuMapping.bot.detection',
+            defaultMessage: 'Bot Detection',
+        }),
+        children: [
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.bot.detection.data',
+                    defaultMessage: 'Bot Detection Data',
+                }),
+                path: '/settings/bot-detection/bot-detected-data-list',
+                component: ListDetectedBotData,
+                icon: <AndroidIcon />,
+            },
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.configure.emails',
+                    defaultMessage: 'Configure Emails',
+                }),
+                path: '/settings/bot-detection/bot-detection-email-configuration',
+                component: ListEmails,
+                icon: <MailOutlineIcon />,
+            },
+        ],
+    },
+    {
+        id: intl.formatMessage({
+            id: 'Base.RouteMenuMapping.tasks',
+            defaultMessage: 'Tasks',
+        }),
+        children: [
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.user.creation',
+                    defaultMessage: 'User Creation',
+                }),
+                path: '/tasks/user-creation',
+                component: UserCreation,
+                icon: <PeopleIcon />,
+            },
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.application.creation',
+                    defaultMessage: 'Application Creation',
+                }),
+                path: '/tasks/application-creation',
+                component: ApplicationCreation,
+                icon: <DnsRoundedIcon />,
+            },
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.subscription.creation',
+                    defaultMessage: 'Subscription Creation',
+                }),
+                path: '/tasks/subscription-creation',
+                component: SubscriptionCreation,
+                icon: <PermMediaOutlinedIcon />,
+            },
+            {
+                id: 'Application Registration',
+                path: '/tasks/application-registration',
+                component: RegistrationCreation,
+                icon: <PublicIcon />,
+            },
+            {
+                id: 'API State Change',
+                path: '/tasks/api-state-change',
+                component: APIStateChange,
+                icon: <SettingsEthernetIcon />,
+            },
+        ],
+    },
+    {
+        id: intl.formatMessage({
+            id: 'Base.RouteMenuMapping.settings',
+            defaultMessage: 'Settings',
+        }),
+        children: [
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.applications',
+                    defaultMessage: 'Applications',
+                }),
+                path: '/settings/applications',
+                component: ListApplications,
+                icon: <SettingsIcon />,
+            },
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.scope.mapping',
+                    defaultMessage: 'Scope Mapping',
+                }),
+                path: '/settings/scope-mapping',
+                component: DemoTable,
+                icon: <TimerIcon />,
+            },
+            {
+                id: intl.formatMessage({
+                    id: 'Base.RouteMenuMapping.tenant.theme',
+                    defaultMessage: 'Tenant Theme',
+                }),
+                path: '/settings/devportal-theme',
+                component: TenantTheme,
+                icon: <PhonelinkSetupIcon />,
+            },
+        ],
     },
 
 ];
