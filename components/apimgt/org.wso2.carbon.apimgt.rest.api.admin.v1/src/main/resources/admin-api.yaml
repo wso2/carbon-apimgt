@@ -5023,7 +5023,7 @@ definitions:
         items:
           type: string
           example: "client_credentials"
-      enableTokenGneration:
+      enableTokenGeneration:
         type: boolean
         example: true
       enableTokenEncryption:

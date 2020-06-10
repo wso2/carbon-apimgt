@@ -42,7 +42,7 @@ import Flow from './components/Flow';
 import Endpoints from './components/Endpoints';
 import APISecurity from './components/APISecurity/APISecurity';
 import QueryAnalysis from './components/QueryAnalysis';
-
+import KeyManager from './components/KeyManager';
 import {
     DEFAULT_API_SECURITY_OAUTH2,
     API_SECURITY_BASIC_AUTH,
@@ -150,6 +150,7 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
+        keyManagers: [...api.keyManagers],
     };
 }
 /**
@@ -266,6 +267,16 @@ export default function RuntimeConfiguration() {
                     nextState.corsConfiguration[action] = event.checked === false ? [] : event.value;
                 }
                 return nextState;
+            case 'keymanagers':
+                nextState.keyManagers = value;
+                return nextState;
+            case 'allKeyManagersEnabled':
+                if (value) {
+                    nextState.keyManagers = [];
+                } else {
+                    nextState.keyManagers = ['all'];
+                }
+                return nextState;
             default:
                 return state;
         }
@@ -349,6 +360,8 @@ export default function RuntimeConfiguration() {
                                 <Paper className={classes.paper} elevation={0}>
                                     <APISecurity api={apiConfig} configDispatcher={configDispatcher} />
                                     <CORSConfiguration api={apiConfig} configDispatcher={configDispatcher} />
+                                    <KeyManager api={apiConfig} configDispatcher={configDispatcher} />
+
                                     {api.type !== 'GRAPHQL'
                                         && <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />}
                                     {!api.isAPIProduct() && (

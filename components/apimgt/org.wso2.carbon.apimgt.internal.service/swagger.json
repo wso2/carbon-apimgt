@@ -875,6 +875,18 @@
         "$ref" : "#/definitions/Policy"
       }, {
         "$ref" : "#/definitions/GraphQLQuery"
+      }, {
+        "properties" : {
+          "rateLimitCount" : {
+            "type" : "integer"
+          },
+          "rateLimitTimeUnit" : {
+            "type" : "string"
+          },
+          "stopOnQuotaReach" : {
+            "type" : "boolean"
+          }
+        }
       } ]
     },
     "GraphQLQuery" : {
@@ -938,7 +950,7 @@
     "ApiPolicy" : {
       "allOf" : [ {
         "$ref" : "#/definitions/Policy"
-      } ]
+      }, { } ]
     },
     "ApiPolicyConditionGroup" : {
       "properties" : {

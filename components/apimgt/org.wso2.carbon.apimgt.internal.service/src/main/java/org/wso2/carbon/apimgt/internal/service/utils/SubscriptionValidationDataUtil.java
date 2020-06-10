@@ -181,7 +181,7 @@ public class SubscriptionValidationDataUtil {
         return subscriptionListDTO;
     }
 
-    public static SubscriptionPolicyListDTO fromSubscriptionPolicyToSubscriptionPolicyListDTO(
+    public static SubscriptionPolicyListDTO fromSubscriptionPolicyToSubscriptionPolicyListDTO (
             List<SubscriptionPolicy> model) {
 
         SubscriptionPolicyListDTO subscriptionPolicyListDTO = new SubscriptionPolicyListDTO();
@@ -194,6 +194,9 @@ public class SubscriptionValidationDataUtil {
                 subscriptionPolicyDTO.setGraphQLMaxDepth(subscriptionPolicyModel.getGraphQLMaxDepth());
                 subscriptionPolicyDTO.setGraphQLMaxComplexity(subscriptionPolicyModel.getGraphQLMaxComplexity());
                 subscriptionPolicyDTO.setTenantId(subscriptionPolicyModel.getTenantId());
+                subscriptionPolicyDTO.setRateLimitCount(subscriptionPolicyModel.getRateLimitCount());
+                subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicyModel.isStopOnQuotaReach());
+                subscriptionPolicyDTO.setRateLimitTimeUnit(subscriptionPolicyModel.getRateLimitTimeUnit());
 
                 subscriptionPolicyListDTO.getList().add(subscriptionPolicyDTO);
 
@@ -216,7 +219,7 @@ public class SubscriptionValidationDataUtil {
                 applicationPolicyDTO.setName(applicationPolicyModel.getName());
                 applicationPolicyDTO.setQuotaType(applicationPolicyModel.getQuotaType());
                 applicationPolicyDTO.setTenantId(applicationPolicyModel.getTenantId());
-//todo set
+
                 applicationPolicyListDTO.getList().add(applicationPolicyDTO);
 
             }
