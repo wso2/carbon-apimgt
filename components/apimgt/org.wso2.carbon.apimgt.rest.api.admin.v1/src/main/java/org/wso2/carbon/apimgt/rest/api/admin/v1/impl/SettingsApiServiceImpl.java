@@ -39,22 +39,24 @@ public class SettingsApiServiceImpl implements SettingsApiService {
 
     private static final Log log = LogFactory.getLog(SettingsApiServiceImpl.class);
 
+    /**
+     * Retrieves admin portal related server settings
+     *
+     * @param messageContext
+     * @return settings list
+     * @throws APIManagementException
+     */
     @Override
-    public Response settingsGet(MessageContext messageContext) {
-        try {
+    public Response settingsGet(MessageContext messageContext) throws APIManagementException {
+
             String username = RestApiUtil.getLoggedInUsername();
             boolean isUserAvailable = false;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
                 isUserAvailable = true;
             }
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO(isUserAvailable);
+            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingsToDTO(isUserAvailable);
             return Response.ok().entity(settingsDTO).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving Admin Settings";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
     }
 
     /**

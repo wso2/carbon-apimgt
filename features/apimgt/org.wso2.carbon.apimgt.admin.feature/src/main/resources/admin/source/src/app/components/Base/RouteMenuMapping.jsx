@@ -26,6 +26,7 @@ import TimerIcon from '@material-ui/icons/Timer';
 import SettingsIcon from '@material-ui/icons/Settings';
 import PhonelinkSetupIcon from '@material-ui/icons/PhonelinkSetup';
 import HomeIcon from '@material-ui/icons/Home';
+import NotificationsIcon from '@material-ui/icons/Notifications';
 import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
 import DemoTable from 'AppComponents/AdminPages/Microgateways/List';
 import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
@@ -38,6 +39,8 @@ import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom';
 import TenantTheme from 'AppComponents/TenantTheme/UploadTheme';
 import ListDetectedBotData from 'AppComponents/BotDetection/DetectedBotData/ListDetectedBotData';
 import ListEmails from 'AppComponents/BotDetection/EmailConfig/ListEmails';
+import KeyManagers from 'AppComponents/KeyManagers';
+import ManageAlerts from 'AppComponents/ManageAlerts/ManageAlerts.jsx';
 import GamesIcon from '@material-ui/icons/Games';
 import CategoryIcon from '@material-ui/icons/Category';
 import AndroidIcon from '@material-ui/icons/Android';
@@ -70,7 +73,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'User Creation',
                 }),
                 path: '/tasks/user-creation',
-                component: () => <DemoTable />,
+                component: DemoTable,
                 icon: <PeopleIcon />,
             },
             {
@@ -79,7 +82,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Application Creation',
                 }),
                 path: '/tasks/application-creation',
-                component: () => <DemoTable />,
+                component: DemoTable,
                 icon: <DnsRoundedIcon />,
             },
             {
@@ -88,19 +91,19 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Subscription Creation',
                 }),
                 path: '/tasks/subscription-creation',
-                component: () => <DemoTable />,
+                component: DemoTable,
                 icon: <PermMediaOutlinedIcon />,
             },
             {
                 id: 'Application Registration',
                 path: '/tasks/application-registration',
-                component: () => <DemoTable />,
+                component: DemoTable,
                 icon: <PublicIcon />,
             },
             {
                 id: 'API State Change',
                 path: '/tasks/api-state-change',
-                component: () => <DemoTable />,
+                component: DemoTable,
                 icon: <SettingsEthernetIcon />,
             },
         ],
@@ -111,8 +114,17 @@ const RouteMenuMapping = (intl) => [
             defaultMessage: 'Microgateways',
         }),
         path: '/settings/mg-labels',
-        component: () => <MicrogatewayLabels />,
-        icon: <GamesIcon />,
+        component: MicrogatewayLabels,
+        icon: <PhonelinkSetupIcon />,
+    },
+    {
+        id: intl.formatMessage({
+            id: 'Base.RouteMenuMapping.keymanagers',
+            defaultMessage: 'KeyManagers',
+        }),
+        path: '/settings/key-managers',
+        component: KeyManagers,
+        icon: <PhonelinkSetupIcon />,
     },
     {
         id: intl.formatMessage({
@@ -120,8 +132,8 @@ const RouteMenuMapping = (intl) => [
             defaultMessage: 'API Categories',
         }),
         path: '/settings/api-categories',
-        component: () => <APICategories />,
-        icon: <CategoryIcon />,
+        component: APICategories,
+        icon: <PhonelinkSetupIcon />,
     },
     {
         id: intl.formatMessage({
@@ -135,8 +147,8 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Bot Detection Data',
                 }),
                 path: '/settings/bot-detection/bot-detected-data-list',
-                component: () => <ListDetectedBotData />,
-                icon: <AndroidIcon />,
+                component: ListDetectedBotData,
+                icon: <DnsRoundedIcon />,
             },
             {
                 id: intl.formatMessage({
@@ -144,8 +156,8 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Configure Emails',
                 }),
                 path: '/settings/bot-detection/bot-detection-email-configuration',
-                component: () => <ListEmails />,
-                icon: <MailOutlineIcon />,
+                component: ListEmails,
+                icon: <PhonelinkSetupIcon />,
             },
         ],
     },
@@ -161,7 +173,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Applications',
                 }),
                 path: '/settings/applications',
-                component: () => <ListApplications />,
+                component: ListApplications,
                 icon: <SettingsIcon />,
             },
             {
@@ -170,7 +182,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Scope Mapping',
                 }),
                 path: '/settings/scope-mapping',
-                component: () => <DemoTable />,
+                component: DemoTable,
                 icon: <TimerIcon />,
             },
             {
@@ -179,7 +191,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Tenant Theme',
                 }),
                 path: '/settings/devportal-theme',
-                component: () => <TenantTheme />,
+                component: TenantTheme,
                 icon: <PhonelinkSetupIcon />,
             },
         ],
@@ -196,8 +208,8 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Advanced Policies',
                 }),
                 path: '/throttling/advanced',
-                component: () => <AdvancedThrottlePolicies />,
-                icon: <PolicyIcon />,
+                component: AdvancedThrottlePolicies,
+                icon: <SettingsIcon />,
             },
             {
                 id: intl.formatMessage({
@@ -205,8 +217,8 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Application Policies',
                 }),
                 path: '/throttling/application',
-                component: () => <ApplicationThrottlingPolicies />,
-                icon: <PhonelinkSetupIcon />,
+                component: ApplicationThrottlingPolicies,
+                icon: <TimerIcon />,
             },
             {
                 id: intl.formatMessage({
@@ -214,8 +226,8 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Subscription Policies',
                 }),
                 path: '/throttling/subscription',
-                component: () => <DemoTable />,
-                icon: <ShoppingBasketIcon />,
+                component: DemoTable,
+                icon: <PhonelinkSetupIcon />,
             },
             {
                 id: intl.formatMessage({
@@ -223,19 +235,28 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Custom Policies',
                 }),
                 path: '/throttling/custom',
-                component: () => <CustomThrottlingPolicies />,
-                icon: <AssignmentIcon />,
+                component: CustomThrottlingPolicies,
+                icon: <PhonelinkSetupIcon />,
             },
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.blacklisted.items',
-                    defaultMessage: 'Blacklist Policies',
+                    defaultMessage: 'Deny Policies',
                 }),
                 path: '/throttling/blacklisted',
-                component: () => <BlacklistThrottlingPolicies />,
-                icon: <BlockIcon />,
+                component: BlacklistThrottlingPolicies,
+                icon: <PhonelinkSetupIcon />,
             },
         ],
+    },
+    {
+        id: intl.formatMessage({
+            id: 'Base.RouteMenuMapping.manage.alerts',
+            defaultMessage: 'Manage Alerts',
+        }),
+        path: '/analytics/manage-alerts',
+        component: ManageAlerts,
+        icon: <NotificationsIcon />,
     },
 
 ];

@@ -208,7 +208,7 @@ function AddEdit(props) {
                 return (
                     <FormattedMessage
                         id='Throttling.Blacklist.Policy.policy.add.success'
-                        defaultMessage='Blacklist Policy added successfully.'
+                        defaultMessage='Deny Policy added successfully.'
                     />
                 );
             })
@@ -227,7 +227,7 @@ function AddEdit(props) {
     return (
         <FormDialogBase
             title={title}
-            saveButtonText='Blacklist'
+            saveButtonText='Deny'
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}

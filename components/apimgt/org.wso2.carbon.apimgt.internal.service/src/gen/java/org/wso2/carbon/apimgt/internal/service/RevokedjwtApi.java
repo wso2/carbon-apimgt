@@ -42,7 +42,7 @@ RevokedjwtApiService delegate = new RevokedjwtApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "JTIs of revoked jwt tokens", notes = "This will provide access to JTIs of revoked JWT tokens in database. ", response = RevokedJWTListDTO.class, responseContainer = "List", tags={  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "An array of shops around you", response = RevokedJWTListDTO.class, responseContainer = "List"),
+        @ApiResponse(code = 200, message = "An array of revoke JWTs", response = RevokedJWTListDTO.class, responseContainer = "List"),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
     public Response revokedjwtGet() throws APIManagementException{
         return delegate.revokedjwtGet(securityContext);

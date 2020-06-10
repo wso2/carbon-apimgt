@@ -102,7 +102,7 @@ public class KeyManagerMappingUtil {
             jsonObject.remove(APIConstants.KeyManager.USERINFO_ENDPOINT);
         }
         JsonElement authorizeEndpoint = jsonObject.get(APIConstants.KeyManager.AUTHORIZE_ENDPOINT);
-        if (userInfoEndpoint != null) {
+        if (authorizeEndpoint != null) {
             keyManagerDTO.setAuthorizeEndpoint(authorizeEndpoint.getAsString());
             jsonObject.remove(APIConstants.KeyManager.AUTHORIZE_ENDPOINT);
         }
@@ -128,7 +128,7 @@ public class KeyManagerMappingUtil {
         }
         JsonElement enableTokenGeneration = jsonObject.get(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
         if (enableTokenGeneration != null) {
-            keyManagerDTO.setEnableTokenGneration(enableTokenGeneration.getAsBoolean());
+            keyManagerDTO.setEnableTokenGeneration(enableTokenGeneration.getAsBoolean());
             jsonObject.remove(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
         }
         JsonElement selfValidateJWTElement = jsonObject.get(APIConstants.KeyManager.SELF_VALIDATE_JWT);
@@ -214,7 +214,7 @@ public class KeyManagerMappingUtil {
                 keyManagerDTO.isEnableMapOAuthConsumerApps());
 
         additionalProperties
-                .put(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION, keyManagerDTO.isEnableTokenGneration());
+                .put(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION, keyManagerDTO.isEnableTokenGeneration());
 
         additionalProperties
                 .put(APIConstants.KeyManager.ENABLE_TOKEN_HASH, keyManagerDTO.isEnableTokenHashing());

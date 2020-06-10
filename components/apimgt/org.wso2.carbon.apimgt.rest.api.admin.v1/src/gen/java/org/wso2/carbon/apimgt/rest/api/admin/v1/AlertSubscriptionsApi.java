@@ -42,7 +42,8 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the list of API Admin alert types subscribed by the user. ", notes = "This operation is used to get the list of subscribed alert types by the user. ", response = AlertsSubscriptionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts")
+            @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Alert Subscriptions",  })
     @ApiResponses(value = { 
@@ -58,7 +59,8 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Subscribe to an admin alert. ", notes = "This operation is used to subscribe to admin alerts ", response = AlertsSubscriptionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts")
+            @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Alert Subscriptions",  })
     @ApiResponses(value = { 
@@ -75,7 +77,8 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Unsubscribe user from all the admin alert types. ", notes = "This operation is used to unsubscribe the respective user from all the admin alert types. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts")
+            @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Alert Subscriptions" })
     @ApiResponses(value = { 
