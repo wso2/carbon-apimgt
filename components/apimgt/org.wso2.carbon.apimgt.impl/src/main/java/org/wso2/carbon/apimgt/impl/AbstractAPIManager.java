@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.Gson;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -3094,6 +3095,23 @@ public abstract class AbstractAPIManager implements APIManager {
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
                 if (keyManager != null) {
                     OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                    if (StringUtils.isNotEmpty(apiKey.getAppMetadata())){
+                        OAuthApplicationInfo storedOAuthApplicationInfo = new Gson().fromJson(apiKey.getAppMetadata()
+                                ,OAuthApplicationInfo.class);
+                        if (oAuthApplicationInfo == null){
+                            oAuthApplicationInfo = storedOAuthApplicationInfo;
+                        }else{
+
+                            if (StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL())){
+                                oAuthApplicationInfo.setCallBackURL(storedOAuthApplicationInfo.getCallBackURL());
+                            }
+                            if (oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) == null &&
+                                    storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) != null) {
+                                oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                                        storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                            }
+                        }
+                    }
                     AccessTokenInfo tokenInfo = keyManager.getAccessTokenByConsumerKey(consumerKey);
                     if (oAuthApplicationInfo != null) {
                         apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
