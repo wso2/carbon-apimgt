@@ -42,7 +42,8 @@ CustomUrlsApiService delegate = new CustomUrlsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get custom-url info of a tenant domain ", notes = "This operation is to get custom-url information of the provided tenant-domain ", response = CustomUrlInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:tenantInfo", description = "Retrieve tenant related information")
+            @AuthorizationScope(scope = "apim:tenantInfo", description = "Retrieve tenant related information"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Tenants" })
     @ApiResponses(value = { 

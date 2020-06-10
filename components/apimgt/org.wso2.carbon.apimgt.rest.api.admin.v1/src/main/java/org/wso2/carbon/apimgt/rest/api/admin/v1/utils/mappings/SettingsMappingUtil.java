@@ -54,11 +54,14 @@ public class SettingsMappingUtil {
      * @return SettingsDTO
      * @throws APIManagementException
      */
-    public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable) throws APIManagementException {
+    public SettingsDTO fromSettingsToDTO(Boolean isUserAvailable) throws APIManagementException {
+
         SettingsDTO settingsDTO = new SettingsDTO();
-        settingsDTO.setScopes(GetScopeList());
-        settingsDTO.setAnalyticsEnabled(APIUtil.isAnalyticsEnabled());
-        settingsDTO.setKeyManagerConfiguration(getSettingsKeyManagerConfigurationDTOList());
+        if (isUserAvailable) {
+            settingsDTO.setAnalyticsEnabled(APIUtil.isAnalyticsEnabled());
+            settingsDTO.setKeyManagerConfiguration(getSettingsKeyManagerConfigurationDTOList());
+        }
+        settingsDTO.setScopes(getScopeList());
         return settingsDTO;
     }
 
@@ -74,7 +77,7 @@ public class SettingsMappingUtil {
         return list;
     }
 
-    private List<String> GetScopeList() throws APIManagementException {
+    private List<String> getScopeList() throws APIManagementException {
         String definition = null;
         try {
             definition = IOUtils

@@ -42,7 +42,8 @@ AlertTypesApiService delegate = new AlertTypesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the list of admin alert types. ", notes = "This operation is used to get the list of supportd alert types for the apim admin dashboard ", response = AlertTypesListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts")
+            @AuthorizationScope(scope = "apim:admin_alert_manage", description = "Manage admin alerts"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Alerts" })
     @ApiResponses(value = { 

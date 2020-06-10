@@ -656,12 +656,33 @@ class API extends Resource {
     /**
      * Get a particular scope
      * @param scopeId {String} UUID of the scope
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @param callback {function} Function which needs to be called upon success of the scope retrieval
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSharedScopeDetails(scopeId, callback = null) {
         const promise_scopes = this.client.then(client => {
             return client.apis['Scopes'].getSharedScope(
+                { scopeId },
+                this._requestMetaData(),
+            );
+        });
+        if (callback) {
+            return promise_scopes.then(callback);
+        } else {
+            return promise_scopes;
+        }
+    }
+
+    /**
+     * Get usages of a particular scope
+     * @param scopeId {String} UUID of the scope
+     * @param callback {function} Function which needs to be called upon success of the scope usage retrieval
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSharedScopeUsages(scopeId, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promise_scopes = apiClient.then(client => {
+            return client.apis['Scopes'].getSharedScopeUsages(
                 { scopeId },
                 this._requestMetaData(),
             );
@@ -2370,6 +2391,14 @@ class API extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return apiClient.then(client => {
             return client.apis["API Category (Collection)"].get_api_categories(
+                this._requestMetaData(),
+            );
+        });
+    }
+    static keyManagers() {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis["Key Managers (Collection)"].get_key_managers(
                 this._requestMetaData(),
             );
         });

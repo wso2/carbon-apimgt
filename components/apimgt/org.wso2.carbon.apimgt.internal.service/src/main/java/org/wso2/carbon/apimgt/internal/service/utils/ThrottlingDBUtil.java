@@ -16,7 +16,7 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.internal.service.impl;
+package org.wso2.carbon.apimgt.internal.service.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -215,6 +215,5 @@ public final class ThrottlingDBUtil {
                         " others. - " + e.getMessage(), e);
             }
         }
-
     }
 }

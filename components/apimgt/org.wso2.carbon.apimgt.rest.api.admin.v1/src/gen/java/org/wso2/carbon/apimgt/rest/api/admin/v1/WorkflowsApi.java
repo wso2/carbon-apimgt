@@ -81,6 +81,7 @@ WorkflowsApiService delegate = new WorkflowsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update workflow status", notes = "This operation can be used to approve or reject a workflow task. ", response = WorkflowDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:api_workflow_approve", description = "Manage workflows")
         })
     }, tags={ "Workflows (Individual)" })
