@@ -94,10 +94,7 @@ import java.util.Set;
 public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     private static final Log log = LogFactory.getLog(AMDefaultKeyManagerImpl.class);
-    private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
-    private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
     private static final String GRANT_TYPE_VALUE = "client_credentials";
-    private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
 
     private DCRClient dcrClient;
     private IntrospectionClient introspectionClient;
@@ -105,6 +102,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private AuthClient revokeClient;
     private CloseableHttpClient kmHttpClient;
     private AccessTokenGenerator accessTokenGenerator;
+
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
 
@@ -226,12 +224,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String applicationName = oAuthApplicationInfo.getClientName();
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
 
-        String tenantDomain;
-        // First we attampt to get the tenant domain from the userID and if it is not possibble, we fetch it
+        // First we attempt to get the tenant domain from the userID and if it is not possible, we fetch it
         // from the ThreadLocalCarbonContext
-        if (StringUtils.isNotEmpty(userId)) {
-            tenantDomain = MultitenantUtils.getTenantDomain(userId);
-        } else {
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+        if (StringUtils.isEmpty(tenantDomain)) {
             tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
 
