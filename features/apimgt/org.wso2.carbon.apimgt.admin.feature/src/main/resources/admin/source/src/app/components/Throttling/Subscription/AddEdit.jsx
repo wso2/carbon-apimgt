@@ -37,6 +37,13 @@ import Select from '@material-ui/core/Select';
 import Switch from '@material-ui/core/Switch';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
+import AddCircle from '@material-ui/icons/AddCircle';
+import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import API from 'AppData/api';
 
@@ -173,6 +180,7 @@ function AddEdit(props) {
         },
     });
 
+    const [customAttributes, setCustomAttributes] = useState([]);
     const [state, dispatch] = useReducer(reducer, initialState);
 
     useEffect(() => {
@@ -217,7 +225,7 @@ function AddEdit(props) {
                         currencyType: '',
                         billingCycle: 'week',
                     },
-                    customAttributes: result.body.customAttributes,
+                    customAttributes: setCustomAttributes(result.body.customAttributes),
                     stopOnQuotaReach: result.body.stopOnQuotaReach,
                     permissions: {
                         roles: ['Internal/everyone'],
@@ -378,6 +386,7 @@ function AddEdit(props) {
                 rateLimitTimeUnit: state.rateLimitTimeUnit,
                 billingPlan: state.billingPlan,
                 stopOnQuotaReach: state.stopOnQuotaReach,
+                customAttributes,
                 graphQLMaxComplexity: state.graphQL.maxComplexity,
                 graphQLMaxDepth: state.graphQL.maxDepth,
                 monetization: {
@@ -407,6 +416,7 @@ function AddEdit(props) {
                 rateLimitTimeUnit: state.rateLimitTimeUnit,
                 billingPlan: state.billingPlan,
                 stopOnQuotaReach: state.stopOnQuotaReach,
+                customAttributes,
                 graphQLMaxComplexity: state.graphQL.maxComplexity,
                 graphQLMaxDepth: state.graphQL.maxDepth,
                 monetization: {
@@ -474,8 +484,24 @@ function AddEdit(props) {
         }
     };
 
-    return (
+    const handleAddNewAttributeClick = () => {
+        setCustomAttributes((prevCustomAttributes) => [...prevCustomAttributes, { name: '', value: '' }]);
+    };
 
+    const handleAttributeDelete = (event) => {
+        const tmpCustomAttributesForDelete = [...customAttributes];
+        const { id } = event.currentTarget;
+        tmpCustomAttributesForDelete.splice(id, 1);
+        setCustomAttributes(tmpCustomAttributesForDelete);
+    };
+
+    const handleAttributeChange = (event) => {
+        const tmpCustomAttributes = [...customAttributes];
+        tmpCustomAttributes[event.target.id][event.target.name] = event.target.value;
+        setCustomAttributes(tmpCustomAttributes);
+    };
+
+    return (
         <ContentBase
             pageStyle='half'
             title={
@@ -959,6 +985,95 @@ function AddEdit(props) {
                                     name='stopOnQuotaReach'
                                 />
                             </Box>
+                        </Box>
+                        {/* Custom Attributes */}
+                        <Box display='flex' flexDirection='row' alignItems='center'>
+                            <Box flex='1'>
+                                <Typography color='inherit' variant='subtitle2' component='div'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.custom.attributes'
+                                        defaultMessage='Custom Attributes'
+                                    />
+                                </Typography>
+                            </Box>
+                        </Box>
+                        <Box component='div' m={2}>
+                            <Grid item xs={12}>
+                                <Box display='flex' flexDirection='row' alignItems='center'>
+                                    <Box flex='1'>
+                                        <Button
+                                            variant='outlined'
+                                            onClick={handleAddNewAttributeClick}
+                                        >
+                                            <AddCircle className={classes.buttonIcon} />
+                                            <FormattedMessage
+                                                id='Throttling.Subscription.custom.attributes.add'
+                                                defaultMessage='Add Custom Attribute'
+                                            />
+                                        </Button>
+                                    </Box>
+                                </Box>
+                                <Table className={classes.table}>
+                                    <TableBody>
+                                        {customAttributes.map((attribute, index) => (
+                                            <TableRow>
+                                                <TableCell>
+                                                    <TextField
+                                                        fullWidth
+                                                        required
+                                                        id={index}
+                                                        name='name'
+                                                        label={intl.formatMessage({
+                                                            id: `Throttling.Subscription.Properties.Properties.
+                                                                    show.add.property.property.name`,
+                                                            defaultMessage: 'Name',
+                                                        })}
+                                                        margin='dense'
+                                                        variant='outlined'
+                                                        value={attribute.name}
+                                                        onChange={handleAttributeChange}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <TextField
+                                                        fullWidth
+                                                        required
+                                                        id={index}
+                                                        name='value'
+                                                        label={intl.formatMessage({
+                                                            id: 'Throttling.Subscription.Properties.property.value',
+                                                            defaultMessage: 'Value',
+                                                        })}
+                                                        margin='dense'
+                                                        value={attribute.value}
+                                                        onChange={handleAttributeChange}
+                                                        variant='outlined'
+                                                    />
+                                                </TableCell>
+                                                <TableCell align='right'>
+                                                    <Tooltip
+                                                        title={(
+                                                            <FormattedMessage
+                                                                id='Throttling.Subscription.attribute.delete.tooltip'
+                                                                defaultMessage='Delete'
+                                                            />
+                                                        )}
+                                                        placement='right-end'
+                                                        interactive
+                                                    >
+                                                        <IconButton
+                                                            id={index}
+                                                            onClick={handleAttributeDelete}
+                                                        >
+                                                            <DeleteForeverIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </Grid>
                         </Box>
                         {/* Permissions */}
                         <Box display='flex' flexDirection='row' alignItems='center'>
