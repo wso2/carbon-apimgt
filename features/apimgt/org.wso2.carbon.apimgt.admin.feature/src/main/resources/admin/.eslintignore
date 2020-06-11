@@ -1,14 +1,4 @@
 /public/**
 /node_modules/**
 /coverage/**
-# Pleae comment the reason if you are  ignoring a file/directory here
-/source/index.jsx
 /source/Tests/**
-/source/src/Admin.jsx
-/source/src/app/components/AdminOperations/**
-/source/src/app/components/Shared/**
-/source/src/app/components/Shared/Logout.jsx
-/source/src/app/components/data/**
-/source/src/app/components/AppContents.jsx
-/source/src/app/components/LoginDenied.jsx
-/source/src/app/components/ProtectedApp.jsx

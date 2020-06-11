@@ -15,25 +15,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React from 'react';
 import { withRouter, Switch, Route } from 'react-router-dom';
-import List from 'AppComponents/Throttling/Advanced/List';
-import AddEdit from 'AppComponents/Throttling/Advanced/AddEdit';
+import SubscriptionThrottlingPolicies from 'AppComponents/Throttling/Subscription/List';
+import AddEdit from 'AppComponents/Throttling/Subscription/AddEdit';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 
 /**
  * Render a list
  * @returns {JSX} Header AppBar components.
  */
-function AdvancedThrottlePolicies() {
+function Tasks() {
     return (
         <Switch>
-            <Route exact path='/throttling/advanced' component={List} />
-            <Route exact path='/throttling/advanced/create' component={AddEdit} />
-            <Route path='/throttling/advanced/:id/' component={AddEdit} />
+            <Route exact path='/throttling/subscription' component={SubscriptionThrottlingPolicies} />
+            <Route exact path='/throttling/subscription/add' component={AddEdit} />
+            <Route path='/throttling/subscription/:id' component={AddEdit} />
             <Route component={ResourceNotFound} />
         </Switch>
     );
 }
 
-export default withRouter(AdvancedThrottlePolicies);
+export default withRouter(Tasks);
