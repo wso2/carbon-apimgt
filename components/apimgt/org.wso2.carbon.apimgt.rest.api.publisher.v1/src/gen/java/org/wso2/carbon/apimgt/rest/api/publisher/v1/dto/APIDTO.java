@@ -44,6 +44,7 @@ public class APIDTO   {
     private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;
     private Boolean enableSchemaValidation = null;
+    private Boolean enableStore = null;
 
 @XmlType(name="TypeEnum")
 @XmlEnum(String.class)
@@ -510,6 +511,23 @@ public enum EndpointImplementationTypeEnum {
   }
   public void setEnableSchemaValidation(Boolean enableSchemaValidation) {
     this.enableSchemaValidation = enableSchemaValidation;
+  }
+
+  /**
+   **/
+  public APIDTO enableStore(Boolean enableStore) {
+    this.enableStore = enableStore;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("enableStore")
+  public Boolean isEnableStore() {
+    return enableStore;
+  }
+  public void setEnableStore(Boolean enableStore) {
+    this.enableStore = enableStore;
   }
 
   /**
@@ -1096,6 +1114,7 @@ public enum EndpointImplementationTypeEnum {
         Objects.equals(hasThumbnail, API.hasThumbnail) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
+        Objects.equals(enableStore, API.enableStore) &&
         Objects.equals(type, API.type) &&
         Objects.equals(transport, API.transport) &&
         Objects.equals(tags, API.tags) &&
@@ -1132,7 +1151,7 @@ public enum EndpointImplementationTypeEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories);
   }
 
   @Override
@@ -1155,6 +1174,7 @@ public enum EndpointImplementationTypeEnum {
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
+    sb.append("    enableStore: ").append(toIndentedString(enableStore)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");

@@ -7395,6 +7395,9 @@ definitions:
       enableSchemaValidation:
         type: boolean
         example: false
+      enableStore:
+        type: boolean
+        example: true
       type:
         type: string
         description: The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
@@ -7822,6 +7825,9 @@ definitions:
       enableSchemaValidation:
         type: boolean
         example: false
+      enableStore:
+        type: boolean
+        example: true
       responseCachingEnabled:
         type: boolean
         example: true
