@@ -110,7 +110,7 @@ function getTitleForArtifactType(props) {
  */
 function TopMenu(props) {
     const {
-        classes, data, setListType, theme, count, isAPIProduct, listType,
+        classes, data, setListType, theme, count, isAPIProduct, listType, showToggle,
     } = props;
     const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
 
@@ -173,22 +173,24 @@ function TopMenu(props) {
                         </APICreateMenu>
                     )}
                 </div>
-                <div className={classes.buttonRight}>
-                    <IconButton
-                        className={classes.button}
-                        disabled={data.length === 0}
-                        onClick={() => setListType('list')}
-                    >
-                        <List color={listType === 'list' ? 'primary' : 'default'} />
-                    </IconButton>
-                    <IconButton
-                        className={classes.button}
-                        disabled={data.length === 0}
-                        onClick={() => setListType('grid')}
-                    >
-                        <GridOn color={listType === 'grid' ? 'primary' : 'default'} />
-                    </IconButton>
-                </div>
+                {showToggle && (
+                    <div className={classes.buttonRight}>
+                        <IconButton
+                            className={classes.button}
+                            disabled={data.length === 0}
+                            onClick={() => setListType('list')}
+                        >
+                            <List color={listType === 'list' ? 'primary' : 'default'} />
+                        </IconButton>
+                        <IconButton
+                            className={classes.button}
+                            disabled={data.length === 0}
+                            onClick={() => setListType('grid')}
+                        >
+                            <GridOn color={listType === 'grid' ? 'primary' : 'default'} />
+                        </IconButton>
+                    </div>
+                )}
             </div>
         );
     } else {
@@ -206,6 +208,7 @@ TopMenu.propTypes = {
         custom: PropTypes.string,
     }).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
+    showToggle: PropTypes.bool.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(TopMenu);

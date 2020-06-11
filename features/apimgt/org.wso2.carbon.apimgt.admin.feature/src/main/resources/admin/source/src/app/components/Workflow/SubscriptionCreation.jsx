@@ -116,7 +116,8 @@ function ListLabels() {
             setData(LocalData);
         })
             .catch((e) => {
-                Alert.error(e);
+                Alert.error('Unable to fetch data ' + e);
+                console.error('Unable to fetch data ' + e);
             });
     };
 
@@ -130,8 +131,7 @@ function ListLabels() {
         body.attributes = {};
         body.description = 'Approve workflow request.';
 
-        let promisedupdateWorkflow = '';
-        promisedupdateWorkflow = restApi.updateWorkflow(referenceId, body);
+        const promisedupdateWorkflow = restApi.updateWorkflow(referenceId, body);
         return promisedupdateWorkflow
             .then(() => {
                 return (
@@ -149,11 +149,10 @@ function ListLabels() {
                 }
                 return null;
             })
-            .finally(() => {
+            .then(() => {
                 fetchData();
             });
     };
-
 
     const pageProps = {
         help: (
@@ -175,16 +174,11 @@ function ListLabels() {
                                 />
                             )}
                             />
-
                         </Link>
                     </ListItem>
                 </List>
             </HelpBase>),
-        /*
-        pageStyle='half' center part of the screen.
-        pageStyle='full' = Take the full content area.
-        pageStyle='paperLess' = Avoid from displaying background paper. ( For dashbord we need this )
-        */
+
         pageStyle: 'half',
         title: intl.formatMessage({
             id: 'Workflow.SubscriptionCreation.title.subscriptioncreation',
@@ -195,7 +189,10 @@ function ListLabels() {
     const columProps = [
         {
             name: 'description',
-            label: 'Description',
+            label: intl.formatMessage({
+                id: 'Workflow.SubscriptionCreation.table.header.Description',
+                defaultMessage: 'Description',
+            }),
             options: {
                 sort: false,
                 display: false,
@@ -203,7 +200,10 @@ function ListLabels() {
         },
         {
             name: 'api',
-            label: 'API',
+            label: intl.formatMessage({
+                id: 'Workflow.SubscriptionCreation.table.header.API',
+                defaultMessage: 'API',
+            }),
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
@@ -221,7 +221,10 @@ function ListLabels() {
         },
         {
             name: 'application',
-            label: 'Application',
+            label: intl.formatMessage({
+                id: 'Workflow.SubscriptionCreation.table.header.Application',
+                defaultMessage: 'Application',
+            }),
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
@@ -237,7 +240,10 @@ function ListLabels() {
         },
         {
             name: 'subscriber',
-            label: 'Subscriber',
+            label: intl.formatMessage({
+                id: 'Workflow.SubscriptionCreation.table.header.Subscriber',
+                defaultMessage: 'Subscriber',
+            }),
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
@@ -264,7 +270,10 @@ function ListLabels() {
         },
         {
             name: 'action',
-            label: 'Actions',
+            label: intl.formatMessage({
+                id: 'Workflow.SubscriptionCreation.table.header.Action',
+                defaultMessage: 'Action',
+            }),
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
@@ -300,7 +309,6 @@ function ListLabels() {
         },
     ];
 
-
     const addButtonProps = {};
     const addButtonOverride = null;
     const noDataMessage = (
@@ -318,11 +326,9 @@ function ListLabels() {
         defaultMessage: 'Search by workflow request description',
     });
 
-
     const filterData = (event) => {
         setSearchText(event.target.value);
     };
-
 
     const columns = [
         ...columProps,
@@ -361,8 +367,8 @@ function ListLabels() {
                                     id='Workflow.SubscriptionCreation.List.empty.content.subscriptioncreations'
                                     defaultMessage={'There are no workflow pending requests for subscription creation.'
                                     + 'It is possible to approve or reject workflow pending requests of subscription '
-                                    + ' creation. Workflow Approval Executor need to be enabled to introduce this '
-                                    + 'approve reject process into system'}
+                                    + ' creation. Workflow Approval Executor needs to be enabled to approve '
+                                    + 'or reject the requests. '}
                                 />
                             </Typography>
                         </CardContent>

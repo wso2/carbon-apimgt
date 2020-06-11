@@ -1367,9 +1367,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.UPDATED, this.username);
 
-                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            boolean gatewayExists;
+            if (config.getGatewayArtifactSynchronizerProperties().isPublishDirectlyToGatewayEnabled()) {
+                gatewayExists = config.getApiGatewayEnvironments().size() > 0;
+            } else {
+                gatewayExists = config.getApiGatewayEnvironments().size() > 0 || getAllLabels(tenantDomain).size() > 0;
+
+            }
                 String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
                 boolean isAPIPublished = false;
                 // gatewayType check is required when API Management is deployed on other servers to avoid synapse
@@ -1391,22 +1397,51 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             apiPublished.setOldOutSequence(oldApi.getOutSequence());
                             //old api contain what environments want to remove
                             Set<String> environmentsToRemove = new HashSet<String>(oldApi.getEnvironments());
+                            List<Label> labelsToRemove = null;
+                            if (oldApi.getGatewayLabels() != null){
+                                 labelsToRemove = new ArrayList<>(oldApi.getGatewayLabels());
+                            } else {
+                                 labelsToRemove = new ArrayList<>();
+                            }
+
                             //updated api contain what environments want to add
                             Set<String> environmentsToPublish = new HashSet<String>(apiPublished.getEnvironments());
+                            List<Label> labelsToPublish;
+                            List<Label> labelsRemoved = null;
+                            if (apiPublished.getGatewayLabels() != null ){
+                                labelsToPublish = new ArrayList<>(apiPublished.getGatewayLabels());
+                                labelsRemoved = new ArrayList<>(oldApi.getGatewayLabels());
+                            } else {
+                                labelsToPublish = new ArrayList<>();
+                                labelsRemoved = new ArrayList<>();
+                            }
                             Set<String> environmentsRemoved = new HashSet<String>(oldApi.getEnvironments());
+
                             if (!environmentsToPublish.isEmpty() && !environmentsToRemove.isEmpty()) {
                                 // this block will sort what gateways have to remove and published
                                 environmentsRemoved.retainAll(environmentsToPublish);
                                 environmentsToRemove.removeAll(environmentsRemoved);
                             }
-                            // map contain failed to publish Environments
-                            Map<String, String> failedToPublishEnvironments = publishToGateway(apiPublished);
+
+                            if (!labelsToPublish.isEmpty() && !labelsToRemove.isEmpty()) {
+                                // this block will sort what gateways have to remove and published
+                                labelsRemoved.retainAll(labelsToPublish);
+                                labelsToRemove.removeAll(labelsRemoved);
+                            }
                             apiPublished.setEnvironments(environmentsToRemove);
+                            apiPublished.setGatewayLabels(labelsToRemove);
                             // map contain failed to remove Environments
                             Map<String, String> failedToRemoveEnvironments = removeFromGateway(apiPublished);
+
+                            apiPublished.setEnvironments(environmentsToPublish);
+                            apiPublished.setGatewayLabels(labelsToPublish);
+                            // map contain failed to publish Environments
+                            Map<String, String> failedToPublishEnvironments = publishToGateway(apiPublished);
+
                             environmentsToPublish.removeAll(failedToPublishEnvironments.keySet());
                             environmentsToPublish.addAll(failedToRemoveEnvironments.keySet());
                             apiPublished.setEnvironments(environmentsToPublish);
+                            apiPublished.setGatewayLabels(labelsToPublish);
                             updateApiArtifact(apiPublished, true, false);
                             failedGateways.clear();
                             failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
@@ -4031,6 +4066,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.setOutSequence(outSequence);
 
                 api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
+                api.setGatewayLabels(APIUtil.getLabelsFromAPIGovernanceArtifact(apiArtifact,
+                        api.getId().getProviderName()));
                 api.setEndpointConfig(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
                 removeFromGateway(api);
                 if (api.isDefaultVersion()) {

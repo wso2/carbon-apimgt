@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.jms.listener.utils;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.ParseException;

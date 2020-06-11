@@ -2214,7 +2214,7 @@ public final class APIConstants {
         public static final String KEY_MANAGER_TYPE = "type";
         public static final String UUID_REGEX = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F" +
                 "]{3}-[0-9a-fA-F]{12}";
-        public static final String CONSUMER_KEY_CLAIM = "consumer_key";
+        public static final String CONSUMER_KEY_CLAIM = "consumer_key_claim";
         public static final String SCOPES_CLAIM = "scopes_claim";
 
         public static class KeyManagerEvent {
@@ -2252,6 +2252,7 @@ public final class APIConstants {
     // Supported Notifier Types
     public enum NotifierType {
         API,
+        GATEWAY_PUBLISHED_API,
         APPLICATION,
         APPLICATION_REGISTRATION,
         POLICY,
@@ -2273,6 +2274,25 @@ public final class APIConstants {
         POLICY_DELETE,
         SUBSCRIPTIONS_CREATE,
         SUBSCRIPTIONS_UPDATE,
-        SUBSCRIPTIONS_DELETE
+        SUBSCRIPTIONS_DELETE,
+        DEPLOY_API_IN_GATEWAY,
+        REMOVE_API_FROM_GATEWAY
+    }
+
+    public static class GatewayArtifactSynchronizer{
+
+        public static final String SYNC_RUNTIME_ARTIFACTS_PUBLISHER_CONFIG  = "SyncRuntimeArtifactsPublisher";
+        public static final String SYNC_RUNTIME_ARTIFACTS_GATEWAY_CONFIG  = "SyncRuntimeArtifactsGateway";
+        public static final String ENABLE_CONFIG = "Enable";
+        public static final String SAVER_CONFIG = "ArtifactSaver";
+        public static final String RETRIEVER_CONFIG = "ArtifactRetriever";
+        public static final String PUBLISH_DIRECTLY_TO_GW_CONFIG = "PublishDirectlyToGW";
+        public static final String GATEWAY_LABELS_CONFIG = "GatewayLabels";
+        public static final String LABEL_CONFIG = "Label";
+        public static final String DB_SAVER_NAME = "DBSaver";
+        public static final String DB_RETRIEVER_NAME = "DBRetriever";
+        public static final String GATEWAY_INSTRUCTION_PUBLISH = "Publish";
+        public static final String GATEWAY_INSTRUCTION_REMOVE = "Remove";
+
     }
 }

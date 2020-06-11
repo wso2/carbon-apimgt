@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class represent the Label
@@ -74,4 +75,16 @@ public class Label {
         this.description = description;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (this == obj) return true;
+        Label other = (Label) obj;
+        if (!Objects.equals(this.name, other.name)) return false;
+        if (!Objects.equals(this.labelId, other.labelId)) return false;
+        if (!Objects.equals(this.description, other.description)) return false;
+        if (!Objects.equals(this.tenantId, other.tenantId)) return false;
+        if (!Objects.equals(this.accessUrls, other.accessUrls)) return false;
+        return true;
+    }
 }

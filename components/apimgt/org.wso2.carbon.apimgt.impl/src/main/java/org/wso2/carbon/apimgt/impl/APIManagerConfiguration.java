@@ -35,11 +35,11 @@ import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
@@ -137,6 +137,8 @@ public class APIManagerConfiguration {
 
         return loginConfiguration;
     }
+
+    private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = new GatewayArtifactSynchronizerProperties();;
 
     /**
      * Returns the configuration of the Identity Provider.
@@ -487,6 +489,10 @@ public class APIManagerConfiguration {
                 setGlobalCacheInvalidationConfiguration(element);
             } else if (APIConstants.KeyManager.KEY_MANAGER_CONFIGURATIONS.equals(localName)) {
                 setKeyManagerConfigurationsDto(element);
+            } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_RUNTIME_ARTIFACTS_PUBLISHER_CONFIG.equals(localName)) {
+                setRuntimeArtifactsSyncPublisherConfig(element);
+            } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_RUNTIME_ARTIFACTS_GATEWAY_CONFIG.equals(localName)) {
+                setRuntimeArtifactsSyncGatewayConfig(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -1549,4 +1555,74 @@ public class APIManagerConfiguration {
         return keyManagerConfigurationsDto;
     }
 
+
+    private void setRuntimeArtifactsSyncPublisherConfig (OMElement omElement){
+
+        OMElement enableElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.ENABLE_CONFIG));
+        if (enableElement != null) {
+            gatewayArtifactSynchronizerProperties.setSaveArtifactsEnabled(
+                    JavaUtils.isTrueExplicitly(enableElement.getText()));
+        } else {
+            log.debug("Save to storage is not set. Set to default false");
+        }
+
+        OMElement saverElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.SAVER_CONFIG));
+        if (saverElement != null) {
+            String artifactSaver = saverElement.getText();
+            gatewayArtifactSynchronizerProperties.setSaverName(artifactSaver);
+        } else {
+            log.debug("Artifact saver Element is not set. Set to default DB Saver");
+        }
+
+        OMElement publishDirectlyToGatewayElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.PUBLISH_DIRECTLY_TO_GW_CONFIG));
+        if (publishDirectlyToGatewayElement != null) {
+            gatewayArtifactSynchronizerProperties.setPublishDirectlyToGatewayEnabled(
+                    JavaUtils.isTrueExplicitly(publishDirectlyToGatewayElement.getText()));
+        } else {
+            log.debug("Publish directly to gateway is not set. Set to default true");
+        }
+
+    }
+
+    private void setRuntimeArtifactsSyncGatewayConfig (OMElement omElement){
+
+        OMElement enableElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.ENABLE_CONFIG));
+        if (enableElement != null) {
+            gatewayArtifactSynchronizerProperties.setRetrieveFromStorageEnabled(
+                    JavaUtils.isTrueExplicitly(enableElement.getText()));
+        } else {
+            log.debug("Retrieve from storage is not set. Set to default false");
+        }
+
+        OMElement retrieverElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.RETRIEVER_CONFIG));
+        if (retrieverElement != null) {
+            String artifactRetriever = retrieverElement.getText();
+            gatewayArtifactSynchronizerProperties.setRetrieverName(artifactRetriever);
+        } else {
+            log.debug("Artifact retriever Element is not set. Set to default DB Retriever");
+        }
+
+        OMElement gatewayLabelElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.GATEWAY_LABELS_CONFIG));
+        if (gatewayLabelElement != null) {
+            Iterator labelsIterator = gatewayLabelElement
+                    .getChildrenWithLocalName(APIConstants.GatewayArtifactSynchronizer.LABEL_CONFIG);
+            while (labelsIterator.hasNext()) {
+                OMElement labelElement = (OMElement) labelsIterator.next();
+                if (labelElement != null) {
+                    gatewayArtifactSynchronizerProperties.getGatewayLabels().add(labelElement.getText());
+                }
+            }
+        }
+    }
+
+    public GatewayArtifactSynchronizerProperties getGatewayArtifactSynchronizerProperties() {
+
+        return gatewayArtifactSynchronizerProperties;
+    }
 }
