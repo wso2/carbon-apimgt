@@ -148,6 +148,11 @@ public class API implements Serializable {
      */
     private boolean isMonetizationEnabled = false;
 
+    /**
+     * Property to hold selected deployment environments of the  particular API.
+     */
+    private Set<DeploymentEnvironments> deploymentEnvironments;
+
     // Used for endpoint environments configured with non empty URLs
     private Set<String> environmentList;
 
@@ -159,11 +164,16 @@ public class API implements Serializable {
     private List<APIEndpoint> endpoints = new ArrayList<APIEndpoint>();
 
     /**
-     *  Property to hold the enable/disable status of the json schema validation.
+     * Property to hold the enable/disable status of the json schema validation.
      */
     private boolean enableSchemaValidation = false;
 
     private List<APICategory> apiCategories;
+
+    /**
+     * Property to hold enable/disable status of the store visibility.
+     */
+    private boolean enableStore = true;
 
 
     public void setEnvironmentList(Set<String> environmentList) {
@@ -266,13 +276,21 @@ public class API implements Serializable {
     private String accessControl;
     private String accessControlRoles;
 
-    public String getSwaggerDefinition() {return swaggerDefinition; }
+    public String getSwaggerDefinition() {
+        return swaggerDefinition;
+    }
 
-    public void setSwaggerDefinition(String swaggerDefinition) { this.swaggerDefinition = swaggerDefinition; }
+    public void setSwaggerDefinition(String swaggerDefinition) {
+        this.swaggerDefinition = swaggerDefinition;
+    }
 
-    public void setGraphQLSchema(String graphQLSchema) { this.graphQLSchema = graphQLSchema; }
+    public void setGraphQLSchema(String graphQLSchema) {
+        this.graphQLSchema = graphQLSchema;
+    }
 
-    public String getGraphQLSchema() {return graphQLSchema; }
+    public String getGraphQLSchema() {
+        return graphQLSchema;
+    }
 
     public Set<String> getEnvironments() {
         return environments;
@@ -963,6 +981,14 @@ public class API implements Serializable {
         this.endpoints = endpoint;
     }
 
+    public boolean isEnableStore() {
+        return enableStore;
+    }
+
+    public void setEnableStore(boolean enableStore) {
+        this.enableStore = enableStore;
+    }
+
     /**
      * This method returns endpoints according to the given endpoint config
      *
@@ -1008,6 +1034,14 @@ public class API implements Serializable {
     public void setKeyManagers(List<String> keyManagers) {
 
         this.keyManagers = keyManagers;
+    }
+
+    public Set<DeploymentEnvironments> getDeploymentEnvironments() {
+        return deploymentEnvironments;
+    }
+
+    public void setDeploymentEnvironments(Set<DeploymentEnvironments> deploymentEnvironments) {
+        this.deploymentEnvironments = deploymentEnvironments;
     }
 
     @Override

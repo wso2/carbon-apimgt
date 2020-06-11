@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
@@ -53,6 +54,7 @@ import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
 import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.AbstractKeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
@@ -68,6 +70,10 @@ import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBSaver;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
@@ -187,9 +193,10 @@ public class APIManagerComponent {
             //Registering Notifiers
             bundleContext.registerService(Notifier.class.getName(), new SubscriptionsNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new ApisNotifier(), null);
-            bundleContext.registerService(Notifier.class.getName(),  new ApplicationNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new ApplicationNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new ApplicationRegistrationNotifier(), null);
-            bundleContext.registerService(Notifier.class.getName(),new PolicyNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new PolicyNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new DeployAPIInGatewayNotifier(), null);
 
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
@@ -300,6 +307,20 @@ public class APIManagerComponent {
             //Initialize Recommendation wso2event output publisher
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
+
+            if (configuration.getGatewayArtifactSynchronizerProperties().isSaveArtifactsEnabled()) {
+                if (APIConstants.GatewayArtifactSynchronizer.DB_SAVER_NAME
+                        .equals(configuration.getGatewayArtifactSynchronizerProperties().getSaverName())) {
+                    bundleContext.registerService(ArtifactSaver.class.getName(), new DBSaver(), null);
+                }
+            }
+            if (configuration.getGatewayArtifactSynchronizerProperties().isRetrieveFromStorageEnabled()) {
+                if (APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME
+                        .equals(configuration.getGatewayArtifactSynchronizerProperties().getRetrieverName())) {
+                    bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
+                }
+            }
+
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
@@ -868,6 +889,36 @@ public class APIManagerComponent {
     protected void removeNotifiers(Notifier notifier) {
 
         ServiceReferenceHolder.getInstance().getNotifiersMap().remove(notifier.getType());
+    }
+
+    @Reference(
+            name = "gateway.artifact.saver",
+            service = ArtifactSaver.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeArtifactSaver")
+    protected void addArtifactSaver (ArtifactSaver artifactSaver) {
+
+        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                        .getGatewayArtifactSynchronizerProperties();
+
+        if (gatewayArtifactSynchronizerProperties.isSaveArtifactsEnabled()
+                && gatewayArtifactSynchronizerProperties.getSaverName().equals(artifactSaver.getName())) {
+            ServiceReferenceHolder.getInstance().setArtifactSaver(artifactSaver);
+
+            try {
+                ServiceReferenceHolder.getInstance().getArtifactSaver().init();
+            } catch (Exception e) {
+                log.error("Error connecting with the Artifact Saver");
+                removeArtifactSaver(null);
+            }
+        }
+    }
+
+    protected void removeArtifactSaver(ArtifactSaver artifactSaver) {
+        ServiceReferenceHolder.getInstance().getArtifactSaver().disconnect();
+        ServiceReferenceHolder.getInstance().setArtifactSaver(null);
     }
 
     /**

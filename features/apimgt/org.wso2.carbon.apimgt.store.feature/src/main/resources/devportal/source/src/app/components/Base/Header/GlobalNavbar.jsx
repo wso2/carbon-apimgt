@@ -24,6 +24,7 @@ import Icon from '@material-ui/core/Icon';
 import { ListItemIcon, List, ListItem, ListItemText } from '@material-ui/core';
 import { withTheme } from '@material-ui/core/styles';
 import CustomIcon from '../../Shared/CustomIcon';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  * GlobalNavBar
@@ -35,10 +36,11 @@ function GlobalNavBar(props) {
     const {
         classes, theme, intl, drawerView, selected, iconWidth, strokeColorSelected, strokeColor
     } = props;
-    
+    const { custom: { landingPage: { active: landingPageActive, activeForAnonymous } } } = theme;
+    const isUserFound = AuthManager.getUser();
     return (
         <List className={classes.listRoot}>
-            {theme.custom.landingPage.active
+            {landingPageActive && (isUserFound && !activeForAnonymous ||  activeForAnonymous)
                 && (
                     <Link to='/home' className={classNames({ [classes.selected]: selected === 'home', [classes.links]: true })}>
                         <ListItem button classes={{root: classes.listItemRoot}}>

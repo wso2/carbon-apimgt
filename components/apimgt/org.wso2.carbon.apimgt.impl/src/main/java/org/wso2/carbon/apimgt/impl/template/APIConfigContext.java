@@ -95,6 +95,11 @@ public class APIConfigContext extends ConfigContext {
         } else {
             context.put("enableSchemaValidation", Boolean.FALSE);
         }
+        if (api.isEnableStore()) {
+            context.put("enableStore", Boolean.TRUE);
+        } else {
+            context.put("enableStore", Boolean.FALSE);
+        }
     }
 
     private void setApiProductVelocityContext(APIProduct apiProduct, VelocityContext context) {

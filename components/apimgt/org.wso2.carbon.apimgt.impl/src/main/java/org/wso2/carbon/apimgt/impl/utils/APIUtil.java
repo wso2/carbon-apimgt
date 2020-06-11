@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -108,6 +109,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -117,17 +119,10 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
-import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.IDPConfiguration;
-import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
-import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
-import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
+import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -228,6 +223,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -673,6 +669,7 @@ public final class APIUtil {
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
             api.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
+            api.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
 
             Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
@@ -749,6 +746,15 @@ public final class APIUtil {
             api.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
                     (APIConstants.Monetization.API_MONETIZATION_STATUS)));
             String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
+
+
+            //set selected clusters which API needs to be deployed
+            String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
+            Set<DeploymentEnvironments> deploymentEnvironments = extractDeploymentsForAPI(deployments);
+            if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
+                api.setDeploymentEnvironments(deploymentEnvironments);
+            }
+
             if (StringUtils.isNotBlank(monetizationInfo)) {
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
@@ -800,7 +806,7 @@ public final class APIUtil {
      * @param apiProviderName name of API provider
      * @return List<Label> list of gateway labels
      */
-    private static List<Label> getLabelsFromAPIGovernanceArtifact(GovernanceArtifact artifact, String apiProviderName)
+    public static List<Label> getLabelsFromAPIGovernanceArtifact(GovernanceArtifact artifact, String apiProviderName)
             throws GovernanceException, APIManagementException {
         String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
         List<Label> gatewayLabelListForAPI = new ArrayList<>();
@@ -908,6 +914,8 @@ public final class APIUtil {
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
             api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+            api.setEnableStore(Boolean.parseBoolean(
+                    artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {
                 cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
@@ -994,6 +1002,11 @@ public final class APIUtil {
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
+            String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
+            Set<DeploymentEnvironments> deploymentEnvironments = extractDeploymentsForAPI(deployments);
+            if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
+                api.setDeploymentEnvironments(deploymentEnvironments);
+            }
 
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
             //non empty URLs to API object
@@ -1240,6 +1253,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, api.getApiSecurity());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA,
                     Boolean.toString(api.isEnabledSchemaValidation()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE, Boolean.toString(api.isEnableStore()));
 
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -1338,6 +1352,18 @@ public final class APIUtil {
             if (api.getKeyManagers() != null) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS, new Gson().toJson(api.getKeyManagers()));
             }
+
+            //check in github code to see this method was removed
+            String apiSecurity = artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
+            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
+                    !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
+            }
+
+//          set deployments selected
+            Set<DeploymentEnvironments> deploymentEnvironments = api.getDeploymentEnvironments();
+            String json = new Gson().toJson(deploymentEnvironments);
+            artifact.setAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS, json);
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -6674,7 +6700,24 @@ public final class APIUtil {
                                 .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
             }
         }
+
         return environmentStringSet;
+    }
+
+    /**
+     * This method used to set selected deployment environment values to governance artifact of API .
+     *
+     * @param deployments DeploymentEnvironments attributes value
+     */
+    public static Set<DeploymentEnvironments> extractDeploymentsForAPI(String deployments) {
+        HashSet<DeploymentEnvironments> deploymentEnvironmentsSet = new HashSet<>();
+        if (deployments != null && !"null".equals(deployments)) {
+            Type deploymentEnvironmentsSetType = new TypeToken<HashSet<DeploymentEnvironments>>() {
+            }.getType();
+            deploymentEnvironmentsSet = new Gson().fromJson(deployments, deploymentEnvironmentsSetType);
+            return deploymentEnvironmentsSet;
+        }
+        return deploymentEnvironmentsSet;
     }
 
     /**
@@ -8318,7 +8361,7 @@ public final class APIUtil {
         }
         return BigInteger.ZERO;
     }
-    
+
     public static InetAddress getAddress(String ipAddress) throws UnknownHostException {
         return InetAddress.getByName(ipAddress);
     }
@@ -10041,6 +10084,7 @@ public final class APIUtil {
     /**
      * Checks whether the given token is a valid JWT by parsing header and validating the
      * header,payload,signature format
+     *
      * @param token the token to be validated
      * @return true if valid JWT
      */
@@ -10067,6 +10111,7 @@ public final class APIUtil {
     /**
      * Get signature of  given JWT token. This method should be called only after validating whether the token is
      * JWT via isValidJWT method.
+     *
      * @param token jwt token.
      * @return signature of the jwt token.
      */
@@ -10078,6 +10123,7 @@ public final class APIUtil {
 
     /**
      * Extracts the tenant domain of the subject in a given JWT
+     *
      * @param token jwt token
      * @return tenant domain of the the sub claim
      */
@@ -10122,13 +10168,15 @@ public final class APIUtil {
         }
         return publicCert;
     }
-        /**
-         * Verify the JWT token signature.
-         *
-         * This method only used for API Key revocation which contains some duplicate logic in GatewayUtils class.
-         * @param splitToken The JWT token which is split into [header, payload, signature]
-         * @return whether the signature is verified or or not
-         */
+
+    /**
+     * Verify the JWT token signature.
+     * <p>
+     * This method only used for API Key revocation which contains some duplicate logic in GatewayUtils class.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature is verified or or not
+     */
     public static boolean verifyTokenSignature(String[] splitToken, Certificate certificate,
                                                String signatureAlgorithm) throws APIManagementException {
         // Retrieve public key from the certificate
@@ -10330,6 +10378,7 @@ public final class APIUtil {
 
     /**
      * Validates the API category names to be attached to an API
+     *
      * @param categories
      * @param tenantDomain
      * @return
@@ -10780,7 +10829,6 @@ public final class APIUtil {
 
         return ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfigurations();
     }
-
     /**
      * Get scopes attached to the API.
      *
@@ -10835,4 +10883,87 @@ public final class APIUtil {
         }
         return claimMappingDtoList;
     }
+
+    /**
+     * This method is used to get deployment clusters' configurations from the api manager configurations
+     *
+     * @return The configuration read from api-manager.xml or else null
+     */
+    public static JSONArray getClusterInfoFromAPIMConfig() {
+
+        //Read the configuration from api-manager.xml
+        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        return apimConfig.getContainerMgtAttributes();
+    }
+
+    /**
+     * This method is used to get deployment clusters' configurations from api-manager.xml/tenant-conf.json and format
+     *
+     * @return JSONArray with configurations
+     */
+    public static JSONArray getAllClustersFromConfig() throws APIManagementException {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        JSONArray containerMgt = new JSONArray();
+        //get cluster Details from deployment.toml
+        JSONArray containerMgtFromToml = getClusterInfoFromAPIMConfig();
+
+        if (org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            if (containerMgtFromToml != null && !containerMgtFromToml.isEmpty()) {
+                for (Object apimConfig : containerMgtFromToml) {
+                    if (!((JSONObject) apimConfig).containsKey(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO)) {
+                        containerMgtFromToml.remove(apimConfig);
+                    }
+                }
+            }
+            return containerMgtFromToml;
+        } else {
+            //read from tenant-conf.json
+            try {
+                APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+                String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
+                        APIConstants.API_TENANT_CONF_LOCATION);
+                JSONParser jsonParser = new JSONParser();
+                JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
+                JSONArray containerMgtInfoFromTenant = new JSONArray();
+                JSONObject containerMgtObj = new JSONObject();
+                JSONArray containerMgtInfo = (JSONArray) (tenantConf.get(ContainerBasedConstants.CONTAINER_MANAGEMENT));
+                for (Object containerMgtInfoObj : containerMgtInfo) {
+                    JSONObject containerMgtDetails = (JSONObject) containerMgtInfoObj;
+                    JSONArray clustersInfo = (JSONArray) containerMgtDetails.
+                            get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
+                    for (Object clusterInfo : clustersInfo) {
+                        //check if the clusters defined in tenant-conf.json
+                        if (!((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_ID).equals("")) {
+                            containerMgtInfoFromTenant.add(clusterInfo);
+                        }
+                    }
+                    if (!containerMgtInfoFromTenant.isEmpty()) {
+                        containerMgtObj.put(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO, containerMgtInfoFromTenant);
+                        for (Object apimConfig : containerMgtFromToml) {
+                            //get class name from the api-manager.xml
+                            if (((JSONObject) apimConfig).get(ContainerBasedConstants.TYPE).equals(containerMgtDetails
+                                    .get(ContainerBasedConstants.TYPE))) {
+                                containerMgtObj.put(ContainerBasedConstants.CLASS_NAME, ((JSONObject) apimConfig)
+                                        .get(ContainerBasedConstants.CLASS_NAME));
+                            }
+                        }
+                        containerMgtObj.put(ContainerBasedConstants.TYPE, containerMgtDetails.get(ContainerBasedConstants.TYPE));
+                    }
+                    containerMgt.add(containerMgtObj);
+                }
+                return containerMgt;
+            } catch (RegistryException e) {
+                handleException("Couldn't read tenant configuration from tenant registry", e);
+            } catch (UserStoreException e) {
+                handleException("Couldn't read tenant configuration from tenant registry", e);
+            } catch (ParseException e) {
+                handleException("Couldn't parse tenant configuration for reading extension handler position", e);
+            }
+        }
+
+        return containerMgt;
+    }
+
 }
+
