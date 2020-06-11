@@ -17,11 +17,16 @@
  */
 package org.wso2.carbon.apimgt.impl.dao;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.APIPolicyConditionGroup;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
@@ -44,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SubscriptionValidationDAO {
@@ -206,6 +212,8 @@ public class SubscriptionValidationDAO {
                 subscriptionPolicyDTO.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
                 subscriptionPolicyDTO.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
                 subscriptionPolicyDTO.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
+                subscriptionPolicyDTO.setGraphQLMaxDepth(resultSet.getInt("MAX_DEPTH"));
+                subscriptionPolicyDTO.setGraphQLMaxComplexity(resultSet.getInt("MAX_COMPLEXITY"));
 
                 subscriptionPolicies.add(subscriptionPolicyDTO);
             }
@@ -586,23 +594,43 @@ public class SubscriptionValidationDAO {
             populateApiPolicyList(apiPolicies, resultSet);
 
         } catch (SQLException e) {
-            log.error("Error in loading application policies for tenantId : " + tenantDomain, e);
+            log.error("Error in loading api policies for tenantId : " + tenantDomain, e);
         }
 
         return apiPolicies;
     }
 
-    private void populateApiPolicyList(List<APIPolicy> apiPolicies, ResultSet resultSet)
+        private void populateApiPolicyList(List<APIPolicy> apiPolicies, ResultSet resultSet)
             throws SQLException {
 
+        Map<Integer, APIPolicy> temp = new ConcurrentHashMap<>();
         if (apiPolicies != null && resultSet != null) {
             while (resultSet.next()) {
-                APIPolicy apiPolicyDTO = new APIPolicy();
-                apiPolicyDTO.setId(resultSet.getInt("POLICY_ID"));
-                apiPolicyDTO.setName(resultSet.getString("NAME"));
-                apiPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                apiPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
-                apiPolicies.add(apiPolicyDTO);
+                int policyId = resultSet.getInt("POLICY_ID");
+                APIPolicy apiPolicy = temp.get(policyId);
+                if (apiPolicy == null) {
+                    apiPolicy = new APIPolicy();
+                    apiPolicy.setId(policyId);
+                    apiPolicy.setName(resultSet.getString("NAME"));
+                    apiPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
+                    apiPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                    apiPolicies.add(apiPolicy);
+                }
+                APIPolicyConditionGroup apiPolicyConditionGroup = new APIPolicyConditionGroup();
+                int conditionGroup = resultSet.getInt("CONDITION_GROUP_ID");
+                apiPolicyConditionGroup.setConditionGroupId(conditionGroup);
+                apiPolicyConditionGroup.setQuotaType(resultSet.getString("QUOTA_TYPE"));
+                apiPolicyConditionGroup.setPolicyId(policyId);
+                ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+                ConditionGroupDTO conditionGroupDTO = null;
+                try {
+                    conditionGroupDTO = apiMgtDAO.createConditionGroupDTO(conditionGroup);
+                } catch (APIManagementException e) {
+                    log.error("Error while processing api policies for policyId : " + policyId, e);
+                }
+                ConditionDTO[] conditionDTOS = conditionGroupDTO.getConditions();
+                apiPolicyConditionGroup.setConditionDTOS(Arrays.asList(conditionDTOS));
+                apiPolicy.addConditionGroup(apiPolicyConditionGroup);
             }
         }
     }
@@ -762,6 +790,8 @@ public class SubscriptionValidationDAO {
                     subscriptionPolicy.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
                     subscriptionPolicy.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
                     subscriptionPolicy.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
+                    subscriptionPolicy.setGraphQLMaxDepth(resultSet.getInt("MAX_DEPTH"));
+                    subscriptionPolicy.setGraphQLMaxComplexity(resultSet.getInt("MAX_COMPLEXITY"));
                     return subscriptionPolicy;
                 }
 

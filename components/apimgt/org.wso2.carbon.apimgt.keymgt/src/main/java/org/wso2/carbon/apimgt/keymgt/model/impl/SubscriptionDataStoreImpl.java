@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
@@ -46,7 +47,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private static final Log log = LogFactory.getLog(SubscriptionDataStoreImpl.class);
     public enum POLICY_TYPE {
         SUBSCRIPTION,
-        APPLICATION
+        APPLICATION,
+        API
     }
     public static final String DELEM_PERIOD = ".";
 
@@ -54,6 +56,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private Map<String, ApplicationKeyMapping> applicationKeyMappingMap;
     private Map<Integer, Application> applicationMap;
     private Map<String, API> apiMap;
+    private Map<String, ApiPolicy> apiPolicyMap;
     private Map<String, SubscriptionPolicy> subscriptionPolicyMap;
     private Map<String, ApplicationPolicy> appPolicyMap;
     private Map<String, Subscription> subscriptionMap;
@@ -63,6 +66,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private boolean applicationKeysInitialized;
     private boolean applicationPoliciesInitialized;
     private boolean subscriptionPoliciesInitialized;
+    private boolean apiPoliciesInitialized;
     public static final int LOADING_POOL_SIZE = 7;
     private String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(LOADING_POOL_SIZE);
@@ -85,6 +89,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.apiMap = new ConcurrentHashMap<>();
         this.subscriptionPolicyMap = new ConcurrentHashMap<>();
         this.appPolicyMap = new ConcurrentHashMap<>();
+        this.apiPolicyMap = new ConcurrentHashMap<>();
         this.subscriptionMap = new ConcurrentHashMap<>();
         initializeLoadingTasks();
     }
@@ -128,6 +133,14 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     public Subscription getSubscriptionById(int appId, int apiId) {
 
         return subscriptionMap.get(SubscriptionDataStoreUtil.getSubscriptionCacheKey(appId, apiId));
+    }
+
+    @Override
+    public ApiPolicy getApiPolicyByName(String policyName, int tenantId) {
+
+        String key = POLICY_TYPE.API +
+                SubscriptionDataStoreUtil.getPolicyCacheKey(policyName, tenantId);
+        return apiPolicyMap.get(key);
     }
 
     public void initializeLoadingTasks() {
@@ -195,6 +208,23 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                         });
 
         executorService.schedule(keyMappingsTask, 0, TimeUnit.SECONDS);
+
+        Runnable apiPolicyLoadingTask =
+                new PopulateTask<String, ApiPolicy>(apiPolicyMap,
+                        () -> {
+                            try {
+                                log.debug("Calling loadAllSubscriptionPolicies.");
+                                List<ApiPolicy> apiPolicyList =
+                                        new SubscriptionDataLoaderImpl().loadAllAPIPolicies(tenantDomain);
+                                apiPoliciesInitialized = true;
+                                return apiPolicyList;
+                            } catch (APIManagementException e) {
+                                log.error("Exception while loading api Policies " + e);
+                            }
+                            return null;
+                        });
+
+        executorService.schedule(apiPolicyLoadingTask, 0, TimeUnit.SECONDS);
 
         Runnable subPolicyLoadingTask =
                 new PopulateTask<String, SubscriptionPolicy>(subscriptionPolicyMap,

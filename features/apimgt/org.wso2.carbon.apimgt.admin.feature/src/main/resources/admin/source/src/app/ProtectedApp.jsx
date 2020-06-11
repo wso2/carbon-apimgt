@@ -38,9 +38,9 @@ import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import Configurations from 'Config';
 import Navigator from 'AppComponents/Base/Navigator';
 import RouteMenuMapping from 'AppComponents/Base/RouteMenuMapping';
-import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
 import Api from 'AppData/api';
 import Progress from 'AppComponents/Shared/Progress';
+import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
 
 const drawerWidth = 256;
 
@@ -273,23 +273,25 @@ class Protected extends Component {
             );
         }
         const leftMenu = (
-            <AppContextProvider value={{ user }}>
-                <>
-                    <Hidden smUp implementation='js'>
-                        <Navigator
-                            PaperProps={{ style: { width: drawerWidth } }}
-                            variant='temporary'
-                            open={mobileOpen}
-                            onClose={() => {
-                                this.setState((oldState) => ({ mobileOpen: !oldState.mobileOpen }));
-                            }}
-                        />
-                    </Hidden>
-                    <Hidden xsDown implementation='css'>
-                        <Navigator PaperProps={{ style: { width: drawerWidth } }} />
-                    </Hidden>
-                </>
-            </AppContextProvider>
+            settings && (
+                <AppContextProvider value={{ settings, user }}>
+                    <>
+                        <Hidden smUp implementation='js'>
+                            <Navigator
+                                PaperProps={{ style: { width: drawerWidth } }}
+                                variant='temporary'
+                                open={mobileOpen}
+                                onClose={() => {
+                                    this.setState((oldState) => ({ mobileOpen: !oldState.mobileOpen }));
+                                }}
+                            />
+                        </Hidden>
+                        <Hidden xsDown implementation='css'>
+                            <Navigator PaperProps={{ style: { width: drawerWidth } }} />
+                        </Hidden>
+                    </>
+                </AppContextProvider>
+            )
         );
         return (
             <MuiThemeProvider theme={theme}>
@@ -299,10 +301,10 @@ class Protected extends Component {
                             <AppContextProvider value={{ settings, user }}>
                                 <Route>
                                     <Switch>
-                                        <Redirect exact from='/' to='/throttling/application' />
+                                        <Redirect exact from='/' to='/dashboard' />
                                         <Route
-                                            path='/throttling/application'
-                                            component={ApplicationThrottlingPolicies}
+                                            path='/dashboard'
+                                            component={Dashboard}
                                         />
                                         {allRoutes.map((r) => {
                                             return <Route path={r.path} component={r.component} />;
@@ -319,9 +321,9 @@ class Protected extends Component {
                         title='iframeOP'
                         id='iframeOP'
                         src={checkSessionURL}
-                        width='0px'
-                        height='0px'
-                        style={{ color: 'red', position: 'absolute' }}
+                        width={0}
+                        height={0}
+                        style={{ position: 'absolute', bottom: 0 }}
                     />
                 </AppErrorBoundary>
             </MuiThemeProvider>

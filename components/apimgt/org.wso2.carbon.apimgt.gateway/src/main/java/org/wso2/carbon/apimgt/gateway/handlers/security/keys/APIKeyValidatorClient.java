@@ -231,6 +231,8 @@ public class APIKeyValidatorClient {
         dto.setStopOnQuotaReach(generatedDto.getStopOnQuotaReach());
         dto.setProductName(generatedDto.getProductName());
         dto.setProductProvider(generatedDto.getProductProvider());
+        dto.setGraphQLMaxDepth(generatedDto.getGraphQLMaxDepth());
+        dto.setGraphQLMaxComplexity(generatedDto.getGraphQLMaxComplexity());
         return dto;
     }
 

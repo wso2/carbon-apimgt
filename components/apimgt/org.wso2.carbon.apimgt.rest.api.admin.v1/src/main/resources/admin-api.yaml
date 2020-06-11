@@ -5276,6 +5276,7 @@ definitions:
           - APPLICATION_DELETION
           - API_STATE
           - SUBSCRIPTION_DELETION
+          - SUBSCRIPTION_UPDATE
         example: APPLICATION_CREATION
         description: |
           Type of the Workflow Request. It shows which type of request is it.

@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,16 +29,16 @@ import java.util.Set;
  */
 public class APIPolicy extends Policy {
 
-    private Set<APIPolicyConditionGroup> conditionGroups;
+    private List<APIPolicyConditionGroup> conditionGroups = new ArrayList<>();
 
-    public Set<APIPolicyConditionGroup> getConditionGroups() {
+    public List<APIPolicyConditionGroup> getConditionGroups() {
 
         return conditionGroups;
     }
 
-    public void setConditionGroups(Set<APIPolicyConditionGroup> conditionGroups) {
+    public void addConditionGroup(APIPolicyConditionGroup conditionGroup) {
 
-        this.conditionGroups = conditionGroups;
+        this.conditionGroups.add(conditionGroup);
     }
 
 }

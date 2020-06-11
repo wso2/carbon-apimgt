@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.keymgt.model;
 
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
@@ -63,6 +64,14 @@ public interface SubscriptionDataStore {
      */
     Subscription getSubscriptionById(int appId, int apiId);
 
+    /**
+     * Gets API Throttling Policy by the name and Tenant Id
+     *
+     * @param policyName Name of the Throttling Policy
+     * @param tenantId   Tenant ID in the Policy
+     * @return API Throttling Policy
+     */
+    ApiPolicy getApiPolicyByName(String policyName, int tenantId);
     /**
      * Gets Subscription Throttling Policy by the name and Tenant Id
      *

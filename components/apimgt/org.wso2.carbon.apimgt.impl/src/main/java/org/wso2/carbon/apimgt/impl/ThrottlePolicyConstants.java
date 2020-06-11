@@ -117,4 +117,8 @@ public class ThrottlePolicyConstants {
     public static final String COLUMN_PRICE_PER_REQUEST = "PRICE_PER_REQUEST";
 
     public static final String COLUMN_CURRENCY = "CURRENCY";
+
+    public static final String COLUMN_MAX_DEPTH = "MAX_DEPTH";
+
+    public static final String COLUMN_MAX_COMPLEXITY = "MAX_COMPLEXITY";
 }

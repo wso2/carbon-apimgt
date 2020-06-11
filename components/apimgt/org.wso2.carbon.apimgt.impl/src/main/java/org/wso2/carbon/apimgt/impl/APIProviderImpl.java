@@ -157,12 +157,12 @@ import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBean
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.common.CommonConstants;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.CollectionImpl;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
@@ -203,7 +203,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
@@ -1011,6 +1010,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+
     /**
      * Validates the name and version of api against illegal characters.
      *
@@ -1595,6 +1595,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 api.setEndpointUTUsername(oldApi.getEndpointUTUsername());
                 api.setEndpointUTPassword(oldApi.getEndpointUTPassword());
+
                 if (log.isDebugEnabled()) {
                     log.debug("Using the previous username and password for endpoint security");
                 }
@@ -1622,6 +1623,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         StringUtils.isBlank(endpointSecurity.getPassword())) {
                                     endpointSecurity.setUsername(oldEndpointSecurity.getUsername());
                                     endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
+                                    if (endpointSecurity.getType().equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                                        endpointSecurity.setUniqueIdentifier(oldEndpointSecurity.getUniqueIdentifier());
+                                        endpointSecurity.setGrantType(oldEndpointSecurity.getGrantType());
+                                        endpointSecurity.setTokenUrl(oldEndpointSecurity.getTokenUrl());
+                                        endpointSecurity.setClientId(oldEndpointSecurity.getClientId());
+                                        endpointSecurity.setClientSecret(oldEndpointSecurity.getClientSecret());
+                                        endpointSecurity.setCustomParameters(oldEndpointSecurity.getCustomParameters());
+                                    }
                                 }
                                 endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new JSONParser()
                                         .parse(new ObjectMapper().writeValueAsString(endpointSecurity)));
@@ -1639,6 +1648,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         StringUtils.isBlank(endpointSecurity.getPassword())) {
                                     endpointSecurity.setUsername(oldEndpointSecurity.getUsername());
                                     endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
+                                    if (endpointSecurity.getType().equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                                        endpointSecurity.setUniqueIdentifier(oldEndpointSecurity.getUniqueIdentifier());
+                                        endpointSecurity.setGrantType(oldEndpointSecurity.getGrantType());
+                                        endpointSecurity.setTokenUrl(oldEndpointSecurity.getTokenUrl());
+                                        endpointSecurity.setClientId(oldEndpointSecurity.getClientId());
+                                        endpointSecurity.setClientSecret(oldEndpointSecurity.getClientSecret());
+                                        endpointSecurity.setCustomParameters(oldEndpointSecurity.getCustomParameters());
+                                    }
                                 }
                                 endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX,
                                         new JSONParser()
@@ -2779,6 +2796,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                     authProperties);
+
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLQueryAnalysisHandler", Collections.<String, String>emptyMap());
+            }
+
             Map<String, String> properties = new HashMap<String, String>();
 
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
@@ -5955,7 +5977,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,subPolicy.getPolicyId(),
                         subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
-                        subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach());
+                        subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),
+                        subPolicy.getGraphQLMaxDepth(),subPolicy.getGraphQLMaxComplexity());
                 APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
@@ -6275,7 +6298,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,subPolicy.getPolicyId(),
                         subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
-                        subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach());
+                        subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),subPolicy.getGraphQLMaxDepth(),
+                        subPolicy.getGraphQLMaxComplexity());
                 APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
@@ -6400,7 +6424,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,subscriptionPolicy.getPolicyId(),
                     subscriptionPolicy.getPolicyName(), subscriptionPolicy.getDefaultQuotaPolicy().getType(),
                     subscriptionPolicy.getRateLimitCount(),subscriptionPolicy.getRateLimitTimeUnit(),
-                    subscriptionPolicy.isStopOnQuotaReach());
+                    subscriptionPolicy.isStopOnQuotaReach(),subscriptionPolicy.getGraphQLMaxDepth(),subscriptionPolicy.getGraphQLMaxComplexity());
             APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
             GlobalPolicy globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);

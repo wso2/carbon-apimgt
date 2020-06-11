@@ -17,6 +17,7 @@
  */
 import React, { useState } from 'react';
 import Box from '@material-ui/core/Box';
+import cloneDeep from 'lodash.clonedeep';
 import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -31,6 +32,7 @@ import Settings from 'Settings';
 import PropTypes from 'prop-types';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Validation from 'AppData/Validation';
+import AppConfiguration from './AppConfiguration';
 
 const styles = theme => ({
     FormControl: {
@@ -74,6 +76,7 @@ const styles = theme => ({
 const KeyConfiguration = (props) => {
     const [isValidityTimeError, setValidityTimeError] = useState(false);
     const [isCalbackUrlError, setCallbackUrlError] = useState(false);
+    
     /**
      * Get the display names for the server supported grant types
      * @param serverSupportedGrantTypes
@@ -100,8 +103,11 @@ const KeyConfiguration = (props) => {
         const { keyRequest, updateKeyRequest, setGenerateEnabled } = props;
         const newRequest = { ...keyRequest };
         const { target: currentTarget } = event;
+        newRequest.serverSupportedGrantTypes = availableGrantTypes;
+        newRequest.supportedGrantTypes = availableGrantTypes;
         let newGrantTypes = [...newRequest.supportedGrantTypes];
-
+        newRequest.keyManager = name;
+        
         switch (field) {
             case 'callbackUrl':
                 if (Validation.url.validate(currentTarget.value).error) {
@@ -132,6 +138,11 @@ const KeyConfiguration = (props) => {
                 setGenerateEnabled(newGrantTypes.includes('client_credentials'));
                 newRequest.supportedGrantTypes = newGrantTypes;
                 break;
+            case 'additionalProperties':
+                let clonedAdditionalProperties = cloneDeep(newRequest.additionalProperties);
+                clonedAdditionalProperties[currentTarget.name] = currentTarget.value;
+                newRequest.additionalProperties = clonedAdditionalProperties;
+                break;
             default:
                 break;
         }
@@ -154,23 +165,89 @@ const KeyConfiguration = (props) => {
      * @returns {Component}
      * @memberof KeyConfiguration
      */
-    const {
-        classes, keyRequest, notFound, intl, isUserOwner, isKeysAvailable,
+    let {
+        classes, keyRequest, notFound, intl, isUserOwner, isKeysAvailable, keyManagerConfig, keys, keyType, key, selectedTab
     } = props;
     const {
-        serverSupportedGrantTypes, supportedGrantTypes, callbackUrl, validityTime,
+        serverSupportedGrantTypes, supportedGrantTypes, callbackUrl, validityTime, additionalProperties
     } = keyRequest;
+    let {
+        applicationConfiguration, availableGrantTypes, description,
+        enableMapOAuthConsumerApps, enableOAuthAppCreation, enableTokenEncryption, enableTokenGeneration, 
+        id, name, revokeEndpoint, tokenEndpoint, type, userInfoEndpoint,
+    } = keyManagerConfig;
+
     if (notFound) {
         return <ResourceNotFound />;
     }
     const grantTypeDisplayListMap = getGrantTypeDisplayList(
-        serverSupportedGrantTypes,
+        availableGrantTypes,
         Settings.grantTypes,
     );
 
     return (
         <React.Fragment>
             <FormControl className={classes.FormControl} component='fieldset'>
+                <Box display='flex'>
+                    <Grid item xs={10} md={5}>
+                        <TextField
+                            classes={{
+                                root: classes.removeHelperPadding,
+                            }}
+                            fullWidth
+                            id='tokenEndpoint'
+                            label={<FormattedMessage
+                                defaultMessage='Token Endpoint'
+                                id='Shared.AppsAndKeys.KeyConfiguration.token.endpoint.label'
+                            />}
+                            value={tokenEndpoint}
+                            name='tokenEndpoint'
+                            margin='normal'
+                            variant='outlined'
+                            disabled={true}
+                        />
+                    </Grid>
+                    <Grid item xs={10} md={5}>
+                        <Box ml={2}>
+                            <TextField
+                                classes={{
+                                    root: classes.removeHelperPadding,
+                                }}
+                                fullWidth
+                                id='revokeEndpoint'
+                                label={<FormattedMessage
+                                    defaultMessage='Revoke Endpoint'
+                                    id='Shared.AppsAndKeys.KeyConfiguration.revoke.endpoint.label'
+                                />}
+                                value={revokeEndpoint}
+                                name='revokeEndpoint'
+                                margin='normal'
+                                variant='outlined'
+                                disabled={true}
+                            />
+                        </Box>
+                    </Grid>
+                </Box>
+                <Box display='flex'>
+                    <Grid item xs={10} md={5}>
+                        <TextField
+                            classes={{
+                                root: classes.removeHelperPadding,
+                            }}
+                            fullWidth
+                            id='userinfoEndpoint'
+                            label={<FormattedMessage
+                                defaultMessage='User Info Endpoint'
+                                id='Shared.AppsAndKeys.KeyConfiguration.userinfo.endpoint.label'
+                            />}
+                            value={userInfoEndpoint}
+                            name='user info endpoint'
+                            margin='normal'
+                            variant='outlined'
+                            disabled={true}
+                        />    
+                    </Grid>
+                </Box>
                 <InputLabel shrink htmlFor='age-label-placeholder' className={classes.quotaHelp}>
                     <FormattedMessage id='grant.types' defaultMessage='Grant Types' />
                 </InputLabel>
@@ -289,6 +366,14 @@ const KeyConfiguration = (props) => {
                     </Box>
                 </Grid>
             </Box>
+            {applicationConfiguration.length > 0 && applicationConfiguration.map(config => (
+                <AppConfiguration 
+                    config={config}
+                    defaultValue={config.default}
+                    isUserOwner={isUserOwner}
+                    handleChange={handleChange}
+                />
+            ))}
         </React.Fragment>
     );
 };
@@ -305,6 +390,7 @@ KeyConfiguration.propTypes = {
     }).isRequired,
     isUserOwner: PropTypes.bool.isRequired,
     isKeysAvailable: PropTypes.bool.isRequired,
+    keyManagerConfig: PropTypes.any.isRequired,
     notFound: PropTypes.bool,
     setGenerateEnabled: PropTypes.func.isRequired,
     updateKeyRequest: PropTypes.func.isRequired,

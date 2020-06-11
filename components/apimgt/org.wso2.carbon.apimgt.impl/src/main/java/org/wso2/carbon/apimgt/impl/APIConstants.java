@@ -327,6 +327,13 @@ public final class APIConstants {
     public static final String API_OVERVIEW_ENDPOINT_AUTH_DIGEST = "overview_endpointAuthDigest";
     public static final String API_OVERVIEW_ENDPOINT_USERNAME = "overview_endpointUsername";
     public static final String API_OVERVIEW_ENDPOINT_PASSWORD = "overview_endpointPpassword";
+    public static final String API_OVERVIEW_ENDPOINT_OAUTH = "overview_endpointOAuth";
+    public static final String API_OVERVIEW_ENDPOINT_GRANT_TYPE = "overview_grantType";
+    public static final String API_OVERVIEW_ENDPOINT_HTTP_METHOD = "overview_httpMethod";
+    public static final String API_OVERVIEW_ENDPOINT_TOKEN_URL = "overview_endpointTokenUrl";
+    public static final String API_OVERVIEW_ENDPOINT_CLIENT_ID = "overview_clientId";
+    public static final String API_OVERVIEW_ENDPOINT_CLIENT_SECRET = "overview_clientSecret";
+    public static final String API_OVERVIEW_ENDPOINT_CUSTOM_PARAMETERS = "overview_customParameters";
     public static final String API_OVERVIEW_TRANSPORTS = "overview_transports";
     public static final String API_OVERVIEW_INSEQUENCE = "overview_inSequence";
     public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
@@ -1067,6 +1074,7 @@ public final class APIConstants {
         public static final String SUBSCRIBERS = "/subscribers";
         public static final String  APPLICATION_KEY_MAPPINGS = "/application-key-mappings";
         public static final String APPLICATION_POLICIES = "/application-policies";
+        public static final String API_POLICIES = "/api-policies";
         public static final String SUBSCRIPTION_POLICIES = "/subscription-policies";
 
         private SubscriptionValidationResources() {
@@ -1160,6 +1168,15 @@ public final class APIConstants {
     public static final String OPERATION_AUTH_SCHEME_MAPPING = "OperationAuthSchemeMapping";
     public static final String OPERATION_SECURITY_ENABLED = "Enabled";
     public static final String OPERATION_SECURITY_DISABLED = "Disabled";
+    public static final String GRAPHQL_PAYLOAD = "GRAPHQL_PAYLOAD";
+    public static final String GRAPHQL_SCHEMA = "GRAPHQL_SCHEMA";
+    public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "GraphQLAccessControlPolicy";
+    public static final String QUERY_ANALYSIS_DEPTH = "depth";
+    public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
+    public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
+    public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
+    public static final String CHECK_ENABLED = "enabled";
+    public static final String DEFAULT_DEPTH_ROLE = "default";
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
@@ -1196,6 +1213,43 @@ public final class APIConstants {
         public static final String CHARSET = "UTF-8";
 
         private DigestAuthConstants() {
+        }
+    }
+
+    public static class OAuthConstants {
+        public static final String OAUTH = "OAUTH";
+        public static final String OAUTH_ID = "id";
+        public static final String UNIQUE_IDENTIFIER = "uniqueIdentifier";
+        public static final String TOKEN_API_URL = "tokenUrl";
+        public static final String OAUTH_CLIENT_ID = "clientId";
+        public static final String OAUTH_CLIENT_SECRET = "clientSecret";
+        public static final String OAUTH_USERNAMEPASSWORD = "usernamePassword";
+        public static final String GRANT_TYPE = "grantType";
+        public static final String OAUTH_CUSTOM_PARAMETERS = "customParameters";
+        public static final String CLIENT_CREDENTIALS = "CLIENT_CREDENTIALS";
+        public static final String PASSWORD = "PASSWORD";
+
+        public static final String ACCESS_TOKEN = "access_token";
+        public static final String REFRESH_TOKEN = "refresh_token";
+        public static final String SCOPE = "scope";
+        public static final String TOKEN_TYPE = "token_type";
+        public static final String EXPIRES_IN = "expires_in";
+
+        // Properties in Endpoint Config
+        public static final String ENDPOINT_SECURITY_PRODUCTION = "production";
+        public static final String ENDPOINT_SECURITY_SANDBOX = "sandbox";
+        public static final String ENDPOINT_SECURITY_PASSWORD = "password";
+        public static final String ENDPOINT_SECURITY_TYPE = "type";
+        public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
+        public static final String ENDPOINT_SECURITY_USERNAME = "username";
+
+        // For configs
+        public static final String OAUTH_ENDPOINT_SECURITY = "OAuthEndpointSecurity.";
+        public static final String OAUTH_TOKEN_REFRESH_INTERVAL = OAUTH_ENDPOINT_SECURITY + "TokenRefreshInterval";
+
+        public static final String TOKEN_REFRESH_INTERVAL = "tokenRefreshInterval";
+
+        private OAuthConstants() {
         }
     }
 
@@ -1424,12 +1478,15 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE = "type";
     public static final String ENDPOINT_SECURITY_TYPE_BASIC = "basic";
     public static final String ENDPOINT_SECURITY_TYPE_DIGEST = "digest";
+    public static final String ENDPOINT_SECURITY_TYPE_OAUTH = "oauth";
     public static final String ENDPOINT_SECURITY_USERNAME = "username";
     public static final String ENDPOINT_SECURITY_CONFIG = "securityConfig";
     public static final String ENDPOINT_SECURITY = "endpoint_security";
     public static final String ENDPOINT_SECURITY_PRODUCTION = "production";
     public static final String ENDPOINT_SECURITY_SANDBOX = "sandbox";
     public static final String ENDPOINT_SECURITY_PASSWORD = "password";
+    public static final String ENDPOINT_SECURITY_CLIENT_ID = "clientId";
+    public static final String ENDPOINT_SECURITY_CLIENT_SECRET = "clientSecret";
     public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
@@ -1762,6 +1819,8 @@ public final class APIConstants {
         public static final String QUOTA_TYPE_BANDWIDTH = "bandwidthVolume";
         public static final String PERMITTED_IP = "permittedIP";
         public static final String PERMITTED_REFERER = "permittedReferer";
+        public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
+        public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
@@ -1770,6 +1829,7 @@ public final class APIConstants {
     public static class APIEndpointSecurityConstants {
         public static final String BASIC_AUTH = "BasicAuth";
         public static final String DIGEST_AUTH = "DigestAuth";
+        public static final String OAUTH = "OAuth";
     }
 
     public enum APITransportType {
