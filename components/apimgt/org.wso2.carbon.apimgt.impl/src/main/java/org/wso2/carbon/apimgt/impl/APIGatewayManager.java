@@ -894,9 +894,12 @@ public class APIGatewayManager {
                 if (apiData != null) {
                     ResourceData[] resourceData = apiData.getResources();
                     for (ResourceData resource : resourceData) {
-                        if (resource != null && resource.getInSeqXml() != null 
-                                && resource.getInSeqXml().contains("DigestAuthMediator")) {
-                            return APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH;
+                        if (resource != null && resource.getInSeqXml() != null) {
+                            if(resource.getInSeqXml().contains("DigestAuthMediator")) {
+                                return APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH;
+                            } else if(resource.getInSeqXml().contains("OAuthMediator")) {
+                                return APIConstants.APIEndpointSecurityConstants.OAUTH;
+                            }
                         }
                     }
                 }
