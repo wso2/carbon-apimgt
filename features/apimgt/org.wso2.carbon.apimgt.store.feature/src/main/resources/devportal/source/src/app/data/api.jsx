@@ -678,6 +678,16 @@ export default class API extends Resource {
         });
     }
 
+    /**
+     * @static
+     * Get the registered key managers.
+     * @return {Promise}
+     * */
+    getKeyManagers() {
+        return this.client.then((client) => {
+            return client.apis['Key Managers (Collection)'].get_key_managers(this._requestMetaData());
+        });
+    }
 
     /**
      * @static

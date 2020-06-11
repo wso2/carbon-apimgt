@@ -85,6 +85,8 @@ function GenericEndpoint(props) {
         classes,
         type,
         setAdvancedConfigOpen,
+        esCategory,
+        setESConfigOpen,
         deleteEndpoint,
         index,
         readOnly,
@@ -182,16 +184,28 @@ function GenericEndpoint(props) {
                             {type === 'prototyped'
                                 ? <div />
                                 : (
-                                    <IconButton
-                                        className={classes.iconButton}
-                                        aria-label='Settings'
-                                        onClick={() => setAdvancedConfigOpen(index, type, category)}
-                                        disabled={(isRestricted(['apim:api_create'], api))}
-                                    >
-                                        <Icon>
-                                        settings
-                                        </Icon>
-                                    </IconButton>
+                                    <>
+                                        <IconButton
+                                            className={classes.iconButton}
+                                            aria-label='Settings'
+                                            onClick={() => setAdvancedConfigOpen(index, type, category)}
+                                            disabled={(isRestricted(['apim:api_create'], api))}
+                                        >
+                                            <Icon>
+                                            settings
+                                            </Icon>
+                                        </IconButton>
+                                        <IconButton
+                                            className={classes.iconButton}
+                                            aria-label='Security'
+                                            onClick={() => setESConfigOpen(type, esCategory)}
+                                            disabled={(isRestricted(['apim:api_create'], api))}
+                                        >
+                                            <Icon>
+                                            security
+                                            </Icon>
+                                        </IconButton>
+                                    </>
                                 )}
                             {(index > 0) ? <Divider className={classes.divider} /> : <div />}
                             {(type === 'load_balance' || type === 'failover') ? (
@@ -227,6 +241,7 @@ GenericEndpoint.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     type: PropTypes.string.isRequired,
     setAdvancedConfigOpen: PropTypes.func.isRequired,
+    setESConfigOpen: PropTypes.func.isRequired,
     index: PropTypes.number.isRequired,
     editEndpoint: PropTypes.func.isRequired,
     category: PropTypes.string.isRequired,

@@ -25,18 +25,11 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.APPLICATION_ID AS APP_ID," +
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
-//                    "   GRP.GROUP_ID AS GROUP_ID," +
-//                    "   ATR.NAME AS NAME," +
-//                    "   ATR.VALUE AS VALUE," +
                     "   SUB.USER_ID AS SUB_NAME" +
                     " FROM " +
                     "   AM_APPLICATION AS APP," +
                     "   AM_SUBSCRIBER AS SUB" +
-//                    "   AM_APPLICATION_GROUP_MAPPING AS GRP," +
-//                    "   AM_APPLICATION_ATTRIBUTES AS ATR" +
                     " WHERE " +
-//                    "   APP.APPLICATION_ID = GRP.APPLICATION_ID AND" +
-//                    "   APP.APPLICATION_ID = ATR.APPLICATION_ID AND" +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID ";
 
     public static final String GET_TENANT_APPLICATIONS_SQL =
@@ -44,20 +37,12 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.APPLICATION_ID AS APP_ID," +
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
-//                    "   GRP.GROUP_ID AS GROUP_ID," +
-//                    "   ATR.NAME AS NAME," +
-//                    "   ATR.VALUE AS VALUE," +
                     "   SUB.USER_ID AS SUB_NAME" +
                     " FROM " +
                     "   AM_APPLICATION AS APP," +
                     "   AM_SUBSCRIBER AS SUB" +
-//                    "   AM_APPLICATION_GROUP_MAPPING AS GRP," +
-//                    "   AM_APPLICATION_ATTRIBUTES AS ATR" +
                     " WHERE " +
-//                    "   APP.APPLICATION_ID = GRP.APPLICATION_ID AND" +
-//                    "   APP.APPLICATION_ID = ATR.APPLICATION_ID AND" +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
-//                    "   SUB.TENANT_ID = ATR.TENANT_ID AND " +
                     "   SUB.TENANT_ID = ? ";
 
     public static final String GET_APPLICATION_BY_ID_SQL =
@@ -66,17 +51,10 @@ public class SubscriptionValidationSQLConstants {
                     "   APP.APPLICATION_TIER AS TIER," +
                     "   APP.TOKEN_TYPE AS TOKEN_TYPE," +
                     "   SUB.USER_ID AS SUB_NAME" +
-//                    "   GRP.GROUP_ID AS GROUP_ID," +
-//                    "   ATR.NAME AS NAME," +
-//                    "   ATR.VALUE AS VALUE" +
                     " FROM " +
                     "   AM_APPLICATION AS APP," +
-//                    "   AM_APPLICATION_ATTRIBUTES AS ATR," +
                     "   AM_SUBSCRIBER AS SUB" +
-//                    "   AM_APPLICATION_GROUP_MAPPING AS GRP" +
                     " WHERE " +
-//                    "   APP.APPLICATION_ID = GRP.APPLICATION_ID AND" +
-//                    "   APP.APPLICATION_ID = ATR.APPLICATION_ID AND " +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   APP.APPLICATION_ID = ? ";
 
@@ -252,6 +230,24 @@ public class SubscriptionValidationSQLConstants {
                     "   POLICY.POLICY_ID = COND.POLICY_ID" +
                     " WHERE POLICY.TENANT_ID = ?";
 
+    public static final String GET_API_POLICY_BY_NAME =
+            "SELECT" +
+                    "   POLICY.POLICY_ID," +
+                    "   POLICY.NAME," +
+                    "   POLICY.TENANT_ID," +
+                    "   POLICY.DEFAULT_QUOTA_TYPE," +
+                    "   COND.CONDITION_GROUP_ID," +
+                    "   COND.QUOTA_TYPE" +
+                    " FROM" +
+                    "   AM_API_THROTTLE_POLICY AS POLICY " +
+                    " LEFT JOIN " +
+                    "   AM_CONDITION_GROUP AS COND " +
+                    " ON " +
+                    "   POLICY.POLICY_ID = COND.POLICY_ID" +
+                    " WHERE " +
+                    " POLICY.TENANT_ID = ? AND" +
+                    " ";
+
     public static final String GET_APPLICATION_POLICY_SQL =
             "SELECT " +
                     "   POLICY_ID," +
@@ -334,7 +330,7 @@ public class SubscriptionValidationSQLConstants {
                     "  API.API_TIER," +
                     "  API.API_VERSION," +
                     "  API.CONTEXT, " +
-                    "  URL.MAPPING_ID," +
+                    "  URL.URL_MAPPING_ID," +
                     "  URL.HTTP_METHOD," +
                     "  URL.AUTH_SCHEME," +
                     "  URL.URL_PATTERN," +
