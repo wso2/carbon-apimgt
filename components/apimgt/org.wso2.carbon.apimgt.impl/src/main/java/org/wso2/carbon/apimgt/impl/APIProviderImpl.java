@@ -106,7 +106,6 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -881,9 +880,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int apiId = apiMgtDAO.addAPI(api, tenantId);
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
-        Map endpointRegistryEntries = APIUtil.extractEndpointRegistryEntries(api.getEndpointConfig());
-        if (endpointRegistryEntries != null) {
-            apiMgtDAO.addAPIRegistryEntryMappings(apiId, endpointRegistryEntries, null);
+        HashSet<String> endpointRegistryEntries = APIUtil.extractEndpointRegistryEntries(api.getEndpointConfig());
+        if (!endpointRegistryEntries.isEmpty()) {
+            apiMgtDAO.addAPIServiceCatalogEntryMappings(apiId, endpointRegistryEntries, null);
         }
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
@@ -1495,8 +1494,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
                 api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
-        Map endpointRegistryEntriesEntries = APIUtil.extractEndpointRegistryEntries(api.getEndpointConfig());
-        if (endpointRegistryEntriesEntries != null) {
+        HashSet<String> endpointRegistryEntriesEntries =
+                APIUtil.extractEndpointRegistryEntries(api.getEndpointConfig());
+        if (!endpointRegistryEntriesEntries.isEmpty()) {
             apiMgtDAO.updateAPIRegistryEntryMappings(apiId, endpointRegistryEntriesEntries);
         }
 

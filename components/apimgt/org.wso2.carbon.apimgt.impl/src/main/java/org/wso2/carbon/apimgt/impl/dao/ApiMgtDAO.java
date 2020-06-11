@@ -14884,16 +14884,17 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param apiId                   ID of the API created using the Endpoint Registry Entry
-     * @param endpointRegistryEntries Map contains production and sandbox endpoint ID
+     * @param apiId                   ID of the API created using the Service Catalog Entry
+     * @param endpointRegistryEntries HashSet contains production and sandbox endpoint IDs
+     *                                (includes load balanced and failover endpoints)
      * @param connection              DB Connection
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurred while adding the mapping
      */
-    public void addAPIRegistryEntryMappings(int apiId, Map endpointRegistryEntries, Connection connection) throws
-            APIManagementException {
+    public void addAPIServiceCatalogEntryMappings(int apiId, HashSet<String> endpointRegistryEntries,
+                                                  Connection connection) throws APIManagementException {
 
-        String[] endpointInfoArray = null;
-        String addApiRegistryEntryMappingSql = SQLConstants.ADD_API_REGISTRY_ENTRY_MAPPING_SQL;
+        String[] endpointInfoArray;
+        String sql = SQLConstants.ADD_API_SERVICE_CATALOG_ENTRY_MAPPING_SQL;
         boolean isNewConnection = false;
         PreparedStatement preparedStatement = null;
         try {
@@ -14902,23 +14903,22 @@ public class ApiMgtDAO {
                 isNewConnection = true;
             }
             connection = APIMgtDBUtil.getConnection();
-            preparedStatement = connection.prepareStatement(addApiRegistryEntryMappingSql);
-            for (Object key : endpointRegistryEntries.keySet()) {
-                String endpointType = key.toString();
-                if (endpointRegistryEntries.get(endpointType) != null) {
-                    endpointInfoArray = endpointRegistryEntries.get(endpointType).toString().split(":");
-                    preparedStatement.setInt(1, apiId);
-                    preparedStatement.setString(2, endpointInfoArray[0]);
-                    preparedStatement.setString(3, endpointInfoArray[1]);
-                    preparedStatement.setString(4, endpointInfoArray[2]);
-                    preparedStatement.addBatch();
-                }
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(sql);
+            for (String endpointId : endpointRegistryEntries) {
+                endpointInfoArray = endpointId.split(":");
+                preparedStatement.setInt(1, apiId);
+                preparedStatement.setString(2, endpointInfoArray[0]);
+                preparedStatement.setString(3, endpointInfoArray[1]);
+                preparedStatement.setString(4, endpointInfoArray[2]);
+                preparedStatement.addBatch();
             }
             preparedStatement.executeBatch();
+            connection.commit();
         } catch (SQLException e) {
-            handleException("Error while adding Endpoint Registry Entry mapping for API with ID: " + apiId, e);
+            handleException("Error while adding Service Catalog Entry mapping for API with ID: " + apiId, e);
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new APIManagementException("Required parameter of Endpoint Registry Entry is missing");
+            throw new APIManagementException("Required parameter of Service Catalog Entry is missing");
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, null, null);
             if (isNewConnection) {
@@ -14928,28 +14928,30 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param apiId                   ID of the API created using the Endpoint Registry Entry
-     * @param endpointRegistryEntries Map contains production and sandbox endpoint ID
-     * @throws APIManagementException
+     * @param apiId                   ID of the API created using the Service Catalog Entry
+     * @param endpointRegistryEntries HashSet contains production and sandbox endpoint IDs
+     *                                (includes load balanced and failover endpoints)
+     * @throws APIManagementException if failed to update the mapping
      */
-    public void updateAPIRegistryEntryMappings(int apiId, Map endpointRegistryEntries) throws APIManagementException {
+    public void updateAPIRegistryEntryMappings(int apiId, HashSet<String> endpointRegistryEntries)
+            throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            deleteAPIRegistryEntryMappings(apiId, connection);
-            addAPIRegistryEntryMappings(apiId, endpointRegistryEntries, connection);
+            deleteAPIServiceCatalogEntryMappings(apiId, connection);
+            addAPIServiceCatalogEntryMappings(apiId, endpointRegistryEntries, connection);
         } catch (SQLException e) {
-            handleException("Error while updating Endpoint Registry Entry mapping for API with ID: " + apiId, e);
+            handleException("Error while updating Service Catalog Entry mapping for API with ID: " + apiId, e);
         }
     }
 
-    private void deleteAPIRegistryEntryMappings(int apiId, Connection connection) throws APIManagementException {
+    private void deleteAPIServiceCatalogEntryMappings(int apiId, Connection connection) throws APIManagementException {
 
-        String deleteAPIRegistryEntryMappingSql = SQLConstants.DELETE_API_REGISTRY_ENTRY_MAPPINGS_SQL;
-        try (PreparedStatement preparedStatement = connection.prepareStatement(deleteAPIRegistryEntryMappingSql)) {
+        String sql = SQLConstants.DELETE_API_SERVICE_CATALOG_ENTRY_MAPPINGS_SQL;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, apiId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            handleException("Error while deleting Endpoint Registry mapping for API with ID: " + apiId, e);
+            handleException("Error while deleting Service Catalog mapping for API with ID: " + apiId, e);
         }
     }
 

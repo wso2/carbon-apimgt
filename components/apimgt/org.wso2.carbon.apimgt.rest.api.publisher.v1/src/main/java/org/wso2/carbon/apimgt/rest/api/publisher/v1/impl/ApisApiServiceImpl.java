@@ -298,11 +298,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         body.setEndpointConfig(endpointConfig);
                     }
                 }
-                if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig.get(APIConstants.
-                        API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) && !validateServiceCatalogEntries(endpointConfig)) {
-                    RestApiUtil.handleBadRequest("Either production endpoint_id or sandbox endpoint_id should " +
-                            "be provided", log);
-                }
+                validateServiceCatalogEntries(endpointConfig);
             }
 
             API apiToAdd = prepareToCreateAPIByDTO(body);
@@ -631,11 +627,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         }
                     }
                 }
-                if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig.get(APIConstants.
-                        API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) && !validateServiceCatalogEntries(endpointConfig)) {
-                    RestApiUtil.handleBadRequest("Either production endpoint_id or sandbox endpoint_id should " +
-                            "be provided", log);
-                }
+                validateServiceCatalogEntries(endpointConfig);
             }
 
             if (!hasClassLevelScope) {
@@ -3269,11 +3261,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         if (apiDTOFromProperties.getEndpointConfig() != null) {
             LinkedHashMap endpointConfig = (LinkedHashMap) apiDTOFromProperties.getEndpointConfig();
-            if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig.get(APIConstants.
-                    API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) && !validateServiceCatalogEntries(endpointConfig)) {
-                RestApiUtil.handleBadRequest("Either production endpoint_id or sandbox endpoint_id should " +
-                        "be provided", log);
-            }
+            validateServiceCatalogEntries(endpointConfig);
         }
 
         // Only HTTP type APIs should be allowed
@@ -3438,11 +3426,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             if (additionalPropertiesAPI.getEndpointConfig() != null) {
                 LinkedHashMap endpointConfig = (LinkedHashMap) additionalPropertiesAPI.getEndpointConfig();
-                if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig.get(APIConstants.
-                        API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) && !validateServiceCatalogEntries(endpointConfig)) {
-                    RestApiUtil.handleBadRequest("Either production endpoint_id or sandbox endpoint_id should " +
-                            "be provided", log);
-                }
+                validateServiceCatalogEntries(endpointConfig);
             }
             additionalPropertiesAPI.setProvider(RestApiUtil.getLoggedInUsername());
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.fromValue(implementationType));
@@ -3848,11 +3832,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             if (additionalPropertiesAPI.getEndpointConfig() != null) {
                 LinkedHashMap endpointConfig = (LinkedHashMap) additionalPropertiesAPI.getEndpointConfig();
-                if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfig.get(APIConstants.
-                        API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) && !validateServiceCatalogEntries(endpointConfig)) {
-                    RestApiUtil.handleBadRequest("Either production endpoint_id or sandbox endpoint_id should " +
-                            "be provided", log);
-                }
+                validateServiceCatalogEntries(endpointConfig);
             }
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -4319,21 +4299,64 @@ public class ApisApiServiceImpl implements ApisApiService {
         return apiEndpointValidationResponseDTO;
     }
 
-    private boolean validateServiceCatalogEntries(LinkedHashMap endpointConfig) {
-        Object productionCatalogEntry = null;
-        Object sandboxCatalogEntry = null;
-        LinkedHashMap productionEps = (LinkedHashMap) endpointConfig.get("production_endpoints");
-        LinkedHashMap sandboxEps = (LinkedHashMap) endpointConfig.get("sandbox_endpoints");
-        if (productionEps == null && sandboxEps == null) {
+    private void validateServiceCatalogEntries(LinkedHashMap endpointConfig) {
+
+        Map<String, Boolean> productionEndpointStatus =
+                validateServiceCatalogEndpoint(endpointConfig, APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
+        Map<String, Boolean> sandboxEndpointStatus =
+                validateServiceCatalogEndpoint(endpointConfig, APIConstants.API_DATA_SANDBOX_ENDPOINTS);
+        Map<String, Boolean> productionFailoverStatus =
+                validateServiceCatalogEndpoint(endpointConfig, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS);
+        Map<String, Boolean> sandboxFailoverStatus =
+                validateServiceCatalogEndpoint(endpointConfig, APIConstants.ENDPOINT_SANDBOX_FAILOVERS);
+
+        if (!productionEndpointStatus.get("hasEndpoints") && !sandboxEndpointStatus.get("hasEndpoints")) {
             RestApiUtil.handleBadRequest("At least one endpoint from Production Endpoint or " +
                     "Sandbox Endpoint must be defined.", log);
         }
-        if (productionEps != null) {
-            productionCatalogEntry = productionEps.get("id");
+        if (!(productionEndpointStatus.get("validCatalogEndpoints") &&
+                sandboxEndpointStatus.get("validCatalogEndpoints") &&
+                productionFailoverStatus.get("validCatalogEndpoints") &&
+                sandboxFailoverStatus.get("validCatalogEndpoints"))) {
+
+            RestApiUtil.handleBadRequest("'id' is missing in Service Catalog type endpoints", log);
         }
-        if (sandboxEps != null) {
-            sandboxCatalogEntry = sandboxEps.get("id");
+    }
+
+    private HashMap<String, Boolean> validateServiceCatalogEndpoint(LinkedHashMap endpointConfig, String endpointType) {
+
+        boolean hasEndpoints = false;
+        boolean validCatalogEndpoints = true;
+
+        if (endpointConfig.get(endpointType) instanceof LinkedHashMap) {
+            // Simple REST Endpoint
+            LinkedHashMap endpoint = (LinkedHashMap) endpointConfig.get(endpointType);
+            if (endpoint != null) {
+                hasEndpoints = true;
+                if (APIConstants.SERVICE_CATALOG_TYPE.equals(endpointConfig.get(APIConstants.
+                        API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    validCatalogEndpoints = endpoint.get("id") != null;
+                }
+            }
+        } else if (endpointConfig.get(endpointType) instanceof ArrayList) {
+            // Load-balanced Endpoints or Failover Endpoints
+            ArrayList<LinkedHashMap> endpoints = (ArrayList<LinkedHashMap>) endpointConfig.get(endpointType);
+            hasEndpoints = !endpoints.isEmpty();
+            for (LinkedHashMap endpoint : endpoints) {
+                if (APIConstants.SERVICE_CATALOG_TYPE.equals(endpoint.get(APIConstants.
+                        API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    validCatalogEndpoints = endpoint.get("id") != null;
+                    if (!validCatalogEndpoints) {
+                        break;
+                    }
+                }
+            }
         }
-        return sandboxCatalogEntry != null || productionCatalogEntry != null;
+
+        HashMap<String, Boolean> status = new HashMap<>();
+        status.put("hasEndpoints", hasEndpoints);
+        status.put("validCatalogEndpoints", validCatalogEndpoints);
+
+        return status;
     }
 }

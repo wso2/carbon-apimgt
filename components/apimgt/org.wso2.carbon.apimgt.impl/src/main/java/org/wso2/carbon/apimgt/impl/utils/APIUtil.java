@@ -10825,29 +10825,49 @@ public final class APIUtil {
 
     /**
      * Extract Endpoint Registry Entry information
-     * @param endpointConfig
-     * @return Map
+     *
+     * @param endpointConfig Endpoint Config
+     * @return HashSet<String> containing endpoint IDs
      */
-    public static Map extractEndpointRegistryEntries(String endpointConfig) {
-        Map serviceCatalogEntries = new HashMap();
+    public static HashSet<String> extractEndpointRegistryEntries(String endpointConfig) {
+        HashSet<String> serviceCatalogEntries = new HashSet<>();
         if (StringUtils.isNotEmpty(endpointConfig)) {
             org.json.JSONObject endpointConfigJSON = new org.json.JSONObject(endpointConfig);
-            if (APIConstants.ENDPOINT_REGISTRY_TYPE.equals(endpointConfigJSON.get(APIConstants.
-                    API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                String production_endpoint = null;
-                String sandbox_endpoint = null;
-                if (endpointConfigJSON.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
-                    production_endpoint = endpointConfigJSON.getJSONObject(APIConstants.
-                            API_DATA_PRODUCTION_ENDPOINTS).getString("id");
-                }
-                if (endpointConfigJSON.has(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
-                    sandbox_endpoint = endpointConfigJSON.getJSONObject(APIConstants.
-                            API_DATA_SANDBOX_ENDPOINTS).getString("id");
-                }
-                serviceCatalogEntries.put("production_endpoint_id", production_endpoint);
-                serviceCatalogEntries.put("sandbox_endpoint_id", sandbox_endpoint);
-            }
+
+            extractCatalogEndpoints(APIConstants.API_DATA_PRODUCTION_ENDPOINTS, endpointConfigJSON,
+                    serviceCatalogEntries);
+            extractCatalogEndpoints(APIConstants.API_DATA_SANDBOX_ENDPOINTS, endpointConfigJSON,
+                    serviceCatalogEntries);
+            extractCatalogEndpoints(APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, endpointConfigJSON,
+                    serviceCatalogEntries);
+            extractCatalogEndpoints(APIConstants.ENDPOINT_SANDBOX_FAILOVERS, endpointConfigJSON,
+                    serviceCatalogEntries);
         }
         return serviceCatalogEntries;
+    }
+
+    private static void extractCatalogEndpoints(String endpointType, org.json.JSONObject endpointConfigJSON,
+                                                HashSet<String> serviceCatalogEntries) {
+
+        if (endpointConfigJSON.has(endpointType)) {
+            if (endpointConfigJSON.get(endpointType) instanceof org.json.JSONObject) {
+                if (endpointConfigJSON.has(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE) &&
+                        APIConstants.SERVICE_CATALOG_TYPE.equals(endpointConfigJSON.get(APIConstants.
+                                API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    org.json.JSONObject endpoint = endpointConfigJSON.getJSONObject(endpointType);
+                    serviceCatalogEntries.add(endpoint.getString("id"));
+                }
+            } else if (endpointConfigJSON.get(endpointType) instanceof org.json.JSONArray) {
+                org.json.JSONArray endpoints = endpointConfigJSON.getJSONArray(endpointType);
+                for (int i = 0; i < endpoints.length(); i++) {
+                    org.json.JSONObject endpoint = endpoints.getJSONObject(i);
+                    if (endpoint.has(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE) &&
+                            APIConstants.SERVICE_CATALOG_TYPE.equals(endpoint.get(APIConstants.
+                                    API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                        serviceCatalogEntries.add(endpoint.getString("id"));
+                    }
+                }
+            }
+        }
     }
 }
