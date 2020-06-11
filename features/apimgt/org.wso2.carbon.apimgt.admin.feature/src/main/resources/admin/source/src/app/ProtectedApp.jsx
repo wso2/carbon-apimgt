@@ -38,9 +38,9 @@ import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import Configurations from 'Config';
 import Navigator from 'AppComponents/Base/Navigator';
 import RouteMenuMapping from 'AppComponents/Base/RouteMenuMapping';
-import ApplicationThrottlingPolicies from 'AppComponents/Throttling/Application/List';
 import Api from 'AppData/api';
 import Progress from 'AppComponents/Shared/Progress';
+import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
 
 const drawerWidth = 256;
 
@@ -301,10 +301,10 @@ class Protected extends Component {
                             <AppContextProvider value={{ settings, user }}>
                                 <Route>
                                     <Switch>
-                                        <Redirect exact from='/' to='/throttling/application' />
+                                        <Redirect exact from='/' to='/dashboard' />
                                         <Route
-                                            path='/throttling/application'
-                                            component={ApplicationThrottlingPolicies}
+                                            path='/dashboard'
+                                            component={Dashboard}
                                         />
                                         {allRoutes.map((r) => {
                                             return <Route path={r.path} component={r.component} />;
