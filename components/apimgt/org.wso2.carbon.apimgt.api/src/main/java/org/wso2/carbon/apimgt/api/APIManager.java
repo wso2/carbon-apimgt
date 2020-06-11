@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.registry.api.Resource;
 
@@ -246,6 +247,36 @@ public interface APIManager {
     String getDocumentationContent(Identifier identifier, String documentationName) throws APIManagementException;
 
     /**
+     * Returns the GraphqlComplexityInfo object for a given API ID
+     *
+     * @param apiId API ID
+     * @return GraphqlComplexityInfo object
+     * @throws APIManagementException if failed to retrieve complexity details of the given API
+     */
+    GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiId) throws APIManagementException;
+
+    /**
+     * Add the complexity details given the GraphqlComplexityInfo object
+     *
+     * @param apiIdentifier         APIIdentifier
+     * @param graphqlComplexityInfo GraphqlComplexityInfo object
+     * @throws APIManagementException if failed to update complexity details
+     */
+    void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
+            throws APIManagementException;
+
+    /**
+     * Updates the complexity details given the GraphqlComplexityInfo object
+     *
+     * @param apiIdentifier         APIIdentifier
+     * @param graphqlComplexityInfo GraphqlComplexityInfo object
+     * @throws APIManagementException if failed to update complexity details
+     */
+    void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo)
+            throws APIManagementException;
+
+
+    /**
      * Retrieves the subscriber from the given access token
      *
      * @param accessToken Subscriber key
@@ -344,46 +375,6 @@ public interface APIManager {
      */
     Application getLightweightApplicationByUUID(String uuid) throws APIManagementException;
 
-    /**
-     * Check whether an application access token is already persist in database.
-     *
-     * @param accessToken
-     * @return
-     * @throws APIManagementException
-     */
-    boolean isApplicationTokenExists(String accessToken) throws APIManagementException;
-
-    /**
-     * Check whether an application access token is already revoked.
-     *
-     * @param accessToken
-     * @return
-     * @throws APIManagementException
-     */
-    boolean isApplicationTokenRevoked(String accessToken) throws APIManagementException;
-
-    /**
-     * Return information related to a specific access token
-     *
-     * @param accessToken AccessToken
-     * @return
-     * @throws APIManagementException
-     */
-    APIKey getAccessTokenData(String accessToken) throws APIManagementException;
-
-    /**
-    /**
-     * Return information related to access token by a searchTerm and searchType       *
-     *
-     *
-     * @param searchType
-     * @param searchTerm
-     * @param loggedInUser
-     * @return
-     * @throws APIManagementException
-     */
-    Map<Integer, APIKey> searchAccessToken(String searchType, String searchTerm, String loggedInUser)
-            throws APIManagementException;
 
     /**
      * Return subscribed APIs per access token

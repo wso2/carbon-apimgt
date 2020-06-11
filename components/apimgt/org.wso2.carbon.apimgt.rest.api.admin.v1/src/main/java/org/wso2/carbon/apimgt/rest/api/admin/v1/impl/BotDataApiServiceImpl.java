@@ -63,7 +63,7 @@ public class BotDataApiServiceImpl implements BotDataApiService {
     @Override
     public Response botDataGetEmailListGet(String tenantDomain, MessageContext messageContext) {
         try {
-            List<BotDetectionData> emailList = APIAdminImpl.retrieveSavedBotDataEmailList();
+            List<BotDetectionData> emailList = new APIAdminImpl().retrieveSavedBotDataEmailList();
             return Response.ok().entity(emailList).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error when getting email ";

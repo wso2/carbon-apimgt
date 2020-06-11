@@ -26,7 +26,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -84,6 +83,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -98,8 +98,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -127,14 +129,16 @@ public class APIMgtDAOTest {
         config.load(dbConfigPath);
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl
                 (config));
+        PowerMockito.mockStatic(KeyManagerHolder.class);
+        keyManager = Mockito.mock(KeyManager.class);
         APIMgtDBUtil.initialize();
         apiMgtDAO = ApiMgtDAO.getInstance();
         IdentityTenantUtil.setRealmService(new TestRealmService());
         String identityConfigPath = System.getProperty("IdentityConfigurationPath");
         IdentityConfigParser.getInstance(identityConfigPath);
-        keyManager = Mockito.mock(KeyManager.class);
-        PowerMockito.mockStatic(KeyManagerHolder.class);
-        BDDMockito.given(KeyManagerHolder.getKeyManagerInstance()).willReturn(keyManager);
+        OAuthServerConfiguration oAuthServerConfiguration = OAuthServerConfiguration.getInstance();
+        ServiceReferenceHolder.getInstance().setOauthServerConfiguration(oAuthServerConfiguration);
+
     }
 
     private static void initializeDatabase(String configFilePath) {
@@ -620,13 +624,15 @@ public class APIMgtDAOTest {
 
         APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_PRODUCTION, "APP-10",
-                "sub_user1", "clientId1");
-        assertTrue(apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(String.valueOf(applicationId), APIConstants
-                .API_KEY_TYPE_PRODUCTION).equals("clientId1"));
-        assertTrue(apiMgtDAO.isMappingExistsforConsumerKey("clientId1"));
-        boolean validation = apiMgtDAO.validateSubscriptionDetails("/wso2utils", "V1.0.0", "clientId1", infoDTO);
+                "sub_user1", "clientId1","Default");
+        Map<String, String> consumerkeyByApplicationIdAndKeyType =
+                apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
+        assertEquals(consumerkeyByApplicationIdAndKeyType.get("Default"), "clientId1");
+        assertTrue(apiMgtDAO.isMappingExistsforConsumerKey("Default","clientId1"));
+        boolean validation = apiMgtDAO.validateSubscriptionDetails("/wso2utils", "V1.0.0", "clientId1","Default",
+                infoDTO);
         APIKeyValidationInfoDTO infoDTO1 = new APIKeyValidationInfoDTO();
-        apiMgtDAO.validateSubscriptionDetails(infoDTO1, "/wso2utils", "V1.0.0", "clientId1", false);
+        apiMgtDAO.validateSubscriptionDetails(infoDTO1, "/wso2utils", "V1.0.0", "clientId1", "Default", false);
         if (validation) {
             assertEquals(20, infoDTO.getSpikeArrestLimit());
         } else {
@@ -640,37 +646,39 @@ public class APIMgtDAOTest {
         }
         apiMgtDAO.updateSubscriptionStatus(subsId, APIConstants.SubscriptionStatus.BLOCKED);
         APIKeyValidationInfoDTO infoDtoForBlocked = new APIKeyValidationInfoDTO();
-        assertFalse(apiMgtDAO.validateSubscriptionDetails("/wso2utils", "V1.0.0", "clientId1", infoDtoForBlocked));
+        assertFalse(apiMgtDAO.validateSubscriptionDetails("/wso2utils", "V1.0.0", "clientId1", "Default",
+                infoDtoForBlocked));
         assertEquals(infoDtoForBlocked.getValidationStatus(), APIConstants.KeyValidationStatus.API_BLOCKED);
         APIKeyValidationInfoDTO infoDtoForBlocked1 = new APIKeyValidationInfoDTO();
-        assertFalse(apiMgtDAO.validateSubscriptionDetails(infoDtoForBlocked1, "/wso2utils", "V1.0.0", "clientId1",
-                false).isAuthorized());
+        assertFalse(apiMgtDAO.validateSubscriptionDetails(infoDtoForBlocked1, "/wso2utils", "V1.0.0", "clientId1"
+                ,"Default",false).isAuthorized());
         assertEquals(infoDtoForBlocked1.getValidationStatus(), APIConstants.KeyValidationStatus.API_BLOCKED);
         APIKeyValidationInfoDTO infoDtoForOnHold = new APIKeyValidationInfoDTO();
         apiMgtDAO.updateSubscriptionStatus(subsId, APIConstants.SubscriptionStatus.ON_HOLD);
-        assertFalse(apiMgtDAO.validateSubscriptionDetails("/wso2utils", "V1.0.0", "clientId1", infoDtoForOnHold));
+        assertFalse(apiMgtDAO.validateSubscriptionDetails("/wso2utils", "V1.0.0", "clientId1", "Default",
+                infoDtoForOnHold));
         assertEquals(infoDtoForOnHold.getValidationStatus(), APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
         APIKeyValidationInfoDTO infoDtoForOnHold1 = new APIKeyValidationInfoDTO();
         apiMgtDAO.updateSubscriptionStatus(subsId, APIConstants.SubscriptionStatus.ON_HOLD);
         assertFalse(apiMgtDAO.validateSubscriptionDetails(infoDtoForOnHold1, "/wso2utils", "V1.0.0", "clientId1",
-                false).isAuthorized());
+                "Default",false).isAuthorized());
         assertEquals(infoDtoForOnHold1.getValidationStatus(), APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
         apiMgtDAO.updateSubscriptionStatus(subsId, APIConstants.SubscriptionStatus.REJECTED);
         APIKeyValidationInfoDTO infoDotForRejected = new APIKeyValidationInfoDTO();
-        assertFalse(apiMgtDAO.validateSubscriptionDetails("/wso2utils", "V1.0.0", "clientId1", infoDotForRejected));
+        assertFalse(apiMgtDAO.validateSubscriptionDetails("/wso2utils", "V1.0.0", "clientId1","Default", infoDotForRejected));
         assertEquals(infoDotForRejected.getValidationStatus(), APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
         APIKeyValidationInfoDTO infoDotForRejected1 = new APIKeyValidationInfoDTO();
         assertFalse(apiMgtDAO.validateSubscriptionDetails(infoDotForRejected1, "/wso2utils", "V1.0.0", "clientId1",
-                false).isAuthorized());
+                "Default",false).isAuthorized());
         assertEquals(infoDotForRejected1.getValidationStatus(), APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
         apiMgtDAO.updateSubscriptionStatus(subsId, APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED);
         APIKeyValidationInfoDTO infoDotForProdOnlyBlocked = new APIKeyValidationInfoDTO();
-        assertFalse(apiMgtDAO.validateSubscriptionDetails("/wso2utils", "V1.0.0", "clientId1",
+        assertFalse(apiMgtDAO.validateSubscriptionDetails("/wso2utils", "V1.0.0", "clientId1","Default",
                 infoDotForProdOnlyBlocked));
         assertEquals(infoDotForProdOnlyBlocked.getValidationStatus(), APIConstants.KeyValidationStatus.API_BLOCKED);
         APIKeyValidationInfoDTO infoDotForProdOnlyBlocked1 = new APIKeyValidationInfoDTO();
         assertFalse(apiMgtDAO.validateSubscriptionDetails(infoDotForProdOnlyBlocked1, "/wso2utils", "V1.0.0",
-                "clientId1", false).isAuthorized());
+                "clientId1", "Default",false).isAuthorized());
         assertEquals(infoDotForProdOnlyBlocked1.getValidationStatus(), APIConstants.KeyValidationStatus.API_BLOCKED);
     }
 
@@ -825,11 +833,9 @@ public class APIMgtDAOTest {
         defaultLimit.setTimeUnit("min");
         defaultLimit.setUnitTime(50);
         defaultLimit.setRequestCount(800);
-
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setLimit(defaultLimit);
         defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
-
         policy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return policy;
     }
@@ -880,6 +886,7 @@ public class APIMgtDAOTest {
         applicationRegistrationWorkflowDTO.setValidityTime(100L);
         applicationRegistrationWorkflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
         applicationRegistrationWorkflowDTO.setStatus(WorkflowStatus.CREATED);
+        applicationRegistrationWorkflowDTO.setKeyManager("Default");
         apiMgtDAO.addWorkflowEntry(applicationRegistrationWorkflowDTO);
         OAuthAppRequest oAuthAppRequest = new OAuthAppRequest();
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
@@ -925,9 +932,9 @@ public class APIMgtDAOTest {
                 .getWorkflowReference(), applicationRegistrationWorkflowDTO.getWorkflowType()));
         apiMgtDAO.removeWorkflowEntry(applicationRegistrationWorkflowDTO.getExternalWorkflowReference(),
                 applicationRegistrationWorkflowDTO.getWorkflowType());
-        apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(String.valueOf(application.getId()),
-                "PRODUCTION");
-        apiMgtDAO.deleteApplicationRegistration(String.valueOf(application.getId()), "PRODUCTION");
+        apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(application.getId(),"PRODUCTION");
+        apiMgtDAO.deleteApplicationRegistration(application.getId(), "PRODUCTION",
+                APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
         apiMgtDAO.deleteApplication(application);
         apiMgtDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_APP, "testCreateApplicationRegistrationEntry",
                 -1234);
@@ -988,9 +995,9 @@ public class APIMgtDAOTest {
         String clientIdProduction = UUID.randomUUID().toString();
         String clientIdSandbox = UUID.randomUUID().toString();
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_PRODUCTION, application
-                .getName(), subscriber.getName(), clientIdProduction);
+                .getName(), subscriber.getName(), clientIdProduction,"Default");
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_SANDBOX, application
-                .getName(), subscriber.getName(), clientIdSandbox);
+                .getName(), subscriber.getName(), clientIdSandbox,"Default");
         int appIdProduction = insertConsumerApp(clientIdProduction, application.getName(), subscriber.getName());
         int appIdSandBox = insertConsumerApp(clientIdSandbox, application.getName(), subscriber.getName());
         String tokenProduction = UUID.randomUUID().toString();
@@ -1023,9 +1030,6 @@ public class APIMgtDAOTest {
         assertNotNull(apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, application.getName(), 0, 10, null));
         Set<SubscribedAPI> subscribedAPIS = apiMgtDAO.getSubscribedAPIs(subscriber, application.getName(), null);
         assertEquals(subscribedAPIS.size(), 1);
-        assertTrue(apiMgtDAO.isAccessTokenExists(tokenProduction));
-        assertTrue(clientIdProduction.equals(apiMgtDAO.findConsumerKeyFromAccessToken(tokenProduction)));
-        apiMgtDAO.revokeAccessToken(tokenProduction);
         apiMgtDAO.updateSubscription(apiId, APIConstants.SubscriptionStatus.BLOCKED, application.getId());
         subscribedAPI.setSubStatus(APIConstants.SubscriptionStatus.REJECTED);
         apiMgtDAO.updateSubscription(subscribedAPI);
@@ -1035,7 +1039,6 @@ public class APIMgtDAOTest {
                 PolicyConstants.POLICY_LEVEL_APP));
         assertTrue(apiMgtDAO.hasSubscription(apiPolicy.getPolicyName(), subscriber.getName(),
                 PolicyConstants.POLICY_LEVEL_API));
-        assertFalse(apiMgtDAO.isAccessTokenRevoked(tokenProduction));
         assertTrue(apiPolicy.getPolicyName().equals(apiMgtDAO.getAPILevelTier(apiMgtDAO.getAPIID(apiId, null))));
         apiMgtDAO.recordAPILifeCycleEvent(apiId, "CREATED", "PUBLISHED", "testCreateApplicationRegistrationEntry",
                 -1234);

@@ -656,12 +656,33 @@ class API extends Resource {
     /**
      * Get a particular scope
      * @param scopeId {String} UUID of the scope
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @param callback {function} Function which needs to be called upon success of the scope retrieval
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSharedScopeDetails(scopeId, callback = null) {
         const promise_scopes = this.client.then(client => {
             return client.apis['Scopes'].getSharedScope(
+                { scopeId },
+                this._requestMetaData(),
+            );
+        });
+        if (callback) {
+            return promise_scopes.then(callback);
+        } else {
+            return promise_scopes;
+        }
+    }
+
+    /**
+     * Get usages of a particular scope
+     * @param scopeId {String} UUID of the scope
+     * @param callback {function} Function which needs to be called upon success of the scope usage retrieval
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getSharedScopeUsages(scopeId, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promise_scopes = apiClient.then(client => {
+            return client.apis['Scopes'].getSharedScopeUsages(
                 { scopeId },
                 this._requestMetaData(),
             );
@@ -1076,7 +1097,6 @@ class API extends Resource {
             return promise_subscription;
         }
     }
-
     /**
      * Block subscriptions for given subscriptionId
      * @param {String} id Subscription UUID
@@ -1725,6 +1745,75 @@ class API extends Resource {
             return client.apis['Label Collection'].get_labels();
         });
     }
+
+    /**
+     * Get the complexity related details of an API
+     */
+    
+    getGraphqlPoliciesComplexity(id) {
+        const promisePolicies = this.client.then(client => {
+            return client.apis['GraphQL Policies'].get_apis__apiId__graphql_policies_complexity(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promisePolicies.then(response => response.body);
+    }
+    /**
+     * Update complexity related details of an API
+     */
+    addGraphqlPoliciesComplexity(api_id, body) {
+        const promised_updateComplexity = this.client.then(client => {
+            const payload = {
+                apiId: api_id,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['GraphQL Policies'].post_apis__apiId__graphql_policies_complexity(
+                    payload,
+                    this._requestMetaData(),
+            );
+        });
+        return promised_updateComplexity;
+    }
+
+
+    /**
+     * Update complexity related details of an API
+     */
+    updateGraphqlPoliciesComplexity(api_id, body) {
+        const promised_updateComplexity = this.client.then(client => {
+            const payload = {
+                apiId: api_id,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['GraphQL Policies'].put_apis__apiId__graphql_policies_complexity(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+        return promised_updateComplexity;
+    }
+
+    /**
+     * Retrieve all types and fields of a GraphQL Schema
+     */
+    getGraphqlPoliciesComplexityTypes(id) {
+        const promisePolicies = this.client.then(client => {
+            return client.apis['GraphQL Policies'].get_apis__apiId__graphql_policies_complexity_types(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promisePolicies.then(response => response.body);
+    }
+
+    
 
     /**
      *
@@ -2498,6 +2587,14 @@ class API extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return apiClient.then(client => {
             return client.apis["API Category (Collection)"].get_api_categories(
+                this._requestMetaData(),
+            );
+        });
+    }
+    static keyManagers() {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis["Key Managers (Collection)"].get_key_managers(
                 this._requestMetaData(),
             );
         });

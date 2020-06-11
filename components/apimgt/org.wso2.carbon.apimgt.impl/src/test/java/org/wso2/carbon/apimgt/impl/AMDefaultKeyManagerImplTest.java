@@ -242,16 +242,7 @@ public class AMDefaultKeyManagerImplTest {
         Assert.assertFalse(tokenInfo.isTokenValid());
     }
     
-    @Test
-    public void testLoadConfiguration() throws APIManagementException {
-        AMDefaultKeyManagerImplWrapper keyManager = new AMDefaultKeyManagerImplWrapper();
-        keyManager.loadConfiguration(null);
-        
-        KeyManagerConfiguration configuration = keyManager.getKeyManagerConfiguration();
-        
-        Assert.assertNotNull(configuration);
-    }
-    
+
     private String getJSONString() {
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(ApplicationConstants.OAUTH_CLIENT_GRANT, "client_credentials, password");

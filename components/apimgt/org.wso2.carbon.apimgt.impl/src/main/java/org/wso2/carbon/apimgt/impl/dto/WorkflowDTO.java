@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 
 import java.io.Serializable;
@@ -56,7 +57,24 @@ public class WorkflowDTO implements Serializable {
     private String externalWorkflowReference;
 
     private String callbackUrl;
-    
+
+    private JSONObject metadata;
+
+    private JSONObject properties;
+
+    public WorkflowDTO(){
+        metadata = new JSONObject();
+        properties = new JSONObject();
+    }
+
+    public String getProperties(String key) {
+        return properties.get(key).toString();
+    }
+
+    public void setProperties(String key, String value) {
+        properties.put(key, value);
+    }
+
     //to pass any additional parameters. This can be used to pass parameters to the executor's complete() method
     private Map<String, String> attributes = new HashMap<String, String>();
 
@@ -160,13 +178,46 @@ public class WorkflowDTO implements Serializable {
         this.attributes = attributes;
     }
 
+    public String getMetadata(String key) {
+        return metadata.get(key).toString();
+    }
+
+    public void setMetadata(String key, String value) {
+        metadata.put(key, value);
+    }
+
+    public JSONObject getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(JSONObject metadata) {
+        this.metadata = metadata;
+    }
+
+    public JSONObject getProperties() {
+        return properties;
+    }
+
+    public void setProperties(JSONObject properties) {
+        this.properties = properties;
+    }
+
     @Override
     public String toString() {
-        return "WorkflowDTO [workflowReference=" + workflowReference + ", workflowType=" + workflowType + ", status="
-                + status + ", createdTime=" + createdTime + ", updatedTime=" + updatedTime + ", workflowDescription="
-                + workflowDescription + ", tenantId=" + tenantId + ", tenantDomain=" + tenantDomain
-                + ", externalWorkflowReference=" + externalWorkflowReference + ", callbackUrl=" + callbackUrl
-                + ", attributes=" + attributes + "]";
-    }    
-    
+        return "WorkflowDTO{" +
+                "workflowReference='" + workflowReference + '\'' +
+                ", workflowType='" + workflowType + '\'' +
+                ", status=" + status +
+                ", createdTime=" + createdTime +
+                ", updatedTime=" + updatedTime +
+                ", workflowDescription='" + workflowDescription + '\'' +
+                ", tenantId=" + tenantId +
+                ", tenantDomain='" + tenantDomain + '\'' +
+                ", externalWorkflowReference='" + externalWorkflowReference + '\'' +
+                ", callbackUrl='" + callbackUrl + '\'' +
+                ", metadata=" + metadata +
+                ", properties=" + properties +
+                ", attributes=" + attributes +
+                '}';
+    }
 }

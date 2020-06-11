@@ -45,16 +45,18 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.net.ssl.SSLContext;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
-
 public class APIKeyValidatorClientTest {
+
     @Rule
     public WireMockRule wireMockRule;
     public static WireMockConfiguration wireMockConfiguration = new WireMockConfiguration();
@@ -70,6 +72,7 @@ public class APIKeyValidatorClientTest {
     @Before
     public void setTrustManager() throws KeyStoreException, IOException, CertificateException,
             NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException {
+
         ConfigurationContext configurationContext = ConfigurationContextFactory
                 .createConfigurationContextFromFileSystem(AXIS2_CLIENT_REPO_PATH, AXIS2_CLIENT_REPO_PATH + File
                         .separator + "axis2_client.xml");
@@ -89,6 +92,8 @@ public class APIKeyValidatorClientTest {
 
     @Test
     public void getAPIKeyData() throws Exception {
+
+        String tenantDomain = "carbon.super";
         wireMockRule = new WireMockRule(wireMockConfiguration);
         wireMockRule.stubFor(WireMock.post(urlEqualTo("/services/APIKeyValidationService")).withBasicAuth("admin",
                 "admin").willReturn(aResponse().withBody("<soapenv:Envelope " +
@@ -148,7 +153,7 @@ public class APIKeyValidatorClientTest {
         WSAPIKeyDataStore wsapiKeyDataStore = new WSAPIKeyDataStore();
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = wsapiKeyDataStore.getAPIKeyData("/pizzashack/1.0.0",
                 "1.0.0", "eaa0e467-36f7-367b-ba8c-87ab9849456f",
-                "ANY", "http://localhost", "/menu", "GET");
+                "ANY", "http://localhost", "/menu", "GET", tenantDomain, new ArrayList<>());
         wireMockRule.resetAll();
         wireMockRule.stop();
         Assert.assertNotNull(apiKeyValidationInfoDTO);
@@ -164,6 +169,8 @@ public class APIKeyValidatorClientTest {
 
     @Test
     public void getAPIKeyDataWhileKeyManagerCallFailed() throws Exception {
+
+        String tenantDomain = "carbon.super";
         wireMockRule = new WireMockRule(wireMockConfiguration);
         wireMockRule.stubFor(WireMock.post(urlEqualTo("/services/APIKeyValidationService")).withBasicAuth("admin",
                 "admin").willReturn(aResponse().withBody("<soapenv:Envelope " +
@@ -223,7 +230,7 @@ public class APIKeyValidatorClientTest {
             WSAPIKeyDataStore wsapiKeyDataStore = new WSAPIKeyDataStore();
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO = wsapiKeyDataStore.getAPIKeyData("/pizzashack/1.0.0",
                     "1.0.0", "eaa0e467-36f7-367b-ba8c-87ab9849456f",
-                    "ANY", "http://localhost", "/menu", "GET");
+                    "ANY", "http://localhost", "/menu", "GET", tenantDomain, new ArrayList<>());
         } catch (APISecurityException e) {
             if (e.getMessage().contains("Error while accessing backend services for API key validation")) {
                 Assert.assertTrue(true);
@@ -236,6 +243,7 @@ public class APIKeyValidatorClientTest {
 
     @Test
     public void testGetUriTemplates() throws Exception {
+
         wireMockRule = new WireMockRule(wireMockConfiguration);
         wireMockRule.stubFor(WireMock.post(urlEqualTo("/services/APIKeyValidationService")).withBasicAuth("admin",
                 "admin").willReturn(aResponse().withBody("<soapenv:Envelope xmlns:soapenv=\"http://www" +
@@ -309,6 +317,7 @@ public class APIKeyValidatorClientTest {
 
     @Test
     public void testGetUriTemplatesWhileKeyValidationCallgetFailed() throws Exception {
+
         wireMockRule = new WireMockRule(wireMockConfiguration);
         wireMockRule.stubFor(WireMock.post(urlEqualTo("/services/APIKeyValidationService")).withBasicAuth("admin",
                 "admin").willReturn(aResponse().withBody("<soapenv:Envelope xmlns:soapenv=\"http://www" +
@@ -380,6 +389,7 @@ public class APIKeyValidatorClientTest {
 
     @Test
     public void testConfigurationValuesNotGiven() throws Exception {
+
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl
                 (apiManagerConfiguration));

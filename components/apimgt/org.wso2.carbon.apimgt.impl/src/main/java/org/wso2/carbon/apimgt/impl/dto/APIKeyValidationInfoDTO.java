@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl.dto;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 
 /**
  * This class represent the API key validation Info DTO.
@@ -62,6 +61,9 @@ public class APIKeyValidationInfoDTO implements Serializable {
     //keeps productId of product for which the key was validated, if key was validated for an api this will be null
     private String productName;
     private String productProvider;
+    private String keyManager;
+    private int graphQLMaxDepth;
+    private int graphQLMaxComplexity;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -239,6 +241,7 @@ public class APIKeyValidationInfoDTO implements Serializable {
         this.scopes = scopes;
     }
 
+
     public String toString() {
 
         StringBuilder builder = new StringBuilder(20);
@@ -263,7 +266,9 @@ public class APIKeyValidationInfoDTO implements Serializable {
                 append(" , stopOnQuotaReach:").append(stopOnQuotaReach).
                 append(" , productName:").append(productName).
                 append(" , productProvider:").append(productProvider).
-                append(" , apiPublisher:").append(apiPublisher);
+                append(" , apiPublisher:").append(apiPublisher).
+                append(" , graphQLMaxDepth:").append(graphQLMaxDepth).
+                append(" , graphQLMaxComplexity:").append(graphQLMaxComplexity);
 
         if (authorizedDomains != null && !authorizedDomains.isEmpty()) {
             builder.append(" , authorizedDomains:[");
@@ -335,5 +340,24 @@ public class APIKeyValidationInfoDTO implements Serializable {
     public String getProductProvider() {
         return productProvider;
     }
+
+    public void setKeyManager(String keyManager) {
+
+        this.keyManager = keyManager;
+    }
+
+    public String getKeyManager() {
+
+        return keyManager;
+    }
+    public int getGraphQLMaxDepth() { return graphQLMaxDepth; }
+
+    public void setGraphQLMaxDepth(int graphQLMaxDepth) { this.graphQLMaxDepth = graphQLMaxDepth; }
+
+    public int getGraphQLMaxComplexity() { return graphQLMaxComplexity; }
+
+    public void setGraphQLMaxComplexity(int graphQLMaxComplexity) { this.graphQLMaxComplexity = graphQLMaxComplexity; }
+
+
 }
 

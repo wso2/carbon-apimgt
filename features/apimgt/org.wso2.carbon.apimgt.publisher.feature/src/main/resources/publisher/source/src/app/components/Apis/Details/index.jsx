@@ -809,6 +809,7 @@ Details.subPaths = {
     MONETIZATION_PRODUCT: '/api-products/:apiprod_uuid/monetization',
     EXTERNAL_STORES: '/apis/:api_uuid/external-devportals',
     TRYOUT: '/apis/:api_uuid/test-console',
+    QUERYANALYSIS: '/apis/:api_uuid/queryanalysis',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum

@@ -24,6 +24,8 @@ public class TokenIssuerDto {
     private boolean disableDefaultClaimMapping = false;
     private Map<String,ClaimMappingDto> claimConfigurations = new HashMap<>();
     private JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
+    private String consumerKeyClaim;
+    private String scopesClaim;
 
     public TokenIssuerDto(String issuer) {
 
@@ -44,6 +46,9 @@ public class TokenIssuerDto {
 
         return claimConfigurations;
     }
+    public void addClaimMapping(ClaimMappingDto claimMappingDto) {
+        claimConfigurations.put(claimMappingDto.getRemoteClaim(),claimMappingDto);
+    }
 
     public JWKSConfigurationDTO getJwksConfigurationDTO() {
 
@@ -58,5 +63,37 @@ public class TokenIssuerDto {
     public void setDisableDefaultClaimMapping(boolean disableDefaultClaimMapping) {
 
         this.disableDefaultClaimMapping = disableDefaultClaimMapping;
+    }
+
+    public void setJwksConfigurationDTO(JWKSConfigurationDTO jwksConfigurationDTO) {
+
+        this.jwksConfigurationDTO = jwksConfigurationDTO;
+    }
+
+    public String getConsumerKeyClaim() {
+
+        return consumerKeyClaim;
+    }
+
+    public void setConsumerKeyClaim(String consumerKeyClaim) {
+
+        this.consumerKeyClaim = consumerKeyClaim;
+    }
+
+    public String getScopesClaim() {
+
+        return scopesClaim;
+    }
+
+    public void setScopesClaim(String scopesClaim) {
+
+        this.scopesClaim = scopesClaim;
+    }
+
+    public void addClaimMappings(ClaimMappingDto[] claimMappingDto) {
+
+        for (ClaimMappingDto mappingDto : claimMappingDto) {
+            addClaimMapping(mappingDto);
+        }
     }
 }

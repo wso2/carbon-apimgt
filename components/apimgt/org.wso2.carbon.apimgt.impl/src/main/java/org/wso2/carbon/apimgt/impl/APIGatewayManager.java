@@ -31,7 +31,14 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
@@ -134,9 +141,10 @@ public class APIGatewayManager {
                 String operation;
                 client = new APIGatewayAdminClient(environment);
                 if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
-                    //Build schema with scopes and roles
+                    //Build schema with additional info
+                    GraphqlComplexityInfo graphqlComplexityInfo = APIUtil.getComplexityDetails(api);
                     GraphQLSchemaDefinition schemaDefinition = new GraphQLSchemaDefinition();
-                    definition = schemaDefinition.buildSchemaWithScopesAndRoles(api);
+                    definition = schemaDefinition.buildSchemaWithAdditionalInfo(api, graphqlComplexityInfo);
                     gatewayAPIDTO.setLocalEntriesToBeRemove(addStringToList(api.getUUID() + "_graphQL",
                             gatewayAPIDTO.getLocalEntriesToBeRemove()));
                     GatewayContentDTO graphqlLocalEntry = new GatewayContentDTO();
@@ -894,9 +902,12 @@ public class APIGatewayManager {
                 if (apiData != null) {
                     ResourceData[] resourceData = apiData.getResources();
                     for (ResourceData resource : resourceData) {
-                        if (resource != null && resource.getInSeqXml() != null 
-                                && resource.getInSeqXml().contains("DigestAuthMediator")) {
-                            return APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH;
+                        if (resource != null && resource.getInSeqXml() != null) {
+                            if(resource.getInSeqXml().contains("DigestAuthMediator")) {
+                                return APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH;
+                            } else if(resource.getInSeqXml().contains("OAuthMediator")) {
+                                return APIConstants.APIEndpointSecurityConstants.OAUTH;
+                            }
                         }
                     }
                 }

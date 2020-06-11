@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.Gson;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -43,7 +44,6 @@ import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -64,11 +64,12 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Wsdl;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -129,6 +130,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -1552,6 +1554,20 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
+    public GraphqlComplexityInfo getComplexityDetails(APIIdentifier apiIdentifier) throws APIManagementException {
+        return apiMgtDAO.getComplexityDetails(apiIdentifier);
+    }
+
+    public void addComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
+        apiMgtDAO.addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+    }
+
+
+    public void updateComplexityDetails(APIIdentifier apiIdentifier, GraphqlComplexityInfo graphqlComplexityInfo) throws APIManagementException {
+        apiMgtDAO.updateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+    }
+
+
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException {
         return null;
     }
@@ -1584,7 +1600,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantid);
         if (!apiMgtDAO.isSharedScopeExists(scopeKey, tenantid)) {
-            return KeyManagerHolder.getKeyManagerInstance().isScopeExists(scopeKey, tenantDomain);
+            return KeyManagerHolder.getKeyManagerInstance(tenantDomain).isScopeExists(scopeKey);
         }
         if (log.isDebugEnabled()) {
             log.debug("Scope name: " + scopeKey + " exists as a shared scope in tenant: " + tenantDomain);
@@ -1887,23 +1903,6 @@ public abstract class AbstractAPIManager implements APIManager {
         throw new ApplicationNameWithInvalidCharactersException(msg);
     }
 
-    public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {
-        return apiMgtDAO.isAccessTokenExists(accessToken);
-    }
-
-    public boolean isApplicationTokenRevoked(String accessToken) throws APIManagementException {
-        return apiMgtDAO.isAccessTokenRevoked(accessToken);
-    }
-
-
-    public APIKey getAccessTokenData(String accessToken) throws APIManagementException {
-        return apiMgtDAO.getAccessTokenData(accessToken);
-    }
-
-    public Map<Integer, APIKey> searchAccessToken(String searchType, String searchTerm, String loggedInUser)
-            throws APIManagementException {
-        return Collections.emptyMap();
-    }
 
     public Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException {
         return Collections.emptySet();
@@ -2746,11 +2745,11 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             }
 
-            String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
             // setting scope
             if (!apiIdsString.isEmpty()) {
-                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-                Map<String, Set<Scope>> apiScopeSet = keyManager.getScopesForAPIS(apiIdsString, tenantDomain);
+                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain);
+                Map<String, Set<Scope>> apiScopeSet = keyManager.getScopesForAPIS(apiIdsString);
                 if (apiScopeSet.size() > 0) {
                     for (int i = 0; i < apiCount; i++) {
                         Object api = apiList.get(i);
@@ -3095,81 +3094,65 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Returns all API keys associated with given application id.
-     *
-     * @param applicationId The id of the application.
-     * @return Set<APIKey>  Set of API keys of the application.
-     * @throws APIManagementException
-     */
-    private Set<APIKey> getApplicationKeys(int applicationId) throws APIManagementException {
-        Set<APIKey> apiKeys = new HashSet<APIKey>();
-        APIKey productionKey = getApplicationKey(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
-        if (productionKey != null) {
-            apiKeys.add(productionKey);
-        } else {
-            productionKey = apiMgtDAO.getKeyStatusOfApplication(APIConstants.API_KEY_TYPE_PRODUCTION, applicationId);
-            if (productionKey != null) {
-                productionKey.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
-                apiKeys.add(productionKey);
-            }
-        }
-
-        APIKey sandboxKey = getApplicationKey(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
-        if (sandboxKey != null) {
-            apiKeys.add(sandboxKey);
-        } else {
-            sandboxKey = apiMgtDAO.getKeyStatusOfApplication(APIConstants.API_KEY_TYPE_SANDBOX, applicationId);
-            if (sandboxKey != null) {
-                sandboxKey.setType(APIConstants.API_KEY_TYPE_SANDBOX);
-                apiKeys.add(sandboxKey);
-            }
-        }
-        return apiKeys;
-    }
-
-    /**
-     * Returns the key associated with given application id and key type.
+     * Returns the key associated with given application id.
      *
      * @param applicationId Id of the Application.
-     * @param keyType The type of key.
      * @return APIKey The key of the application.
      * @throws APIManagementException
      */
-    private APIKey getApplicationKey(int applicationId, String keyType) throws APIManagementException {
-        String consumerKey = apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(String.valueOf(applicationId), keyType);
-        if (StringUtils.isNotEmpty(consumerKey)) {
-            String consumerKeyStatus = apiMgtDAO.getKeyStatusOfApplication(keyType, applicationId).getState();
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-            OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
-            AccessTokenInfo tokenInfo = keyManager.getAccessTokenByConsumerKey(consumerKey);
-            APIKey apiKey = new APIKey();
-            apiKey.setConsumerKey(consumerKey);
-            apiKey.setType(keyType);
-            apiKey.setState(consumerKeyStatus);
-            if (oAuthApplicationInfo != null) {
-                apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
-                apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
-                apiKey.setGrantTypes(oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES).toString());
-                if (oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES) != null) {
-                    apiKey.setAdditionalProperties(
-                            oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES).toString());
+    protected Set<APIKey> getApplicationKeys(int applicationId) throws APIManagementException {
+
+        Set<APIKey> apiKeyList = apiMgtDAO.getKeyMappingsFromApplicationId(applicationId);
+        for (APIKey apiKey : apiKeyList) {
+            String keyManagerName = apiKey.getKeyManager();
+            String consumerKey = apiKey.getConsumerKey();
+            if (StringUtils.isNotEmpty(consumerKey)) {
+                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+                if (keyManager != null) {
+                    OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                    if (StringUtils.isNotEmpty(apiKey.getAppMetaData())) {
+                        OAuthApplicationInfo storedOAuthApplicationInfo = new Gson().fromJson(apiKey.getAppMetaData()
+                                , OAuthApplicationInfo.class);
+                        if (oAuthApplicationInfo == null) {
+                            oAuthApplicationInfo = storedOAuthApplicationInfo;
+                        } else {
+
+                            if (StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL())) {
+                                oAuthApplicationInfo.setCallBackURL(storedOAuthApplicationInfo.getCallBackURL());
+                            }
+                            if (oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) == null &&
+                                    storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) != null) {
+                                oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                                        storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                            }
+                        }
+                    }
+                    AccessTokenInfo tokenInfo = keyManager.getAccessTokenByConsumerKey(consumerKey);
+                    if (oAuthApplicationInfo != null) {
+                        apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
+                        apiKey.setCallbackUrl(oAuthApplicationInfo.getCallBackURL());
+                        apiKey.setGrantTypes(
+                                oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES).toString());
+                        if (oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES) != null) {
+                            apiKey.setAdditionalProperties(
+                                    oAuthApplicationInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES));
+                        }
+                    }
+                    if (tokenInfo != null) {
+                        apiKey.setAccessToken(tokenInfo.getAccessToken());
+                        apiKey.setValidityPeriod(tokenInfo.getValidityPeriod());
+                        apiKey.setTokenScope(getScopeString(tokenInfo.getScopes()));
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Access token does not exist for Consumer Key: " + consumerKey);
+                        }
+                    }
+                } else {
+                    log.error("Key Manager " + keyManagerName + " not initialized in tenant " + tenantDomain);
                 }
             }
-            if (tokenInfo != null) {
-                apiKey.setAccessToken(tokenInfo.getAccessToken());
-                apiKey.setValidityPeriod(tokenInfo.getValidityPeriod());
-                apiKey.setTokenScope(getScopeString(tokenInfo.getScopes()));
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Access token does not exist for Consumer Key: " + consumerKey);
-                }
-            }
-            return apiKey;
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Consumer key does not exist for Application Id: " + applicationId + " Key Type: " + keyType);
-        }
-        return null;
+        return apiKeyList;
     }
 
     /**

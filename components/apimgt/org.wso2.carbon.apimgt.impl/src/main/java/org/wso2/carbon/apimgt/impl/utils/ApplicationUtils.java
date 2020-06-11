@@ -33,8 +33,8 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 /**
@@ -70,15 +70,18 @@ public class ApplicationUtils {
      * This method will parse json String and set properties in  OAuthApplicationInfo object.
      * Further it will initiate new OauthAppRequest  object and set applicationInfo object as its own property.
      * @param clientName client Name.
+     * @param clientId The ID of the client
      * @param callbackURL This is the call back URL of the application
      * @param tokenScope The token scope
      * @param clientDetails The client details
-     * @param clientId The ID of the client
+     * @param tenantDomain
+     * @param keyManagerName
      * @return appRequest object of OauthAppRequest.
      * @throws APIManagementException
      */
     public static OAuthAppRequest createOauthAppRequest(String clientName, String clientId, String callbackURL,
-            String tokenScope, String clientDetails, String tokenType)
+                                                        String tokenScope, String clientDetails, String tokenType,
+                                                        String tenantDomain, String keyManagerName)
             throws
             APIManagementException {
 
@@ -93,8 +96,10 @@ public class ApplicationUtils {
 
         if (clientDetails != null) {
             //parse json string and set applicationInfo parameters.
-            authApplicationInfo = KeyManagerHolder.getKeyManagerInstance().buildFromJSON(authApplicationInfo,
-                    clientDetails);
+            KeyManager keyManagerInstance = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+            if (keyManagerInstance != null) {
+                authApplicationInfo = keyManagerInstance.buildFromJSON(authApplicationInfo, clientDetails);
+            }
 
             if (log.isDebugEnabled()) {
                 log.debug("Additional json parameters when building OauthAppRequest =  " + clientDetails);
@@ -113,32 +118,34 @@ public class ApplicationUtils {
 
     /**
      * This method adds additional parameters specified in JSON input to TokenRequest.
+     *
+     * @param keyManager
      * @param jsonParams Additional Parameters required by the Authorization Server.
      * @param tokenRequest Values captured in TokenRequest.
      * @return Token Request after adding parameters in JSON input.
      * @throws APIManagementException
      */
-    public static AccessTokenRequest populateTokenRequest(String jsonParams, AccessTokenRequest tokenRequest)
+    public static AccessTokenRequest populateTokenRequest(KeyManager keyManager,
+                                                          String jsonParams, AccessTokenRequest tokenRequest)
             throws APIManagementException {
+
         if (tokenRequest == null) {
             tokenRequest = new AccessTokenRequest();
         }
-
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-        if (keyManager != null) {
+        if (keyManager != null){
             return keyManager.buildAccessTokenRequestFromJSON(jsonParams, tokenRequest);
         }
         return null;
     }
 
-    public static AccessTokenRequest createAccessTokenRequest(OAuthApplicationInfo oAuthApplication,
+    public static AccessTokenRequest createAccessTokenRequest(KeyManager keyManager,
+                                                              OAuthApplicationInfo oAuthApplication,
                                                               AccessTokenRequest tokenRequest)
             throws APIManagementException {
         if (tokenRequest == null) {
             tokenRequest = new AccessTokenRequest();
         }
 
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         if (keyManager != null) {
             return keyManager.buildAccessTokenRequestFromOAuthApp(oAuthApplication, tokenRequest);
         }
@@ -147,9 +154,10 @@ public class ApplicationUtils {
 
 
     public static void updateOAuthAppAssociation(Application application, String keyType,
-                                                 OAuthApplicationInfo oAuthApplication) throws APIManagementException {
-        application.addOAuthApp(keyType,oAuthApplication);
-        ApiMgtDAO.getInstance().updateApplicationKeyTypeMapping(application,keyType);
+                                                 OAuthApplicationInfo oAuthApplication, String keyManagerName)
+            throws APIManagementException {
+        application.addOAuthApp(keyType,keyManagerName,oAuthApplication);
+        ApiMgtDAO.getInstance().updateApplicationKeyTypeMapping(application,keyType,keyManagerName);
     }
 
     /**

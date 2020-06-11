@@ -14,34 +14,24 @@
  * limitations under the License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Collapse,
     ExpansionPanel,
     ExpansionPanelDetails,
     ExpansionPanelSummary,
-    FormControlLabel,
     Grid,
-    Switch,
     Typography,
     withStyles,
-    FormGroup,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import { isRestricted } from 'AppData/AuthManager';
-import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
-import EndpointSecurity from './GeneralConfiguration/EndpointSecurity';
 import Certificates from './GeneralConfiguration/Certificates';
 import API from '../../../../data/api'; // TODO: Use webpack aliases instead of relative paths ~tmkb
 import Alert from '../../../Shared/Alert';
 import { endpointsToList } from './endpointUtils';
 
 const styles = (theme) => ({
-    endpointTypeSelect: {
-        width: '50%',
-    },
     configHeaderContainer: {
         display: 'flex',
         justifyContent: 'space-between',
@@ -84,39 +74,12 @@ function GeneralConfiguration(props) {
     const {
         intl,
         epConfig,
-        endpointSecurityInfo,
-        handleEndpointSecurityChange,
         endpointType,
         classes,
-        setEndpointSecurityInfo,
-        endpointsDispatcher,
     } = props;
     const [isConfigExpanded, setConfigExpand] = useState(false);
     const [endpointCertificates, setEndpointCertificates] = useState([]);
-    const { api } = useContext(APIContext);
     const [aliasList, setAliasList] = useState([]);
-
-    const [state, setState] = React.useState({
-        production: false,
-        sandbox: false,
-    });
-
-    const handleToggleEndpointSecurity = (name) => (event) => {
-        setState({ ...state, [name]: event.target.checked });
-        const tmpSecurityInfo = endpointSecurityInfo === null ? {
-            production: {
-                enabled: state[name], type: 'BASIC', username: null, password: null,
-            },
-            sandbox: {
-                enabled: state[name], type: 'BASIC', username: null, password: null,
-            },
-        } : endpointSecurityInfo;
-        setEndpointSecurityInfo(tmpSecurityInfo);
-        endpointsDispatcher({
-            action: 'endpointSecurity',
-            value: { ...tmpSecurityInfo, [name]: { ...tmpSecurityInfo[name], enabled: event.target.checked } },
-        });
-    };
 
     /**
      * Method to upload the certificate content by calling the rest api.
@@ -210,21 +173,6 @@ function GeneralConfiguration(props) {
             });
     }, []);
 
-    let isProductionSecurityEnabled = false;
-    if (endpointSecurityInfo && !Object.keys(endpointSecurityInfo).includes('production')
-     && endpointSecurityInfo.username !== '') {
-        isProductionSecurityEnabled = true;
-    } else if (endpointSecurityInfo && endpointSecurityInfo.production.enabled) {
-        isProductionSecurityEnabled = endpointSecurityInfo.production.enabled;
-    }
-    let isSandboxSecurityEnabled = false;
-    if (endpointSecurityInfo && !Object.keys(endpointSecurityInfo).includes('sandbox')
-    && endpointSecurityInfo.username !== '') {
-        isSandboxSecurityEnabled = true;
-    } else if (endpointSecurityInfo && endpointSecurityInfo.sandbox.enabled) {
-        isSandboxSecurityEnabled = endpointSecurityInfo.sandbox.enabled;
-    }
-
     return (
         <>
             <ExpansionPanel
@@ -238,25 +186,6 @@ function GeneralConfiguration(props) {
                     id='panel1bh-header'
                     className={classes.configHeaderContainer}
                 >
-                    {endpointType.key === 'awslambda'
-                        ? (<div />)
-                        : (
-                            <Typography
-                                className={classes.secondaryHeading}
-                                hidden={
-                                    endpointType.key === 'default'
-                                    || endpointType.key === 'awslambda'
-                                }
-                            >
-                                <FormattedMessage
-                                    id='Apis.Details.Endpoints.GeneralConfiguration.endpoint.security.sub.heading'
-                                    defaultMessage='Endpoint Security'
-                                />
-                                {' '}
-:
-                                {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'NONE'}
-                            </Typography>
-                        )}
                     {endpointType.key === 'default' || endpointType.key === 'awslambda' ? (
                         <div />
                     ) : (
@@ -264,7 +193,6 @@ function GeneralConfiguration(props) {
                             className={classes.secondaryHeading}
                             hidden={endpointType.key === 'default' || endpointType.key === 'awslambda'}
                         >
-                             |
                             <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.certificates.sub.heading'
                                 defaultMessage='Certificates'
@@ -276,106 +204,18 @@ function GeneralConfiguration(props) {
                     )}
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.generalConfigContent}>
-                    <Grid container direction='row' xs={12}>
-                        {endpointType.key === 'awslambda' ? (
-                            <div />
-                        ) : (
-                            <Grid container item xs={6}>
-                                {endpointType.key === 'awslambda' ? (
-                                    <div />
-                                ) : (
-                                    <Grid
-                                        item
-                                        xs
-                                        className={classes.endpointConfigSection}
-                                        hidden={endpointType.key === 'awslambda'}
-                                    >
-                                        <FormGroup column>
-                                            <FormControlLabel
-                                                checked={(endpointSecurityInfo && isProductionSecurityEnabled)
-                                                     || state.production}
-                                                value='production'
-                                                control={(
-                                                    <Switch
-                                                        onChange={handleToggleEndpointSecurity('production')}
-                                                        color='primary'
-                                                        disabled={isRestricted(['apim:api_create'], api)}
-                                                    />
-                                                )}
-                                                label={(
-                                                    <Typography className={classes.securityHeading}>
-                                                        <FormattedMessage
-                                                            id={
-                                                                'Apis.Details.Endpoints.EndpointOverview.'
-                                                                + 'production.endpoint.security.enable.switch'
-                                                            }
-                                                            defaultMessage='Production Endpoint Security'
-                                                        />
-                                                    </Typography>
-                                                )}
-                                            />
-                                            <Collapse in={(endpointSecurityInfo && isProductionSecurityEnabled)
-                                                || state.production}
-                                            >
-                                                <EndpointSecurity
-                                                    securityInfo={endpointSecurityInfo
-                                                        && (endpointSecurityInfo.production
-                                                            ? endpointSecurityInfo.production : endpointSecurityInfo)}
-                                                    onChangeEndpointAuth={handleEndpointSecurityChange}
-                                                    isProduction
-                                                />
-                                            </Collapse>
-                                            <FormControlLabel
-                                                checked={isSandboxSecurityEnabled || state.sandbox}
-                                                value='sandbox'
-                                                control={(
-                                                    <Switch
-                                                        onChange={handleToggleEndpointSecurity('sandbox')}
-                                                        color='primary'
-                                                        disabled={isRestricted(['apim:api_create'], api)}
-                                                    />
-                                                )}
-                                                label={(
-                                                    <Typography className={classes.securityHeading}>
-                                                        <FormattedMessage
-                                                            id={
-                                                                'Apis.Details.Endpoints.EndpointOverview.'
-                                                                + 'sandbox.endpoint.security.enable.switch'
-                                                            }
-                                                            defaultMessage='Sandbox Endpoint Security'
-                                                        />
-                                                    </Typography>
-                                                )}
-                                            />
-                                            <Collapse in={(endpointSecurityInfo && isSandboxSecurityEnabled)
-                                                || state.sandbox}
-                                            >
-                                                <EndpointSecurity
-                                                    securityInfo={endpointSecurityInfo
-                                                        && (endpointSecurityInfo.sandbox
-                                                            ? endpointSecurityInfo.sandbox : endpointSecurityInfo)}
-                                                    onChangeEndpointAuth={handleEndpointSecurityChange}
-                                                />
-                                            </Collapse>
-                                        </FormGroup>
-                                    </Grid>
-                                )}
-                            </Grid>
-                        )}
-                        <Grid
-                            item
-                            xs={6}
-                            className={classes.endpointConfigSection}
-                            hidden={endpointType.key === 'default' || endpointType.key === 'awslambda'}
-                        >
-                            <Certificates
-                                endpoints={endpointsToList(epConfig)}
-                                certificates={endpointCertificates}
-                                uploadCertificate={saveCertificate}
-                                deleteCertificate={deleteCertificate}
-                                aliasList={aliasList}
-                            />
-                        </Grid>
+                    <Grid
+                        container
+                        className={classes.endpointConfigSection}
+                        hidden={endpointType.key === 'default' || endpointType.key === 'awslambda'}
+                    >
+                        <Certificates
+                            endpoints={endpointsToList(epConfig)}
+                            certificates={endpointCertificates}
+                            uploadCertificate={saveCertificate}
+                            deleteCertificate={deleteCertificate}
+                            aliasList={aliasList}
+                        />
                     </Grid>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
@@ -385,8 +225,6 @@ function GeneralConfiguration(props) {
 
 GeneralConfiguration.propTypes = {
     epConfig: PropTypes.shape({}).isRequired,
-    endpointSecurityInfo: PropTypes.shape({}).isRequired,
-    handleEndpointSecurityChange: PropTypes.func.isRequired,
     endpointType: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,

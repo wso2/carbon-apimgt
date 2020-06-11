@@ -25,7 +25,8 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
-import com.amazonaws.services.lambda.model.*;
+import com.amazonaws.services.lambda.model.FunctionConfiguration;
+import com.amazonaws.services.lambda.model.ListFunctionsResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import graphql.language.FieldDefinition;
@@ -38,23 +39,29 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
-import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.http.HttpHost;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.XML;
@@ -72,46 +79,77 @@ import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
+import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.ResourcePath;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.Policy;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
-import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
-import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
-import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.CertificateMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.ExternalStoreMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.MediationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.registry.api.Resource;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -123,39 +161,18 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.Map;
-
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.CertificateMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.ExternalStoreMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.MediationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.registry.api.Resource;
-import org.wso2.carbon.registry.core.RegistryConstants;
+import java.util.Set;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.GraphqlQueryAnalysisMappingUtil;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.namespace.QName;
-
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.HeadMethod;
-import org.apache.http.HttpHost;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.wso2.carbon.utils.CarbonUtils;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -438,7 +455,14 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //attach micro-geteway labels
         assignLabelsToDTO(body, apiToAdd);
-
+        if (body.getKeyManagers() instanceof List) {
+            apiToAdd.setKeyManagers((List<String>) body.getKeyManagers());
+        } else if (body.getKeyManagers() == null) {
+            apiToAdd.setKeyManagers(
+                    Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
+        } else {
+            throw new APIManagementException("KeyManagers value need to be an array");
+        }
         return apiToAdd;
     }
 
@@ -446,6 +470,136 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
         APIDTO apiToReturn = getAPIByID(apiId);
         return Response.ok().entity(apiToReturn).build();
+    }
+
+
+    /**
+     * Get complexity details of a given API
+     *
+     * @param apiId          apiId
+     * @param messageContext message context
+     * @return Response with complexity details of the GraphQL API
+     */
+
+    @Override
+    public Response apisApiIdGraphqlPoliciesComplexityGet(String apiId, MessageContext messageContext) throws APIManagementException {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiIdentifier);
+                GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
+                        GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
+                return Response.ok().entity(graphQLQueryComplexityInfoDTO).build();
+            } else {
+                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving complexity details of API : " + apiId, e, log);
+            } else {
+                String msg = "Error while retrieving complexity details of API " + apiId;
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * Create complexity details of a given API
+     *
+     * @param apiId          apiId
+     * @param body           GraphQLQueryComplexityInfo DTO as request body
+     * @param messageContext message context
+     * @return Response
+     */
+
+    @Override
+    public Response apisApiIdGraphqlPoliciesComplexityPost(String apiId, GraphQLQueryComplexityInfoDTO body, MessageContext messageContext) throws APIManagementException {
+        try {
+            if (StringUtils.isBlank(apiId)) {
+                String errorMessage = "API ID cannot be empty or null.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            GraphqlComplexityInfo graphqlComplexityInfo =
+                    GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlComplexityInfo(body);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                apiProvider.addComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+                return Response.ok().build();
+            } else {
+                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while adding complexity details of API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while adding complexity details of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * Update complexity details of a given API
+     *
+     * @param apiId          apiId
+     * @param body           GraphQLQueryComplexityInfo DTO as request body
+     * @param messageContext message context
+     * @return Response
+     */
+
+    @Override
+    public Response apisApiIdGraphqlPoliciesComplexityPut(String apiId, GraphQLQueryComplexityInfoDTO body, MessageContext messageContext) throws APIManagementException {
+        try {
+            if (StringUtils.isBlank(apiId)) {
+                String errorMessage = "API ID cannot be empty or null.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            GraphqlComplexityInfo graphqlComplexityInfo =
+                    GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlComplexityInfo(body);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                apiProvider.updateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+                return Response.ok().build();
+            } else {
+                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating complexity details of API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while updating complexity details of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
 
     /**
@@ -556,14 +710,122 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
             boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
 
+            JSONParser parser = new JSONParser();
+            String oldEndpointConfigString = originalAPI.getEndpointConfig();
+            JSONObject oldEndpointConfig = (JSONObject) parser.parse(oldEndpointConfigString);
+            String oldProductionApiSecret = null;
+            String oldSandboxApiSecret = null;
+
+            if (oldEndpointConfig != null) {
+                if ((oldEndpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY))) {
+                    JSONObject oldEndpointSecurity =
+                            (JSONObject) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                    if (oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION)) {
+                        JSONObject oldEndpointSecurityProduction = (JSONObject) oldEndpointSecurity
+                                .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
+
+                        if (oldEndpointSecurityProduction.get(APIConstants
+                                .OAuthConstants.OAUTH_CLIENT_ID) != null && oldEndpointSecurityProduction.get(
+                                APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null) {
+                            oldProductionApiSecret = oldEndpointSecurityProduction.get(APIConstants
+                                    .OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                        }
+                    }
+                    if (oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX)) {
+                        JSONObject oldEndpointSecuritySandbox = (JSONObject) oldEndpointSecurity
+                                .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
+
+                        if (oldEndpointSecuritySandbox.get(APIConstants
+                        .OAuthConstants.OAUTH_CLIENT_ID) != null && oldEndpointSecuritySandbox.get(
+                                APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null) {
+                            oldSandboxApiSecret = oldEndpointSecuritySandbox.get(APIConstants
+                                    .OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                        }
+                    }
+                }
+            }
+
+
+            LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
+            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+
+            // OAuth 2.0 backend protection: Api Key and Api Secret encryption while updating the API
+            if (endpointConfig != null) {
+                if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+                    LinkedHashMap endpointSecurity = (LinkedHashMap) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                    if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                        LinkedHashMap endpointSecurityProduction = (LinkedHashMap) endpointSecurity
+                                .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
+                        String productionEndpointType = (String) endpointSecurityProduction
+                                .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                        // Change default value of customParameters JSONObject to String
+                        LinkedHashMap<String, String> customParametersHashMap = (LinkedHashMap<String, String>)
+                                endpointSecurityProduction.get(APIConstants
+                                        .OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                        String customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                        endpointSecurityProduction.put(APIConstants
+                                .OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
+
+                        if (APIConstants.OAuthConstants.OAUTH.equals(productionEndpointType)) {
+                            String apiSecret = endpointSecurityProduction.get(APIConstants
+                                    .OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+
+                            if (!apiSecret.equals("")) {
+                                String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
+                                endpointSecurityProduction.put(APIConstants
+                                        .OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
+                            } else {
+                                endpointSecurityProduction.put(APIConstants
+                                .OAuthConstants.OAUTH_CLIENT_SECRET, oldProductionApiSecret);
+                            }
+                        }
+                        endpointSecurity.put(APIConstants
+                                .OAuthConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityProduction);
+                        endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                        body.setEndpointConfig(endpointConfig);
+                    }
+                    if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                        LinkedHashMap endpointSecuritySandbox = (LinkedHashMap) endpointSecurity
+                                .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
+                        String sandboxEndpointType = (String) endpointSecuritySandbox
+                                .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                        // Change default value of customParameters JSONObject to String
+                        LinkedHashMap<String, String> customParametersHashMap = (LinkedHashMap<String, String>)
+                                endpointSecuritySandbox.get(APIConstants
+                                        .OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                        String customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                        endpointSecuritySandbox.put(APIConstants
+                                .OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
+
+                        if (APIConstants.OAuthConstants.OAUTH.equals(sandboxEndpointType)) {
+                            String apiSecret = endpointSecuritySandbox.get(APIConstants
+                                    .OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+
+                            if (!apiSecret.equals("")) {
+                                String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
+                                endpointSecuritySandbox.put(APIConstants
+                                        .OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
+                            } else {
+                                endpointSecuritySandbox.put(APIConstants
+                                        .OAuthConstants.OAUTH_CLIENT_SECRET, oldSandboxApiSecret);
+                            }
+                        }
+                        endpointSecurity.put(APIConstants
+                                .OAuthConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecuritySandbox);
+                        endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                        body.setEndpointConfig(endpointConfig);
+                    }
+                }
+            }
+
             // AWS Lambda: secret key encryption while updating the API
             if (body.getEndpointConfig() != null) {
-                LinkedHashMap endpointConfig = (LinkedHashMap) body.getEndpointConfig();
                 if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
                     String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
                     if (!StringUtils.isEmpty(secretKey)) {
                         if (!APIConstants.AWS_SECRET_KEY.equals(secretKey)) {
-                            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                             String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
                             endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
                             body.setEndpointConfig(endpointConfig);
@@ -655,6 +917,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiToUpdate.setUUID(originalAPI.getUUID());
             validateScopes(apiToUpdate);
             apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
+            if (body.getKeyManagers() instanceof List) {
+                apiToUpdate.setKeyManagers((List<String>) body.getKeyManagers());
+            } else {
+                apiToUpdate.setKeyManagers(
+                        Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
+            }
 
             //attach micro-geteway labels
             assignLabelsToDTO(body, apiToUpdate);
@@ -710,6 +978,50 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
+
+
+
+
+    /**
+     * Get all types and fields of the GraphQL Schema of a given API
+     *
+     * @param apiId          apiId
+     * @param messageContext message context
+     * @return Response with all the types and fields found within the schema definition
+     */
+    @Override
+    public Response apisApiIdGraphqlPoliciesComplexityTypesGet(String apiId, MessageContext messageContext) {
+        GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
+                List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
+                GraphQLSchemaTypeListDTO graphQLSchemaTypeListDTO =
+                        GraphqlQueryAnalysisMappingUtil.fromGraphqlSchemaTypeListtoDTO(typeList);
+                return Response.ok().entity(graphQLSchemaTypeListDTO).build();
+            } else {
+                throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving types and fields of API : " + apiId, e, log);
+            } else {
+                String msg = "Error while retrieving types and fields of the schema of API " + apiId;
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        }
+        return null;
+    }
+
 
     // AWS Lambda: rest api operation to get ARNs
     @Override
@@ -3976,9 +4288,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (url != null) {
             validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, returnContent);
         } else if (fileInputStream != null) {
+            String filename = fileDetail.getContentDisposition().getFilename();
             try {
-                String openAPIContent = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
-                validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
+                if (filename.endsWith(".zip")) {
+                    validationResponse =
+                            OASParserUtil. extractAndValidateOpenAPIArchive(fileInputStream,returnContent);
+                } else  {
+                    String openAPIContent = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+                    validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
+                }
             } catch (IOException e) {
                 RestApiUtil.handleInternalServerError("Error while reading file content", e, log);
             }

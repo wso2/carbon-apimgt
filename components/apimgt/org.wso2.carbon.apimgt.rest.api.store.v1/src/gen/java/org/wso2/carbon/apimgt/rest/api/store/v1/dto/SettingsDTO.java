@@ -27,7 +27,7 @@ public class SettingsDTO   {
     private Boolean recommendationEnabled = false;
     private Boolean isUnlimitedTierPaid = false;
     private SettingsIdentityProviderDTO identityProvider = null;
-    private Boolean isAnonymousModeEnabled = true;
+    private Boolean isAnonymousModeEnabled = false;
 
   /**
    **/

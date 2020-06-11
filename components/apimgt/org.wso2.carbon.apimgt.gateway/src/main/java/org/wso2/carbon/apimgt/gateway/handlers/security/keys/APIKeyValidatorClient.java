@@ -21,7 +21,6 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
@@ -44,7 +43,6 @@ import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
-import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.rmi.RemoteException;
@@ -94,7 +92,9 @@ public class APIKeyValidatorClient {
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
                                                  String requiredAuthenticationLevel, String clientDomain,
-                                                 String matchingResource, String httpVerb) throws APISecurityException {
+                                                 String matchingResource, String httpVerb, String tenantDomain,
+                                                 List<String> keyManagers)
+            throws APISecurityException {
 
         CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());
         if (cookie != null) {
@@ -132,7 +132,8 @@ public class APIKeyValidatorClient {
             }
             org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
                     keyValidationServiceStub.validateKey(context, apiVersion, apiKey, requiredAuthenticationLevel, clientDomain,
-                                                         matchingResource, httpVerb);
+                                                         matchingResource, httpVerb, tenantDomain,
+                            keyManagers.toArray(new String[keyManagers.size()]));
             if (log.isDebugEnabled()) {
                 log.debug("KeyValidation response received to gateway from keymanager via web service call for:"
                         + context + " with ID: " + MessageContext.getCurrentMessageContext().getMessageID() + " at "
@@ -164,7 +165,8 @@ public class APIKeyValidatorClient {
         }
     }
 
-    public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey)
+    public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
+                                                        String tenantDomain, String keyManager)
             throws APISecurityException {
         CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());
         if (cookie != null) {
@@ -179,7 +181,8 @@ public class APIKeyValidatorClient {
                         + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
             org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
-                    keyValidationServiceStub.validateSubscription(context, version, consumerKey);
+                    keyValidationServiceStub
+                            .validateSubscription(context, version, consumerKey, tenantDomain, keyManager);
             if (log.isDebugEnabled()) {
                 log.debug("Subscription Validation response received to gateway " +
                         "from key manager via web service call for:"
@@ -228,6 +231,8 @@ public class APIKeyValidatorClient {
         dto.setStopOnQuotaReach(generatedDto.getStopOnQuotaReach());
         dto.setProductName(generatedDto.getProductName());
         dto.setProductProvider(generatedDto.getProductProvider());
+        dto.setGraphQLMaxDepth(generatedDto.getGraphQLMaxDepth());
+        dto.setGraphQLMaxComplexity(generatedDto.getGraphQLMaxComplexity());
         return dto;
     }
 

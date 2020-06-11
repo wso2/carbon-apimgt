@@ -103,8 +103,8 @@ x-wso2-security:
         key: apim:monetization_usage_publish
       - description: ""
         roles: admin
-        name: apim:api_workflow
-        key: apim:api_workflow
+        name: apim:api_workflow_approve
+        key: apim:api_workflow_approve
       - description: ""
         roles: admin
         name: apim:bot_data
@@ -122,14 +122,14 @@ x-wso2-security:
 # The "API Collection" resource APIs
 ######################################################
 paths:
-######################################################
-# The "Application Throttling Policy Collection" resource API
-######################################################
+  ######################################################
+  # The "Application Throttling Policy Collection" resource API
+  ######################################################
   '/throttling/policies/application':
 
-#-----------------------------------------------------
-# Retrieve all Application level policies
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve all Application level policies
+    #-----------------------------------------------------
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer e59e2657-4c2a-3cd0-8b48-0f4f39940c41\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/application"
       x-wso2-request: |
@@ -178,9 +178,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Add a Application level Throttling Policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Add a Application level Throttling Policy
+    #-----------------------------------------------------
     post:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93\" -X POST -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/application -d @data.json"
       x-wso2-request: "POST https://localhost:9443/api/am/admin/v0.16/throttling/policies/application\r\nAuthorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyName\": \"1PerMin\",\r\n  \"displayName\": \"1PerMin\",\r\n  \"description\": \"Allows 1 request per minute\",\r\n  \"defaultLimit\": {\r\n    \"type\": \"RequestCountLimit\",\r\n    \"timeUnit\": \"min\",\r\n    \"unitTime\": 1,\r\n    \"requestCount\": 1\r\n  }\r\n}"
@@ -233,14 +233,14 @@ paths:
             Unsupported media type.
             The entity of the request was in a not supported format.
 
-######################################################
-# The "Individual Application Throttling Policy" resource API
-######################################################
+  ######################################################
+  # The "Individual Application Throttling Policy" resource API
+  ######################################################
   '/throttling/policies/application/{policyId}':
 
-#-----------------------------------------------------
-# Retrieve a certain Application Policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve a certain Application Policy
+    #-----------------------------------------------------
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/application/6fc88136-dd36-4e81-ac6c-746225c5001b"
       x-wso2-request: |
@@ -296,9 +296,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Delete an Application level throttling policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Delete an Application level throttling policy
+    #-----------------------------------------------------
     delete:
       x-wso2-curl: "curl -k -X DELETE -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/application/f7becc49-9cc1-463f-bc2b-fc4c82582479"
       x-wso2-request: |
@@ -333,9 +333,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Update an Application throttling policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Update an Application throttling policy
+    #-----------------------------------------------------
     put:
       x-wso2-curl: "curl -k -X PUT -H \"Authorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/application/f7becc49-9cc1-463f-bc2b-fc4c82582479 -d @data.json"
       x-wso2-request: "PUT https://localhost:9443/api/am/admin/v0.16/throttling/policies/application/f7becc49-9cc1-463f-bc2b-fc4c82582479\r\nAuthorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyName\": \"1PerMin\",\r\n  \"displayName\": \"1PerMin\",\r\n  \"description\": \"Allows single request per minute\",\r\n  \"defaultLimit\": {\r\n    \"type\": \"RequestCountLimit\",\r\n    \"timeUnit\": \"min\",\r\n    \"unitTime\": 1,\r\n    \"requestCount\": 1\r\n  }\r\n}"
@@ -404,9 +404,9 @@ paths:
             $ref: '#/definitions/Error'
 
   /policies/mediation:
-#-----------------------------------------------------------------------------------------
-# Retrieving the list of all global mediation sequences under a given search condition
-#-----------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------
+    # Retrieving the list of all global mediation sequences under a given search condition
+    #-----------------------------------------------------------------------------------------
     get:
       x-scope: apim:mediation_policy_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer 36a1644d-16c8-3f10-af2a-cedac82a6f21\" https://localhost:9443/api/am/admin/v0.16/policies/mediation"
@@ -454,9 +454,9 @@ paths:
             $ref: '#/definitions/Error'
 
 
-#----------------------------------------------------------------------------
-# Upload a global mediation policy
-#----------------------------------------------------------------------------
+    #----------------------------------------------------------------------------
+    # Upload a global mediation policy
+    #----------------------------------------------------------------------------
     post:
       x-scope: apim:mediation_policy_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer 45c1e774-7d5a-3e2a-b76c-53f786efac6b\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/admin/v0.16/policies/mediation\""
@@ -471,7 +471,7 @@ paths:
           description: mediation policy to upload
           required: true
           schema:
-             $ref: '#/definitions/Mediation'
+            $ref: '#/definitions/Mediation'
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
@@ -522,14 +522,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Individual global mediation sequence" resource
-######################################################
+  ######################################################
+  # The "Individual global mediation sequence" resource
+  ######################################################
   /policies/mediation/{mediationPolicyId}:
 
-#-----------------------------------------------------
-# Retrieve a particular global mediation policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve a particular global mediation policy
+    #-----------------------------------------------------
     get:
       x-scope: apim:mediation_policy_view
       x-wso2-curl: "curl -k -H \"Authorization: Bearer da3b0521-5adb-3edc-8ab9-295b4c34c809\" https://localhost:9443/api/am/admin/v0.16/policies/mediation/2e5cebbb-e48c-4345-a912-1f0a2058aa05"
@@ -584,9 +584,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Delete the mediation policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Delete the mediation policy
+    #-----------------------------------------------------
     delete:
       x-scope: apim:mediation_policy_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc\" -X DELETE https://localhost:9443/api/am/admin/v0.16/policies/mediation/2c85844c-588f-4000-9ce5-f4cdc422cc8b"
@@ -625,9 +625,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Update the a mediation policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Update the a mediation policy
+    #-----------------------------------------------------
     put:
       x-scope: apim:mediation_policy_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer 58b3b072-74bb-3381-a213-ce1ca2857c2f\" -H \"Content-Type: application/json\" -X PUT -d @data.json https://localhost:9443/api/am/admin/v0.16/policies/mediation/8242d72c-b7d7-4b51-9098-d24bd4a5ea3a"
@@ -699,14 +699,14 @@ paths:
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
-######################################################
-# The "Subscription Throttling Policy Collection" resource API
-######################################################
+  ######################################################
+  # The "Subscription Throttling Policy Collection" resource API
+  ######################################################
   '/throttling/policies/subscription':
 
-#-----------------------------------------------------
-# Retrieve all Subscription level policies
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve all Subscription level policies
+    #-----------------------------------------------------
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/subscription"
       x-wso2-request: |
@@ -756,9 +756,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Add a Subscription level Throttling Policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Add a Subscription level Throttling Policy
+    #-----------------------------------------------------
     post:
       x-wso2-curl: "curl -k -X POST -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/subscription -d @data.json"
       x-wso2-request: "POST https://localhost:9443/api/am/admin/v0.16/throttling/policies/subscription\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n{\r\n    \"policyName\": \"Platinum\",\r\n    \"displayName\": \"Platinum\",\r\n    \"description\": \"Allows 4000 requests per minute\",\r\n    \"defaultLimit\":          {\r\n       \"type\": \"RequestCountLimit\",\r\n       \"timeUnit\": \"min\",\r\n       \"unitTime\": 1,\r\n       \"requestCount\": 4000\r\n    },\r\n    \"rateLimitCount\": -1,\r\n    \"rateLimitTimeUnit\": \"NA\",\r\n    \"customAttributes\":          [\r\n                   {\r\n          \"name\": \"customAttr1\",\r\n          \"value\": \"value1\"\r\n       },\r\n                   {\r\n          \"name\": \"customAttr2\",\r\n          \"value\": \"value2\"\r\n       }\r\n    ],\r\n    \"stopOnQuotaReach\": true,\r\n    \"billingPlan\": \"COMMERCIAL\"\r\n}"
@@ -811,14 +811,14 @@ paths:
             Unsupported media type.
             The entity of the request was in a not supported format.
 
-######################################################
-# The "Individual Subscription Throttling Policy" resource API
-######################################################
+  ######################################################
+  # The "Individual Subscription Throttling Policy" resource API
+  ######################################################
   '/throttling/policies/subscription/{policyId}':
 
-#-----------------------------------------------------
-# Retrieve a certain Subscription Policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve a certain Subscription Policy
+    #-----------------------------------------------------
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/subscription/6dd9fc11-bbe1-4daf-aee5-06a4d0e44476"
       x-wso2-request: |
@@ -874,9 +874,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Delete a Subscription level throttling policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Delete a Subscription level throttling policy
+    #-----------------------------------------------------
     delete:
       x-wso2-curl: "curl -k -X DELETE -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/subscription/3cc8902e-f7c7-49dc-987b-b146e9bd8ee8"
       x-wso2-request: |
@@ -912,9 +912,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Update a Subscription Throttling Policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Update a Subscription Throttling Policy
+    #-----------------------------------------------------
     put:
       x-wso2-curl: "curl -k -X PUT -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/subscription/6dd9fc11-bbe1-4daf-aee5-06a4d0e44476 -d @data.json"
       x-wso2-request: "PUT https://localhost:9443/api/am/admin/v0.16/throttling/policies/subscription/6dd9fc11-bbe1-4daf-aee5-06a4d0e44476\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n{\r\n    \"policyName\": \"Platinum\",\r\n    \"displayName\": \"Platinum\",\r\n    \"description\": \"Allows 10000 requests per minute\",\r\n    \"defaultLimit\":          {\r\n       \"type\": \"RequestCountLimit\",\r\n       \"timeUnit\": \"min\",\r\n       \"unitTime\": 1,\r\n       \"requestCount\": 10000\r\n    },\r\n    \"isDeployed\": true,\r\n    \"rateLimitCount\": -1,\r\n    \"rateLimitTimeUnit\": \"NA\",\r\n    \"customAttributes\":          [\r\n                   {\r\n          \"name\": \"customAttr0\",\r\n          \"value\": \"value1\"\r\n       },\r\n                   {\r\n          \"name\": \"customAttr1\",\r\n          \"value\": \"value1\"\r\n       }\r\n    ],\r\n    \"stopOnQuotaReach\": true,\r\n    \"billingPlan\": \"COMMERCIAL\"\r\n}"
@@ -982,14 +982,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Custom Rule Collection" resource API
-######################################################
+  ######################################################
+  # The "Custom Rule Collection" resource API
+  ######################################################
   '/throttling/policies/custom':
 
-#-----------------------------------------------------
-# Retrieve all Custom Rules
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve all Custom Rules
+    #-----------------------------------------------------
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/custom"
       x-wso2-request: |
@@ -1000,7 +1000,6 @@ paths:
       summary: Get all Custom Rules
       description: |
         Retrieves all Custom Rules.
-
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
@@ -1042,9 +1041,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Add a Custom Rule
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Add a Custom Rule
+    #-----------------------------------------------------
     post:
       x-wso2-curl: "curl -k -X POST -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/custom -d @data.json"
       x-wso2-request: "POST https://localhost:9443/api/am/admin/v0.16/throttling/policies/custom\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyName\": \"custom1\",\r\n  \"description\": \"Allow 10 requests per minute for admin user\",\r\n  \"siddhiQuery\": \"FROM RequestStream\\nSELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey\\nINSERT INTO EligibilityStream; \\n\\nFROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) \\nSELECT throttleKey, (count(userId) >= 10) as isThrottled, expiryTimeStamp group by throttleKey \\nINSERT ALL EVENTS into ResultStream;\",\r\n  \"keyTemplate\": \"$userId\"\r\n}"
@@ -1053,7 +1052,6 @@ paths:
       summary: Add a Custom Rule
       description: |
         Adds a new Custom Rule.
-
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
@@ -1100,14 +1098,14 @@ paths:
             Unsupported media type.
             The entity of the request was in a not supported format.
 
-######################################################
-# The "Individual Custom Rule" resource API
-######################################################
+  ######################################################
+  # The "Individual Custom Rule" resource API
+  ######################################################
   '/throttling/policies/custom/{ruleId}':
 
-#-----------------------------------------------------
-# Retrieve a certain Custom Rule
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve a certain Custom Rule
+    #-----------------------------------------------------
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4"
       x-wso2-request: |
@@ -1118,7 +1116,6 @@ paths:
       summary: Get a Custom Rule
       description: |
         Retrieves a Custom Rule. We need to provide the policy Id as a path parameter.
-
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
@@ -1166,9 +1163,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Delete a Custom Rule
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Delete a Custom Rule
+    #-----------------------------------------------------
     delete:
       x-wso2-curl: "curl -k -X DELETE -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4"
       x-wso2-request: |
@@ -1179,7 +1176,6 @@ paths:
       summary: Delete a Custom Rule
       description: |
         Delete a Custom Rule. We need to provide the Id of the policy as a path parameter.
-
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
@@ -1206,9 +1202,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Update a Custom Rule
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Update a Custom Rule
+    #-----------------------------------------------------
     put:
       x-wso2-curl: "curl -k -X PUT -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4 -d @data.json"
       x-wso2-request: "PUT https://localhost:9443/api/am/admin/v0.16/throttling/policies/custom/33662a62-8db1-4d75-af08-afd63c6bd0b4\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n{\r\n  \"policyName\": \"custom1\",\r\n  \"description\": \"Allow 10 requests per minute for admin user\",\r\n  \"siddhiQuery\": \"FROM RequestStream\\nSELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , str:concat('admin@carbon.super','') as throttleKey\\nINSERT INTO EligibilityStream; \\n\\nFROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) \\nSELECT throttleKey, (count(userId) >= 10) as isThrottled, expiryTimeStamp group by throttleKey \\nINSERT ALL EVENTS into ResultStream;\",\r\n  \"keyTemplate\": \"$userId\"\r\n}"
@@ -1217,7 +1213,6 @@ paths:
       summary: Update a Custom Rule
       description: |
         Updates an existing Custom Rule.
-
         **NOTE:**
         * Only super tenant users are allowed for this operation.
       parameters:
@@ -1280,14 +1275,14 @@ paths:
             $ref: '#/definitions/Error'
 
 
-######################################################
-# The "Advanced Throttling Policy Collection" resource API
-######################################################
+  ######################################################
+  # The "Advanced Throttling Policy Collection" resource API
+  ######################################################
   '/throttling/policies/advanced':
 
-#-----------------------------------------------------
-# Retrieve all Advanced level policies
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve all Advanced level policies
+    #-----------------------------------------------------
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer aa5195d9-3977-33f4-839e-5779dabfe826\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/advanced"
       x-wso2-request: |
@@ -1337,9 +1332,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Add an Advanced level throttling policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Add an Advanced level throttling policy
+    #-----------------------------------------------------
     post:
       x-wso2-curl: "curl -k -X POST -H \"Authorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/advanced -d @data.json"
       x-wso2-request: "POST https://localhost:9443/api/am/admin/v0.16/throttling/policies/advanced\r\nAuthorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\r\nContent-Type: application/json\r\n\r\n{\r\n   \"policyName\": \"100KBP2Min\",\r\n   \"displayName\": \"100KBP2Min\",\r\n   \"description\": \"description of the policy\",\r\n   \"defaultLimit\":    {\r\n      \"type\": \"BandwidthLimit\",\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100,\r\n      \"dataUnit\": \"KB\"\r\n   },\r\n   \"conditionalGroups\":    [\r\n            {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":          [\r\n                        {\r\n               \"type\": \"IPCondition\",\r\n               \"invertCondition\": false,\r\n               \"ipConditionType\": \"IPSpecific\",\r\n               \"specificIP\": \"10.100.1.22\",\r\n               \"startingIP\": null,\r\n               \"endingIP\": null\r\n            },\r\n                        {\r\n               \"type\": \"HeaderCondition\",\r\n               \"invertCondition\": false,\r\n               \"headerName\": \"Location\",\r\n               \"headerValue\": \"google.com\"\r\n            },\r\n                        {\r\n               \"type\": \"HeaderCondition\",\r\n               \"invertCondition\": false,\r\n               \"headerName\": \"Host\",\r\n               \"headerValue\": \"10.100.7.77\"\r\n            },\r\n                        {\r\n               \"type\": \"QueryParameterCondition\",\r\n               \"invertCondition\": false,\r\n               \"parameterName\": \"name\",\r\n               \"parameterValue\": \"admin\"\r\n            },\r\n                        {\r\n               \"type\": \"QueryParameterCondition\",\r\n               \"invertCondition\": false,\r\n               \"parameterName\": \"lastAccess\",\r\n               \"parameterValue\": \"25-02-2016\"\r\n            },\r\n                        {\r\n               \"type\": \"JWTClaimsCondition\",\r\n               \"invertCondition\": true,\r\n               \"claimUrl\": \"claimUrl0\",\r\n               \"attribute\": \"claimAttr0\"\r\n            },\r\n                        {\r\n               \"type\": \"JWTClaimsCondition\",\r\n               \"invertCondition\": true,\r\n               \"claimUrl\": \"claimUrl1\",\r\n               \"attribute\": \"claimAttr\"\r\n            }\r\n         ],\r\n         \"limit\":          {\r\n            \"type\": \"RequestCountLimit\",\r\n            \"timeUnit\": \"sec\",\r\n            \"unitTime\": 60,\r\n            \"requestCount\": 0\r\n         }\r\n      },\r\n            {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\": [         {\r\n            \"type\": \"IPCondition\",\r\n            \"invertCondition\": true,\r\n            \"ipConditionType\": \"IPRange\",\r\n            \"specificIP\": null,\r\n            \"startingIP\": \"0.0.0.0\",\r\n            \"endingIP\": \"1.1.1.1\"\r\n         }],\r\n         \"limit\":          {\r\n            \"type\": \"RequestCountLimit\",\r\n            \"timeUnit\": \"sec\",\r\n            \"unitTime\": 60,\r\n            \"requestCount\": 0\r\n         }\r\n      }\r\n   ]\r\n}"
@@ -1392,14 +1387,14 @@ paths:
             Unsupported media type.
             The entity of the request was in a not supported format.
 
-######################################################
-# The "Individual Advanced Throttling Policy" resource API
-######################################################
+  ######################################################
+  # The "Individual Advanced Throttling Policy" resource API
+  ######################################################
   '/throttling/policies/advanced/{policyId}':
 
-#-----------------------------------------------------
-# Retrieve a certain Advanced Throttling Policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve a certain Advanced Throttling Policy
+    #-----------------------------------------------------
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/advanced/ea4ee02d-6cfb-4eea-9e30-3f548783160b"
       x-wso2-request: |
@@ -1455,9 +1450,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Delete an Advanced level throttling policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Delete an Advanced level throttling policy
+    #-----------------------------------------------------
     delete:
       x-wso2-curl: "curl -k -X DELETE -H \"Authorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/advanced/a0c9f368-b7d2-4eec-a757-f67034160208"
       x-wso2-request: |
@@ -1492,9 +1487,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Update an Advanced Throttling Policy
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Update an Advanced Throttling Policy
+    #-----------------------------------------------------
     put:
       x-wso2-curl: "curl -k -X PUT -H \"Authorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/throttling/policies/advanced/a0c9f368-b7d2-4eec-a757-f67034160208 -d @data.json"
       x-wso2-request: "PUT https://localhost:9443/api/am/admin/v0.16/throttling/policies/advanced/a0c9f368-b7d2-4eec-a757-f67034160208\r\nAuthorization: Bearer f7058af8-65a3-36c0-8d61-bc30476755c7\r\nContent-Type: application/json\r\n\r\n{\r\n   \"policyName\": \"100KBP2Min\",\r\n   \"displayName\": \"100KBP2Min\",\r\n   \"description\": \"description of the policy\",\r\n   \"defaultLimit\":    {\r\n      \"type\": \"BandwidthLimit\",\r\n      \"timeUnit\": \"min\",\r\n      \"unitTime\": 2,\r\n      \"dataAmount\": 100,\r\n      \"dataUnit\": \"KB\"\r\n   },\r\n   \"conditionalGroups\":    [\r\n      {\r\n         \"description\": \"Sample description about condition group\",\r\n         \"conditions\":          [\r\n                        {\r\n               \"type\": \"IPCondition\",\r\n               \"invertCondition\": false,\r\n               \"ipConditionType\": \"IPSpecific\",\r\n               \"specificIP\": \"10.100.1.22\",\r\n               \"startingIP\": null,\r\n               \"endingIP\": null\r\n            },\r\n                        {\r\n               \"type\": \"HeaderCondition\",\r\n               \"invertCondition\": false,\r\n               \"headerName\": \"Host\",\r\n               \"headerValue\": \"10.100.7.77\"\r\n            },\r\n                        {\r\n               \"type\": \"QueryParameterCondition\",\r\n               \"invertCondition\": false,\r\n               \"parameterName\": \"name\",\r\n               \"parameterValue\": \"admin\"\r\n            },\r\n                        {\r\n               \"type\": \"JWTClaimsCondition\",\r\n               \"invertCondition\": true,\r\n               \"claimUrl\": \"claimUrl0\",\r\n               \"attribute\": \"claimAttr0\"\r\n            }\r\n         ],\r\n         \"limit\":          {\r\n            \"type\": \"RequestCountLimit\",\r\n            \"timeUnit\": \"sec\",\r\n            \"unitTime\": 60,\r\n            \"requestCount\": 0\r\n         }\r\n      }\r\n   ]\r\n}"
@@ -1562,14 +1557,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Blocking Condition Collection" resource API
-######################################################
+  ######################################################
+  # The "Blocking Condition Collection" resource API
+  ######################################################
   '/throttling/blacklist':
 
-#-----------------------------------------------------
-# Retrieve all Blocking conditions
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve all Blocking conditions
+    #-----------------------------------------------------
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer a1e3951b-a15c-3d79-a15b-99f1d612843e\" https://localhost:9443/api/am/admin/v0.16/throttling/blacklist"
       x-wso2-request: |
@@ -1619,9 +1614,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Add a Custom Rule
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Add a Custom Rule
+    #-----------------------------------------------------
     post:
       x-wso2-curl: "curl -k -X POST -H \"Authorization: Bearer a1e3951b-a15c-3d79-a15b-99f1d612843e\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/throttling/blacklist"
       x-wso2-request: "POST https://localhost:9443/api/am/admin/v0.16/throttling/blacklist\r\nAuthorization: Bearer a1e3951b-a15c-3d79-a15b-99f1d612843e\r\nContent-Type: application/json\r\n\r\n{\r\n   \"conditionType\": \"IP\",\r\n   \"conditionValue\": \"10.100.7.77\"\r\n}\r\n"
@@ -1674,14 +1669,14 @@ paths:
             Unsupported media type.
             The entity of the request was in a not supported format.
 
-######################################################
-# The "Individual Blocking Condition" resource API
-######################################################
+  ######################################################
+  # The "Individual Blocking Condition" resource API
+  ######################################################
   '/throttling/blacklist/{conditionId}':
 
-#-----------------------------------------------------
-# Retrieve a Blocking condition
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve a Blocking condition
+    #-----------------------------------------------------
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer a1e3951b-a15c-3d79-a15b-99f1d612843e\" https://localhost:9443/api/am/admin/v0.16/throttling/blacklist/b513eb68-69e8-4c32-92cf-852c101363c"
       x-wso2-request: |
@@ -1737,9 +1732,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Delete a Blocking condition
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Delete a Blocking condition
+    #-----------------------------------------------------
     delete:
       x-wso2-curl: "curl -k -X DELETE -H \"Authorization: Bearer a1e3951b-a15c-3d79-a15b-99f1d612843e\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/throttling/blacklist/b513eb68-69e8-4c32-92cf-852c101363cf"
       x-wso2-request: |
@@ -1774,14 +1769,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Application Collection" resource APIs
-######################################################
+  ######################################################
+  # The "Application Collection" resource APIs
+  ######################################################
   /applications:
 
-#-----------------------------------------------------
-# Retrieve a list of all applications of a certain subscriber
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve a list of all applications of a certain subscriber
+    #-----------------------------------------------------
     get:
       x-scope: apim:app_owner_change
       x-wso2-request: |
@@ -1803,10 +1798,10 @@ paths:
         - name: tenantDomain
           in: query
           description: |
-               Tenant domain of the applications to get. This has to be specified only if require to get applications of
-               another tenant other than the requester's tenant. So, if not specified, the default will be set as the
-               requester's tenant domain. This cross tenant Application access is allowed only for super tenant admin
-               users only at a migration process.
+            Tenant domain of the applications to get. This has to be specified only if require to get applications of
+            another tenant other than the requester's tenant. So, if not specified, the default will be set as the
+            requester's tenant domain. This cross tenant Application access is allowed only for super tenant admin
+            users only at a migration process.
           required: false
           type: string
       tags:
@@ -1842,14 +1837,14 @@ paths:
 
 
 
-######################################################
-# The "Change Owner" Function resource API
-######################################################
+  ######################################################
+  # The "Change Owner" Function resource API
+  ######################################################
   /applications/{applicationId}/change-owner:
 
-#-----------------------------------------------------
-# Change the owner of an Application
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Change the owner of an Application
+    #-----------------------------------------------------
     post:
       x-scope: apim:app_owner_change
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://localhost:9443/api/am/admin/v0.16/applications/890a4f4d-09eb-4877-a323-57f6ce2ed79b/change-owner?owner=admin\""
@@ -1875,7 +1870,6 @@ paths:
           description: |
             OK.
             Application owner changed successfully.
-
         400:
           description: |
             Bad Request.
@@ -1895,9 +1889,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# Export Application Resource API
-######################################################
+  ######################################################
+  # Export Application Resource API
+  ######################################################
   /export/applications:
 
     get:
@@ -1965,9 +1959,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# Import Application Resource API
-######################################################
+  ######################################################
+  # Import Application Resource API
+  ######################################################
   /import/applications:
 
     post:
@@ -2051,9 +2045,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# Import Resource API
-######################################################
+  ######################################################
+  # Import Resource API
+  ######################################################
   /import/api:
 
     post:
@@ -2119,9 +2113,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# Export Resource API
-######################################################
+  ######################################################
+  # Export Resource API
+  ######################################################
   /export/api:
 
     get:
@@ -2197,21 +2191,21 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-####################################################
-# The "Label" resource API
-######################################################
+  ####################################################
+  # The "Label" resource API
+  ######################################################
   /labels:
 
-#-----------------------------------------------------
-# Retrieve all labels
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve all labels
+    #-----------------------------------------------------
     get:
       x-scope: apim:label_read
       x-wso2-request: |
-              GET https://localhost:9443/api/am/admin/v0.16/labels
-              Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+        GET https://localhost:9443/api/am/admin/v0.16/labels
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v0.16/labels\""
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"count\": 1,\r\n  \"list\": [\r\n	{\r\n	\"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n	\"name\":\"internal\",\r\n	\"description\":\"label used for internal purpose\",\r\n	\"accessUrls\":[\r\n	  \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"count\": 1,\r\n  \"list\": [\r\n  {\r\n  \"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n  \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}"
       summary: Get all registered Labels
       description: |
         Get all registered Labels
@@ -2225,14 +2219,14 @@ paths:
           schema:
             $ref: '#/definitions/LabelList'
 
-#-----------------------------------------------------
-# Add a Label
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Add a Label
+    #-----------------------------------------------------
     post:
       x-scope: apim:label_manage
       x-wso2-curl: "curl -k -X POST -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://apis.wso2.com/api/am/admin/v0.16/labels -d @data.json"
-      x-wso2-request: "POST https://localhost:9443/api/am/admin/v0.16/labels\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"internal\",\r\n	\"description\":\"label used for internal purpose\",\r\n	\"accessUrls\":[\r\n	  \"https://localhost:9095\"\r\n         ]\r\n     }"
-      x-wso2-response: "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\r\n	\"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n	\"name\":\"internal\",\r\n	\"description\":\"label used for internal purpose\",\r\n	\"accessUrls\":[\r\n	  \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}"
+      x-wso2-request: "POST https://localhost:9443/api/am/admin/v0.16/labels\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n     }"
+      x-wso2-response: "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\r\n  \"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n  \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}"
       summary: Add a Label
       description: |
         Add a new gateway Label
@@ -2260,9 +2254,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The BotDetectedData API resources
-######################################################
+  ######################################################
+  # The BotDetectedData API resources
+  ######################################################
 
   #-----------------------------------------------------
   # Get configured email list
@@ -2308,9 +2302,9 @@ paths:
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
-#-----------------------------------------------------
+  #-----------------------------------------------------
   # Delete email
-#-----------------------------------------------------
+  #-----------------------------------------------------
   /botData/deleteEmail:
 
     delete:
@@ -2343,21 +2337,21 @@ paths:
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
-#-----------------------------------------------------
+  #-----------------------------------------------------
   # Add email
-#-----------------------------------------------------
+  #-----------------------------------------------------
   /botData/addEmail:
 
     post:
       x-scope: apim:bot_data
       summary: Add an Email
       description: |
-          Here we can use this to configure email
+        Here we can use this to configure email
       parameters:
         - in: body
           name: body
           description: |
-              A email
+            A email
           required: true
           schema:
             $ref: '#/definitions/Email'
@@ -2381,20 +2375,20 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Individual label" resource APIs
-######################################################
+  ######################################################
+  # The "Individual label" resource APIs
+  ######################################################
 
   /labels/{labelId}:
 
-#-----------------------------------------------------
-# Update a Label
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Update a Label
+    #-----------------------------------------------------
     put:
       x-scope: apim:label_manage
       x-wso2-curl: "curl -k -X PUT -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/labels/d7cf8523-9180-4255-84fa-6cb171c1f779 -d @data.json"
-      x-wso2-request: "PUT https://localhost:9443/api/am/admin/v0.16/labels/d7cf8523-9180-4255-84fa-6cb171c1f779\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"update_internal\",\r\n	\"description\":\"Updated label used for internal purpose\",\r\n	\"accessUrls\":[\r\n	  \"https://localhost:9095\"\r\n         ]\r\n     }"
-      x-wso2-response: "HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\n\r\n{\r\n	\"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n	\"name\":\"updated_internal\",\r\n	\"description\":\"Updated label used for internal purpose\",\r\n	\"accessUrls\":[\r\n	  \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}"
+      x-wso2-request: "PUT https://localhost:9443/api/am/admin/v0.16/labels/d7cf8523-9180-4255-84fa-6cb171c1f779\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"update_internal\",\r\n  \"description\":\"Updated label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n     }"
+      x-wso2-response: "HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\n\r\n{\r\n  \"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n  \"name\":\"updated_internal\",\r\n  \"description\":\"Updated label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}"
       summary: Update a Label
       description: |
         Update a Label by label Id
@@ -2428,9 +2422,9 @@ paths:
             The resource to be updated does not exist.
           schema:
             $ref: '#/definitions/Error'
-#-----------------------------------------------------
-# Delete a Label
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Delete a Label
+    #-----------------------------------------------------
     delete:
       x-scope: apim:label_manage
       x-wso2-response: "HTTP/1.1 200 OK"
@@ -2520,7 +2514,7 @@ paths:
           schema:
             $ref: '#/definitions/MonetizationUsagePublishInfo'
 
-######################################################
+  ######################################################
   # The "Workflow approval" resource API
   ######################################################
   /workflows/update-workflow-status:
@@ -2529,7 +2523,7 @@ paths:
     # Resume the workflow by approving or rejecting the workflow request
     #-------------------------------------------------------------------
     post:
-      x-scope: apim:api_workflow
+      x-scope: apim:api_workflow_approve
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v0.16/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\""
       x-wso2-request: "POST https://localhost:9443/api/am/publisher/v0.16/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"status\" : \"APPROVED\",\n   \"attributes\" : {\n      \"apiCurrentState\": \"Created\",\n      \"apiLCAction\": \"Publish\",\n      \"apiName\":\"APIname\",\n      \"apiVersion\" : \"1.0.0\",\n      \"apiProvider\" : \"admin\",\n      \"invoker\": \"admin\"\n   }\n}"
       x-wso2-response: "HTTP/1.1 200 OK"
@@ -2593,7 +2587,6 @@ paths:
         - name: username
           description: |
             The state represents the current state of the tenant
-
             Supported states are [ active, inactive]
           in: path
           type: string
@@ -2677,19 +2670,19 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Category Collection" resource API
-######################################################
+  ######################################################
+  # The "Category Collection" resource API
+  ######################################################
   /api-categories:
 
-#-----------------------------------------------------
-# Retrieve all categories
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve all categories
+    #-----------------------------------------------------
     get:
       x-scope: apim:admin_operations
       x-wso2-request: |
-              GET https://localhost:9443/api/am/admin/v0.16/api-categories
-              Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+        GET https://localhost:9443/api/am/admin/v0.16/api-categories
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v0.16/api-categories\""
       x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}"
       summary: Get all API categories
@@ -2705,9 +2698,9 @@ paths:
           schema:
             $ref: '#/definitions/APICategoryList'
 
-#-----------------------------------------------------
-# Add a Category
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Add a Category
+    #-----------------------------------------------------
     post:
       x-scope: apim:admin_operations
       x-wso2-curl: "curl -k -X POST -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://apis.wso2.com/api/am/admin/v0.16/api-categories -d @data.json"
@@ -2746,13 +2739,13 @@ paths:
 
   /api-categories/{apiCategoryId}:
 
-  #-----------------------------------------------------
-  # Update a Category
-  #-----------------------------------------------------
+    #-----------------------------------------------------
+    # Update a Category
+    #-----------------------------------------------------
     put:
       x-scope: apim:admin_operations
       x-wso2-curl: "curl -k -X PUT -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.16/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779 -d @data.json"
-      x-wso2-request: "PUT https://localhost:9443/api/am/admin/v0.16/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"update_internal\",\r\n	\"description\":\"Updated label used for internal purpose\",\r\n	\"accessUrls\":[\r\n	  \"https://localhost:9095\"\r\n         ]\r\n     }"
+      x-wso2-request: "PUT https://localhost:9443/api/am/admin/v0.16/api-categories/d7cf8523-9180-4255-84fa-6cb171c1f779\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"update_internal\",\r\n  \"description\":\"Updated label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n     }"
       x-wso2-response: "HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\":1,\r\n   \"list\":[\r\n      {\r\n         \"id\":\"463e2c9f-5e99-43c3-a66e-de7e0f367373\",\r\n         \"name\":\"Finance\",\r\n         \"description\":\"Finance related APIS\"\r\n      }\r\n   ]\r\n}"
       summary: Update an API Category
       description: |
@@ -2787,9 +2780,9 @@ paths:
             The resource to be updated does not exist.
           schema:
             $ref: '#/definitions/Error'
-  #-----------------------------------------------------
-  # Delete an API Category
-  #-----------------------------------------------------
+    #-----------------------------------------------------
+    # Delete an API Category
+    #-----------------------------------------------------
     delete:
       x-scope: apim:admin_operations
       x-wso2-response: "HTTP/1.1 200 OK"
@@ -2814,13 +2807,175 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ######################################################
+  # The "Key Manager Collection" resource API
+  ######################################################
+  /key-managers:
+
+    #-----------------------------------------------------
+    # Retrieve all key managers
+    #-----------------------------------------------------
+    get:
+      x-scope: apim:admin_operations
+      summary: Get all Key managers
+      description: |
+        Get all Key managers
+      tags:
+        - Key Manager (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            KeyManagers returned
+          schema:
+            $ref: '#/definitions/KeyManagerList'
+
+    #-----------------------------------------------------
+    # Add a Key Manager
+    #-----------------------------------------------------
+    post:
+      x-scope: apim:admin_operations
+      summary: Add a new API Key Manager
+      description: |
+        Add a new API Key Manager
+      parameters:
+        - in: body
+          name: body
+          description: |
+            Key Manager object that should to be added
+          required: true
+          schema:
+            $ref: '#/definitions/KeyManager'
+      tags:
+        - Key Manager (Collection)
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+          schema:
+            $ref: '#/definitions/KeyManager'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+
+  ######################################################
+  # The "Individual KeyManager" resource APIs
+  ######################################################
+
+  /key-managers/{keyManagerId}:
+
+    #-----------------------------------------------------
+    # Retrieve a certain Key Manager Resource
+    #-----------------------------------------------------
+    get:
+      x-scope: apim:admin_operations
+      summary: Get a Key Manager Configuration
+      description: |
+        Retrieve a single Key Manager Configuration. We should provide the Id of the KeyManager as a path parameter.
+      parameters:
+        - $ref: '#/parameters/keyManagerId'
+      tags:
+        - Key Manager (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            KeyManager Configuration returned
+          schema:
+            $ref: '#/definitions/KeyManager'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        404:
+          description: |
+            Not Found.
+            Requested KeyManager Configuration does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+    #-----------------------------------------------------
+    # Update a Key Manager
+    #-----------------------------------------------------
+    put:
+      x-scope: apim:admin_operations
+      summary: Update a Key Manager
+      description: |
+        Update a Key Manager by keyManager id
+      parameters:
+        - $ref: '#/parameters/keyManagerId'
+        - in: body
+          name: body
+          description: |
+            Key Manager object with updated information
+          required: true
+          schema:
+            $ref: '#/definitions/KeyManager'
+      tags:
+        - Key Manager (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Label updated.
+          schema:
+            $ref: '#/definitions/KeyManager'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+    #-----------------------------------------------------
+    # Delete a Key Manager
+    #-----------------------------------------------------
+    delete:
+      x-scope: apim:admin_operations
+      summary: Delete a Key Manager
+      description: |
+        Delete a Key Manager by keyManager id
+      parameters:
+        - $ref: '#/parameters/keyManagerId'
+      tags:
+        - Key Manager (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Key Manager successfully deleted.
+        404:
+          description: |
+            Not Found.
+            Key Manager to be deleted does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
 
-# Label Id
-# Specified as part of the path expression
+  # Label Id
+  # Specified as part of the path expression
   labelId:
     name: labelId
     in: path
@@ -2829,8 +2984,8 @@ parameters:
     type: string
     required: true
 
-# Throttling Policy Id
-# Specified as part of the path expression
+  # Throttling Policy Id
+  # Specified as part of the path expression
   policyId:
     name: policyId
     in: path
@@ -2839,8 +2994,8 @@ parameters:
     type: string
     required: true
 
-# Custom rule Id
-# Specified as part of the path expression
+  # Custom rule Id
+  # Specified as part of the path expression
   ruleId:
     name: ruleId
     in: path
@@ -2849,8 +3004,8 @@ parameters:
     type: string
     required: true
 
-# Application Id
-# Specified as part of the path expression
+  # Application Id
+  # Specified as part of the path expression
   applicationId:
     name: applicationId
     in: path
@@ -2859,8 +3014,8 @@ parameters:
     type: string
     required: true
 
-# Blocking Condition Id
-# Specified as part of the path expression
+  # Blocking Condition Id
+  # Specified as part of the path expression
   conditionId:
     name: conditionId
     in: path
@@ -2869,7 +3024,7 @@ parameters:
     type: string
     required: true
 
-# The HTTP Accept header
+  # The HTTP Accept header
   Accept:
     name: Accept
     in: header
@@ -2878,7 +3033,7 @@ parameters:
     default: application/json
     type: string
 
-# The HTTP Content-Type header
+  # The HTTP Content-Type header
   Content-Type:
     name: Content-Type
     in: header
@@ -2888,8 +3043,8 @@ parameters:
     required: true
     type : string
 
-# The HTTP If-None-Match header
-# Used to avoid retrieving data that are already cached
+  # The HTTP If-None-Match header
+  # Used to avoid retrieving data that are already cached
   If-None-Match:
     name: If-None-Match
     in: header
@@ -2898,8 +3053,8 @@ parameters:
       variant of the resource (Will be supported in future).
     type : string
 
-# The HTTP If-Modified-Since header
-# Used to avoid retrieving data that are already cached
+  # The HTTP If-Modified-Since header
+  # Used to avoid retrieving data that are already cached
   If-Modified-Since:
     name: If-Modified-Since
     in: header
@@ -2908,8 +3063,8 @@ parameters:
       formerly retrieved variant of the resource (Will be supported in future).
     type: string
 
-# The HTTP If-Match header
-# Used to avoid concurrent updates
+  # The HTTP If-Match header
+  # Used to avoid concurrent updates
   If-Match:
     name: If-Match
     in: header
@@ -2917,8 +3072,8 @@ parameters:
       Validator for conditional requests; based on ETag (Will be supported in future).
     type: string
 
-# The HTTP If-Unmodified-Since header
-# Used to avoid concurrent updates
+  # The HTTP If-Unmodified-Since header
+  # Used to avoid concurrent updates
   If-Unmodified-Since:
     name: If-Unmodified-Since
     in: header
@@ -2926,8 +3081,8 @@ parameters:
       Validator for conditional requests; based on Last Modified header (Will be supported in future).
     type: string
 
-# Used for pagination:
-# The maximum number of resoures to be returned by a GET
+  # Used for pagination:
+  # The maximum number of resoures to be returned by a GET
   limit:
     name: limit
     in: query
@@ -2936,9 +3091,9 @@ parameters:
     default: 25
     type: integer
 
-# Used for pagination:
-# The order number of an instance in a qualified set of resoures
-# at which to start to return the next batch of qualified resources
+  # Used for pagination:
+  # The order number of an instance in a qualified set of resoures
+  # at which to start to return the next batch of qualified resources
   offset:
     name: offset
     in: query
@@ -2947,8 +3102,8 @@ parameters:
     default: 0
     type: integer
 
-# Mediation policy identifier
-# Specified as part of the path expression
+  # Mediation policy identifier
+  # Specified as part of the path expression
   mediationPolicyId:
     name: mediationPolicyId
     in: path
@@ -2957,7 +3112,7 @@ parameters:
     required: true
     type: string
 
-# Group Identifier of the application
+  # Group Identifier of the application
   user:
     name: user
     in: query
@@ -2986,14 +3141,24 @@ parameters:
     type: string
     required: true
 
+  # Key Manager Id
+  # Specified as part of the path expression
+  keyManagerId:
+    name: keyManagerId
+    in: path
+    description: |
+      Key Manager UUID
+    type: string
+    required: true
+
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
 definitions:
 
-#-----------------------------------------------------
-# The Error resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Error resource
+  #-----------------------------------------------------
   Error:
     title: Error object returned with 4XX HTTP status
     required:
@@ -3023,9 +3188,9 @@ definitions:
         items:
           $ref: '#/definitions/ErrorListItem'
 
-#-----------------------------------------------------
-# The Error List Item resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Error List Item resource
+  #-----------------------------------------------------
   ErrorListItem:
     title: Description of individual errors that may have occurred during a request.
     required:
@@ -3040,9 +3205,9 @@ definitions:
         description: |
           Description about individual errors occurred
 
-#-----------------------------------------------------
-# The Throttling Policy resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Throttling Policy resource
+  #-----------------------------------------------------
   ThrottlePolicy :
     title: Generic Throttling Policy
     required:
@@ -3067,9 +3232,9 @@ definitions:
         default: false
         description: Indicates whether the policy is deployed successfully or not.
 
-#-----------------------------------------------------
-# The Advanced Throttling Policy Info resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Advanced Throttling Policy Info resource
+  #-----------------------------------------------------
   AdvancedThrottlePolicyInfo :
     title: Advanced Throttling Policy
     required:
@@ -3080,9 +3245,9 @@ definitions:
           defaultLimit:
             $ref: '#/definitions/ThrottleLimit'
 
-#-----------------------------------------------------
-# The Advanced Throttling Policy resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Advanced Throttling Policy resource
+  #-----------------------------------------------------
   AdvancedThrottlePolicy :
     title: Advanced Throttling Policy
     required:
@@ -3099,9 +3264,9 @@ definitions:
             items:
               $ref: '#/definitions/ConditionalGroup'
 
-#-----------------------------------------------------
-# The Advanced Throttling Policy List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Advanced Throttling Policy List resource
+  #-----------------------------------------------------
   AdvancedThrottlePolicyList:
     title: Advanced Throttling Policy List
     properties:
@@ -3126,9 +3291,9 @@ definitions:
         description: email value
         example: "abc@.com"
 
-#-----------------------------------------------------
-# The Application Throttling Policy resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Application Throttling Policy resource
+  #-----------------------------------------------------
   ApplicationThrottlePolicy:
     title: Application Throttling Policy
     required:
@@ -3139,9 +3304,9 @@ definitions:
           defaultLimit:
             $ref: '#/definitions/ThrottleLimit'
 
-#-----------------------------------------------------
-# The Advanced Throttling Policy List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Advanced Throttling Policy List resource
+  #-----------------------------------------------------
   ApplicationThrottlePolicyList:
     title: Application Level Throttling Policy List
     properties:
@@ -3155,9 +3320,9 @@ definitions:
         items:
           $ref: '#/definitions/ApplicationThrottlePolicy'
 
-#-----------------------------------------------------
-# The Subscription Throttling Policy resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Subscription Throttling Policy resource
+  #-----------------------------------------------------
   SubscriptionThrottlePolicy:
     title: Subscription Throttling Policy
     required:
@@ -3190,14 +3355,14 @@ definitions:
             type: boolean
             default: false
             description: |
-             This indicates the action to be taken when a user goes beyond the allocated quota. If checked, the user's requests will be dropped. If unchecked, the requests will be allowed to pass through.
+              This indicates the action to be taken when a user goes beyond the allocated quota. If checked, the user's requests will be dropped. If unchecked, the requests will be allowed to pass through.
           billingPlan:
             type: string
             description: |
               define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL.
-#-----------------------------------------------------
-# The Subscription Throttling Policy List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Subscription Throttling Policy List resource
+  #-----------------------------------------------------
   SubscriptionThrottlePolicyList:
     title: Subscription Level Throttling Policy List
     properties:
@@ -3211,9 +3376,9 @@ definitions:
         items:
           $ref: '#/definitions/SubscriptionThrottlePolicy'
 
-#-----------------------------------------------------
-# The Custom Rule resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Custom Rule resource
+  #-----------------------------------------------------
   CustomRule:
     title: Custom Rule
     required:
@@ -3232,9 +3397,9 @@ definitions:
             description: The specific combination of attributes that are checked in the policy.
             example: $userId
 
-#-----------------------------------------------------
-# The Custom Rule List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Custom Rule List resource
+  #-----------------------------------------------------
   CustomRuleList:
     title: Custom Rule List
     properties:
@@ -3248,9 +3413,9 @@ definitions:
         items:
           $ref: '#/definitions/CustomRule'
 
-#-----------------------------------------------------
-# The Conditional Group resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Conditional Group resource
+  #-----------------------------------------------------
   ConditionalGroup :
     title: Conditional Groups for Throttling
     required:
@@ -3287,9 +3452,9 @@ definitions:
       limit:
         $ref: '#/definitions/ThrottleLimit'
 
-#-----------------------------------------------------
-# The Throttling Condition resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Throttling Condition resource
+  #-----------------------------------------------------
   ThrottleCondition:
     discriminator: type
     x-wso2-subtypes:
@@ -3317,13 +3482,12 @@ definitions:
         default: false
         description: |
           Specifies whether inversion of the condition to be matched against the request.
-
           **Note:** When you add conditional groups for advanced throttling policies, this paramater should have the same value (`true` or `false`)
           for the same type of conditional group.
 
-#-----------------------------------------------------
-# The Throttling HTTP Header Condition resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Throttling HTTP Header Condition resource
+  #-----------------------------------------------------
   HeaderCondition:
     title: HTTP Headerc based throttling condition
     required:
@@ -3339,9 +3503,9 @@ definitions:
             type: string
             description: Value of the header
 
-#-----------------------------------------------------
-# The Throttling IP Condition resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Throttling IP Condition resource
+  #-----------------------------------------------------
   IPCondition:
     title: IP based throttling condition
     required:
@@ -3365,9 +3529,9 @@ definitions:
             type: string
             description: Ending IP when "IPRange" is used as the ipConditionType
 
-#-----------------------------------------------------
-# The JWT Claims Condition resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The JWT Claims Condition resource
+  #-----------------------------------------------------
   JWTClaimsCondition:
     title:  JWT claim attibute based throttling condition
     required:
@@ -3383,9 +3547,9 @@ definitions:
             type: string
             description: Attribute to be matched
 
-#-----------------------------------------------------
-# The Query Parameter Condition resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Query Parameter Condition resource
+  #-----------------------------------------------------
   QueryParameterCondition:
     title: Query parameter based throttling condition
     required:
@@ -3401,9 +3565,9 @@ definitions:
             type: string
             description: Value of the query parameter to be matched
 
-#-----------------------------------------------------
-# The Throttling Limit resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Throttling Limit resource
+  #-----------------------------------------------------
   ThrottleLimit :
     discriminator: type
     x-wso2-subtypes:
@@ -3433,9 +3597,9 @@ definitions:
         description: Time limit that the throttling limit applies.
         example: 10
 
-#-----------------------------------------------------
-# The Monetization Info resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Monetization Info resource
+  #-----------------------------------------------------
   MonetizationInfo:
     title: API monetization details object
     required:
@@ -3455,9 +3619,9 @@ definitions:
         additionalProperties:
           type: string
 
-#-----------------------------------------------------
-# The Throttling Bandwidth Limit resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Throttling Bandwidth Limit resource
+  #-----------------------------------------------------
   BandwidthLimit :
     required:
       - dataAmount
@@ -3475,9 +3639,9 @@ definitions:
             description: Unit of data allowed to be transfered. Allowed values are "KB", "MB" and "GB"
             example: KB
 
-#-----------------------------------------------------
-# The Throttling Request Count Limit resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Throttling Request Count Limit resource
+  #-----------------------------------------------------
   RequestCountLimit :
     required:
       - requestCount
@@ -3490,9 +3654,9 @@ definitions:
             example: 1000
             description: Maximum number of requests allowed
 
-#-----------------------------------------------------
-# The Throttling Blocking Condition resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Throttling Blocking Condition resource
+  #-----------------------------------------------------
   BlockingCondition:
     title: Blocking Conditions
     description: Blocking Conditions
@@ -3513,9 +3677,9 @@ definitions:
         description: Value of the blocking condition
         example: '{"fixedIp":"192.168.1.1":"invert":false}'
 
-#-----------------------------------------------------
-# The Throttling Blocking Condition List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Throttling Blocking Condition List resource
+  #-----------------------------------------------------
   BlockingConditionList:
     title: Blocking Conditions List
     properties:
@@ -3529,9 +3693,9 @@ definitions:
         items:
           $ref: '#/definitions/BlockingCondition'
 
-#-----------------------------------------------------
-# Custom Attribute object
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # Custom Attribute object
+  #-----------------------------------------------------
   CustomAttribute:
     title: Name-Value pair
     required:
@@ -3547,9 +3711,9 @@ definitions:
         description: Value of the custom attribute
         example: value1
 
-#-----------------------------------------------------
-# The Mediation List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Mediation List resource
+  #-----------------------------------------------------
   mediationList:
     title: Mediation List
     properties:
@@ -3575,9 +3739,9 @@ definitions:
         items:
           $ref: '#/definitions/MediationInfo'
 
-#-----------------------------------------------------
-# The MediationInfo resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The MediationInfo resource
+  #-----------------------------------------------------
   MediationInfo:
     title: MediationInfo
     required:
@@ -3599,9 +3763,9 @@ definitions:
           - fault
         example: in
 
-#-----------------------------------------------------
-# The Mediation resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Mediation resource
+  #-----------------------------------------------------
   Mediation:
     title: Mediation
     required:
@@ -3630,9 +3794,9 @@ definitions:
                       </log>
                   </sequence>'
 
-#-----------------------------------------------------
-# The Application List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Application List resource
+  #-----------------------------------------------------
   ApplicationList:
     title: Application List
     properties:
@@ -3658,9 +3822,9 @@ definitions:
         items:
           $ref: '#/definitions/ApplicationInfo'
 
-#-----------------------------------------------------
-# The Application Info resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Application Info resource
+  #-----------------------------------------------------
   ApplicationInfo:
     title: Application info object with basic application details
     properties:
@@ -3680,9 +3844,9 @@ definitions:
         type: string
         example: ""
 
-#-----------------------------------------------------
-# The API Info List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The API Info List resource
+  #-----------------------------------------------------
   APIInfoList:
     title: API Info List
     properties:
@@ -3696,9 +3860,9 @@ definitions:
         items:
           $ref: '#/definitions/APIInfo'
 
-#-----------------------------------------------------
-# The API Info resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The API Info resource
+  #-----------------------------------------------------
   APIInfo:
     title: API info object with basic API details
     properties:
@@ -3715,13 +3879,13 @@ definitions:
         description: The provider of the API
         example: admin
 
-#-----------------------------------------------------
-# The Label resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Label resource
+  #-----------------------------------------------------
   Label:
     title: Label
     required:
-    - name
+      - name
     properties:
       id:
         type: string
@@ -3737,9 +3901,9 @@ definitions:
         items:
           type: string
           example: "http://localhost:9443/"
-#-----------------------------------------------------
-# The Label List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The Label List resource
+  #-----------------------------------------------------
   LabelList:
     title: Label List
     properties:
@@ -3770,20 +3934,20 @@ definitions:
   # The publish status resource
   #-----------------------------------------------------
   MonetizationUsagePublishInfo:
-   title: Usage publish status
-   properties:
-     state:
-       type: string
-       description: State of usage publish job
-     status:
-       type: string
-       description: Status of usage publish job
-     startedTime:
-       type: string
-       description: Timestamp of the started time of the Job
-     lastPublsihedTime:
-       type: string
-       description: Timestamp of the last published time
+    title: Usage publish status
+    properties:
+      state:
+        type: string
+        description: State of usage publish job
+      status:
+        type: string
+        description: Status of usage publish job
+      startedTime:
+        type: string
+        description: Timestamp of the started time of the Job
+      lastPublsihedTime:
+        type: string
+        description: Timestamp of the last published time
 
   #-----------------------------------------------------
   # The workflow response resource
@@ -3860,7 +4024,7 @@ definitions:
   APICategory:
     title: API Category
     required:
-    - name
+      - name
     properties:
       id:
         type: string
@@ -3903,6 +4067,161 @@ definitions:
         description: media-type of the file
         example: "image/jpeg"
 
+  #-----------------------------------------------------
+  # The KeyManager resource
+  #-----------------------------------------------------
+  KeyManager:
+    title: Key Manager
+    required:
+      - name
+      - type
+    properties:
+      id:
+        type: string
+        example: "01234567-0123-0123-0123-012345678901"
+      name:
+        type: string
+        example: "WSO2 IS"
+      type:
+        type: string
+        example: "IS"
+      description:
+        type: string
+        example: "This is a key manager for Developers"
+      introspectionEndpoint:
+        type: string
+        example: ""
+      clientRegistrationEndpoint:
+        type: string
+        example: ""
+      tokenEndpoint:
+        type: string
+        example: ""
+      revokeEndpoint:
+        type: string
+        example: ""
+      userInfoEndpoint:
+        type: string
+        example: ""
+      authorizeEndpoint:
+        type: string
+        example: ""
+      jwksEndpoint:
+        type: string
+        example: ""
+      issuer:
+        type: string
+        example: ""
+      scopeManagementEndpoint:
+        type: string
+        example: ""
+      availableGrantTypes:
+        type: array
+        items:
+          type: string
+          example: "client_credentials"
+      enableTokenGneration:
+        type: boolean
+        example: true
+      enableTokenEncryption:
+        type: boolean
+        example: false
+        default: false
+      enableTokenHashing:
+        type: boolean
+        example: false
+        default: false
+      enableMapOAuthConsumerApps:
+        type: boolean
+        example: false
+        default: false
+      enableSelfValidationJWT:
+        type: boolean
+        example: true
+        default: true
+      claimMapping:
+        type: array
+        items:
+          $ref: '#/definitions/ClaimMappingEntry'
+      tokenValidation:
+        $ref: '#/definitions/TokenValidation'
+      enabled:
+        type: boolean
+        example: true
+      additionalProperties:
+        type: object
+
+  #-----------------------------------------------------
+  # The KeyManager resource
+  #-----------------------------------------------------
+  KeyManagerInfo:
+    title: Key Manager Info
+    required:
+      - name
+      - type
+    properties:
+      id:
+        type: string
+        example: "01234567-0123-0123-0123-012345678901"
+      name:
+        type: string
+        example: "WSO2 IS"
+      type:
+        type: string
+        example: "IS"
+      description:
+        type: string
+        example: "This is a key manager for Developers"
+      enabled:
+        type: boolean
+        example: true
+
+
+
+  #-----------------------------------------------------
+  # The KeyManager List resource
+  #-----------------------------------------------------
+  KeyManagerList:
+    title: Key Manager List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Key managers returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/KeyManagerInfo'
+  #-----------------------------------------------------
+  # The Claim Mapping Resource
+  #-----------------------------------------------------
+
+  ClaimMappingEntry:
+    title: Claim Mapping Configuration
+    properties:
+      remoteClaim:
+        type: string
+        example: "http://idp.org/username"
+      localClaim:
+        type: string
+        example: "http://wso2.org/username"
+
+  TokenValidation:
+    title: Token handling Configuration
+    properties:
+      enable:
+        type: boolean
+        example: false
+        default: true
+      type:
+        type: string
+        enum:
+          - REGEX
+          - JWT
+          - CUSTOM
+      value:
+        type: object
 
 #-----------------------------------------------------
 # END-OF-FILE

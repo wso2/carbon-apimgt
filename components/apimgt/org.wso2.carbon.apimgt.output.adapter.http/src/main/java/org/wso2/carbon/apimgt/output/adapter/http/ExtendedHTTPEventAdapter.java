@@ -31,8 +31,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.conn.params.ConnRoutePNames;
-import org.wso2.carbon.apimgt.output.adapter.http.internal.util.ExtendedHTTPEventAdapterConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
+import org.wso2.carbon.apimgt.output.adapter.http.internal.util.ExtendedHTTPEventAdapterConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.output.adapter.core.EventAdapterUtil;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapter;
@@ -390,7 +391,7 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
                 }
                 int statusCode = this.getHttpClient().executeMethod(hostConfiguration, method);
                 if (statusCode == HttpStatus.SC_UNAUTHORIZED && accessTokenGenerator != null){
-                    accessTokenGenerator.setValidToken(false);
+                    accessTokenGenerator.removeInvalidToken(new String[]{APIConstants.OAUTH2_DEFAULT_SCOPE});
                 }
             } catch (IOException e) {
                 EventAdapterUtil.logAndDrop(eventAdapterConfiguration.getName(), this.getPayload(),

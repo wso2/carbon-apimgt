@@ -20,35 +20,78 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApiService;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
+import java.util.Map;
 
 public class SettingsApiServiceImpl implements SettingsApiService {
 
     private static final Log log = LogFactory.getLog(SettingsApiServiceImpl.class);
 
+    /**
+     * Retrieves admin portal related server settings
+     *
+     * @param messageContext
+     * @return settings list
+     * @throws APIManagementException
+     */
     @Override
-    public Response settingsGet(MessageContext messageContext) {
-        try {
+    public Response settingsGet(MessageContext messageContext) throws APIManagementException {
+
             String username = RestApiUtil.getLoggedInUsername();
             boolean isUserAvailable = false;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
                 isUserAvailable = true;
             }
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
-            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO(isUserAvailable);
+            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingsToDTO(isUserAvailable);
             return Response.ok().entity(settingsDTO).build();
+    }
+
+    /**
+     * Get all scopes of a user
+     *
+     * @param username Search query
+     * @return Scope list
+     */
+    @Override
+    public Response settingsScopesScopeGet(String username, String scopeName, MessageContext messageContext) {
+        String[] userRoles;
+        ScopeSettingsDTO scopeSettingsDTO = new ScopeSettingsDTO();
+        ErrorDTO errorDTO = new ErrorDTO();
+        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenant(MultitenantUtils
+                .getTenantDomain(username));
+        try {
+            if (APIUtil.isUserExist(username) && scopeRoleMapping.containsKey(scopeName)) {
+                userRoles = APIUtil.getListOfRoles(username);
+                SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
+
+                if (settingsMappingUtil.GetRoleScopeList(userRoles, scopeRoleMapping).contains(scopeName)) {
+                    scopeSettingsDTO.setName(scopeName);
+                }
+            } else {
+                errorDTO.setCode(404l);
+                errorDTO.description("Username or Scope does not exist. Username: "
+                        + username + ", " + "Scope: " + scopeName);
+                errorDTO.setMessage("Not Found");
+                return Response.ok().entity(errorDTO).build();
+            }
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving Admin Settings";
+            String errorMessage = "Error when getting the list of scopes. Username: " + username + " , "
+                    + "Scope: " + scopeName;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-        return null;
+        return Response.ok().entity(scopeSettingsDTO).build();
     }
 }
