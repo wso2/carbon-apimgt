@@ -16,26 +16,26 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
-import API from 'AppData/api';
-import { makeStyles } from '@material-ui/core/styles';
-import { Card } from '@material-ui/core';
-import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
-import LaunchIcon from '@material-ui/icons/Launch';
-import Box from '@material-ui/core/Box';
-import Divider from '@material-ui/core/Divider';
-import DeviceHubIcon from '@material-ui/icons/DeviceHub';
-import Link from '@material-ui/core/Link';
-import PersonAddRoundedIcon from '@material-ui/icons/PersonAddRounded';
+import React, { useEffect, useState } from 'react';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { Link as RouterLink } from 'react-router-dom';
-import AddToQueueRoundedIcon from '@material-ui/icons/AddToQueueRounded';
-import RssFeedRoundedIcon from '@material-ui/icons/RssFeedRounded';
-import AirplayRoundedIcon from '@material-ui/icons/AirplayRounded';
-import FormatShapesRoundedIcon from '@material-ui/icons/FormatShapesRounded';
+import { Card } from '@material-ui/core';
 import Avatar from '@material-ui/core/Avatar';
-
+import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
+import CardContent from '@material-ui/core/CardContent';
+import Divider from '@material-ui/core/Divider';
+import Link from '@material-ui/core/Link';
+import { makeStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import AddToQueueRoundedIcon from '@material-ui/icons/AddToQueueRounded';
+import AirplayRoundedIcon from '@material-ui/icons/AirplayRounded';
+import DeviceHubIcon from '@material-ui/icons/DeviceHub';
+import FormatShapesRoundedIcon from '@material-ui/icons/FormatShapesRounded';
+import LaunchIcon from '@material-ui/icons/Launch';
+import PersonAddRoundedIcon from '@material-ui/icons/PersonAddRounded';
+import RssFeedRoundedIcon from '@material-ui/icons/RssFeedRounded';
+import Configurations from 'Config';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -48,10 +48,7 @@ const useStyles = makeStyles((theme) => ({
         fontSize: 20,
         fontWeight: 'fontWeightBold',
     },
-    pos: {
-        marginBottom: 12,
-    },
-    largeAvatar: {
+    avatar: {
         width: theme.spacing(4),
         height: theme.spacing(4),
     },
@@ -63,10 +60,16 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function TasksWorkflowCard() {
     const classes = useStyles();
+    const intl = useIntl();
     const [tasksList, setTasksList] = useState();
     // const restApi = new API();
     // todo: delete dev components
-    const fewerTasksList = [
+    const mockTasksList = [
+        {
+            name: 'DefaultApplication',
+            createdBy: 'Admin',
+            age: '3 hours ago',
+        },
         {
             name: 'DefaultApplication',
             createdBy: 'Admin',
@@ -91,7 +94,8 @@ export default function TasksWorkflowCard() {
 
     useEffect(() => {
         // todo: do api calls and set tasksList
-        setTasksList(fewerTasksList);
+        setTasksList(mockTasksList);
+        // setTasksList([]);
     }, []);
 
     const tasksDisabledCard = (
@@ -103,26 +107,35 @@ export default function TasksWorkflowCard() {
                 </Box>
 
                 <Typography className={classes.title} gutterBottom>
-                Enable workflow to manage tasks
+                    <FormattedMessage
+                        id='Dashboard.tasksWorkflow.tasksDisabled.card.title'
+                        defaultMessage='Enable workflow to manage tasks'
+                    />
                 </Typography>
 
-                {/* todo make the learn more link */}
                 <Typography variant='body2' component='p'>
-                Manage workflow tasks, increase productivity and enhance
-                 competitiveness by enabling developers to easily deploy
-                 business processes and models.
+                    <FormattedMessage
+                        id='Dashboard.tasksWorkflow.tasksDisabled.card.description'
+                        defaultMessage='Manage workflow tasks, increase productivity and enhance
+                        competitiveness by enabling developers to easily deploy
+                        business processes and models.'
+                    />
                 </Typography>
 
-                {/* todo: standardize the help link with doc url */}
                 <Box mt={3}>
                     <Button
                         size='small'
                         variant='contained'
                         color='primary'
                         target='_blank'
-                        href='https://apim.docs.wso2.com/en/next/develop/extending-api-manager/extending-workflows/cleaning-up-workflow-tasks/'
+                        href={Configurations.app.docUrl
+                            + 'learn/consume-api/manage-subscription/advanced-topics/'
+                            + 'adding-an-api-subscription-workflow/#adding-an-api-subscription-workflow'}
                     >
-                        How to Enable Worflows
+                        <FormattedMessage
+                            id='Dashboard.tasksWorkflow.tasksDisabled.card.how.to.enable.workflows.link.text'
+                            defaultMessage='How to Enable Worflows'
+                        />
                         <LaunchIcon fontSize='inherit' />
                     </Button>
                 </Box>
@@ -139,13 +152,19 @@ export default function TasksWorkflowCard() {
                 </Box>
 
                 <Typography className={classes.title} gutterBottom>
-                All the pending tasks completed
+                    <FormattedMessage
+                        id='Dashboard.tasksWorkflow.noTasks.card.title'
+                        defaultMessage='All the pending tasks completed'
+                    />
                 </Typography>
 
                 <Typography variant='body2' component='p'>
-                Manage workflow tasks, increase productivity and enhance
-                 competitiveness by enabling developers to easily deploy
-                 business processes and models.
+                    <FormattedMessage
+                        id='Dashboard.tasksWorkflow.noTasks.card.description'
+                        defaultMessage='Manage workflow tasks, increase productivity and enhance
+                        competitiveness by enabling developers to easily deploy
+                        business processes and models.'
+                    />
                 </Typography>
             </CardContent>
         </Card>
@@ -155,7 +174,7 @@ export default function TasksWorkflowCard() {
         return (
             <Box alignItems='center' display='flex' width='50%' my='1%'>
                 <Box mx={1}>
-                    <Avatar className={classes.largeAvatar}>
+                    <Avatar className={classes.avatar}>
                         <IconComponent fontSize='inherit' />
                     </Avatar>
                 </Box>
@@ -167,8 +186,10 @@ export default function TasksWorkflowCard() {
                     </Link>
                     <Typography variant='body2' gutterBottom>
                         {numberOfTasks}
-                        {' '}
-                            Pending tasks
+                        <FormattedMessage
+                            id='Dashboard.tasksWorkflow.compactTasks.card.numberOfPendingTasks.postFix'
+                            defaultMessage=' Pending tasks'
+                        />
                     </Typography>
                 </Box>
             </Box>
@@ -180,27 +201,42 @@ export default function TasksWorkflowCard() {
             {
                 icon: PersonAddRoundedIcon,
                 path: '/tasks/user-creation',
-                name: 'User Creation',
+                name: intl.formatMessage({
+                    id: 'Dashboard.tasksWorkflow.compactTasks.userCreation.name',
+                    defaultMessage: 'User Creation',
+                }),
             },
             {
                 icon: AddToQueueRoundedIcon,
                 path: '/tasks/application-creation',
-                name: 'Application Creation',
+                name: intl.formatMessage({
+                    id: 'Dashboard.tasksWorkflow.compactTasks.applicationCreation.name',
+                    defaultMessage: 'Application Creation',
+                }),
             },
             {
                 icon: RssFeedRoundedIcon,
                 path: '/tasks/subscription-creation',
-                name: 'Subscription Creation',
+                name: intl.formatMessage({
+                    id: 'Dashboard.tasksWorkflow.compactTasks.subscriptionCreation.name',
+                    defaultMessage: 'Subscription Creation',
+                }),
             },
             {
                 icon: AirplayRoundedIcon,
                 path: '/tasks/application-registration',
-                name: 'Application Registration',
+                name: intl.formatMessage({
+                    id: 'Dashboard.tasksWorkflow.compactTasks.applicationRegistration.name',
+                    defaultMessage: 'Application Registration',
+                }),
             },
             {
                 icon: FormatShapesRoundedIcon,
                 path: '/tasks/api-state-change',
-                name: 'API State Change',
+                name: intl.formatMessage({
+                    id: 'Dashboard.tasksWorkflow.compactTasks.apiStateChange.name',
+                    defaultMessage: 'API State Change',
+                }),
             },
         ];
         return (
@@ -209,7 +245,10 @@ export default function TasksWorkflowCard() {
                     <Box display='flex'>
                         <Box flexGrow={1}>
                             <Typography className={classes.title} gutterBottom>
-                            Pending Tasks
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.compactTasks.card.title'
+                                    defaultMessage='Pending tasks'
+                                />
                             </Typography>
                         </Box>
                         <Box>
@@ -244,7 +283,10 @@ export default function TasksWorkflowCard() {
                     <Box display='flex'>
                         <Box flexGrow={1}>
                             <Typography className={classes.title} gutterBottom>
-                            Pending Tasks
+                                <FormattedMessage
+                                    id='Dashboard.tasksWorkflow.fewerTasks.card.title'
+                                    defaultMessage='Pending tasks'
+                                />
                             </Typography>
                         </Box>
                         <Box>
@@ -265,7 +307,10 @@ export default function TasksWorkflowCard() {
                                     </Typography>
                                     <Box display='flex'>
                                         <Typography variant='body2'>
-                                        Created by&nbsp;
+                                            <FormattedMessage
+                                                id='Dashboard.tasksWorkflow.fewerTasks.card.createdBy.prefix'
+                                                defaultMessage='Created by &nbsp;'
+                                            />
                                         </Typography>
                                         <Typography style={{ 'font-weight': 'bold' }} variant='body2'>
                                             {task.createdBy}
@@ -277,8 +322,18 @@ export default function TasksWorkflowCard() {
                                     </Box>
                                 </Box>
                                 <Box>
-                                    <Button>Accept</Button>
-                                    <Button>Reject</Button>
+                                    <Button>
+                                        <FormattedMessage
+                                            id='Dashboard.tasksWorkflow.fewerTasks.card.task.accept'
+                                            defaultMessage='Accept'
+                                        />
+                                    </Button>
+                                    <Button>
+                                        <FormattedMessage
+                                            id='Dashboard.tasksWorkflow.fewerTasks.card.task.reject'
+                                            defaultMessage='Reject'
+                                        />
+                                    </Button>
                                 </Box>
                             </Box>
                         );

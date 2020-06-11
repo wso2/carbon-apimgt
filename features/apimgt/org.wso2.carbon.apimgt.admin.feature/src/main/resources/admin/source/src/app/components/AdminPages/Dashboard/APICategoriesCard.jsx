@@ -16,19 +16,21 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
-import API from 'AppData/api';
-import { makeStyles } from '@material-ui/core/styles';
+import React, { useEffect, useState } from 'react';
+import { FormattedMessage } from 'react-intl';
+import { Link as RouterLink } from 'react-router-dom';
 import { Card } from '@material-ui/core';
-import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
+import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import CardContent from '@material-ui/core/CardContent';
+import Divider from '@material-ui/core/Divider';
+import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import CategoryIcon from '@material-ui/icons/Category';
 import LaunchIcon from '@material-ui/icons/Launch';
-import Box from '@material-ui/core/Box';
 import Progress from 'AppComponents/Shared/Progress';
-import Divider from '@material-ui/core/Divider';
+import API from 'AppData/api';
+import Configurations from 'Config';
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -41,11 +43,7 @@ const useStyles = makeStyles(() => ({
         fontSize: 20,
         fontWeight: 'fontWeightBold',
     },
-    pos: {
-        marginBottom: 12,
-    },
 }));
-
 
 /**
  * Render progress inside a container centering in the container.
@@ -54,12 +52,17 @@ const useStyles = makeStyles(() => ({
 export default function APICategoriesCard() {
     const classes = useStyles();
     const [apiCategoriesList, setApiCategoriesList] = useState();
+    const [numberOfCategories, setNumberOfCategories] = useState(0);
     const restApi = new API();
 
     useEffect(() => {
         restApi.apiCategoriesListGet()
             .then((result) => {
-                setApiCategoriesList(result.body.list);
+                const allCategoriesList = result.body.list;
+                // Slice last 4 api categories (if available) to display to maintain card height
+                const displayingList = allCategoriesList.slice(Math.max(allCategoriesList.length - 4, 0));
+                setApiCategoriesList(displayingList);
+                setNumberOfCategories(allCategoriesList.length);
             })
             .catch(() => {
                 setApiCategoriesList([]);
@@ -75,27 +78,53 @@ export default function APICategoriesCard() {
                 </Box>
 
                 <Typography className={classes.title} gutterBottom>
-            API Category based grouping
+                    <FormattedMessage
+                        id='Dashboard.apiCategories.noApiCategories.card.title'
+                        defaultMessage='API Category based grouping'
+                    />
                 </Typography>
 
-                {/* todo make the learn more link */}
                 <Typography variant='body2' component='p'>
-            API categories allow API providers to categorize APIs
-             that have similar attributes. When a categorized API
-             gets published to the Developer Portal, its categories
-             appear as clickable links to the API consumers.
-             The API consumers can use the available API categories
-             to quickly jump to a category of interest. Learn more
+                    <FormattedMessage
+                        id='Dashboard.apiCategories.noApiCategories.card.description'
+                        values={{
+                            learnMoreLink:
+    <a
+        rel='noopener noreferrer'
+        target='_blank'
+        href={Configurations.app.docUrl
+     + 'develop/customizations/customizing-the-developer-portal/'
+     + 'customize-api-listing/categorizing-and-grouping-apis/'
+     + 'api-category-based-grouping'}
+    >
+        Learn More
+        <LaunchIcon fontSize='inherit' />
+    </a>,
+                        }}
+                        defaultMessage='API categories allow API providers to categorize APIs
+                        that have similar attributes. When a categorized API
+                        gets published to the Developer Portal, its categories
+                        appear as clickable links to the API consumers.
+                        The API consumers can use the available API categories
+                        to quickly jump to a category of interest. {learnMoreLink}'
+                    />
                 </Typography>
+
 
                 <Box mt={3}>
                     <Button
                         size='small'
                         variant='contained'
                         color='primary'
-                        href='settings/api-categories'
+                        component={RouterLink}
+                        to='settings/api-categories'
                     >
-                Add new Category
+                        <Typography variant='inherit'>
+                            <FormattedMessage
+                                id='Dashboard.apiCategories.noApiCategories.card.add.new.link.text'
+                                defaultMessage='Add new Category'
+                            />
+                        </Typography>
                         <LaunchIcon fontSize='inherit' />
                     </Button>
                 </Box>
@@ -110,55 +139,68 @@ export default function APICategoriesCard() {
                     <Box display='flex'>
                         <Box flexGrow={1}>
                             <Typography className={classes.title} gutterBottom>
-                            API Categories
+                                <FormattedMessage
+                                    id='Dashboard.apiCategories.apiCategoriesListing.card.title'
+                                    defaultMessage='API Categories'
+                                />
                             </Typography>
                         </Box>
                         <Box>
                             <Typography className={classes.title} gutterBottom>
-                                {apiCategoriesList.length}
+                                {numberOfCategories}
                             </Typography>
                         </Box>
                     </Box>
 
                     <Divider light />
 
-                    {/* Listing last 4 categories on the card */}
-                    {/* todoL impl to display at most 4 categories only */}
-                    {apiCategoriesList.map((category) => {
-                        return (
-                            <Box display='flex' alignItems='center'>
-                                <Box flexGrow={1}>
-                                    <Typography variant='subtitle2'>
-                                        {category.name}
-                                    </Typography>
-                                    <Typography variant='body2'>
-                                        {category.description}
-                                    </Typography>
+                    <Box height={170} mt={1} mb={-2}>
+                        {apiCategoriesList.map((category) => {
+                            return (
+                                <Box display='flex' alignItems='center'>
+                                    <Box flexGrow={1} mt={0.5}>
+                                        <Typography variant='subtitle2'>
+                                            {category.name}
+                                        </Typography>
+                                        <Typography variant='body2'>
+                                            {category.description || (
+                                                <FormattedMessage
+                                                    id='Dashboard.apiCategories.apiCategoriesListing.no.description'
+                                                    defaultMessage='No description available'
+                                                />
+                                            )}
+                                        </Typography>
+                                    </Box>
+                                    <Box>
+                                        <Typography variant='body2'>
+                                            {category.numberOfAPIs}
+                                            {' APIs'}
+                                        </Typography>
+                                    </Box>
                                 </Box>
-                                <Box>
-                                    <Typography variant='body2'>
-                                        {category.numberOfAPIs}
-                                        {' APIs'}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        );
-                    })}
-                </CardContent>
-                <CardActions alignItems='flex-end'>
-                    <Box width={1} display='flex' flexDirection='row-reverse'>
-                        <Box>
-                            <Button
-                                size='small'
-                                color='primary'
-                                href='settings/api-categories'
-                            >
-                        View All
-                                <LaunchIcon fontSize='small' />
-                            </Button>
-                        </Box>
+                            );
+                        })}
                     </Box>
-                </CardActions>
+                </CardContent>
+
+                <Box m={0.5} display='flex' alignSelf='flex-end' flexDirection='row-reverse'>
+                    <Box>
+                        <Button
+                            size='small'
+                            color='primary'
+                            component={RouterLink}
+                            to='settings/api-categories'
+                        >
+                            <Typography variant='inherit'>
+                                <FormattedMessage
+                                    id='Dashboard.apiCategories.apiCategoriesListing.card.view.all.link.text'
+                                    defaultMessage='View All'
+                                />
+                                <LaunchIcon fontSize='inherit' />
+                            </Typography>
+                        </Button>
+                    </Box>
+                </Box>
             </Card>
         );
     };

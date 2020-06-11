@@ -17,18 +17,19 @@
  */
 
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { Card } from '@material-ui/core';
-import CardContent from '@material-ui/core/CardContent';
-import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
-import Divider from '@material-ui/core/Divider';
-import DescriptionIcon from '@material-ui/icons/Description';
-import AirplayIcon from '@material-ui/icons/Airplay';
-import RssFeedIcon from '@material-ui/icons/RssFeed';
-import CodeIcon from '@material-ui/icons/Code';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { Link as RouterLink } from 'react-router-dom';
+import { Card } from '@material-ui/core';
+import Box from '@material-ui/core/Box';
+import CardContent from '@material-ui/core/CardContent';
+import Divider from '@material-ui/core/Divider';
 import Link from '@material-ui/core/Link';
+import { makeStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import AirplayIcon from '@material-ui/icons/Airplay';
+import CodeIcon from '@material-ui/icons/Code';
+import DescriptionIcon from '@material-ui/icons/Description';
+import RssFeedIcon from '@material-ui/icons/RssFeed';
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -46,68 +47,94 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-const selectedRateLimitingPolicies = [
-    {
-        name: 'Advanced Policies',
-        description: 'Control access per API or API resource using advanced rules',
-        icon: <DescriptionIcon color='inherit' fontSize='small' />,
-        path: '/throttling/advanced',
-    },
-    {
-        name: 'Application Policies',
-        description: 'Applicable per access token generated for an application',
-        icon: <AirplayIcon color='inherit' fontSize='small' />,
-    },
-    {
-        name: 'Subscription Policies',
-        description: 'Control access per Subscription',
-        icon: <RssFeedIcon color='inherit' fontSize='small' />,
-    },
-    {
-        name: 'Custom Policies',
-        description: 'Allows system administrators to define dynamic '
-         + 'rules for specific use cases, which are applied globally across all tenants.',
-        icon: <CodeIcon color='inherit' fontSize='small' />,
-    },
-];
-
 /**
  * Render progress inside a container centering in the container.
  * @returns {JSX} Loading animation.
  */
 export default function RateLimitingCard() {
     const classes = useStyles();
+    const intl = useIntl();
+    const selectedRateLimitingPolicies = [
+        {
+            name: intl.formatMessage({
+                id: 'Dashboard.rateLimiting.card.advancedPolicies.name',
+                defaultMessage: 'Advanced Policies',
+            }),
+            description: intl.formatMessage({
+                id: 'Dashboard.rateLimiting.card.advancedPolicies.description',
+                defaultMessage: 'Control access per API or API resource using advanced rules',
+            }),
+            icon: <DescriptionIcon color='inherit' fontSize='small' />,
+            path: '/throttling/advanced',
+        },
+        {
+            name: intl.formatMessage({
+                id: 'Dashboard.rateLimiting.card.applicationPolicies.name',
+                defaultMessage: 'Application Policies',
+            }),
+            description: intl.formatMessage({
+                id: 'Dashboard.rateLimiting.card.applicationPolicies.description',
+                defaultMessage: 'Applicable per access token generated for an application',
+            }),
+            icon: <AirplayIcon color='inherit' fontSize='small' />,
+        },
+        {
+            name: intl.formatMessage({
+                id: 'Dashboard.rateLimiting.card.subscriptionPolicies.name',
+                defaultMessage: 'Subscription Policies',
+            }),
+            description: intl.formatMessage({
+                id: 'Dashboard.rateLimiting.card.subscriptionPolicies.description',
+                defaultMessage: 'Control access per Subscription',
+            }),
+            icon: <RssFeedIcon color='inherit' fontSize='small' />,
+        },
+        {
+            name: intl.formatMessage({
+                id: 'Dashboard.rateLimiting.card.customPolicies.name',
+                defaultMessage: 'Custom Policies',
+            }),
+            description: intl.formatMessage({
+                id: 'Dashboard.rateLimiting.card.customPolicies.description',
+                defaultMessage: 'Allows system administrators to define dynamic '
+                + 'rules for specific use cases, which are applied globally across all tenants.',
+            }),
+            icon: <CodeIcon color='inherit' fontSize='small' />,
+        },
+    ];
 
     return (
         <Card className={classes.root} style={{ textAlign: 'left' }}>
             <CardContent>
                 <Typography className={classes.title} gutterBottom>
-                            Rate Limiting
+                    <FormattedMessage
+                        id='Dashboard.rateLimiting.card.title'
+                        defaultMessage='Rate Limiting'
+                    />
                 </Typography>
 
                 <Divider light />
-
-                {selectedRateLimitingPolicies.map((policy) => {
-                    return (
-                        <Box display='flex'>
-                            <Box mx={1} mt={0.5}>
-                                {policy.icon}
-                            </Box>
-
-                            <Box flexGrow={1}>
-                                <Link component={RouterLink} to={policy.path} color='inherit'>
-                                    <Typography>
-                                        {policy.name}
+                <Box mt={1} mb={-2}>
+                    {selectedRateLimitingPolicies.map((policy) => {
+                        return (
+                            <Box display='flex'>
+                                <Box mx={1} mt={0.5}>
+                                    {policy.icon}
+                                </Box>
+                                <Box flexGrow={1}>
+                                    <Link component={RouterLink} to={policy.path} color='inherit'>
+                                        <Typography variant='subtitle2'>
+                                            {policy.name}
+                                        </Typography>
+                                    </Link>
+                                    <Typography variant='body2' gutterBottom>
+                                        {policy.description}
                                     </Typography>
-                                </Link>
-
-                                <Typography variant='body2' gutterBottom>
-                                    {policy.description}
-                                </Typography>
+                                </Box>
                             </Box>
-                        </Box>
-                    );
-                })}
+                        );
+                    })}
+                </Box>
             </CardContent>
         </Card>
     );

@@ -22,7 +22,6 @@ import Grid from '@material-ui/core/Grid';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import APICategoriesCard from 'AppComponents/AdminPages/Dashboard/APICategoriesCard';
 import RateLimitingCard from 'AppComponents/AdminPages/Dashboard/RateLimitingCard';
-import TasksWorkflowCard from 'AppComponents/AdminPages/Dashboard/TasksWorkflowCard';
 
 const useStyles = makeStyles(() => ({
     rootGrid: {
@@ -36,7 +35,6 @@ const useStyles = makeStyles(() => ({
  */
 export default function Dashboard() {
     const classes = useStyles();
-    // todo: check on the card sizes
     return (
         <ContentBase title='Dashboard' pageStyle='paperLess'>
             <div className={classes.rootGrid}>
@@ -46,9 +44,6 @@ export default function Dashboard() {
                     </Grid>
                     <Grid item xs={6}>
                         <APICategoriesCard />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TasksWorkflowCard />
                     </Grid>
                 </Grid>
             </div>
