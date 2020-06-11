@@ -132,15 +132,21 @@ public class SubscriptionValidationSQLConstants {
                     "  API.API_TIER," +
                     "  API.API_VERSION," +
                     "  API.CONTEXT, " +
+                    "  URL.URL_MAPPING_ID," +
                     "  URL.HTTP_METHOD," +
                     "  URL.AUTH_SCHEME," +
                     "  URL.URL_PATTERN," +
-                    "  URL.THROTTLING_TIER AS RES_TIER" +
+                    "  URL.THROTTLING_TIER AS RES_TIER," +
+                    "  SCOPE.SCOPE_NAME " +
                     " FROM " +
                     "  AM_API AS API," +
                     "  AM_API_URL_MAPPING AS URL" +
+                    " LEFT JOIN " +
+                    " AM_API_RESOURCE_SCOPE_MAPPING AS SCOPE " +
+                    " ON " +
+                    "  URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
                     " WHERE " +
-                    "  API.API_ID = URL.API_ID ";
+                    "  API.API_ID = URL.API_ID";
 
     public static final String GET_ALL_AM_KEY_MAPPINGS_SQL =
             "SELECT " +
@@ -231,7 +237,20 @@ public class SubscriptionValidationSQLConstants {
                     "   TENANT_ID = ? ";
 
     public static final String GET_TENANT_API_POLICIES_SQL =
-            ""; //todo
+            "SELECT" +
+                    "   POLICY.POLICY_ID," +
+                    "   POLICY.NAME," +
+                    "   POLICY.TENANT_ID," +
+                    "   POLICY.DEFAULT_QUOTA_TYPE," +
+                    "   COND.CONDITION_GROUP_ID," +
+                    "   COND.QUOTA_TYPE" +
+                    " FROM" +
+                    "   AM_API_THROTTLE_POLICY AS POLICY " +
+                    " LEFT JOIN " +
+                    "   AM_CONDITION_GROUP AS COND " +
+                    " ON " +
+                    "   POLICY.POLICY_ID = COND.POLICY_ID" +
+                    " WHERE POLICY.TENANT_ID = ?";
 
     public static final String GET_APPLICATION_POLICY_SQL =
             "SELECT " +
@@ -246,7 +265,19 @@ public class SubscriptionValidationSQLConstants {
                     "   TENANT_ID = ? ";
 
     public static final String GET_API_POLICY_SQL =
-            "";//todo
+            "SELECT" +
+                    "   POLICY.POLICY_ID," +
+                    "   POLICY.NAME," +
+                    "   POLICY.TENANT_ID," +
+                    "   POLICY.DEFAULT_QUOTA_TYPE," +
+                    "   COND.CONDITION_GROUP_ID," +
+                    "   COND.QUOTA_TYPE" +
+                    " FROM" +
+                    "   AM_API_THROTTLE_POLICY AS POLICY " +
+                    " LEFT JOIN " +
+                    "   AM_CONDITION_GROUP AS COND " +
+                    " ON " +
+                    "   POLICY.POLICY_ID = COND.POLICY_ID";
 
     public static final String GET_TENANT_APIS_SQL =
             "SELECT " +
@@ -256,6 +287,7 @@ public class SubscriptionValidationSQLConstants {
                     "  API.API_TIER," +
                     "  API.API_VERSION," +
                     "  API.CONTEXT, " +
+                    "  URL.URL_MAPPING_ID," +
                     "  URL.HTTP_METHOD," +
                     "  URL.AUTH_SCHEME," +
                     "  URL.URL_PATTERN," +
@@ -263,9 +295,13 @@ public class SubscriptionValidationSQLConstants {
                     " FROM " +
                     "  AM_API AS API," +
                     "  AM_API_URL_MAPPING AS URL" +
+                    " LEFT JOIN " +
+                    "  AM_API_RESOURCE_SCOPE_MAPPING AS SCOPE " +
+                    " ON " +
+                    "  URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
                     " WHERE " +
                     "  CONTEXT LIKE ? AND " +
-                    "  API.API_ID = URL.API_ID ";
+                    "  API.API_ID = URL.API_ID";
     public static final String GET_ST_APIS_SQL =
             "SELECT " +
                     "  API.API_ID," +
@@ -274,6 +310,7 @@ public class SubscriptionValidationSQLConstants {
                     "  API.API_TIER," +
                     "  API.API_VERSION," +
                     "  API.CONTEXT, " +
+                    "  URL.URL_MAPPING_ID," +
                     "  URL.HTTP_METHOD," +
                     "  URL.AUTH_SCHEME," +
                     "  URL.URL_PATTERN," +
@@ -281,6 +318,10 @@ public class SubscriptionValidationSQLConstants {
                     " FROM " +
                     "  AM_API AS API," +
                     "  AM_API_URL_MAPPING AS URL" +
+                    " LEFT JOIN " +
+                    "  AM_API_RESOURCE_SCOPE_MAPPING AS SCOPE " +
+                    " ON " +
+                    "  URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID " +
                     " WHERE " +
                     "  CONTEXT NOT LIKE ? AND " +
                     "  API.API_ID = URL.API_ID ";
@@ -293,14 +334,19 @@ public class SubscriptionValidationSQLConstants {
                     "  API.API_TIER," +
                     "  API.API_VERSION," +
                     "  API.CONTEXT, " +
-//                    "  URL.MAPPING_ID," +
+                    "  URL.MAPPING_ID," +
                     "  URL.HTTP_METHOD," +
                     "  URL.AUTH_SCHEME," +
                     "  URL.URL_PATTERN," +
-                    "  URL.THROTTLING_TIER AS RES_TIER" +
+                    "  URL.THROTTLING_TIER AS RES_TIER," +
+                    "  SCOPE.SCOPE_NAME " +
                     " FROM " +
                     "   AM_API AS API," +
                     "   AM_API_URL_MAPPING AS URL" +
+                    " LEFT JOIN " +
+                    "  AM_API_RESOURCE_SCOPE_MAPPING AS SCOPE " +
+                    " ON " +
+                    "  URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID " +
                     " WHERE " +
                     "   API.API_ID = URL.API_ID AND " +
                     "   API.API_VERSION = ? AND " +

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class URLMapping {
@@ -26,6 +28,8 @@ public class URLMapping {
     private String authScheme;
     private String httpMethod;
     private String urlPattern;
+    private List<String> scopes = new ArrayList<>();
+
 
     public String getHttpMethod() {
 
@@ -65,6 +69,14 @@ public class URLMapping {
     public void setUrlPattern(String urlPattern) {
 
         this.urlPattern = urlPattern;
+    }
+
+    public void addScope(String scope) {
+        scopes.add(scope);
+    }
+
+    public List<String> getScopes() {
+        return scopes;
     }
 
     @Override

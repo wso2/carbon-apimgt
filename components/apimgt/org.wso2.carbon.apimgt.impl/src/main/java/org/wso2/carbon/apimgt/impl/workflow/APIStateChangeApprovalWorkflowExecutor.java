@@ -102,7 +102,8 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
                 apiStateWorkFlowDTO.setProperties("apiName", apiStateWorkFlowDTO.getApiName());
                 apiStateWorkFlowDTO.setProperties("apiVersion", apiStateWorkFlowDTO.getApiVersion());
                 apiStateWorkFlowDTO.setProperties("apiProvider", apiStateWorkFlowDTO.getApiProvider());
-		        apiStateWorkFlowDTO.setProperties("currentState", apiStateWorkFlowDTO.getApiCurrentState());
+                apiStateWorkFlowDTO.setProperties("currentState", apiStateWorkFlowDTO.getApiCurrentState());
+
                 super.execute(workflowDTO);
             } else {
                 // For any other states, act as simple workflow executor.

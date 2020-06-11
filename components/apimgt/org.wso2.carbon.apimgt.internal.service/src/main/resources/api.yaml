@@ -373,7 +373,7 @@ paths:
 ######################################################
 parameters:
   requestedTenant:
-    name: X-WSO2-Tenant
+    name: xWSO2Tenant
     in: header
     description: |
       This is used to specify the tenant domain, where the resource need to be
@@ -815,6 +815,10 @@ definitions:
         type: string
       urlPattern:
         type: string
+      scopes:
+        type: array
+        items:
+          type: string
   #-----------------------------------------------------
   # The pagination resource
   #-----------------------------------------------------
