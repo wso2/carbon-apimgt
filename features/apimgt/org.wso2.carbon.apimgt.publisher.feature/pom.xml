@@ -15,7 +15,8 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
@@ -171,11 +172,15 @@
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.localentry.stub:${carbon.apimgt.version}
                                 </bundleDef>
-                                <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
-                                <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}
+                                </bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}
+                                <importFeatureDef>
+                                    org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}
                                 </importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.registry.core:${carbon.registry.version}
                                 </importFeatureDef>
@@ -205,22 +210,60 @@
                 <version>1.5.0</version>
                 <executions>
                     <execution>
-                        <id>npm install (initialize)</id>
+                        <id>npm install(mvn)</id>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
-                            <environmentVariables>
-                                <PUPPETEER_SKIP_CHROMIUM_DOWNLOAD>
-                                    true
-                                </PUPPETEER_SKIP_CHROMIUM_DOWNLOAD>
-                            </environmentVariables>
-                            <workingDirectory>src/main/resources/publisher</workingDirectory>
+                            <workingDirectory>../</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>ci</argument>
-                                <argument>--silent</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>lerna clean</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <workingDirectory>../</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>clean</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>lerna bootstrap</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <workingDirectory>../</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>bootstrap</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm install</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <workingDirectory>../</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>ci</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -236,22 +279,6 @@
                             <arguments>
                                 <argument>run</argument>
                                 <argument>${npm.build.command}</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>node test</id>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <phase>test</phase>
-                        <configuration>
-                            <skip>${maven.test.skip}</skip>
-                            <workingDirectory>src/main/resources/publisher</workingDirectory>
-                            <executable>${npm.executable}</executable>
-                            <arguments>
-                                <argument>run</argument>
-                                <argument>test</argument>
                             </arguments>
                         </configuration>
                     </execution>
