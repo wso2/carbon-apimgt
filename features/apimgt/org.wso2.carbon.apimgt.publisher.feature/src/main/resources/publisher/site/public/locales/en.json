@@ -834,6 +834,7 @@
   "Apis.Details.index.lifecycle": "lifecycle",
   "Apis.Details.index.monetization": "monetization",
   "Apis.Details.index.operations": "operations",
+  "Apis.Details.index.Tryout": "Test Console",
   "Apis.Details.index.overview": "overview",
   "Apis.Details.index.properties": "properties",
   "Apis.Details.index.resources": "resources",
@@ -841,6 +842,7 @@
   "Apis.Details.index.schema.definition": "Schema Definition",
   "Apis.Details.index.subscriptions": "subscriptions",
   "Apis.Details.index.wsdl.definition": "WSDL Definition",
+  "Apis.Details.index.invalid.tenant.domain": "Invalid tenant domain",
   "Apis.GraphQL.Steps.ProvideGraphQL.error.empty": "This field cannot be empty.",
   "Apis.GraphQL.Steps.ProvideGraphQL.file.invalid.file": "Invalid file",
   "Apis.GraphQL.Steps.ProvideGraphQL.try.dropping.schema.file": "Try dropping schema file here, or click to select schema to upload.",
@@ -1009,5 +1011,7 @@
   "unblock": "Unblock",
   "upload.image": "Click or drag the image to upload.",
   "version": "Version",
-  "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager"
+  "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager",
+  "api.console.require.access.token": "You need an access token to try the API. Please log in and subscribe to the API to generate an access token. If you already have an access token, please provide it below.",
+  "notice": "Notice"
 }
