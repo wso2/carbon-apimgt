@@ -18,7 +18,6 @@
 package org.wso2.carbon.apimgt.keymgt.model.impl;
 
 import com.google.gson.Gson;
-import com.hazelcast.map.impl.querycache.subscriber.SubscriberListener;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,18 +29,18 @@ import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerConfigurationsDto;
 import org.wso2.carbon.apimgt.keymgt.model.entity.APIList;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.SubscriptionValidationConfig;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.keymgt.model.entity.APIPolicyList;
+import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMappingList;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationList;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicyList;
-import org.wso2.carbon.apimgt.keymgt.model.entity.Subscriber;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionList;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
@@ -165,6 +164,25 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             subscriptionPolicies = (new Gson().fromJson(responseString, SubscriptionPolicyList.class)).getList();
         }
         return subscriptionPolicies;
+    }
+
+    @Override
+    public List<ApiPolicy> loadAllAPIPolicies(String tenantDomain) throws DataLoadingException {
+
+        String apiPoliciesEP = APIConstants.SubscriptionValidationResources.API_POLICIES;
+        List<ApiPolicy> apiPolicies = new ArrayList<>();
+        String responseString = null;
+        try {
+            responseString = invokeService(apiPoliciesEP, tenantDomain);
+        } catch (IOException e) {
+            String msg = "Error while executing the http client " + apiPoliciesEP;
+            log.error(msg, e);
+            throw new DataLoadingException(msg, e);
+        }
+        if (responseString != null && !responseString.isEmpty()) {
+            apiPolicies = (new Gson().fromJson(responseString, APIPolicyList.class)).getList();
+        }
+        return apiPolicies;
     }
 
     @Override
