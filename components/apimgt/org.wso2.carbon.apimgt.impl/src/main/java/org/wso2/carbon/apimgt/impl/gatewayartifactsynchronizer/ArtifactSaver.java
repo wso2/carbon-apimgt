@@ -38,7 +38,8 @@ public interface ArtifactSaver {
      * @param gatewayRuntimeArtifacts - A String contains all the information about the API and gateway artifacts
      * @throws ArtifactSynchronizerException if there are any errors in the process
      */
-    void saveArtifact(String gatewayRuntimeArtifacts, String gatewayInstruction) throws ArtifactSynchronizerException;
+    void saveArtifact(String gatewayRuntimeArtifacts, String gatewayLabel, String gatewayInstruction)
+            throws ArtifactSynchronizerException;
 
     /**
      * This method will return true if the API is published in any of the Gateways

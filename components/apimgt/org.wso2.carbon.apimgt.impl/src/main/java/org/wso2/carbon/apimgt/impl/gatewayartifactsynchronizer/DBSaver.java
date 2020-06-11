@@ -40,7 +40,7 @@ public class DBSaver implements ArtifactSaver {
     }
 
     @Override
-    public void saveArtifact(String gatewayRuntimeArtifacts, String gatewayInstruction)
+    public void saveArtifact(String gatewayRuntimeArtifacts, String gatewayLabel, String gatewayInstruction)
             throws ArtifactSynchronizerException {
 
         try {
@@ -49,7 +49,6 @@ public class DBSaver implements ArtifactSaver {
             String apiName = (String) artifactObject.get("name");
             String version = (String) artifactObject.get("version");
             String tenantDomain = (String) artifactObject.get("tenantDomain");
-            String gatewayLabel = (String) artifactObject.get("gatewayLabel");
 
             byte[] gatewayRuntimeArtifactsAsBytes = gatewayRuntimeArtifacts.getBytes();
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayRuntimeArtifactsAsBytes);

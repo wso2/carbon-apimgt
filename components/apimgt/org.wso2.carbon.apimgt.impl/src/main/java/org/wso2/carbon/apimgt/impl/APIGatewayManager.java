@@ -198,7 +198,7 @@ public class APIGatewayManager {
                     }
 
                     if (saveArtifactsToStorage) {
-                        artifactSaver.saveArtifact(new Gson().toJson(gatewayAPIDTO),
+                        artifactSaver.saveArtifact(new Gson().toJson(gatewayAPIDTO), environment.getName(),
                                 APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
                         publishedGateways.add(environment.getName());
                     }
@@ -261,7 +261,6 @@ public class APIGatewayManager {
         gatewayAPIDTO.setApiId(api.getUUID());
         gatewayAPIDTO.setTenantDomain(tenantDomain);
         gatewayAPIDTO.setOverride(true);
-        gatewayAPIDTO.setGatewayLabel(environment.getName());
 
         String definition;
 
@@ -527,7 +526,6 @@ public class APIGatewayManager {
                 productAPIDto.setVersion(id.getVersion());
                 productAPIDto.setTenantDomain(tenantDomain);
                 productAPIDto.setOverride(false);
-                productAPIDto.setGatewayLabel(environmentName);
                 String definition = apiProduct.getDefinition();
                 productAPIDto.setLocalEntriesToBeRemove(addStringToList(apiProduct.getUuid(),
                         productAPIDto.getLocalEntriesToBeRemove()));
@@ -569,7 +567,7 @@ public class APIGatewayManager {
                 }
 
                 if (saveArtifactsToStorage) {
-                    artifactSaver.saveArtifact(new Gson().toJson(productAPIDto),
+                    artifactSaver.saveArtifact(new Gson().toJson(productAPIDto), environmentName,
                                 APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
                     publishedGateways.add(environment.getName());
                 }
@@ -721,9 +719,9 @@ public class APIGatewayManager {
             }
 
             if (saveArtifactsToStorage) {
-                artifactSaver.saveArtifact(new Gson().toJson(gatewayAPIDTO),
+                artifactSaver.saveArtifact(new Gson().toJson(gatewayAPIDTO), environment.getName(),
                         APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_REMOVE);
-                removedGateways.add(gatewayAPIDTO.getGatewayLabel());
+                removedGateways.add(environment.getName());
             }
         } catch (AxisFault axisFault) {
             /*
@@ -762,7 +760,6 @@ public class APIGatewayManager {
         gatewayAPIDTO.setTenantDomain(tenantDomain);
         gatewayAPIDTO.setOverride(true);
         gatewayAPIDTO.setApiId(api.getUUID());
-        gatewayAPIDTO.setGatewayLabel(environment.getName());
 
         setClientCertificatesToBeRemoved(api, tenantDomain, gatewayAPIDTO);
         setEndpointsToBeRemoved(api, gatewayAPIDTO);
@@ -821,7 +818,6 @@ public class APIGatewayManager {
                     if (environment == null) {
                         continue;
                     }
-                    productAPIGatewayAPIDTO.setGatewayLabel(environmentName);
 
                     for (API api : associatedAPIs) {
                         if (!APIStatus.PUBLISHED.getStatus().equals(api.getStatus())) {
@@ -837,9 +833,9 @@ public class APIGatewayManager {
                     }
 
                     if (saveArtifactsToStorage) {
-                        artifactSaver.saveArtifact(new Gson().toJson(productAPIGatewayAPIDTO),
+                        artifactSaver.saveArtifact(new Gson().toJson(productAPIGatewayAPIDTO), environmentName,
                                 APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_REMOVE);
-                        removedGateways.add(productAPIGatewayAPIDTO.getGatewayLabel());
+                        removedGateways.add(environmentName);
                     }
 
                 } catch (AxisFault e) {

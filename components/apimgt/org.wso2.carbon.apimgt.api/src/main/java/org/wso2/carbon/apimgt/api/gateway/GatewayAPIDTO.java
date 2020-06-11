@@ -27,6 +27,8 @@ import java.io.Serializable;
  */
 public class GatewayAPIDTO implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private String name;
     private String version;
     private String provider;
@@ -45,7 +47,6 @@ public class GatewayAPIDTO implements Serializable {
     private String[] endpointEntriesToBeRemove;
     private CredentialDto[] credentialsToBeAdd ;
     private String[] credentialsToBeRemove;
-    private String gatewayLabel;
 
     public String getName() {
 
@@ -225,15 +226,5 @@ public class GatewayAPIDTO implements Serializable {
     public void setCredentialsToBeRemove(String[] credentialsToBeRemove) {
 
         this.credentialsToBeRemove = credentialsToBeRemove;
-    }
-
-    public String getGatewayLabel() {
-
-        return gatewayLabel;
-    }
-
-    public void setGatewayLabel(String gatewayLabel) {
-
-        this.gatewayLabel = gatewayLabel;
     }
 }
