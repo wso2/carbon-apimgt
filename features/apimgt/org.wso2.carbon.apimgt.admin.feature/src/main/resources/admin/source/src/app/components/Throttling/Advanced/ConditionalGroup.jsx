@@ -35,7 +35,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
 import AddEditExecution from 'AppComponents/Throttling/Advanced/AddEditExecution';
 import AddEditConditionPolicy from 'AppComponents/Throttling/Advanced/AddEditConditionPolicy';
-import AddEditConditionPolicyIp from 'AppComponents/Throttling/Advanced/AddEditConditionPolicyIp';
+import AddEditConditionPolicyIp from 'AppComponents/Throttling/Advanced/AddEditConditionPolicyIP';
 import CON_CONSTS from 'AppComponents/Throttling/Advanced/CON_CONSTS';
 import DeleteCondition from 'AppComponents/Throttling/Advanced/DeleteCondition';
 
