@@ -896,8 +896,8 @@ public class APIManagerComponent {
             service = ArtifactSaver.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetArtifactSaver")
-    protected void setArtifactSaver (ArtifactSaver artifactSaver) {
+            unbind = "removeArtifactSaver")
+    protected void addArtifactSaver (ArtifactSaver artifactSaver) {
 
         GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
@@ -911,12 +911,12 @@ public class APIManagerComponent {
                 ServiceReferenceHolder.getInstance().getArtifactSaver().init();
             } catch (Exception e) {
                 log.error("Error connecting with the Artifact Saver");
-                unsetArtifactSaver(null);
+                removeArtifactSaver(null);
             }
         }
     }
 
-    protected void unsetArtifactSaver(ArtifactSaver artifactSaver) {
+    protected void removeArtifactSaver(ArtifactSaver artifactSaver) {
         ServiceReferenceHolder.getInstance().getArtifactSaver().disconnect();
         ServiceReferenceHolder.getInstance().setArtifactSaver(null);
     }

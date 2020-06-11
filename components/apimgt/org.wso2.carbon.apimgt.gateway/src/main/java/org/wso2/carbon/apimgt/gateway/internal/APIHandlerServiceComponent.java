@@ -412,8 +412,8 @@ public class APIHandlerServiceComponent {
             service = ArtifactRetriever.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetArtifactRetriever")
-    protected void setArtifactRetriever(ArtifactRetriever artifactRetriever) {
+            unbind = "removeArtifactRetriever")
+    protected void addArtifactRetriever(ArtifactRetriever artifactRetriever) {
 
         GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
@@ -427,12 +427,12 @@ public class APIHandlerServiceComponent {
                 ServiceReferenceHolder.getInstance().getArtifactRetriever().init();
             } catch (Exception e) {
                 log.error("Error connecting with the Artifact retriever");
-                unsetArtifactRetriever(null);
+                removeArtifactRetriever(null);
             }
         }
     }
 
-    protected void unsetArtifactRetriever(ArtifactRetriever artifactRetriever) {
+    protected void removeArtifactRetriever(ArtifactRetriever artifactRetriever) {
         ServiceReferenceHolder.getInstance().getArtifactRetriever().disconnect();
         ServiceReferenceHolder.getInstance().setArtifactRetriever(null);
 
