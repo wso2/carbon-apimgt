@@ -441,7 +441,7 @@ public class APIAdminImpl implements APIAdmin {
      * @return list of bot detected data
      * @throws APIManagementException
      */
-    public List<BotDetectionData> retrieveSavedBotData() throws APIManagementException {
+    public List<BotDetectionData> retrieveBotDetectionData() throws APIManagementException {
 
         List<BotDetectionData> botDetectionDatalist = new ArrayList<>();
         String appName = AlertMgtConstants.APIM_ALERT_BOT_DETECTION_APP;

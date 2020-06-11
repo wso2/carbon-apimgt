@@ -338,8 +338,8 @@ ExceptionCodes implements ErrorHandler {
     USER_NOT_FOUND(901502, "User Not Found", 404, "User does not exist"),
 
     //Analytics related codes
-    ANALYTICS_NOT_ENABLED(901600, "Analytics Not Enabled", 404,
-            "Analytics should be enabled to view Bot Detected Data");
+    ANALYTICS_NOT_ENABLED(901600, "%s not accessible", 404,
+            "Analytics should be enabled to access %s");
 
 
     private final long errorCode;

@@ -88,11 +88,13 @@ public class BotDataApiServiceImpl implements BotDataApiService {
     public Response botDataGet(MessageContext messageContext) throws APIManagementException {
 
         if (APIUtil.isAnalyticsEnabled()) {
-            List<BotDetectionData> botDetectionDataList = new APIAdminImpl().retrieveSavedBotData();
+            List<BotDetectionData> botDetectionDataList = new APIAdminImpl().retrieveBotDetectionData();
             BotDetectionDataListDTO listDTO = BotDetectionMappingUtil.fromBotDetectionModelToDTO(botDetectionDataList);
             return Response.ok().entity(listDTO).build();
         } else {
-            throw new APIManagementException("Analytics Not Enabled", ExceptionCodes.ANALYTICS_NOT_ENABLED);
+            throw new APIManagementException("Analytics Not Enabled",
+                    ExceptionCodes.from(ExceptionCodes.ANALYTICS_NOT_ENABLED, "Bot Detection Data is",
+                            "Bot Detection Data"));
         }
     }
 }
