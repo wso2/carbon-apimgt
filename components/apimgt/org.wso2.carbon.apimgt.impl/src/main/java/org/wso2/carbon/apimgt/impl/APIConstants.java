@@ -349,6 +349,7 @@ public final class APIConstants {
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
     public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
+    public static final String API_OVERVIEW_DEPLOYMENTS = "overview_deployments";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
@@ -1526,6 +1527,7 @@ public final class APIConstants {
     public static final String API_LC_ACTION_DEPRECATE = "Deprecate";
     public static final String DEPRECATE_CHECK_LIST_ITEM = "Deprecate old versions after publishing the API";
     public static final String RESUBSCRIBE_CHECK_LIST_ITEM = "Requires re-subscription when publishing the API";
+    public static final String PUBLISH_IN_PRIVATE_JET_MODE = "Publish In Private-Jet Mode";
 
     public static final String METRICS_PREFIX = "org.wso2.am";
 
@@ -2293,6 +2295,13 @@ public final class APIConstants {
         public static final String DB_RETRIEVER_NAME = "DBRetriever";
         public static final String GATEWAY_INSTRUCTION_PUBLISH = "Publish";
         public static final String GATEWAY_INSTRUCTION_REMOVE = "Remove";
+
+    }
+
+    public static class ContainerMgtAttributes {
+        public static final String DEPLOYMENTS = "Deployments";
+        public static final String CONTAINER_MANAGEMENT = "ContainerMgt";
+        public static final String CONTAINER_MANAGEMENT_INFO ="ContainerMgtInfo";
 
     }
 }

@@ -31,6 +31,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.JWKSConfigurationDTO;
@@ -83,7 +84,7 @@ public class APIManagerConfiguration {
     private static final String EMAIL_LOGIN = "EmailLogin";
     private static final String PRIMARY_LOGIN = "primary";
     private static final String CLAIM_URI = "ClaimUri";
-    private static final String TOKEN_REVOCATION_NOTIFIERS ="TokenRevocationNotifiers";
+    private static final String TOKEN_REVOCATION_NOTIFIERS = "TokenRevocationNotifiers";
     private static final String REALTIME_NOTIFIER = "RealtimeNotifier";
     private static final String PERSISTENT_NOTIFIER = "PersistentNotifier";
     private static final String TOKEN_REVOCATION_NOTIFIERS_PASSWORD = "TokenRevocationNotifiers.Notifier.Password";
@@ -96,6 +97,7 @@ public class APIManagerConfiguration {
     private JSONArray applicationAttributes = new JSONArray();
     private JSONArray monetizationAttributes = new JSONArray();
     private CacheInvalidationConfiguration cacheInvalidationConfiguration;
+    private JSONArray containerMgtAttributes = new JSONArray();
 
     private RecommendationEnvironment recommendationEnvironment;
 
@@ -493,6 +495,8 @@ public class APIManagerConfiguration {
                 setRuntimeArtifactsSyncPublisherConfig(element);
             } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_RUNTIME_ARTIFACTS_GATEWAY_CONFIG.equals(localName)) {
                 setRuntimeArtifactsSyncGatewayConfig(element);
+            } else if (APIConstants.ContainerMgtAttributes.CONTAINER_MANAGEMENT.equals(localName)) {
+                setContainerMgtConfigurations(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -582,6 +586,10 @@ public class APIManagerConfiguration {
     public JSONArray getMonetizationAttributes() {
 
         return monetizationAttributes;
+    }
+
+    public JSONArray getContainerMgtAttributes() {
+        return containerMgtAttributes;
     }
 
     /**
@@ -709,6 +717,7 @@ public class APIManagerConfiguration {
 
     /**
      * set workflow related configurations
+     *
      * @param element
      */
     private void setWorkflowProperties(OMElement element) {
@@ -1309,6 +1318,7 @@ public class APIManagerConfiguration {
 
     /**
      * To populate Monetization Additional Attributes
+     *
      * @param element
      */
     private void setMonetizationAdditionalAttributes(OMElement element) {
@@ -1346,6 +1356,7 @@ public class APIManagerConfiguration {
 
     /**
      * To populate recommendation related configurations
+     *
      * @param element
      */
     private void setRecommendationConfigurations(OMElement element) {
@@ -1555,7 +1566,6 @@ public class APIManagerConfiguration {
         return keyManagerConfigurationsDto;
     }
 
-
     private void setRuntimeArtifactsSyncPublisherConfig (OMElement omElement){
 
         OMElement enableElement = omElement
@@ -1623,6 +1633,93 @@ public class APIManagerConfiguration {
 
     public GatewayArtifactSynchronizerProperties getGatewayArtifactSynchronizerProperties() {
 
-        return gatewayArtifactSynchronizerProperties;
+        return gatewayArtifactSynchronizerProperties; }
+
+    /**
+     * To populate deployment environments based configurations
+     *
+     * @param omElement
+     */
+    public void setContainerMgtConfigurations(OMElement omElement) {
+        JSONObject containerMgt = new JSONObject();
+        Iterator containerMgtElements = omElement.getChildElements();
+        JSONArray containerMgtInfo = new JSONArray();
+        Map<String, String> deploymentEnvs = new HashMap<>();
+        while (containerMgtElements.hasNext()) {
+            OMElement containerMgtElement = (OMElement) containerMgtElements.next();
+
+            //Get Deployment Environments
+            if (containerMgtElement.getLocalName().equals(ContainerBasedConstants.DEPLOYMENT_ENVIRONMENTS)) {
+                Iterator environmentsIterator = containerMgtElement.getChildElements();
+                while (environmentsIterator.hasNext()) {
+                    //read default values for class name and put into a map
+                    OMElement environmentElement = (OMElement) environmentsIterator.next();
+                    deploymentEnvs.put(environmentElement.getAttributeValue(new QName("name")).toLowerCase(),
+                            environmentElement.getText());
+                }
+            } else if (containerMgtElement.getLocalName().equals(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO)) {
+                //if configurations defined put them into JSON array
+                Iterator containerMgtInfoElements = containerMgtElement.getChildElements();
+                JSONObject containerMgtInfoObj = new JSONObject();
+                while (containerMgtInfoElements.hasNext()) {
+                    OMElement containerMgtInfoElement = (OMElement) containerMgtInfoElements.next();
+                    if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.TYPE)) {
+                        containerMgt.put(ContainerBasedConstants.TYPE, containerMgtInfoElement.getText().toLowerCase());
+                    } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.CLASS_NAME)) {
+                        if (containerMgtInfoElement.getText() != null && containerMgtInfoElement.getText() != "") {
+                            containerMgt.put(ContainerBasedConstants.CLASS_NAME, containerMgtInfoElement.getText().toLowerCase());
+                        } else {
+                            containerMgt.put(ContainerBasedConstants.CLASS_NAME,
+                                    deploymentEnvs.get(containerMgt.get(ContainerBasedConstants.TYPE)));
+                        }
+                    } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.CLUSTER_ID)) {
+                        containerMgtInfoObj.put(ContainerBasedConstants.CLUSTER_ID, containerMgtInfoElement.getText());
+                    } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.DISPLAY_NAME)) {
+                        containerMgtInfoObj.put(ContainerBasedConstants.DISPLAY_NAME, containerMgtInfoElement.getText());
+                    } else if (containerMgtInfoElement.getLocalName().equals(ContainerBasedConstants.PROPERTIES)) {
+                        Iterator clusterPropertiesIterator =
+                                containerMgtInfoElement.getChildElements();
+                        JSONObject propertyObj = new JSONObject();
+                        while (clusterPropertiesIterator.hasNext()) {
+                            OMElement propertyElement = (OMElement) clusterPropertiesIterator.next();
+
+                            if (propertyElement.getAttributeValue(new QName("name"))
+                                    .equals(ContainerBasedConstants.REPLICAS)) {
+                                propertyObj.put(ContainerBasedConstants.REPLICAS, propertyElement.getText());
+                            } else if (propertyElement.getAttributeValue(new QName("name"))
+                                    .equals(ContainerBasedConstants.INGRESS_URL)) {
+                                propertyObj.put(ContainerBasedConstants.INGRESS_URL, propertyElement.getText());
+                            } else if (propertyElement.getAttributeValue(new QName("name"))
+                                    .equals(ContainerBasedConstants.NAMESPACE)) {
+                                propertyObj.put(ContainerBasedConstants.NAMESPACE, propertyElement.getText());
+                            } else if (propertyElement.getAttributeValue(new QName("name"))
+                                    .equals(ContainerBasedConstants.SATOKEN)) {
+                                propertyObj.put(ContainerBasedConstants.SATOKEN, propertyElement.getText());
+                            } else if (propertyElement.getAttributeValue(new QName("name"))
+                                    .equals(ContainerBasedConstants.MASTER_URL)) {
+                                propertyObj.put(ContainerBasedConstants.MASTER_URL, propertyElement.getText());
+                            } else if (propertyElement.getAttributeValue(new QName("name"))
+                                    .equals(ContainerBasedConstants.JWT_SECURITY_CR_NAME)) {
+                                propertyObj.put(ContainerBasedConstants.JWT_SECURITY_CR_NAME, propertyElement.getText());
+                            } else if (propertyElement.getAttributeValue(new QName("name"))
+                                    .equals(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME)) {
+                                propertyObj.put(ContainerBasedConstants.OAUTH2_SECURITY_CR_NAME, propertyElement.getText());
+                            } else if (propertyElement.getAttributeValue(new QName("name"))
+                                    .equals(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME)) {
+                                propertyObj.put(ContainerBasedConstants.BASICAUTH_SECURITY_CR_NAME, propertyElement.getText());
+                            }
+                        }
+                        containerMgtInfoObj.put(ContainerBasedConstants.PROPERTIES, propertyObj);
+                    }
+                }
+                containerMgtInfo.add(containerMgtInfoObj);
+            }
+        }
+        if (!containerMgtInfo.isEmpty()) {
+            containerMgt.put(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO, containerMgtInfo);
+        }
+        if (!containerMgt.isEmpty()) {
+            containerMgtAttributes.add(containerMgt);
+        }
     }
 }
