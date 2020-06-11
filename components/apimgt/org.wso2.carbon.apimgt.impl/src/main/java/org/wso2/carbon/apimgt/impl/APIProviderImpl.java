@@ -1010,6 +1010,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+
     /**
      * Validates the name and version of api against illegal characters.
      *
@@ -2795,6 +2796,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                     authProperties);
+
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLQueryAnalysisHandler", Collections.<String, String>emptyMap());
+            }
+
             Map<String, String> properties = new HashMap<String, String>();
 
             boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
@@ -5971,7 +5977,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,subPolicy.getPolicyId(),
                         subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
-                        subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach());
+                        subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),
+                        subPolicy.getGraphQLMaxDepth(),subPolicy.getGraphQLMaxComplexity());
                 APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
@@ -6291,7 +6298,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,subPolicy.getPolicyId(),
                         subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
-                        subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach());
+                        subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),subPolicy.getGraphQLMaxDepth(),
+                        subPolicy.getGraphQLMaxComplexity());
                 APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
@@ -6416,7 +6424,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,subscriptionPolicy.getPolicyId(),
                     subscriptionPolicy.getPolicyName(), subscriptionPolicy.getDefaultQuotaPolicy().getType(),
                     subscriptionPolicy.getRateLimitCount(),subscriptionPolicy.getRateLimitTimeUnit(),
-                    subscriptionPolicy.isStopOnQuotaReach());
+                    subscriptionPolicy.isStopOnQuotaReach(),subscriptionPolicy.getGraphQLMaxDepth(),subscriptionPolicy.getGraphQLMaxComplexity());
             APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
             GlobalPolicy globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);

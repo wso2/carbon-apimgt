@@ -41,6 +41,7 @@ import MaxBackendTps from './components/MaxBackendTps';
 import Flow from './components/Flow';
 import Endpoints from './components/Endpoints';
 import APISecurity from './components/APISecurity/APISecurity';
+import QueryAnalysis from './components/QueryAnalysis';
 import KeyManager from './components/KeyManager';
 import {
     DEFAULT_API_SECURITY_OAUTH2,
@@ -371,6 +372,14 @@ export default function RuntimeConfiguration() {
                                             selectedMediationPolicy={inPolicy}
                                             isRestricted={isRestricted(['apim:api_create'], api)}
                                         />
+                                    )}
+                                    {api.type === 'GRAPHQL' && (
+                                        <Box mt={3}>
+                                            <QueryAnalysis
+                                                api={apiConfig}
+                                                isRestricted={isRestricted(['apim:api_create'], api)}
+                                            />
+                                        </Box>
                                     )}
                                 </Paper>
                                 <ArrowForwardIcon className={classes.arrowForwardIcon} />

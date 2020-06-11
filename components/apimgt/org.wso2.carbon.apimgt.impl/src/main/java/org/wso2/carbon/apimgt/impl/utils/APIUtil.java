@@ -107,6 +107,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -2536,6 +2537,17 @@ public final class APIUtil {
     }
 
     /**
+     * Check if document visibility levels are enabled
+     * @return True if document visibility levels are enabled
+     */
+    public static boolean isDocVisibilityLevelsEnabled() {
+        // checking if Doc visibility levels enabled in api-manager.xml
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(
+                        APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS).equals("true");
+    }
+
+    /**
      * Returns the External API Store Configuration with the given Store Name
      *
      * @param apiStoreName
@@ -4914,6 +4926,20 @@ public final class APIUtil {
             return 0;
         }
     }
+
+    /**
+     * This method is used to retrieve complexity details
+     *
+     * @param api API
+     * @return GraphqlComplexityInfo object that contains the complexity details
+     * @throws APIManagementException
+     */
+
+    public static GraphqlComplexityInfo getComplexityDetails(API api) throws  APIManagementException {
+        APIIdentifier identifier = api.getId();
+        return ApiMgtDAO.getInstance().getComplexityDetails(identifier);
+    }
+
 
     public static boolean isAPIManagementEnabled() {
         return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("APIManagement.Enabled"));

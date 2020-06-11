@@ -1168,6 +1168,15 @@ public final class APIConstants {
     public static final String OPERATION_AUTH_SCHEME_MAPPING = "OperationAuthSchemeMapping";
     public static final String OPERATION_SECURITY_ENABLED = "Enabled";
     public static final String OPERATION_SECURITY_DISABLED = "Disabled";
+    public static final String GRAPHQL_PAYLOAD = "GRAPHQL_PAYLOAD";
+    public static final String GRAPHQL_SCHEMA = "GRAPHQL_SCHEMA";
+    public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "GraphQLAccessControlPolicy";
+    public static final String QUERY_ANALYSIS_DEPTH = "depth";
+    public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
+    public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
+    public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
+    public static final String CHECK_ENABLED = "enabled";
+    public static final String DEFAULT_DEPTH_ROLE = "default";
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
@@ -1810,6 +1819,8 @@ public final class APIConstants {
         public static final String QUOTA_TYPE_BANDWIDTH = "bandwidthVolume";
         public static final String PERMITTED_IP = "permittedIP";
         public static final String PERMITTED_REFERER = "permittedReferer";
+        public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
+        public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
