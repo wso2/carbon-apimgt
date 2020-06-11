@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.containermgt;
 
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
