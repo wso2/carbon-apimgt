@@ -1406,7 +1406,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                             //updated api contain what environments want to add
                             Set<String> environmentsToPublish = new HashSet<String>(apiPublished.getEnvironments());
-                            List<Label> labelsToPublish = new ArrayList<>(apiPublished.getGatewayLabels());
+                            List<Label> labelsToPublish;
+                            if (apiPublished.getGatewayLabels() != null ){
+                                labelsToPublish = new ArrayList<>(apiPublished.getGatewayLabels());
+                            } else {
+                                labelsToPublish = new ArrayList<>();
+                            }
+
 
                             Set<String> environmentsRemoved = new HashSet<String>(oldApi.getEnvironments());
                             List<Label> labelsRemoved = new ArrayList<>(oldApi.getGatewayLabels());
