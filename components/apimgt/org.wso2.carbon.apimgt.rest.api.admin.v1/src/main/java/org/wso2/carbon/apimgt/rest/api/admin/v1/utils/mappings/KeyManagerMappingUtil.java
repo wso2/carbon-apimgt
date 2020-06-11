@@ -52,6 +52,7 @@ public class KeyManagerMappingUtil {
         KeyManagerDTO keyManagerDTO = new KeyManagerDTO();
         keyManagerDTO.setId(keyManagerConfigurationDTO.getUuid());
         keyManagerDTO.setName(keyManagerConfigurationDTO.getName());
+        keyManagerDTO.setDisplayName(keyManagerConfigurationDTO.getDisplayName());
         keyManagerDTO.setDescription(keyManagerConfigurationDTO.getDescription());
         keyManagerDTO.setType(keyManagerConfigurationDTO.getType());
         keyManagerDTO.setEnabled(keyManagerConfigurationDTO.isEnabled());
@@ -166,6 +167,7 @@ public class KeyManagerMappingUtil {
 
         KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
         keyManagerConfigurationDTO.setName(keyManagerDTO.getName());
+        keyManagerConfigurationDTO.setDisplayName(keyManagerDTO.getDisplayName());
         keyManagerConfigurationDTO.setDescription(keyManagerDTO.getDescription());
         keyManagerConfigurationDTO.setEnabled(keyManagerDTO.isEnabled());
         keyManagerConfigurationDTO.setType(keyManagerDTO.getType());
