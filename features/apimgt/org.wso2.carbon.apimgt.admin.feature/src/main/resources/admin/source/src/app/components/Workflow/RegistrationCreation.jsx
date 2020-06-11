@@ -114,7 +114,6 @@ function ListLabels() {
         });
     }
 
-
     const fetchData = () => {
     // Fetch data from backend
         setData(null);
@@ -123,7 +122,8 @@ function ListLabels() {
             setData(LocalData);
         })
             .catch((e) => {
-                Alert.error(e);
+                Alert.error('Unable to fetch data ' + e);
+                console.error('Unable to fetch data ' + e);
             });
     };
 
@@ -138,8 +138,7 @@ function ListLabels() {
         body.description = 'Approve workflow request.';
 
         const restApi = new API();
-        let promisedupdateWorkflow = '';
-        promisedupdateWorkflow = restApi.updateWorkflow(referenceId, body);
+        const promisedupdateWorkflow = restApi.updateWorkflow(referenceId, body);
         return promisedupdateWorkflow
             .then(() => {
                 return (
@@ -157,7 +156,7 @@ function ListLabels() {
                 }
                 return null;
             })
-            .finally(() => {
+            .then(() => {
                 fetchData();
             });
     };
@@ -187,11 +186,7 @@ function ListLabels() {
                     </ListItem>
                 </List>
             </HelpBase>),
-        /*
-        pageStyle='half' center part of the screen.
-        pageStyle='full' = Take the full content area.
-        pageStyle='paperLess' = Avoid from displaying background paper. ( For dashbord we need this )
-        */
+
         pageStyle: 'half',
         title: intl.formatMessage({
             id: 'Workflow.RegistrationCreation.title.registrationcreation',
@@ -202,7 +197,10 @@ function ListLabels() {
     const columProps = [
         {
             name: 'description',
-            label: 'Description',
+            label: intl.formatMessage({
+                id: 'Workflow.RegistrationCreation.table.header.Description',
+                defaultMessage: 'Description',
+            }),
             options: {
                 sort: false,
                 display: false,
@@ -210,7 +208,10 @@ function ListLabels() {
         },
         {
             name: 'application',
-            label: 'Application',
+            label: intl.formatMessage({
+                id: 'Workflow.RegistrationCreation.table.header.Application',
+                defaultMessage: 'Application',
+            }),
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
@@ -226,7 +227,10 @@ function ListLabels() {
         },
         {
             name: 'applicationTier',
-            label: 'Throtting Policy',
+            label: intl.formatMessage({
+                id: 'Workflow.RegistrationCreation.table.header.ApplicationTier',
+                defaultMessage: 'Throtting Policy',
+            }),
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
@@ -242,7 +246,10 @@ function ListLabels() {
         },
         {
             name: 'keyType',
-            label: 'Key Type',
+            label: intl.formatMessage({
+                id: 'Workflow.RegistrationCreation.table.header.KeyType',
+                defaultMessage: 'Key Type',
+            }),
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
@@ -258,7 +265,10 @@ function ListLabels() {
         },
         {
             name: 'creater',
-            label: 'Created by',
+            label: intl.formatMessage({
+                id: 'Workflow.RegistrationCreation.table.header.Creater',
+                defaultMessage: 'Created by',
+            }),
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
@@ -285,7 +295,10 @@ function ListLabels() {
         },
         {
             name: 'action',
-            label: 'Actions',
+            label: intl.formatMessage({
+                id: 'Workflow.RegistrationCreation.table.header.Action',
+                defaultMessage: 'Action',
+            }),
             options: {
                 sort: false,
                 customBodyRender: (value, tableMeta) => {
@@ -338,11 +351,9 @@ function ListLabels() {
         defaultMessage: 'Search by workflow request description',
     });
 
-
     const filterData = (event) => {
         setSearchText(event.target.value);
     };
-
 
     const columns = [
         ...columProps,
@@ -381,8 +392,8 @@ function ListLabels() {
                                     id='Workflow.ApplicationRegistration.List.empty.content.applicationregistrations'
                                     defaultMessage={'There are no workflow pending requests for application '
                                     + 'registration. It is possible to approve or reject workflow pending requests of '
-                                    + 'application registration. Workflow Approval Executor need to be enabled to '
-                                    + 'introduce this approve reject process into system'}
+                                    + 'application registration. Workflow Approval Executor needs to be enabled '
+                                    + 'to approve or reject the requests. '}
                                 />
                             </Typography>
                         </CardContent>
