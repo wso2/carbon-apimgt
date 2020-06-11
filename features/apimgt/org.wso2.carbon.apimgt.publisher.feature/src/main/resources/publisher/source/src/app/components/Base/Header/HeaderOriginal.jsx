@@ -44,7 +44,6 @@ const styles = (theme) => ({
         color: theme.palette.primary.contrastText,
     },
     toolbar: {
-        paddingLeft: 8,
         minHeight: 56,
         [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
             minHeight: 48,
@@ -55,8 +54,7 @@ const styles = (theme) => ({
     },
     menuIcon: {
         color: theme.palette.getContrastText(theme.palette.background.appBar),
-        fontSize: 24,
-        marginRight: 10,
+        fontSize: 35,
     },
 });
 
@@ -114,9 +112,11 @@ class Header extends React.Component {
             <>
                 <AppBar className={classes.appBar} position='fixed'>
                     <Toolbar className={classes.toolbar}>
-                        <IconButton onClick={this.toggleGlobalNavBar}>
-                            <MenuIcon className={classes.menuIcon} />
-                        </IconButton>
+                        <Hidden mdUp>
+                            <IconButton onClick={this.toggleGlobalNavBar}>
+                                <MenuIcon className={classes.menuIcon} />
+                            </IconButton>
+                        </Hidden>
                         <Link to='/'>
                             <img
                                 src={Configurations.app.context + theme.custom.logo}
