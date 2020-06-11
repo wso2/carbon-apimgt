@@ -104,7 +104,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.tokenmgt</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.wso2.carbon.apimgt</groupId>
