@@ -151,12 +151,14 @@ public class SettingsDTO   {
     this.docVisibilityEnabled = docVisibilityEnabled;
   }
 
+  /**
+   **/
   public SettingsDTO deployments(List<DeploymentsDTO> deployments) {
     this.deployments = deployments;
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
   @JsonProperty("deployments")
   public List<DeploymentsDTO> getDeployments() {
@@ -165,6 +167,7 @@ public class SettingsDTO   {
   public void setDeployments(List<DeploymentsDTO> deployments) {
     this.deployments = deployments;
   }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
