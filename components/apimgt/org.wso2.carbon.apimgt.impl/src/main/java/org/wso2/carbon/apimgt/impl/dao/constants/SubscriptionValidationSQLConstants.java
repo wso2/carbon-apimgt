@@ -211,7 +211,7 @@ public class SubscriptionValidationSQLConstants {
                     "   APS.STOP_ON_QUOTA_REACH AS STOP_ON_QUOTA_REACH, " +
                     "   APS.TENANT_ID AS TENANT_ID, " +
                     "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_DEPTH AS MAX_DEPTH, " +
-                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_COMPLEXITY AS MAX_COMPLEXITY, " +
+                    "   AM_GRAPHQL_QUERY_ANALYSIS.MAX_COMPLEXITY AS MAX_COMPLEXITY" +
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION AS APS" +
                     "LEFT OUTER JOIN "+
