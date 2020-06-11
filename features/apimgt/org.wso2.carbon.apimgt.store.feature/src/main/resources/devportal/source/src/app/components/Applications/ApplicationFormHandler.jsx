@@ -44,7 +44,12 @@ const styles = theme => ({
         '& span': {
             color: theme.palette.getContrastText(theme.palette.primary.main),
         }
-    }
+    },
+    warning: {
+        '& span': {
+            color: theme.palette.warning.dark,
+        }
+    },
 });
 
 /**
@@ -75,6 +80,8 @@ class ApplicationFormHandler extends React.Component {
             allAppAttributes: null,
             isApplicationSharingEnabled: true,
             applicationOwner: '',
+            allowedTokenTypes: {},
+            oldAppTokenType: '',
         };
         this.handleAddChip = this.handleAddChip.bind(this);
         this.handleDeleteChip = this.handleDeleteChip.bind(this);
@@ -123,6 +130,7 @@ class ApplicationFormHandler extends React.Component {
                 const throttlingPolicyList = tierResponse.body.list.map((item) => item.name);
                 const allAppAttributes = allAttributes.body.list;
                 const newRequest = { ...applicationRequest };
+                const allowedTokenTypes = this.getAllowedTokenTypes(application.tokenType);
                 newRequest.applicationId = application.applicationId;
                 newRequest.name = application.name;
                 newRequest.throttlingPolicy = application.throttlingPolicy;
@@ -136,6 +144,8 @@ class ApplicationFormHandler extends React.Component {
                     throttlingPolicyList,
                     allAppAttributes,
                     applicationOwner: response[0].owner,
+                    allowedTokenTypes: allowedTokenTypes,
+                    oldAppTokenType: application.tokenType,
                 });
             })
             .catch((error) => {
@@ -147,13 +157,14 @@ class ApplicationFormHandler extends React.Component {
                 }
             });
         this.isApplicationGroupSharingEnabled();
-    }
+    };
 
     /**
      * Used to initialize the component state
      * @memberof ApplicationFormHandler
      */
     initApplicationCreateState = () => {
+        const allowedTokenTypes = this.getAllowedTokenTypes();
         // Get all the tiers to populate the drop down.
         const api = new API();
         const promiseTiers = api.getAllTiers('application');
@@ -167,12 +178,23 @@ class ApplicationFormHandler extends React.Component {
                 if (throttlingPolicyList.length > 0) {
                     [newRequest.throttlingPolicy] = throttlingPolicyList;
                 }
+                if (allowedTokenTypes.JWT) {
+                    // set the default selected token type to JWT if it is in the allowed token type map.
+                    newRequest.tokenType = 'JWT';
+                } else {
+                    newRequest.tokenType = Object.keys(allowedTokenTypes)[0];
+                }
                 const allAppAttributes = [];
                 allAttributes.body.list.map((item) => allAppAttributes.push(item));
                 if (allAttributes.length > 0) {
                     newRequest.attributes = allAppAttributes.filter((item) => !item.hidden);
                 }
-                this.setState({ applicationRequest: newRequest, throttlingPolicyList, allAppAttributes });
+                this.setState({
+                    applicationRequest: newRequest,
+                    throttlingPolicyList,
+                    allAppAttributes,
+                    allowedTokenTypes: allowedTokenTypes,
+                });
             })
             .catch((error) => {
                 console.log(error);
@@ -182,7 +204,81 @@ class ApplicationFormHandler extends React.Component {
                     this.setState({ notFound: true });
                 }
             });
-    }
+    };
+
+    /**
+     * Returns the allowed token types map.
+     * @returns {object}
+     */
+    getAllowedTokenTypes = (oldApplicationTokenType) => {
+        const settingsContext = this.context;
+        const allowedTokenTypesArray = settingsContext.settings.allowedAppTokenTypes;
+        let allowedTokenTypesMap = {};
+        // iterate through Application.TOKEN_TYPES map and populate the allowed types as a map
+        if (allowedTokenTypesArray) {
+            Object.entries(Application.TOKEN_TYPES).map(([key, value]) => (
+                allowedTokenTypesArray.map((tokenType) => {
+                    if (tokenType === key) {
+                        allowedTokenTypesMap[key] = value;
+                    }
+                })
+            ));
+
+            if (oldApplicationTokenType) {
+                /*
+                 * In case when application token types are restricted, but before that an application is created
+                 * with a restricted token type, we should show the restricted token type with the allowed token types
+                 * for editing as the app is already created.
+                 * */
+                if (allowedTokenTypesArray
+                    && !allowedTokenTypesArray.includes(oldApplicationTokenType)) {
+                    let key = oldApplicationTokenType;
+                    allowedTokenTypesMap[key] = (Application.TOKEN_TYPES)[key];
+                }
+            }
+            return allowedTokenTypesMap;
+        } else {
+            return Application.TOKEN_TYPES;
+        }
+    };
+
+    /**
+     * Checks token type to complete the helper text for token type field.
+     */
+    checkTokenType = () => {
+        const { classes } = this.props;
+        const { applicationRequest, oldAppTokenType } = this.state;
+        const allowedTokenTypes = this.getAllowedTokenTypes();
+        const newAppTokenType = applicationRequest.tokenType;
+        const settingsContext = this.context;
+        const allowedTokenTypesArray = settingsContext.settings.allowedAppTokenTypes;
+
+        /*
+        * In case when application token types are restricted, but before that an application is created with a
+        * restricted token type, and now the user tries to change the token type of the application. In this scenario,
+        * we provide a warning message saying that you cannot go back to the old token type(now restricted) as it is
+        * restricted.
+        * */
+        if (allowedTokenTypesArray && oldAppTokenType && !Object.keys(allowedTokenTypes).includes(oldAppTokenType)
+            && oldAppTokenType !== newAppTokenType) {
+            return (
+                <span className={classes.warning}>
+                    <FormattedMessage
+                        defaultMessage='If you choose this token type, you will not be able to go back to your old
+                         application token type'
+                        id='Shared.AppsAndKeys.ApplicationCreateForm.select.token.type.warn'
+                    />
+                </span>
+            );
+        } else {
+            return (
+                <FormattedMessage
+                    defaultMessage='Select token type'
+                    id='Shared.AppsAndKeys.ApplicationCreateForm.select.token.type'
+                />
+            );
+        }
+    };
 
     /**
      * Update Application Request state
@@ -391,7 +487,7 @@ class ApplicationFormHandler extends React.Component {
     render() {
         const {
             throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled,
-            isEdit, applicationOwner,
+            isEdit, applicationOwner, allowedTokenTypes,
         } = this.state;
         const { match: { params }, classes } = this.props;
 
@@ -453,6 +549,8 @@ class ApplicationFormHandler extends React.Component {
                                     isApplicationSharingEnabled={isApplicationSharingEnabled}
                                     handleDeleteChip={this.handleDeleteChip}
                                     handleAddChip={this.handleAddChip}
+                                    allowedTokenTypes={allowedTokenTypes}
+                                    checkTokenType={this.checkTokenType}
                                 />
 
                                 <Box display='flex' justifyContent='flex-start' mt={4} spacing={1}>

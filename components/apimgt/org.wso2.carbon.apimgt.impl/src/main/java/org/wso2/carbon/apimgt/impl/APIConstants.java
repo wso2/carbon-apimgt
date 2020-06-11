@@ -748,6 +748,7 @@ public final class APIConstants {
     public static final String API_STORE_GROUP_EXTRACTOR_CLAIM_URI = API_STORE + "DefaultGroupExtractorClaimUri";
     public static final String API_STORE_MAP_EXISTING_AUTH_APPS = API_STORE + "MapExistingAuthApps";
     public static final String API_STORE_API_KEY_ALIAS = API_STORE + "ApiKeyAlias";
+    public static final String API_STORE_ALLOWED_APPLICATION_TOKEN_TYPES = API_STORE + "AllowedApplicationTokenTypes.TokenType";
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
     public static final String API_DEVPORTAL_ANONYMOUS_MODE = API_STORE + "EnableAnonymousMode";
 

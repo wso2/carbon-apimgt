@@ -26,6 +26,7 @@ public class SettingsDTO   {
     private Boolean monetizationEnabled = false;
     private Boolean recommendationEnabled = false;
     private Boolean isUnlimitedTierPaid = false;
+    private List<String> allowedAppTokenTypes = new ArrayList<>();
     private SettingsIdentityProviderDTO identityProvider = null;
     private Boolean isAnonymousModeEnabled = true;
 
@@ -167,6 +168,23 @@ public class SettingsDTO   {
 
   /**
    **/
+  public SettingsDTO allowedAppTokenTypes(List<String> allowedAppTokenTypes) {
+    this.allowedAppTokenTypes = allowedAppTokenTypes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("allowedAppTokenTypes")
+  public List<String> getAllowedAppTokenTypes() {
+    return allowedAppTokenTypes;
+  }
+  public void setAllowedAppTokenTypes(List<String> allowedAppTokenTypes) {
+    this.allowedAppTokenTypes = allowedAppTokenTypes;
+  }
+
+  /**
+   **/
   public SettingsDTO identityProvider(SettingsIdentityProviderDTO identityProvider) {
     this.identityProvider = identityProvider;
     return this;
@@ -217,13 +235,14 @@ public class SettingsDTO   {
         Objects.equals(monetizationEnabled, settings.monetizationEnabled) &&
         Objects.equals(recommendationEnabled, settings.recommendationEnabled) &&
         Objects.equals(isUnlimitedTierPaid, settings.isUnlimitedTierPaid) &&
+        Objects.equals(allowedAppTokenTypes, settings.allowedAppTokenTypes) &&
         Objects.equals(identityProvider, settings.identityProvider) &&
         Objects.equals(isAnonymousModeEnabled, settings.isAnonymousModeEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, allowedAppTokenTypes, identityProvider, isAnonymousModeEnabled);
   }
 
   @Override
@@ -239,6 +258,7 @@ public class SettingsDTO   {
     sb.append("    monetizationEnabled: ").append(toIndentedString(monetizationEnabled)).append("\n");
     sb.append("    recommendationEnabled: ").append(toIndentedString(recommendationEnabled)).append("\n");
     sb.append("    isUnlimitedTierPaid: ").append(toIndentedString(isUnlimitedTierPaid)).append("\n");
+    sb.append("    allowedAppTokenTypes: ").append(toIndentedString(allowedAppTokenTypes)).append("\n");
     sb.append("    identityProvider: ").append(toIndentedString(identityProvider)).append("\n");
     sb.append("    isAnonymousModeEnabled: ").append(toIndentedString(isAnonymousModeEnabled)).append("\n");
     sb.append("}");

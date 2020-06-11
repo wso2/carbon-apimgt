@@ -18,6 +18,9 @@ const DefaultConfigurations = {
             paper: '#ffffff',
             drawer: '#1a1f2f',
         },
+        warning: {
+            dark: '#ffa500',
+        },
     },
     typography: {
         fontFamily: '"Open Sans", "Helvetica", "Arial", sans-serif',

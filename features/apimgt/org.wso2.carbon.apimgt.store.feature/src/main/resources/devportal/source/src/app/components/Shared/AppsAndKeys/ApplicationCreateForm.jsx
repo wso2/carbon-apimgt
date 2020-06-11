@@ -113,6 +113,8 @@ const ApplicationCreate = (props) => {
         isApplicationSharingEnabled,
         handleAddChip,
         handleDeleteChip,
+        allowedTokenTypes,
+        checkTokenType,
     } = props;
     return (
         <form noValidate autoComplete='off' className={classes.applicationForm}>
@@ -197,16 +199,11 @@ const ApplicationCreate = (props) => {
                 value={applicationRequest.tokenType}
                 name='tokenType'
                 onChange={handleChange}
-                helperText={(
-                    <FormattedMessage
-                        defaultMessage='Select token type'
-                        id='Shared.AppsAndKeys.ApplicationCreateForm.select.token.type'
-                    />
-                )}
+                helperText={checkTokenType()}
                 margin='normal'
                 variant='outlined'
             >
-                {Object.entries(Application.TOKEN_TYPES).map(([key, value]) => (
+                {Object.entries(allowedTokenTypes).map(([key, value]) => (
                     <MenuItem key={value.displayName} value={key}>
                         {value.displayName}
                     </MenuItem>
@@ -300,6 +297,8 @@ ApplicationCreate.propTypes = {
     handleAddChip: PropTypes.func.isRequired,
     handleDeleteChip: PropTypes.func.isRequired,
     throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
+    allowedTokenTypes: PropTypes.shape({}).isRequired,
+    checkTokenType: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(ApplicationCreate));

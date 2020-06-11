@@ -498,6 +498,15 @@
 
         <!--This parameter specifies whether Anonymous Mode is enabled. By default it is true.-->
         <EnableAnonymousMode>{{apim.devportal.enable_anonymous_mode}}</EnableAnonymousMode>
+
+        <!--This parameter specifies allowed token types for application creation-->
+        {% if apim.devportal.allowed_application_token_types is defined %}
+            <AllowedApplicationTokenTypes>
+                {%for tokenType in apim.devportal.allowed_application_token_types%}
+                    <TokenType>{{tokenType}}</TokenType>
+                {% endfor %}
+            </AllowedApplicationTokenTypes>
+        {% endif %}
     </APIStore>
 
     <APIPublisher>

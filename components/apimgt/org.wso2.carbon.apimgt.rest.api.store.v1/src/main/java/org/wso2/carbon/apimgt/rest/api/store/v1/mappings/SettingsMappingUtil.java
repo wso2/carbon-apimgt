@@ -53,6 +53,7 @@ public class SettingsMappingUtil {
         identityProviderDTO.setExternal(APIUtil.getIdentityProviderConfig() != null);
         settingsDTO.setIdentityProvider(identityProviderDTO);
         settingsDTO.setIsAnonymousModeEnabled(anonymousEnabled);
+        settingsDTO.setAllowedAppTokenTypes(APIUtil.getAllowedTokenTypesForAppCreation());
         if (isUserAvailable) {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());
             Map<String, Environment> environments = APIUtil.getEnvironments();

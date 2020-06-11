@@ -418,6 +418,7 @@
   "Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application.placeholder": "My Mobile Application",
   "Shared.AppsAndKeys.ApplicationCreateForm.per.token.quota": "Per Token Quota.",
   "Shared.AppsAndKeys.ApplicationCreateForm.select.token.type": "Select token type",
+  "Shared.AppsAndKeys.ApplicationCreateForm.select.token.type.warn": "If you choose this token type, you will not be able to go back to your old\n                         application token type",
   "Shared.AppsAndKeys.ApplicationCreateForm.token.type": "Token Type",
   "Shared.AppsAndKeys.ApplicationCreateForm.type.a.group.and.enter": "Type a group and enter",
   "Shared.AppsAndKeys.KeyConfCiguration.Invalid.callback.url.error.text": "Invalid url. Please enter a valid url.",

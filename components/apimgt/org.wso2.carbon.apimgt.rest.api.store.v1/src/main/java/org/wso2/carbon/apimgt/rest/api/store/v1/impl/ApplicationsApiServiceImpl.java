@@ -164,6 +164,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 RestApiUtil.handleBadRequest("Specified tier " + tierName + " is invalid", log);
             }
 
+            if (APIUtil.getAllowedTokenTypesForAppCreation() != null) {
+                List<String> allowedTokenTypes = APIUtil.getAllowedTokenTypesForAppCreation();
+                if (!allowedTokenTypes.contains(body.getTokenType().toString())) {
+                    RestApiUtil.handleBadRequest("Specified token type is not allowed", log);
+                }
+            }
+
             Object applicationAttributesFromUser = body.getAttributes();
             Map<String, String> applicationAttributes =
                     new ObjectMapper().convertValue(applicationAttributesFromUser, Map.class);
@@ -276,6 +283,20 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             
             if (!RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+
+            if (APIUtil.getAllowedTokenTypesForAppCreation() != null) {
+                List<String> allowedTokenTypes = APIUtil.getAllowedTokenTypesForAppCreation();
+                /*
+                 * If the old application token type is equal to updated application type or the token type is in the
+                 * allowed token types, proceed. Otherwise throw and error. In here we check for the old application
+                 * token type as in a scenario where token type A is restricted after creating an app with that type,
+                 * still we allow to use token type A for that application.
+                 * */
+                if (!(oldApplication.getTokenType().equalsIgnoreCase(body.getTokenType().toString())
+                        || allowedTokenTypes.contains(body.getTokenType().toString()))) {
+                    RestApiUtil.handleBadRequest("Specified token type is not allowed", log);
+                }
             }
 
             Object applicationAttributesFromUser = body.getAttributes();

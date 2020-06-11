@@ -5409,6 +5409,10 @@ definitions:
       IsUnlimitedTierPaid:
         type: boolean
         default: false
+      allowedAppTokenTypes:
+        type: array
+        items:
+          type: string
       identityProvider:
         properties:
           external:
