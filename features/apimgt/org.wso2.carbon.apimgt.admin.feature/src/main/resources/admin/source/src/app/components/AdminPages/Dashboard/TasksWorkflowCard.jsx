@@ -28,13 +28,14 @@ import Divider from '@material-ui/core/Divider';
 import Link from '@material-ui/core/Link';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import AddToQueueRoundedIcon from '@material-ui/icons/AddToQueueRounded';
+import AirplayRoundedIcon from '@material-ui/icons/AirplayRounded';
 import DeviceHubIcon from '@material-ui/icons/DeviceHub';
-import DnsRoundedIcon from '@material-ui/icons/DnsRounded';
+import FormatShapesRoundedIcon from '@material-ui/icons/FormatShapesRounded';
 import LaunchIcon from '@material-ui/icons/Launch';
-import PeopleIcon from '@material-ui/icons/People';
-import PermMediaOutlinedIcon from '@material-ui/icons/PhotoSizeSelectActual';
-import PublicIcon from '@material-ui/icons/Public';
-import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
+import PersonAddRoundedIcon from '@material-ui/icons/PersonAddRounded';
+import RssFeedRoundedIcon from '@material-ui/icons/RssFeedRounded';
+import Api from 'AppData/api';
 import Configurations from 'Config';
 
 const useStyles = makeStyles((theme) => ({
@@ -61,6 +62,15 @@ const useStyles = makeStyles((theme) => ({
 export default function TasksWorkflowCard() {
     const classes = useStyles();
     const intl = useIntl();
+    const api = new Api();
+
+    const [userCretionTasks, setUserCreationTasks] = useState();
+    const [applicationCreationTasks, setApplicationCreationTasks] = useState();
+    const [subscriptionCreationTasks, setSubscriptionCreationTasks] = useState();
+    const [applicationRegistrationTasks, setApplicationRegistrationTasks] = useState();
+    const [apiStateChangeTasks, setApiStateChangeTasks] = useState();
+    const [allTasksCount, setAllTasksCount] = useState(0);
+
     const [tasksList, setTasksList] = useState();
     // const restApi = new API();
     // todo: delete dev components
@@ -92,11 +102,42 @@ export default function TasksWorkflowCard() {
         },
     ];
 
+    const fetchAllWorkFlows = () => {
+        let tasksCounter = 0;
+        api.workflowsGet('AM_USER_SIGNUP')
+            .then((result) => {
+                setUserCreationTasks(result.body.list);
+                tasksCounter += result.body.count;
+            });
+        api.workflowsGet('AM_API_STATE')
+            .then((result) => {
+                setApiStateChangeTasks(result.body.list);
+                tasksCounter += result.body.count;
+            });
+        api.workflowsGet('AM_APPLICATION_CREATION')
+            .then((result) => {
+                setApplicationCreationTasks(result.body.list);
+                tasksCounter += result.body.count;
+            });
+        api.workflowsGet('AM_USER_SIGNUP')
+            .then((result) => {
+                setUserCreationTasks(result.body.list);
+                tasksCounter += result.body.count;
+            });
+        api.workflowsGet('AM_USER_SIGNUP')
+            .then((result) => {
+                setUserCreationTasks(result.body.list);
+                tasksCounter += result.body.count;
+            });
+        setAllTasksCount(tasksCounter);
+    };
+
     useEffect(() => {
         // todo: do api calls and set tasksList
         setTasksList(mockTasksList);
         // setTasksList([]);
     }, []);
+
 
     const tasksDisabledCard = (
         <Card className={classes.root}>
@@ -199,7 +240,7 @@ export default function TasksWorkflowCard() {
     const compactTasksCard = () => {
         const compactTaskComponentDetails = [
             {
-                icon: PeopleIcon,
+                icon: PersonAddRoundedIcon,
                 path: '/tasks/user-creation',
                 name: intl.formatMessage({
                     id: 'Dashboard.tasksWorkflow.compactTasks.userCreation.name',
@@ -207,7 +248,7 @@ export default function TasksWorkflowCard() {
                 }),
             },
             {
-                icon: DnsRoundedIcon,
+                icon: AddToQueueRoundedIcon,
                 path: '/tasks/application-creation',
                 name: intl.formatMessage({
                     id: 'Dashboard.tasksWorkflow.compactTasks.applicationCreation.name',
@@ -215,7 +256,7 @@ export default function TasksWorkflowCard() {
                 }),
             },
             {
-                icon: PermMediaOutlinedIcon,
+                icon: RssFeedRoundedIcon,
                 path: '/tasks/subscription-creation',
                 name: intl.formatMessage({
                     id: 'Dashboard.tasksWorkflow.compactTasks.subscriptionCreation.name',
@@ -223,7 +264,7 @@ export default function TasksWorkflowCard() {
                 }),
             },
             {
-                icon: PublicIcon,
+                icon: AirplayRoundedIcon,
                 path: '/tasks/application-registration',
                 name: intl.formatMessage({
                     id: 'Dashboard.tasksWorkflow.compactTasks.applicationRegistration.name',
@@ -231,7 +272,7 @@ export default function TasksWorkflowCard() {
                 }),
             },
             {
-                icon: SettingsEthernetIcon,
+                icon: FormatShapesRoundedIcon,
                 path: '/tasks/api-state-change',
                 name: intl.formatMessage({
                     id: 'Dashboard.tasksWorkflow.compactTasks.apiStateChange.name',

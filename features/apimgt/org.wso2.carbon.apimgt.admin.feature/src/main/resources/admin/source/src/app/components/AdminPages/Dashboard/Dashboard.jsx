@@ -21,6 +21,7 @@ import Grid from '@material-ui/core/Grid';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import APICategoriesCard from 'AppComponents/AdminPages/Dashboard/APICategoriesCard';
 import RateLimitingCard from 'AppComponents/AdminPages/Dashboard/RateLimitingCard';
+import TasksWorkflowCard from 'AppComponents/AdminPages/Dashboard/TasksWorkflowCard';
 
 /**
  * Render progress inside a container centering in the container.
