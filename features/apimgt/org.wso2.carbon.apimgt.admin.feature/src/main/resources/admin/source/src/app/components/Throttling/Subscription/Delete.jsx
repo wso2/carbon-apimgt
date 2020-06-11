@@ -36,23 +36,23 @@ function Delete(props) {
     } = props;
 
     const formSaveCallback = () => {
-        const policyId = dataRow[4];
+        const policyId = dataRow[6];
         const promiseAPICall = restApi
-            .deleteApplicationThrottlingPolicy(policyId)
+            .deleteSubscriptionPolicy(policyId)
             .then(() => {
                 updateList();
                 return (
                     <FormattedMessage
-                        id='Throttling.Application.Policy.policy.delete.success'
-                        defaultMessage='Application Rate Limiting Policy successfully deleted.'
+                        id='Throttling.Subscription.Policy.policy.delete.success'
+                        defaultMessage='Subscription Rate Limiting Policy successfully deleted.'
                     />
                 );
             })
             .catch(() => {
                 return (
                     <FormattedMessage
-                        id='Throttling.Application.Policy.policy.delete.error'
-                        defaultMessage='Application Rate Limiting Policy could not be deleted.'
+                        id='Throttling.Subscription.Policy.policy.delete.error'
+                        defaultMessage='Subscription Rate Limiting Policy could not be deleted.'
                     />
                 );
             });
@@ -62,27 +62,30 @@ function Delete(props) {
 
     return (
         <FormDialogBase
-            title='Delete Application Policy?'
+            title='Delete Subscription Policy?'
             saveButtonText='Delete'
             icon={<DeleteForeverIcon />}
             formSaveCallback={formSaveCallback}
         >
             <DialogContentText>
                 <FormattedMessage
-                    id='Throttling.Application.Policy.policy.dialog.delete.error'
-                    defaultMessage='Application Rate Limiting Policy will be deleted.'
+                    id='Throttling.Subscription.Policy.policy.dialog.delete.error'
+                    defaultMessage='Subscription Rate Limiting Policy will be deleted.'
                 />
             </DialogContentText>
         </FormDialogBase>
     );
 }
+Delete.defaultProps = {
+    dataRow: null,
+};
+
 Delete.propTypes = {
     updateList: PropTypes.number.isRequired,
-    selectedPolicyName: PropTypes.shape({
-        name: PropTypes.number.isRequired,
-    }).isRequired,
     dataRow: PropTypes.shape({
-        policyId: PropTypes.number.isRequired,
-    }).isRequired,
+        id: PropTypes.string.isRequired,
+        description: PropTypes.string.isRequired,
+        label: PropTypes.string.isRequired,
+    }),
 };
 export default Delete;

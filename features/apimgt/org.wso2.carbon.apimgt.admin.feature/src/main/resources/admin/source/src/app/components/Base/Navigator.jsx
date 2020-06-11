@@ -1,8 +1,9 @@
 import React from 'react';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
-import { injectIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -70,12 +71,18 @@ const styles = (theme) => ({
  */
 function Navigator(props) {
     const {
-        classes, intl, history, ...other
+        classes, history, ...other
     } = props;
+    const intl = useIntl();
+    const { settings } = useAppContext();
+    const isAnalyticsEnabled = settings.analyticsEnabled;
     const matchMenuPath = (currentRoute, pathToMatch) => {
         return (currentRoute.indexOf(pathToMatch) !== -1);
     };
-    const routeMenuMapping = RouteMenuMapping(intl);
+    let routeMenuMapping = RouteMenuMapping(intl);
+    if (!isAnalyticsEnabled) {
+        routeMenuMapping = RouteMenuMapping(intl).filter((menu) => menu.id !== 'Manage Alerts');
+    }
     const updateAllRoutePaths = (path) => {
         for (let i = 0; i < routeMenuMapping.length; i++) {
             const childRoutes = routeMenuMapping[i].children;
@@ -120,7 +127,7 @@ function Navigator(props) {
                 }) => (
                     <>
                         {!children && (
-                            <Link component={RouterLink} to={parentPath}>
+                            <Link component={RouterLink} to={parentPath} style={{ textDecoration: 'none' }}>
                                 <ListItem
                                     className={clsx(
                                         classes.item,
@@ -158,4 +165,4 @@ Navigator.propTypes = {
     classes: PropTypes.shape({}).isRequired,
 };
 
-export default injectIntl(withRouter(withStyles(styles)(Navigator)));
+export default withRouter(withStyles(styles)(Navigator));
