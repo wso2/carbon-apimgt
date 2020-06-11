@@ -15530,7 +15530,7 @@ public class ApiMgtDAO {
     /**
      * Retrieve the list of blobs of the APIs for a given label
      *
-     * @param gatewayLabel - Gateway label of the API
+     * @param label - Gateway label of the API
      * @throws APIManagementException if an error occurs
      */
     public List<ByteArrayInputStream> getAllGatewayPublishedAPIArtifacts(String label)
