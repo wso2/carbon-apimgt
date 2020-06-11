@@ -220,7 +220,7 @@
         "summary" : "Get all apis",
         "description" : "This will provide access to apis in database.\n",
         "parameters" : [ {
-          "name" : "X-WSO2-Tenant",
+          "name" : "xWSO2Tenant",
           "in" : "header",
           "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
@@ -267,7 +267,7 @@
         "summary" : "Get all applications",
         "description" : "This will provide access to applications in database.\n",
         "parameters" : [ {
-          "name" : "X-WSO2-Tenant",
+          "name" : "xWSO2Tenant",
           "in" : "header",
           "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
@@ -301,7 +301,7 @@
         "summary" : "Get all subscriptions",
         "description" : "This will provide access to subscriptions in database.\n",
         "parameters" : [ {
-          "name" : "X-WSO2-Tenant",
+          "name" : "xWSO2Tenant",
           "in" : "header",
           "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
@@ -341,7 +341,7 @@
         "summary" : "Get all subscription throttling policies",
         "description" : "This will provide access to subscription level throttling policies in database.\n",
         "parameters" : [ {
-          "name" : "X-WSO2-Tenant",
+          "name" : "xWSO2Tenant",
           "in" : "header",
           "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
@@ -375,7 +375,7 @@
         "summary" : "Get all application throttling policies",
         "description" : "This will provide access to application level throttling policies in database.\n",
         "parameters" : [ {
-          "name" : "X-WSO2-Tenant",
+          "name" : "xWSO2Tenant",
           "in" : "header",
           "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
@@ -409,7 +409,7 @@
         "summary" : "Get all API throttling policies",
         "description" : "This will provide access to api level throttling policies in database.\n",
         "parameters" : [ {
-          "name" : "X-WSO2-Tenant",
+          "name" : "xWSO2Tenant",
           "in" : "header",
           "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
@@ -443,7 +443,7 @@
         "summary" : "Get all application key mappings",
         "description" : "This will provide access to application vs key mappings in database.\n",
         "parameters" : [ {
-          "name" : "X-WSO2-Tenant",
+          "name" : "xWSO2Tenant",
           "in" : "header",
           "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
           "required" : true,
@@ -1009,6 +1009,12 @@
         },
         "urlPattern" : {
           "type" : "string"
+        },
+        "scopes" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
         }
       }
     },
@@ -1040,7 +1046,7 @@
   },
   "parameters" : {
     "requestedTenant" : {
-      "name" : "X-WSO2-Tenant",
+      "name" : "xWSO2Tenant",
       "in" : "header",
       "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
       "required" : true,

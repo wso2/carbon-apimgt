@@ -17,17 +17,23 @@
  */
 package org.wso2.carbon.apimgt.impl.dao;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.APIPolicyConditionGroup;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -43,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SubscriptionValidationDAO {
@@ -273,10 +280,10 @@ public class SubscriptionValidationDAO {
             PreparedStatement ps;
             if (tenantDomain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ST_APIS_SQL);
-                ps.setString(1, "/t%");
+                ps.setString(1, APIConstants.TENANT_PREFIX + "%");
             } else {
                 ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APIS_SQL);
-                ps.setString(1, "/t/" + tenantDomain + "%");
+                ps.setString(1, APIConstants.TENANT_PREFIX + tenantDomain + "%");
             }
             ResultSet resultSet = ps.executeQuery();
             populateAPIList(resultSet, apiList);
@@ -336,6 +343,7 @@ public class SubscriptionValidationDAO {
     private void populateAPIList(ResultSet resultSet, List<API> apiList) throws SQLException {
 
         Map<Integer, API> temp = new ConcurrentHashMap<>();
+        Map<Integer, URLMapping> tempUrls = new ConcurrentHashMap<>();
         while (resultSet.next()) {
             int apiId = resultSet.getInt("API_ID");
             API api = temp.get(apiId);
@@ -348,14 +356,23 @@ public class SubscriptionValidationDAO {
                 api.setVersion(resultSet.getString("API_VERSION"));
                 api.setContext(resultSet.getString("CONTEXT"));
                 temp.put(apiId, api);
+                tempUrls = new ConcurrentHashMap<>();
                 apiList.add(api);
             }
-            URLMapping urlMapping = new URLMapping();
-            urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
-            urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-            urlMapping.setThrottlingPolicy(resultSet.getString("THROTTLING_TIER"));
-            urlMapping.setUrlPattern(resultSet.getString("URL_PATTERN"));
-            api.addResource(urlMapping);
+            int urlId = resultSet.getInt("URL_MAPPING_ID");
+            URLMapping urlMapping = null;
+            urlMapping = tempUrls.get(urlId);
+            if (urlMapping == null) {
+                urlMapping = new URLMapping();
+                urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
+                urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
+                urlMapping.setThrottlingPolicy(resultSet.getString("THROTTLING_TIER"));
+
+                urlMapping.setUrlPattern(resultSet.getString("URL_PATTERN"));
+                tempUrls.put(urlId, urlMapping);
+                api.addResource(urlMapping);
+            }
+            urlMapping.addScope(resultSet.getString("URL_MAPPING_ID"));
         }
     }
 
@@ -577,23 +594,43 @@ public class SubscriptionValidationDAO {
             populateApiPolicyList(apiPolicies, resultSet);
 
         } catch (SQLException e) {
-            log.error("Error in loading application policies for tenantId : " + tenantDomain, e);
+            log.error("Error in loading api policies for tenantId : " + tenantDomain, e);
         }
 
         return apiPolicies;
     }
 
-    private void populateApiPolicyList(List<APIPolicy> apiPolicies, ResultSet resultSet)
+        private void populateApiPolicyList(List<APIPolicy> apiPolicies, ResultSet resultSet)
             throws SQLException {
 
+        Map<Integer, APIPolicy> temp = new ConcurrentHashMap<>();
         if (apiPolicies != null && resultSet != null) {
             while (resultSet.next()) {
-                APIPolicy apiPolicyDTO = new APIPolicy();
-                apiPolicyDTO.setId(resultSet.getInt("POLICY_ID"));
-                apiPolicyDTO.setName(resultSet.getString("NAME"));
-                apiPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                apiPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
-                apiPolicies.add(apiPolicyDTO);
+                int policyId = resultSet.getInt("POLICY_ID");
+                APIPolicy apiPolicy = temp.get(policyId);
+                if (apiPolicy == null) {
+                    apiPolicy = new APIPolicy();
+                    apiPolicy.setId(policyId);
+                    apiPolicy.setName(resultSet.getString("NAME"));
+                    apiPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
+                    apiPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                    apiPolicies.add(apiPolicy);
+                }
+                APIPolicyConditionGroup apiPolicyConditionGroup = new APIPolicyConditionGroup();
+                int conditionGroup = resultSet.getInt("CONDITION_GROUP_ID");
+                apiPolicyConditionGroup.setConditionGroupId(conditionGroup);
+                apiPolicyConditionGroup.setQuotaType(resultSet.getString("QUOTA_TYPE"));
+                apiPolicyConditionGroup.setPolicyId(policyId);
+                ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+                ConditionGroupDTO conditionGroupDTO = null;
+                try {
+                    conditionGroupDTO = apiMgtDAO.createConditionGroupDTO(conditionGroup);
+                } catch (APIManagementException e) {
+                    log.error("Error while processing api policies for policyId : " + policyId, e);
+                }
+                ConditionDTO[] conditionDTOS = conditionGroupDTO.getConditions();
+                apiPolicyConditionGroup.setConditionDTOS(Arrays.asList(conditionDTOS));
+                apiPolicy.addConditionGroup(apiPolicyConditionGroup);
             }
         }
     }

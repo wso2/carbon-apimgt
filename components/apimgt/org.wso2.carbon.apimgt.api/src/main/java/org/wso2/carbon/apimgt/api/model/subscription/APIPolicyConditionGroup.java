@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api.model.subscription;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -31,10 +32,10 @@ public class APIPolicyConditionGroup {
     private int policyId = -1;
     private String quotaType;
     private int conditionGroupId = -1;
-    private Set<ConditionDTO> conditionDTOS;
+    private List<ConditionDTO> conditionDTOS;
 
     public int getPolicyId() {
-
+    
         return policyId;
     }
 
@@ -63,12 +64,12 @@ public class APIPolicyConditionGroup {
         this.quotaType = quotaType;
     }
 
-    public Set<ConditionDTO> getConditionDTOS() {
+    public List<ConditionDTO> getConditionDTOS() {
 
         return conditionDTOS;
     }
 
-    public void setConditionDTOS(Set<ConditionDTO> conditionDTOS) {
+    public void setConditionDTOS(List<ConditionDTO> conditionDTOS) {
 
         this.conditionDTOS = conditionDTOS;
     }

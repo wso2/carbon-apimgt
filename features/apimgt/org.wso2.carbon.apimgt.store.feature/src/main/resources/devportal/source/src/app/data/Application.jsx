@@ -51,7 +51,7 @@ export default class Application extends Resource {
      */
     _setKeys(keys) {
         for (const keyObj of keys) {
-            this.keys.set(keyObj.keyType, keyObj);
+            this.keys.set(keyObj.keyManager, keyObj);
         }
     }
 
@@ -62,7 +62,7 @@ export default class Application extends Resource {
      */
     _setTokens(keys) {
         for (const keyObj of keys) {
-            this.tokens.set(keyObj.keyType, keyObj.token);
+            this.tokens.set(keyObj.keyManager, keyObj.token);
         }
     }
 
@@ -73,7 +73,7 @@ export default class Application extends Resource {
      */
     getKeys(keyType) {
         return this.client.then((client) => client.apis['Application Keys']
-            .get_applications__applicationId__keys({ applicationId: this.applicationId }))
+            .get_applications__applicationId__oauth_keys({ applicationId: this.applicationId }))
             .then((keysResponse) => {
                 const keys = keysResponse.obj.list;
                 this._setKeys(keys);
@@ -89,6 +89,7 @@ export default class Application extends Resource {
      * @param {string} selectedScopes token scopes
      * @returns {promise} Set the generated token into current
      * instance and return tokenObject received as Promise object
+     * deprecated
      */
     generateToken(type, validityPeriod, selectedScopes) {
         const promiseToken = this.getKeys()
@@ -115,6 +116,39 @@ export default class Application extends Resource {
     }
 
     /** *
+     * Generate token for this application instance
+     * @param {string} type token type
+     * @param {string} validityPeriod token validityPeriod
+     * @param {string} selectedScopes token scopes
+     * @returns {promise} Set the generated token into current
+     * instance and return tokenObject received as Promise object
+     */
+    generateToken(selectedTab, type, validityPeriod, selectedScopes) {
+        const promiseToken = this.getKeys()
+            .then(() => this.client)
+            .then((client) => {
+                const keys = this.keys.get(selectedTab);
+                const keyMappingId = keys.keyMappingId;
+                const accessToken = this.tokens.get(selectedTab);
+                const requestContent = {
+                    consumerSecret: keys.consumerSecret,
+                    validityPeriod,
+                    revokeToken: accessToken.accessToken,
+                    scopes: selectedScopes,
+                    additionalProperties: keys.additionalProperties,
+                };
+                const payload = { applicationId: this.id, keyMappingId: keyMappingId, body: requestContent };
+                return client.apis['Application Tokens']
+                    .post_applications__applicationId__oauth_keys__keyMappingId__generate_token(payload);
+            });
+        return promiseToken.then((tokenResponse) => {
+            const token = tokenResponse.obj;
+            this.tokens.set(selectedTab, token);
+            return token;
+        });
+    }
+
+    /** *
      * Generate Consumer Secret and Consumer Key for this application instance
      * @param {string} keyType Key type either `Production` or `SandBox`
      * @param {string[]} supportedGrantTypes Grant types supported
@@ -123,6 +157,7 @@ export default class Application extends Resource {
      * @param {string} additionalProperties additional properties that needed for application.
      * @returns {promise} Set the generated token into current instance and return tokenObject
      * received as Promise object
+     * deprecated
      */
     generateKeys(keyType, supportedGrantTypes, callbackUrl, validityTime, additionalProperties) {
         const promisedKeys = this.client.then((client) => {
@@ -143,14 +178,66 @@ export default class Application extends Resource {
     }
 
     /** *
+     * Generate Consumer Secret and Consumer Key for this application instance
+     * @param {string} keyType Key type either `Production` or `SandBox`
+     * @param {string[]} supportedGrantTypes Grant types supported
+     * @param  {string} callbackUrl callback url
+     * @param  {string} tokenType Token type either `OAUTH` or `JWT`
+     * @param {string} additionalProperties additional properties that needed for application.
+     * @returns {promise} Set the generated token into current instance and return tokenObject
+     * received as Promise object
+     */
+    generateKeys(keyType, supportedGrantTypes, callbackUrl, validityTime, additionalProperties, keyManager) {
+        const promisedKeys = this.client.then((client) => {
+            const requestContent = {
+                keyType, /* TODO: need to support dynamic key types ~tmkb */
+                grantTypesToBeSupported: supportedGrantTypes,
+                callbackUrl,
+                validityTime,
+                additionalProperties,
+                keyManager,
+            };
+            const payload = { applicationId: this.id, body: requestContent };
+            return client.apis['Application Keys'].post_applications__applicationId__generate_keys(payload);
+        });
+        return promisedKeys.then((keysResponse) => {
+            this.keys.set(keyType, keysResponse.obj);
+            return this.keys.get(keyType);
+        });
+    }
+
+    /** *
+     * Cleanup Consumer Secret and Consumer Key for this application instance
+     * @param {string} keyType Key type either `Production` or `SandBox`
+     * @returns {promise} Set the generated token into current instance and return tokenObject
+     * received as Promise object
+     * deprecated
+     */
+    cleanUpKeys(keyType) {
+        return this.client.then((client) => client.apis['Application Keys']
+            .post_applications__applicationId__keys__keyType__clean_up({ applicationId: this.id, keyType }))
+            .then((response) => {
+                this.keys = new Map();
+                this.tokens = new Map();
+                return response.ok;
+            });
+    }
+
+    /** *
      * Cleanup Consumer Secret and Consumer Key for this application instance
      * @param {string} keyType Key type either `Production` or `SandBox`
      * @returns {promise} Set the generated token into current instance and return tokenObject
      * received as Promise object
      */
-    cleanUpKeys(keyType) {
+    cleanUpKeys(keyType, keyManager, keyMappingId) {
+        const requestContent = {
+            keyType, 
+            keyMappingId,
+            keyManager,
+        };
+        const payload = { applicationId: this.id, keyMappingId, body: requestContent };
         return this.client.then((client) => client.apis['Application Keys']
-            .post_applications__applicationId__keys__keyType__clean_up({ applicationId: this.id, keyType }))
+            .post_applications__applicationId__oauth_keys__keyMappingId__clean_up(payload))
             .then((response) => {
                 this.keys = new Map();
                 this.tokens = new Map();
@@ -168,6 +255,7 @@ export default class Application extends Resource {
      * @param  {String} consumerSecret Consumer secret of application
      * @param  {String} additionalProperties Additional properties for the oauth application
      * @returns {promise} Update the callbackURL and/or supportedGrantTypes
+     * deprecated
      */
     updateKeys(tokenType, keyType, supportedGrantTypes, callbackUrl, consumerKey, consumerSecret, additionalProperties) {
         const promisedPut = this.client.then((client) => {
@@ -189,11 +277,45 @@ export default class Application extends Resource {
         });
     }
 
+    /** *
+     * Generate Consumer Secret and Consumer Key for this application instance
+     * @param  {string} tokenType Token Type either `OAUTH` or `JWT`
+     * @param  {string} keyType Key type either `Production` or `SandBox`
+     * @param {string[]} supportedGrantTypes Grant types supported
+     * @param  {string} callbackUrl callback url
+     * @param  {String} consumerKey Consumer key of application
+     * @param  {String} consumerSecret Consumer secret of application
+     * @param  {String} additionalProperties Additional properties for the oauth application
+     * @returns {promise} Update the callbackURL and/or supportedGrantTypes
+     */
+    updateKeys(tokenType, keyType, supportedGrantTypes, callbackUrl, consumerKey, consumerSecret, additionalProperties, keyManager, keyMappingId) {
+        const promisedPut = this.client.then((client) => {
+            const requestContent = {
+                keyManager,
+                keyMappingId,
+                consumerKey,
+                consumerSecret,
+                supportedGrantTypes,
+                callbackUrl,
+                keyType,
+                tokenType,
+                additionalProperties
+            };
+            const payload = { applicationId: this.id, keyMappingId, body: requestContent };
+            return client.apis['Application Keys'].put_applications__applicationId__oauth_keys__keyMappingId_(payload);
+        });
+        return promisedPut.then((keysResponse) => {
+            this.keys.set(keyManager, keysResponse.obj);
+            return this;
+        });
+    }
+
     /**
      * Regenerate Consumer Secret for this application instance
      * @param {String} consumerKey Consumer key of application
      * @param {string} keyType Key type either `Production` or `SandBox`
      * @returns {promise} Update the consumerSecret
+     * deprecated
      */
     regenerateSecret(consumerKey, keyType) {
         const promisedPost = this.client.then((client) => {
@@ -209,12 +331,38 @@ export default class Application extends Resource {
     }
 
     /**
+     * Regenerate Consumer Secret for this application instance
+     * @param {String} consumerKey Consumer key of application
+     * @param {string} keyType Key type either `Production` or `SandBox`
+     * @returns {promise} Update the consumerSecret
+     */
+    regenerateSecret(consumerKey, keyType, keyMappingId, keyManager) {
+        const requestContent = {
+            keyManager,
+            keyMappingId,
+            consumerKey,
+            keyType,
+        };
+        const promisedPost = this.client.then((client) => {
+            const payload = { applicationId: this.id, keyMappingId, body: requestContent };
+            return client.apis['Application Keys']
+                .post_applications__applicationId__oauth_keys__keyMappingId__regenerate_secret(payload);
+        });
+        return promisedPost.then((secretResponse) => {
+            const secret = secretResponse.obj;
+            this.keys.set(keyManager, secretResponse.obj);
+            return secret;
+        });
+    }
+
+    /**
      * Provide Consumer Key and Secret of Existing OAuth Apps
      *
      * @param keyType           key type, either PRODUCTION or SANDBOX
      * @param consumerKey       consumer key of the OAuth app
      * @param consumerSecret    consumer secret of the OAuth app
      * @returns {*}
+     * deprecated
      */
     provideKeys(keyType, consumerKey, consumerSecret) {
         const promisedKeys = this.client.then((client) => {
@@ -225,6 +373,26 @@ export default class Application extends Resource {
         return promisedKeys.then((keysResponse) => {
             this.keys.set(keyType, keysResponse.obj);
             return this.keys.get(keyType);
+        });
+    }
+
+    /**
+     * Provide Consumer Key and Secret of Existing OAuth Apps
+     *
+     * @param keyType           key type, either PRODUCTION or SANDBOX
+     * @param consumerKey       consumer key of the OAuth app
+     * @param consumerSecret    consumer secret of the OAuth app
+     * @returns {*}
+     */
+    provideKeys(keyType, consumerKey, consumerSecret, keyManager, keyMappingId) {
+        const promisedKeys = this.client.then((client) => {
+            const requestContent = { consumerKey, consumerSecret, keyType, keyManager, keyMappingId };
+            const payload = { applicationId: this.id, body: requestContent };
+            return client.apis['Application Keys'].post_applications__applicationId__map_keys(payload);
+        });
+        return promisedKeys.then((keysResponse) => {
+            this.keys.set(keyManager, keysResponse.obj);
+            return this.keys.get(KeyManager);
         });
     }
 

@@ -1135,25 +1135,16 @@ public class SQLConstants {
     public static final String DELETE_ACCSS_ALLOWED_DOMAINS_SQL =
             " DELETE FROM AM_APP_KEY_DOMAIN_MAPPING WHERE CONSUMER_KEY=?";
 
-    public static final String ADD_ACCESS_ALLOWED_DOMAINS_SQL =
-            " INSERT INTO AM_APP_KEY_DOMAIN_MAPPING (CONSUMER_KEY, AUTHZ_DOMAIN) " +
-            " VALUES (?,?)";
-
-    public static final String DELETE_ACCESS_ALLOWED_DOMAIN_SQL =
-            " DELETE " +
-            " FROM AM_APP_KEY_DOMAIN_MAPPING " +
-            " WHERE CONSUMER_KEY=?";
-
-    public static final String ADD_ACCESS_ALLOWED_DAMOIN_SQL =
-            " INSERT INTO AM_APP_KEY_DOMAIN_MAPPING (CONSUMER_KEY,AUTHZ_DOMAIN) " +
-            " VALUES (?,?)";
-
     public static final String GET_REGISTRATION_APPROVAL_STATUS_SQL =
             " SELECT KEY_MANAGER,STATE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE =?";
 
     public static final String UPDATE_APPLICAITON_KEY_TYPE_MAPPINGS_SQL =
-            " UPDATE AM_APPLICATION_KEY_MAPPING SET CONSUMER_KEY = ? WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND " +
-                    "KEY_MANAGER = ?";
+            " UPDATE AM_APPLICATION_KEY_MAPPING SET CONSUMER_KEY = ? , APP_INFO = ? WHERE APPLICATION_ID = ? AND " +
+                    "KEY_TYPE = ? AND KEY_MANAGER = ?";
+
+    public static final String UPDATE_APPLICATION_KEY_TYPE_MAPPINGS_METADATA_SQL =
+            " UPDATE AM_APPLICATION_KEY_MAPPING SET APP_INFO = ? WHERE APPLICATION_ID = ? AND " +
+                    "KEY_TYPE = ? AND KEY_MANAGER = ?";
 
     public static final String ADD_APPLICATION_KEY_TYPE_MAPPING_SQL =
             " INSERT INTO " +
@@ -3165,6 +3156,8 @@ public class SQLConstants {
     public static final String GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_APP_ID_KEY_MANAGER_SQL =
             "SELECT CONSUMER_KEY FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND " +
                     "KEY_MANAGER = ?";
+    public static final String GET_KEY_MAPPING_INFO_FROM_APP_ID = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE," +
+            "STATE,APP_INFO FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
 
     /** Throttle related constants**/
 

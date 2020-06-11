@@ -18,11 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
-
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -30,9 +26,9 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
@@ -68,6 +64,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -85,8 +82,6 @@ import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
-import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
@@ -3043,9 +3038,12 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setString(1, consumerKey);
-                ps.setInt(2, application.getId());
-                ps.setString(3, keyType);
-                ps.setString(4, keyManagerName);
+                OAuthApplicationInfo oAuthApp = application.getOAuthApp(keyType, keyManagerName);
+                String content = new Gson().toJson(oAuthApp);
+                ps.setBinaryStream(2, new ByteArrayInputStream(content.getBytes()));
+                ps.setInt(3, application.getId());
+                ps.setString(4, keyType);
+                ps.setString(5, keyManagerName);
                 ps.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -7000,7 +6998,7 @@ public class ApiMgtDAO {
      * @return An object of {@code ConditionGroupDTO} type.
      * @throws APIManagementException
      */
-    private ConditionGroupDTO createConditionGroupDTO(int conditionGroup) throws APIManagementException {
+    public ConditionGroupDTO createConditionGroupDTO(int conditionGroup) throws APIManagementException {
         List<Condition> conditions = getConditions(conditionGroup);
         ArrayList<ConditionDTO> conditionDTOs = new ArrayList<ConditionDTO>(conditions.size());
         for (Condition condition : conditions) {
@@ -8720,26 +8718,33 @@ public class ApiMgtDAO {
         return false;
     }
 
-    public Set<APIKey> getKeyMappingsFromApplicationId(int applicationId) throws APIManagementException{
-        final String query = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE,STATE FROM AM_APPLICATION_KEY_MAPPING " +
-                "WHERE APPLICATION_ID=?";
-        Set<APIKey> apiKeyList  = new HashSet<>();
-        try(Connection connection = APIMgtDBUtil.getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement(query)){
-            preparedStatement.setInt(1,applicationId);
-            try(ResultSet resultSet = preparedStatement.executeQuery()){
-             while (resultSet.next()){
-                 APIKey apiKey = new APIKey() ;
-                 apiKey.setMappingId(resultSet.getString("UUID"));
-                 apiKey.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
-                 apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
-                 apiKey.setType(resultSet.getString("KEY_TYPE"));
-                 apiKey.setState(resultSet.getString("STATE"));
-                 apiKeyList.add(apiKey);
-             }
+    public Set<APIKey> getKeyMappingsFromApplicationId(int applicationId) throws APIManagementException {
+
+        Set<APIKey> apiKeyList = new HashSet<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement(SQLConstants.GET_KEY_MAPPING_INFO_FROM_APP_ID)) {
+            preparedStatement.setInt(1, applicationId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    APIKey apiKey = new APIKey();
+                    apiKey.setMappingId(resultSet.getString("UUID"));
+                    apiKey.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
+                    apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
+                    apiKey.setType(resultSet.getString("KEY_TYPE"));
+                    apiKey.setState(resultSet.getString("STATE"));
+                    try (InputStream appInfo = resultSet.getBinaryStream("APP_INFO")) {
+                        if (appInfo != null) {
+                            apiKey.setAppMetaData(IOUtils.toString(appInfo));
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while retrieving metadata", e);
+                    }
+                    apiKeyList.add(apiKey);
+                }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error while Retriving Key Mappings ",e);
+            throw new APIManagementException("Error while Retrieving Key Mappings ", e);
         }
         return apiKeyList;
     }
@@ -8810,6 +8815,43 @@ public class ApiMgtDAO {
             throw new APIManagementException("Error while retrieving the Key Mapping id", e);
         }
         return null;
+    }
+
+    /**
+     * This method used to update Application metadata according to oauth app info
+     * @param applicationId
+     * @param keyType
+     * @param keyManagerName
+     * @param updatedAppInfo
+     * @throws APIManagementException
+     */
+    public void updateApplicationKeyTypeMetaData(int applicationId, String keyType, String keyManagerName,
+                                                 OAuthApplicationInfo updatedAppInfo) throws APIManagementException {
+
+        if (applicationId > 0 && updatedAppInfo != null) {
+            String addApplicationKeyMapping = SQLConstants.UPDATE_APPLICATION_KEY_TYPE_MAPPINGS_METADATA_SQL;
+
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                connection.setAutoCommit(false);
+                try {
+                    try (PreparedStatement ps = connection.prepareStatement(addApplicationKeyMapping)) {
+                        String content = new Gson().toJson(updatedAppInfo);
+                        ps.setBinaryStream(1, new ByteArrayInputStream(content.getBytes()));
+                        ps.setInt(2, applicationId);
+                        ps.setString(3, keyType);
+                        ps.setString(4, keyManagerName);
+                        ps.executeUpdate();
+                    }
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                }
+            } catch (SQLException e) {
+                handleException("Error updating the Application Metadata of the AM_APPLICATION_KEY_MAPPING table " +
+                        "where " +
+                        "APPLICATION_ID = " + applicationId + " and KEY_TYPE = " + keyType, e);
+            }
+        }
     }
 
     private class SubscriptionInfo {

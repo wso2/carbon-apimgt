@@ -27,6 +27,7 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.SubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.SubscriptionPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.KeymanagersApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.ApiPoliciesApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
