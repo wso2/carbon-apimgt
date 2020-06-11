@@ -9,6 +9,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionDataListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EmailDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 

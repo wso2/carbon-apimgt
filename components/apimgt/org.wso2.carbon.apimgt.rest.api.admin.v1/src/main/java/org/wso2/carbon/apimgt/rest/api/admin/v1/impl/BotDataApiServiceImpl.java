@@ -20,11 +20,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.BotDataApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionDataListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EmailDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.BotDetectionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
@@ -77,7 +81,7 @@ public class BotDataApiServiceImpl implements BotDataApiService {
      * Get all bot detected data
      *
      * @param messageContext
-     * @return list of bot detected data
+     * @return list of all bot detected data
      * @throws APIManagementException
      */
     @Override
@@ -85,8 +89,10 @@ public class BotDataApiServiceImpl implements BotDataApiService {
 
         if (APIUtil.isAnalyticsEnabled()) {
             List<BotDetectionData> botDetectionDataList = new APIAdminImpl().retrieveSavedBotData();
-            return Response.ok().entity(botDetectionDataList).build();
+            BotDetectionDataListDTO listDTO = BotDetectionMappingUtil.fromBotDetectionModelToDTO(botDetectionDataList);
+            return Response.ok().entity(listDTO).build();
+        } else {
+            throw new APIManagementException("Analytics Not Enabled", ExceptionCodes.ANALYTICS_NOT_ENABLED);
         }
-        return null;
     }
 }
