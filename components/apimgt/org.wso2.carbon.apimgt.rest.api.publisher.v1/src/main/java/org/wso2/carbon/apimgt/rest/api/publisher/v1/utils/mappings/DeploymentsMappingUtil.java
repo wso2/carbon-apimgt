@@ -57,41 +57,39 @@ public class DeploymentsMappingUtil {
 
         DeploymentListDTO deploymentListDTO = new DeploymentListDTO();
         List<DeploymentsDTO> deploymentsList = new ArrayList<DeploymentsDTO>();
-
         //Get cloud environments from tenant-conf.json file
         //Get tenant domain to access tenant conf
         APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         //read tenant-conf.json and get details
-        if (SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+        if (SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             //get details from deployment.toml
             JSONArray containerMgtInfo = APIUtil.getClusterInfoFromAPIMConfig();
-            if(!containerMgtInfo.isEmpty()){
-                for(Object containerMgtInfoObj : containerMgtInfo){
+            if (!containerMgtInfo.isEmpty()) {
+                for (Object containerMgtInfoObj : containerMgtInfo) {
                     DeploymentsDTO k8sClustersInfoDTO = new DeploymentsDTO();
                     List<DeploymentClusterInfoDTO> deploymentClusterInfoDTOList = new ArrayList<>();
                     JSONArray clustersInfo = (JSONArray) (((JSONObject) containerMgtInfoObj).get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
                     //check is the super tenant defined cluster ddtails
-                    if(clustersInfo != null && !clustersInfo.isEmpty()){
-                        for(Object clusterInfo : clustersInfo){
+                    if (clustersInfo != null && !clustersInfo.isEmpty()) {
+                        for (Object clusterInfo : clustersInfo) {
                             DeploymentClusterInfoDTO deploymentClusterInfoDTO = new DeploymentClusterInfoDTO();
                             deploymentClusterInfoDTO.setClusterId(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_ID).toString());
                             deploymentClusterInfoDTO.setClusterName(((JSONObject) clusterInfo).get(ContainerBasedConstants.DISPLAY_NAME).toString());
                             JSONObject properties = (JSONObject) ((JSONObject) clusterInfo).get(ContainerBasedConstants.PROPERTIES);
-                            deploymentClusterInfoDTO.setMasterURL(properties.get(ContainerBasedConstants.MASTER_URL).toString().replace("\\",""));
+                            deploymentClusterInfoDTO.setMasterURL(properties.get(ContainerBasedConstants.MASTER_URL).toString().replace("\\", ""));
                             deploymentClusterInfoDTO.setNamespace(properties.get(ContainerBasedConstants.NAMESPACE).toString());
-                            deploymentClusterInfoDTO.setIngressURL(properties.get(ContainerBasedConstants.INGRESS_URL).toString().replace("\\",""));
+                            deploymentClusterInfoDTO.setIngressURL(properties.get(ContainerBasedConstants.INGRESS_URL).toString().replace("\\", ""));
 
                             deploymentClusterInfoDTOList.add(deploymentClusterInfoDTO);
                         }
                         k8sClustersInfoDTO.setClusters(deploymentClusterInfoDTOList);
-                        k8sClustersInfoDTO.setName((String) ((JSONObject)containerMgtInfoObj).get(ContainerBasedConstants.TYPE));
+                        k8sClustersInfoDTO.setName((String) ((JSONObject) containerMgtInfoObj).get(ContainerBasedConstants.TYPE));
                         deploymentsList.add(k8sClustersInfoDTO);
                     }
                 }
                 deploymentListDTO.setCount(deploymentsList.size());
                 deploymentListDTO.setList(deploymentsList);
-
             }
         } else {
             try {
@@ -102,13 +100,13 @@ public class DeploymentsMappingUtil {
                 JSONObject tenant_conf = (JSONObject) tenantObject;
                 //get kubernetes cluster info
                 JSONArray containerMgtInfo = (JSONArray) tenant_conf.get(ContainerBasedConstants.CONTAINER_MANAGEMENT);
-                for(Object containerMgtInfoObj : containerMgtInfo){
+                for (Object containerMgtInfoObj : containerMgtInfo) {
                     DeploymentsDTO k8sClustersInfoDTO = new DeploymentsDTO();
                     List<DeploymentClusterInfoDTO> deploymentClusterInfoDTOList = new ArrayList<>();
                     JSONArray clustersInfo = (JSONArray) (((JSONObject) containerMgtInfoObj).get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
-                    for(Object clusterInfo : clustersInfo){
+                    for (Object clusterInfo : clustersInfo) {
                         //check whether cluster details are defined.
-                        if(!((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_ID).equals("")){
+                        if (!((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_ID).equals("")) {
                             DeploymentClusterInfoDTO deploymentClusterInfoDTO = new DeploymentClusterInfoDTO();
                             deploymentClusterInfoDTO.setClusterId(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_ID).toString());
                             deploymentClusterInfoDTO.setClusterName(((JSONObject) clusterInfo).get(ContainerBasedConstants.DISPLAY_NAME).toString());
@@ -120,8 +118,8 @@ public class DeploymentsMappingUtil {
                             deploymentClusterInfoDTOList.add(deploymentClusterInfoDTO);
                         }
                     }
-                    if (!deploymentClusterInfoDTOList.isEmpty()){
-                        k8sClustersInfoDTO.setName((String) ((JSONObject)containerMgtInfoObj).get(ContainerBasedConstants.TYPE));
+                    if (!deploymentClusterInfoDTOList.isEmpty()) {
+                        k8sClustersInfoDTO.setName((String) ((JSONObject) containerMgtInfoObj).get(ContainerBasedConstants.TYPE));
                         k8sClustersInfoDTO.setClusters(deploymentClusterInfoDTOList);
                     }
                     deploymentsList.add(k8sClustersInfoDTO);

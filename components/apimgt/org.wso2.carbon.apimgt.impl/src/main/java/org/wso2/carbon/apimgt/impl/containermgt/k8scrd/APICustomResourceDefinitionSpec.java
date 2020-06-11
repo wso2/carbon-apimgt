@@ -30,7 +30,6 @@ public class APICustomResourceDefinitionSpec implements KubernetesResource {
     private int replicas;
     private Definition definition;
     private boolean override;
-//    private String version;
 
     public String getUpdateTimeStamp() {
         return updateTimeStamp;
@@ -71,10 +70,6 @@ public class APICustomResourceDefinitionSpec implements KubernetesResource {
     public void setMode(String mode) {
         this.mode = mode;
     }
-
-//    public String getVersion() { return version; }
-//
-//    public void setVersion(String version) { this.version = version; }
 
     /**
      * This method returns the string equivalent to the following json object.

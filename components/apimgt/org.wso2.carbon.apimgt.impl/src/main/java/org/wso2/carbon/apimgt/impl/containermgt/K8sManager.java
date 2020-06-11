@@ -453,7 +453,6 @@ public class K8sManager implements ContainerManager {
         } else {
             this.oauthSecurityCRName = "";
         }
-
     }
 
     /**
@@ -466,7 +465,6 @@ public class K8sManager implements ContainerManager {
                 .withClientKeyPassphrase(System.getProperty(CLIENT_KEY_PASSPHRASE)).build();
 
         this.openShiftClient = new DefaultOpenShiftClient(config);
-
     }
 
     /**
@@ -507,5 +505,4 @@ public class K8sManager implements ContainerManager {
 
         return crdClient;
     }
-
 }

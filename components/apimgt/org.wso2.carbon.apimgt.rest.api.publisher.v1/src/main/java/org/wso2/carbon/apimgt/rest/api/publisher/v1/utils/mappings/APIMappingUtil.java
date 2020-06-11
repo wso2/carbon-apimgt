@@ -209,13 +209,17 @@ public class APIMappingUtil {
                 }
             }
         }
-        if (dto.getDeployments() != null) {
-            Set<String> deployments = new HashSet<>();
-            List<String> deploymentsFromDTO = dto.getDeployments();
-            for (String deployment : deploymentsFromDTO) {
-                deployments.add(deployment);
+        if (dto.getDeploymentEnvironments() != null) {
+            Set<DeploymentEnvironmentsDTO> deploymentsFromDTO = new HashSet<DeploymentEnvironmentsDTO>(dto.getDeploymentEnvironments());
+            Set<DeploymentEnvironments> deploymentEnvironments = new HashSet<DeploymentEnvironments>();
+
+            for (DeploymentEnvironmentsDTO deployment : deploymentsFromDTO) {
+                DeploymentEnvironments deploymentEnvironment = new DeploymentEnvironments();
+                deploymentEnvironment.setType(deployment.getType());
+                deploymentEnvironment.setClusterNames(deployment.getClusterName());
+                deploymentEnvironments.add(deploymentEnvironment);
             }
-            model.setDeployments(deployments);
+            model.setDeploymentEnvironments(deploymentEnvironments);
         }
 
         if (dto.getSubscriptionAvailability() != null) {
@@ -398,6 +402,50 @@ public class APIMappingUtil {
         }
         apiMonetizationInfoDTO.setProperties(monetizationPropertiesMap);
         return apiMonetizationInfoDTO;
+    }
+
+    public static DeploymentStatusListDTO fromDeploymentStatustoDTO ( APIIdentifier apiIdentifier) throws APIManagementException{
+        //create DTO form the model
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        API api = apiProvider.getAPI(apiIdentifier);
+
+        DeploymentStatusListDTO deploymentStatusListDTO = new DeploymentStatusListDTO();
+        DeploymentStatusDTO deploymentStatusDTO = new DeploymentStatusDTO();
+        List<DeploymentStatusDTO> deploymentStatuses = new ArrayList<DeploymentStatusDTO>();
+        List<DeploymentClusterStatusDTO> clustersList  = new ArrayList<DeploymentClusterStatusDTO>();
+
+
+        List<DeploymentStatus> deploymentStatusList = apiProvider.getDeploymentStatus(apiIdentifier);
+
+        for(DeploymentStatus status : deploymentStatusList){
+            DeploymentClusterStatusDTO deploymentClusterStatusDTO = new DeploymentClusterStatusDTO();
+            List<PodStatusDTO>  podStatusDTOList = new ArrayList<PodStatusDTO>();
+
+            deploymentClusterStatusDTO.setClusterName(status.getClusterName());
+            deploymentClusterStatusDTO.setPodsRunning(status.getPodsRunning());
+
+            for (Map<String, String> getPodStatus : status.getPodStatus()){
+                PodStatusDTO podStatusDTO = new PodStatusDTO();
+                podStatusDTO.setName(getPodStatus.get("podName"));
+                podStatusDTO.setStatus(getPodStatus.get("status"));
+                podStatusDTO.setReady(getPodStatus.get("ready"));
+                podStatusDTO.setCreationTimestamp(getPodStatus.get("creationTimestamp"));
+
+                podStatusDTOList.add(podStatusDTO);
+            }
+
+            deploymentClusterStatusDTO.setHealthStatus(podStatusDTOList);
+            clustersList.add(deploymentClusterStatusDTO);
+
+        }
+        deploymentStatusDTO.setClusters(clustersList);
+        deploymentStatusDTO.setType("kubernetes");
+        deploymentStatuses.add(deploymentStatusDTO);
+
+        deploymentStatusListDTO.setList(deploymentStatuses);
+        deploymentStatusListDTO.setCount(deploymentStatuses.size());
+
+        return deploymentStatusListDTO;
     }
 
     /**
@@ -1077,10 +1125,16 @@ public class APIMappingUtil {
         dto.setCategories(categoryNameList);
         dto.setKeyManagers(model.getKeyManagers());
 
-        if(model.getDeployments() != null && !model.getDeployments().isEmpty()){
-            List<String> deploymentsList = new ArrayList<String>();
-            deploymentsList.addAll(model.getDeployments());
-            dto.setDeployments(deploymentsList);
+        if (model.getDeploymentEnvironments() != null && !model.getDeploymentEnvironments().isEmpty()) {
+            List<DeploymentEnvironmentsDTO> deploymentEnvironmentsDTOS = new ArrayList<DeploymentEnvironmentsDTO>();
+            for (DeploymentEnvironments deploymentEnvironment : model.getDeploymentEnvironments()) {
+                DeploymentEnvironmentsDTO deploymentEnvironmentsDTO = new DeploymentEnvironmentsDTO();
+                deploymentEnvironmentsDTO.setType(deploymentEnvironment.getType());
+                deploymentEnvironmentsDTO.setClusterName(deploymentEnvironment.getClusterNames());
+
+                deploymentEnvironmentsDTOS.add(deploymentEnvironmentsDTO);
+            }
+            dto.setDeploymentEnvironments(deploymentEnvironmentsDTOS);
         }
         return dto;
     }

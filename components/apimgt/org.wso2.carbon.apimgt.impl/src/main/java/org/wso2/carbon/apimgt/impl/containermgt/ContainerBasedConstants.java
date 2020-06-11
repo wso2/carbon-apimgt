@@ -64,9 +64,7 @@ public final class ContainerBasedConstants {
     public static final String REPUBLISH = "Re-Publish";
     public static final String PUBLISHED = "Published";
     public static final String PUBLISH = "Publish";
-
     public static final String V1 = "v1";
-
     public static final String SECURITY = "security";
     public static final String COMPONENTS = "components";
     public static final String SECURITY_SCHEMES = "securitySchemes";

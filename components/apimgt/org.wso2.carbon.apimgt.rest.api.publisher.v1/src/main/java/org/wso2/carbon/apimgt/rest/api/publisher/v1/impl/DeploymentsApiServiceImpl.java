@@ -49,7 +49,6 @@ public class DeploymentsApiServiceImpl implements DeploymentsApiService {
       public Response deploymentsGet(MessageContext messageContext) {
       try{
           DeploymentsMappingUtil deploymentsMappingUtil = new DeploymentsMappingUtil();
-//          List<DeploymentsDTO> deploymentsDTOS = deploymentsMappingUtil.fromTenantConftoDTO();
          DeploymentListDTO deploymentListDTO = deploymentsMappingUtil.fromTenantConftoDTO();
           return Response.ok().entity(deploymentListDTO).build();
       }catch (APIManagementException e) {
