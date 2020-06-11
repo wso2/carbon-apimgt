@@ -10824,12 +10824,12 @@ public final class APIUtil {
     }
 
     /**
-     * Extract Endpoint Registry Entry information
+     * Extract Service Catalog Entry information
      *
      * @param endpointConfig Endpoint Config
      * @return HashSet<String> containing endpoint IDs
      */
-    public static HashSet<String> extractEndpointRegistryEntries(String endpointConfig) {
+    public static HashSet<String> extractServiceCatalogEntries(String endpointConfig) {
         HashSet<String> serviceCatalogEntries = new HashSet<>();
         if (StringUtils.isNotEmpty(endpointConfig)) {
             org.json.JSONObject endpointConfigJSON = new org.json.JSONObject(endpointConfig);
@@ -10855,7 +10855,7 @@ public final class APIUtil {
                         APIConstants.SERVICE_CATALOG_TYPE.equals(endpointConfigJSON.get(APIConstants.
                                 API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                     org.json.JSONObject endpoint = endpointConfigJSON.getJSONObject(endpointType);
-                    serviceCatalogEntries.add(endpoint.getString("id"));
+                    serviceCatalogEntries.add(endpoint.getString(APIConstants.SERVICE_CATALOG_ENTRY_ID));
                 }
             } else if (endpointConfigJSON.get(endpointType) instanceof org.json.JSONArray) {
                 org.json.JSONArray endpoints = endpointConfigJSON.getJSONArray(endpointType);
@@ -10864,7 +10864,7 @@ public final class APIUtil {
                     if (endpoint.has(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE) &&
                             APIConstants.SERVICE_CATALOG_TYPE.equals(endpoint.get(APIConstants.
                                     API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                        serviceCatalogEntries.add(endpoint.getString("id"));
+                        serviceCatalogEntries.add(endpoint.getString(APIConstants.SERVICE_CATALOG_ENTRY_ID));
                     }
                 }
             }

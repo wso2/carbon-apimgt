@@ -4310,14 +4310,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         Map<String, Boolean> sandboxFailoverStatus =
                 validateServiceCatalogEndpoint(endpointConfig, APIConstants.ENDPOINT_SANDBOX_FAILOVERS);
 
-        if (!productionEndpointStatus.get("hasEndpoints") && !sandboxEndpointStatus.get("hasEndpoints")) {
+        if (!productionEndpointStatus.get(APIConstants.API_ENDPOINT_CONFIG_HAS_ENDPOINTS) &&
+                !sandboxEndpointStatus.get(APIConstants.API_ENDPOINT_CONFIG_HAS_ENDPOINTS)) {
             RestApiUtil.handleBadRequest("At least one endpoint from Production Endpoint or " +
                     "Sandbox Endpoint must be defined.", log);
         }
-        if (!(productionEndpointStatus.get("validCatalogEndpoints") &&
-                sandboxEndpointStatus.get("validCatalogEndpoints") &&
-                productionFailoverStatus.get("validCatalogEndpoints") &&
-                sandboxFailoverStatus.get("validCatalogEndpoints"))) {
+        if (!(productionEndpointStatus.get(APIConstants.API_ENDPOINT_CONFIG_VALID_CATALOG_ENDPOINTS) &&
+                sandboxEndpointStatus.get(APIConstants.API_ENDPOINT_CONFIG_VALID_CATALOG_ENDPOINTS) &&
+                productionFailoverStatus.get(APIConstants.API_ENDPOINT_CONFIG_VALID_CATALOG_ENDPOINTS) &&
+                sandboxFailoverStatus.get(APIConstants.API_ENDPOINT_CONFIG_VALID_CATALOG_ENDPOINTS))) {
 
             RestApiUtil.handleBadRequest("'id' is missing in Service Catalog type endpoints", log);
         }
@@ -4335,7 +4336,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 hasEndpoints = true;
                 if (APIConstants.SERVICE_CATALOG_TYPE.equals(endpointConfig.get(APIConstants.
                         API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                    validCatalogEndpoints = endpoint.get("id") != null;
+                    validCatalogEndpoints = endpoint.get(APIConstants.SERVICE_CATALOG_ENTRY_ID) != null;
                 }
             }
         } else if (endpointConfig.get(endpointType) instanceof ArrayList) {
@@ -4345,7 +4346,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             for (LinkedHashMap endpoint : endpoints) {
                 if (APIConstants.SERVICE_CATALOG_TYPE.equals(endpoint.get(APIConstants.
                         API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                    validCatalogEndpoints = endpoint.get("id") != null;
+                    validCatalogEndpoints = endpoint.get(APIConstants.SERVICE_CATALOG_ENTRY_ID) != null;
                     if (!validCatalogEndpoints) {
                         break;
                     }
@@ -4354,8 +4355,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         HashMap<String, Boolean> status = new HashMap<>();
-        status.put("hasEndpoints", hasEndpoints);
-        status.put("validCatalogEndpoints", validCatalogEndpoints);
+        status.put(APIConstants.API_ENDPOINT_CONFIG_HAS_ENDPOINTS, hasEndpoints);
+        status.put(APIConstants.API_ENDPOINT_CONFIG_VALID_CATALOG_ENDPOINTS, validCatalogEndpoints);
 
         return status;
     }

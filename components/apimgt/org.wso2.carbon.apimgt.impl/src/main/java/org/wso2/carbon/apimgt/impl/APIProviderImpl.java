@@ -880,9 +880,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int apiId = apiMgtDAO.addAPI(api, tenantId);
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
-        HashSet<String> endpointRegistryEntries = APIUtil.extractEndpointRegistryEntries(api.getEndpointConfig());
-        if (!endpointRegistryEntries.isEmpty()) {
-            apiMgtDAO.addAPIServiceCatalogEntryMappings(apiId, endpointRegistryEntries, null);
+        HashSet<String> serviceCatalogEntries = APIUtil.extractServiceCatalogEntries(api.getEndpointConfig());
+        if (!serviceCatalogEntries.isEmpty()) {
+            apiMgtDAO.addAPIServiceCatalogEntryMappings(apiId, serviceCatalogEntries, null);
         }
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
@@ -1494,10 +1494,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
                 api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
-        HashSet<String> endpointRegistryEntriesEntries =
-                APIUtil.extractEndpointRegistryEntries(api.getEndpointConfig());
-        if (!endpointRegistryEntriesEntries.isEmpty()) {
-            apiMgtDAO.updateAPIRegistryEntryMappings(apiId, endpointRegistryEntriesEntries);
+        HashSet<String> serviceCatalogEntries =
+                APIUtil.extractServiceCatalogEntries(api.getEndpointConfig());
+        if (!serviceCatalogEntries.isEmpty()) {
+            apiMgtDAO.updateAPIRegistryEntryMappings(apiId, serviceCatalogEntries);
         }
 
     }

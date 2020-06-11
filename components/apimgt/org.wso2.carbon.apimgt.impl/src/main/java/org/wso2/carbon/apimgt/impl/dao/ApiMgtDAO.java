@@ -14884,13 +14884,13 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param apiId                   ID of the API created using the Service Catalog Entry
-     * @param endpointRegistryEntries HashSet contains production and sandbox endpoint IDs
-     *                                (includes load balanced and failover endpoints)
-     * @param connection              DB Connection
+     * @param apiId                 ID of the API created using the Service Catalog Entry
+     * @param serviceCatalogEntries HashSet contains production and sandbox endpoint IDs
+     *                              (includes load balanced and failover endpoint IDs)
+     * @param connection            DB Connection
      * @throws APIManagementException if an error occurred while adding the mapping
      */
-    public void addAPIServiceCatalogEntryMappings(int apiId, HashSet<String> endpointRegistryEntries,
+    public void addAPIServiceCatalogEntryMappings(int apiId, HashSet<String> serviceCatalogEntries,
                                                   Connection connection) throws APIManagementException {
 
         String[] endpointInfoArray;
@@ -14905,7 +14905,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(sql);
-            for (String endpointId : endpointRegistryEntries) {
+            for (String endpointId : serviceCatalogEntries) {
                 endpointInfoArray = endpointId.split(":");
                 preparedStatement.setInt(1, apiId);
                 preparedStatement.setString(2, endpointInfoArray[0]);
@@ -14928,17 +14928,17 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param apiId                   ID of the API created using the Service Catalog Entry
-     * @param endpointRegistryEntries HashSet contains production and sandbox endpoint IDs
-     *                                (includes load balanced and failover endpoints)
+     * @param apiId                 ID of the API created using the Service Catalog Entry
+     * @param serviceCatalogEntries HashSet contains production and sandbox endpoint IDs
+     *                              (includes load balanced and failover endpoint IDs)
      * @throws APIManagementException if failed to update the mapping
      */
-    public void updateAPIRegistryEntryMappings(int apiId, HashSet<String> endpointRegistryEntries)
+    public void updateAPIRegistryEntryMappings(int apiId, HashSet<String> serviceCatalogEntries)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             deleteAPIServiceCatalogEntryMappings(apiId, connection);
-            addAPIServiceCatalogEntryMappings(apiId, endpointRegistryEntries, connection);
+            addAPIServiceCatalogEntryMappings(apiId, serviceCatalogEntries, connection);
         } catch (SQLException e) {
             handleException("Error while updating Service Catalog Entry mapping for API with ID: " + apiId, e);
         }

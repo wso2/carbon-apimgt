@@ -1412,7 +1412,9 @@ public final class APIConstants {
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
     public static final String SERVICE_CATALOG_TYPE = "catalog";
-    public static final String ENDPOINT_REGISTRY_ENTRY_ID = "endpoint_id";
+    public static final String API_ENDPOINT_CONFIG_HAS_ENDPOINTS = "hasEndpoints";
+    public static final String API_ENDPOINT_CONFIG_VALID_CATALOG_ENDPOINTS = "validCatalogEndpoints";
+    public static final String SERVICE_CATALOG_ENTRY_ID = "id";
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
