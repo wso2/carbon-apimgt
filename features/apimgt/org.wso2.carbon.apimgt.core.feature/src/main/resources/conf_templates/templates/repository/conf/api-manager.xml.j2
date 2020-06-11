@@ -1133,4 +1133,32 @@
          </ConfigurationRetriever>
      </KeyManagerConfigurations>
 
+    {% if apim.sync_runtime_artifacts.publisher is defined %}
+    <SyncRuntimeArtifactsPublisher>
+        <Enable>true</Enable>
+        {% if apim.sync_runtime_artifacts.publisher.artifact_saver is defined %}
+        <ArtifactSaver>{{apim.sync_runtime_artifacts.publisher.artifact_saver}}</ArtifactSaver>
+        {% endif %}
+        {% if apim.sync_runtime_artifacts.publisher.publish_directly_to_gateway is defined %}
+        <PublishDirectlyToGW>{{apim.sync_runtime_artifacts.publisher.publish_directly_to_gateway}}</PublishDirectlyToGW>
+        {% endif %}
+    </SyncRuntimeArtifactsPublisher>
+    {% endif %}
+
+    {% if apim.sync_runtime_artifacts.gateway is defined %}
+    <SyncRuntimeArtifactsGateway>
+        <Enable>true</Enable>
+        {% if apim.sync_runtime_artifacts.gateway.gateway_labels is defined %}
+        <GatewayLabels>
+            {% for attribute in apim.sync_runtime_artifacts.gateway.gateway_labels %}
+            <Label>{{attribute}}</Label>
+            {% endfor %}
+        </GatewayLabels>
+        {% endif %}
+        {% if apim.sync_runtime_artifacts.gateway.artifact_retriever is defined %}
+        <ArtifactRetriever>{{apim.sync_runtime_artifacts.gateway.artifact_retriever}}</ArtifactRetriever>
+        {% endif %}
+    </SyncRuntimeArtifactsGateway>
+    {% endif %}
+
 </APIManager>

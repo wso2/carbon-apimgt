@@ -800,7 +800,7 @@ public final class APIUtil {
      * @param apiProviderName name of API provider
      * @return List<Label> list of gateway labels
      */
-    private static List<Label> getLabelsFromAPIGovernanceArtifact(GovernanceArtifact artifact, String apiProviderName)
+    public static List<Label> getLabelsFromAPIGovernanceArtifact(GovernanceArtifact artifact, String apiProviderName)
             throws GovernanceException, APIManagementException {
         String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
         List<Label> gatewayLabelListForAPI = new ArrayList<>();
