@@ -427,6 +427,11 @@ public class OAuthAuthenticator implements Authenticator {
             synCtx.setProperty("api.ut.apiPublisher", info.getApiPublisher());
             synCtx.setProperty("API_NAME", info.getApiName());
 
+            /* GraphQL Query Analysis Information */
+            if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
+                synCtx.setProperty(APIConstants.MAXIMUM_QUERY_DEPTH, info.getGraphQLMaxDepth());
+                synCtx.setProperty(APIConstants.MAXIMUM_QUERY_COMPLEXITY, info.getGraphQLMaxComplexity());
+            }
             if(log.isDebugEnabled()){
                 log.debug("User is authorized to access the Resource");
             }

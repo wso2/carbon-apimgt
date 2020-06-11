@@ -1674,7 +1674,7 @@
         <saml.common.util.version>1.0.4</saml.common.util.version>
         <saml.common.util.version.range>[1.0.0,2.0.0)</saml.common.util.version.range>
 
-        <graphql.java.version>13.0.wso2v1</graphql.java.version>
+        <graphql.java.version>13.0.wso2v2</graphql.java.version>
 
         <carbon.governance.version>4.8.14</carbon.governance.version>
         <carbon.deployment.version>4.10.1</carbon.deployment.version>

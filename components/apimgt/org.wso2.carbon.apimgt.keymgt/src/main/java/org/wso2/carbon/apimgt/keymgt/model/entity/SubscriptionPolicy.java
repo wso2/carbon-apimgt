@@ -28,6 +28,8 @@ public class SubscriptionPolicy extends Policy {
     private Integer rateLimitCount = null;
     private String rateLimitTimeUnit = null;
     private Boolean stopOnQuotaReach = null;
+    private Integer graphQLMaxComplexity = null;
+    private Integer graphQLMaxDepth = null;
 
     public int getRateLimitCount() {
 
@@ -59,6 +61,21 @@ public class SubscriptionPolicy extends Policy {
         this.stopOnQuotaReach = stopOnQuotaReach;
     }
 
+    public int getGraphQLMaxComplexity() {
+        return graphQLMaxComplexity;
+    }
+
+    public void setGraphQLMaxComplexity(int graphQLMaxComplexity) {
+        this.graphQLMaxComplexity = graphQLMaxComplexity;
+    }
+
+    public int getGraphQLMaxDepth() {
+        return graphQLMaxDepth;
+    }
+
+    public void setGraphQLMaxDepth(int graphQLMaxDepth) {
+        this.graphQLMaxDepth = graphQLMaxDepth;
+    }
     @Override
     public String getCacheKey() {
 

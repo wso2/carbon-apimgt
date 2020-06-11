@@ -205,6 +205,11 @@ ExceptionCodes implements ErrorHandler {
     LENGTH_EXCEEDS(900704, "Character length exceeds the allowable limit", 400,
             "One of the provided input character length exceeds the allowable limit."),
 
+
+    //GraphQL API related codes
+    API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
+
+
     // Oauth related codes
     AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),
     INVALID_CREDENTIALS(900901, "Invalid Credentials", 401, " Invalid username or password"),

@@ -107,6 +107,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -4914,6 +4915,20 @@ public final class APIUtil {
             return 0;
         }
     }
+
+    /**
+     * This method is used to retrieve complexity details
+     *
+     * @param api API
+     * @return GraphqlComplexityInfo object that contains the complexity details
+     * @throws APIManagementException
+     */
+
+    public static GraphqlComplexityInfo getComplexityDetails(API api) throws  APIManagementException {
+        APIIdentifier identifier = api.getId();
+        return ApiMgtDAO.getInstance().getComplexityDetails(identifier);
+    }
+
 
     public static boolean isAPIManagementEnabled() {
         return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("APIManagement.Enabled"));
