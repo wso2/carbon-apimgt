@@ -15546,7 +15546,6 @@ public class ApiMgtDAO {
                 byte[] st = (byte[]) rs.getObject(1);
                 ByteArrayInputStream byteArrayInputStream= new ByteArrayInputStream(st);
                 baip.add(byteArrayInputStream);
-                log.info("Retrieved an api from DB");
             }
             return baip;
         } catch (SQLException e) {
