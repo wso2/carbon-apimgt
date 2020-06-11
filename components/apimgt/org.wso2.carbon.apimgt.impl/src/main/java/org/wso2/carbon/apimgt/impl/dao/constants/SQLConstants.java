@@ -1821,9 +1821,6 @@ public class SQLConstants {
             " WHERE " +
             "   POLICY_ID = ?";
 
-    public static final String REMOVE_FROM_GRAPHQL_QUERY_ANALYSIS_SQL =
-            "DELETE FROM AM_GRAPHQL_QUERY_ANALYSIS WHERE POLICY_ID = ?";
-
     public static final String REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL =
             "DELETE FROM AM_GRAPHQL_COMPLEXITY WHERE API_ID = ?";
 

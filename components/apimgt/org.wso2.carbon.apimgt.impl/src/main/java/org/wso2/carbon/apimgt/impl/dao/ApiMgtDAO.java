@@ -7220,7 +7220,6 @@ public class ApiMgtDAO {
         String deleteAPIQuery = SQLConstants.REMOVE_FROM_API_SQL;
         String deleteResourceScopeMappingsQuery = SQLConstants.REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
-        String deleteGraphqlQueryAnalysisQuery = SQLConstants.REMOVE_FROM_GRAPHQL_QUERY_ANALYSIS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
 
 
@@ -7231,12 +7230,6 @@ public class ApiMgtDAO {
             id = getAPIID(apiId, connection);
 
             prepStmt = connection.prepareStatement(deleteAuditAPIMapping);
-            prepStmt.setInt(1, id);
-            prepStmt.execute();
-            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
-
-            //Delete all graphql query analysis related details associated with given API
-            prepStmt = connection.prepareStatement(deleteGraphqlQueryAnalysisQuery);
             prepStmt.setInt(1, id);
             prepStmt.execute();
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
@@ -10410,7 +10403,7 @@ public class ApiMgtDAO {
             if (rs.next()) {
                 policyId = Integer.parseInt(rs.getString(1));
             }
-            if(policy.getGraphQLMaxDepth() != 0 && policy.getGraphQLMaxComplexity() != 0){
+            if(policy.getGraphQLMaxDepth() > 0 || policy.getGraphQLMaxComplexity() > 0){
                 addGraphQLQueryAnalysisInfo(conn, policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity(), policyId);
             }
             conn.commit();
@@ -10455,7 +10448,6 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         PreparedStatement ps = null;
-        ResultSet rs = null;
         try{
             String query = SQLConstants.ADD_QUERY_ANALYSIS_SQL;
             ps = conn.prepareStatement(query);
@@ -10464,10 +10456,10 @@ public class ApiMgtDAO {
             ps.setInt(3,maxComplexity);
             ps.executeUpdate();
         } catch (Exception e) {
-            handleException("Failed to add Subscription Policy: " , e);
+            handleException("Failed to add GraphQL Query Analysis Info: " , e);
 
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+            APIMgtDBUtil.closeAllConnections(ps, null, null);
         }
     }
 
@@ -12068,7 +12060,7 @@ public class ApiMgtDAO {
             if (rs.next()) {
                 policyId = rs.getInt("POLICY_ID");
             }
-            if(policy.getGraphQLMaxDepth() != 0 && policy.getGraphQLMaxComplexity() != 0){
+            if(policy.getGraphQLMaxDepth() != 0 || policy.getGraphQLMaxComplexity() != 0){
                 updateGraphQLQueryAnalysisInfo(connection, policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity(), policyId);
             }
             connection.commit();

@@ -833,11 +833,9 @@ public class APIMgtDAOTest {
         defaultLimit.setTimeUnit("min");
         defaultLimit.setUnitTime(50);
         defaultLimit.setRequestCount(800);
-
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setLimit(defaultLimit);
         defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
-
         policy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return policy;
     }

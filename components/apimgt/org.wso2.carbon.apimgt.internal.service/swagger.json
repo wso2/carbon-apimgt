@@ -950,7 +950,16 @@
     "ApiPolicy" : {
       "allOf" : [ {
         "$ref" : "#/definitions/Policy"
-      }, { } ]
+      }, {
+        "properties" : {
+          "conditionGroups" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/definitions/ApiPolicyConditionGroup"
+            }
+          }
+        }
+      } ]
     },
     "ApiPolicyConditionGroup" : {
       "properties" : {
