@@ -136,6 +136,9 @@ public class SubscriptionThrottlePolicyMappingUtil {
                 customAttrJsonArray.add(attrJsonObj);
             }
             subscriptionPolicy.setCustomAttributes(customAttrJsonArray.toJSONString().getBytes());
+        } else {
+            //if no custom attributes are set, assign an empty byte array
+            subscriptionPolicy.setCustomAttributes(new JSONArray().toJSONString().getBytes());
         }
         if (dto.getMonetization() != null &&
                 StringUtils.isNotBlank(dto.getMonetization().getMonetizationPlan().name())) {
