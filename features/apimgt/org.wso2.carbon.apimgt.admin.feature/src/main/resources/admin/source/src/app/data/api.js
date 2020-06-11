@@ -824,6 +824,47 @@ class API extends Resource {
         });
     }
 
+    /**
+     * Get list of workflow pending requests
+     */
+    workflowsGet(workflowType) {
+        return this.client.then((client) => {
+            return client.apis['Workflow (Collection)'].get_workflows(
+                { workflowType: workflowType },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get workflow pending request according to external workflow reference
+     */
+    workflowGet(externalWorkflowReference) {
+        return this.client.then((client) => {
+            return client.apis['Workflows (Individual)'].get_workflows__externalWorkflowRef_(
+                { externalWorkflowReference: externalWorkflowReference },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Update workflow request according to external workflow reference
+     */
+    updateWorkflow(workflowReferenceId,body) {
+        return this.client.then((client) => {
+            const payload = {
+                workflowReferenceId: workflowReferenceId,
+                body,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Workflows (Individual)'].post_workflows_update_workflow_status(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+    }
+
 }
 
 API.CONSTS = {

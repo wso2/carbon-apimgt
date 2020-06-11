@@ -50,6 +50,12 @@ import PolicyIcon from '@material-ui/icons/Policy';
 import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
 import BlockIcon from '@material-ui/icons/Block';
 import AssignmentIcon from '@material-ui/icons/Assignment';
+import ApplicationCreation from 'AppComponents/Workflow/ApplicationCreation';
+import SubscriptionCreation from 'AppComponents/Workflow/SubscriptionCreation';
+import RegistrationCreation from 'AppComponents/Workflow/RegistrationCreation';
+import APIStateChange from 'AppComponents/Workflow/APIStateChange';
+import UserCreation from 'AppComponents/Workflow/UserCreation';
+
 
 const RouteMenuMapping = (intl) => [
     {
@@ -189,7 +195,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'User Creation',
                 }),
                 path: '/tasks/user-creation',
-                component: DemoTable,
+                component: UserCreation,
                 icon: <PeopleIcon />,
             },
             {
@@ -198,7 +204,7 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Application Creation',
                 }),
                 path: '/tasks/application-creation',
-                component: DemoTable,
+                component: ApplicationCreation,
                 icon: <DnsRoundedIcon />,
             },
             {
@@ -207,19 +213,19 @@ const RouteMenuMapping = (intl) => [
                     defaultMessage: 'Subscription Creation',
                 }),
                 path: '/tasks/subscription-creation',
-                component: DemoTable,
+                component: SubscriptionCreation,
                 icon: <PermMediaOutlinedIcon />,
             },
             {
                 id: 'Application Registration',
                 path: '/tasks/application-registration',
-                component: DemoTable,
+                component: RegistrationCreation,
                 icon: <PublicIcon />,
             },
             {
                 id: 'API State Change',
                 path: '/tasks/api-state-change',
-                component: DemoTable,
+                component: APIStateChange,
                 icon: <SettingsEthernetIcon />,
             },
         ],
