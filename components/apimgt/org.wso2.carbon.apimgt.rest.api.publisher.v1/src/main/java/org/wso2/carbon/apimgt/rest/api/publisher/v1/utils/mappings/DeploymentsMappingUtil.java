@@ -53,7 +53,6 @@ public class DeploymentsMappingUtil {
                     DeploymentsDTO k8sClustersInfoDTO = new DeploymentsDTO();
                     List<DeploymentClusterInfoDTO> deploymentClusterInfoDTOList = new ArrayList<>();
                     JSONArray clustersInfo = (JSONArray) (((JSONObject) containerMgtInfoObj).get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
-//                  JSONObject clustersInfo = APIUtil.getClusterInfoFromConfig(containerMgtInfoObj.toString());
                     //check is the super tenant defined cluster ddtails
                     if(clustersInfo != null && !clustersInfo.isEmpty()){
                         for(Object clusterInfo : clustersInfo){
@@ -71,11 +70,6 @@ public class DeploymentsMappingUtil {
                         k8sClustersInfoDTO.setName((String) ((JSONObject)containerMgtInfoObj).get(ContainerBasedConstants.TYPE));
                         deploymentsList.add(k8sClustersInfoDTO);
                     }
-//                    if (!deploymentClusterInfoDTOList.isEmpty()){
-//                        k8sClustersInfoDTO.setName((String) ((JSONObject)containerMgtInfoObj).get(ContainerBasedConstants.TYPE));
-//                    }
-//                    k8sClustersInfoDTO.setClusters(deploymentClusterInfoDTOList);
-//                    deploymentsList.add(k8sClustersInfoDTO);
                 }
                 deploymentListDTO.setCount(deploymentsList.size());
                 deploymentListDTO.setList(deploymentsList);
@@ -94,7 +88,6 @@ public class DeploymentsMappingUtil {
                     DeploymentsDTO k8sClustersInfoDTO = new DeploymentsDTO();
                     List<DeploymentClusterInfoDTO> deploymentClusterInfoDTOList = new ArrayList<>();
                     JSONArray clustersInfo = (JSONArray) (((JSONObject) containerMgtInfoObj).get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
-//                  JSONObject clustersInfo = APIUtil.getClusterInfoFromConfig(containerMgtInfoObj.toString());
                     for(Object clusterInfo : clustersInfo){
                         //check whether cluster details are defined.
                         if(!((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_ID).equals("")){
@@ -113,65 +106,10 @@ public class DeploymentsMappingUtil {
                         k8sClustersInfoDTO.setName((String) ((JSONObject)containerMgtInfoObj).get(ContainerBasedConstants.TYPE));
                         k8sClustersInfoDTO.setClusters(deploymentClusterInfoDTOList);
                     }
-
                     deploymentsList.add(k8sClustersInfoDTO);
-
-
-//                    if (!clustersInfo.isEmpty()){
-//                        DeploymentsDTO k8sClustersInfoDTO = new DeploymentsDTO();
-//                        k8sClustersInfoDTO.setName((String) ((JSONObject)containerMgtInfoObj).get(ContainerBasedConstants.TYPE));
-//                        //get clusters' properties
-//                        List<DeploymentClusterInfoDTO> deploymentClusterInfoDTOList = new ArrayList<>();
-//                        clustersInfo.keySet().forEach(keyStr ->
-//                        {
-//                            Object clusterProperties = clustersInfo.get(keyStr);
-//                            DeploymentClusterInfoDTO deploymentClusterInfoDTO = new DeploymentClusterInfoDTO();
-//                            deploymentClusterInfoDTO.setClusterId((String) keyStr);
-//                            deploymentClusterInfoDTO.setClusterName(((JSONObject) clusterProperties).get("DisplayName").toString());
-//                            deploymentClusterInfoDTO.setMasterURL(((JSONObject) clusterProperties).get("MasterURL").toString());
-//                            deploymentClusterInfoDTO.setNamespace(((JSONObject) clusterProperties).get("Namespace").toString());
-//                            deploymentClusterInfoDTO.setIngressURL(((JSONObject)clusterProperties).get("IngressURL").toString());
-//
-//                            deploymentClusterInfoDTOList.add(deploymentClusterInfoDTO);
-//
-//                        });
-//                        k8sClustersInfoDTO.setClusters(deploymentClusterInfoDTOList);
-//                        deploymentsList.add(k8sClustersInfoDTO);
-//
-//                        deploymentListDTO.setCount(deploymentsList.size());
-//                        deploymentListDTO.setList(deploymentsList);
-//                    }
-
                 }
                 deploymentListDTO.setCount(deploymentsList.size());
                 deploymentListDTO.setList(deploymentsList);
-//                DeploymentsDTO k8sClustersInfoDTO = new DeploymentsDTO();
-//                k8sClustersInfoDTO.setName((String) ContainerMgtInfo.get("Type"));
-                //get clusters' properties
-//                List<DeploymentClusterInfoDTO> deploymentClusterInfoDTOList = new ArrayList<>();
-//                JSONObject clustersInfo = APIUtil.getClusterInfoFromConfig(ContainerMgtInfo.toString());
-//                clustersInfo.keySet().forEach(keyStr ->
-//                {
-//                    Object clusterProperties = clustersInfo.get(keyStr);
-//                    DeploymentClusterInfoDTO deploymentClusterInfoDTO = new DeploymentClusterInfoDTO();
-//                    deploymentClusterInfoDTO.setClusterId((String) keyStr);
-//                    deploymentClusterInfoDTO.setClusterName(((JSONObject) clusterProperties).get("DisplayName").toString());
-//                    deploymentClusterInfoDTO.setMasterURL(((JSONObject) clusterProperties).get("MasterURL").toString());
-//                    deploymentClusterInfoDTO.setNamespace(((JSONObject) clusterProperties).get("Namespace").toString());
-//                    deploymentClusterInfoDTO.setIngressURL(((JSONObject)clusterProperties).get("IngressURL").toString());
-//
-//                    if (!keyStr.toString().equals("")) {
-//                        deploymentClusterInfoDTOList.add(deploymentClusterInfoDTO);
-//                    }
-//                    //else part should be handle: null pointer exception
-//                });
-
-//                k8sClustersInfoDTO.setClusters(deploymentClusterInfoDTOList);
-//                deploymentsList.add(k8sClustersInfoDTO);
-//
-//                deploymentListDTO.setCount(deploymentsList.size());
-//                deploymentListDTO.setList(deploymentsList);
-
             } catch (RegistryException e) {
                 handleException("Couldn't read tenant configuration from tenant registry", e);
             } catch (UserStoreException e) {
