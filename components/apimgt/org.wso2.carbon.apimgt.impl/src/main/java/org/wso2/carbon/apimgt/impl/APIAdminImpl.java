@@ -588,7 +588,7 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     /**
-     * TThis method used to check the existence of the scope name for the particular user
+     * This method used to check the existence of the scope name for the particular user
      *
      * @param username      username to be validated
      * @param scopeName     scope to be validated
