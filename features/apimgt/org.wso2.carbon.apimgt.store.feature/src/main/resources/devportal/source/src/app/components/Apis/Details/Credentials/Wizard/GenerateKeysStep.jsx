@@ -17,6 +17,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import Icon from '@material-ui/core/Icon';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -29,6 +31,14 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import cloneDeep from 'lodash.clonedeep';
 import ButtonPanel from './ButtonPanel';
+import Paper from '@material-ui/core/Paper';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Box from '@material-ui/core/Box';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
     keyConfigWrapper: {
@@ -37,7 +47,38 @@ const useStyles = makeStyles((theme) => ({
     radioWrapper: {
         flexDirection: 'row',
     },
+    paper: {
+        background: 'none',
+        marginBottom: theme.spacing(2),
+        marginTop: theme.spacing(2),
+    },
 }));
+
+function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`nav-tabpanel-${index}`}
+            aria-labelledby={`nav-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box p={3}>
+                    <Typography>{children}</Typography>
+                </Box>
+            )}
+        </div>
+    );
+};
+
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.any.isRequired,
+  value: PropTypes.any.isRequired,
+};
 
 const generateKeysStep = (props) => {
     const keyStates = {
@@ -50,17 +91,22 @@ const generateKeysStep = (props) => {
     const [notFound, setNotFound] = useState(false);
     const [nextActive, setNextActive] = useState(true);
     const [isUserOwner, setIsUserOwner] = useState(false);
+    const [keyManagers, setKeyManagers] = useState([]);
+    const [selectedTab, setSelectedTab] = useState('Default');
 
     const [keyRequest, setKeyRequest] = useState({
         keyType: 'PRODUCTION',
         serverSupportedGrantTypes: [],
         supportedGrantTypes: [],
         callbackUrl: '',
+        validityTime: 3600,
+        additionalProperties: {},
+        keyManager: '',
     });
 
     const {
         currentStep, createdApp, incrementStep, setCreatedKeyType, intl,
-        setStepStatus, stepStatuses,
+        setStepStatus, stepStatuses, setCreatedSelectedTab
     } = props;
 
     /**
@@ -76,9 +122,34 @@ const generateKeysStep = (props) => {
         setKeyRequest(newKeyRequest);
     };
 
+    /**
+    * @param {*} event event
+    * @param {*} currentTab current tab
+    * @memberof Wizard
+    */
+   const handleTabChange = (event, newSelectedTab) => {
+        setSelectedTab(newSelectedTab);
+    };
+
     useEffect(() => {
         setIsUserOwner(true);
         const api = new API();
+        const promisedKeyManagers = api.getKeyManagers();
+        promisedKeyManagers
+            .then((response) => {
+                const responseKeyManagerList = [];
+                response.body.list.map((item) => responseKeyManagerList.push(item));
+                setKeyManagers(responseKeyManagerList);
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
         const promisedSettings = api.getSettings();
         promisedSettings
             .then((response) => {
@@ -103,7 +174,8 @@ const generateKeysStep = (props) => {
         Application.get(createdApp.value).then((application) => {
             return application.generateKeys(
                 keyRequest.keyType, keyRequest.supportedGrantTypes,
-                keyRequest.callbackUrl,
+                keyRequest.callbackUrl, keyRequest.validityTime, 
+                keyRequest.additionalProperties, keyRequest.keyManager
             );
         }).then((response) => {
             if (response.keyState === keyStates.CREATED || response.keyState === keyStates.REJECTED) {
@@ -111,6 +183,7 @@ const generateKeysStep = (props) => {
             } else {
                 incrementStep();
                 setCreatedKeyType(keyRequest.keyType);
+                setCreatedSelectedTab(selectedTab);
                 setStepStatus(stepStatuses.PROCEED);
                 console.log('Keys generated successfully with ID : ' + response);
             }
@@ -155,20 +228,53 @@ const generateKeysStep = (props) => {
                         />
                     </RadioGroup>
                 </FormControl>
-                <KeyConfiguration
-                    updateKeyRequest={setKeyRequest}
-                    keyRequest={keyRequest}
-                    keyType={selectedType}
-                    isUserOwner={isUserOwner}
-                    setGenerateEnabled={setNextActive}
-                />
-            </div>
-            <ButtonPanel
-                classes={classes}
-                currentStep={currentStep}
-                handleCurrentStep={generateKeys}
-                nextActive={nextActive}
-            />
+                <Paper className={classes.paper}>
+                    <Tabs
+                        value={selectedTab}
+                        indicatorColor="primary"
+                        textColor="primary"
+                        onChange={handleTabChange}
+                        aria-label="key manager tabs"
+                    >
+                        {keyManagers.map(keymanager => (
+                            <Tab label={keymanager.name} value={keymanager.name} disabled={!keymanager.enabled}/>
+                        ))}
+                        
+                    </Tabs>
+                    {keyManagers.map(keymanager => (
+                        <TabPanel value={selectedTab} index={keymanager.name}>
+                            <ExpansionPanel defaultExpanded>
+                                <ExpansionPanelSummary expandIcon={<Icon>expand_more</Icon>}>
+                                    <Typography className={classes.heading} variant='subtitle1'>
+                                        <FormattedMessage
+                                            defaultMessage='Key Configuration'
+                                            id='Shared.AppsAndKeys.TokenManager.key.configuration'
+                                        />
+                                    </Typography>    
+                                </ExpansionPanelSummary>
+                                <ExpansionPanelDetails className={classes.keyConfigWrapper}>
+                                    <KeyConfiguration
+                                        updateKeyRequest={setKeyRequest}
+                                        keyRequest={keyRequest}
+                                        keyType={selectedType}
+                                        isUserOwner={isUserOwner}
+                                        setGenerateEnabled={setNextActive}
+                                        keyManagerConfig={keymanager}
+                                        selectedTab={selectedTab}
+                                        isKeysAvailable={false}
+                                    />
+                                    <ButtonPanel
+                                        classes={classes}
+                                        currentStep={currentStep}
+                                        handleCurrentStep={generateKeys}
+                                        nextActive={nextActive}
+                                    />
+                                </ExpansionPanelDetails>
+                            </ExpansionPanel>
+                        </TabPanel>
+                    ))}
+                </Paper>    
+            </div>    
         </>
     );
 };
