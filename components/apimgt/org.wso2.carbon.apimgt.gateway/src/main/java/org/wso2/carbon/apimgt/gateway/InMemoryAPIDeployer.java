@@ -67,9 +67,13 @@ public class InMemoryAPIDeployer {
                 try {
                     String gatewayRuntimeArtifact = artifactRetriever.retrieveArtifact(apiId, gatewayLabel,
                             APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-                    GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
-                    apiGatewayAdmin.deployAPI(gatewayAPIDTO);
-                    return true;
+                    if (gatewayRuntimeArtifact != null) {
+                        GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
+                        apiGatewayAdmin.deployAPI(gatewayAPIDTO);
+                        return true;
+                    } else {
+                        log.error("Error retrieving artifacts for API " + apiId + ". Storage returned null");
+                    }
                 } catch (AxisFault | ArtifactSynchronizerException e) {
                     log.error("Error deploying " + apiId + " in Gateway", e);
                 }
@@ -99,9 +103,11 @@ public class InMemoryAPIDeployer {
                         for (String APIruntimeArtifact :gatewayRuntimeArtifacts){
                             GatewayAPIDTO gatewayAPIDTO = null;
                             try {
-                                gatewayAPIDTO = new Gson().fromJson(APIruntimeArtifact, GatewayAPIDTO.class);
-                                log.info("Deploying synapse artifacts of " + gatewayAPIDTO.getName());
-                                apiGatewayAdmin.deployAPI(gatewayAPIDTO);
+                                if (APIruntimeArtifact != null) {
+                                    gatewayAPIDTO = new Gson().fromJson(APIruntimeArtifact, GatewayAPIDTO.class);
+                                    log.info("Deploying synapse artifacts of " + gatewayAPIDTO.getName());
+                                    apiGatewayAdmin.deployAPI(gatewayAPIDTO);
+                                }
                             } catch (AxisFault axisFault) {
                                 log.error("Error in deploying" + gatewayAPIDTO.getName()+ " to the Gateway ");
                                 continue;
@@ -135,9 +141,13 @@ public class InMemoryAPIDeployer {
                     String gatewayRuntimeArtifact = artifactRetriever
                             .retrieveArtifact(apiId, gatewayLabel,
                                     APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_REMOVE);
-                    GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
-                    apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
-                    return true;
+                    if (gatewayRuntimeArtifact != null) {
+                        GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
+                        apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
+                        return true;
+                    } else {
+                        log.error("Error retrieving artifacts for API " + apiId + ". Storage returned null");
+                    }
                 } catch (AxisFault | ArtifactSynchronizerException e) {
                     log.error("Error undeploying " + apiId + " in Gateway", e);
                 }
@@ -163,7 +173,11 @@ public class InMemoryAPIDeployer {
                 try {
                     String gatewayRuntimeArtifact = artifactRetriever.retrieveArtifact(apiId, gatewayLabel,
                             APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-                    gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
+                    if (gatewayRuntimeArtifact != null) {
+                        gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
+                    } else {
+                        log.error("Error retrieving artifacts for API " + apiId + ". Storage returned null");
+                    }
                 } catch (ArtifactSynchronizerException e) {
                     log.error("Error retrieving artifacts of " + apiId + " from storage", e);
                 }
