@@ -146,16 +146,16 @@ class ApiConsole extends React.Component {
             })
             .then((swaggerResponse) => {
                 swagger = swaggerResponse.obj;
-                if (user != null) {
-                    this.setState({
-                        api: apiData,
-                        swagger,
-                        environments,
-                        labels,
-                        productionAccessToken,
-                        sandboxAccessToken,
+                this.setState({
+                    api: apiData,
+                    swagger,
+                    environments,
+                    labels,
+                    productionAccessToken,
+                    sandboxAccessToken,
 
-                    });
+                });
+                if (user != null) {
                     return this.apiClient.getSubscriptions(apiID);
                 } else {
                     return null;
