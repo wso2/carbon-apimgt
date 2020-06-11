@@ -96,7 +96,8 @@ public class InMemoryAPIDeployer {
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             if (artifactRetriever != null) {
                 try {
-                    for (Iterator<String> it = assignedGatewayLabels.iterator(); it.hasNext();) {
+                    Iterator<String> it = assignedGatewayLabels.iterator();
+                    while (it.hasNext()) {
                         String label = it.next();
                         List<String> gatewayRuntimeArtifacts = ServiceReferenceHolder
                                 .getInstance().getArtifactRetriever().retrieveAllArtifacts(label);
