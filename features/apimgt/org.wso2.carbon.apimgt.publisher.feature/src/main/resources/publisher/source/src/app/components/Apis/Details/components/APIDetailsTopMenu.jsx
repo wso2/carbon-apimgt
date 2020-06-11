@@ -6,7 +6,6 @@ import Utils from 'AppData/Utils';
 import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
-import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
@@ -32,6 +31,7 @@ const styles = (theme) => ({
         alignItems: 'center',
         textDecoration: 'none',
         display: 'flex',
+        color: theme.palette.getContrastText(theme.palette.background.paper),
     },
     backIcon: {
         color: theme.palette.primary.main,
@@ -115,10 +115,6 @@ const APIDetailsTopMenu = (props) => {
 
     const isDownlodable = ['API'].includes(api.apiType);
     const { settings, user } = useAppContext();
-    let apiType = 'API';
-    if (isAPIProduct) {
-        apiType = 'PRODUCT';
-    }
     const { tenantList } = useContext(ApiContext);
     const userNameSplit = user.name.split('@');
     const tenantDomain = userNameSplit[userNameSplit.length - 1];
@@ -129,35 +125,37 @@ const APIDetailsTopMenu = (props) => {
     // todo: need to support rev proxy ~tmkb
     return (
         <div className={classes.root}>
-            <Link to={isAPIProduct ? '/api-products' : '/apis'} className={classes.backLink}>
-                <KeyboardArrowLeft className={classes.backIcon} />
-                <div className={classes.backText}>
-                    <FormattedMessage
-                        id='Apis.Details.components.APIDetailsTopMenu.back.to.listing'
-                        defaultMessage='BACK TO {break} {apiType}s'
-                        values={{ break: <br />, apiType }}
-                    />
+            <Link
+                to={isAPIProduct
+                    ? `/api-products/${api.id}/overview`
+                    : `/apis/${api.id}/overview`}
+                className={classes.backLink}
+            >
+                <ThumbnailView api={api} width={70} height={50} imageUpdate={imageUpdate} />
+                <div style={{ marginLeft: theme.spacing(1), maxWidth: 500 }}>
+                    <Typography variant='h4' className={classes.apiName}>
+                        {api.name}
+                        {' '}
+                        {isAPIProduct ? '' : ':' + api.version}
+                    </Typography>
+                    <Typography variant='caption' gutterBottom align='left'>
+                        <FormattedMessage
+                            id='Apis.Details.components.APIDetailsTopMenu.created.by'
+                            defaultMessage='Created by:'
+                        />
+                        {' '}
+                        {api.provider}
+                    </Typography>
                 </div>
             </Link>
-            <VerticalDivider height={70} />
-            <ThumbnailView api={api} width={70} height={50} imageUpdate={imageUpdate} />
-            <div style={{ marginLeft: theme.spacing(1), maxWidth: 500 }}>
-                <Typography variant='h4' className={classes.apiName}>
-                    {api.name}
-                    {' '}
-                    {isAPIProduct ? '' : ':' + api.version}
-                </Typography>
-                <Typography variant='caption' gutterBottom align='left'>
-                    Created by:
-                    {' '}
-                    {api.provider}
-                </Typography>
-            </div>
             <VerticalDivider height={70} />
             <div className={classes.infoItem}>
                 <Typography variant='subtitle1'>{isAPIProduct ? api.state : api.lifeCycleStatus}</Typography>
                 <Typography variant='caption' align='left'>
-                    State
+                    <FormattedMessage
+                        id='Apis.Details.components.APIDetailsTopMenu.state'
+                        defaultMessage='State'
+                    />
                 </Typography>
             </div>
             <div className={classes.dateWrapper} />

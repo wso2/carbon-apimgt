@@ -46,8 +46,6 @@ const DeferredAPIs = () => (
         <Apis />
     </Suspense>
 );
-const theme = createMuiTheme(Themes.light);
-
 /**
  * Language.
  * @type {string}
@@ -69,6 +67,7 @@ export default class Protected extends Component {
             settings: null,
             clientId: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_CLIENT_ID),
             sessionStateCookie: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_SESSION_STATE),
+            theme: null,
         };
         this.environments = [];
         this.checkSession = this.checkSession.bind(this);
@@ -88,13 +87,74 @@ export default class Protected extends Component {
             this.setState({ user });
             settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
             this.checkSession();
+            if (user.name && user.name.indexOf('@') !== -1) {
+                const tenant = user.name.split('@')[user.name.split('@').length - 1];
+                this.setTenantTheme(tenant);
+            } else {
+                this.setState({ theme: Themes.light });
+            }
         } else {
             // If no user data available , Get the user info from existing token information
             // This could happen when OAuth code authentication took place and could send
             // user information via redirection
             const userPromise = AuthManager.getUserFromToken();
-            userPromise.then((loggedUser) => this.setState({ user: loggedUser }));
+            userPromise.then((loggedUser) => {
+                if (loggedUser.name && loggedUser.name.indexOf('@') !== -1) {
+                    const tenant = loggedUser.name.split('@')[loggedUser.name.split('@').length - 1];
+                    this.setTenantTheme(tenant);
+                } else {
+                    this.setState({ theme: Themes.light });
+                }
+                this.setState({ user: loggedUser });
+            });
             settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
+        }
+    }
+
+    /**
+     * Generate page title from theme config.
+     * @param {object} theme object.
+     * @returns {JSX} link dom tag.
+     */
+    getTitle(localTheme) {
+        const {
+            custom: {
+                title: {
+                    prefix, sufix,
+                },
+            },
+        } = localTheme;
+        return (prefix + sufix);
+    }
+
+    /**
+     * Load Theme file.
+     *
+     * @param {string} tenant tenant name
+     */
+    setTenantTheme(tenant) {
+        if (tenant && tenant !== '' && tenant !== 'carbon.super') {
+            fetch(`${Configurations.app.context}/site/public/tenant_themes/${tenant}/apim-publisher/defaultTheme.json`)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('HTTP error ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data && data.light) {
+                        this.setState({ theme: data.light });
+                    } else {
+                        console.log('Error loading teant theme. Loading the default theme.');
+                        this.setState({ theme: Themes.light });
+                    }
+                })
+                .catch(() => {
+                    console.log('Error loading teant theme. Loading the default theme.');
+                    this.setState({ theme: Themes.light });
+                });
+        } else {
+            this.setState({ theme: Themes.light });
         }
     }
 
@@ -121,6 +181,7 @@ export default class Protected extends Component {
         }
     }
 
+
     /**
      * @returns {React.Component} @inheritDoc
      * @memberof Protected
@@ -129,6 +190,7 @@ export default class Protected extends Component {
         const { user = AuthManager.getUser(), messages } = this.state;
         const header = <Header avatar={<Avatar user={user} />} user={user} />;
         const { settings, clientId } = this.state;
+        const { theme } = this.state;
         const checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
         + clientId + '&redirect_uri=https://' + window.location.host
         + Configurations.app.context + '/services/auth/callback/login';
@@ -139,8 +201,11 @@ export default class Protected extends Component {
                 </IntlProvider>
             );
         }
+        if (!theme) {
+            return (<Progress />);
+        }
         return (
-            <MuiThemeProvider theme={theme}>
+            <MuiThemeProvider theme={createMuiTheme(theme)}>
                 <AppErrorBoundary>
                     <Base header={header}>
                         <iframe
