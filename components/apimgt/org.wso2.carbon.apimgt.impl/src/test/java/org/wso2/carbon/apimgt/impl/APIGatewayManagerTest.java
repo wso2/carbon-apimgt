@@ -624,7 +624,7 @@ public class APIGatewayManagerTest {
         Map<String, String> failedEnvironmentsMap = gatewayManager
                 .publishToGateway(api, apiTemplateBuilder, tenantDomain);
         Assert.assertEquals(failedEnvironmentsMap.size(), 1);
-        Assert.assertTrue(failedEnvironmentsMap.keySet().contains(prodEnvironmentName ));
+        Assert.assertTrue(failedEnvironmentsMap.keySet().contains(prodEnvironmentName));
 
         //Test failure to deploy API when setting secure vault property failed
         Mockito.doThrow(new APIManagementException("Failed to set secure vault property for the tenant"))
@@ -680,6 +680,6 @@ public class APIGatewayManagerTest {
         Map<String, String> failedEnvironmentsMap = gatewayManager
                 .publishToGateway(api, apiTemplateBuilder, tenantDomain);
         Assert.assertEquals(failedEnvironmentsMap.size(), 1);
-        Assert.assertTrue(failedEnvironmentsMap.keySet().contains(prodEnvironmentName ));
+        Assert.assertTrue(failedEnvironmentsMap.keySet().contains(prodEnvironmentName));
     }
 }
